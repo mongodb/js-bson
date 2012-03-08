@@ -2,8 +2,6 @@ var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/bson').nat
 
 var testCase = require('nodeunit').testCase,
   mongoO = require('../../lib/bson').pure(),
-  debug = require('util').debug,
-  inspect = require('util').inspect,
   Buffer = require('buffer').Buffer,
   gleak = require('../../tools/gleak'),
   fs = require('fs'),
