@@ -5,6 +5,10 @@ name = all
 
 total: build_native
 
+test: build_native
+	$(NODEUNIT) ./test/node
+	TEST_NATIVE=TRUE $(NODEUNIT) ./test/node
+
 build_native:
 	$(MAKE) -C ./ext all
 

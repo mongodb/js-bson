@@ -1,11 +1,11 @@
-var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/mongodb').native() : require('../../lib/mongodb').pure();
+var mongodb = process.env['TEST_NATIVE'] != null ? require('../../lib/bson').native() : require('../../lib/bson').pure();
 
 var testCase = require('nodeunit').testCase,
-  mongoO = require('../../lib/mongodb').pure(),
+  mongoO = require('../../lib/bson').pure(),
   debug = require('util').debug,
   inspect = require('util').inspect,
   Buffer = require('buffer').Buffer,
-  gleak = require('../../dev/tools/gleak'),
+  gleak = require('../../tools/gleak'),
   fs = require('fs'),
   BSON = mongoO.BSON,
   Code = mongoO.Code, 
@@ -118,7 +118,7 @@ exports.tearDown = function(callback) {
  * @ignore
  */
 exports['Should Correctly get BSON types from require'] = function(test) {
-  var _mongodb = require('../../lib/mongodb');
+  var _mongodb = require('../../lib/bson');
   test.ok(_mongodb.ObjectID === ObjectID);
   test.ok(_mongodb.Binary === Binary);
   test.ok(_mongodb.Long === Long);
@@ -525,7 +525,7 @@ exports['Should Correctly Serialize and Deserialize a Binary object'] = function
  * @ignore
  */
 exports['Should Correctly Serialize and Deserialize a big Binary object'] = function(test) {
-  var data = fs.readFileSync("test/gridstore/test_gs_weird_bug.png", 'binary');
+  var data = fs.readFileSync("test/node/data/test_gs_weird_bug.png", 'binary');
   var bin = new Binary();
   bin.write(data);
   var doc = {doc: bin};
@@ -1102,19 +1102,6 @@ exports['Should Correctly handle Forced Doubles to ensure we allocate enough spa
   }    
 
   test.done();      
-}
-
-/**
- * @ignore
- */
-exports['Should Correctly deserialize a message'] = function(test) {
-  var data = "24000000be00de4428000000010000000800000000000000000000000000000000000000";
-  var parent = {bson_deserializer:{"Long":Long, "BSON":BSONSE.BSON}}
-  var binaryData = new Buffer(hexStringToBinary(data));    
-
-  var doc2 = new MongoReply(parent, binaryData);   
-  test.deepEqual([], doc2.documents);
-  test.done();
 }
 
 /**
