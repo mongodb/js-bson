@@ -1,52 +1,46 @@
 this.bson_test = {
-    'test one': function (test) {
-      // var motherOfAllDocuments = {
-      //   // 'string': '客家话',
-      //   'array': [1,2,3],
-      //   'hash': {'a':1, 'b':2},
-      //   'date': new Date(),
-      //   'oid': new ObjectID(),
-      //   // 'binary': new Binary(data),
-      //   'int': 42,
-      //   'float': 33.3333,
-      //   'regexp': /regexp/,
-      //   'boolean': true,
-      //   'long': Long.fromNumber(100),
-      //   'where': new Code('this.a > i', {i:1}),        
-      //   'dbref': new DBRef('namespace', new ObjectID(), 'integration_tests_'),
-      //   'minkey': new MinKey(),
-      //   'maxkey': new MaxKey()    
-      // }
-      // 
-      // // Let's serialize it
-      // var data = BSON.serialize(motherOfAllDocuments, true, true, false);
-      // // Deserialize the object
-      // var object = BSON.deserialize(data);
-      // 
-      // // Asserts
-      // test.equal(motherOfAllDocuments.string, object.string);
-      // test.deepEqual(motherOfAllDocuments.array, object.array);
-      // test.deepEqual(motherOfAllDocuments.date, object.date);
-      // test.deepEqual(motherOfAllDocuments.oid.toHexString(), object.oid.toHexString());
-      // // test.deepEqual(motherOfAllDocuments.binary.length(), object.binary.length());
-      // 
-      // // // Assert the values of the binary
-      // // for(var i = 0; i < motherOfAllDocuments.binary.length(); i++) {
-      // //   test.equal(motherOfAllDocuments.binary.value[i], object.binary[i]);
-      // // }
-      // 
-      // test.deepEqual(motherOfAllDocuments.int, object.int);
-      // test.deepEqual(motherOfAllDocuments.float, object.float);
-      // test.deepEqual(motherOfAllDocuments.regexp, object.regexp);
-      // test.deepEqual(motherOfAllDocuments.boolean, object.boolean);
-      // test.deepEqual(motherOfAllDocuments.long.toNumber(), object.long);
-      // test.deepEqual(motherOfAllDocuments.where, object.where);
-      // test.deepEqual(motherOfAllDocuments.dbref.oid.toHexString(), object.dbref.oid.toHexString());
-      // test.deepEqual(motherOfAllDocuments.dbref.namespace, object.dbref.namespace);
-      // test.deepEqual(motherOfAllDocuments.dbref.db, object.dbref.db);
-      // test.deepEqual(motherOfAllDocuments.minkey, object.minkey);
-      // test.deepEqual(motherOfAllDocuments.maxkey, object.maxkey);
-      
+    'Full document serialization and deserialization': function (test) {
+      var motherOfAllDocuments = {
+        'string': "客家话",
+        'array': [1,2,3],
+        'hash': {'a':1, 'b':2},
+        'date': new Date(),
+        'oid': new ObjectID(),
+        'binary': new Binary('hello world'),
+        'int': 42,
+        'float': 33.3333,
+        'regexp': /regexp/,
+        'boolean': true,
+        'long': Long.fromNumber(100),
+        'where': new Code('this.a > i', {i:1}),        
+        'dbref': new DBRef('namespace', new ObjectID(), 'integration_tests_'),
+        'minkey': new MinKey(),
+        'maxkey': new MaxKey()    
+      }
+    
+      // Let's serialize it
+      var data = BSON.serialize(motherOfAllDocuments, true, true, false);
+      // Deserialize the object
+      var object = BSON.deserialize(data);
+    
+      // Asserts
+      test.equal(Utf8.decode(motherOfAllDocuments.string), object.string);
+      test.deepEqual(motherOfAllDocuments.array, object.array);
+      test.deepEqual(motherOfAllDocuments.date, object.date);
+      test.deepEqual(motherOfAllDocuments.oid.toHexString(), object.oid.toHexString());
+      test.deepEqual(motherOfAllDocuments.binary.length(), object.binary.length());    
+      test.ok(assertArrayEqual(motherOfAllDocuments.binary.value(true), object.binary.value(true)));
+      test.deepEqual(motherOfAllDocuments.int, object.int);
+      test.deepEqual(motherOfAllDocuments.float, object.float);
+      test.deepEqual(motherOfAllDocuments.regexp, object.regexp);
+      test.deepEqual(motherOfAllDocuments.boolean, object.boolean);
+      test.deepEqual(motherOfAllDocuments.long.toNumber(), object.long);
+      test.deepEqual(motherOfAllDocuments.where, object.where);
+      test.deepEqual(motherOfAllDocuments.dbref.oid.toHexString(), object.dbref.oid.toHexString());
+      test.deepEqual(motherOfAllDocuments.dbref.namespace, object.dbref.namespace);
+      test.deepEqual(motherOfAllDocuments.dbref.db, object.dbref.db);
+      test.deepEqual(motherOfAllDocuments.minkey, object.minkey);
+      test.deepEqual(motherOfAllDocuments.maxkey, object.maxkey);
       test.done();
     },
     
@@ -59,7 +53,7 @@ this.bson_test = {
       // Binary from array buffer
       var binary = new Binary(stringToArrayBuffer(string));
       test.ok(string.length, binary.buffer.length);
-      test.deepEqual(array, binary.buffer);
+      test.ok(assertArrayEqual(array, binary.buffer));
       
       // Construct using number of chars
       binary = new Binary(5);
@@ -68,12 +62,12 @@ this.bson_test = {
       // Construct using an Array
       var binary = new Binary(stringToArray(string));
       test.ok(string.length, binary.buffer.length);
-      test.deepEqual(array, binary.buffer);
+      test.ok(assertArrayEqual(array, binary.buffer));
       
       // Construct using a string
       var binary = new Binary(string);
       test.ok(string.length, binary.buffer.length);
-      test.deepEqual(array, binary.buffer);      
+      test.ok(assertArrayEqual(array, binary.buffer));
       test.done();
     },
 
@@ -86,25 +80,25 @@ this.bson_test = {
       // Binary from array buffer
       var binary = new Binary(stringToArrayBuffer(string));
       test.ok(string.length, binary.buffer.length);
-
+    
       // Write a byte to the array
       binary.put('a')
-
+    
       // Verify that the data was writtencorrectly
       test.equal(string.length + 1, binary.position);
-      test.deepEqual(array, binary.value(true));
+      test.ok(assertArrayEqual(array, binary.value(true)));
       test.equal('hello worlda', binary.value());
-
+    
       // Exercise a binary with lots of space in the buffer
       var binary = new Binary();
       test.ok(Binary.BUFFER_SIZE, binary.buffer.length);
-
+    
       // Write a byte to the array
       binary.put('a')
-
+    
       // Verify that the data was writtencorrectly
       test.equal(1, binary.position);
-      test.deepEqual(['a'.charCodeAt(0)], binary.value(true));
+      test.ok(assertArrayEqual(['a'.charCodeAt(0)], binary.value(true)));
       test.equal('a', binary.value());
       test.done();
     },
@@ -120,7 +114,7 @@ this.bson_test = {
       // Binary from array buffer
       var binary = new Binary(stringToArrayBuffer(string));
       test.ok(string.length, binary.buffer.length);
-
+    
       // Write a string starting at end of buffer
       binary.write('a');
       test.equal('hello worlda', binary.value());
@@ -146,25 +140,34 @@ this.bson_test = {
       // Construct using array
       var string = 'hello world';
       var array = stringToArrayBuffer(string);
-
+    
       // Binary from array buffer
       var binary = new Binary(stringToArrayBuffer(string));
       test.ok(string.length, binary.buffer.length);
       
       // Read the first 2 bytes
       var data = binary.read(0, 2);
-      test.deepEqual(stringToArrayBuffer('he'), data);
-
+      test.ok(assertArrayEqual(stringToArrayBuffer('he'), data));
+    
       // Read the entire field
       var data = binary.read(0);
-      test.deepEqual(stringToArrayBuffer(string), data);
-
+      test.ok(assertArrayEqual(stringToArrayBuffer(string), data));
+    
       // Read 3 bytes
       var data = binary.read(6, 5);
-      test.deepEqual(stringToArrayBuffer('world'), data);
+      test.ok(assertArrayEqual(stringToArrayBuffer('world'), data));
       test.done();
     }    
 };
+
+var assertArrayEqual = function(array1, array2) {
+  if(array1.length != array2.length) return false;
+  for(var i = 0; i < array1.length; i++) {
+    if(array1[i] != array2[i]) return false;
+  }
+  
+  return true;
+}
 
 // String to arraybuffer
 var stringToArrayBuffer = function(string) {
@@ -186,4 +189,54 @@ var stringToArray = function(string) {
   }
   // Return the data buffer
   return dataBuffer;
+}
+
+var Utf8 = {
+	// public method for url encoding
+	encode : function (string) {
+		string = string.replace(/\r\n/g,"\n");
+		var utftext = "";
+ 
+		for (var n = 0; n < string.length; n++) {
+			var c = string.charCodeAt(n);
+			if (c < 128) {
+				utftext += String.fromCharCode(c);
+			} else if((c > 127) && (c < 2048)) {
+				utftext += String.fromCharCode((c >> 6) | 192);
+				utftext += String.fromCharCode((c & 63) | 128);
+			} else {
+				utftext += String.fromCharCode((c >> 12) | 224);
+				utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+				utftext += String.fromCharCode((c & 63) | 128);
+			}
+ 
+		}
+ 
+		return utftext;
+	},
+ 
+	// public method for url decoding
+	decode : function (utftext) {
+		var string = "";
+		var i = 0;
+		var c = c1 = c2 = 0;
+ 
+		while ( i < utftext.length ) {
+			c = utftext.charCodeAt(i); 
+			if(c < 128) {
+				string += String.fromCharCode(c);
+				i++;
+			} else if((c > 191) && (c < 224)) {
+				c2 = utftext.charCodeAt(i+1);
+				string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+				i += 2;
+			} else {
+				c2 = utftext.charCodeAt(i+1);
+				c3 = utftext.charCodeAt(i+2);
+				string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+				i += 3;
+			} 
+		} 
+		return string;
+	} 
 }
