@@ -19,7 +19,8 @@ var testCase = require('nodeunit').testCase,
   Double = mongoO.Double,
   MinKey = mongoO.MinKey,
   MaxKey = mongoO.MaxKey,
-  BinaryParser = mongoO.BinaryParser;
+  BinaryParser = mongoO.BinaryParser,
+  utils = require('./tools/utils');
 
 var BSONSE = mongodb,
   BSONDE = mongodb;
@@ -218,6 +219,133 @@ exports.shouldCorrectlySerializeUsingTypedArray = function(test) {
   test.deepEqual(motherOfAllDocuments.dbref.db, object.dbref.db);
   test.deepEqual(motherOfAllDocuments.minkey, object.minkey);
   test.deepEqual(motherOfAllDocuments.maxkey, object.maxkey);
+  test.done();
+}
+
+/**
+ * @ignore
+ */  
+exports['exercise all the binary object constructor methods'] = function (test) {
+  // Construct using array
+  var string = 'hello world';
+  // String to array
+  var array = utils.stringToArrayBuffer(string);
+
+  // Binary from array buffer
+  var binary = new Binary(utils.stringToArrayBuffer(string));
+  test.ok(string.length, binary.buffer.length);
+  test.ok(utils.assertArrayEqual(array, binary.buffer));
+  
+  // Construct using number of chars
+  binary = new Binary(5);
+  test.ok(5, binary.buffer.length);
+  
+  // Construct using an Array
+  var binary = new Binary(utils.stringToArray(string));
+  test.ok(string.length, binary.buffer.length);
+  test.ok(utils.assertArrayEqual(array, binary.buffer));
+  
+  // Construct using a string
+  var binary = new Binary(string);
+  test.ok(string.length, binary.buffer.length);
+  test.ok(utils.assertArrayEqual(array, binary.buffer));
+  test.done();
+};
+
+/**
+ * @ignore
+ */  
+exports['exercise the put binary object method for an instance when using Uint8Array'] = function (test) {
+  // Construct using array
+  var string = 'hello world';
+  // String to array
+  var array = utils.stringToArrayBuffer(string + 'a');
+  
+  // Binary from array buffer
+  var binary = new Binary(utils.stringToArrayBuffer(string));
+  test.ok(string.length, binary.buffer.length);
+
+  // Write a byte to the array
+  binary.put('a')
+
+  // Verify that the data was writtencorrectly
+  test.equal(string.length + 1, binary.position);
+  test.ok(utils.assertArrayEqual(array, binary.value(true)));
+  test.equal('hello worlda', binary.value());
+
+  // Exercise a binary with lots of space in the buffer
+  var binary = new Binary();
+  test.ok(Binary.BUFFER_SIZE, binary.buffer.length);
+
+  // Write a byte to the array
+  binary.put('a')
+
+  // Verify that the data was writtencorrectly
+  test.equal(1, binary.position);
+  test.ok(utils.assertArrayEqual(['a'.charCodeAt(0)], binary.value(true)));
+  test.equal('a', binary.value());
+  test.done();
+},
+
+/**
+ * @ignore
+ */  
+exports['exercise the write binary object method for an instance when using Uint8Array'] = function (test) {
+  // Construct using array
+  var string = 'hello world';
+  // Array
+  var writeArrayBuffer = new Uint8Array(new ArrayBuffer(1));
+  writeArrayBuffer[0] = 'a'.charCodeAt(0);
+  var arrayBuffer = ['a'.charCodeAt(0)];
+  
+  // Binary from array buffer
+  var binary = new Binary(utils.stringToArrayBuffer(string));
+  test.ok(string.length, binary.buffer.length);
+
+  // Write a string starting at end of buffer
+  binary.write('a');
+  test.equal('hello worlda', binary.value());
+  // Write a string starting at index 0
+  binary.write('a', 0);
+  test.equal('aello worlda', binary.value());
+  // Write a arraybuffer starting at end of buffer
+  binary.write(writeArrayBuffer);
+  test.equal('aello worldaa', binary.value());
+  // Write a arraybuffer starting at position 5
+  binary.write(writeArrayBuffer, 5);
+  test.equal('aelloaworldaa', binary.value());
+  // Write a array starting at end of buffer
+  binary.write(arrayBuffer);
+  test.equal('aelloaworldaaa', binary.value());
+  // Write a array starting at position 6
+  binary.write(arrayBuffer, 6);
+  test.equal('aelloaaorldaaa', binary.value());
+  test.done();
+},
+
+/**
+ * @ignore
+ */  
+exports['exercise the read binary object method for an instance when using Uint8Array'] = function (test) {      
+  // Construct using array
+  var string = 'hello world';
+  var array = utils.stringToArrayBuffer(string);
+
+  // Binary from array buffer
+  var binary = new Binary(utils.stringToArrayBuffer(string));
+  test.ok(string.length, binary.buffer.length);
+  
+  // Read the first 2 bytes
+  var data = binary.read(0, 2);
+  test.ok(utils.assertArrayEqual(utils.stringToArrayBuffer('he'), data));
+
+  // Read the entire field
+  var data = binary.read(0);
+  test.ok(utils.assertArrayEqual(utils.stringToArrayBuffer(string), data));
+
+  // Read 3 bytes
+  var data = binary.read(6, 5);
+  test.ok(utils.assertArrayEqual(utils.stringToArrayBuffer('world'), data));
   test.done();
 }
 
