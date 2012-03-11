@@ -11,6 +11,8 @@ process.stdout.write("==========================================================
 var build_native = process.env['npm_package_config_native'] != null ? process.env['npm_package_config_native'] : 'false';
 build_native = build_native == 'true' ? true : false;
 
+console.log("==================== build_native :: " + build_native)
+
 // If we are building the native bson extension ensure we use gmake if available
 if(build_native) {
   // Check if we need to use gmake
@@ -19,9 +21,13 @@ if(build_native) {
     var make = null;
     // No gmake build using make
     if(err != null) {
+      console.log("==================== make :: ")
       make = spawn('make', ['-C', process.env['PWD'], 'total'], {cwd:process.env['PWD']});
+      console.dir(make)
     } else {
+      console.log("==================== gmake :: ")
       make = spawn('gmake', ['-C', process.env['PWD'], 'total'], {cwd:process.env['PWD']});
+      console.dir(gmake)
     }
 
     // Execute spawn
