@@ -8,13 +8,8 @@ process.stdout.write("=                                                         
 process.stdout.write("================================================================================\n");
 
 // Check if we want to build the native code
-var build_native = process.env['npm_package_config_native'] != null ? process.env['npm_package_config_native'] : 'false';
+var build_native = process.env['npm_config_mongodb_native'] != null ? process.env['npm_config_mongodb_native'] : 'false';
 build_native = build_native == 'true' ? true : false;
-
-console.log("=====================================================")
-console.dir(process.env)
-
-console.log("==================== build_native :: " + build_native)
 
 // If we are building the native bson extension ensure we use gmake if available
 if(build_native) {
@@ -24,13 +19,14 @@ if(build_native) {
     var make = null;
     // No gmake build using make
     if(err != null) {
-      console.log("==================== make :: ")
-      make = spawn('make', ['-C', process.env['PWD'], 'total'], {cwd:process.env['PWD']});
-      console.dir(make)
+      // console.log("==================== make :: ")
+      // make = spawn('make', ['-C', process.env['PWD'], 'total'], {cwd:process.env['PWD']});
+      make = spawn('make', ['total'], {cwd:process.env['PWD']});
+      // console.dir(make)
     } else {
-      console.log("==================== gmake :: ")
-      make = spawn('gmake', ['-C', process.env['PWD'], 'total'], {cwd:process.env['PWD']});
-      console.dir(gmake)
+      // console.log("==================== gmake :: ")
+      make = spawn('gmake', ['total'], {cwd:process.env['PWD']});
+      // console.dir(gmake)
     }
 
     // Execute spawn
