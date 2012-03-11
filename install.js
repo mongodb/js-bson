@@ -19,9 +19,9 @@ if(build_native) {
     var make = null;
     // No gmake build using make
     if(err != null) {
-      make = spawn('make', ['total'], {cwd:process.env['PWD']});
+      make = spawn('make', ['-C', process.env['PWD'], 'total'], {cwd:process.env['PWD']});
     } else {
-      make = spawn('gmake', ['total'], {cwd:process.env['PWD']});
+      make = spawn('gmake', ['-C', process.env['PWD'], 'total'], {cwd:process.env['PWD']});
     }
 
     // Execute spawn
