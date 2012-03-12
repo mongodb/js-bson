@@ -13,7 +13,7 @@ docs/sphinx-docs
 data/
 dev/
 examples/
-test/
 
-external-libs/bson/build/
-external-libs/bson/build/.wafpickle-7
+
+ex/build/
+ext/build/.wafpickle-7
