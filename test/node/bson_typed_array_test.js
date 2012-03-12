@@ -119,6 +119,11 @@ exports.tearDown = function(callback) {
  * @ignore
  */  
 exports.shouldCorrectlyDeserializeUsingTypedArray = function(test) {
+  if(typeof ArrayBuffer == 'undefined') {
+    test.done();
+    return;
+  }
+  
   var motherOfAllDocuments = {
     'string': '客家话',
     'array': [1,2,3],
@@ -176,6 +181,11 @@ exports.shouldCorrectlyDeserializeUsingTypedArray = function(test) {
  * @ignore
  */  
 exports.shouldCorrectlySerializeUsingTypedArray = function(test) {
+  if(typeof ArrayBuffer == 'undefined') {
+    test.done();
+    return;
+  }
+
   var motherOfAllDocuments = {
     'string': 'hello',
     'array': [1,2,3],
@@ -226,6 +236,11 @@ exports.shouldCorrectlySerializeUsingTypedArray = function(test) {
  * @ignore
  */  
 exports['exercise all the binary object constructor methods'] = function (test) {
+  if(typeof ArrayBuffer == 'undefined') {
+    test.done();
+    return;
+  }
+
   // Construct using array
   var string = 'hello world';
   // String to array
@@ -256,6 +271,11 @@ exports['exercise all the binary object constructor methods'] = function (test) 
  * @ignore
  */  
 exports['exercise the put binary object method for an instance when using Uint8Array'] = function (test) {
+  if(typeof ArrayBuffer == 'undefined') {
+    test.done();
+    return;
+  }
+
   // Construct using array
   var string = 'hello world';
   // String to array
@@ -291,6 +311,11 @@ exports['exercise the put binary object method for an instance when using Uint8A
  * @ignore
  */  
 exports['exercise the write binary object method for an instance when using Uint8Array'] = function (test) {
+  if(typeof ArrayBuffer == 'undefined') {
+    test.done();
+    return;
+  }
+
   // Construct using array
   var string = 'hello world';
   // Array
@@ -327,6 +352,11 @@ exports['exercise the write binary object method for an instance when using Uint
  * @ignore
  */  
 exports['exercise the read binary object method for an instance when using Uint8Array'] = function (test) {      
+  if(typeof ArrayBuffer == 'undefined') {
+    test.done();
+    return;
+  }
+
   // Construct using array
   var string = 'hello world';
   var array = utils.stringToArrayBuffer(string);
