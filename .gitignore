@@ -3,7 +3,7 @@
 *.seed
 .project
 .settings
-data
+./data
 node_modules/
 output
 build
