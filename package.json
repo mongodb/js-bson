@@ -20,7 +20,7 @@
 , "main":             "./lib/bson/index"
 , "directories" :   { "lib" : "./lib/bson" }
 , "engines" :       { "node" : ">=0.4.12" }
-, "scripts": { "install" : "node install.js" }
+, "scripts": { "install" : "node install.js", "test" : "make test" }
 , "licenses" :    [ { "type" :  "Apache License, Version 2.0"
                     , "url" :   "http://www.apache.org/licenses/LICENSE-2.0" } ]
 }
