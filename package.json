@@ -11,7 +11,11 @@
                     , "url" :   "https://github.com/christkv/bson/issues" }
 , "os" :            [ "linux"
                     , "darwin"
-                    , "freebsd" ]
+                    , "freebsd"
+                    , "sunos"
+                    , "windows"
+                    , "win32"
+                    , "win64" ]
 , "devDependencies": {
       "nodeunit": "0.7.3"
 	  , "gleak": "0.2.3"
