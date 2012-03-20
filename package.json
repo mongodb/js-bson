@@ -9,13 +9,6 @@
                     , "url" :   "git@github.com:christkv/bson.git" }
 , "bugs" :          { "mail" :  "node-mongodb-native@googlegroups.com"
                     , "url" :   "https://github.com/christkv/bson/issues" }
-, "os" :            [ "linux"
-                    , "darwin"
-                    , "freebsd"
-                    , "sunos"
-                    , "windows"
-                    , "win32"
-                    , "win64" ]
 , "devDependencies": {
       "nodeunit": "0.7.3"
 	  , "gleak": "0.2.3"
