@@ -111,6 +111,18 @@ exports.setUp = function(callback) {
 exports.tearDown = function(callback) {
   callback();
 }
+
+/**
+ * @ignore
+ */
+exports['Should Correctly create ObjectID and do deep equals'] = function(test) {
+  var test_string = {hello: new ObjectID()};
+  test_string.hello.toHexString();
+  
+  var serialized_data = new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(test_string, false, true);
+  test.deepEqual(test_string, new BSONDE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data));
+  test.done();
+}
   
 /**
  * @ignore
@@ -1188,42 +1200,6 @@ exports['ObjectID should correctly retrieve timestamp'] = function(test) {
   var testDate = new Date();
   var object1 = new ObjectID();
   test.equal(Math.floor(testDate.getTime()/1000), Math.floor(object1.getTimestamp().getTime()/1000));
-  test.done();
-}
-
-/**
- * @ignore
- */
-exports['ObjectID should have a correct cached representation of the hexString'] = function (test) {
-  var a = new ObjectID;
-  var __id = a.__id;
-  test.equal(__id, a.toHexString());
-
-  // hexString
-  a = new ObjectID(__id);
-  test.equal(__id, a.toHexString());
-
-  // fromHexString
-  a = ObjectID.createFromHexString(__id);
-  test.equal(a.__id, a.toHexString());
-  test.equal(__id, a.toHexString());
-
-  // number
-  var genTime = a.generationTime;
-  a = new ObjectID(genTime);
-   __id = a.__id;
-  test.equal(__id, a.toHexString());
-
-  // generationTime
-  delete a.__id;
-  a.generationTime = genTime;
-  test.equal(__id, a.toHexString());
-
-  // createFromTime
-  a = ObjectID.createFromTime(genTime);
-  __id = a.__id;
-  test.equal(__id, a.toHexString());
-
   test.done();
 }
 
