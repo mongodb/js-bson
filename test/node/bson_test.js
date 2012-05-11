@@ -1526,6 +1526,44 @@ exports['Should correctly deserializeStream a buffer object'] = function(test) {
 /**
  * @ignore
  */
+exports['ObjectID should have a correct cached representation of the hexString'] = function (test) {
+  ObjectID.cacheHexString = true;
+  var a = new ObjectID;
+  var __id = a.__id;
+  test.equal(__id, a.toHexString());
+
+  // hexString
+  a = new ObjectID(__id);
+  test.equal(__id, a.toHexString());
+
+  // fromHexString
+  a = ObjectID.createFromHexString(__id);
+  test.equal(a.__id, a.toHexString());
+  test.equal(__id, a.toHexString());
+
+  // number
+  var genTime = a.generationTime;
+  a = new ObjectID(genTime);
+   __id = a.__id;
+  test.equal(__id, a.toHexString());
+
+  // generationTime
+  delete a.__id;
+  a.generationTime = genTime;
+  test.equal(__id, a.toHexString());
+
+  // createFromTime
+  a = ObjectID.createFromTime(genTime);
+  __id = a.__id;
+  test.equal(__id, a.toHexString());
+  ObjectID.cacheHexString = false;
+
+  test.done();
+}
+
+/**
+ * @ignore
+ */
 // 'Should Correctly Function' = function(test) {
 //   var doc = {b:1, func:function() {
 //     this.b = 2;
