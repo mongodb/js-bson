@@ -15,6 +15,7 @@ var sys = require('util'),
   MaxKey = require('../../lib/bson/bson').MaxKey,  
   MinKey = require('../../lib/bson/bson').MinKey,  
   Timestamp = require('../../lib/bson/bson').Timestamp,  
+  gleak = require('../../tools/gleak'),
   assert = require('assert');
 
 // Parsers
@@ -248,7 +249,7 @@ exports['Should Correctly Serialize and Deserialize Ordered Hash'] = function(te
   var serialized_data = bsonC.serialize(doc)
   var decoded_hash = bsonC.deserialize(serialized_data).doc
   var keys = []
-  for(name in decoded_hash) keys.push(name)
+  for(var name in decoded_hash) keys.push(name)
   assert.deepEqual(['b', 'a', 'c', 'd'], keys)
   test.done();
 }
@@ -291,5 +292,14 @@ exports['Should Correctly Serialize and Deserialize a big Binary object'] = func
   var serialized_data = bsonC.serialize(doc)
   var deserialized_data = bsonC.deserialize(serialized_data);
   assert.equal(doc.doc.value(), deserialized_data.doc.value())
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports.noGlobalsLeaked = function(test) {
+  var leaks = gleak.detectNew();
+  test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
   test.done();
 }

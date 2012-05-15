@@ -80,12 +80,7 @@ void BSON::Initialize(v8::Handle<v8::Object> target) {
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "serializeWithBufferAndIndex", SerializeWithBufferAndIndex);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "deserialize", BSONDeserialize);
   NODE_SET_PROTOTYPE_METHOD(constructor_template, "deserializeStream", BSONDeserializeStream);
-
-  // Experimental
-  // NODE_SET_PROTOTYPE_METHOD(constructor_template, "calculateObjectSize2", CalculateObjectSize2);
-  // NODE_SET_PROTOTYPE_METHOD(constructor_template, "serialize2", BSONSerialize2);
-  // NODE_SET_METHOD(constructor_template->GetFunction(), "serialize2", BSONSerialize2);  
-
+	// Set up the function on the Class
   target->ForceSet(String::NewSymbol("BSON"), constructor_template->GetFunction());
 }
 
@@ -118,6 +113,7 @@ Handle<Value> BSON::New(const Arguments &args) {
       bson->_dbRefNamespaceString = Persistent<String>::New(String::New("namespace"));
       bson->_dbRefDbString = Persistent<String>::New(String::New("db"));
       bson->_dbRefOidString = Persistent<String>::New(String::New("oid"));
+			bson->_toBsonString = Persistent<String>::New(String::New("toBSON"));
 
       // total number of found classes
       uint32_t numberOfClasses = 0;
@@ -350,161 +346,6 @@ uint32_t BSON::deserialize_int32(char* data, uint32_t offset) {
   uint32_t value = 0;
   memcpy(&value, (data + offset), 4);
   return value;
-}
-
-//------------------------------------------------------------------------------------------------
-//
-// Experimental
-//
-//------------------------------------------------------------------------------------------------
-Handle<Value> BSON::CalculateObjectSize2(const Arguments &args) {
-  HandleScope scope;
-  // Ensure we have a valid object
-  if(args.Length() == 1 && !args[0]->IsObject()) return VException("One argument required - [object]");
-  if(args.Length() > 1) return VException("One argument required - [object]");  
-  // Calculate size of the object
-  uint32_t object_size = BSON::calculate_object_size2(args[0]);
-  // Return the object size
-  return scope.Close(Uint32::New(object_size));
-}
-
-uint32_t BSON::calculate_object_size2(Handle<Value> value) {
-  // Final object size
-  uint32_t object_size = (4 + 1);
-  uint32_t stackIndex = 0;
-  // Controls the flow
-  bool done = false;
-  bool finished = false;
-
-  // Current object we are processing
-  Local<Object> currentObject = value->ToObject();
-
-  // Current list of object keys
-  #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 6
-    Local<Array> keys = currentObject->GetPropertyNames();
-  #else
-    Local<Array> keys = currentObject->GetOwnPropertyNames();
-  #endif
-  
-  // Contains pointer to keysIndex
-  uint32_t keysIndex = 0;
-  uint32_t keysLength = keys->Length();  
-    
-  // printf("=================================================================================\n");      
-  // printf("Start serializing\n");      
-    
-  while(!done) {
-    // If the index is bigger than the number of keys for the object
-    // we finished up the previous object and are ready for the next one
-    if(keysIndex >= keysLength) {
-      #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 6
-        keys = currentObject->GetPropertyNames();
-      #else
-        keys = currentObject->GetOwnPropertyNames();
-      #endif
-      keysLength = keys->Length();
-    }
-    
-    // Iterate over all the keys
-    while(keysIndex < keysLength) {
-      // Fetch the key name
-      Local<String> name = keys->Get(keysIndex++)->ToString();
-      // Fetch the object related to the key
-      Local<Value> value = currentObject->Get(name);
-      // Add size of the name, plus zero, plus type
-      object_size += name->Utf8Length() + 1 + 1;      
-
-      // If we have a string
-      if(value->IsString()) {
-        object_size += value->ToString()->Utf8Length() + 1 + 4;
-      } else if(value->IsNumber()) {
-        // Check if we have a float value or a long value
-        Local<Number> number = value->ToNumber();
-        double d_number = number->NumberValue();
-        int64_t l_number = number->IntegerValue();
-        // Check if we have a double value and not a int64
-        double d_result = d_number - l_number;    
-        // If we have a value after subtracting the integer value we have a float
-        if(d_result > 0 || d_result < 0) {
-          object_size = object_size + 8;      
-        } else if(l_number <= BSON_INT32_MAX && l_number >= BSON_INT32_MIN) {
-          object_size = object_size + 4;
-        } else {
-          object_size = object_size + 8;
-        }        
-      } else if(value->IsBoolean()) {
-        object_size = object_size + 1;
-      } else if(value->IsDate()) {
-        object_size = object_size + 8;
-      } else if(value->IsRegExp()) {
-        // Fetch the string for the regexp
-        Handle<RegExp> regExp = Handle<RegExp>::Cast(value);    
-        ssize_t len = DecodeBytes(regExp->GetSource(), UTF8);
-        int flags = regExp->GetFlags();
-
-        // global
-        if((flags & (1 << 0)) != 0) len++;
-        // ignorecase
-        if((flags & (1 << 1)) != 0) len++;
-        //multiline
-        if((flags & (1 << 2)) != 0) len++;
-        // if((flags & (1 << 2)) != 0) len++;
-        // Calculate the space needed for the regexp: size of string - 2 for the /'ses +2 for null termiations
-        object_size = object_size + len + 2;
-      } else if(value->IsNull() || value->IsUndefined()) {
-      }
-      // } else if(value->IsNumber()) {
-      //   // Check if we have a float value or a long value
-      //   Local<Number> number = value->ToNumber();
-      //   double d_number = number->NumberValue();
-      //   int64_t l_number = number->IntegerValue();
-      //   // Check if we have a double value and not a int64
-      //   double d_result = d_number - l_number;    
-      //   // If we have a value after subtracting the integer value we have a float
-      //   if(d_result > 0 || d_result < 0) {
-      //     object_size = name->Utf8Length() + 1 + object_size + 8 + 1;
-      //   } else if(l_number <= BSON_INT32_MAX && l_number >= BSON_INT32_MIN) {
-      //     object_size = name->Utf8Length() + 1 + object_size + 4 + 1;
-      //   } else {
-      //     object_size = name->Utf8Length() + 1 + object_size + 8 + 1;
-      //   }
-      // } else if(value->IsObject()) {
-      //   printf("------------- hello\n");
-      // }
-    }
-
-    // If we have finished all the keys
-    if(keysIndex == keysLength) {
-      finished = false;
-    }
-    
-    // Validate the stack
-    if(stackIndex == 0) {
-      // printf("======================================================================== 3\n");      
-      done = true;
-    } else if(finished || keysIndex == keysLength) {
-      // Pop off the stack
-      stackIndex = stackIndex - 1;
-      // Fetch the current object stack
-      // vector<Local<Value> > currentObjectStored = stack.back();
-      // stack.pop_back();
-      // // Unroll the current object
-      // currentObject = currentObjectStored.back()->ToObject();
-      // currentObjectStored.pop_back();
-      // // Unroll the keysIndex
-      // keys = Local<Array>::Cast(currentObjectStored.back()->ToObject());
-      // currentObjectStored.pop_back();
-      // // Unroll the keysIndex
-      // keysIndex = currentObjectStored.back()->ToUint32()->Value();
-      // currentObjectStored.pop_back();      
-      // // Check if we finished up
-      // if(keysIndex == keys->Length()) {
-      //   finished = true;
-      // }
-    }
-  }
-
-  return object_size;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1222,12 +1063,29 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args) {
   BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());  
 
   uint32_t object_size = 0;
+
+	// Unpack the object
+	Local<Object> object = args[0]->ToObject();
+	// Final object
+	Local<Value> finalObject;
+	
+	// Check if we have a method toBSON on the object
+	if(object->Has(bson->_toBsonString)) {
+		// Fetch the function
+		Local<Function> fun = Local<Function>::Cast(object->Get(String::New("toBSON")));		
+		// Execute the function and get back the object
+		Handle<Value> args[] = {};
+		finalObject = fun->Call(object, 0, args);
+	} else {
+		finalObject = object;
+	}
+
   // Calculate the total size of the document in binary form to ensure we only allocate memory once
   // With serialize function
   if(args.Length() == 4) {
-    object_size = BSON::calculate_object_size(bson, args[0], args[3]->BooleanValue());    
+    object_size = BSON::calculate_object_size(bson, finalObject, args[3]->BooleanValue());    
   } else {
-    object_size = BSON::calculate_object_size(bson, args[0], false);        
+    object_size = BSON::calculate_object_size(bson, finalObject, false);        
   }
 
   // Allocate the memory needed for the serializtion
@@ -1247,7 +1105,7 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args) {
     }
     
     // Serialize the object
-    BSON::serialize(bson, serialized_object, 0, Null(), args[0], check_key, serializeFunctions);      
+    BSON::serialize(bson, serialized_object, 0, Null(), finalObject, check_key, serializeFunctions);      
   } catch(char *err_msg) {
     // Free up serialized object space
     free(serialized_object);
@@ -1287,14 +1145,30 @@ Handle<Value> BSON::CalculateObjectSize(const Arguments &args) {
   
   // Unpack the BSON parser instance
   BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());  
-  
+
+	// Unpack the object
+	Local<Object> object = args[0]->ToObject();
+	// Final object
+	Local<Value> finalObject;
+	
+	// Check if we have a method toBSON on the object
+	if(object->Has(bson->_toBsonString)) {
+		// Fetch the function
+		Local<Function> fun = Local<Function>::Cast(object->Get(String::New("toBSON")));		
+		// Execute the function and get back the object
+		Handle<Value> args[] = {};
+		finalObject = fun->Call(object, 0, args);
+	} else {
+		finalObject = object;
+	}
+
   // Object size
   uint32_t object_size = 0;
   // Check if we have our argument, calculate size of the object  
   if(args.Length() >= 2) {
-    object_size = BSON::calculate_object_size(bson, args[0], args[1]->BooleanValue());
+    object_size = BSON::calculate_object_size(bson, finalObject, args[1]->BooleanValue());
   } else {
-    object_size = BSON::calculate_object_size(bson, args[0], false);
+    object_size = BSON::calculate_object_size(bson, finalObject, false);
   }
 
   // Return the object size
@@ -2045,13 +1919,29 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
     data = Buffer::Data(obj);
     length = Buffer::Length(obj);
   #endif
+
+	// Unpack the object
+	Local<Object> object = args[0]->ToObject();
+	// Final object
+	Local<Value> finalObject;
+
+	// Check if we have a method toBSON on the object
+	if(object->Has(bson->_toBsonString)) {
+		// Fetch the function
+		Local<Function> fun = Local<Function>::Cast(object->Get(String::New("toBSON")));		
+		// Execute the function and get back the object
+		Handle<Value> args[] = {};
+		finalObject = fun->Call(object, 0, args);
+	} else {
+		finalObject = object;
+	}
   
   uint32_t object_size = 0;
   // Calculate the total size of the document in binary form to ensure we only allocate memory once
   if(args.Length() == 5) {
-    object_size = BSON::calculate_object_size(bson, args[0], args[4]->BooleanValue());    
+    object_size = BSON::calculate_object_size(bson, finalObject, args[4]->BooleanValue());    
   } else {
-    object_size = BSON::calculate_object_size(bson, args[0], false);    
+    object_size = BSON::calculate_object_size(bson, finalObject, false);    
   }
   
   // Unpack the index variable
@@ -2075,7 +1965,7 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
     }
     
     // Serialize the object
-    BSON::serialize(bson, serialized_object, 0, Null(), args[0], check_key, serializeFunctions);
+    BSON::serialize(bson, serialized_object, 0, Null(), finalObject, check_key, serializeFunctions);
   } catch(char *err_msg) {
     // Free up serialized object space
     free(serialized_object);

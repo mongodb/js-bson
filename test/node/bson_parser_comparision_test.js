@@ -16,6 +16,7 @@ var sys = require('util'),
   MaxKey = require('../../lib/bson/bson').MaxKey,  
   MinKey = require('../../lib/bson/bson').MinKey,  
   Timestamp = require('../../lib/bson/bson').Timestamp,  
+  gleak = require('../../tools/gleak'),
   assert = require('assert');
 
 // Parsers
@@ -455,5 +456,14 @@ exports['Serialize big complex document'] = function(test) {
   var docJSBin = bsonJS.serialize(doc, false, true, true);
   var docCBin = bsonC.serialize(doc, false, true, true);
   assert.equal(docCBin.toString('base64'), docJSBin.toString('base64'));
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports.noGlobalsLeaked = function(test) {
+  var leaks = gleak.detectNew();
+  test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
   test.done();
 }
