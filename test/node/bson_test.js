@@ -18,7 +18,8 @@ var testCase = require('nodeunit').testCase,
   Double = mongoO.Double,
   MinKey = mongoO.MinKey,
   MaxKey = mongoO.MaxKey,
-  BinaryParser = mongoO.BinaryParser;
+  BinaryParser = mongoO.BinaryParser,
+  vm = require('vm');  
 
 var BSONSE = mongodb,
   BSONDE = mongodb;
@@ -394,6 +395,35 @@ exports['Should Correctly Serialize and Deserialize A Boolean'] = function(test)
  */
 exports['Should Correctly Serialize and Deserialize a Date'] = function(test) {
   var date = new Date();
+  //(2009, 11, 12, 12, 00, 30)
+  date.setUTCDate(12);
+  date.setUTCFullYear(2009);
+  date.setUTCMonth(11 - 1);
+  date.setUTCHours(12);
+  date.setUTCMinutes(0);
+  date.setUTCSeconds(30);
+  var doc = {doc: date};
+  var serialized_data = new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
+
+  var serialized_data2 = new Buffer(new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).calculateObjectSize(doc, false, true));
+  new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serializeWithBufferAndIndex(doc, false, serialized_data2, 0);    
+  assertBuffersEqual(test, serialized_data, serialized_data2, 0);
+
+  test.equal(doc.date, new BSONDE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data).doc.date);
+  test.done();        
+}
+
+/**
+ * @ignore
+ */
+exports['Should Correctly Serialize and Deserialize a Date from another VM'] = function(test) {
+  var script = "date1 = new Date();",
+      ctx = vm.createContext({
+                date1 : null
+      });
+  vm.runInContext(script, ctx, 'myfile.vm');      
+    
+  var date = ctx.date1;
   //(2009, 11, 12, 12, 00, 30)
   date.setUTCDate(12);
   date.setUTCFullYear(2009);
