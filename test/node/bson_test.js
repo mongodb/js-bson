@@ -12,6 +12,7 @@ var testCase = require('nodeunit').testCase,
   Long = mongoO.Long,
   MongoReply = mongoO.MongoReply,
   ObjectID = mongoO.ObjectID,
+  ObjectId = mongoO.ObjectId,
   Symbol = mongoO.Symbol,
   DBRef = mongoO.DBRef,
   Double = mongoO.Double,
@@ -1553,10 +1554,10 @@ exports['ObjectID should have a correct cached representation of the hexString']
   test.equal(__id, a.toHexString());
 
   // createFromTime
-  a = ObjectID.createFromTime(genTime);
+  a = ObjectId.createFromTime(genTime);
   __id = a.__id;
   test.equal(__id, a.toHexString());
-  ObjectID.cacheHexString = false;
+  ObjectId.cacheHexString = false;
 
   test.done();
 }
