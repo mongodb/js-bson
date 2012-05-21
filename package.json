@@ -1,7 +1,7 @@
 { "name" :            "bson"
 , "description" :     "A bson parser for node.js and the browser"
 , "keywords" :        ["mongodb", "bson", "parser"]
-, "version" :         "0.0.6"
+, "version" :         "0.0.7"
 , "author" :          "Christian Amor Kvalheim <christkv@gmail.com>"
 , "contributors" :  []
 
