@@ -1498,8 +1498,10 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
     index = index + len + 1;        
-    // Store the current index to calculate the object size
-    uint32_t currentIndex = index;
+    // Object size
+    uint32_t object_size = BSON::calculate_object_size(bson, value, serializeFunctions);
+    // Write the size of the object
+    BSON::write_int32((serialized_object + index), object_size);
     // Adjust the index
     index = index + 4;
     // Write out all the elements
@@ -1507,7 +1509,7 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
       // Add "index" string size for each element
       sprintf(length_str, "%d", i);
       // Encode the values      
-      index = BSON::serialize(bson, serialized_object, index, String::New(length_str), array->Get(i), check_key, serializeFunctions);
+      index = BSON::serialize(bson, serialized_object, index, String::New(length_str), array->Get(Integer::New(i)), check_key, serializeFunctions);
       // Write trailing '\0' for object
       *(serialized_object + index) = '\0';
     }
@@ -1515,10 +1517,46 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
     // Pad the last item
     *(serialized_object + index) = '\0';
     index = index + 1;
-    // Write the document size
-    BSON::write_int32((serialized_object + currentIndex), (index - currentIndex));
     // Free up memory
     free(length_str);
+    
+    //     // Cast to array
+    //     Local<Array> array = Local<Array>::Cast(value->ToObject());
+    //     // Turn length into string to calculate the size of all the strings needed
+    //     char *length_str = (char *)malloc(256 * sizeof(char));    
+    //     // Save the string at the offset provided
+    //     *(serialized_object + index) = BSON_DATA_ARRAY;
+    //     // Adjust writing position for the first byte
+    //     index = index + 1;
+    //     // Convert name to char*
+    //     ssize_t len = DecodeBytes(name, UTF8);
+    //     ssize_t written = DecodeWrite((serialized_object + index), len, name, UTF8);
+    // assert(written == len);
+    //     // Add null termiation for the string
+    //     *(serialized_object + index + len) = '\0';    
+    //     // Adjust the index
+    //     index = index + len + 1;        
+    //     // Store the current index to calculate the object size
+    //     uint32_t currentIndex = index;
+    //     // Adjust the index
+    //     index = index + 4;
+    //     // Write out all the elements
+    //     for(uint32_t i = 0; i < array->Length(); i++) {
+    //       // Add "index" string size for each element
+    //       sprintf(length_str, "%d", i);
+    //       // Encode the values      
+    //       index = BSON::serialize(bson, serialized_object, index, String::New(length_str), array->Get(i), check_key, serializeFunctions);
+    //       // Write trailing '\0' for object
+    //       *(serialized_object + index) = '\0';
+    //     }
+    // 
+    //     // Pad the last item
+    //     *(serialized_object + index) = '\0';
+    //     index = index + 1;
+    //     // Write the document size
+    //     BSON::write_int32((serialized_object + currentIndex), (index - currentIndex));
+    //     // Free up memory
+    //     free(length_str);
   } else if(value->IsRegExp()) {
     // Save the string at the offset provided
     *(serialized_object + index) = BSON_DATA_REGEXP;
