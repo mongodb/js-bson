@@ -1127,10 +1127,13 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args) {
     Buffer *buffer = Buffer::New(serialized_object, object_size);
     // Release the serialized string
     free(serialized_object);
+    // Return the serialized content
     return scope.Close(buffer->handle_);
   } else {
     // Encode the string (string - null termiating character)
     Local<Value> bin_value = Encode(serialized_object, object_size, BINARY)->ToString();
+    // Release the serialized string
+    free(serialized_object);
     // Return the serialized content
     return bin_value;    
   }  
@@ -1495,10 +1498,8 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
     *(serialized_object + index + len) = '\0';    
     // Adjust the index
     index = index + len + 1;        
-    // Object size
-    uint32_t object_size = BSON::calculate_object_size(bson, value, serializeFunctions);
-    // Write the size of the object
-    BSON::write_int32((serialized_object + index), object_size);
+    // Store the current index to calculate the object size
+    uint32_t currentIndex = index;
     // Adjust the index
     index = index + 4;
     // Write out all the elements
@@ -1506,7 +1507,7 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
       // Add "index" string size for each element
       sprintf(length_str, "%d", i);
       // Encode the values      
-      index = BSON::serialize(bson, serialized_object, index, String::New(length_str), array->Get(Integer::New(i)), check_key, serializeFunctions);
+      index = BSON::serialize(bson, serialized_object, index, String::New(length_str), array->Get(i), check_key, serializeFunctions);
       // Write trailing '\0' for object
       *(serialized_object + index) = '\0';
     }
@@ -1514,6 +1515,8 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
     // Pad the last item
     *(serialized_object + index) = '\0';
     index = index + 1;
+    // Write the document size
+    BSON::write_int32((serialized_object + currentIndex), (index - currentIndex));
     // Free up memory
     free(length_str);
   } else if(value->IsRegExp()) {
@@ -1756,25 +1759,17 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
       // Set the right type if we have a scope or not
       if(propertyNameLength > 0) {
         // Set basic data code object with scope object
-        *(serialized_object + originalIndex) = BSON_DATA_CODE_W_SCOPE;        
-
-        // Calculate the size of the whole object
-        uint32_t scopeSize = BSON::calculate_object_size(bson, scope, false);
+        *(serialized_object + originalIndex) = BSON_DATA_CODE_W_SCOPE;                
         // Decode the function length
         ssize_t len = DecodeBytes(function, UTF8);
-        // Calculate total size
-        uint32_t size = 4 + len + 1 + 4 + scopeSize;
-        
-        // Write the total size
-        BSON::write_int32((serialized_object + index), size);
-        // Adjust the index
+        // Contains the total size index location
+        uint32_t totalSizeIndex = index;
+        // Move index to string length
         index = index + 4;
-        
-        // Write the function size
+        // Write the length of the function string
         BSON::write_int32((serialized_object + index), len + 1);
         // Adjust the index
         index = index + 4;
-
         // Write the data into the serialization stream
         ssize_t written = DecodeWrite((serialized_object + index), len, function, UTF8);      
 				assert(written == len);
@@ -1782,10 +1777,10 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
         *(serialized_object + index + len) = 0x00;
         // Adjust the index with the length of the function
         index = index + len + 1;
-        // Write the scope object
-        BSON::serialize(bson, (serialized_object + index), 0, Null(), scope, check_key, serializeFunctions);
-        // Adjust the index
-        index = index + scopeSize;
+        // Write the scope object and update the index to the end
+        index = index + BSON::serialize(bson, (serialized_object + index), 0, Null(), scope, check_key, serializeFunctions);
+        // Write the total size of the code object
+        BSON::write_int32((serialized_object + totalSizeIndex), (index - totalSizeIndex));
       } else {
         // Set basic data code object
         *(serialized_object + originalIndex) = BSON_DATA_CODE;                
@@ -1848,10 +1843,8 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
       Local<Array> property_names = object->GetOwnPropertyNames();
     #endif
 
-    // Calculate size of the total object
-    uint32_t object_size = BSON::calculate_object_size(bson, value, serializeFunctions);
-    // Write the size
-    BSON::write_int32((serialized_object + index), object_size);
+    // Keep a pointer to the current index
+    uint32_t currentIndex = index;
     // Adjust size
     index = index + 4;    
     
@@ -1880,13 +1873,8 @@ uint32_t BSON::serialize(BSON *bson, char *serialized_object, uint32_t index, Ha
     // Pad the last item
     *(serialized_object + index) = '\0';
     index = index + 1;
-
-    // Null out reminding fields if we have a toplevel object and nested levels
-    if(name->IsNull()) {
-      for(uint32_t i = 0; i < (object_size - index); i++) {
-        *(serialized_object + index + i) = '\0';
-      }
-    }    
+    // Write the final size of the object
+    BSON::write_int32((serialized_object + currentIndex), (index - currentIndex));
   }
   
   return index;
@@ -1948,9 +1936,6 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
   Local<Uint32> indexObject = args[3]->ToUint32();
   uint32_t index = indexObject->Value();
 
-  // Allocate the memory needed for the serializtion
-  char *serialized_object = (char *)malloc(object_size * sizeof(char));  
-
   // Catch any errors
   try {
     // Check if we have a boolean value
@@ -1965,11 +1950,8 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
     }
     
     // Serialize the object
-    BSON::serialize(bson, serialized_object, 0, Null(), finalObject, check_key, serializeFunctions);
+    BSON::serialize(bson, data, 0, Null(), finalObject, check_key, serializeFunctions);
   } catch(char *err_msg) {
-    // Free up serialized object space
-    free(serialized_object);
-    V8::AdjustAmountOfExternalAllocatedMemory(-object_size);
     // Throw exception with the string
     Handle<Value> error = VException(err_msg);
     // free error message
@@ -1977,11 +1959,7 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
     // Return error
     return error;
   }
-
-  for(uint32_t i = 0; i < object_size; i++) {
-    *(data + index + i) = *(serialized_object + i);
-  }
-  
+  // Return the serialized object
   return scope.Close(Uint32::New(index + object_size - 1));
 }
 

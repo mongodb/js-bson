@@ -93,10 +93,6 @@ class BSON : public ObjectWrap {
     static Handle<Value> decodeBinary(BSON *bson, uint32_t sub_type, uint32_t number_of_bytes, char *data);
     static Handle<Value> decodeCode(BSON *bson, char *code, Handle<Value> scope);
     static Handle<Value> decodeDBref(BSON *bson, Local<Value> ref, Local<Value> oid, Local<Value> db);    
-
-		// Experimental
-    static uint32_t calculate_object_size2(Handle<Value> object);    
-    static uint32_t serialize2(char *serialized_object, uint32_t index, Handle<Value> name, Handle<Value> value, uint32_t object_size, bool check_key);    
 };
 
 #endif  // BSON_H_
