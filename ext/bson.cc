@@ -1924,14 +1924,6 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
 		finalObject = object;
 	}
   
-  uint32_t object_size = 0;
-  // Calculate the total size of the document in binary form to ensure we only allocate memory once
-  if(args.Length() == 5) {
-    object_size = BSON::calculate_object_size(bson, finalObject, args[4]->BooleanValue());    
-  } else {
-    object_size = BSON::calculate_object_size(bson, finalObject, false);    
-  }
-  
   // Unpack the index variable
   Local<Uint32> indexObject = args[3]->ToUint32();
   uint32_t index = indexObject->Value();
@@ -1950,7 +1942,7 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
     }
     
     // Serialize the object
-    BSON::serialize(bson, (data + index), 0, Null(), finalObject, check_key, serializeFunctions);
+    index = index + BSON::serialize(bson, (data + index), 0, Null(), finalObject, check_key, serializeFunctions);
   } catch(char *err_msg) {
     // Throw exception with the string
     Handle<Value> error = VException(err_msg);
@@ -1961,7 +1953,7 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) {
   }
 
   // Return the object
-  return scope.Close(Uint32::New(index + object_size - 1));
+  return scope.Close(Uint32::New(index - 1));
 }
 
 Handle<Value> BSON::BSONDeserializeStream(const Arguments &args) {
