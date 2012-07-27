@@ -75,8 +75,8 @@ void DataStream::CheckKey(const Local<String>& keyName)
 template<typename T> void BSONSerializer<T>::SerializeDocument(const Handle<Value>& value)
 {
 	void* documentSize = this->BeginWriteSize();
-
-	Local<Object> object = value->ToObject();
+	Local<Object> object = bson->GetSerializeObject(value);
+	// Get the object property names
 	Local<Array> propertyNames = object->GetOwnPropertyNames();
 
 	// Length of the property
