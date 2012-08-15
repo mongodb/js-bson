@@ -6,14 +6,14 @@
 , "contributors" :  []
 
 , "repository" :    { "type" :  "git"
-                    , "url" :   "git@github.com:christkv/bson.git" }
+                    , "url" :   "git@github.com:mongodb/js-bson.git" }
 , "bugs" :          { "mail" :  "node-mongodb-native@googlegroups.com"
-                    , "url" :   "https://github.com/christkv/bson/issues" }
+                    , "url" :   "https://github.com/mongodb/js-bson/issues" }
 , "devDependencies": {
       "nodeunit": "0.7.3"
 	  , "gleak": "0.2.3"
   }
-, "config":         { "native" : false }                    
+, "config":         { "native" : false }
 , "main":             "./lib/bson/index"
 , "directories" :   { "lib" : "./lib/bson" }
 , "engines" :       { "node" : ">=0.4.0" }
