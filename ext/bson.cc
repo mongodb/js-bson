@@ -61,7 +61,7 @@ void DataStream::CheckKey(const Local<String>& keyName)
 	char* keyStringBuffer = (char*) alloca(keyLength+1);
 	keyName->WriteUtf8(keyStringBuffer);
 
-	if(keyStringBuffer[0] == '$') 
+	if(keyStringBuffer[0] == '$')
 	{
 		ThrowAllocatedStringException(64+keyLength, "key %s must not start with '$'", keyStringBuffer);
 	}
@@ -76,8 +76,13 @@ template<typename T> void BSONSerializer<T>::SerializeDocument(const Handle<Valu
 {
 	void* documentSize = this->BeginWriteSize();
 	Local<Object> object = bson->GetSerializeObject(value);
+
 	// Get the object property names
-	Local<Array> propertyNames = object->GetOwnPropertyNames();
+	#if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 6
+    Local<Array> propertyNames = object->GetPropertyNames();
+  #else
+    Local<Array> propertyNames = object->GetOwnPropertyNames();
+  #endif
 
 	// Length of the property
 	int propertyLength = propertyNames->Length();
@@ -138,30 +143,30 @@ template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, 
 			this->WriteDouble(doubleValue);
 		}
 	}
-	else if(value->IsString()) 
+	else if(value->IsString())
 	{
 		this->CommitType(typeLocation, BSON_TYPE_STRING);
 		this->WriteLengthPrefixedString(value->ToString());
 	}
-	else if(value->IsBoolean()) 
+	else if(value->IsBoolean())
 	{
 		this->CommitType(typeLocation, BSON_TYPE_BOOLEAN);
 		this->WriteBool(value);
 	}
-	else if(value->IsArray()) 
+	else if(value->IsArray())
 	{
 		this->CommitType(typeLocation, BSON_TYPE_ARRAY);
 		SerializeArray(value);
 	}
-	else if(value->IsDate()) 
+	else if(value->IsDate())
 	{
 		this->CommitType(typeLocation, BSON_TYPE_DATE);
 		this->WriteInt64(value);
 	}
-	else if(value->IsRegExp()) 
+	else if(value->IsRegExp())
 	{
 		this->CommitType(typeLocation, BSON_TYPE_REGEXP);
-		const Handle<RegExp>& regExp = Handle<RegExp>::Cast(value);    
+		const Handle<RegExp>& regExp = Handle<RegExp>::Cast(value);
 
 		this->WriteString(regExp->GetSource());
 
@@ -179,27 +184,27 @@ template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, 
 	else if(value->IsObject())
 	{
 		const Local<Object>& object = value->ToObject();
-		if(object->Has(bson->_bsontypeString)) 
+		if(object->Has(bson->_bsontypeString))
 		{
-			const Local<String>& constructorString = object->GetConstructorName();    
-			if(bson->longString->StrictEquals(constructorString)) 
+			const Local<String>& constructorString = object->GetConstructorName();
+			if(bson->longString->StrictEquals(constructorString))
 			{
 				this->CommitType(typeLocation, BSON_TYPE_LONG);
 				this->WriteInt32(object, bson->_longLowString);
 				this->WriteInt32(object, bson->_longHighString);
-			} 
-			else if(bson->timestampString->StrictEquals(constructorString)) 
+			}
+			else if(bson->timestampString->StrictEquals(constructorString))
 			{
 				this->CommitType(typeLocation, BSON_TYPE_TIMESTAMP);
 				this->WriteInt32(object, bson->_longLowString);
 				this->WriteInt32(object, bson->_longHighString);
-			} 
-			else if(bson->objectIDString->StrictEquals(constructorString)) 
+			}
+			else if(bson->objectIDString->StrictEquals(constructorString))
 			{
 				this->CommitType(typeLocation, BSON_TYPE_OID);
 				this->WriteObjectId(object, bson->_objectIDidString);
-			} 
-			else if(bson->binaryString->StrictEquals(constructorString)) 
+			}
+			else if(bson->binaryString->StrictEquals(constructorString))
 			{
 				this->CommitType(typeLocation, BSON_TYPE_BINARY);
 
@@ -210,37 +215,43 @@ template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, 
 				this->WriteByte(object, bson->_binarySubTypeString);	// write subtype
 				this->WriteData(Buffer::Data(bufferObj), length);
 			}
-			else if(bson->doubleString->StrictEquals(constructorString)) 
+			else if(bson->doubleString->StrictEquals(constructorString))
 			{
 				this->CommitType(typeLocation, BSON_TYPE_NUMBER);
 				this->WriteDouble(object, bson->_doubleValueString);
-			} 
-			else if(bson->symbolString->StrictEquals(constructorString)) 
+			}
+			else if(bson->symbolString->StrictEquals(constructorString))
 			{
 				this->CommitType(typeLocation, BSON_TYPE_SYMBOL);
 				this->WriteLengthPrefixedString(object->Get(bson->_symbolValueString)->ToString());
-			} 
-			else if(bson->codeString->StrictEquals(constructorString)) 
+			}
+			else if(bson->codeString->StrictEquals(constructorString))
 			{
 				const Local<String>& function = object->Get(bson->_codeCodeString)->ToString();
 				const Local<Object>& scope = object->Get(bson->_codeScopeString)->ToObject();
 
-				uint32_t propertyNameLength = scope->GetOwnPropertyNames()->Length();
-				if(propertyNameLength > 0) 
+				// For Node < 0.6.X use the GetPropertyNames
+	      #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 6
+	        uint32_t propertyNameLength = scope->GetPropertyNames()->Length();
+	      #else
+	        uint32_t propertyNameLength = scope->GetOwnPropertyNames()->Length();
+	      #endif
+
+				if(propertyNameLength > 0)
 				{
 					this->CommitType(typeLocation, BSON_TYPE_CODE_W_SCOPE);
 					void* codeWidthScopeSize = this->BeginWriteSize();
 					this->WriteLengthPrefixedString(function->ToString());
 					SerializeDocument(scope);
 					this->CommitSize(codeWidthScopeSize);
-				} 
-				else 
+				}
+				else
 				{
 					this->CommitType(typeLocation, BSON_TYPE_CODE);
 					this->WriteLengthPrefixedString(function->ToString());
-				}          
-			} 
-			else if(bson->dbrefString->StrictEquals(constructorString)) 
+				}
+			}
+			else if(bson->dbrefString->StrictEquals(constructorString))
 			{
 				this->CommitType(typeLocation, BSON_TYPE_OBJECT);
 
@@ -255,7 +266,7 @@ template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, 
 				SerializeValue(idType, object->Get(bson->_dbRefOidString));
 
 				const Local<Value>& refDbValue = object->Get(bson->_dbRefDbString);
-				if(!refDbValue->IsUndefined()) 
+				if(!refDbValue->IsUndefined())
 				{
 					void* dbType = this->BeginWriteType();
 					this->WriteData("$db", 4);
@@ -265,11 +276,11 @@ template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, 
 				this->WriteByte(0);
 				this->CommitSize(dbRefSize);
 			}
-			else if(bson->minKeyString->StrictEquals(constructorString)) 
+			else if(bson->minKeyString->StrictEquals(constructorString))
 			{
 				this->CommitType(typeLocation, BSON_TYPE_MIN_KEY);
-			} 
-			else if(bson->maxKeyString->StrictEquals(constructorString)) 
+			}
+			else if(bson->maxKeyString->StrictEquals(constructorString))
 			{
 				this->CommitType(typeLocation, BSON_TYPE_MAX_KEY);
 			}
@@ -288,9 +299,9 @@ template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, 
 
 // Data points to start of element list, length is length of entire document including '\0' but excluding initial size
 BSONDeserializer::BSONDeserializer(BSON* aBson, char* data, size_t length)
-: bson(aBson), 
+: bson(aBson),
   pStart(data),
-  p(data), 
+  p(data),
   pEnd(data + length - 1)
 {
 	if(*pEnd != '\0') ThrowAllocatedStringException(64, "Missing end of document marker '\\0'");
@@ -332,7 +343,7 @@ int32_t BSONDeserializer::ReadRegexOptions()
 uint32_t BSONDeserializer::ReadIntegerString()
 {
 	uint32_t value = 0;
-	while(*p) 
+	while(*p)
 	{
 		if(*p < '0' || *p > '9') ThrowAllocatedStringException(64, "Invalid key for array");
 		value = value * 10 + *p++ - '0';
@@ -495,7 +506,7 @@ Handle<Value> BSONDeserializer::DeserializeValue(BsonType type)
 			// Read 32 bit integers
 			int32_t lowBits = (int32_t) ReadInt32();
 			int32_t highBits = (int32_t) ReadInt32();
-			
+
 		    // If value is < 2^53 and >-2^53
 		    if((highBits < 0x200000 || (highBits == 0x200000 && lowBits == 0)) && highBits >= -0x200000) {
 			  // Adjust the pointer and read as 64 bit value
@@ -504,7 +515,7 @@ Handle<Value> BSONDeserializer::DeserializeValue(BsonType type)
 		      int64_t finalValue = (int64_t) ReadInt64();
 		      return Number::New(finalValue);
 		    }
-			
+
 			Local<Value> argv[] = { Int32::New(lowBits), Int32::New(highBits) };
 			return bson->longConstructor->NewInstance(2, argv);
 		}
@@ -537,7 +548,7 @@ Handle<Value> BSONDeserializer::DeserializeValue(BsonType type)
 }
 
 
-static Handle<Value> VException(const char *msg) 
+static Handle<Value> VException(const char *msg)
 {
 	HandleScope scope;
 	return ThrowException(Exception::Error(String::New(msg)));
@@ -545,7 +556,7 @@ static Handle<Value> VException(const char *msg)
 
 Persistent<FunctionTemplate> BSON::constructor_template;
 
-BSON::BSON() : ObjectWrap() 
+BSON::BSON() : ObjectWrap()
 {
 	// Setup pre-allocated comparision objects
 	_bsontypeString = Persistent<String>::New(String::New("_bsontype"));
@@ -579,7 +590,7 @@ BSON::BSON() : ObjectWrap()
 	maxKeyString = Persistent<String>::New(String::New("MaxKey"));
 }
 
-void BSON::Initialize(v8::Handle<v8::Object> target) 
+void BSON::Initialize(v8::Handle<v8::Object> target)
 {
 	// Grab the scope of the call from Node
 	HandleScope scope;
@@ -600,17 +611,17 @@ void BSON::Initialize(v8::Handle<v8::Object> target)
 }
 
 // Create a new instance of BSON and passing it the existing context
-Handle<Value> BSON::New(const Arguments &args) 
+Handle<Value> BSON::New(const Arguments &args)
 {
 	HandleScope scope;
 
 	// Check that we have an array
-	if(args.Length() == 1 && args[0]->IsArray()) 
+	if(args.Length() == 1 && args[0]->IsArray())
 	{
 		// Cast the array to a local reference
 		Local<Array> array = Local<Array>::Cast(args[0]);
 
-		if(array->Length() > 0) 
+		if(array->Length() > 0)
 		{
 			// Create a bson object instance and return it
 			BSON *bson = new BSON();
@@ -618,59 +629,59 @@ Handle<Value> BSON::New(const Arguments &args)
 			uint32_t foundClassesMask = 0;
 
 			// Iterate over all entries to save the instantiate funtions
-			for(uint32_t i = 0; i < array->Length(); i++) 
+			for(uint32_t i = 0; i < array->Length(); i++)
 			{
 				// Let's get a reference to the function
 				Local<Function> func = Local<Function>::Cast(array->Get(i));
 				Local<String> functionName = func->GetName()->ToString();
 
 				// Save the functions making them persistant handles (they don't get collected)
-				if(functionName->StrictEquals(bson->longString)) 
+				if(functionName->StrictEquals(bson->longString))
 				{
 					bson->longConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 1;
-				} 
-				else if(functionName->StrictEquals(bson->objectIDString)) 
+				}
+				else if(functionName->StrictEquals(bson->objectIDString))
 				{
 					bson->objectIDConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 2;
-				} 
-				else if(functionName->StrictEquals(bson->binaryString)) 
+				}
+				else if(functionName->StrictEquals(bson->binaryString))
 				{
 					bson->binaryConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 4;
-				} 
-				else if(functionName->StrictEquals(bson->codeString)) 
+				}
+				else if(functionName->StrictEquals(bson->codeString))
 				{
 					bson->codeConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 8;
-				} 
-				else if(functionName->StrictEquals(bson->dbrefString)) 
+				}
+				else if(functionName->StrictEquals(bson->dbrefString))
 				{
 					bson->dbrefConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 0x10;
-				} 
-				else if(functionName->StrictEquals(bson->symbolString)) 
+				}
+				else if(functionName->StrictEquals(bson->symbolString))
 				{
 					bson->symbolConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 0x20;
-				} 
-				else if(functionName->StrictEquals(bson->doubleString)) 
+				}
+				else if(functionName->StrictEquals(bson->doubleString))
 				{
 					bson->doubleConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 0x40;
-				} 
-				else if(functionName->StrictEquals(bson->timestampString)) 
+				}
+				else if(functionName->StrictEquals(bson->timestampString))
 				{
 					bson->timestampConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 0x80;
-				} 
-				else if(functionName->StrictEquals(bson->minKeyString)) 
+				}
+				else if(functionName->StrictEquals(bson->minKeyString))
 				{
 					bson->minKeyConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 0x100;
-				} 
-				else if(functionName->StrictEquals(bson->maxKeyString)) 
+				}
+				else if(functionName->StrictEquals(bson->maxKeyString))
 				{
 					bson->maxKeyConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 0x200;
@@ -678,26 +689,26 @@ Handle<Value> BSON::New(const Arguments &args)
 			}
 
 			// Check if we have the right number of constructors otherwise throw an error
-			if(foundClassesMask != 0x3ff) 
+			if(foundClassesMask != 0x3ff)
 			{
 				delete bson;
 				return VException("Missing function constructor for either [Long/ObjectID/Binary/Code/DbRef/Symbol/Double/Timestamp/MinKey/MaxKey]");
-			} 
-			else 
+			}
+			else
 			{
 				bson->Wrap(args.This());
-				return args.This();                  
+				return args.This();
 			}
-		} 
-		else 
+		}
+		else
 		{
 			return VException("No types passed in");
-		}    
-	} 
-	else 
+		}
+	}
+	else
 	{
 		return VException("Argument passed in must be an array of types");
-	}  
+	}
 }
 
 //------------------------------------------------------------------------------------------------
@@ -705,7 +716,7 @@ Handle<Value> BSON::New(const Arguments &args)
 //------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------
 
-Handle<Value> BSON::BSONDeserialize(const Arguments &args) 
+Handle<Value> BSON::BSONDeserialize(const Arguments &args)
 {
 	HandleScope scope;
 
@@ -719,10 +730,10 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args)
 	Local<Object> obj = args[0]->ToObject();
 
 	// Unpack the BSON parser instance
-	BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());  
+	BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());
 
 	// If we passed in a buffer, let's unpack it, otherwise let's unpack the string
-	if(Buffer::HasInstance(obj)) 
+	if(Buffer::HasInstance(obj))
 	{
 #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
 		Buffer *buffer = ObjectWrap::Unwrap<Buffer>(obj);
@@ -749,7 +760,7 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args)
 		}
 
 	}
-	else 
+	else
 	{
 		// The length of the data for this encoding
 		ssize_t len = DecodeBytes(args[0], BINARY);
@@ -776,7 +787,7 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args)
 			free(data);
 			return error;
 		}
-	}  
+	}
 }
 
 Local<Object> BSON::GetSerializeObject(const Handle<Value>& argValue)
@@ -797,7 +808,7 @@ Local<Object> BSON::GetSerializeObject(const Handle<Value>& argValue)
 	}
 }
 
-Handle<Value> BSON::BSONSerialize(const Arguments &args) 
+Handle<Value> BSON::BSONSerialize(const Arguments &args)
 {
 	HandleScope scope;
 
@@ -808,7 +819,7 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args)
 	if(args.Length() > 4) return VException("One, two, tree or four arguments required - [object] or [object, boolean] or [object, boolean, boolean] or [object, boolean, boolean, boolean]");
 
 	// Unpack the BSON parser instance
-	BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());  
+	BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());
 
 	// Calculate the total size of the document in binary form to ensure we only allocate memory once
 	// With serialize function
@@ -816,7 +827,7 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args)
 
 	char *serialized_object = NULL;
 	size_t object_size;
-	try 
+	try
 	{
 		Local<Object> object = bson->GetSerializeObject(args[0]);
 
@@ -825,14 +836,14 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args)
 		object_size = counter.GetSerializeSize();
 
 		// Allocate the memory needed for the serialization
-		serialized_object = (char *)malloc(object_size);  
+		serialized_object = (char *)malloc(object_size);
 
 		// Check if we have a boolean value
 		bool checkKeys = args.Length() >= 3 && args[1]->IsBoolean() && args[1]->BooleanValue();
 		BSONSerializer<DataStream> data(bson, checkKeys, serializeFunctions, serialized_object);
 		data.SerializeDocument(object);
-	} 
-	catch(char *err_msg) 
+	}
+	catch(char *err_msg)
 	{
 		free(serialized_object);
 		Handle<Value> error = VException(err_msg);
@@ -841,21 +852,21 @@ Handle<Value> BSON::BSONSerialize(const Arguments &args)
 	}
 
 	// If we have 3 arguments
-	if(args.Length() == 3 || args.Length() == 4) 
+	if(args.Length() == 3 || args.Length() == 4)
 	{
 		Buffer *buffer = Buffer::New(serialized_object, object_size);
 		free(serialized_object);
 		return scope.Close(buffer->handle_);
-	} 
-	else 
+	}
+	else
 	{
 		Local<Value> bin_value = Encode(serialized_object, object_size, BINARY)->ToString();
 		free(serialized_object);
-		return bin_value;    
-	}  
+		return bin_value;
+	}
 }
 
-Handle<Value> BSON::CalculateObjectSize(const Arguments &args) 
+Handle<Value> BSON::CalculateObjectSize(const Arguments &args)
 {
 	HandleScope scope;
 	// Ensure we have a valid object
@@ -864,7 +875,7 @@ Handle<Value> BSON::CalculateObjectSize(const Arguments &args)
 	if(args.Length() > 3) return VException("One or two arguments required - [object] or [object, boolean]");
 
 	// Unpack the BSON parser instance
-	BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());  
+	BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());
 	bool serializeFunctions = (args.Length() >= 2) && args[1]->BooleanValue();
 	BSONSerializer<CountStream> countSerializer(bson, false, serializeFunctions);
 	countSerializer.SerializeDocument(args[0]);
@@ -873,9 +884,9 @@ Handle<Value> BSON::CalculateObjectSize(const Arguments &args)
 	return scope.Close(Uint32::New((uint32_t) countSerializer.GetSerializeSize()));
 }
 
-Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args) 
+Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args)
 {
-	HandleScope scope;  
+	HandleScope scope;
 
 	//BSON.serializeWithBufferAndIndex = function serializeWithBufferAndIndex(object, ->, buffer, index) {
 	// Ensure we have the correct values
@@ -886,9 +897,9 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args)
 	uint32_t index;
 	size_t object_size;
 
-	try 
+	try
 	{
-		BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());  
+		BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());
 
 		Local<Object> obj = args[2]->ToObject();
 		char* data = Buffer::Data(obj);
@@ -903,8 +914,8 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args)
 		object_size = dataSerializer.GetSerializeSize();
 
 		if(object_size + index > length) return VException("Serious error - overflowed buffer!!");
-	} 
-	catch(char *exception) 
+	}
+	catch(char *exception)
 	{
 		Handle<Value> error = VException(exception);
 		free(exception);
@@ -914,7 +925,7 @@ Handle<Value> BSON::SerializeWithBufferAndIndex(const Arguments &args)
 	return scope.Close(Uint32::New((uint32_t) (index + object_size - 1)));
 }
 
-Handle<Value> BSON::BSONDeserializeStream(const Arguments &args) 
+Handle<Value> BSON::BSONDeserializeStream(const Arguments &args)
 {
 	HandleScope scope;
 
@@ -922,7 +933,7 @@ Handle<Value> BSON::BSONDeserializeStream(const Arguments &args)
 	if(args.Length() < 5) return VException("Arguments required (Buffer(data), Number(index in data), Number(number of documents to deserialize), Array(results), Number(index in the array), Object(optional))");
 
 	// If the number of argumets equals 3
-	if(args.Length() >= 5) 
+	if(args.Length() >= 5)
 	{
 		if(!Buffer::HasInstance(args[0])) return VException("First argument must be Buffer instance");
 		if(!args[1]->IsUint32()) return VException("Second argument must be a positive index number");
@@ -941,7 +952,7 @@ Handle<Value> BSON::BSONDeserializeStream(const Arguments &args)
 	uint32_t resultIndex = args[4]->Uint32Value();
 
 	// Unpack the BSON parser instance
-	BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());  
+	BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());
 
 	// Unpack the buffer variable
 #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
@@ -957,7 +968,7 @@ Handle<Value> BSON::BSONDeserializeStream(const Arguments &args)
 	Local<Object> documents = args[3]->ToObject();
 
 	BSONDeserializer deserializer(bson, data+index, length-index);
-	for(uint32_t i = 0; i < numberOfDocuments; i++) 
+	for(uint32_t i = 0; i < numberOfDocuments; i++)
 	{
 		try
 		{
@@ -976,7 +987,7 @@ Handle<Value> BSON::BSONDeserializeStream(const Arguments &args)
 }
 
 // Exporting function
-extern "C" void init(Handle<Object> target) 
+extern "C" void init(Handle<Object> target)
 {
 	HandleScope scope;
 	BSON::Initialize(target);
