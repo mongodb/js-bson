@@ -477,7 +477,7 @@ Handle<Value> BSONDeserializer::DeserializeValue(BsonType type)
 
 	case BSON_TYPE_CODE_W_SCOPE:
 		{
-			uint32_t length = ReadUInt32();
+			ReadUInt32();
 			const Local<Value>& code = ReadString();
 			const Handle<Value>& scope = DeserializeDocument();
 			Local<Value> argv[] = { code, scope->ToObject() };
@@ -770,7 +770,7 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args)
 
 		// Let's define the buffer size
 		char* data = (char *)malloc(len);
-		ssize_t written = DecodeWrite(data, len, args[0], BINARY);
+		DecodeWrite(data, len, args[0], BINARY);
 
 		try
 		{

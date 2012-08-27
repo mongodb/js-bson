@@ -1,4 +1,4 @@
-var bson = require('./bson');
+var bson = require('../build/Release/bson');
 exports.BSON = bson.BSON;
 exports.Long = require('../lib/bson/long').Long;
 exports.ObjectID = require('../lib/bson/objectid').ObjectID;
@@ -17,4 +17,4 @@ exports.BSON.BSON_BINARY_SUBTYPE_FUNCTION = 1;
 exports.BSON.BSON_BINARY_SUBTYPE_BYTE_ARRAY = 2;
 exports.BSON.BSON_BINARY_SUBTYPE_UUID = 3;
 exports.BSON.BSON_BINARY_SUBTYPE_MD5 = 4;
-exports.BSON.BSON_BINARY_SUBTYPE_USER_DEFINED = 128;          
+exports.BSON.BSON_BINARY_SUBTYPE_USER_DEFINED = 128;

@@ -1,7 +1,7 @@
 { "name" :            "bson"
 , "description" :     "A bson parser for node.js and the browser"
 , "keywords" :        ["mongodb", "bson", "parser"]
-, "version" :         "0.1.1"
+, "version" :         "0.1.2"
 , "author" :          "Christian Amor Kvalheim <christkv@gmail.com>"
 , "contributors" :  []
 
@@ -16,7 +16,7 @@
 , "config":         { "native" : false }
 , "main":             "./lib/bson/index"
 , "directories" :   { "lib" : "./lib/bson" }
-, "engines" :       { "node" : ">=0.4.0" }
+, "engines" :       { "node" : ">=0.6.0" }
 , "scripts": { "install" : "node install.js", "test" : "make test" }
 , "licenses" :    [ { "type" :  "Apache License, Version 2.0"
                     , "url" :   "http://www.apache.org/licenses/LICENSE-2.0" } ]
