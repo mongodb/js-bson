@@ -1,6 +1,5 @@
 var sys = require('util'),
   fs = require('fs'),
-  Buffer = require('buffer').Buffer,
   BSON = require('../../build/Release/bson').BSON,
   Buffer = require('buffer').Buffer,
   BSONJS = require('../../lib/bson/bson').BSON,
@@ -228,6 +227,17 @@ exports['Should Correctly Serialize and Deserialize Oid'] = function(test) {
   var doc = {doc: new ObjectID()}
   var serialized_data = bsonC.serialize(doc)
   assert.deepEqual(doc.doc.toHexString(), bsonC.deserialize(serialized_data).doc.toHexString())
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Should Correctly Serialize and Deserialize Buffer'] = function(test) {
+  var doc = {doc: new Buffer("123451234512345")}
+  var serialized_data = bsonC.serialize(doc)
+
+  assert.equal("123451234512345", bsonC.deserialize(serialized_data).doc.buffer.toString('ascii'));
   test.done();
 }
 

@@ -285,6 +285,21 @@ template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, 
 				this->CommitType(typeLocation, BSON_TYPE_MAX_KEY);
 			}
 		}
+		else if(Buffer::HasInstance(value))
+		{
+			this->CommitType(typeLocation, BSON_TYPE_BINARY);
+
+	    #if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 3
+       Buffer *buffer = ObjectWrap::Unwrap<Buffer>(value->ToObject());
+			 uint32_t length = object->length();
+	    #else
+			 uint32_t length = Buffer::Length(value->ToObject());
+	    #endif
+
+			this->WriteInt32(length);
+			this->WriteByte(0);
+			this->WriteData(Buffer::Data(value->ToObject()), length);
+		}
 		else
 		{
 			this->CommitType(typeLocation, BSON_TYPE_OBJECT);
