@@ -9,8 +9,21 @@ process.stdout.write("==========================================================
 
 // Check if we want to build the native code
 var build_native = process.env['npm_package_config_mongodb_native'] != null ? process.env['npm_package_config_mongodb_native'] : 'false';
+if(process.env['npm_config_mongodb_debug']) {
+  console.log("== process.env['npm_package_config_mongodb_native'] :: " + process.env['npm_package_config_mongodb_native']);
+  console.log("== build_native :: " + build_native);
+}
+
 build_native = process.env['npm_config_mongodb_native'] != null ? process.env['npm_config_mongodb_native'] : build_native;
+if(process.env['npm_config_mongodb_debug']) {
+  console.log("== process.env['npm_config_mongodb_native'] :: " + process.env['npm_config_mongodb_native']);
+  console.log("== build_native :: " + build_native);
+}
+
 build_native = build_native == 'true' ? true : false;
+if(process.env['npm_config_mongodb_debug']) {
+  console.log("== build_native :: " + build_native);
+}
 
 // If we are building the native bson extension ensure we use gmake if available
 if(build_native) {
