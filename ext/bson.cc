@@ -1008,5 +1008,4 @@ extern "C" void init(Handle<Object> target)
 	BSON::Initialize(target);
 }
 
-// NODE_MODULE(bson, BSON::Initialize);
-// NODE_MODULE(l, Long::Initialize);
+NODE_MODULE(bson, BSON::Initialize);
