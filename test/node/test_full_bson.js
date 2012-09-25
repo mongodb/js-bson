@@ -1,6 +1,6 @@
 var sys = require('util'),
   fs = require('fs'),
-  BSON = require('../../build/Release/bson').BSON,
+  BSON = require('../../ext').BSON,
   Buffer = require('buffer').Buffer,
   BSONJS = require('../../lib/bson/bson').BSON,
   BinaryParser = require('../../lib/bson/binary_parser').BinaryParser,

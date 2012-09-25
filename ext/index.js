@@ -2,9 +2,9 @@ var bson = null;
 
 // Load the precompiled win32 binary
 if(process.platform == "win32" && process.arch == "x64") {
- bson = require('./win32/x64/bson');  
+  bson = require('./win32/x64/bson');  
 } else {
- bson = require('../build/Release/bson');  
+  bson = require('../build/Release/bson');  
 }
 
 exports.BSON = bson.BSON;
