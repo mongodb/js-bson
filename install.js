@@ -26,7 +26,7 @@ if(process.env['npm_config_mongodb_debug']) {
 }
 
 // If we are building the native bson extension ensure we use gmake if available
-if(build_native) {
+if(build_native && process.platform != "win32" && process.platform != "win64") {
   // Check if we need to use gmake
   exec('which gmake', function(err, stdout, stderr) {
     // Set up spawn command
