@@ -1,0 +1,3 @@
+0.1.4 2012-09-25
+----------------
+- Added precompiled c++ native extensions for win32 ia32 and x64
