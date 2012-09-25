@@ -25,6 +25,8 @@ if(process.env['npm_config_mongodb_debug']) {
   console.log("== build_native :: " + build_native);
 }
 
+//SET npm_config_arch=ia32
+
 // If we are building the native bson extension ensure we use gmake if available
 if(build_native && process.platform != "win32" && process.platform != "win64") {
   // Check if we need to use gmake

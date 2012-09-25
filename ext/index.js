@@ -1,4 +1,12 @@
-var bson = require('../build/Release/bson');
+var bson = null;
+
+// Load the precompiled win32 binary
+if(process.platform == "win32") {
+ bson = require('./win32/bson');  
+} else {
+ bson = require('../build/Release/bson');  
+}
+
 exports.BSON = bson.BSON;
 exports.Long = require('../lib/bson/long').Long;
 exports.ObjectID = require('../lib/bson/objectid').ObjectID;
