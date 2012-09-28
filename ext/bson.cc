@@ -1,7 +1,5 @@
 //===========================================================================
 
-#include <string.h>
-#include <stdlib.h>
 #include <stdarg.h>
 
 #ifdef __clang__
@@ -11,6 +9,8 @@
 
 #include <v8.h>
 
+// this and the above block must be around the v8.h header otherwise
+// v8 is not happy
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -18,12 +18,6 @@
 #include <node.h>
 #include <node_version.h>
 #include <node_buffer.h>
-#include <cstring>
-#include <cmath>
-#include <cstdlib>
-#include <iostream>
-#include <limits>
-#include <vector>
 
 #include "bson.h"
 
@@ -560,6 +554,8 @@ Handle<Value> BSONDeserializer::DeserializeValue(BsonType type)
 	default:
 		ThrowAllocatedStringException(64, "Unhandled BSON Type: %d", type);
 	}
+
+	return v8::Null();
 }
 
 
