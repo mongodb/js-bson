@@ -17,7 +17,7 @@
 , "main":             "./lib/bson/index"
 , "directories" :   { "lib" : "./lib/bson" }
 , "engines" :       { "node" : ">=0.6.0" }
-, "scripts": { "install" : "node-gyp rebuild || (exit 0)", "test" : "make test" }
+, "scripts": { "install" : "node-gyp rebuild || (exit 0)", "test" : "nodeunit ./test/node && TEST_NATIVE=TRUE nodeunit ./test/node" }
 , "licenses" :    [ { "type" :  "Apache License, Version 2.0"
                     , "url" :   "http://www.apache.org/licenses/LICENSE-2.0" } ]
 }
