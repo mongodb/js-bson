@@ -6,7 +6,7 @@
 , "contributors" :  []
 
 , "repository" :    { "type" :  "git"
-                    , "url" :   "git@github.com:mongodb/js-bson.git" }
+                    , "url" :   "git://github.com/mongodb/js-bson.git" }
 , "bugs" :          { "mail" :  "node-mongodb-native@googlegroups.com"
                     , "url" :   "https://github.com/mongodb/js-bson/issues" }
 , "devDependencies": {
