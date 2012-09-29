@@ -1,8 +1,8 @@
 //===========================================================================
 
 #include <stdarg.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 #ifdef __clang__
 #pragma clang diagnostic push
