@@ -2,7 +2,7 @@
 
 #include <stdarg.h>
 #include <stdlib.h>
-#include <cstring.h>
+#include <string.h>
 
 #ifdef __clang__
 #pragma clang diagnostic push
