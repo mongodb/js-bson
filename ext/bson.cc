@@ -518,15 +518,6 @@ Handle<Value> BSONDeserializer::DeserializeValue(BsonType type)
 			int32_t lowBits = (int32_t) ReadInt32();
 			int32_t highBits = (int32_t) ReadInt32();
 
-		    // If value is < 2^53 and >-2^53
-		    if((highBits < 0x200000 || (highBits == 0x200000 && lowBits == 0)) && highBits >= -0x200000) {
-			  // Adjust the pointer and read as 64 bit value
-			  p -= 8;
-			  // Read the 64 bit value
-		      int64_t finalValue = (int64_t) ReadInt64();
-		      return Number::New(finalValue);
-		    }
-
 			Local<Value> argv[] = { Int32::New(lowBits), Int32::New(highBits) };
 			return bson->longConstructor->NewInstance(2, argv);
 		}
