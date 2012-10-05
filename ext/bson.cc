@@ -3,6 +3,9 @@
 #include <stdarg.h>
 #include <cstdlib>
 #include <cstring>
+#include <string.h>
+#include <stdlib.h>
+#include <alloca.h>
 
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -20,6 +23,11 @@
 #include <node.h>
 #include <node_version.h>
 #include <node_buffer.h>
+
+#include <cmath>
+#include <iostream>
+#include <limits>
+#include <vector>
 
 #include "bson.h"
 
