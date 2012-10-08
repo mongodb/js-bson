@@ -5,7 +5,6 @@
 #include <cstring>
 #include <string.h>
 #include <stdlib.h>
-#include <alloca.h>
 
 #ifdef __clang__
 #pragma clang diagnostic push
