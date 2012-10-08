@@ -4,7 +4,7 @@ var spawn = require('child_process').spawn,
 process.stdout.write("================================================================================\n");
 process.stdout.write("=                                                                              =\n");
 process.stdout.write("=  Attempting to build bson c++ extension                                      =\n");
-process.stdout.write("=   Windows: no build will be attempted ad binaries are prepackaged            =\n");
+process.stdout.write("=   Windows: no build will be attempted as binaries are prepackaged            =\n");
 process.stdout.write("=   Unix: on failure the package will still install without the C++ extension  =\n");
 process.stdout.write("=                                                                              =\n");
 process.stdout.write("================================================================================\n");
