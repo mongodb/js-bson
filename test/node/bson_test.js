@@ -564,6 +564,29 @@ exports['Should Correctly Serialize and Deserialize a Binary object'] = function
 /**
  * @ignore
  */
+exports['Should Correctly Serialize and Deserialize a Type 2 Binary object'] = function(test) {
+  var bin = new Binary(new Buffer('binstring'), Binary.SUBTYPE_BYTE_ARRAY);
+  var string = 'binstring';
+  for(var index = 0; index < string.length; index++) {
+    bin.put(string.charAt(index));
+  }
+  
+  var doc = {doc: bin};
+  var serialized_data = new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
+    
+  var serialized_data2 = new Buffer(new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).calculateObjectSize(doc, false, true));
+  new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serializeWithBufferAndIndex(doc, false, serialized_data2, 0);    
+  assertBuffersEqual(test, serialized_data, serialized_data2, 0);
+    
+  var deserialized_data = new BSONDE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);
+  
+  test.deepEqual(doc.doc.value(), deserialized_data.doc.value());
+  test.done();        
+}
+
+/**
+ * @ignore
+ */
 exports['Should Correctly Serialize and Deserialize a big Binary object'] = function(test) {
   var data = fs.readFileSync("test/node/data/test_gs_weird_bug.png", 'binary');
   var bin = new Binary();

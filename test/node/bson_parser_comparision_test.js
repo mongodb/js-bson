@@ -19,7 +19,7 @@ var sys = require('util'),
   gleak = require('../../tools/gleak'),
   assert = require('assert');
 
-// Parsers
+// Long/ObjectID/Binary/Code/DbRef/Symbol/Double/Timestamp/MinKey/MaxKey
 var bsonC = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
 var bsonJS = new BSONJS([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
 
@@ -215,6 +215,17 @@ exports['Simple serialization and deserialization for a Binary value'] = functio
   var string = 'binstring'
   for(var index = 0; index < string.length; index++) { binary.put(string.charAt(index)); }
 
+  var simple_string_serialized = bsonC.serialize({doc:binary}, false, true);
+  assert.deepEqual(simple_string_serialized, bsonJS.serialize({doc:binary}, false, true));
+  assert.deepEqual(bsonJS.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.value(), bsonC.deserialize(simple_string_serialized).doc.value());
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Simple serialization and deserialization for a Binary value of type 2'] = function(test) {
+  var binary = new Binary(new Buffer('binstring'), Binary.SUBTYPE_BYTE_ARRAY);
   var simple_string_serialized = bsonC.serialize({doc:binary}, false, true);
   assert.deepEqual(simple_string_serialized, bsonJS.serialize({doc:binary}, false, true));
   assert.deepEqual(bsonJS.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.value(), bsonC.deserialize(simple_string_serialized).doc.value());

@@ -220,6 +220,11 @@ template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, 
 
 				this->WriteInt32(length);
 				this->WriteByte(object, bson->_binarySubTypeString);	// write subtype
+				// If type 0x02 write the array length aswell
+				if(object->Get(bson->_binarySubTypeString)->Int32Value() == 0x02) {
+					this->WriteInt32(length);
+				}
+				// Write the actual data
 				this->WriteData(Buffer::Data(bufferObj), length);
 			}
 			else if(bson->doubleString->StrictEquals(constructorString))
@@ -516,6 +521,10 @@ Handle<Value> BSONDeserializer::DeserializeValue(BsonType type)
 		{
 			uint32_t length = ReadUInt32();
 			uint32_t subType = ReadByte();
+			if(subType == 0x02) {
+				length = ReadInt32();
+			}
+
 			Buffer* buffer = Buffer::New(p, length);
 			p += length;
 
@@ -653,73 +662,50 @@ Handle<Value> BSON::New(const Arguments &args)
 			uint32_t foundClassesMask = 0;
 
 			// Iterate over all entries to save the instantiate funtions
-			for(uint32_t i = 0; i < array->Length(); i++)
-			{
+			for(uint32_t i = 0; i < array->Length(); i++) {
 				// Let's get a reference to the function
 				Local<Function> func = Local<Function>::Cast(array->Get(i));
 				Local<String> functionName = func->GetName()->ToString();
 
 				// Save the functions making them persistant handles (they don't get collected)
-				if(functionName->StrictEquals(bson->longString))
-				{
+				if(functionName->StrictEquals(bson->longString)) {
 					bson->longConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 1;
-				}
-				else if(functionName->StrictEquals(bson->objectIDString))
-				{
+				} else if(functionName->StrictEquals(bson->objectIDString)) {
 					bson->objectIDConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 2;
-				}
-				else if(functionName->StrictEquals(bson->binaryString))
-				{
+				} else if(functionName->StrictEquals(bson->binaryString)) {
 					bson->binaryConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 4;
-				}
-				else if(functionName->StrictEquals(bson->codeString))
-				{
+				} else if(functionName->StrictEquals(bson->codeString)) {
 					bson->codeConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 8;
-				}
-				else if(functionName->StrictEquals(bson->dbrefString))
-				{
+				} else if(functionName->StrictEquals(bson->dbrefString)) {
 					bson->dbrefConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 0x10;
-				}
-				else if(functionName->StrictEquals(bson->symbolString))
-				{
+				} else if(functionName->StrictEquals(bson->symbolString)) {
 					bson->symbolConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 0x20;
-				}
-				else if(functionName->StrictEquals(bson->doubleString))
-				{
+				} else if(functionName->StrictEquals(bson->doubleString)) {
 					bson->doubleConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 0x40;
-				}
-				else if(functionName->StrictEquals(bson->timestampString))
-				{
+				} else if(functionName->StrictEquals(bson->timestampString)) {
 					bson->timestampConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 0x80;
-				}
-				else if(functionName->StrictEquals(bson->minKeyString))
-				{
+				} else if(functionName->StrictEquals(bson->minKeyString)) {
 					bson->minKeyConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 0x100;
-				}
-				else if(functionName->StrictEquals(bson->maxKeyString))
-				{
+				} else if(functionName->StrictEquals(bson->maxKeyString)) {
 					bson->maxKeyConstructor = Persistent<Function>::New(func);
 					foundClassesMask |= 0x200;
 				}
 			}
 
 			// Check if we have the right number of constructors otherwise throw an error
-			if(foundClassesMask != 0x3ff)
-			{
+			if(foundClassesMask != 0x3ff) {
 				delete bson;
 				return VException("Missing function constructor for either [Long/ObjectID/Binary/Code/DbRef/Symbol/Double/Timestamp/MinKey/MaxKey]");
-			}
-			else
-			{
+			} else {
 				bson->Wrap(args.This());
 				return args.This();
 			}
