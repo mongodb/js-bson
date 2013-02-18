@@ -165,7 +165,7 @@ bson.pkg(function(parents){
 
   return {
     'name'         : 'bson',
-    'mainModuleId' : 'index',
+    'mainModuleId' : 'bson',
     'modules'      : [],
     'parents'      : parents
   };
@@ -174,7 +174,9 @@ bson.pkg(function(parents){
   /**
  * Module dependencies.
  */
-var Buffer = require('buffer').Buffer; // TODO just use global Buffer
+if(typeof window === 'undefined') { 
+  var Buffer = require('buffer').Buffer; // TODO just use global Buffer
+}
 
 // Binary default subtype
 var BSON_BINARY_SUBTYPE_DEFAULT = 0;

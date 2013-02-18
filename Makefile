@@ -14,6 +14,6 @@ clean:
 	node-gyp clean
 
 browserify:
-	node_modules/.bin/onejs build package.json browser_build/bson.js
+	node_modules/.bin/onejs build browser_build/package.json browser_build/bson.js
 
 .PHONY: all
