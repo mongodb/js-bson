@@ -14,6 +14,6 @@ clean:
 	node-gyp clean
 
 browserify:
-	node_modules/.bin/browserify lib/bson/bson.js -o browser_build/bson.js
+	node_modules/.bin/browserify lib/entry.js -o browser_build/bson.js
 
 .PHONY: all
