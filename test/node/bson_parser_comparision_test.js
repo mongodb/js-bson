@@ -473,6 +473,42 @@ exports['Serialize big complex document'] = function(test) {
 /**
  * @ignore
  */
+exports['Should Correctly Serialize undefined as null and Deserialize it as null value'] = function(test) {
+  // Complex document serialization
+  var doc = {doc: {notdefined: undefined}};;
+  var docJSBin = bsonJS.serialize(doc, false, true, true);
+  var docCBin = bsonC.serialize(doc, false, true, true);
+  assert.equal(docCBin.toString('base64'), docJSBin.toString('base64'));
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Should Correctly Serialize and Deserialize Buffer'] = function(test) {
+  // Complex document serialization
+  var doc = {doc: new Buffer("hello world")};
+  var docJSBin = bsonJS.serialize(doc, false, true, true);
+  var docCBin = bsonC.serialize(doc, false, true, true);
+  assert.equal(docCBin.toString('base64'), docJSBin.toString('base64'));
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Should Correctly Serialize and Deserialize Number'] = function(test) {
+  // Complex document serialization
+  var doc = {doc: (BSONJS.BSON_INT32_MAX + 10)};
+  var docJSBin = bsonJS.serialize(doc, false, true, true);
+  var docCBin = bsonC.serialize(doc, false, true, true);
+  assert.equal(docCBin.toString('base64'), docJSBin.toString('base64'));
+  test.done();
+}
+
+/**
+ * @ignore
+ */
 exports['Should error out due to 24 characters but not valid hexstring for ObjectID'] = function(test) {
   try {
     var oid = new ObjectID("tttttttttttttttttttttttt");
