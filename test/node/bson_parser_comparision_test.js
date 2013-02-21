@@ -19,7 +19,7 @@ var sys = require('util'),
   gleak = require('../../tools/gleak'),
   assert = require('assert');
 
-// Parsers
+// Long/ObjectID/Binary/Code/DbRef/Symbol/Double/Timestamp/MinKey/MaxKey
 var bsonC = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
 var bsonJS = new BSONJS([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
 
@@ -215,6 +215,17 @@ exports['Simple serialization and deserialization for a Binary value'] = functio
   var string = 'binstring'
   for(var index = 0; index < string.length; index++) { binary.put(string.charAt(index)); }
 
+  var simple_string_serialized = bsonC.serialize({doc:binary}, false, true);
+  assert.deepEqual(simple_string_serialized, bsonJS.serialize({doc:binary}, false, true));
+  assert.deepEqual(bsonJS.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.value(), bsonC.deserialize(simple_string_serialized).doc.value());
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Simple serialization and deserialization for a Binary value of type 2'] = function(test) {
+  var binary = new Binary(new Buffer('binstring'), Binary.SUBTYPE_BYTE_ARRAY);
   var simple_string_serialized = bsonC.serialize({doc:binary}, false, true);
   assert.deepEqual(simple_string_serialized, bsonJS.serialize({doc:binary}, false, true));
   assert.deepEqual(bsonJS.deserialize(new Buffer(simple_string_serialized, 'binary')).doc.value(), bsonC.deserialize(simple_string_serialized).doc.value());
@@ -453,6 +464,42 @@ exports['Create ObjectID from hex string'] = function(test) {
 exports['Serialize big complex document'] = function(test) {
   // Complex document serialization
   var doc = {"DateTime": "Tue Nov 40 2011 17:27:55 GMT+0000 (WEST)","isActive": true,"Media": {"URL": "http://videos.sapo.pt/Tc85NsjaKjj8o5aV7Ubb"},"Title": "Lisboa fecha a ganhar 0.19%","SetPosition": 60,"Type": "videos","Thumbnail": [{"URL": "http://rd3.videos.sapo.pt/Tc85NsjaKjj8o5aV7Ubb/pic/320x240","Dimensions": {"Height": 240,"Width": 320}}],"Source": {"URL": "http://videos.sapo.pt","SetID": "1288","SourceID": "http://videos.sapo.pt/tvnet/rss2","SetURL": "http://noticias.sapo.pt/videos/tv-net_1288/","ItemID": "Tc85NsjaKjj8o5aV7Ubb","Name": "SAPO VÃ­deos"},"Category": "Tec_ciencia","Description": "Lisboa fecha a ganhar 0.19%","GalleryID": new ObjectID("4eea2a634ce8573200000000"),"InternalRefs": {"RegisterDate": "Thu Dec 15 2011 17:12:51 GMT+0000 (WEST)","ChangeDate": "Thu Dec 15 2011 17:12:51 GMT+0000 (WEST)","Hash": 332279244514},"_id": new ObjectID("4eea2a96e52778160000003a")}
+  var docJSBin = bsonJS.serialize(doc, false, true, true);
+  var docCBin = bsonC.serialize(doc, false, true, true);
+  assert.equal(docCBin.toString('base64'), docJSBin.toString('base64'));
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Should Correctly Serialize undefined as null and Deserialize it as null value'] = function(test) {
+  // Complex document serialization
+  var doc = {doc: {notdefined: undefined}};;
+  var docJSBin = bsonJS.serialize(doc, false, true, true);
+  var docCBin = bsonC.serialize(doc, false, true, true);
+  assert.equal(docCBin.toString('base64'), docJSBin.toString('base64'));
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Should Correctly Serialize and Deserialize Buffer'] = function(test) {
+  // Complex document serialization
+  var doc = {doc: new Buffer("hello world")};
+  var docJSBin = bsonJS.serialize(doc, false, true, true);
+  var docCBin = bsonC.serialize(doc, false, true, true);
+  assert.equal(docCBin.toString('base64'), docJSBin.toString('base64'));
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Should Correctly Serialize and Deserialize Number'] = function(test) {
+  // Complex document serialization
+  var doc = {doc: (BSONJS.BSON_INT32_MAX + 10)};
   var docJSBin = bsonJS.serialize(doc, false, true, true);
   var docCBin = bsonC.serialize(doc, false, true, true);
   assert.equal(docCBin.toString('base64'), docJSBin.toString('base64'));
