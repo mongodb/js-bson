@@ -17,7 +17,7 @@
 , "config":         { "native" : false }
 , "main":             "./lib/bson/index"
 , "directories" :   { "lib" : "./lib/bson" }
-, "engines" :       { "node" : ">=0.6.0" }
+, "engines" :       { "node" : ">=0.6.19" }
 , "scripts": { 
     "install" : "(node-gyp rebuild 2> builderror.log) || (exit 0)", 
     "test" : "nodeunit ./test/node && TEST_NATIVE=TRUE nodeunit ./test/node" 
