@@ -307,6 +307,31 @@ exports['Should Correctly Serialize and Deserialize Integer'] = function(test) {
 /**
  * @ignore
  */
+exports['Should Fail when Serialize Recursive Object'] = function(test) {
+  var doc = {doc: {age: 42, name: 'Spongebob', shoe_size: 9.5}};
+  doc.rec = doc;
+  try {
+    var serialized_data = new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
+
+    var serialized_data2 = new Buffer(new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).calculateObjectSize(doc, false, true));
+    new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serializeWithBufferAndIndex(doc, false, serialized_data2, 0);    
+    assertBuffersEqual(test, serialized_data, serialized_data2, 0);
+
+    test.deepEqual(doc.doc.age, new BSONDE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data).doc.age);
+    test.deepEqual(doc.doc.name, new BSONDE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data).doc.name);
+    test.deepEqual(doc.doc.shoe_size, new BSONDE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data).doc.shoe_size);
+    test.done();        
+  }
+  catch (e) {
+    console.log(e.message);
+    if (/.*Maximum call stack size exceeded.*/.test(e.message))
+      test.done();
+  }
+}
+
+/**
+ * @ignore
+ */
 exports['Should Correctly Serialize and Deserialize Object'] = function(test) {
   var doc = {doc: {age: 42, name: 'Spongebob', shoe_size: 9.5}};
   var serialized_data = new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
