@@ -12,23 +12,23 @@ this.bson_test = {
         'regexp': /regexp/,
         'boolean': true,
         'long': Long.fromNumber(100),
-        'where': new Code('this.a > i', {i:1}),        
+        'where': new Code('this.a > i', {i:1}),
         'dbref': new DBRef('namespace', new ObjectID(), 'integration_tests_'),
         'minkey': new MinKey(),
-        'maxkey': new MaxKey()    
+        'maxkey': new MaxKey()
       }
-    
+
       // Let's serialize it
       var data = BSON.serialize(motherOfAllDocuments, true, true, false);
       // Deserialize the object
       var object = BSON.deserialize(data);
-    
+
       // Asserts
       test.equal(Utf8.decode(motherOfAllDocuments.string), object.string);
       test.deepEqual(motherOfAllDocuments.array, object.array);
       test.deepEqual(motherOfAllDocuments.date, object.date);
       test.deepEqual(motherOfAllDocuments.oid.toHexString(), object.oid.toHexString());
-      test.deepEqual(motherOfAllDocuments.binary.length(), object.binary.length());    
+      test.deepEqual(motherOfAllDocuments.binary.length(), object.binary.length());
       test.ok(assertArrayEqual(motherOfAllDocuments.binary.value(true), object.binary.value(true)));
       test.deepEqual(motherOfAllDocuments.int, object.int);
       test.deepEqual(motherOfAllDocuments.float, object.float);
@@ -43,7 +43,7 @@ this.bson_test = {
       test.deepEqual(motherOfAllDocuments.maxkey, object.maxkey);
       test.done();
     },
-    
+
     'exercise all the binary object constructor methods': function (test) {
       // Construct using array
       var string = 'hello world';
@@ -54,16 +54,16 @@ this.bson_test = {
       var binary = new Binary(stringToArrayBuffer(string));
       test.ok(string.length, binary.buffer.length);
       test.ok(assertArrayEqual(array, binary.buffer));
-      
+
       // Construct using number of chars
       binary = new Binary(5);
       test.ok(5, binary.buffer.length);
-      
+
       // Construct using an Array
       var binary = new Binary(stringToArray(string));
       test.ok(string.length, binary.buffer.length);
       test.ok(assertArrayEqual(array, binary.buffer));
-      
+
       // Construct using a string
       var binary = new Binary(string);
       test.ok(string.length, binary.buffer.length);
@@ -76,33 +76,33 @@ this.bson_test = {
       var string = 'hello world';
       // String to array
       var array = stringToArrayBuffer(string + 'a');
-      
+
       // Binary from array buffer
       var binary = new Binary(stringToArrayBuffer(string));
       test.ok(string.length, binary.buffer.length);
-    
+
       // Write a byte to the array
       binary.put('a')
-    
+
       // Verify that the data was writtencorrectly
       test.equal(string.length + 1, binary.position);
       test.ok(assertArrayEqual(array, binary.value(true)));
       test.equal('hello worlda', binary.value());
-    
+
       // Exercise a binary with lots of space in the buffer
       var binary = new Binary();
       test.ok(Binary.BUFFER_SIZE, binary.buffer.length);
-    
+
       // Write a byte to the array
       binary.put('a')
-    
+
       // Verify that the data was writtencorrectly
       test.equal(1, binary.position);
       test.ok(assertArrayEqual(['a'.charCodeAt(0)], binary.value(true)));
       test.equal('a', binary.value());
       test.done();
     },
-    
+
     'exercise the write binary object method for an instance when using Uint8Array': function (test) {
       // Construct using array
       var string = 'hello world';
@@ -110,11 +110,11 @@ this.bson_test = {
       var writeArrayBuffer = new Uint8Array(new ArrayBuffer(1));
       writeArrayBuffer[0] = 'a'.charCodeAt(0);
       var arrayBuffer = ['a'.charCodeAt(0)];
-      
+
       // Binary from array buffer
       var binary = new Binary(stringToArrayBuffer(string));
       test.ok(string.length, binary.buffer.length);
-    
+
       // Write a string starting at end of buffer
       binary.write('a');
       test.equal('hello worlda', binary.value());
@@ -135,24 +135,24 @@ this.bson_test = {
       test.equal('aelloaaorldaaa', binary.value());
       test.done();
     },
-    
-    'exercise the read binary object method for an instance when using Uint8Array': function (test) {      
+
+    'exercise the read binary object method for an instance when using Uint8Array': function (test) {
       // Construct using array
       var string = 'hello world';
       var array = stringToArrayBuffer(string);
-    
+
       // Binary from array buffer
       var binary = new Binary(stringToArrayBuffer(string));
       test.ok(string.length, binary.buffer.length);
-      
+
       // Read the first 2 bytes
       var data = binary.read(0, 2);
       test.ok(assertArrayEqual(stringToArrayBuffer('he'), data));
-    
+
       // Read the entire field
       var data = binary.read(0);
       test.ok(assertArrayEqual(stringToArrayBuffer(string), data));
-    
+
       // Read 3 bytes
       var data = binary.read(6, 5);
       test.ok(assertArrayEqual(stringToArrayBuffer('world'), data));
@@ -170,11 +170,11 @@ this.bson_test = {
 				return {b:1};
 			}
 
-			// Serialize the data		
+			// Serialize the data
 			var serialized_data = BSON.serialize(doc, false, true);
-			var deserialized_doc = BSON.deserialize(serialized_data);	
+			var deserialized_doc = BSON.deserialize(serialized_data);
 			test.equal(1, deserialized_doc.b);
-		  test.done();			
+		  test.done();
 		}
 };
 
@@ -183,7 +183,7 @@ var assertArrayEqual = function(array1, array2) {
   for(var i = 0; i < array1.length; i++) {
     if(array1[i] != array2[i]) return false;
   }
-  
+
   return true;
 }
 
@@ -214,7 +214,7 @@ var Utf8 = {
 	encode : function (string) {
 		string = string.replace(/\r\n/g,"\n");
 		var utftext = "";
- 
+
 		for (var n = 0; n < string.length; n++) {
 			var c = string.charCodeAt(n);
 			if (c < 128) {
@@ -227,20 +227,20 @@ var Utf8 = {
 				utftext += String.fromCharCode(((c >> 6) & 63) | 128);
 				utftext += String.fromCharCode((c & 63) | 128);
 			}
- 
+
 		}
- 
+
 		return utftext;
 	},
- 
+
 	// public method for url decoding
 	decode : function (utftext) {
 		var string = "";
 		var i = 0;
 		var c = c1 = c2 = 0;
- 
+
 		while ( i < utftext.length ) {
-			c = utftext.charCodeAt(i); 
+			c = utftext.charCodeAt(i);
 			if(c < 128) {
 				string += String.fromCharCode(c);
 				i++;
@@ -253,8 +253,8 @@ var Utf8 = {
 				c3 = utftext.charCodeAt(i+2);
 				string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
 				i += 3;
-			} 
-		} 
+			}
+		}
 		return string;
-	} 
+	}
 }
