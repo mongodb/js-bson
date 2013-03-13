@@ -174,7 +174,7 @@ bson.pkg(function(parents){
   /**
  * Module dependencies.
  */
-if(typeof window === 'undefined') {
+if(typeof window === 'undefined') { 
   var Buffer = require('buffer').Buffer; // TODO just use global Buffer
 }
 
@@ -191,7 +191,7 @@ var writeStringToArray = function(data) {
   // Write the content to the buffer
   for(var i = 0; i < data.length; i++) {
     buffer[i] = data.charCodeAt(i);
-  }
+  }  
   // Write the string to the buffer
   return buffer;
 }
@@ -207,12 +207,12 @@ var convertArraytoUtf8BinaryString = function(byteArray, startIndex, endIndex) {
   for(var i = startIndex; i < endIndex; i++) {
    result = result + String.fromCharCode(byteArray[i]);
   }
-  return result;
+  return result;  
 };
 
 /**
  * A class representation of the BSON Binary type.
- *
+ * 
  * Sub types
  *  - **BSON.BSON_BINARY_SUBTYPE_DEFAULT**, default BSON type.
  *  - **BSON.BSON_BINARY_SUBTYPE_FUNCTION**, BSON function type.
@@ -228,13 +228,13 @@ var convertArraytoUtf8BinaryString = function(byteArray, startIndex, endIndex) {
  */
 function Binary(buffer, subType) {
   if(!(this instanceof Binary)) return new Binary(buffer, subType);
-
+  
   this._bsontype = 'Binary';
 
   if(buffer instanceof Number) {
     this.sub_type = buffer;
     this.position = 0;
-  } else {
+  } else {    
     this.sub_type = subType == null ? BSON_BINARY_SUBTYPE_DEFAULT : subType;
     this.position = 0;
   }
@@ -251,12 +251,12 @@ function Binary(buffer, subType) {
         throw new Error("only String, Buffer, Uint8Array or Array accepted");
       }
     } else {
-      this.buffer = buffer;
+      this.buffer = buffer;      
     }
     this.position = buffer.length;
   } else {
     if(typeof Buffer != 'undefined') {
-      this.buffer =  new Buffer(Binary.BUFFER_SIZE);
+      this.buffer =  new Buffer(Binary.BUFFER_SIZE);      
     } else if(typeof Uint8Array != 'undefined'){
       this.buffer = new Uint8Array(new ArrayBuffer(Binary.BUFFER_SIZE));
     } else {
@@ -277,21 +277,21 @@ Binary.prototype.put = function put(byte_value) {
   // If it's a string and a has more than one character throw an error
   if(byte_value['length'] != null && typeof byte_value != 'number' && byte_value.length != 1) throw new Error("only accepts single character String, Uint8Array or Array");
   if(typeof byte_value != 'number' && byte_value < 0 || byte_value > 255) throw new Error("only accepts number in a valid unsigned byte range 0-255");
-
+  
   // Decode the byte value once
   var decoded_byte = null;
   if(typeof byte_value == 'string') {
-    decoded_byte = byte_value.charCodeAt(0);
+    decoded_byte = byte_value.charCodeAt(0);      
   } else if(byte_value['length'] != null) {
     decoded_byte = byte_value[0];
   } else {
     decoded_byte = byte_value;
   }
-
+  
   if(this.buffer.length > this.position) {
     this.buffer[this.position++] = decoded_byte;
   } else {
-    if(typeof Buffer != 'undefined' && Buffer.isBuffer(this.buffer)) {
+    if(typeof Buffer != 'undefined' && Buffer.isBuffer(this.buffer)) {    
       // Create additional overflow buffer
       var buffer = new Buffer(Binary.BUFFER_SIZE + this.buffer.length);
       // Combine the two buffers together
@@ -305,13 +305,13 @@ Binary.prototype.put = function put(byte_value) {
         buffer = new Uint8Array(new ArrayBuffer(Binary.BUFFER_SIZE + this.buffer.length));
       } else {
         buffer = new Array(Binary.BUFFER_SIZE + this.buffer.length);
-      }
-
+      }      
+      
       // We need to copy all the content to the new array
       for(var i = 0; i < this.buffer.length; i++) {
         buffer[i] = this.buffer[i];
       }
-
+      
       // Reassign the buffer
       this.buffer = buffer;
       // Write the byte
@@ -334,9 +334,9 @@ Binary.prototype.write = function write(string, offset) {
   if(this.buffer.length < offset + string.length) {
     var buffer = null;
     // If we are in node.js
-    if(typeof Buffer != 'undefined' && Buffer.isBuffer(this.buffer)) {
+    if(typeof Buffer != 'undefined' && Buffer.isBuffer(this.buffer)) {      
       buffer = new Buffer(this.buffer.length + string.length);
-      this.buffer.copy(buffer, 0, 0, this.buffer.length);
+      this.buffer.copy(buffer, 0, 0, this.buffer.length);      
     } else if(Object.prototype.toString.call(this.buffer) == '[object Uint8Array]') {
       // Create a new buffer
       buffer = new Uint8Array(new ArrayBuffer(this.buffer.length + string.length))
@@ -345,7 +345,7 @@ Binary.prototype.write = function write(string, offset) {
         buffer[i] = this.buffer[i];
       }
     }
-
+    
     // Assign the new buffer
     this.buffer = buffer;
   }
@@ -358,11 +358,11 @@ Binary.prototype.write = function write(string, offset) {
     this.buffer.write(string, 'binary', offset);
     this.position = (offset + string.length) > this.position ? (offset + string.length) : this.position;
     // offset = string.length;
-  } else if(Object.prototype.toString.call(string) == '[object Uint8Array]'
-    || Object.prototype.toString.call(string) == '[object Array]' && typeof string != 'string') {
+  } else if(Object.prototype.toString.call(string) == '[object Uint8Array]' 
+    || Object.prototype.toString.call(string) == '[object Array]' && typeof string != 'string') {      
     for(var i = 0; i < string.length; i++) {
       this.buffer[offset++] = string[i];
-    }
+    }    
 
     this.position = offset > this.position ? offset : this.position;
   } else if(typeof string == 'string') {
@@ -386,7 +386,7 @@ Binary.prototype.read = function read(position, length) {
   length = length && length > 0
     ? length
     : this.position;
-
+  
   // Let's return the data based on the type we have
   if(this.buffer['slice']) {
     return this.buffer.slice(position, position + length);
@@ -408,8 +408,8 @@ Binary.prototype.read = function read(position, length) {
  * @api public
  */
 Binary.prototype.value = function value(asRaw) {
-  asRaw = asRaw == null ? false : asRaw;
-
+  asRaw = asRaw == null ? false : asRaw;  
+  
   // If it's a node.js buffer object
   if(typeof Buffer != 'undefined' && Buffer.isBuffer(this.buffer)) {
     return asRaw ? this.buffer.slice(0, this.position) : this.buffer.toString('binary', 0, this.position);
@@ -464,43 +464,43 @@ Binary.BUFFER_SIZE = 256;
 
 /**
  * Default BSON type
- *
+ *  
  * @classconstant SUBTYPE_DEFAULT
  **/
 Binary.SUBTYPE_DEFAULT = 0;
 /**
  * Function BSON type
- *
+ *  
  * @classconstant SUBTYPE_DEFAULT
  **/
 Binary.SUBTYPE_FUNCTION = 1;
 /**
  * Byte Array BSON type
- *
+ *  
  * @classconstant SUBTYPE_DEFAULT
  **/
 Binary.SUBTYPE_BYTE_ARRAY = 2;
 /**
  * OLD UUID BSON type
- *
+ *  
  * @classconstant SUBTYPE_DEFAULT
  **/
 Binary.SUBTYPE_UUID_OLD = 3;
 /**
  * UUID BSON type
- *
+ *  
  * @classconstant SUBTYPE_DEFAULT
  **/
 Binary.SUBTYPE_UUID = 4;
 /**
  * MD5 BSON type
- *
+ *  
  * @classconstant SUBTYPE_DEFAULT
  **/
 Binary.SUBTYPE_MD5 = 5;
 /**
  * User BSON type
- *
+ *  
  * @classconstant SUBTYPE_DEFAULT
  **/
 Binary.SUBTYPE_USER_DEFINED = 128;
@@ -511,7 +511,7 @@ Binary.SUBTYPE_USER_DEFINED = 128;
 exports.Binary = Binary;
 
 
-},
+}, 
 
 
 
@@ -530,7 +530,7 @@ for (var i = 0; i < 64; i++) {
 
 function BinaryParser (bigEndian, allowExceptions) {
   if(!(this instanceof BinaryParser)) return new BinaryParser(bigEndian, allowExceptions);
-
+  
 	this.bigEndian = bigEndian;
 	this.allowExceptions = allowExceptions;
 };
@@ -566,7 +566,7 @@ BinaryParser.decodeInt = function decodeInt (data, bits, signed, forceBigEndian)
   var b = new this.Buffer(this.bigEndian || forceBigEndian, data)
       , x = b.readBits(0, bits)
       , max = maxBits[bits]; //max = Math.pow( 2, bits );
-
+  
   return signed && x >= max / 2
       ? x - max
       : x;
@@ -789,7 +789,7 @@ BinaryParser.hprint = function hprint (s) {
     if (s.charCodeAt(i) < 32) {
       number = s.charCodeAt(i) <= 15
         ? "0" + s.charCodeAt(i).toString(16)
-        : s.charCodeAt(i).toString(16);
+        : s.charCodeAt(i).toString(16);        
       process.stdout.write(number + " ")
     } else {
       number = s.charCodeAt(i) <= 15
@@ -798,7 +798,7 @@ BinaryParser.hprint = function hprint (s) {
         process.stdout.write(number + " ")
     }
   }
-
+  
   process.stdout.write("\n\n");
 };
 
@@ -902,7 +902,7 @@ BinaryParser.Buffer = BinaryParserBuffer;
 
 exports.BinaryParser = BinaryParser;
 
-},
+}, 
 
 
 
@@ -1636,7 +1636,7 @@ var packElement = function(name, value, checkKeys, buffer, index, serializeFunct
           buffer[index++] = (size >> 16) & 0xff;
           buffer[index++] = (size >> 24) & 0xff;
           // Write the string
-          buffer.write(functionString, index, 'utf8');
+          supportsBuffer ? buffer.write(functionString, index, 'utf8') : writeToTypedArray(buffer, functionString, index);
           // Update index
           index = index + size - 1;
           // Write zero
@@ -1826,7 +1826,7 @@ var packElement = function(name, value, checkKeys, buffer, index, serializeFunct
           buffer[index++] = (codeSize >> 24) & 0xff;
 
           // Write the string
-          buffer.write(functionString, index, 'utf8');
+          supportsBuffer ? buffer.write(functionString, index, 'utf8') : writeToTypedArray(buffer, functionString, index);
           // Update index
           index = index + codeSize - 1;
           // Write zero
@@ -1869,7 +1869,7 @@ var packElement = function(name, value, checkKeys, buffer, index, serializeFunct
           buffer[index++] = (size >> 16) & 0xff;
           buffer[index++] = (size >> 24) & 0xff;
           // Write the string
-          buffer.write(functionString, index, 'utf8');
+          supportsBuffer ? buffer.write(functionString, index, 'utf8') : writeToTypedArray(buffer, functionString, index);
           // Update index
           index = index + size - 1;
           // Write zero
@@ -2426,7 +2426,8 @@ exports.Timestamp = Timestamp;
 exports.Double = Double;
 exports.MinKey = MinKey;
 exports.MaxKey = MaxKey;
-},
+
+}, 
 
 
 
@@ -2441,7 +2442,7 @@ exports.MaxKey = MaxKey;
  */
 function Code(code, scope) {
   if(!(this instanceof Code)) return new Code(code, scope);
-
+  
   this._bsontype = 'Code';
   this.code = code;
   this.scope = scope == null ? {} : scope;
@@ -2456,7 +2457,7 @@ Code.prototype.toJSON = function() {
 }
 
 exports.Code = Code;
-},
+}, 
 
 
 
@@ -2472,7 +2473,7 @@ exports.Code = Code;
  */
 function DBRef(namespace, oid, db) {
   if(!(this instanceof DBRef)) return new DBRef(namespace, oid, db);
-
+  
   this._bsontype = 'DBRef';
   this.namespace = namespace;
   this.oid = oid;
@@ -2492,7 +2493,7 @@ DBRef.prototype.toJSON = function() {
 }
 
 exports.DBRef = DBRef;
-},
+}, 
 
 
 
@@ -2506,7 +2507,7 @@ exports.DBRef = DBRef;
  */
 function Double(value) {
   if(!(this instanceof Double)) return new Double(value);
-
+  
   this._bsontype = 'Double';
   this.value = value;
 }
@@ -2530,28 +2531,28 @@ Double.prototype.toJSON = function() {
 }
 
 exports.Double = Double;
-},
+}, 
 
 
 
 'float_parser': function(module, exports, global, require, undefined){
   // Copyright (c) 2008, Fair Oaks Labs, Inc.
 // All rights reserved.
-//
+// 
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
-//
+// 
 //  * Redistributions of source code must retain the above copyright notice,
 //    this list of conditions and the following disclaimer.
-//
+// 
 //  * Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
 //    and/or other materials provided with the distribution.
-//
+// 
 //  * Neither the name of Fair Oaks Labs, Inc. nor the names of its contributors
 //    may be used to endorse or promote products derived from this software
 //    without specific prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -2656,7 +2657,7 @@ var writeIEEE754 = function(buffer, value, offset, endian, mLen, nBytes) {
 
 exports.readIEEE754 = readIEEE754;
 exports.writeIEEE754 = writeIEEE754;
-},
+}, 
 
 
 
@@ -2736,7 +2737,7 @@ exports.pure = function() {
   return classes;
 }
 
-},
+}, 
 
 
 
@@ -2784,7 +2785,7 @@ exports.pure = function() {
  */
 function Long(low, high) {
   if(!(this instanceof Long)) return new Long(low, high);
-
+  
   this._bsontype = 'Long';
   /**
    * @type {number}
@@ -3595,7 +3596,7 @@ Long.TWO_PWR_24_ = Long.fromInt(1 << 24);
  * Expose.
  */
 exports.Long = Long;
-},
+}, 
 
 
 
@@ -3608,12 +3609,12 @@ exports.Long = Long;
  */
 function MaxKey() {
   if(!(this instanceof MaxKey)) return new MaxKey();
-
-  this._bsontype = 'MaxKey';
+  
+  this._bsontype = 'MaxKey';  
 }
 
 exports.MaxKey = MaxKey;
-},
+}, 
 
 
 
@@ -3626,12 +3627,12 @@ exports.MaxKey = MaxKey;
  */
 function MinKey() {
   if(!(this instanceof MinKey)) return new MinKey();
-
+  
   this._bsontype = 'MinKey';
 }
 
 exports.MinKey = MinKey;
-},
+}, 
 
 
 
@@ -3889,7 +3890,7 @@ Object.defineProperty(ObjectID.prototype, "generationTime", {
  */
 exports.ObjectID = ObjectID;
 exports.ObjectId = ObjectID;
-},
+}, 
 
 
 
@@ -3942,7 +3943,7 @@ Symbol.prototype.toJSON = function() {
 }
 
 exports.Symbol = Symbol;
-},
+}, 
 
 
 
@@ -4800,7 +4801,7 @@ Timestamp.TWO_PWR_24_ = Timestamp.fromInt(1 << 24);
  * Expose.
  */
 exports.Timestamp = Timestamp;
-},
+}, 
 
  });
 
