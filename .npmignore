@@ -8,12 +8,13 @@ HISTORY
 Readme.md
 TODO
 
+benchmarks/
 docs/
 docs/sphinx-docs
 data/
 dev/
 examples/
-
+test/
 
 ex/build/
 ext/build/.wafpickle-7
