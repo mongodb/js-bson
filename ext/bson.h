@@ -5,7 +5,11 @@
 
 //===========================================================================
 
-#define USE_MISALIGNED_MEMORY_ACCESS 1
+#ifdef __arm__
+#define USE_MISALIGNED_MEMORY_ACCESS 0
+#else
+#define USE_MISALIGNED_MEMORY_ACCESS 0
+#endif
 
 #include <node.h>
 #include <node_object_wrap.h>
