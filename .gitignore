@@ -8,3 +8,4 @@ node_modules/
 output
 build
 .bin
+npm-debug.log
