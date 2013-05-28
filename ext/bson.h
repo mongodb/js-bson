@@ -8,7 +8,7 @@
 #ifdef __arm__
 #define USE_MISALIGNED_MEMORY_ACCESS 0
 #else
-#define USE_MISALIGNED_MEMORY_ACCESS 0
+#define USE_MISALIGNED_MEMORY_ACCESS 1
 #endif
 
 #include <node.h>
