@@ -178,6 +178,32 @@ exports.tearDown = function(callback) {
 // }
 
 /**
+ * Should make sure that arrays by themselves can be either be properly
+ * serialized and deserialized, or that serializing throws an error
+ */
+exports.shouldCorrectlyDeserializeArray = function(test) {
+  var testArray = [1,2,3];
+  var data = null;
+
+  try {
+    data = BSONSE.BSON.serialize(testArray, true, false, false);
+  }
+  catch(e) {
+    // if arrays are not supported, throw an error
+    test.done();
+  }
+
+  //otherwise, I expect an array back, with all its bells and whistles
+  var obj = BSONSE.BSON.deserialize(data);
+
+  test.deepEqual(testArray, obj);
+  test.equal(testArray.length, obj.length);
+  test.equal(true, Array.isArray(obj));
+
+  test.done();
+};
+
+/**
  * @ignore
  */  
 exports.shouldCorrectlySerializeUsingTypedArray = function(test) {
