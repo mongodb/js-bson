@@ -2,6 +2,7 @@ var mongodb = require('../../lib/bson').pure();
 
 var testCase = require('nodeunit').testCase,
   mongoO = require('../../lib/bson').pure(),
+  mongoC = require('../../lib/bson').native(),
   debug = require('util').debug,
   inspect = require('util').inspect,
   Buffer = require('buffer').Buffer,
@@ -21,6 +22,8 @@ var testCase = require('nodeunit').testCase,
   MaxKey = mongoO.MaxKey,
   BinaryParser = mongoO.BinaryParser,
   utils = require('./tools/utils');
+
+var bsonC = new mongoC.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
 
 var BSONSE = mongodb,
   BSONDE = mongodb;
@@ -185,10 +188,14 @@ exports.shouldCorrectlyDeserializeArray = function(test) {
   var testArray = [1,2,3];
   var data = null;
 
-  console.dir(BSONSE)
-
   try {
     data = BSONSE.BSON.serialize(testArray, true, false, false);
+    test.ok(false);
+  } catch(e) {
+  }
+
+  try {
+    data = bsonC.serialize(testArray, true, false, false);
     test.ok(false);
   } catch(e) {
     test.done();
