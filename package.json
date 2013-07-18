@@ -12,7 +12,7 @@
 , "devDependencies": {
       "nodeunit": "0.7.3"
 	  , "gleak": "0.2.3"
-    , "one": "latest"
+    , "one": "2.X.X"
   }
 , "config":         { "native" : false }
 , "main":             "./lib/bson/index"

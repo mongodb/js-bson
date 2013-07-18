@@ -11,7 +11,9 @@ var bson = (function(){
   exports.module   = module;
   exports.packages = pkgmap;
   exports.pkg      = pkg;
-  exports.require  = function require(uri){ return pkgmap.main.index.require(uri); };
+  exports.require  = function require(uri){
+    return pkgmap.main.index.require(uri);
+  };
 
 
   ties             = {};
@@ -52,7 +54,7 @@ function dirname(path) {
 };
 
 function findModule(workingModule, uri){
-  var moduleId      = join(dirname(workingModule.id), uri).replace(/\.js$/, ''),
+  var moduleId      = join(dirname(workingModule.id), /\.\/$/.test(uri) ? (uri + 'index') : uri ).replace(/\.js$/, ''),
       moduleIndexId = join(moduleId, 'index'),
       pkg           = workingModule.pkg,
       module;
@@ -62,6 +64,7 @@ function findModule(workingModule, uri){
 
   while(i-->0){
     id = pkg.modules[i].id;
+
     if(id==moduleId || id == moduleIndexId){
       module = pkg.modules[i];
       break;
@@ -1894,6 +1897,11 @@ var packElement = function(name, value, checkKeys, buffer, index, serializeFunct
  * @api public
  */
 BSON.serialize = function(object, checkKeys, asBuffer, serializeFunctions) {
+  // Throw error if we are trying serialize an illegal type
+  if(object == null || typeof object != 'object' || Array.isArray(object)) 
+    throw new Error("Only javascript objects supported");
+  
+  // Emoty target buffer
   var buffer = null;
   // Calculate the size of the object
   var size = BSON.calculateObjectSize(object, serializeFunctions);
@@ -2212,10 +2220,8 @@ BSON.deserialize = function(buffer, options, isArray) {
         // Unpack the low and high bits
         var lowBits = buffer[index++] | buffer[index++] << 8 | buffer[index++] << 16 | buffer[index++] << 24;
         var highBits = buffer[index++] | buffer[index++] << 8 | buffer[index++] << 16 | buffer[index++] << 24;
-        // Create long object
-        var long = new Long(lowBits, highBits);
         // Set the object
-        object[name] = long.lessThanOrEqual(JS_INT_MAX_LONG) && long.greaterThanOrEqual(JS_INT_MIN_LONG) ? long.toNumber() : long;
+        object[name] = new Long(lowBits, highBits);
         break;
       case BSON.BSON_DATA_SYMBOL:
         // Read the content of the field
@@ -3680,7 +3686,7 @@ var ObjectID = function ObjectID(id, _hex) {
     this.id = id;
   } else if(checkForHexRegExp.test(id)) {
     return ObjectID.createFromHexString(id);
-  } else if(!checkForHexRegExp.test(id)) {
+  } else {
     throw new Error("Value passed in is not a valid 24 character hex string");
   }
 
@@ -3804,9 +3810,9 @@ ObjectID.prototype.equals = function equals (otherID) {
 }
 
 /**
-* Returns the generation time in seconds that this ID was generated.
+* Returns the generation date (accurate up to the second) that this ID was generated.
 *
-* @return {Number} return number of seconds in the timestamp part of the 12 byte id.
+* @return {Date} the generation date
 * @api public
 */
 ObjectID.prototype.getTimestamp = function() {
@@ -3890,6 +3896,7 @@ Object.defineProperty(ObjectID.prototype, "generationTime", {
  */
 exports.ObjectID = ObjectID;
 exports.ObjectId = ObjectID;
+
 }, 
 
 
@@ -4812,4 +4819,8 @@ if(typeof module != 'undefined' && module.exports ){
   if( !module.parent ){
     bson();
   }
+}
+
+if(typeof window != 'undefined' && typeof require == 'undefined'){
+  window.require = bson.require;
 }

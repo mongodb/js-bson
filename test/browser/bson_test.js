@@ -1,27 +1,29 @@
+var b = bson();
+
 this.bson_test = {
     'Full document serialization and deserialization': function (test) {
       var motherOfAllDocuments = {
         'string': "客家话",
         'array': [1,2,3],
         'hash': {'a':1, 'b':2},
-        'date': new Date(),
-        'oid': new ObjectID(),
-        'binary': new Binary('hello world'),
+        'date': Date(),
+        'oid': new b.ObjectID(),
+        'binary': new b.Binary('hello world'),
         'int': 42,
         'float': 33.3333,
         'regexp': /regexp/,
         'boolean': true,
-        'long': Long.fromNumber(100),
-        'where': new Code('this.a > i', {i:1}),
-        'dbref': new DBRef('namespace', new ObjectID(), 'integration_tests_'),
-        'minkey': new MinKey(),
-        'maxkey': new MaxKey()
+        'long': b.Long.fromNumber(100),
+        'where': new b.Code('this.a > i', {i:1}),
+        'dbref': new b.DBRef('namespace', new b.ObjectID(), 'integration_tests_'),
+        'minkey': new b.MinKey(),
+        'maxkey': new b.MaxKey()
       }
 
       // Let's serialize it
-      var data = BSON.serialize(motherOfAllDocuments, true, true, false);
+      var data = b.BSON.serialize(motherOfAllDocuments, true, true, false);
       // Deserialize the object
-      var object = BSON.deserialize(data);
+      var object = b.BSON.deserialize(data);
 
       // Asserts
       test.equal(Utf8.decode(motherOfAllDocuments.string), object.string);
@@ -34,7 +36,7 @@ this.bson_test = {
       test.deepEqual(motherOfAllDocuments.float, object.float);
       test.deepEqual(motherOfAllDocuments.regexp, object.regexp);
       test.deepEqual(motherOfAllDocuments.boolean, object.boolean);
-      test.deepEqual(motherOfAllDocuments.long.toNumber(), object.long);
+      test.deepEqual(motherOfAllDocuments.long.toNumber(), object.long.toNumber());
       test.deepEqual(motherOfAllDocuments.where, object.where);
       test.deepEqual(motherOfAllDocuments.dbref.oid.toHexString(), object.dbref.oid.toHexString());
       test.deepEqual(motherOfAllDocuments.dbref.namespace, object.dbref.namespace);
@@ -51,21 +53,21 @@ this.bson_test = {
       var array = stringToArrayBuffer(string);
 
       // Binary from array buffer
-      var binary = new Binary(stringToArrayBuffer(string));
+      var binary = new b.Binary(stringToArrayBuffer(string));
       test.ok(string.length, binary.buffer.length);
       test.ok(assertArrayEqual(array, binary.buffer));
 
       // Construct using number of chars
-      binary = new Binary(5);
+      binary = new b.Binary(5);
       test.ok(5, binary.buffer.length);
 
       // Construct using an Array
-      var binary = new Binary(stringToArray(string));
+      var binary = new b.Binary(stringToArray(string));
       test.ok(string.length, binary.buffer.length);
       test.ok(assertArrayEqual(array, binary.buffer));
 
       // Construct using a string
-      var binary = new Binary(string);
+      var binary = new b.Binary(string);
       test.ok(string.length, binary.buffer.length);
       test.ok(assertArrayEqual(array, binary.buffer));
       test.done();
@@ -78,7 +80,7 @@ this.bson_test = {
       var array = stringToArrayBuffer(string + 'a');
 
       // Binary from array buffer
-      var binary = new Binary(stringToArrayBuffer(string));
+      var binary = new b.Binary(stringToArrayBuffer(string));
       test.ok(string.length, binary.buffer.length);
 
       // Write a byte to the array
@@ -90,8 +92,8 @@ this.bson_test = {
       test.equal('hello worlda', binary.value());
 
       // Exercise a binary with lots of space in the buffer
-      var binary = new Binary();
-      test.ok(Binary.BUFFER_SIZE, binary.buffer.length);
+      var binary = new b.Binary();
+      test.ok(b.Binary.BUFFER_SIZE, binary.buffer.length);
 
       // Write a byte to the array
       binary.put('a')
@@ -112,7 +114,7 @@ this.bson_test = {
       var arrayBuffer = ['a'.charCodeAt(0)];
 
       // Binary from array buffer
-      var binary = new Binary(stringToArrayBuffer(string));
+      var binary = new b.Binary(stringToArrayBuffer(string));
       test.ok(string.length, binary.buffer.length);
 
       // Write a string starting at end of buffer
@@ -142,7 +144,7 @@ this.bson_test = {
       var array = stringToArrayBuffer(string);
 
       // Binary from array buffer
-      var binary = new Binary(stringToArrayBuffer(string));
+      var binary = new b.Binary(stringToArrayBuffer(string));
       test.ok(string.length, binary.buffer.length);
 
       // Read the first 2 bytes
@@ -162,7 +164,7 @@ this.bson_test = {
 		'Should correctly handle toBson function for an object': function(test) {
 			// Test object
 			var doc = {
-				hello: new ObjectID(),
+				hello: new b.ObjectID(),
 				a:1
 			};
 			// Add a toBson method to the object
@@ -171,11 +173,38 @@ this.bson_test = {
 			}
 
 			// Serialize the data
-			var serialized_data = BSON.serialize(doc, false, true);
-			var deserialized_doc = BSON.deserialize(serialized_data);
+			var serialized_data = b.BSON.serialize(doc, false, true);
+			var deserialized_doc = b.BSON.deserialize(serialized_data);
 			test.equal(1, deserialized_doc.b);
 		  test.done();
 		}
+
+    // 'Should correctly serialize and deserialize cyrilic': function(test) {
+    //   var doc = {
+    //     'string': "Главное"
+    //   }
+    //   var doc = {
+    //     message: "客家话",
+    //     hello: "world",
+    //     date: new Date,
+    //     regExp: new RegExp("some", "i")
+    //   }
+
+    //   // Serialize a document
+    //   var data = b.BSON.serialize(doc, true, true, false);
+    //   // // De serialize it again
+    //   var doc_2 = b.BSON.deserialize(data);
+
+    //   console.log("================================ original")
+    //   console.log(doc)
+    //   console.log("================================ reflated")
+    //   console.log(doc_2)
+
+    //   // test.equal(doc.message, doc_2.message);
+    //   test.done();
+
+    //   // console.log(doc, doc_2);
+    // }
 };
 
 var assertArrayEqual = function(array1, array2) {
