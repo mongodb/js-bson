@@ -185,22 +185,14 @@ exports.shouldCorrectlyDeserializeArray = function(test) {
   var testArray = [1,2,3];
   var data = null;
 
+  console.dir(BSONSE)
+
   try {
     data = BSONSE.BSON.serialize(testArray, true, false, false);
-  }
-  catch(e) {
-    // if arrays are not supported, throw an error
+    test.ok(false);
+  } catch(e) {
     test.done();
   }
-
-  //otherwise, I expect an array back, with all its bells and whistles
-  var obj = BSONSE.BSON.deserialize(data);
-
-  test.deepEqual(testArray, obj);
-  test.equal(testArray.length, obj.length);
-  test.equal(true, Array.isArray(obj));
-
-  test.done();
 };
 
 /**
@@ -243,7 +235,7 @@ exports.shouldCorrectlySerializeUsingTypedArray = function(test) {
   test.deepEqual(motherOfAllDocuments.float, object.float);
   test.deepEqual(motherOfAllDocuments.regexp, object.regexp);
   test.deepEqual(motherOfAllDocuments.boolean, object.boolean);
-  test.deepEqual(motherOfAllDocuments.long.toNumber(), object.long);
+  test.deepEqual(motherOfAllDocuments.long.toNumber(), object.long.toNumber());
   test.deepEqual(motherOfAllDocuments.where, object.where);
   test.deepEqual(motherOfAllDocuments.dbref.oid.toHexString(), object.dbref.oid.toHexString());
   test.deepEqual(motherOfAllDocuments.dbref.namespace, object.dbref.namespace);
