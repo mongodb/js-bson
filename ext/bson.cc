@@ -65,10 +65,8 @@ void DataStream::CheckKey(const Local<String>& keyName)
 	size_t keyLength = keyName->Utf8Length();
 	if(keyLength == 0) return;
 
-	// Allocate space for the key
+	// Allocate space for the key, do not need to zero terminate as WriteUtf8 does it
 	char* keyStringBuffer = (char*) alloca(keyLength + 1);
-	// Zero terminate the string
-	keyStringBuffer[keyLength - 1] = 0x00;
 	// Write the key to the allocated buffer
 	keyName->WriteUtf8(keyStringBuffer);
 	// Check for the zero terminator
