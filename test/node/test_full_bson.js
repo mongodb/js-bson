@@ -305,6 +305,38 @@ exports['Should Correctly Serialize and Deserialize a big Binary object'] = func
   test.done();
 }
 
+exports['Should Correctly fail due to attempting serialization of illegal key values'] = function(test) {
+  var k = new Buffer(15);
+  for (var i = 0; i < 15; i++)
+    k[i] = 0;
+
+  k.write("hello");
+  k[6] = 0x06;
+  k.write("world", 10);
+
+  var v = new Buffer(65801);
+  for (var i = 0; i < 65801; i++)
+    v[i] = 1;
+  v[0] = 0x0A;
+  var doc = {};
+  doc[k.toString()] = v.toString();  
+
+  // Should throw due to null character
+  try {
+    bsonJS.serialize(doc, true, true, false);
+    test.ok(false);
+  } catch (err) {
+  }
+
+  try {
+    bsonC.serialize(doc, true, true, false);
+    test.ok(false);
+  } catch (err) {
+  }
+
+  test.done();
+}
+
 /**
  * @ignore
  */

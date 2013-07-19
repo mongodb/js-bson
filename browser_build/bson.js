@@ -1263,8 +1263,9 @@ var serializeObject = function(object, checkKeys, buffer, index, serializeFuncti
 		// Serialize the object
     for(var key in object) {
       // Check the key and throw error if it's illegal
-      if(checkKeys ==  true && (key != '$db' && key != '$ref' && key != '$id')) {
-        BSON.checkKey(key);
+      if (key != '$db' && key != '$ref' && key != '$id') {
+        // dollars and dots ok
+        BSON.checkKey(key, !checkKeys);
       }
 
       // Pack the element
@@ -2327,13 +2328,20 @@ BSON.deserialize = function(buffer, options, isArray) {
  * @ignore
  * @api private
  */
-BSON.checkKey = function checkKey (key) {
+BSON.checkKey = function checkKey (key, dollarsAndDotsOk) {
   if (!key.length) return;
   // Check if we have a legal key for the object
-  if('$' == key[0]) {
-    throw Error("key " + key + " must not start with '$'");
-  } else if (!!~key.indexOf('.')) {
-    throw Error("key " + key + " must not contain '.'");
+  if (!!~key.indexOf("\x00")) {
+    // The BSON spec doesn't allow keys with null bytes because keys are
+    // null-terminated.
+    throw Error("key " + key + " must not contain null bytes");
+  }
+  if (!dollarsAndDotsOk) {
+    if('$' == key[0]) {
+      throw Error("key " + key + " must not start with '$'");
+    } else if (!!~key.indexOf('.')) {
+      throw Error("key " + key + " must not contain '.'");
+    }
   }
 };
 

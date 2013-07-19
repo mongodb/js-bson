@@ -65,8 +65,19 @@ void DataStream::CheckKey(const Local<String>& keyName)
 	size_t keyLength = keyName->Utf8Length();
 	if(keyLength == 0) return;
 
-	char* keyStringBuffer = (char*) alloca(keyLength+1);
+	// Allocate space for the key
+	char* keyStringBuffer = (char*) alloca(keyLength + 1);
+	// Zero terminate the string
+	keyStringBuffer[keyLength - 1] = 0x00;
+	// Write the key to the allocated buffer
 	keyName->WriteUtf8(keyStringBuffer);
+	// Check for the zero terminator
+	char* terminator = strchr(keyStringBuffer, 0x00);
+
+	// If the location is not at the end of the string we've got an illegal 0x00 byte somewhere
+	if(terminator != &keyStringBuffer[keyLength]) {
+		ThrowAllocatedStringException(64+keyLength, "key %s must not contain null bytes", keyStringBuffer);
+	}
 
 	if(keyStringBuffer[0] == '$')
 	{
