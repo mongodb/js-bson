@@ -3842,7 +3842,7 @@ ObjectID.prototype.getTimestamp = function() {
 * @ignore
 * @api private
 */
-ObjectID.index = 0;
+ObjectID.index = parseInt(Math.random() * 0xFFFFFF, 10);
 
 ObjectID.createPk = function createPk () {
   return new ObjectID();
