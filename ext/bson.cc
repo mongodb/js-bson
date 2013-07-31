@@ -784,7 +784,7 @@ NAN_METHOD(BSON::BSONDeserialize)
 		{
 			Local<String> error = String::New(exception);
 			free(exception);
-			NanReturnValue(error);
+			return NanThrowError(error);
 		}
 
 	}
@@ -814,7 +814,7 @@ NAN_METHOD(BSON::BSONDeserialize)
 			Local<String> error = String::New(exception);
 			free(exception);
 			free(data);
-			NanReturnValue(error);
+			return NanThrowError(error);
 		}
 	}
 }
@@ -880,7 +880,7 @@ NAN_METHOD(BSON::BSONSerialize)
 		free(serialized_object);
 		Local<String> error = String::New(err_msg);
 		free(err_msg);
-		NanReturnValue(error);
+		return NanThrowError(error);
 	}
 
 	// If we have 3 arguments
