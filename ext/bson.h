@@ -234,7 +234,7 @@ public:
 	BSONDeserializer(BSON* aBson, char* data, size_t length);
 	BSONDeserializer(BSONDeserializer& parentSerializer, size_t length);
 
-	Handle<Value> DeserializeDocument();
+	Handle<Value> DeserializeDocument(bool promoteLongs);
 
 	bool			HasMoreData() const { return p < pEnd; }
 	Local<String>	ReadCString();
@@ -259,10 +259,10 @@ public:
 	size_t			GetSerializeSize() const { return p - pStart; }
 
 private:
-	Handle<Value> DeserializeArray();
-	Handle<Value> DeserializeValue(BsonType type);
-	Handle<Value> DeserializeDocumentInternal();
-	Handle<Value> DeserializeArrayInternal();
+	Handle<Value> DeserializeArray(bool promoteLongs);
+	Handle<Value> DeserializeValue(BsonType type, bool promoteLongs);
+	Handle<Value> DeserializeDocumentInternal(bool promoteLongs);
+	Handle<Value> DeserializeArrayInternal(bool promoteLongs);
 
 	BSON*		bson;
 	char* const pStart;

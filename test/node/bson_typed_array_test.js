@@ -167,7 +167,7 @@ exports.shouldCorrectlyDeserializeUsingTypedArray = function(test) {
   test.deepEqual(motherOfAllDocuments.float, object.float);
   test.deepEqual(motherOfAllDocuments.regexp, object.regexp);
   test.deepEqual(motherOfAllDocuments.boolean, object.boolean);
-  test.deepEqual(motherOfAllDocuments.long.toNumber(), object.long.toNumber());
+  test.deepEqual(motherOfAllDocuments.long.toNumber(), object.long);
   test.deepEqual(motherOfAllDocuments.where, object.where);
   test.deepEqual(motherOfAllDocuments.dbref.oid.toHexString(), object.dbref.oid.toHexString());
   test.deepEqual(motherOfAllDocuments.dbref.namespace, object.dbref.namespace);
@@ -222,7 +222,7 @@ exports.shouldCorrectlySerializeUsingTypedArray = function(test) {
   test.deepEqual(motherOfAllDocuments.float, object.float);
   test.deepEqual(motherOfAllDocuments.regexp, object.regexp);
   test.deepEqual(motherOfAllDocuments.boolean, object.boolean);
-  test.deepEqual(motherOfAllDocuments.long.toNumber(), object.long.toNumber());
+  test.deepEqual(motherOfAllDocuments.long.toNumber(), object.long);
   test.deepEqual(motherOfAllDocuments.where, object.where);
   test.deepEqual(motherOfAllDocuments.dbref.oid.toHexString(), object.dbref.oid.toHexString());
   test.deepEqual(motherOfAllDocuments.dbref.namespace, object.dbref.namespace);

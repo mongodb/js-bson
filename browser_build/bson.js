@@ -1965,6 +1965,7 @@ var crc32 =  function(string, start, end) {
  *  - **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
  *  - **cacheFunctions** {Boolean, default:false}, cache evaluated functions for reuse.
  *  - **cacheFunctionsCrc32** {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.
+ *  - **promoteLongs** {Boolean, default:true}, when deserializing a Long will fit it into a Number if it's smaller than 53 bits
  *
  * @param {Buffer} data the buffer containing the serialized set of BSON documents.
  * @param {Number} startIndex the start index in the data Buffer where the deserialization is to start.
@@ -2054,6 +2055,7 @@ var convertArraytoUtf8BinaryString = function(byteArray, startIndex, endIndex) {
  *  - **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
  *  - **cacheFunctions** {Boolean, default:false}, cache evaluated functions for reuse.
  *  - **cacheFunctionsCrc32** {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.
+ *  - **promoteLongs** {Boolean, default:true}, when deserializing a Long will fit it into a Number if it's smaller than 53 bits
  *
  * @param {Buffer} buffer the buffer containing the serialized set of BSON documents.
  * @param {Object} [options] additional options used for the deserialization.
@@ -2067,6 +2069,7 @@ BSON.deserialize = function(buffer, options, isArray) {
   var evalFunctions = options['evalFunctions'] == null ? false : options['evalFunctions'];
   var cacheFunctions = options['cacheFunctions'] == null ? false : options['cacheFunctions'];
   var cacheFunctionsCrc32 = options['cacheFunctionsCrc32'] == null ? false : options['cacheFunctionsCrc32'];
+  var promoteLongs = options['promoteLongs'] || true;
 
   // Validate that we have at least 4 bytes of buffer
   if(buffer.length < 5) throw new Error("corrupt bson message < 5 bytes long");
@@ -2221,8 +2224,14 @@ BSON.deserialize = function(buffer, options, isArray) {
         // Unpack the low and high bits
         var lowBits = buffer[index++] | buffer[index++] << 8 | buffer[index++] << 16 | buffer[index++] << 24;
         var highBits = buffer[index++] | buffer[index++] << 8 | buffer[index++] << 16 | buffer[index++] << 24;
-        // Set the object
-        object[name] = new Long(lowBits, highBits);
+        // Create long object
+        var long = new Long(lowBits, highBits); 
+        // Promote the long if possible
+        if(promoteLongs) {
+          object[name] = long.lessThanOrEqual(JS_INT_MAX_LONG) && long.greaterThanOrEqual(JS_INT_MIN_LONG) ? long.toNumber() : long;
+        } else {
+          object[name] = long;
+        }
         break;
       case BSON.BSON_DATA_SYMBOL:
         // Read the content of the field

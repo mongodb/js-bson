@@ -406,16 +406,16 @@ Local<String> BSONDeserializer::ReadObjectId()
 	return String::New(objectId, 12);
 }
 
-Handle<Value> BSONDeserializer::DeserializeDocument()
+Handle<Value> BSONDeserializer::DeserializeDocument(bool promoteLongs)
 {
 	uint32_t length = ReadUInt32();
 	if(length < 5) ThrowAllocatedStringException(64, "Bad BSON: Document is less than 5 bytes");
 
 	BSONDeserializer documentDeserializer(*this, length-4);
-	return documentDeserializer.DeserializeDocumentInternal();
+	return documentDeserializer.DeserializeDocumentInternal(promoteLongs);
 }
 
-Handle<Value> BSONDeserializer::DeserializeDocumentInternal()
+Handle<Value> BSONDeserializer::DeserializeDocumentInternal(bool promoteLongs)
 {
 	Local<Object> returnObject = Object::New();
 
@@ -423,7 +423,7 @@ Handle<Value> BSONDeserializer::DeserializeDocumentInternal()
 	{
 		BsonType type = (BsonType) ReadByte();
 		const Local<String>& name = ReadCString();
-		const Handle<Value>& value = DeserializeValue(type);
+		const Handle<Value>& value = DeserializeValue(type, promoteLongs);
 		returnObject->ForceSet(name, value);
 	}
 	if(p != pEnd) ThrowAllocatedStringException(64, "Bad BSON Document: Serialize consumed unexpected number of bytes");
@@ -441,16 +441,16 @@ Handle<Value> BSONDeserializer::DeserializeDocumentInternal()
 	}
 }
 
-Handle<Value> BSONDeserializer::DeserializeArray()
+Handle<Value> BSONDeserializer::DeserializeArray(bool promoteLongs)
 {
 	uint32_t length = ReadUInt32();
 	if(length < 5) ThrowAllocatedStringException(64, "Bad BSON: Array Document is less than 5 bytes");
 
 	BSONDeserializer documentDeserializer(*this, length-4);
-	return documentDeserializer.DeserializeArrayInternal();
+	return documentDeserializer.DeserializeArrayInternal(promoteLongs);
 }
 
-Handle<Value> BSONDeserializer::DeserializeArrayInternal()
+Handle<Value> BSONDeserializer::DeserializeArrayInternal(bool promoteLongs)
 {
 	Local<Array> returnArray = Array::New();
 
@@ -458,7 +458,7 @@ Handle<Value> BSONDeserializer::DeserializeArrayInternal()
 	{
 		BsonType type = (BsonType) ReadByte();
 		uint32_t index = ReadIntegerString();
-		const Handle<Value>& value = DeserializeValue(type);
+		const Handle<Value>& value = DeserializeValue(type, promoteLongs);
 		returnArray->Set(index, value);
 	}
 	if(p != pEnd) ThrowAllocatedStringException(64, "Bad BSON Array: Serialize consumed unexpected number of bytes");
@@ -466,7 +466,7 @@ Handle<Value> BSONDeserializer::DeserializeArrayInternal()
 	return returnArray;
 }
 
-Handle<Value> BSONDeserializer::DeserializeValue(BsonType type)
+Handle<Value> BSONDeserializer::DeserializeValue(BsonType type, bool promoteLongs)
 {
 	switch(type)
 	{
@@ -515,7 +515,7 @@ Handle<Value> BSONDeserializer::DeserializeValue(BsonType type)
 		{
 			ReadUInt32();
 			const Local<Value>& code = ReadString();
-			const Handle<Value>& scope = DeserializeDocument();
+			const Handle<Value>& scope = DeserializeDocument(promoteLongs);
 			Local<Value> argv[] = { code, scope->ToObject() };
 			return bson->codeConstructor->NewInstance(2, argv);
 		}
@@ -547,6 +547,18 @@ Handle<Value> BSONDeserializer::DeserializeValue(BsonType type)
 			int32_t lowBits = (int32_t) ReadInt32();
 			int32_t highBits = (int32_t) ReadInt32();
 
+			// Promote long is enabled
+			if(promoteLongs) {
+				// If value is < 2^53 and >-2^53
+				if((highBits < 0x200000 || (highBits == 0x200000 && lowBits == 0)) && highBits >= -0x200000) {
+					// Adjust the pointer and read as 64 bit value
+					p -= 8;
+					// Read the 64 bit value
+					int64_t finalValue = (int64_t) ReadInt64();
+					return Number::New(finalValue);
+				} 
+			}
+
 			// Decode the Long value
 			Local<Value> argv[] = { Int32::New(lowBits), Int32::New(highBits) };
 			return bson->longConstructor->NewInstance(2, argv);
@@ -556,10 +568,10 @@ Handle<Value> BSONDeserializer::DeserializeValue(BsonType type)
 		return Date::New((double) ReadInt64());
 
 	case BSON_TYPE_ARRAY:
-		return DeserializeArray();
+		return DeserializeArray(promoteLongs);
 
 	case BSON_TYPE_OBJECT:
-		return DeserializeDocument();
+		return DeserializeDocument(promoteLongs);
 
 	case BSON_TYPE_SYMBOL:
 		{
@@ -731,11 +743,21 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args)
 {
 	HandleScope scope;
 
-	// Ensure that we have an parameter
-	if(Buffer::HasInstance(args[0]) && args.Length() > 1) return VException("One argument required - buffer1.");
-	if(args[0]->IsString() && args.Length() > 1) return VException("One argument required - string1.");
-	// Throw an exception if the argument is not of type Buffer
-	if(!Buffer::HasInstance(args[0]) && !args[0]->IsString()) return VException("Argument must be a Buffer or String.");
+	// Fail if the first argument is not a string or a buffer
+	if(args.Length() > 1 && !args[0]->IsString() && !Buffer::HasInstance(args[0]))
+		return VException("First Argument must be a Buffer or String.");
+
+	// Promote longs
+	bool promoteLongs = true;
+
+	// If we have an options object
+	if(args.Length() == 2 && args[1]->IsObject()) {
+		Local<Object> options = args[1]->ToObject();
+
+		if(options->Has(String::New("promoteLongs"))) {
+			promoteLongs = options->Get(String::New("promoteLongs"))->ToBoolean()->Value();
+		}
+	}	
 
 	// Define pointer to data
 	Local<Object> obj = args[0]->ToObject();
@@ -761,7 +783,8 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args)
 		try
 		{
 			BSONDeserializer deserializer(bson, data, length);
-			return deserializer.DeserializeDocument();
+			// deserializer.promoteLongs = promoteLongs;
+			return deserializer.DeserializeDocument(promoteLongs);
 		}
 		catch(char* exception)
 		{
@@ -786,7 +809,8 @@ Handle<Value> BSON::BSONDeserialize(const Arguments &args)
 		try
 		{
 			BSONDeserializer deserializer(bson, data, len);
-			Handle<Value> result = deserializer.DeserializeDocument();
+			// deserializer.promoteLongs = promoteLongs;
+			Handle<Value> result = deserializer.DeserializeDocument(promoteLongs);
 			free(data);
 			return result;
 
@@ -964,6 +988,17 @@ Handle<Value> BSON::BSONDeserializeStream(const Arguments &args)
 	uint32_t numberOfDocuments = args[2]->Uint32Value();
 	uint32_t index = args[1]->Uint32Value();
 	uint32_t resultIndex = args[4]->Uint32Value();
+	bool promoteLongs = true;
+
+	// Check for the value promoteLongs in the options object
+	if(args.Length() == 6) {
+		Local<Object> options = args[5]->ToObject();
+
+		// Check if we have the promoteLong variable
+		if(options->Has(String::New("promoteLongs"))) {
+			promoteLongs = options->Get(String::New("promoteLongs"))->ToBoolean()->Value();
+		}
+	}
 
 	// Unpack the BSON parser instance
 	BSON *bson = ObjectWrap::Unwrap<BSON>(args.This());
@@ -986,7 +1021,7 @@ Handle<Value> BSON::BSONDeserializeStream(const Arguments &args)
 	{
 		try
 		{
-			documents->Set(i + resultIndex, deserializer.DeserializeDocument());
+			documents->Set(i + resultIndex, deserializer.DeserializeDocument(promoteLongs));
 		}
 		catch (char* exception)
 		{
