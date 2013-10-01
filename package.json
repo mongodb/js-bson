@@ -10,7 +10,7 @@
 , "bugs" :          { "mail" :  "node-mongodb-native@googlegroups.com"
                     , "url" :   "https://github.com/mongodb/js-bson/issues" }
 , "dependencies": {
-      "nan": "~0.3.0"
+      "nan": "~0.4.1"
   }
 , "devDependencies": {
       "nodeunit": "0.7.3"

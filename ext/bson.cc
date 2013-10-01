@@ -354,10 +354,13 @@ BSONDeserializer::BSONDeserializer(BSONDeserializer& parentSerializer, size_t le
 	if(*pEnd != '\0') ThrowAllocatedStringException(64, "Missing end of document marker '\\0'");
 }
 
-Local<String> BSONDeserializer::ReadCString()
+Handle<Value> BSONDeserializer::ReadCString()
 {
 	char* start = p;
-	while(*p++) { }
+	while(*p++ && (p < pEnd)) { }
+	if(p > pEnd) {
+		return Null();
+	}
 	return String::New(start, (int32_t) (p-start-1) );
 }
 
@@ -422,7 +425,9 @@ Handle<Value> BSONDeserializer::DeserializeDocumentInternal(bool promoteLongs)
 	while(HasMoreData())
 	{
 		BsonType type = (BsonType) ReadByte();
-		const Local<String>& name = ReadCString();
+		const Handle<Value>& name = ReadCString();
+		if(name->IsNull()) ThrowAllocatedStringException(64, "Bad BSON Document: illegal CString");
+		// name->Is
 		const Handle<Value>& value = DeserializeValue(type, promoteLongs);
 		returnObject->ForceSet(name, value);
 	}
@@ -498,9 +503,10 @@ Handle<Value> BSONDeserializer::DeserializeValue(BsonType type, bool promoteLong
 
 	case BSON_TYPE_REGEXP:
 		{
-			const Local<String>& regex = ReadCString();
+			const Handle<Value>& regex = ReadCString();
+			if(regex->IsNull()) ThrowAllocatedStringException(64, "Bad BSON Document: illegal CString");
 			int32_t options = ReadRegexOptions();
-			return RegExp::New(regex, (RegExp::Flags) options);
+			return RegExp::New(regex->ToString(), (RegExp::Flags) options);
 		}
 
 	case BSON_TYPE_CODE:

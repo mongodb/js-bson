@@ -238,7 +238,7 @@ public:
 	Handle<Value> DeserializeDocument(bool promoteLongs);
 
 	bool			HasMoreData() const { return p < pEnd; }
-	Local<String>	ReadCString();
+	Handle<Value>	ReadCString();
 	uint32_t		ReadIntegerString();
 	int32_t			ReadRegexOptions();
 	Local<String>	ReadString();
