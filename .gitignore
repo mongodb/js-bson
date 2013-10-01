@@ -9,3 +9,4 @@ output
 build
 .bin
 npm-debug.log
+builderror.log
