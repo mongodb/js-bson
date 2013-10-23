@@ -1,3 +1,9 @@
+0.2.3 2013-10-01
+----------------
+- Drying of ObjectId code for generation of id (Issue #54, https://github.com/moredip)
+- Fixed issue where corrupt CString's could cause endless loop
+- Support for Node 0.11.X > (Issue #49, https://github.com/kkoopa)
+
 0.1.4 2012-09-25
 ----------------
 - Added precompiled c++ native extensions for win32 ia32 and x64
