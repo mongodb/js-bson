@@ -497,7 +497,7 @@ exports['Should Correctly Serialize and Deserialize Buffer'] = function(test) {
 /**
  * @ignore
  */
-exports['Should Correctly Serialize and Deserialize Number'] = function(test) {
+exports['Should Correctly Serialize and Deserialize Number 2'] = function(test) {
   // Complex document serialization
   var doc = {doc: (BSONJS.BSON_INT32_MAX + 10)};
   var docJSBin = bsonJS.serialize(doc, false, true, true);
@@ -526,10 +526,6 @@ exports['Should Correctly Correctly handle Long promotion'] = function(test) {
   // Deserialize using default promotion
   var docDeJS = bsonJS.deserialize(docCBin);
   var docDeC = bsonC.deserialize(docJSBin);
-  
-  console.log("---------------------------------------------------")
-  console.dir(docDeJS.doc2)
-  console.dir(docDeC.doc2)
 
   // Assert
   assert.equal('number', typeof docDeC.doc);
@@ -540,10 +536,6 @@ exports['Should Correctly Correctly handle Long promotion'] = function(test) {
   // Turn of promotion of long
   var docDeJS = bsonJS.deserialize(docCBin, {promoteLongs:false});
   var docDeC = bsonC.deserialize(docJSBin, {promoteLongs:false});
-
-  console.log("---------------------------------------------------")
-  console.dir(docDeJS.doc2)
-  console.dir(docDeC.doc2)
 
   // Assert
   assert.ok(docDeC.doc instanceof Long);

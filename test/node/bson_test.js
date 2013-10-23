@@ -254,7 +254,7 @@ exports['Should Correctly Serialize and Deserialize null value'] = function(test
 /**
  * @ignore
  */
-exports['Should Correctly Serialize and Deserialize Number'] = function(test) {
+exports['Should Correctly Serialize and Deserialize Number 1'] = function(test) {
   var test_number = {doc: 5.5};
   var serialized_data = new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(test_number, false, true);
 
@@ -374,7 +374,7 @@ exports['Should Correctly Serialize and Deserialize Buffer'] = function(test) {
 /**
  * @ignore
  */
-exports['Should Correctly Serialize and Deserialize Number'] = function(test) {
+exports['Should Correctly Serialize and Deserialize Number 4'] = function(test) {
   var doc = {doc: (BSON.BSON_INT32_MAX + 10)};
   var serialized_data = new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
 

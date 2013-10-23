@@ -133,7 +133,7 @@ exports['Should Correctly Serialize and Deserialize undefined value'] = function
 /**
  * @ignore
  */
-exports['Should Correctly Serialize and Deserialize Number'] = function(test) {
+exports['Should Correctly Serialize and Deserialize Number 3'] = function(test) {
   var test_number = {doc: 5.5}
   var serialized_data = bsonC.serialize(test_number)
   assert.deepEqual(test_number, bsonC.deserialize(serialized_data));
