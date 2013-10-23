@@ -516,6 +516,7 @@ exports['Should Correctly Correctly handle Long promotion'] = function(test) {
     , doc1: {
       a: Long.fromString("100000000000000")
     }
+    , doc2: [[Long.fromNumber(1), Long.fromNumber(2)]]
   };
 
   var docJSBin = bsonJS.serialize(doc, false, true, true);
@@ -525,6 +526,11 @@ exports['Should Correctly Correctly handle Long promotion'] = function(test) {
   // Deserialize using default promotion
   var docDeJS = bsonJS.deserialize(docCBin);
   var docDeC = bsonC.deserialize(docJSBin);
+  
+  console.log("---------------------------------------------------")
+  console.dir(docDeJS.doc2)
+  console.dir(docDeC.doc2)
+
   // Assert
   assert.equal('number', typeof docDeC.doc);
   assert.equal('number', typeof docDeJS.doc);
@@ -534,6 +540,11 @@ exports['Should Correctly Correctly handle Long promotion'] = function(test) {
   // Turn of promotion of long
   var docDeJS = bsonJS.deserialize(docCBin, {promoteLongs:false});
   var docDeC = bsonC.deserialize(docJSBin, {promoteLongs:false});
+
+  console.log("---------------------------------------------------")
+  console.dir(docDeJS.doc2)
+  console.dir(docDeC.doc2)
+
   // Assert
   assert.ok(docDeC.doc instanceof Long);
   assert.ok(docDeJS.doc instanceof Long);
