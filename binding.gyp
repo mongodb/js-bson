@@ -3,7 +3,7 @@
     {
       'target_name': 'bson',
       'sources': [ 'ext/bson.cc' ],
-      'include_dirs': ["<!(node -p -e \"require('path').dirname(require.resolve('nan'))\")"],
+      'include_dirs': ["<!(node -e \"require('nan')\")"],
       'cflags!': [ '-fno-exceptions' ],
       'cflags_cc!': [ '-fno-exceptions' ],
       'conditions': [
