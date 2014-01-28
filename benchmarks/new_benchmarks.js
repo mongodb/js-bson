@@ -13,8 +13,22 @@ var BSONNATIVE = require('../lib/bson').BSONNative.BSON,
 var BSONJSOLD = require('../lib/bson').BSONPure.BSON
 	, BSONJSNEW = require('../lib/bson/bson_new').BSON;
 
-var varmUpCount = 10000;
-var iterations = 40000;
+var warmUpCount = 50000;
+var iterations = 50000;
+
+function makeid() {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  for( var i=0; i < 5; i++ )
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+}
+
+function makerandomType() {
+	return "world"
+}
 
 var executeFunction = function(count, bson, object) {
 	for(var i = 0; i < count; i++) {
@@ -32,18 +46,42 @@ var printResults = function(name, number, elapsed) {
 var executeBenchmark = function(_iterations, _name, _bson, _obj) {
 	// Time the function
 	var start = new Date();
-	var b = executeFunction(_iterations, _bson, _obj);
-	console.dir(b)
+	executeFunction(_iterations, _bson, _obj);
 	var end = new Date();
 	var timeElapsed = end.getTime() - start.getTime();
 	// Print results
 	printResults(_name, _iterations, timeElapsed);
 }
 
+var execute = function(_warmUpCount, _iterations, _serializers, _obj) {
+	for(var i = 0; i < _serializers.length;i++) {
+		//	Warm up
+		executeFunction(_warmUpCount, _serializers[i].bson, _obj);
+		// Time
+		executeBenchmark(_iterations, _serializers[i].name, _serializers[i].bson, _obj)
+	}
+}
+
 // Parser instances
 var bsonOld = new BSONJSOLD([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
 var bsonNative = new BSONNATIVE([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
 var bsonNew = new BSONJSNEW([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
+
+// Serializers
+var serializers = [
+	{
+			bson: bsonOld
+		,	name: "BSONJSOLD"
+	}, 
+	{
+			bson: bsonNative
+		,	name: "BSONNATIVE"
+	}, 
+	{
+			bson: bsonNew
+		,	name: "BSONJSNEW"
+	}
+]
 
 // // var doc = {a:1, b: 3.4, c: "world", d: new Date(), e: /aa/, f:new Binary(new Buffer(256))}
 // var doc = {a:1, b: 3.4, c: "world", d: new Date(), e: /aa/, f:new Binary(new Buffer(256))}
@@ -66,44 +104,47 @@ var bsonNew = new BSONJSNEW([Long, ObjectID, Binary, Code, DBRef, Symbol, Double
 // // var doc = {a:1, "hello": "world", obj: [{"dog": "days"}, {"dog": "days"}, {"dog": "days"}]};
 // // var doc = {a:1, "hello": "world", obj: [1, 2, 3]};
 // // var doc = {doc:[1]}
-// var doc = {a:1, "hello": "world", obj: [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]};
-// iterations = 1
-// console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 3")
-// executeBenchmark(iterations, "BSONJSOLD", bsonOld, doc);
-// executeBenchmark(iterations, "BSONNATIVE", bsonNative, doc);
-// executeBenchmark(iterations, "BSONJSNEW", bsonNew, doc);
-
-// var doc = {a:1, b: 3.4, c: "world", d: new Date(), e: /aa/}//, f:new Binary(new Buffer(256))}
-// console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 4")
-// executeBenchmark(iterations, "BSONJSOLD", bsonOld, doc);
-// executeBenchmark(iterations, "BSONNATIVE", bsonNative, doc);
-// executeBenchmark(iterations, "BSONJSNEW", bsonNew, doc);
-
-var doc = {
-  'string': 'hello',
-  'array': [1,2,3],
-  'hash': {'a':1, 'b':2},
-  'date': new Date(),
-  'oid': new ObjectID(),
-  'binary': new Binary(new Buffer("hello")),
-  'binary': new Buffer("hello"),
-  'int': 42,
-  'float': 33.3333,
-  'regexp': /regexp/,
-  'boolean': true,
-  'long': Long.fromNumber(100),
-  'where': new Code('this.a > i', {i:1}),        
+var doc0 = {'hello': 'world', n: 0}
+var doc1 = {
+  // 'string': 'hello', 'array': [1,2,3],
+  // 'hash': {'a':1, 'b':2}, 'date': new Date(),
+  // 'oid': new ObjectID(), 'binary': new Binary(new Buffer("hello")),
+  // 'binary': new Buffer("hello"), 'int': 42, 'float': 33.3333,
+  // 'regexp': /regexp/, 'boolean': true,
+  // 'long': Long.fromNumber(100), 'where': new Code('this.a > i', {i:1}),        
   'dbref': new DBRef('namespace', new ObjectID(), 'integration_tests_'),
-  'dbref': new DBRef('namespace', new ObjectID("000000000000000000000000")),
-  'minkey': new MinKey(),
-  'maxkey': new MaxKey()    
+  // 'minkey': new MinKey(), 'maxkey': new MaxKey()    
 }
 
-executeFunction(varmUpCount, bsonOld, doc);
-executeFunction(varmUpCount, bsonNative, doc);
-executeFunction(varmUpCount, bsonNew, doc);
+var doc2 = {a:1, "hello": "world", obj: [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]};
+var doc3 = {a:1, b: 3.4, c: "world", d: new Date(), e: /aa/, f:new Binary(new Buffer(256))}
+var doc4 = {a:1}
+
+// Build giant doc
+var doc5 = {};
+for(var i = 0; i < 10000; i++) {
+	doc5[makeid()] = makerandomType();
+}
+// iterations = 1;
+// warmUpCount = 1;
+console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 0")
+execute(warmUpCount, iterations, serializers, doc0);
+
+console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 1")
+execute(warmUpCount, iterations, serializers, doc1);
+
+console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 2")
+execute(warmUpCount, iterations, serializers, doc2);
+
+console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 3")
+execute(warmUpCount, iterations, serializers, doc3);
 
 console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 4")
-executeBenchmark(iterations, "BSONJSOLD", bsonOld, doc);
-executeBenchmark(iterations, "BSONNATIVE", bsonNative, doc);
-executeBenchmark(iterations, "BSONJSNEW", bsonNew, doc);
+execute(warmUpCount, iterations, serializers, doc4);
+
+var warmUpCount = 100;
+var iterations = 1000;
+
+console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 5")
+execute(warmUpCount, iterations, serializers, doc5);
+
