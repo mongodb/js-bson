@@ -129,6 +129,21 @@ exports['Should Correctly create ObjectID and do deep equals'] = function(test) 
 /**
  * @ignore
  */
+exports['Should Correctly convert ObjectID to itself'] = function(test) {
+  var myObject, newObject;
+  var selfConvertion = (function() {
+    myObject = new ObjectID();
+    newObject = ObjectID(myObject);
+  });
+
+  test.doesNotThrow(selfConvertion);
+  test.equal(myObject, newObject);
+  test.done();
+}
+
+/**
+ * @ignore
+ */
 exports['Should Correctly get BSON types from require'] = function(test) {
   var _mongodb = require('../../lib/bson');
   test.ok(_mongodb.ObjectID === ObjectID);
