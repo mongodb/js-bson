@@ -1681,6 +1681,21 @@ exports['ObjectID should have a correct cached representation of the hexString']
 /**
  * @ignore
  */
+exports['Should fail to create ObjectID due to illegal hex code'] = function(test) {
+  try {
+    new ObjectID("zzzzzzzzzzzzzzzzzzzzzzzz");
+    test.ok(false);
+  } catch (err) {
+  }
+
+  test.equal(false, ObjectID.isValid("zzzzzzzzzzzzzzzzzzzzzzzz"));
+  test.equal(true, ObjectID.isValid("000000000000000000000000"));
+  test.done();
+}
+
+/**
+ * @ignore
+ */
 // 'Should Correctly Function' = function(test) {
 //   var doc = {b:1, func:function() {
 //     this.b = 2;
