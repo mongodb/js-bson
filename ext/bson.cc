@@ -94,11 +94,7 @@ template<typename T> void BSONSerializer<T>::SerializeDocument(const Handle<Valu
 	Local<Object> object = bson->GetSerializeObject(value);
 
 	// Get the object property names
-	#if NODE_MAJOR_VERSION == 0 && NODE_MINOR_VERSION < 6
-    Local<Array> propertyNames = object->GetPropertyNames();
-  #else
-    Local<Array> propertyNames = object->GetOwnPropertyNames();
-  #endif
+  Local<Array> propertyNames = object->GetPropertyNames();
 
 	// Length of the property
 	int propertyLength = propertyNames->Length();

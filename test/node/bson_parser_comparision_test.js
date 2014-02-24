@@ -545,8 +545,6 @@ exports['Should Correctly Correctly handle Long promotion'] = function(test) {
   test.done();
 }
 
-BSON.JS_INT_MAX
-
 /**
  * @ignore
  */
@@ -559,6 +557,31 @@ exports['Should error out due to 24 characters but not valid hexstring for Objec
   test.done();
 }
 
+/**
+ * @ignore
+ */
+exports['Should correctly serialize prototype fields'] = function(test) {
+  function User(name) {
+      this.name = name;
+  }
+  
+  User.prototype = {
+      field_in_prototype: "This goes missing."
+  }
+
+  // Create doc to serialize
+  var doc = new User("Bob");
+
+  // Serialize using both 
+  var simple_string_serialized = bsonJS.serialize(doc, false, true, true);
+  var simple_string_serialized_2 = bsonC.serialize(doc, false, true, true);
+
+  // Deserialize the string
+  var doc1 = bsonJS.deserialize(simple_string_serialized);
+  var doc2 = bsonC.deserialize(simple_string_serialized_2);
+  assert.deepEqual(doc1, doc2);
+  test.done();
+}
 
 /**
  * @ignore
