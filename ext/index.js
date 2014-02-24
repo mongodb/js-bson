@@ -10,8 +10,13 @@ try {
 	  bson = require('../build/Release/bson');  
 	}	
 } catch(err) {
-	console.error("Failed to load c++ bson extension, using pure JS version");
-	bson = require('../lib/bson/bson');
+	// Attempt to load the release bson version
+	try {
+		bson = require('../build/Release/bson');
+	} catch (err) {
+		console.error("Failed to load c++ bson extension, using pure JS version");
+		bson = require('../lib/bson/bson');
+	}
 }
 
 exports.BSON = bson.BSON;
