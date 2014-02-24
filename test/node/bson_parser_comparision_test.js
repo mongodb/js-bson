@@ -586,6 +586,25 @@ exports['Should correctly serialize prototype fields'] = function(test) {
 /**
  * @ignore
  */
+exports['Should correctly serialize regexp'] = function(test) {
+  // Create doc to serialize
+  var doc = {regexp: /<[^>]>/gi}
+
+  // Serialize using both 
+  var simple_string_serialized = bsonJS.serialize(doc, false, true, true);
+  var simple_string_serialized_2 = bsonC.serialize(doc, false, true, true);
+
+  // Deserialize the string
+  var doc1 = bsonJS.deserialize(simple_string_serialized);
+  var doc2 = bsonC.deserialize(simple_string_serialized_2);
+  assert.equal("/<[^>]>/gi", doc1.regexp.toString());
+  assert.equal("/<[^>]>/gi", doc2.regexp.toString());
+  test.done();
+}
+
+/**
+ * @ignore
+ */
 exports.noGlobalsLeaked = function(test) {
   var leaks = gleak.detectNew();
   test.equal(0, leaks.length, "global var leak detected: " + leaks.join(', '));
