@@ -14,7 +14,7 @@ try {
 	try {
 		bson = require('../build/Release/bson');
 	} catch (err) {
-		console.error("Failed to load c++ bson extension, using pure JS version");
+		console.error("js-bson: Failed to load c++ bson extension, using pure JS version");
 		bson = require('../lib/bson/bson');
 	}
 }
