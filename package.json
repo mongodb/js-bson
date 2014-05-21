@@ -13,7 +13,7 @@
     "nan": "~1.0.0"
   }
 , "devDependencies": {
-      "nodeunit": "0.8.2"
+      "nodeunit": "0.7.3"
 	  , "gleak": "0.2.3"
     , "one": "2.X.X"
   }
