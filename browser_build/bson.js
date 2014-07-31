@@ -3710,8 +3710,14 @@ var ObjectID = function ObjectID(id, _hex) {
   if(ObjectID.cacheHexString) this.__id = this.toHexString();
 };
 
-// Allow usage of ObjectId aswell as ObjectID
+// Allow usage of ObjectId as well as ObjectID
 var ObjectId = ObjectID;
+
+// Precomputed hex table enables speedy hex string conversion
+var hexTable = [];
+for (var i = 0; i < 256; i++) {
+  hexTable[i] = (i <= 15 ? '0' : '') + i.toString(16);
+}
 
 /**
 * Return the ObjectID id as a 24 byte hex string representation
@@ -3722,16 +3728,10 @@ var ObjectId = ObjectID;
 ObjectID.prototype.toHexString = function() {
   if(ObjectID.cacheHexString && this.__id) return this.__id;
 
-  var hexString = ''
-    , number
-    , value;
+  var hexString = '';
 
-  for (var index = 0, len = this.id.length; index < len; index++) {
-    value = BinaryParser.toByte(this.id[index]);
-    number = value <= 15
-      ? '0' + value.toString(16)
-      : value.toString(16);
-    hexString = hexString + number;
+  for (var i = 0; i < this.id.length; i++) {
+    hexString += hexTable[this.id.charCodeAt(i)];
   }
 
   if(ObjectID.cacheHexString) this.__id = hexString;
