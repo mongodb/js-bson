@@ -80,10 +80,11 @@ exports.tearDown = function(callback) {
  */
 exports['Should correctly handle toBson function for an object'] = function(test) {
 	// Test object
-	  var doc = {
-			hello: new ObjectID(),
-			a:1
-		};
+  var doc = {
+		hello: new ObjectID(),
+		a:1
+	};
+
 	// Add a toBson method to the object
 	doc.toBSON = function() {
 		return {b:1};
@@ -93,6 +94,110 @@ exports['Should correctly handle toBson function for an object'] = function(test
 	var serialized_data = new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
 	var deserialized_doc = new BSONDE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);	
 	test.deepEqual({b:1}, deserialized_doc);
+
+  // Serialize the data   
+  var serialized_data = new mongoO.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
+  var deserialized_doc = new mongoO.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);  
+  test.deepEqual({b:1}, deserialized_doc);
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly handle embedded toBson function for an object'] = function(test) {
+  // Test object
+  var doc = {
+    hello: new ObjectID(),
+    a:1,
+    b: {
+      d: 1
+    }
+  };
+
+  // Add a toBson method to the object
+  doc.b.toBSON = function() {
+    return {e:1};
+  }
+  
+  // Serialize the data   
+  var serialized_data = new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
+  var deserialized_doc = new BSONDE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);  
+  test.deepEqual({e:1}, deserialized_doc.b);
+
+  var serialized_data = new mongoO.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
+  var deserialized_doc = new mongoO.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);  
+  test.deepEqual({e:1}, deserialized_doc.b);
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly serialize when embedded non object returned by toBSON'] = function(test) {
+  // Test object
+  var doc = {
+    hello: new ObjectID(),
+    a:1,
+    b: {
+      d: 1
+    }
+  };
+
+  // Add a toBson method to the object
+  doc.b.toBSON = function() {
+    return "hello";
+  }
+
+  // Serialize the data   
+  var serialized_data = new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
+  var deserialized_doc = new BSONDE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);  
+  test.deepEqual("hello", deserialized_doc.b);
+
+  // Serialize the data   
+  var serialized_data = new mongoO.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
+  var deserialized_doc = new mongoO.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);  
+  test.deepEqual("hello", deserialized_doc.b);
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Should fail when top level object returns a non object type'] = function(test) {
+  // Test object
+  var doc = {
+    hello: new ObjectID(),
+    a:1,
+    b: {
+      d: 1
+    }
+  };
+
+  // Add a toBson method to the object
+  doc.toBSON = function() {
+    return "hello";
+  }
+
+  var test1 = false;
+  var test2 = false;
+
+  try {
+    var serialized_data = new mongoO.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);    
+    var deserialized_doc = new mongoO.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);  
+  } catch (err) {
+    test1 = true;
+  }
+
+  try {
+    var serialized_data = new BSONSE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
+    var deserialized_doc = new BSONDE.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);  
+  } catch (err) {
+    test2 = true;
+  }
+
+  test.equal(true, test1);
+  test.equal(true, test2);
   test.done();
 }
   

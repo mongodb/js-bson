@@ -56,7 +56,6 @@ void ThrowAllocatedStringException(size_t allocationSize, const char* format, ..
 	char* string = (char*) malloc(allocationSize);
 	vsprintf(string, format, args);
 	va_end(args);
-
 	throw string;
 }
 
@@ -138,8 +137,25 @@ template<typename T> void BSONSerializer<T>::SerializeArray(const Handle<Value>&
 // This is templated so that we can use this function to both count the number of bytes, and to serialize those bytes.
 // The template approach eliminates almost all of the inspection of values unless they're required (eg. string lengths)
 // and ensures that there is always consistency between bytes counted and bytes written by design.
-template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, const Handle<Value>& value)
+template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, const Handle<Value>& constValue)
 {
+	Local<Value> value = *constValue;
+
+	// Check for toBSON function
+	if(value->IsObject()) {
+		Local<Object> object = value->ToObject();
+
+		// NanNew<String>("toBSON")
+		// NanNew(BSON::_toBSONString)
+
+		if(object->Has(NanNew<String>("toBSON"))) {
+			const Local<Value>& toBSON = object->Get(NanNew<String>("toBSON"));
+			if(!toBSON->IsFunction()) ThrowAllocatedStringException(64, "toBSON is not a function");
+			value = Local<Function>::Cast(toBSON)->Call(object, 0, NULL);
+		}
+	}
+
+	// Process all the values
 	if(value->IsNumber())
 	{
 		double doubleValue = value->NumberValue();
@@ -600,35 +616,35 @@ Persistent<FunctionTemplate> BSON::constructor_template;
 BSON::BSON() : ObjectWrap()
 {
 	// Setup pre-allocated comparision objects
-        NanAssignPersistent(_bsontypeString, NanNew<String>("_bsontype"));
-        NanAssignPersistent(_longLowString, NanNew<String>("low_"));
-        NanAssignPersistent(_longHighString, NanNew<String>("high_"));
-        NanAssignPersistent(_objectIDidString, NanNew<String>("id"));
-        NanAssignPersistent(_binaryPositionString, NanNew<String>("position"));
-        NanAssignPersistent(_binarySubTypeString, NanNew<String>("sub_type"));
-        NanAssignPersistent(_binaryBufferString, NanNew<String>("buffer"));
-        NanAssignPersistent(_doubleValueString, NanNew<String>("value"));
-        NanAssignPersistent(_symbolValueString, NanNew<String>("value"));
-        NanAssignPersistent(_dbRefRefString, NanNew<String>("$ref"));
-        NanAssignPersistent(_dbRefIdRefString, NanNew<String>("$id"));
-        NanAssignPersistent(_dbRefDbRefString, NanNew<String>("$db"));
-        NanAssignPersistent(_dbRefNamespaceString, NanNew<String>("namespace"));
-        NanAssignPersistent(_dbRefDbString, NanNew<String>("db"));
-        NanAssignPersistent(_dbRefOidString, NanNew<String>("oid"));
-        NanAssignPersistent(_codeCodeString, NanNew<String>("code"));
-        NanAssignPersistent(_codeScopeString, NanNew<String>("scope"));
-        NanAssignPersistent(_toBSONString, NanNew<String>("toBSON"));
+  NanAssignPersistent(_bsontypeString, NanNew<String>("_bsontype"));
+  NanAssignPersistent(_longLowString, NanNew<String>("low_"));
+  NanAssignPersistent(_longHighString, NanNew<String>("high_"));
+  NanAssignPersistent(_objectIDidString, NanNew<String>("id"));
+  NanAssignPersistent(_binaryPositionString, NanNew<String>("position"));
+  NanAssignPersistent(_binarySubTypeString, NanNew<String>("sub_type"));
+  NanAssignPersistent(_binaryBufferString, NanNew<String>("buffer"));
+  NanAssignPersistent(_doubleValueString, NanNew<String>("value"));
+  NanAssignPersistent(_symbolValueString, NanNew<String>("value"));
+  NanAssignPersistent(_dbRefRefString, NanNew<String>("$ref"));
+  NanAssignPersistent(_dbRefIdRefString, NanNew<String>("$id"));
+  NanAssignPersistent(_dbRefDbRefString, NanNew<String>("$db"));
+  NanAssignPersistent(_dbRefNamespaceString, NanNew<String>("namespace"));
+  NanAssignPersistent(_dbRefDbString, NanNew<String>("db"));
+  NanAssignPersistent(_dbRefOidString, NanNew<String>("oid"));
+  NanAssignPersistent(_codeCodeString, NanNew<String>("code"));
+  NanAssignPersistent(_codeScopeString, NanNew<String>("scope"));
+  NanAssignPersistent(_toBSONString, NanNew<String>("toBSON"));
 
-        NanAssignPersistent(longString, NanNew<String>("Long"));
-        NanAssignPersistent(objectIDString, NanNew<String>("ObjectID"));
-        NanAssignPersistent(binaryString, NanNew<String>("Binary"));
-        NanAssignPersistent(codeString, NanNew<String>("Code"));
-        NanAssignPersistent(dbrefString, NanNew<String>("DBRef"));
-        NanAssignPersistent(symbolString, NanNew<String>("Symbol"));
-        NanAssignPersistent(doubleString, NanNew<String>("Double"));
-        NanAssignPersistent(timestampString, NanNew<String>("Timestamp"));
-        NanAssignPersistent(minKeyString, NanNew<String>("MinKey"));
-        NanAssignPersistent(maxKeyString, NanNew<String>("MaxKey"));
+  NanAssignPersistent(longString, NanNew<String>("Long"));
+  NanAssignPersistent(objectIDString, NanNew<String>("ObjectID"));
+  NanAssignPersistent(binaryString, NanNew<String>("Binary"));
+  NanAssignPersistent(codeString, NanNew<String>("Code"));
+  NanAssignPersistent(dbrefString, NanNew<String>("DBRef"));
+  NanAssignPersistent(symbolString, NanNew<String>("Symbol"));
+  NanAssignPersistent(doubleString, NanNew<String>("Double"));
+  NanAssignPersistent(timestampString, NanNew<String>("Timestamp"));
+  NanAssignPersistent(minKeyString, NanNew<String>("MinKey"));
+  NanAssignPersistent(maxKeyString, NanNew<String>("MaxKey"));
 }
 
 void BSON::Initialize(v8::Handle<v8::Object> target)
@@ -953,7 +969,7 @@ NAN_METHOD(BSON::SerializeWithBufferAndIndex)
 	{
 		Local<String> error = NanNew<String>(exception);
 		free(exception);
-                return NanThrowError(error);
+		return NanThrowError(error);
 	}
 
 	NanReturnValue(NanNew<Uint32>((uint32_t) (index + object_size - 1)));
