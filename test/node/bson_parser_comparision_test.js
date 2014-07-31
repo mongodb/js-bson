@@ -283,23 +283,23 @@ exports['Simple serialization and deserialization for a DBRef'] = function(test)
   test.done();
 }
 
-/**
- * @ignore
- */
-exports['Should correctly deserialize bytes array'] = function(test) {
-  // Serialized document
-  var bytes = [47,0,0,0,2,110,97,109,101,0,6,0,0,0,80,97,116,116,121,0,16,97,103,101,0,34,0,0,0,7,95,105,100,0,76,100,12,23,11,30,39,8,89,0,0,1,0];
-  var serialized_data = '';
-  // Convert to chars
-  for(var i = 0; i < bytes.length; i++) {
-    serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
-  }
-  var object = bsonC.deserialize(serialized_data);
-  assert.equal('Patty', object.name)
-  assert.equal(34, object.age)
-  assert.equal('4c640c170b1e270859000001', object._id.toHexString())
-  test.done();
-}
+// /**
+//  * @ignore
+//  */
+// exports['Should correctly deserialize bytes array'] = function(test) {
+//   // Serialized document
+//   var bytes = [47,0,0,0,2,110,97,109,101,0,6,0,0,0,80,97,116,116,121,0,16,97,103,101,0,34,0,0,0,7,95,105,100,0,76,100,12,23,11,30,39,8,89,0,0,1,0];
+//   var serialized_data = '';
+//   // Convert to chars
+//   for(var i = 0; i < bytes.length; i++) {
+//     serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
+//   }
+//   var object = bsonC.deserialize(serialized_data);
+//   assert.equal('Patty', object.name)
+//   assert.equal(34, object.age)
+//   assert.equal('4c640c170b1e270859000001', object._id.toHexString())
+//   test.done();
+// }
 
 /**
  * @ignore
