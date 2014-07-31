@@ -654,7 +654,7 @@ void BSON::Initialize(v8::Handle<v8::Object> target)
 	// Define a new function template
 	Local<FunctionTemplate> t = NanNew<FunctionTemplate>(New);
 	t->InstanceTemplate()->SetInternalFieldCount(1);
-	t->SetClassName(NanSymbol("BSON"));
+	t->SetClassName(NanNew<String>("BSON"));
 
 	// Instance methods
 	NODE_SET_PROTOTYPE_METHOD(t, "calculateObjectSize", CalculateObjectSize);
@@ -665,7 +665,7 @@ void BSON::Initialize(v8::Handle<v8::Object> target)
 
 	NanAssignPersistent(constructor_template, t);
 
-	target->ForceSet(NanSymbol("BSON"), t->GetFunction());
+	target->ForceSet(NanNew<String>("BSON"), t->GetFunction());
 }
 
 // Create a new instance of BSON and passing it the existing context
