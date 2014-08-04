@@ -5,8 +5,12 @@
 .settings
 ./data
 node_modules/
+
 output
 build
 .bin
 npm-debug.log
 builderror.log
+
+bson.sublime-project
+bson.sublime-workspace
