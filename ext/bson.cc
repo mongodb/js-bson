@@ -27,6 +27,7 @@
 #include <iostream>
 #include <limits>
 #include <vector>
+#include <errno.h>
 
 #if defined(__sun) || defined(_AIX)
 	#include <alloca.h>
@@ -36,6 +37,16 @@
 
 using namespace v8;
 using namespace node;
+
+void die(const char *message) {
+	if(errno) {
+		perror(message);
+	} else {
+		printf("ERROR: %s\n", message);
+	}
+
+	exit(1);
+}
 
 //===========================================================================
 
@@ -54,6 +65,7 @@ void ThrowAllocatedStringException(size_t allocationSize, const char* format, ..
 	va_list args;
 	va_start(args, format);
 	char* string = (char*) malloc(allocationSize);
+	if(string == NULL) die("Failed to allocate ThrowAllocatedStringException");
 	vsprintf(string, format, args);
 	va_end(args);
 	throw string;
@@ -686,7 +698,7 @@ NAN_METHOD(BSON::New)
 
 			uint32_t foundClassesMask = 0;
 
-			// Iterate over all entries to save the instantiate funtions
+			// Iterate over all entries to save the instantiate functions
 			for(uint32_t i = 0; i < array->Length(); i++) {
 				// Let's get a reference to the function
 				Local<Function> func = Local<Function>::Cast(array->Get(i));
@@ -816,6 +828,7 @@ NAN_METHOD(BSON::BSONDeserialize)
 
 		// Let's define the buffer size
 		char* data = (char *)malloc(len);
+		if(data == NULL) die("Failed to allocate char buffer for BSON serialization");
 		DecodeWrite(data, len, args[0], BINARY);
 
 		try
@@ -887,6 +900,7 @@ NAN_METHOD(BSON::BSONSerialize)
 
 		// Allocate the memory needed for the serialization
 		serialized_object = (char *)malloc(object_size);
+		if(serialized_object == NULL) die("Failed to allocate memory for object");
 
 		// Check if we have a boolean value
 		bool checkKeys = args.Length() >= 3 && args[1]->IsBoolean() && args[1]->BooleanValue();
