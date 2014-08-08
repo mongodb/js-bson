@@ -272,8 +272,6 @@ template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, 
 			}
 			else if(NanNew(bson->codeString)->StrictEquals(constructorString))
 			{
-				printf("=============================== FOUND CODE TYPE\n");
-
 				const Local<String>& function = object->Get(NanNew(bson->_codeCodeString))->ToString();
 				const Local<Object>& scope = object->Get(NanNew(bson->_codeScopeString))->ToObject();
 
@@ -286,7 +284,6 @@ template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, 
 
 				if(propertyNameLength > 0)
 				{
-					printf("=============================== BSON_TYPE_CODE_W_SCOPE\n");
 					this->CommitType(typeLocation, BSON_TYPE_CODE_W_SCOPE);
 					void* codeWidthScopeSize = this->BeginWriteSize();
 					this->WriteLengthPrefixedString(function->ToString());
@@ -295,7 +292,6 @@ template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, 
 				}
 				else
 				{
-					printf("=============================== BSON_TYPE_CODE\n");
 					this->CommitType(typeLocation, BSON_TYPE_CODE);
 					this->WriteLengthPrefixedString(function->ToString());
 				}
