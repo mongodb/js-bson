@@ -235,6 +235,31 @@ exports['Simple serialization and deserialization for a Binary value of type 2']
 /**
  * @ignore
  */
+exports['Complex nested serialization and deserialization for a Code value'] = function(test) {
+  // var code = { fn: new Code('this.a > i', {'i': 1})};
+  var code = {
+    "mapreduce": "test_map_reduce_functions_scope",
+    "map": "function (){\n              emit(fn(this.timestamp.getYear()), 1);\n          }",
+    "reduce": "function (k, v){\n              count = 0;\n              for(i = 0; i < v.length; i++) {\n                  count += v[i];\n              }\n              return count;\n          }",
+    "scope": {
+      "fn": new Code("function (val){ return val+1; }")
+    },
+    "out": {
+      "replace": "replacethiscollection"
+    }
+  }
+
+  var simple_string_serialized_2 = bsonJS.serialize({doc:code}, false, true);
+  var simple_string_serialized = bsonC.serialize({doc:code}, false, true);
+  assert.equal(simple_string_serialized_2.length, simple_string_serialized.length);
+  assert.deepEqual(simple_string_serialized, simple_string_serialized_2);
+  assert.deepEqual(bsonJS.deserialize(simple_string_serialized_2).doc.scope, bsonC.deserialize(simple_string_serialized).doc.scope);
+  test.done();
+}
+
+/**
+ * @ignore
+ */
 exports['Simple serialization and deserialization for a Code value'] = function(test) {
   var code = new Code('this.a > i', {'i': 1});
   var simple_string_serialized_2 = bsonJS.serialize({doc:code}, false, true);
