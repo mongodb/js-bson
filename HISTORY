@@ -1,3 +1,8 @@
+0.2.12 2014-08-24
+-----------------
+- Fixes for fortify review of c++ extension
+- toBSON correctly allows returns of non objects
+
 0.2.3 2013-10-01
 ----------------
 - Drying of ObjectId code for generation of id (Issue #54, https://github.com/moredip)
