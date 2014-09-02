@@ -219,7 +219,7 @@ public:
 
 	void SerializeDocument(const Handle<Value>& value);
 	void SerializeArray(const Handle<Value>& value);
-	void SerializeValue(void* typeLocation, const Handle<Value>& value);
+	void SerializeValue(void* typeLocation, const Handle<Value> value);
 
 private:
 	bool		checkKeys;
