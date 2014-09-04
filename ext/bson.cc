@@ -149,9 +149,9 @@ template<typename T> void BSONSerializer<T>::SerializeArray(const Handle<Value>&
 // This is templated so that we can use this function to both count the number of bytes, and to serialize those bytes.
 // The template approach eliminates almost all of the inspection of values unless they're required (eg. string lengths)
 // and ensures that there is always consistency between bytes counted and bytes written by design.
-template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, const Handle<Value>& constValue)
+template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, const Handle<Value> constValue)
 {
-	Local<Value> value = *constValue;
+	Local<Value> value = constValue;
 
 	// Check for toBSON function
 	if(value->IsObject()) {
@@ -226,7 +226,7 @@ template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, 
 		const Local<Object>& object = value->ToObject();
 		if(object->Has(NanNew(bson->_bsontypeString)))
 		{
-			const Local<String>& constructorString = object->Get(bson->_bsontypeString)->ToString();
+			const Local<String>& constructorString = object->Get(NanNew(bson->_bsontypeString))->ToString();
 			if(NanNew(bson->longString)->StrictEquals(constructorString))
 			{
 				this->CommitType(typeLocation, BSON_TYPE_LONG);
