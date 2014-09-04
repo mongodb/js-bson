@@ -151,7 +151,8 @@ template<typename T> void BSONSerializer<T>::SerializeArray(const Handle<Value>&
 // and ensures that there is always consistency between bytes counted and bytes written by design.
 template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, const Handle<Value> constValue)
 {
-	Local<Value> value = constValue;
+	// Turn into local value
+	Local<Value> value = Local<Value>::New(constValue);
 
 	// Check for toBSON function
 	if(value->IsObject()) {
