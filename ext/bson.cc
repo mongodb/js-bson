@@ -152,7 +152,7 @@ template<typename T> void BSONSerializer<T>::SerializeArray(const Handle<Value>&
 template<typename T> void BSONSerializer<T>::SerializeValue(void* typeLocation, const Handle<Value> constValue)
 {
 	// Turn into local value
-	Local<Value> value = Local<Value>::New(constValue);
+	Local<Value> value = NanNew<Value>(constValue);
 
 	// Check for toBSON function
 	if(value->IsObject()) {
