@@ -512,7 +512,7 @@ Handle<Value> BSONDeserializer::DeserializeValue(BsonType type, bool promoteLong
 		return NanNull();
 
 	case BSON_TYPE_UNDEFINED:
-		return NanUndefined();
+		return NanNull();
 
 	case BSON_TYPE_TIMESTAMP:
 		{
