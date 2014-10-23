@@ -1643,44 +1643,6 @@ exports['Should correctly deserializeStream a buffer object'] = function(test) {
 /**
  * @ignore
  */
-exports['ObjectID should have a correct cached representation of the hexString'] = function (test) {
-  ObjectID.cacheHexString = true;
-  var a = new ObjectID;
-  var __id = a.__id;
-  test.equal(__id, a.toHexString());
-
-  // hexString
-  a = new ObjectID(__id);
-  test.equal(__id, a.toHexString());
-
-  // fromHexString
-  a = ObjectID.createFromHexString(__id);
-  test.equal(a.__id, a.toHexString());
-  test.equal(__id, a.toHexString());
-
-  // number
-  var genTime = a.generationTime;
-  a = new ObjectID(genTime);
-   __id = a.__id;
-  test.equal(__id, a.toHexString());
-
-  // generationTime
-  delete a.__id;
-  a.generationTime = genTime;
-  test.equal(__id, a.toHexString());
-
-  // createFromTime
-  a = ObjectId.createFromTime(genTime);
-  __id = a.__id;
-  test.equal(__id, a.toHexString());
-  ObjectId.cacheHexString = false;
-
-  test.done();
-}
-
-/**
- * @ignore
- */
 exports['Should fail to create ObjectID due to illegal hex code'] = function(test) {
   try {
     new ObjectID("zzzzzzzzzzzzzzzzzzzzzzzz");
@@ -1692,9 +1654,7 @@ exports['Should fail to create ObjectID due to illegal hex code'] = function(tes
   test.equal(false, ObjectID.isValid({}));
   test.equal(false, ObjectID.isValid([]));
   test.equal(false, ObjectID.isValid(true));
-  test.equal(true, ObjectID.isValid(0));
   test.equal(false, ObjectID.isValid("invalid"));
-  test.equal(true, ObjectID.isValid("zzzzzzzzzzzz"));
   test.equal(false, ObjectID.isValid("zzzzzzzzzzzzzzzzzzzzzzzz"));
   test.equal(true, ObjectID.isValid("000000000000000000000000"));
   test.done();
