@@ -7,7 +7,7 @@ try {
 	} else if(process.platform == "win32" && process.arch == "ia32") {
 	  bson = require('./win32/ia32/bson');  
 	} else {
-	  bson = require('../build/Release/bson');  
+	  bson = require('bson');  
 	}	
 } catch(err) {
 	// Attempt to load the release bson version
