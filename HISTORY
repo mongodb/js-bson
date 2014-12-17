@@ -1,3 +1,7 @@
+0.2.16 2014-12-17
+-----------------
+- Made pid cycle on 0xffff to avoid weird overflows on creation of ObjectID's
+
 0.2.12 2014-08-24
 -----------------
 - Fixes for fortify review of c++ extension
