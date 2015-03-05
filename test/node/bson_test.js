@@ -373,6 +373,24 @@ exports['Should Correctly Serialize and Deserialize Buffer'] = function(test) {
 /**
  * @ignore
  */
+exports['Should Correctly Serialize and Deserialize Buffer with promoteBuffers option'] = function(test) {
+  var doc = {doc: new Buffer("hello world")};
+  var serialized_data = new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
+
+  var serialized_data2 = new Buffer(new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).calculateObjectSize(doc, false, true));
+  new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serializeWithBufferAndIndex(doc, false, serialized_data2, 0);
+  assertBuffersEqual(test, serialized_data, serialized_data2, 0);
+
+  var options = { promoteBuffers: true };
+  var deserialized = new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data, options);
+  test.ok(deserialized.doc instanceof Buffer);
+  test.equal("hello world", deserialized.doc.toString());
+  test.done();
+}
+
+/**
+ * @ignore
+ */
 exports['Should Correctly Serialize and Deserialize Number 4'] = function(test) {
   var doc = {doc: (BSON.BSON_INT32_MAX + 10)};
   var serialized_data = new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);

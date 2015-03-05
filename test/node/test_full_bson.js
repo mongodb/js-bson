@@ -245,6 +245,18 @@ exports['Should Correctly Serialize and Deserialize Buffer'] = function(test) {
 /**
  * @ignore
  */
+exports['Should Correctly Serialize and Deserialize Buffer with promoteBuffers option'] = function(test) {
+  var doc = {doc: new Buffer("123451234512345")}
+  var serialized_data = bsonC.serialize(doc)
+
+  var options = { promoteBuffers: true };
+  assert.equal("123451234512345", bsonC.deserialize(serialized_data, options).doc.toString('ascii'));
+  test.done();
+}
+
+/**
+ * @ignore
+ */
 exports['Should Correctly encode Empty Hash'] = function(test) {
   var test_code = {}
   var serialized_data = bsonC.serialize(test_code)
