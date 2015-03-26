@@ -1,7 +1,7 @@
 { "name" :            "bson"
 , "description" :     "A bson parser for node.js and the browser"
 , "keywords" :        ["mongodb", "bson", "parser"]
-, "version" :         "0.2.21"
+, "version" :         "0.3.0"
 , "author" :          "Christian Amor Kvalheim <christkv@gmail.com>"
 , "contributors" :  []
 
@@ -9,14 +9,14 @@
                     , "url" :   "git://github.com/mongodb/js-bson.git" }
 , "bugs" :          { "mail" :  "node-mongodb-native@googlegroups.com"
                     , "url" :   "https://github.com/mongodb/js-bson/issues" }
-, "dependencies": {
-    "nan": "1.7.0"
-  }
 , "devDependencies": {
       "nodeunit": "0.9.0"
 	  , "gleak": "0.2.3"
     , "one": "2.X.X"
   }
+, "optionalDependencies": {
+  "bson-ext": "~0.1"
+}
 , "config":         { "native" : false }
 , "main":             "./lib/bson/index"
 , "directories" :   { "lib" : "./lib/bson" }
