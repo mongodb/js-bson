@@ -1,3 +1,7 @@
+0.3.1 2015-03-27
+----------------
+- Return pure js version on native() call if failed to initialize.
+
 0.3.0 2015-03-26
 ----------------
 - Pulled out all C++ code into bson-ext and made it an optional dependency.
