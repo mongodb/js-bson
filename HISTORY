@@ -1,4 +1,4 @@
-0.3.1 2015-03-27
+0.3.2 2015-03-27
 ----------------
 - Removed node-gyp from install script in package.json.
 
