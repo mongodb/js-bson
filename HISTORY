@@ -1,5 +1,9 @@
 0.3.1 2015-03-27
 ----------------
+- Removed node-gyp from install script in package.json.
+
+0.3.1 2015-03-27
+----------------
 - Return pure js version on native() call if failed to initialize.
 
 0.3.0 2015-03-26
