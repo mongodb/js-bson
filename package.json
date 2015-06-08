@@ -1,30 +1,51 @@
-{ "name" :            "eggDB-bson"
-, "description" :     "A bson parser for node.js and the browser"
-, "keywords" :        ["mongodb", "bson", "parser"]
-, "version" :         "0.3.2"
-, "author" :          "Christian Amor Kvalheim <christkv@gmail.com>"
-, "contributors" :  []
+{
+   "name":"eggDB-bson",
+   "description":"A bson parser for node.js",
+   "keywords":[
+      "mongodb",
+      "bson",
+      "parser",
+      "EggDB"
+   ],
+   "version":"0.0.1",
+   "author":{
+      "name":"Eliott Lambert",
+      "email":"lambert.eliott@gmail.com",
+      "url":"https://github.com/LambertEliott"
+   },
+   "contributors":[
 
-, "repository" :    { "type" :  "git"
-                    , "url" :   "git://github.com/mongodb/js-bson.git" }
-, "bugs" :          { "mail" :  "node-mongodb-native@googlegroups.com"
-                    , "url" :   "https://github.com/mongodb/js-bson/issues" }
-, "devDependencies": {
-      "nodeunit": "0.9.0"
-	  , "gleak": "0.2.3"
-    , "one": "2.X.X"
-  }
-, "optionalDependencies": {
-  "bson-ext": "~0.1"
-}
-, "config":         { "native" : false }
-, "main":             "./lib/bson/index"
-, "directories" :   { "lib" : "./lib/bson" }
-, "engines" :       { "node" : ">=0.6.19" }
-, "scripts": {
-  "test" : "nodeunit ./test/node && TEST_NATIVE=TRUE nodeunit ./test/node"
-}
-, "browser": "lib/bson/bson.js"
-, "licenses" :    [ { "type" :  "Apache License, Version 2.0"
-                    , "url" :   "http://www.apache.org/licenses/LICENSE-2.0" } ]
+   ],
+   "repository":{
+      "type":"git",
+      "url":"git://github.com/LambertEliott/eggDB-js-bson.git"
+   },
+   "devDependencies":{
+      "nodeunit":"0.9.0",
+      "gleak":"0.2.3",
+      "one":"2.X.X"
+   },
+   "optionalDependencies":{
+      "bson-ext":"~0.1"
+   },
+   "config":{
+      "native":false
+   },
+   "main":"./lib/bson/index",
+   "directories":{
+      "lib":"./lib/bson"
+   },
+   "engines":{
+      "node":">=0.6.19"
+   },
+   "scripts":{
+      "test":"nodeunit ./test/node && TEST_NATIVE=TRUE nodeunit ./test/node"
+   },
+   "browser":"lib/bson/bson.js",
+   "licenses":[
+      {
+         "type":"Apache License, Version 2.0",
+         "url":"http://www.apache.org/licenses/LICENSE-2.0"
+      }
+   ]
 }
