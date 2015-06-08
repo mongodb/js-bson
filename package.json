@@ -1,4 +1,4 @@
-{ "name" :            "bson"
+{ "name" :            "eggDB-bson"
 , "description" :     "A bson parser for node.js and the browser"
 , "keywords" :        ["mongodb", "bson", "parser"]
 , "version" :         "0.3.2"
