@@ -33,6 +33,15 @@ module.exports = function(bson) {
     bson.serialize(doc1, true);
   }, options)); 
 
+  //
+  // Benchmark: Serialize {'hello': 'world', n: 0, doc: { a: 1}}
+  //
+  var doc2 = {'hello': 'world', n: 0, doc: { a: 1, b: { 'hello': 'again' }}};
+
+  benchmarks.push(Benchmark("{'hello': 'world', n: 0, doc: { a: 1, b: { 'hello': 'again' }}}", function() {
+    bson.serialize(doc2, true);
+  }, options)); 
+
   // Export Benchmarks
   return benchmarks;  
 }

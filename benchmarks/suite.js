@@ -6,8 +6,7 @@ var Benchmark = require('benchmark'),
 // Get all the benchmarks
 var legacyBenchmarks = require('./legacy/benchmarks'),
   nativeBenchmarks = require('./native/benchmarks'),
-  candidate1Benchmarks = require('./candidate1/benchmarks'),
-  candidate2Benchmarks = require('./candidate2/benchmarks');
+  candidate1Benchmarks = require('./candidate1/benchmarks');
 
 // Shared functions
 var start = function(event) {
@@ -22,7 +21,6 @@ var cycle = function(event) {
 var legacySuite = new Benchmark.Suite('legacy js parser');
 var nativeSuite = new Benchmark.Suite('legacy c++ parser');
 var candidate1Suite = new Benchmark.Suite('single buffer allocation with copy js parser');
-var candidate2Suite = new Benchmark.Suite('array of buffers returned js parser');
 
 // Legacy parser
 legacyBenchmarks.forEach(function(bench) {
@@ -48,14 +46,6 @@ candidate1Benchmarks.forEach(function(bench) {
 candidate1Suite.on('start', start);
 candidate1Suite.on('cycle', cycle);
 
-// candidate2 parser
-candidate2Benchmarks.forEach(function(bench) {
-  candidate2Suite.add(bench);
-});
-
-candidate2Suite.on('start', start);
-candidate2Suite.on('cycle', cycle);
-
 // Chain the suites
 legacySuite.on('complete', function() {
   nativeSuite.run({async: false});
@@ -63,10 +53,6 @@ legacySuite.on('complete', function() {
 
 nativeSuite.on('complete', function() {
   candidate1Suite.run({async: false});
-});
-
-candidate1Suite.on('complete', function() {
-  candidate2Suite.run({async: false});
 });
 
 // Start execution
