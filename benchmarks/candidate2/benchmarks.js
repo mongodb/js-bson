@@ -17,7 +17,7 @@ var Benchmark = require('benchmark'),
 var Benchmarks = require('../shared/benchmarks');
 
 // Get the parser
-var BSON = require(f('%s/bson_single_buffer', libDir)).BSON;
+var BSON = require(f('%s/bson_multiple_buffer', libDir)).BSON;
 
 // Create a serializer
 var bson = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
