@@ -1,4 +1,4 @@
-var BSONNATIVE = require('../lib/bson').BSONNative.BSON,
+var BSONNATIVE = require('bson-ext'),
 	Long = require('../lib/bson').Long,
 	ObjectID = require('../lib/bson').ObjectID,
 	Binary = require('../lib/bson').Binary,
