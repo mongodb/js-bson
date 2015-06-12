@@ -2,7 +2,8 @@ var sys = require('util'),
   fs = require('fs'),
   BSON = require('bson-ext'),
   Buffer = require('buffer').Buffer,
-  BSONJS = require('../../lib/bson/bson').BSON,
+  // BSONJS = require('../../lib/bson/bson').BSON,
+  BSONJS = require('../../lib/bson/bson_single_buffer'),
   BinaryParser = require('../../lib/bson/binary_parser').BinaryParser,
   Long = require('../../lib/bson/long').Long,
   ObjectID = require('../../lib/bson/bson').ObjectID,
@@ -319,7 +320,7 @@ exports['Should Correctly fail due to attempting serialization of illegal key va
     v[i] = 1;
   v[0] = 0x0A;
   var doc = {};
-  doc[k.toString()] = v.toString();  
+  doc[k.toString()] = v.toString();
 
   // Should throw due to null character
   try {
