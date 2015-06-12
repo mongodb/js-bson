@@ -58,5 +58,4 @@ nativeSuite.on('complete', function() {
 // Start execution
 legacySuite.run({async: false});
 
-
-
+// candidate1Suite.run({async: false});

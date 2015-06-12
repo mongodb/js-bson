@@ -1,14 +1,14 @@
 var libDir = '../../lib/bson',
-  Benchmark = require('benchmark'), 
+  Benchmark = require('benchmark'),
   Long = require(libDir).Long,
   ObjectID = require(libDir).ObjectID,
   Binary = require(libDir).Binary,
-  Code = require(libDir).Code,  
-  DBRef = require(libDir).DBRef,  
-  Symbol = require(libDir).Symbol,  
-  Double = require(libDir).Double,  
-  MaxKey = require(libDir).MaxKey,  
-  MinKey = require(libDir).MinKey,  
+  Code = require(libDir).Code,
+  DBRef = require(libDir).DBRef,
+  Symbol = require(libDir).Symbol,
+  Double = require(libDir).Double,
+  MaxKey = require(libDir).MaxKey,
+  MinKey = require(libDir).MinKey,
   Timestamp = require(libDir).Timestamp;
 
 module.exports = function(bson) {
@@ -22,7 +22,7 @@ module.exports = function(bson) {
 
   benchmarks.push(Benchmark("{'hello': 'world', n: 0}", function() {
     bson.serialize(doc0, true);
-  }, options)); 
+  }, options));
 
   //
   // Benchmark: Serialize {'hello': 'world', n: 0, doc: { a: 1}}
@@ -31,7 +31,7 @@ module.exports = function(bson) {
 
   benchmarks.push(Benchmark("{'hello': 'world', n: 0, doc: { a: 1}}", function() {
     bson.serialize(doc1, true);
-  }, options)); 
+  }, options));
 
   //
   // Benchmark: Serialize {'hello': 'world', n: 0, doc: { a: 1}}
@@ -40,8 +40,34 @@ module.exports = function(bson) {
 
   benchmarks.push(Benchmark("{'hello': 'world', n: 0, doc: { a: 1, b: { 'hello': 'again' }}}", function() {
     bson.serialize(doc2, true);
-  }, options)); 
+  }, options));
+
+  // Pre serialized results
+  var doc0serialize = bson.serialize(doc0, true);
+  var doc1serialize = bson.serialize(doc1, true);
+  var doc2serialize = bson.serialize(doc2, true);
+
+  //
+  // Benchmark: DeSerialize {'hello': 'world', n: 0}
+  //
+  benchmarks.push(Benchmark("deserialize {'hello': 'world', n: 0}", function() {
+    bson.deserialize(doc0serialize);
+  }, options));
+
+  //
+  // Benchmark: DeSerialize {'hello': 'world', n: 0, doc: { a: 1}}
+  //
+  benchmarks.push(Benchmark("deserialize {'hello': 'world', n: 0, doc: { a: 1}}", function() {
+    bson.deserialize(doc1serialize);
+  }, options));
+
+  //
+  // Benchmark: DeSerialize {'hello': 'world', n: 0, doc: { a: 1}}
+  //
+  benchmarks.push(Benchmark("deserialize {'hello': 'world', n: 0, doc: { a: 1, b: { 'hello': 'again' }}}", function() {
+    bson.deserialize(doc2serialize);
+  }, options));
 
   // Export Benchmarks
-  return benchmarks;  
+  return benchmarks;
 }
