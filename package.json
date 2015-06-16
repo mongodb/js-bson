@@ -16,9 +16,6 @@
     , "benchmark": "1.0.0"
     , "colors": "1.1.0"
   }
-, "optionalDependencies": {
-  "bson-ext": "~0.1"
-}
 , "config":         { "native" : false }
 , "main":             "./lib/bson/index"
 , "directories" :   { "lib" : "./lib/bson" }

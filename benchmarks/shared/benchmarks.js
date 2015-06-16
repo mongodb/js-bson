@@ -34,12 +34,21 @@ module.exports = function(bson) {
   }, options));
 
   //
-  // Benchmark: Serialize {'hello': 'world', n: 0, doc: { a: 1}}
+  // Benchmark: Serialize {'hello': 'world', n: 0, doc: { a: 1, b: { 'hello': 'again' }}};
   //
   var doc2 = {'hello': 'world', n: 0, doc: { a: 1, b: { 'hello': 'again' }}};
 
   benchmarks.push(Benchmark("{'hello': 'world', n: 0, doc: { a: 1, b: { 'hello': 'again' }}}", function() {
     bson.serialize(doc2, true);
+  }, options));
+
+  //
+  // Benchmark: Serialize {'hello': 'world', n: 0, doc: { a: 1, b: { 'hello': 'again' }}};
+  //
+  var doc3 = {'hello': 'world', n: 0,  a: 1, c: 1, 'hello1': 'again' };
+
+  benchmarks.push(Benchmark("{'hello': 'world', n: 0,  a: 1, c: 1, 'hello1': 'again' }", function() {
+    bson.serialize(doc3, true);
   }, options));
 
   // Pre serialized results

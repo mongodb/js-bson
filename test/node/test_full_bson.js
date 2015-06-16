@@ -1,9 +1,10 @@
+"use strict"
+
 var sys = require('util'),
   fs = require('fs'),
   BSON = require('bson-ext'),
   Buffer = require('buffer').Buffer,
-  // BSONJS = require('../../lib/bson/bson').BSON,
-  BSONJS = require('../../lib/bson/bson_single_buffer'),
+  BSONJS = require('../../lib/bson/bson'),
   BinaryParser = require('../../lib/bson/binary_parser').BinaryParser,
   Long = require('../../lib/bson/long').Long,
   ObjectID = require('../../lib/bson/bson').ObjectID,
@@ -19,8 +20,8 @@ var sys = require('util'),
   assert = require('assert');
 
 // Parsers
-var bsonC = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
-var bsonJS = new BSONJS([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
+var bsonC = new BSONJS();
+var bsonJS = new BSONJS();
 
 /**
  * Retrieve the server information for the current
