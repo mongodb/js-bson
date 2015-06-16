@@ -1,3 +1,11 @@
+0.4.2 2015-06-16
+----------------
+- More fixes for corrupt Bson
+
+0.4.1 2015-06-16
+----------------
+- More fixes for corrupt Bson
+
 0.4.0 2015-06-16
 ----------------
 - New JS serializer serializing into a single buffer then copying out the new buffer. Performance is similar to current C++ parser.

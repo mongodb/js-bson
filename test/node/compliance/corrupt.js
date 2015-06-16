@@ -101,7 +101,6 @@ var data = {
         {
             "encoded": "1a0000000e74657374000c00000068656c6c6f20776f726c6400000500000000",
             "error": "One object, but with object size listed smaller than it is in the data",
-            "skip": true
         },
         {
             "encoded": "05000000",
