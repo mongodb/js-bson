@@ -2,7 +2,6 @@
 
 var sys = require('util'),
   fs = require('fs'),
-  BSON = require('bson-ext'),
   Buffer = require('buffer').Buffer,
   BSONJS = require('../../lib/bson/bson'),
   BinaryParser = require('../../lib/bson/binary_parser').BinaryParser,
