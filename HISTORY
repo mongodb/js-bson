@@ -1,3 +1,8 @@
+0.4.0 2015-06-16
+----------------
+- New JS serializer serializing into a single buffer then copying out the new buffer. Performance is similar to current C++ parser.
+- Removed bson-ext extension dependency for now.
+
 0.3.2 2015-03-27
 ----------------
 - Removed node-gyp from install script in package.json.
