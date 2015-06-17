@@ -1684,6 +1684,7 @@ exports['Should fail to create ObjectID due to illegal hex code'] = function(tes
 
   test.equal(false, ObjectID.isValid(null));
   test.equal(false, ObjectID.isValid({}));
+  test.equal(false, ObjectID.isValid({length: 12}))
   test.equal(false, ObjectID.isValid([]));
   test.equal(false, ObjectID.isValid(true));
   test.equal(true, ObjectID.isValid(0));
