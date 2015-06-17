@@ -1,3 +1,7 @@
+0.4.5 2015-06-17
+----------------
+- Removed any references to the shared buffer to avoid non GC collectible bson instances.
+
 0.4.4 2015-06-17
 ----------------
 - Fixed rethrowing of error when not RangeError.
