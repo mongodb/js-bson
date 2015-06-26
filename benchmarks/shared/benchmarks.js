@@ -20,27 +20,27 @@ module.exports = function(bson) {
   //
   var doc0 = {'hello': 'world', n: 0};
 
-  benchmarks.push(Benchmark("{'hello': 'world', n: 0}", function() {
-    bson.serialize(doc0, true);
-  }, options));
+  // benchmarks.push(Benchmark("{'hello': 'world', n: 0}", function() {
+  //   bson.serialize(doc0, true);
+  // }, options));
 
   //
   // Benchmark: Serialize {'hello': 'world', n: 0, doc: { a: 1}}
   //
   var doc1 = {'hello': 'world', n: 0, doc: { a: 1}};
 
-  benchmarks.push(Benchmark("{'hello': 'world', n: 0, doc: { a: 1}}", function() {
-    bson.serialize(doc1, true);
-  }, options));
+  // benchmarks.push(Benchmark("{'hello': 'world', n: 0, doc: { a: 1}}", function() {
+  //   bson.serialize(doc1, true);
+  // }, options));
 
   //
   // Benchmark: Serialize {'hello': 'world', n: 0, doc: { a: 1, b: { 'hello': 'again' }}};
   //
   var doc2 = {'hello': 'world', n: 0, doc: { a: 1, b: { 'hello': 'again' }}};
 
-  benchmarks.push(Benchmark("{'hello': 'world', n: 0, doc: { a: 1, b: { 'hello': 'again' }}}", function() {
-    bson.serialize(doc2, true);
-  }, options));
+  // benchmarks.push(Benchmark("{'hello': 'world', n: 0, doc: { a: 1, b: { 'hello': 'again' }}}", function() {
+  //   bson.serialize(doc2, true);
+  // }, options));
 
   //
   // Benchmark: Serialize {'hello': 'world', n: 0, doc: { a: 1, b: { 'hello': 'again' }}};
