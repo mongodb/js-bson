@@ -35,7 +35,7 @@ A simple example of how to use BSON in `node.js`:
 
 ```javascript
 var bson = require("bson");
-var BSON = bson.BSONPure.BSON;
+var BSON = new bson.BSONPure.BSON();
 var Long = bson.BSONPure.Long;
 
 var doc = {long: Long.fromNumber(100)}
