@@ -1,3 +1,7 @@
+0.4.8 2015-07-14
+----------------
+- Fixed size validation to ensure we can deserialize from dumped files.
+
 0.4.7 2015-06-26
 ----------------
 - Added ability to instruct deserializer to return raw BSON buffers for named array fields.

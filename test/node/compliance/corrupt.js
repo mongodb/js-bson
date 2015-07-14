@@ -99,16 +99,12 @@ var data = {
             "error": "An object size that's too small to even include the object size, but is correctly encoded, along with a correct EOO (and no data)"
         },
         {
-            "encoded": "1a0000000e74657374000c00000068656c6c6f20776f726c6400000500000000",
-            "error": "One object, but with object size listed smaller than it is in the data",
-        },
-        {
             "encoded": "05000000",
             "error": "One object, missing the EOO at the end"
         },
         {
             "encoded": "05000000ff",
-            "error": " One object, sized correctly, with a spot for an EOO, but the EOO isn't 0x00"
+            "error": "One object, sized correctly, with a spot for an EOO, but the EOO isn't 0x00"
         }
     ]
 }

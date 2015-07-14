@@ -306,18 +306,16 @@ exports['Should Correctly Serialize and Deserialize a big Binary object'] = func
   test.done();
 }
 
-
 exports['Should Correctly Deserialize bson file from mongodump'] = function(test) {
-  var data = fs.readFileSync("test/node/data/mongodump.airpair.tags.png", { encoding: null });
+  var data = fs.readFileSync("test/node/data/test.bson", { encoding: null });
   var docs = []
   var bsonIndex = 0
   while (bsonIndex < data.length)
     bsonIndex = bsonC.deserializeStream(data,bsonIndex,1,docs,docs.length,{isArray:true})
-  
-  assert.equal(docs.length, 50)
+
+  assert.equal(docs.length, 1)
   test.done();
 }
-
 
 exports['Should Correctly fail due to attempting serialization of illegal key values'] = function(test) {
   var k = new Buffer(15);

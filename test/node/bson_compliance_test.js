@@ -39,14 +39,14 @@ exports.tearDown = function(callback) {
 exports['Pass all corrupt BSON scenarios ./compliance/corrupt.json'] = function(test) {
   // Read and parse the json file
   var scenarios = require(__dirname + '/compliance/corrupt');
-  // console.dir(scenarios)
 
   // Create a new BSON instance
   var bson = new BSON();
 
-  // Iterate over all the results
-  scenarios.documents.forEach(function(doc) {
-    if(doc.skip) return;
+  for(var i = 0; i < scenarios.documents.length; i++) {
+    var doc = scenarios.documents[i];
+    if(doc.skip) continue;
+
     try {
       // Create a buffer containing the payload
       var buffer = new Buffer(doc.encoded, 'hex');
@@ -55,7 +55,7 @@ exports['Pass all corrupt BSON scenarios ./compliance/corrupt.json'] = function(
       test.ok(false);
     } catch(err) {
     }
-  });
+  }
 
   test.done();
 }
