@@ -1,3 +1,7 @@
+0.4.11 2015-08-06
+-----------------
+- Minor fix for invalid key checking.
+
 0.4.10 2015-08-06
 -----------------
 - NODE-38 Added new BSONRegExp type to allow direct serialization to MongoDB type.
