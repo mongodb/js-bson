@@ -66,7 +66,7 @@ nativeSuite.on('complete', function() {
 });
 
 candidate1Suite.on('complete', function() {
-  candidate2Suite.run({async: false});
+  // candidate2Suite.run({async: false});
 });
 
 // Start execution

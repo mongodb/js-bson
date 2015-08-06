@@ -1,3 +1,8 @@
+0.4.10 2015-08-06
+-----------------
+- NODE-38 Added new BSONRegExp type to allow direct serialization to MongoDB type.
+- Some performance improvements by in lining code.
+
 0.4.9 2015-08-06
 ----------------
 - Undefined fields are omitted from serialization in objects.

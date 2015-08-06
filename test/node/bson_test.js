@@ -6,6 +6,7 @@ var testCase = require('nodeunit').testCase,
   fs = require('fs'),
   BSON = require('../../lib/bson/bson'),
   Code = BSON.Code,
+  BSONRegExp = BSON.BSONRegExp,
   Binary = BSON.Binary,
   Timestamp = BSON.Timestamp,
   Long = BSON.Long,
@@ -1705,5 +1706,39 @@ exports['Should fail to create ObjectID due to illegal hex code'] = function(tes
   test.equal(true, ObjectID.isValid("zzzzzzzzzzzz"));
   test.equal(false, ObjectID.isValid("zzzzzzzzzzzzzzzzzzzzzzzz"));
   test.equal(true, ObjectID.isValid("000000000000000000000000"));
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly serialize the BSONRegExp type'] = function(test) {
+  var doc = {regexp: new BSONRegExp('test', 'i')};
+  var serialized_data = new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
+
+  var serialized_data2 = new Buffer(new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).calculateObjectSize(doc, false, true));
+  new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serializeWithBufferAndIndex(doc, false, serialized_data2, 0);
+  assertBuffersEqual(test, serialized_data, serialized_data2, 0);
+  var doc1 = new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);
+  var regexp = new RegExp("test", 'i')
+  test.deepEqual(regexp, doc1.regexp);
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly deserialize the BSONRegExp type'] = function(test) {
+  var doc = {regexp: new BSONRegExp('test', 'i')};
+  var serialized_data = new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
+
+  var serialized_data2 = new Buffer(new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).calculateObjectSize(doc, false, true));
+  new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serializeWithBufferAndIndex(doc, false, serialized_data2, 0);
+  assertBuffersEqual(test, serialized_data, serialized_data2, 0);
+  
+  var doc1 = new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data, {bsonRegExp:true});
+  test.ok(doc1.regexp instanceof BSONRegExp);
+  test.equal('test', doc1.regexp.pattern);
+  test.equal('i', doc1.regexp.options);
   test.done();
 }
