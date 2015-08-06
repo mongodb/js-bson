@@ -1,3 +1,7 @@
+0.4.9 2015-08-06
+----------------
+- Undefined fields are omitted from serialization in objects.
+
 0.4.8 2015-07-14
 ----------------
 - Fixed size validation to ensure we can deserialize from dumped files.
