@@ -1,3 +1,7 @@
+0.4.12 2015-09-18
+-----------------
+- Made ignore undefined an optional parameter.
+
 0.4.11 2015-08-06
 -----------------
 - Minor fix for invalid key checking.
