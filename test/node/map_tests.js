@@ -1,4 +1,5 @@
-var M = require('../../lib/bson/map');
+var M = require('../../lib/bson/map'),
+  BSON = require('../../lib/bson/bson');
 
 /**
  * @ignore
@@ -72,3 +73,48 @@ exports['should correctly exercise the map'] = function(test) {
   test.equal(true, iterator.next().done);
   test.done();
 }
+
+/**
+ * @ignore
+ */
+exports['should serialize a map'] = function(test) {
+  // Serialize top level map only
+  var m = new M([['a', 1], ['b', 2]]);
+  var bson = new BSON.BSON();
+  // Serialize the map
+  var data = bson.serialize(m, false, true);
+  // Deserialize the data
+  var object = bson.deserialize(data);
+  test.deepEqual({a:1, b:2}, object);
+
+  // Serialize nested maps
+  var m1 = new M([['a', 1], ['b', 2]]);
+  var m = new M([['c', m1]]);
+  // Serialize the map
+  var data = bson.serialize(m, false, true);
+  // Deserialize the data
+  var object = bson.deserialize(data);
+  test.deepEqual({c: {a:1, b:2} }, object);
+  test.done();
+
+  // Serialize top level map only
+  var m = new M([['1', 1], ['0', 2]]);
+  var bson = new BSON.BSON();
+  // Serialize the map, validating that the order in the resulting BSON is preserved
+  var data = bson.serialize(m, false, true);
+  test.equal('13000000103100010000001030000200000000', data.toString('hex'));
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
