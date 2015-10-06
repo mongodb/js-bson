@@ -1,0 +1,74 @@
+var M = require('../../lib/bson/map');
+
+/**
+ * @ignore
+ */
+exports['should correctly exercise the map'] = function(test) {
+  var m = new M([['a', 1], ['b', 2]]);
+  test.ok(m.has('a'));
+  test.ok(m.has('b'));
+  test.equal(1, m.get('a'));
+  test.equal(2, m.get('b'));
+  test.ok(m.set('a', 3) === m);
+  test.ok(m.has('a'));
+  test.equal(3, m.get('a'));
+
+  // Get the values
+  var iterator = m.values();
+  test.equal(3, iterator.next().value);
+  test.equal(2, iterator.next().value);
+  test.equal(true, iterator.next().done);
+
+  // Get the entries
+  var iterator = m.entries();
+  test.deepEqual(['a', 3], iterator.next().value);
+  test.deepEqual(['b', 2], iterator.next().value);
+  test.deepEqual(true, iterator.next().done);
+
+  // Get the keys
+  var iterator = m.keys();
+  test.deepEqual('a', iterator.next().value);
+  test.deepEqual('b', iterator.next().value);
+  test.deepEqual(true, iterator.next().done);
+
+  // Collect values
+  var values = [];
+  // Get entries forEach
+  m.forEach(function(value, key, map) {
+    test.ok(value != null);
+    test.ok(key != null);
+    test.ok(map != null);
+    test.ok(m === this);
+    values.push([key, value]);
+  }, m);
+
+  test.deepEqual([['a', 3], ['b', 2]], values);
+
+  // Modify the state
+  test.equal(true, m.delete('a'));
+  m.set('c', 5);
+  m.set('a', 7);
+
+  // Validate order is preserved
+  // Get the keys
+  var iterator = m.keys();
+  test.deepEqual('b', iterator.next().value);
+  test.deepEqual('c', iterator.next().value);
+  test.deepEqual('a', iterator.next().value);
+  test.deepEqual(true, iterator.next().done);
+
+  // Get the entries
+  var iterator = m.entries();
+  test.deepEqual(['b', 2], iterator.next().value);
+  test.deepEqual(['c', 5], iterator.next().value);
+  test.deepEqual(['a', 7], iterator.next().value);
+  test.deepEqual(true, iterator.next().done);
+
+  // Get the values
+  var iterator = m.values();
+  test.equal(2, iterator.next().value);
+  test.equal(5, iterator.next().value);
+  test.equal(7, iterator.next().value);
+  test.equal(true, iterator.next().done);
+  test.done();
+}
