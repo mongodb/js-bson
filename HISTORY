@@ -1,3 +1,7 @@
+0.4.14 2015-10-06
+-----------------
+- Exposed Map correctly via bson.js file.
+
 0.4.13 2015-10-06
 -----------------
 - Added ES6 Map type serialization as well as a polyfill for ES5.
