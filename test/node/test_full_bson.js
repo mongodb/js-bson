@@ -349,6 +349,18 @@ exports['Should Correctly fail due to attempting serialization of illegal key va
   test.done();
 }
 
+exports['Should correctly fail to serialize regexp with null bytes'] = function(test) {
+  var doc = {};
+  doc.test = new RegExp('a\0b');
+
+  try {
+    bsonJS.serialize(doc, true, true, false);
+    test.ok(false);
+  } catch(err) {}
+
+  test.done();
+};
+
 /**
  * @ignore
  */
