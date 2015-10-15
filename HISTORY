@@ -1,3 +1,8 @@
+0.4.18 2015-10-15
+-----------------
+- ObjectID equality check should return boolean instead of throwing exception for invalid oid string #139
+- add option for deserializing binary into Buffer object #116
+
 0.4.17 2015-10-15
 -----------------
 - Validate regexp string for null bytes and throw if there is one.
