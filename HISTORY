@@ -1,3 +1,7 @@
+0.4.17 2015-10-15
+-----------------
+- Validate regexp string for null bytes and throw if there is one.
+
 0.4.16 2015-10-07
 -----------------
 - Fixed issue with return statement in Map.js.
