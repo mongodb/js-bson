@@ -63,6 +63,7 @@ The API consists of two simple methods to serialize/deserialize objects to/from 
        * **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
        * **cacheFunctions** {Boolean, default:false}, cache evaluated functions for reuse.
        * **cacheFunctionsCrc32** {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.
+       * **promoteBuffers** {Boolean, default:false}, deserialize Binary data directly into node.js Buffer object.
      * @param {TypedArray/Array} a TypedArray/Array containing the BSON data
      * @param {Object} [options] additional options used for the deserialization.
      * @param {Boolean} [isArray] ignore used for recursive parsing.
