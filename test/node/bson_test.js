@@ -1759,3 +1759,18 @@ exports['Should correctly deserialize the BSONRegExp type'] = function(test) {
   test.equal('i', doc1.regexp.options);
   test.done();
 }
+
+/**
+ * @ignore
+ */
+exports['Should return boolean for ObjectID equality check'] = function(test) {
+  var id = new ObjectID();
+  test.equal(true, id.equals(new ObjectID(id.toString())));
+  test.equal(true, id.equals(id.toString()));
+  test.equal(false, id.equals('1234567890abcdef12345678'));
+  test.equal(false, id.equals('zzzzzzzzzzzzzzzzzzzzzzzz'));
+  test.equal(false, id.equals('foo'));
+  test.equal(false, id.equals(null));
+  test.equal(false, id.equals(undefined));
+  test.done();
+}
