@@ -1,3 +1,8 @@
+0.4.20 2015-10-15
+-----------------
+- Added bower file to repository.
+- Fixed browser pid sometimes set greater than 0xFFFF on browsers (Issue #155, https://github.com/rahatarmanahmed)
+
 0.4.19 2015-10-15
 -----------------
 - Remove all support for bson-ext.
