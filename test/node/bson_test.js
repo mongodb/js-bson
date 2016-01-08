@@ -900,7 +900,18 @@ exports['Should Correctly serialize and deserialize and embedded array'] = funct
  */
 exports['Should Correctly Serialize and Deserialize UTF8'] = function(test) {
   // Serialize utf8
-  var doc = { "name" : "本荘由利地域に洪水警報", "name1" : "öüóőúéáűíÖÜÓŐÚÉÁŰÍ", "name2" : "abcdedede"};
+  var doc = { "name" : "本荘由利地域に洪水警報",
+    "name1" : "öüóőúéáűíÖÜÓŐÚÉÁŰÍ",
+    "name2" : "abcdedede",
+    "name3" : "本荘由利地域に洪水警報",
+    "name4" : "abcdedede",
+    "本荘由利地域に洪水警報": "本荘由利地域に洪水警報",
+    "本荘由利地本荘由利地": {
+      "本荘由利地域に洪水警報": "本荘由利地域に洪水警報",
+      "地域に洪水警報本荘由利": "本荘由利地域に洪水警報",
+      "洪水警報本荘地域に洪水警報本荘由利": "本荘由利地域に洪水警報"
+    }
+  };
   var serialized_data = new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
 
   var serialized_data2 = new Buffer(new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).calculateObjectSize(doc, false, true));
@@ -1752,7 +1763,7 @@ exports['Should correctly deserialize the BSONRegExp type'] = function(test) {
   var serialized_data2 = new Buffer(new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).calculateObjectSize(doc, false, true));
   new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serializeWithBufferAndIndex(doc, false, serialized_data2, 0);
   assertBuffersEqual(test, serialized_data, serialized_data2, 0);
-  
+
   var doc1 = new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data, {bsonRegExp:true});
   test.ok(doc1.regexp instanceof BSONRegExp);
   test.equal('test', doc1.regexp.pattern);
