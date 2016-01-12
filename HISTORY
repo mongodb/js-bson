@@ -1,3 +1,7 @@
+0.4.21 2016-01-12
+-----------------
+- Minor optimizations to avoid non needed object creation.
+
 0.4.20 2015-10-15
 -----------------
 - Added bower file to repository.
