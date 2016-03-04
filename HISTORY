@@ -1,3 +1,8 @@
+0.4.22 2016-03-04
+-----------------
+- Fix "TypeError: data.copy is not a function" in Electron (Issue #170, https://github.com/kangas).
+- Fixed issue with undefined type on deserializing.
+
 0.4.21 2016-01-12
 -----------------
 - Minor optimizations to avoid non needed object creation.
