@@ -1,8 +1,6 @@
 # BSON parser
 
-This BSON parser is primarily meant to be used with the `mongodb` node.js driver.
-However, wonderful tools such as `onejs` can package up a BSON parser that will work in the browser.
-The current build is located in the `browser_build/bson.js` file.
+This package can be used to serialize JSON documents into the BSON format or the other way around. If you want to use it within the browser, give [browserify](https://github.com/substack/node-browserify) a try (it will help you add this package to your bundle). The current build is located in the `browser_build/bson.js` file.
 
 A simple example of how to use BSON in the browser:
 
