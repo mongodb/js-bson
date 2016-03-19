@@ -1,5 +1,4 @@
-Javascript + C++ BSON parser
-============================
+# BSON parser
 
 This BSON parser is primarily meant to be used with the `mongodb` node.js driver.
 However, wonderful tools such as `onejs` can package up a BSON parser that will work in the browser.
@@ -9,25 +8,25 @@ A simple example of how to use BSON in the browser:
 
 ```html
 <html>
-<head>
-  <script src="https://raw.github.com/mongodb/js-bson/master/browser_build/bson.js">
-  </script>
-</head>
-<body onload="start();">
-<script>
-  function start() {
-    var BSON = bson().BSON;
-    var Long = bson().Long;
-
-    var doc = {long: Long.fromNumber(100)}
-
-    // Serialize a document
-    var data = BSON.serialize(doc, false, true, false);
-    // De serialize it again
-    var doc_2 = BSON.deserialize(data);
-  }
-</script>
-</body>
+  <head>
+    <script src="./browser_build/bson.js"></script>
+  </head>
+  
+  <body onload="start();">
+    <script>
+      function start() {
+        var BSON = bson().BSON;
+        var Long = bson().Long;
+    
+        var doc = {long: Long.fromNumber(100)}
+    
+        // Serialize a document
+        var data = BSON.serialize(doc, false, true, false);
+        // De serialize it again
+        var doc_2 = BSON.deserialize(data);
+      }
+    </script>
+  </body>
 </html>
 ```
 
