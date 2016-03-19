@@ -11,35 +11,35 @@ A simple example of how to use BSON in the browser:
 
 <script>
   function try() {
-    var BSON = bson().BSON;
-    var Long = bson().Long;
+    var BSON = bson().BSON
+    var Long = bson().Long
 
-    var doc = {long: Long.fromNumber(100)}
+    var doc = { long: Long.fromNumber(100) }
 
     // Serialize a document
-    var data = BSON.serialize(doc, false, true, false);
+    var data = BSON.serialize(doc, false, true, false)
     // De serialize it again
-    var doc_2 = BSON.deserialize(data);
+    var doc_2 = BSON.deserialize(data)
   }
 </script>
 ```
 
 A simple example of how to use BSON in `node.js`:
 
-```javascript
-var bson = require("bson");
-var BSON = new bson.BSONPure.BSON();
-var Long = bson.BSONPure.Long;
+```js
+var bson = require('bson')
+var BSON = new bson.BSONPure.BSON()
+var Long = bson.BSONPure.Long
 
-var doc = {long: Long.fromNumber(100)}
+var doc = { long: Long.fromNumber(100) }
 
 // Serialize a document
-var data = BSON.serialize(doc, false, true, false);
-console.log("data:", data);
+var data = BSON.serialize(doc, false, true, false)
+console.log('data:', data)
 
 // Deserialize the resulting Buffer
-var doc_2 = BSON.deserialize(data);
-console.log("doc_2:", doc_2);
+var doc_2 = BSON.deserialize(data)
+console.log('doc_2:', doc_2)
 ```
 
 The API consists of two simple methods to serialize/deserialize objects to/from BSON format:
