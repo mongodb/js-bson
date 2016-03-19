@@ -1,5 +1,7 @@
 # BSON parser
 
+If you don't yet know what BSON actually is, read [the spec](http://bsonspec.org).
+
 This package can be used to serialize JSON documents into the BSON format or the other way around. If you want to use it within the browser, give [browserify](https://github.com/substack/node-browserify) a try (it will help you add this package to your bundle). The current build is located in the `browser_build/bson.js` file.
 
 A simple example of how to use BSON in the browser:
