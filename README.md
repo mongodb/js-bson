@@ -40,6 +40,8 @@ var doc_2 = BSON.deserialize(data)
 console.log('doc_2:', doc_2)
 ```
 
+## API
+
 The API consists of two simple methods to serialize/deserialize objects to/from BSON format:
 
   * BSON.serialize(object, checkKeys, asBuffer, serializeFunctions)
