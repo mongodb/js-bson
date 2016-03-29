@@ -1735,6 +1735,19 @@ exports['Should fail to create ObjectID due to illegal hex code'] = function(tes
   test.equal(false, ObjectID.isValid("zzzzzzzzzzzzzzzzzzzzzzzz"));
   test.equal(true, ObjectID.isValid("000000000000000000000000"));
   test.equal(true, ObjectID.isValid(new ObjectID("thisis12char")));
+
+  var tmp = new ObjectID();
+  // Cloning tmp so that instanceof fails to fake import from different version/instance of the same npm package
+  var objectIdLike = {
+    id: tmp.id,
+    toHexString: function() {
+      return tmp.toHexString();
+    }
+  };
+  test.equal(true, tmp.equals(objectIdLike));
+  test.equal(true, tmp.equals(new ObjectId(objectIdLike)));
+  test.equal(true, ObjectID.isValid(objectIdLike));
+
   test.done();
 }
 
