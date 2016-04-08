@@ -1,3 +1,8 @@
+0.4.23 2016-04-08
+-----------------
+- Allow for proper detection of ObjectId or objects that look like ObjectId, improving compatibility across third party libraries.
+- Remove one package from dependency due to having been pulled from NPM.
+
 0.4.22 2016-03-04
 -----------------
 - Fix "TypeError: data.copy is not a function" in Electron (Issue #170, https://github.com/kangas).
