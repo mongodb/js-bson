@@ -10,7 +10,7 @@ A simple example of how to use BSON in the browser:
 <script src="./browser_build/bson.js"></script>
 
 <script>
-  function try() {
+  function start() {
     var BSON = bson().BSON
     var Long = bson().Long
 
@@ -52,7 +52,7 @@ The API consists of two simple methods to serialize/deserialize objects to/from 
      * @param {Boolean} asBuffer return the serialized object as a Buffer object **(ignore)**.
      * @param {Boolean} serializeFunctions serialize the javascript functions **(default:false)**
      * @return {TypedArray/Array} returns a TypedArray or Array depending on what your browser supports
- 
+
   * BSON.deserialize(buffer, options, isArray)
      * Options
        * **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
