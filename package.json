@@ -17,10 +17,7 @@
   "version": "0.4.22",
   "author": "Christian Amor Kvalheim <christkv@gmail.com>",
   "contributors": [],
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/mongodb/js-bson.git"
-  },
+  "repository": "mongodb/js-bson",
   "bugs": {
     "mail": "node-mongodb-native@googlegroups.com",
     "url": "https://github.com/mongodb/js-bson/issues"
