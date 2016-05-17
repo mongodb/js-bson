@@ -1,53 +1,48 @@
-Javascript BSON parser
-============================
+# BSON parser
 
-This BSON parser is primarily meant to be used with the `mongodb` node.js driver.
-However, wonderful tools such as `onejs` can package up a BSON parser that will work in the browser.
-The current build is located in the `browser_build/bson.js` file.
+If you don't yet know what BSON actually is, read [the spec](http://bsonspec.org).
+
+This package can be used to serialize JSON documents into the BSON format or the other way around. If you want to use it within the browser, give [browserify](https://github.com/substack/node-browserify) a try (it will help you add this package to your bundle). The current build is located in the `browser_build/bson.js` file.
 
 A simple example of how to use BSON in the browser:
 
 ```html
-<html>
-<head>
-  <script src="https://raw.github.com/mongodb/js-bson/master/browser_build/bson.js">
-  </script>
-</head>
-<body onload="start();">
+<script src="./browser_build/bson.js"></script>
+
 <script>
   function start() {
-    var BSON = bson().BSON;
-    var Long = bson().Long;
+    var BSON = bson().BSON
+    var Long = bson().Long
 
-    var doc = {long: Long.fromNumber(100)}
+    var doc = { long: Long.fromNumber(100) }
 
     // Serialize a document
-    var data = BSON.serialize(doc, false, true, false);
+    var data = BSON.serialize(doc, false, true, false)
     // De serialize it again
-    var doc_2 = BSON.deserialize(data);
+    var doc_2 = BSON.deserialize(data)
   }
 </script>
-</body>
-</html>
 ```
 
 A simple example of how to use BSON in `node.js`:
 
-```javascript
-var bson = require("bson");
-var BSON = new bson.BSONPure.BSON();
-var Long = bson.BSONPure.Long;
+```js
+var bson = require('bson')
+var BSON = new bson.BSONPure.BSON()
+var Long = bson.BSONPure.Long
 
-var doc = {long: Long.fromNumber(100)}
+var doc = { long: Long.fromNumber(100) }
 
 // Serialize a document
-var data = BSON.serialize(doc, false, true, false);
-console.log("data:", data);
+var data = BSON.serialize(doc, false, true, false)
+console.log('data:', data)
 
 // Deserialize the resulting Buffer
-var doc_2 = BSON.deserialize(data);
-console.log("doc_2:", doc_2);
+var doc_2 = BSON.deserialize(data)
+console.log('doc_2:', doc_2)
 ```
+
+## API
 
 The API consists of two simple methods to serialize/deserialize objects to/from BSON format:
 
@@ -57,7 +52,7 @@ The API consists of two simple methods to serialize/deserialize objects to/from 
      * @param {Boolean} asBuffer return the serialized object as a Buffer object **(ignore)**.
      * @param {Boolean} serializeFunctions serialize the javascript functions **(default:false)**
      * @return {TypedArray/Array} returns a TypedArray or Array depending on what your browser supports
- 
+
   * BSON.deserialize(buffer, options, isArray)
      * Options
        * **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
