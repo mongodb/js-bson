@@ -1276,7 +1276,7 @@ exports['Should deserialize correctly'] = function(test) {
   assertBuffersEqual(test, serialized_data, serialized_data2, 0);
   var doc2 = new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);
 
-  test.deepEqual(doc, doc2)
+  test.deepEqual(JSON.stringify(doc), JSON.stringify(doc2))
   test.done();
 }
 
@@ -1296,7 +1296,10 @@ exports['Should correctly serialize and deserialize MinKey and MaxKey values'] =
   assertBuffersEqual(test, serialized_data, serialized_data2, 0);
   var doc2 = new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);
 
-  test.deepEqual(doc, doc2)
+  // Peform equality checks
+  test.equal(JSON.stringify(doc), JSON.stringify(doc2));
+  test.ok(doc._id.equals(doc2._id))
+  // process.exit(0)
   test.ok(doc2.minKey instanceof MinKey);
   test.ok(doc2.maxKey instanceof MaxKey);
   test.done();
@@ -1744,6 +1747,7 @@ exports['Should fail to create ObjectID due to illegal hex code'] = function(tes
       return tmp.toHexString();
     }
   };
+
   test.equal(true, tmp.equals(objectIdLike));
   test.equal(true, tmp.equals(new ObjectId(objectIdLike)));
   test.equal(true, ObjectID.isValid(objectIdLike));

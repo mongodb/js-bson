@@ -125,7 +125,7 @@ exports['Pass all valid BSON serialization scenarios ./compliance/valid.json'] =
     // Attempt to deserialize
     var object = bson.deserialize(buffer, {promoteLongs:false});
     // // Validate the object
-    test.deepEqual(expectedDocument, object);
+    test.deepEqual(JSON.stringify(expectedDocument), JSON.stringify(object));
   });
 
   test.done();

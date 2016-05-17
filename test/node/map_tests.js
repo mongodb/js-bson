@@ -104,17 +104,3 @@ exports['should serialize a map'] = function(test) {
   var data = bson.serialize(m, false, true);
   test.equal('13000000103100010000001030000200000000', data.toString('hex'));
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
