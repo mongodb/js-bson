@@ -1,4 +1,4 @@
-Javascript + C++ BSON parser
+Javascript BSON parser
 ============================
 
 This BSON parser is primarily meant to be used with the `mongodb` node.js driver.
