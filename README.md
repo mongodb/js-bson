@@ -45,6 +45,16 @@ console.log('doc_2:', doc_2)
 ## API
 
 The API consists of two simple methods to serialize/deserialize objects to/from BSON format:
+=======
+## Installation
+
+`npm install bson`
+
+## API
+
+### BSON serialization and deserialiation
+
+**`new bson.BSONPure.BSON()`** - Creates a new BSON seralizer/deserializer you can use to serialize and deserialize BSON.
 
   * BSON.serialize(object, checkKeys, asBuffer, serializeFunctions)
      * @param {Object} object the Javascript object to serialize.
@@ -63,3 +73,23 @@ The API consists of two simple methods to serialize/deserialize objects to/from 
      * @param {Object} [options] additional options used for the deserialization.
      * @param {Boolean} [isArray] ignore used for recursive parsing.
      * @return {Object} returns the deserialized Javascript Object.
+
+### ObjectId
+
+**`bson.ObjectId.isValid(id)`** - Returns true if `id` is a valid number or hexadecimal string representing an ObjectId.
+**`bson.ObjectId.createFromHexString(hexString)`** - Returns the ObjectId the `hexString` represents.
+**`bson.ObjectId.createFromTime(time)`** - Returns an ObjectId containing the passed time.
+* `time` - A Unix timestamp (number of seconds since the epoch).
+
+**`var objectId = new bson.ObjectId(id)`** - Creates a new `ObjectId`.
+* `id` - Must either be a 24-character hex string or a 12 byte binary string.
+
+**`objectId.toJSON()`**
+**`objectId.toString()`**
+**`objectId.toHexString()`** - Returns a hexadecimal string representation of the ObjectId.
+
+**`objectId.equals(otherObjectId)`** - Returns true if the ObjectIds are the same, false otherwise.
+
+**`objectId.getTimestamp()`** - Returns a `Date` object containing the time the objectId was created for.
+
+**`objectId.getTimestamp()`** - Returns a `Date` object containing the time the objectId contains.
