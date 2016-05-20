@@ -1,0 +1,49 @@
+{
+    "description": "Double type",
+    "bson_type": "0x01",
+    "test_key": "d",
+    "valid": [
+        {
+            "description": "+1.0",
+            "bson": "10000000016400000000000000F03F00",
+            "extjson": "{\"d\" : 1.0}"
+        },
+        {
+            "description": "-1.0",
+            "bson": "10000000016400000000000000F0BF00",
+            "extjson": "{\"d\" : -1.0}"
+        },
+        {
+            "description": "0.0",
+            "bson": "10000000016400000000000000000000",
+            "extjson": "{\"d\" : 0.0}"
+        },
+        {
+            "description": "-0.0",
+            "bson": "10000000016400000000000000008000",
+            "extjson": "{\"d\" : -0.0}"
+        },
+        {
+            "description": "NaN",
+            "bson": "10000000016400000000000000F87F00",
+        },
+        {
+            "description": "NaN with payload",
+            "bson": "10000000016400120000000000F87F00",
+        },
+        {
+            "description": "Inf",
+            "bson": "10000000016400000000000000F07F00",
+        },
+        {
+            "description": "-Inf",
+            "bson": "10000000016400000000000000F0FF00",
+        }
+    ],
+    "decodeErrors": [
+        {
+            "description": "double truncated",
+            "bson": "0B0000000164000000F03F00"
+        }
+    ]
+}
