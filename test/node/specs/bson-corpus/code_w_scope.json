@@ -26,7 +26,7 @@
         {
             "description": "Unicode and embedded null in code string, empty scope",
             "bson": "1A0000000F61001200000005000000C3A9006400050000000000",
-            "extjson": "{\"a\" : {\"$code\" : \"\u00e9\u0000d\", \"$scope\" : {}}}"
+            "extjson": "{\"a\" : {\"$code\" : \"\\u00e9\\u0000d\", \"$scope\" : {}}}"
         }
     ],
     "decodeErrors": [

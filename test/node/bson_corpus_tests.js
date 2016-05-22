@@ -37,9 +37,11 @@ function executeValid(spec, scenarios) {
     var serializedBuffer = bson.serialize(document);
 
     // Test for the test key
-    assert.ok(deserializedObject[spec.test_key]);
+    assert.ok(deserializedObject[spec.test_key] != undefined);
 
     // console.log("==================================== COMPARE")
+    // console.dir(document)
+    // console.dir(deserializedObject)
     // console.log(scenario.bson)
     // console.log(buffer.toString('hex'))
     // console.log(serializedBuffer.toString('hex'))
@@ -88,7 +90,7 @@ function printScenarioInformation(spec) {
 
 function executeAll(spec) {
   printScenarioInformation(spec);
-  executeValid(spec, spec.valid || []);
+  // executeValid(spec, spec.valid || []);
   executeDecodeError(spec, spec.decodeErrors || []);
   // executeParseErrors(spec, spec.parseErrors || []);
 }
@@ -100,11 +102,43 @@ function executeAll(spec) {
 //   executeAll(require(__dirname + '/specs/bson-corpus/array'));
 //   test.done();
 // }
+//
+// /**
+//  * @ignore
+//  */
+// exports['Pass all BSON corpus ./specs/bson-corpus/binary.json'] = function(test) {
+//   executeAll(require(__dirname + '/specs/bson-corpus/binary'));
+//   test.done();
+// }
+//
+// /**
+//  * @ignore
+//  */
+// exports['Pass all BSON corpus ./specs/bson-corpus/boolean.json'] = function(test) {
+//   executeAll(require(__dirname + '/specs/bson-corpus/boolean'));
+//   test.done();
+// }
+//
+// /**
+//  * @ignore
+//  */
+// exports['Pass all BSON corpus ./specs/bson-corpus/code_w_scope.json'] = function(test) {
+//   executeAll(require(__dirname + '/specs/bson-corpus/code_w_scope'));
+//   test.done();
+// }
+
+// /**
+//  * @ignore
+//  */
+// exports['Pass all BSON corpus ./specs/bson-corpus/code.json'] = function(test) {
+//   executeAll(require(__dirname + '/specs/bson-corpus/code'));
+//   test.done();
+// }
 
 /**
  * @ignore
  */
-exports['Pass all BSON corpus ./specs/bson-corpus/binary.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/binary'));
+exports['Pass all BSON corpus ./specs/bson-corpus/datetime.json'] = function(test) {
+  executeAll(require(__dirname + '/specs/bson-corpus/datetime'));
   test.done();
 }
