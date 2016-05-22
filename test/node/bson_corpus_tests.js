@@ -43,10 +43,6 @@ function executeValid(spec, scenarios) {
         bsonRegExp: true
       });
 
-      // console.log("==================================== COMPARE")
-      // console.dir(document)
-      // console.dir(deserializedObject);
-
       // Validate the deserialized object
       assert.deepEqual(document, deserializedObject);
     }
@@ -55,14 +51,8 @@ function executeValid(spec, scenarios) {
     var deserializedObject = bson.deserialize(buffer);
 
     // Test for the test key
-    assert.ok(typeof deserializedObject[spec.test_key] != 'undefined');
-
-    // console.log("==================================== COMPARE")
-    // console.dir(document.a.toString())
-    // console.dir(deserializedObject.a.toString())
-    // console.log(scenario.bson)
-    // console.log(buffer.toString('hex'))
-    // console.log(serializedBuffer.toString('hex'))
+    var keys = Object.keys(deserializedObject);
+    assert.ok(keys.indexOf(spec.test_key) != -1);
   };
 }
 
