@@ -2,6 +2,12 @@
 
 var bson = require('../lib/bson');
 var Binary = bson.Binary
+  , Long = bson.Long
+  , MaxKey = bson.MaxKey
+  , MinKey = bson.MinKey
+  , BSONRegExp = bson.BSONRegExp
+  , Timestamp = bson.Timestamp
+  , ObjectId = bson.ObjectId
   , Code = bson.Code;
 
 var deserialize = function(document) {
@@ -38,6 +44,22 @@ var deserialize = function(document) {
               date.setTime(time);
               doc[name] = date;
           }
+        } else if(document[name]['$numberLong'] != undefined) {
+          doc[name] = Long.fromString(document[name]['$numberLong']);
+        } else if(document[name]['$maxKey'] != undefined) {
+          doc[name] = new MaxKey();
+        } else if(document[name]['$minKey'] != undefined) {
+          doc[name] = new MinKey();
+        } else if(document[name]['$oid'] != undefined) {
+          doc[name] = new ObjectId(new Buffer(document[name]['$oid'], 'hex'));
+        } else if(document[name]['$regex'] != undefined) {
+          doc[name] = new BSONRegExp(document[name]['$regex'], document[name]['$options'])
+        } else if(document[name]['$timestamp'] != undefined) {
+          doc[name] = new Timestamp(document[name]['$timestamp'].i, document[name]['$timestamp'].t);
+        } else if(document[name]['$undefined'] != undefined) {
+          doc[name] = undefined;
+        } else {
+          doc[name] = document[name];
         }
 
 

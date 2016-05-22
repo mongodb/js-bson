@@ -7,7 +7,7 @@
         {
             "description": "Undefined",
             "bson": "0800000006610000",
-            "extjson": "{\"a\" : {\"$undefined\" : true}}",
+            "extjson": "{\"a\" : {\"$undefined\" : true}}"
         }
     ]
 }

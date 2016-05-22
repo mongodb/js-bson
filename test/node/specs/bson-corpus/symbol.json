@@ -6,27 +6,27 @@
     "valid": [
         {
             "description": "Empty string",
-            "bson": "0D0000000E6100010000000000",
+            "bson": "0D0000000E6100010000000000"
         },
         {
             "description": "Single character",
-            "bson": "0E0000000E610002000000620000",
+            "bson": "0E0000000E610002000000620000"
         },
         {
             "description": "Multi-character",
-            "bson": "190000000E61000D0000006162616261626162616261620000",
+            "bson": "190000000E61000D0000006162616261626162616261620000"
         },
         {
             "description": "two-byte UTF-8 (\u00e9)",
-            "bson": "190000000E61000D000000C3A9C3A9C3A9C3A9C3A9C3A90000",
+            "bson": "190000000E61000D000000C3A9C3A9C3A9C3A9C3A9C3A90000"
         },
         {
             "description": "three-byte UTF-8 (\u2606)",
-            "bson": "190000000E61000D000000E29886E29886E29886E298860000",
+            "bson": "190000000E61000D000000E29886E29886E29886E298860000"
         },
         {
             "description": "Embedded nulls",
-            "bson": "190000000E61000D0000006162006261620062616261620000",
+            "bson": "190000000E61000D0000006162006261620062616261620000"
         }
     ],
     "decodeErrors": [
@@ -53,10 +53,6 @@
         {
             "description": "empty symbol, but extra null",
             "bson": "0E00000002610001000000000000"
-        },
-        {
-            "description": "invalid UTF-8",
-            "bson": "0E00000002610002000000E90000"
         }
     ]
 }
