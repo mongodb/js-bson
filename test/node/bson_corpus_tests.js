@@ -238,11 +238,3 @@ exports['Pass all BSON corpus ./specs/bson-corpus/top.json'] = function(test) {
   executeAll(require(__dirname + '/specs/bson-corpus/top'));
   test.done();
 }
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/undefined.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/undefined'));
-  test.done();
-}
