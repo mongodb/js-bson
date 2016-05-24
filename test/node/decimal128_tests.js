@@ -1,7 +1,7 @@
-var Decimal128 = require('../../lib/bson/Decimal128');
-var NAN = new Buffer([0x7c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
-var INF_NEGATIVE_BUFFER = new Buffer([0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
-var INF_POSITIVE_BUFFER = new Buffer([0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+var Decimal128 = require('../../lib/bson/decimal128');
+var NAN = new Buffer([0x7c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
+var INF_NEGATIVE_BUFFER = new Buffer([0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
+var INF_POSITIVE_BUFFER = new Buffer([0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
 
 /**
  * @ignore
@@ -210,11 +210,179 @@ exports['fromString large format'] = function(test) {
   var bytes = new Buffer([0x30, 0x40, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
     , 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff].reverse());
   test.deepEqual(bytes, result.bytes);
+  test.done();
+}
 
-  // console.log("======================================= 0")
-  // console.dir(bytes)
-  // console.log("======================================= 1")
-  // console.dir(result)
+exports['fromString exponent normalization'] = function(test) {
+  // Create decimal from string value 1000000000000000000000000000000000000000
+  var result = Decimal128.fromString("1000000000000000000000000000000000000000");
+  var bytes = new Buffer([0x30, 0x4c, 0x31, 0x4d, 0xc6, 0x44, 0x8d, 0x93
+    , 0x38, 0xc1, 0x5b, 0x0a, 0x00, 0x00, 0x00, 0x00].reverse());
+  test.deepEqual(bytes, result.bytes);
 
+  // Create decimal from string value 10000000000000000000000000000000000
+  var result = Decimal128.fromString("10000000000000000000000000000000000");
+  var bytes = new Buffer([0x30, 0x42, 0x31, 0x4d, 0xc6,0x44, 0x8d, 0x93
+    , 0x38, 0xc1, 0x5b, 0x0a, 0x00, 0x00, 0x00, 0x00].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 1000000000000000000000000000000000
+  var result = Decimal128.fromString("1000000000000000000000000000000000");
+  var bytes = new Buffer([0x30, 0x40, 0x31, 0x4d, 0xc6, 0x44, 0x8d, 0x93
+    , 0x38, 0xc1, 0x5b, 0x0a, 0x00, 0x00, 0x00, 0x00].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  var str =  "100000000000000000000000000000000000000000000000000000000000000000000"
+      + "000000000000000000000000000000000000000000000000000000000000000000000"
+      + "000000000000000000000000000000000000000000000000000000000000000000000"
+      + "000000000000000000000000000000000000000000000000000000000000000000000"
+      + "000000000000000000000000000000000000000000000000000000000000000000000"
+      + "000000000000000000000000000000000000000000000000000000000000000000000"
+      + "000000000000000000000000000000000000000000000000000000000000000000000"
+      + "000000000000000000000000000000000000000000000000000000000000000000000"
+      + "000000000000000000000000000000000000000000000000000000000000000000000"
+      + "000000000000000000000000000000000000000000000000000000000000000000000"
+      + "000000000000000000000000000000000000000000000000000000000000000000000"
+      + "000000000000000000000000000000000000000000000000000000000000000000000"
+      + "000000000000000000000000000000000000000000000000000000000000000000000"
+      + "000000000000000000000000000000000000000000000000000000000000000000000"
+      + "0000000000000000000000000000000000";
+
+  // Create decimal from string value str
+  var result = Decimal128.fromString(str);
+  var bytes = new Buffer([0x37, 0xcc, 0x31, 0x4d, 0xc6, 0x44, 0x8d, 0x93
+    , 0x38, 0xc1, 0x5b, 0x0a, 0x00, 0x00, 0x00, 0x00].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 1E-6177
+  var result = Decimal128.fromString("1E-6177");
+  var bytes = new Buffer([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
+  test.deepEqual(bytes, result.bytes);
+  test.done();
+}
+
+exports['fromString from string zeros'] = function(test) {
+  // Create decimal from string value 0
+  var result = Decimal128.fromString("0");
+  var bytes = new Buffer([0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 0e-611
+  var result = Decimal128.fromString("0e-611");
+  var bytes = new Buffer([0x2b, 0x7a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 0e+6000
+  var result = Decimal128.fromString("0e+6000");
+  var bytes = new Buffer([0x5f, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 1E-6177
+  var result = Decimal128.fromString("-0e-1");
+  var bytes = new Buffer([0xb0, 0x3e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
+  test.deepEqual(bytes, result.bytes);
+  test.done();
+}
+
+exports['fromString from string round'] = function(test) {
+  // Create decimal from string value 10E-6177
+  var result = Decimal128.fromString("10E-6177");
+  var bytes = new Buffer([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 15E-6177
+  var result = Decimal128.fromString("15E-6177");
+  var bytes = new Buffer([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  var array = new Array(6179);
+  for(var i = 0; i < array.length; i++) array[i] = '0';
+  array[1] = '.';
+  array[6177] = '1';
+  array[6178] = '5';
+  // Create decimal from string value array
+  var result = Decimal128.fromString(array.join(''));
+  var bytes = new Buffer([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 251E-6178
+  var result = Decimal128.fromString("251E-6178");
+  var bytes = new Buffer([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 250E-6178
+  var result = Decimal128.fromString("250E-6178");
+  var bytes = new Buffer([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 10000000000000000000000000000000006
+  var result = Decimal128.fromString("10000000000000000000000000000000006");
+  var bytes = new Buffer([0x30, 0x42, 0x31, 0x4d, 0xc6, 0x44, 0x8d, 0x93
+    , 0x38, 0xc1, 0x5b, 0x0a, 0x00, 0x00, 0x00, 0x01].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 10000000000000000000000000000000003
+  var result = Decimal128.fromString("10000000000000000000000000000000003");
+  var bytes = new Buffer([0x30, 0x42, 0x31, 0x4d, 0xc6, 0x44, 0x8d, 0x93
+    , 0x38, 0xc1, 0x5b, 0x0a, 0x00, 0x00, 0x00, 0x00].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 10000000000000000000000000000000005
+  var result = Decimal128.fromString("10000000000000000000000000000000005");
+  var bytes = new Buffer([0x30, 0x42, 0x31, 0x4d, 0xc6, 0x44, 0x8d, 0x93
+    , 0x38, 0xc1, 0x5b, 0x0a, 0x00, 0x00, 0x00, 0x00].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 100000000000000000000000000000000051
+  var result = Decimal128.fromString("100000000000000000000000000000000051");
+  var bytes = new Buffer([0x30, 0x44, 0x31, 0x4d, 0xc6, 0x44, 0x8d, 0x93
+    , 0x38, 0xc1, 0x5b, 0x0a, 0x00, 0x00, 0x00, 0x01].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 10000000000000000000000000000000006E6111
+  var result = Decimal128.fromString("10000000000000000000000000000000006E6111");
+  var bytes = new Buffer([0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 12980742146337069071326240823050239
+  var result = Decimal128.fromString("12980742146337069071326240823050239");
+  var bytes = new Buffer([0x30, 0x42, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00
+    , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 99999999999999999999999999999999999
+  var result = Decimal128.fromString("99999999999999999999999999999999999");
+  var bytes = new Buffer([0x30, 0x44, 0x31, 0x4d, 0xc6, 0x44, 0x8d, 0x93
+    , 0x38, 0xc1, 0x5b, 0x0a, 0x00, 0x00, 0x00, 0x00].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+  var result = Decimal128.fromString("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+  var bytes = new Buffer([0x30, 0xc6, 0x31, 0x4d, 0xc6, 0x44, 0x8d, 0x93
+    , 0x38, 0xc1, 0x5b, 0x0a, 0x00, 0x00, 0x00, 0x00].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 9999999999999999999999999999999999E6111
+  var result = Decimal128.fromString("9999999999999999999999999999999999E6111");
+  var bytes = new Buffer([0x5f, 0xff, 0xed, 0x09, 0xbe, 0xad, 0x87, 0xc0
+    , 0x37, 0x8d, 0x8e, 0x63, 0xff, 0xff, 0xff, 0xff].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 99999999999999999999999999999999999E6144
+  var result = Decimal128.fromString("99999999999999999999999999999999999E6144");
+  var bytes = new Buffer([0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
+  test.deepEqual(bytes, result.bytes);
   test.done();
 }
