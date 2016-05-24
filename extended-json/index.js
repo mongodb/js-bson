@@ -23,14 +23,11 @@ var deserialize = function(document) {
           doc[name][i] = deserialize(document[name][i]);
         }
       } else if(document[name] && typeof document[name] == 'object') {
-        // console.log("!!!!!!!!!!!! --- object")
-        // console.dir(document[name])
         if(document[name]['$binary'] != undefined) {
           var buffer = new Buffer(document[name]['$binary'], 'base64');
           var type = new Buffer(document[name]['$type'], 'hex')[0];
           doc[name] = new Binary(buffer, type);
         } else if(document[name]['$code'] != undefined) {
-          // console.log("!!!!!!!!!! CODE")
           var code = document[name]['$code'];
           var scope = document[name]['$scope'];
           doc[name] = new Code(code, scope);
@@ -61,9 +58,6 @@ var deserialize = function(document) {
         } else {
           doc[name] = document[name];
         }
-
-
-        // if(document[name].)
       } else {
         doc[name] = document[name];
       }
