@@ -177,6 +177,39 @@ exports['fromString scientific format'] = function(test) {
   var bytes = new Buffer([0x30, 0x4c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x1a].reverse());
   test.deepEqual(bytes, result.bytes);
+  test.done();
+}
+
+exports['fromString large format'] = function(test) {
+  // Create decimal from string value 12345689012345789012345
+  var result = Decimal128.fromString("12345689012345789012345");
+  var bytes = new Buffer([0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x02, 0x9d
+    , 0x42, 0xda, 0x3a, 0x76, 0xf9, 0xe0, 0xd9, 0x79].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 1234567890123456789012345678901234
+  var result = Decimal128.fromString("1234567890123456789012345678901234");
+  var bytes = new Buffer([0x30, 0x40, 0x3c, 0xde, 0x6f, 0xff, 0x97, 0x32
+    , 0xde, 0x82, 0x5c, 0xd0, 0x7e, 0x96, 0xaf, 0xf2].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 9.999999999999999999999999999999999E+6144
+  var result = Decimal128.fromString("9.999999999999999999999999999999999E+6144");
+  var bytes = new Buffer([0x5f, 0xff, 0xed, 0x09, 0xbe, 0xad, 0x87, 0xc0
+    , 0x37, 0x8d, 0x8e, 0x63, 0xff, 0xff, 0xff, 0xff].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 9.999999999999999999999999999999999E-6143
+  var result = Decimal128.fromString("9.999999999999999999999999999999999E-6143");
+  var bytes = new Buffer([0x00, 0x01, 0xed, 0x09, 0xbe, 0xad, 0x87, 0xc0
+    , 0x37, 0x8d, 0x8e, 0x63, 0xff, 0xff, 0xff, 0xff].reverse());
+  test.deepEqual(bytes, result.bytes);
+
+  // Create decimal from string value 5.192296858534827628530496329220095E+33
+  var result = Decimal128.fromString("5.192296858534827628530496329220095E+33");
+  var bytes = new Buffer([0x30, 0x40, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
+    , 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff].reverse());
+  test.deepEqual(bytes, result.bytes);
 
   // console.log("======================================= 0")
   // console.dir(bytes)
