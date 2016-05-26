@@ -552,3 +552,30 @@ exports['Serialize and Deserialize tests'] = function(test) {
   test.equal("1", doc.value.a.toString());
   test.done();
 }
+
+exports['Support toBSON and toObject methods for custom mapping'] = function(test) {
+  var BSON = require('../../lib/bson/bson');
+  var bson = new BSON();
+
+  // Create a custom object
+  var MyCustomDecimal = function(value) {
+    this.value = value instanceof Decimal128 ? value.toString() : value;
+  }
+
+  MyCustomDecimal.prototype.toBSON = function() {
+    return Decimal128.fromString(this.value);
+  }
+
+  // Add a custom mapper for the type
+  Decimal128.prototype.toObject = function() {
+    return new MyCustomDecimal(this);
+  }
+
+  // Test all methods around a simple serialization at object top level
+  var doc = {value: new MyCustomDecimal("1")};
+  var buffer = bson.serialize(doc, false, true, true, 0, true)
+  var back = bson.deserialize(buffer);
+  test.ok(back.value instanceof MyCustomDecimal);
+  test.equal("1", back.value.value);
+  test.done();
+}
