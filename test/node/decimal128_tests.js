@@ -515,3 +515,40 @@ exports['toString zeros'] = function(test) {
   test.equal('0E-600', decimal.toString());
   test.done();
 }
+
+exports['Serialize and Deserialize tests'] = function(test) {
+  var BSON = require('../../lib/bson/bson');
+  var bson = new BSON();
+
+  // Test all methods around a simple serialization at object top level
+  var doc = {value: Decimal128.fromString("1")};
+  var buffer = bson.serialize(doc, false, true, true, 0, true)
+  var size = bson.calculateObjectSize(doc);
+  var back = bson.deserialize(buffer);
+
+  test.equal(buffer.length, size);
+  test.deepEqual(doc, back);
+  test.equal("1", doc.value.toString());
+  test.equal('{"value":{"$numberDecimal":"1"}}', JSON.stringify(doc, null));
+
+  // Test all methods around a simple serialization at array top level
+  var doc = {value: [Decimal128.fromString("1")]};
+  var buffer = bson.serialize(doc, false, true, true, 0, true)
+  var size = bson.calculateObjectSize(doc);
+  var back = bson.deserialize(buffer);
+
+  test.equal(buffer.length, size);
+  test.deepEqual(doc, back);
+  test.equal("1", doc.value[0].toString());
+
+  // Test all methods around a simple serialization at nested object
+  var doc = {value: { a: Decimal128.fromString("1") } };
+  var buffer = bson.serialize(doc, false, true, true, 0, true)
+  var size = bson.calculateObjectSize(doc);
+  var back = bson.deserialize(buffer);
+
+  test.equal(buffer.length, size);
+  test.deepEqual(doc, back);
+  test.equal("1", doc.value.a.toString());
+  test.done();
+}
