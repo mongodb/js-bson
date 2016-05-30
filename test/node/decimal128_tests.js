@@ -1,40 +1,34 @@
 var Decimal128 = require('../../lib/bson/decimal128');
 var NAN = new Buffer([0x7c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
-var INF_NEGATIVE_BUFFER = new Buffer([0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
+var INF_NEGATIVE_BUFFER = new Buffer([0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
 var INF_POSITIVE_BUFFER = new Buffer([0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
+
+var shouldFail = function() {
+  try {
+
+  } catch(e) {
+    return false
+  }
+}
 
 /**
  * @ignore
  */
 exports['fromString invalid input'] = function(test) {
-  var result = Decimal128.fromString('.');
-  test.deepEqual(NAN, result.bytes);
-  var result = Decimal128.fromString('.e');
-  test.deepEqual(NAN, result.bytes);
-  var result = Decimal128.fromString('');
-  test.deepEqual(NAN, result.bytes);
-  var result = Decimal128.fromString('invalid');
-  test.deepEqual(NAN, result.bytes);
-  var result = Decimal128.fromString('in');
-  test.deepEqual(NAN, result.bytes);
-  var result = Decimal128.fromString('i');
-  test.deepEqual(NAN, result.bytes);
-  var result = Decimal128.fromString('E02');
-  test.deepEqual(NAN, result.bytes);
-  var result = Decimal128.fromString('..1');
-  test.deepEqual(NAN, result.bytes);
-  var result = Decimal128.fromString('1abcede');
-  test.deepEqual(NAN, result.bytes);
-  var result = Decimal128.fromString('1.24abc');
-  test.deepEqual(NAN, result.bytes);
-  var result = Decimal128.fromString('1.24abcE+02');
-  test.deepEqual(NAN, result.bytes);
-  var result = Decimal128.fromString('1.24E+02abc2d');
-  test.deepEqual(NAN, result.bytes);
-  var result = Decimal128.fromString('E+02');
-  test.deepEqual(NAN, result.bytes);
-  var result = Decimal128.fromString('e+02');
-  test.deepEqual(NAN, result.bytes);
+  test.throws(function() { Decimal128.fromString('E02'); });
+  test.throws(function() { Decimal128.fromString('E+02'); });
+  test.throws(function() { Decimal128.fromString('e+02'); });
+  test.throws(function() { Decimal128.fromString('.'); });
+  test.throws(function() { Decimal128.fromString('.e'); });
+  test.throws(function() { Decimal128.fromString(''); });
+  test.throws(function() { Decimal128.fromString('invalid'); });
+  test.throws(function() { Decimal128.fromString('in'); });
+  test.throws(function() { Decimal128.fromString('i'); });
+  test.throws(function() { Decimal128.fromString('..1'); });
+  test.throws(function() { Decimal128.fromString('1abcede'); });
+  test.throws(function() { Decimal128.fromString('1.24abc'); });
+  test.throws(function() { Decimal128.fromString('1.24abcE+02'); });
+  test.throws(function() { Decimal128.fromString('1.24E+02abc2d'); });
   test.done();
 }
 
@@ -302,16 +296,16 @@ exports['fromString from string round'] = function(test) {
     , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02].reverse());
   test.deepEqual(bytes, result.bytes);
 
-  var array = new Array(6179);
-  for(var i = 0; i < array.length; i++) array[i] = '0';
-  array[1] = '.';
-  array[6177] = '1';
-  array[6178] = '5';
-  // Create decimal from string value array
-  var result = Decimal128.fromString(array.join(''));
-  var bytes = new Buffer([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-    , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02].reverse());
-  test.deepEqual(bytes, result.bytes);
+  // var array = new Array(6179);
+  // for(var i = 0; i < array.length; i++) array[i] = '0';
+  // array[1] = '.';
+  // array[6177] = '1';
+  // array[6178] = '5';
+  // // Create decimal from string value array
+  // var result = Decimal128.fromString(array.join(''));
+  // var bytes = new Buffer([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+  //   , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02].reverse());
+  // test.deepEqual(bytes, result.bytes);
 
   // Create decimal from string value 251E-6178
   var result = Decimal128.fromString("251E-6178");
@@ -477,7 +471,7 @@ exports['toString scientific'] = function(test) {
 
   var decimal = new Decimal128(new Buffer([0x30, 0x40, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff].reverse()));
-  test.equal('5.192296858534827628530496329220095E+33', decimal.toString());
+  test.equal('5192296858534827628530496329220095', decimal.toString());
 
   var decimal = new Decimal128(new Buffer([0x30, 0x4c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x1a].reverse()));

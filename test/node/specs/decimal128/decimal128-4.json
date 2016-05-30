@@ -8,7 +8,6 @@
           "bson": "1800000013640001000000000000000000000000003EB000",
           "extjson": "{\"d\" : {\"$numberDecimal\" : \"-0.1\"}}"
        },
-
        {
           "description": "[basx045] strings without E cannot generate E in result",
           "bson": "1800000013640003000000000000000000000000003A3000",

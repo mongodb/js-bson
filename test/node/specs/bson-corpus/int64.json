@@ -4,29 +4,34 @@
     "test_key": "a",
     "valid": [
         {
+            "description": "-1",
+            "bson": "10000000126100FFFFFFFFFFFFFFFF00",
+            "extjson": "{\"a\" : {\"$numberLong\" : \"-1\"}}",
+            "noroundtrip": true
+        },
+        {
             "description": "MinValue",
             "bson": "10000000126100000000000000008000",
-            "extjson": "{\"a\" : {\"$numberLong\" : \"-9223372036854775808\"}}"
+            "extjson": "{\"a\" : {\"$numberLong\" : \"-9223372036854775808\"}}",
+            "noroundtrip": true
         },
         {
             "description": "MaxValue",
             "bson": "10000000126100FFFFFFFFFFFFFF7F00",
-            "extjson": "{\"a\" : {\"$numberLong\" : \"9223372036854775807\"}}"
-        },
-        {
-            "description": "-1",
-            "bson": "10000000126100FFFFFFFFFFFFFFFF00",
-            "extjson": "{\"a\" : {\"$numberLong\" : \"-1\"}}"
+            "extjson": "{\"a\" : {\"$numberLong\" : \"9223372036854775807\"}}",
+            "noroundtrip": true
         },
         {
             "description": "0",
             "bson": "10000000126100000000000000000000",
-            "extjson": "{\"a\" : {\"$numberLong\" : \"0\"}}"
+            "extjson": "{\"a\" : {\"$numberLong\" : \"0\"}}",
+            "noroundtrip": true
         },
         {
             "description": "1",
             "bson": "10000000126100010000000000000000",
-            "extjson": "{\"a\" : {\"$numberLong\" : \"1\"}}"
+            "extjson": "{\"a\" : {\"$numberLong\" : \"1\"}}",
+            "noroundtrip": true
         }
     ],
     "decodeErrors": [

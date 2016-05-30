@@ -15,6 +15,13 @@
             "lossy": true
         },
         {
+            "description": "Special - Negative NaN",
+            "bson": "18000000136400000000000000000000000000000000FC00",
+            "canonical_extjson": "{\"d\" : {\"$numberDecimal\" : \"NaN\"}}",
+            "extjson": "{\"d\" : {\"$numberDecimal\" : \"-NaN\"}}",
+            "lossy": true
+        },
+        {
             "description": "Special - Canonical SNaN",
             "bson": "180000001364000000000000000000000000000000007E00",
             "extjson": "{\"d\" : {\"$numberDecimal\" : \"NaN\"}}",
@@ -41,24 +48,6 @@
             "description": "Special - Canonical Negative Infinity",
             "bson": "18000000136400000000000000000000000000000000F800",
             "extjson": "{\"d\" : {\"$numberDecimal\" : \"-Infinity\"}}"
-        },
-        {
-            "description": "Special - Invalid representation treated as 0",
-            "bson": "180000001364000000000000000000000000000000106C00",
-            "extjson": "{\"d\" : {\"$numberDecimal\" : \"0\"}}",
-            "lossy": true
-        },
-        {
-            "description": "Special - Invalid representation treated as -0",
-            "bson": "18000000136400DCBA9876543210DEADBEEF00000010EC00",
-            "extjson": "{\"d\" : {\"$numberDecimal\" : \"-0\"}}",
-            "lossy": true
-        },
-        {
-            "description": "Special - Invalid representation treated as 0E3",
-            "bson": "18000000136400FFFFFFFFFFFFFFFFFFFFFFFFFFFF116C00",
-            "extjson": "{\"d\" : {\"$numberDecimal\" : \"0E+3\"}}",
-            "lossy": true
         },
         {
             "description": "Regular - Adjusted Exponent Limit",
