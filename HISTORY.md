@@ -1,3 +1,7 @@
+0.5.0 2016-07-05
+-----------------
+- Added Decimal128 type and extended test suite to include entire bson corpus.
+
 0.4.23 2016-04-08
 -----------------
 - Allow for proper detection of ObjectId or objects that look like ObjectId, improving compatibility across third party libraries.
