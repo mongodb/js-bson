@@ -1,4 +1,8 @@
-0.5.1 2016-07-05
+0.5.2 2016-07-11
+-----------------
+- All values encoded big-endian style for ObjectId.
+
+0.5.1 2016-07-11
 -----------------
 - Fixed encoding/decoding issue in ObjectId timestamp generation.
 - Removed BinaryParser dependency from the serializer/deserializer.
