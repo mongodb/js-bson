@@ -18,7 +18,7 @@ var testCase = require('nodeunit').testCase,
   Double = BSON.Double,
   MinKey = BSON.MinKey,
   MaxKey = BSON.MaxKey,
-  BinaryParser = require('../../lib/bson/binary_parser').BinaryParser,
+  BinaryParser = require('../binary_parser').BinaryParser,
   vm = require('vm');
 
 // for tests
@@ -1345,6 +1345,8 @@ exports['ObjectID should correctly create objects'] = function(test) {
 exports['ObjectID should correctly retrieve timestamp'] = function(test) {
   var testDate = new Date();
   var object1 = new ObjectID();
+  console.log("================================ " + Math.floor(object1.getTimestamp().getTime()/1000))
+  console.log("================================ " + Math.floor(testDate.getTime()/1000))
   test.equal(Math.floor(testDate.getTime()/1000), Math.floor(object1.getTimestamp().getTime()/1000));
   test.done();
 }

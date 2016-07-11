@@ -1,3 +1,8 @@
+0.5.1 2016-07-05
+-----------------
+- Fixed encoding/decoding issue in ObjectId timestamp generation.
+- Removed BinaryParser dependency from the serializer/deserializer.
+
 0.5.0 2016-07-05
 -----------------
 - Added Decimal128 type and extended test suite to include entire bson corpus.
