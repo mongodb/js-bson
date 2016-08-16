@@ -1,3 +1,7 @@
+0.5.3 2016-07-11
+-----------------
+- Throw error if ObjectId is not a string or a buffer.
+
 0.5.2 2016-07-11
 -----------------
 - All values encoded big-endian style for ObjectId.
