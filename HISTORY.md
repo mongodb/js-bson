@@ -1,3 +1,7 @@
+0.5.4 2016-08-23
+-----------------
+- Added promoteValues flag (default to true) allowing user to specify if deserialization should be into wrapper classes only.
+
 0.5.3 2016-07-11
 -----------------
 - Throw error if ObjectId is not a string or a buffer.
