@@ -1,20 +1,20 @@
-var BSONNATIVE = require('bson-ext'),
-	Long = require('../lib/bson').Long,
+// var BSONNATIVE = require('bson-ext'),
+var Long = require('../lib/bson').Long,
 	ObjectID = require('../lib/bson').ObjectID,
 	Binary = require('../lib/bson').Binary,
-	Code = require('../lib/bson').Code,  
-	DBRef = require('../lib/bson').DBRef,  
-	Symbol = require('../lib/bson').Symbol,  
-	Double = require('../lib/bson').Double,  
-	MaxKey = require('../lib/bson').MaxKey,  
-	MinKey = require('../lib/bson').MinKey,  
+	Code = require('../lib/bson').Code,
+	DBRef = require('../lib/bson').DBRef,
+	Symbol = require('../lib/bson').Symbol,
+	Double = require('../lib/bson').Double,
+	MaxKey = require('../lib/bson').MaxKey,
+	MinKey = require('../lib/bson').MinKey,
 	Timestamp = require('../lib/bson').Timestamp;
 
-var BSONJSOLD = require('../lib/bson').BSONPure.BSON
-	, BSONJSNEW = require('../lib/bson/bson_new').BSON;
+var BSONJSOLD = require('../lib/bson').BSONPure.BSON;
+	// , BSONJSNEW = require('../lib/bson/bson_new').BSON;
 
 var warmUpCount = 50000;
-var iterations = 50000;
+var iterations = 200000;
 
 function makeid() {
   var text = "";
@@ -64,23 +64,23 @@ var execute = function(_warmUpCount, _iterations, _serializers, _obj) {
 
 // Parser instances
 var bsonOld = new BSONJSOLD([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
-var bsonNative = new BSONNATIVE([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
-var bsonNew = new BSONJSNEW([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
+// var bsonNative = new BSONNATIVE([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
+// var bsonNew = new BSONJSNEW([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
 
 // Serializers
 var serializers = [
 	{
 			bson: bsonOld
 		,	name: "BSONJSOLD"
-	}, 
-	{
-			bson: bsonNative
-		,	name: "BSONNATIVE"
-	}, 
-	{
-			bson: bsonNew
-		,	name: "BSONJSNEW"
-	}
+	},
+	// {
+	// 		bson: bsonNative
+	// 	,	name: "BSONNATIVE"
+	// },
+	// {
+	// 		bson: bsonNew
+	// 	,	name: "BSONJSNEW"
+	// }
 ]
 
 // // var doc = {a:1, b: 3.4, c: "world", d: new Date(), e: /aa/, f:new Binary(new Buffer(256))}
@@ -111,9 +111,9 @@ var doc1 = {
   // 'oid': new ObjectID(), 'binary': new Binary(new Buffer("hello")),
   // 'binary': new Buffer("hello"), 'int': 42, 'float': 33.3333,
   // 'regexp': /regexp/, 'boolean': true,
-  // 'long': Long.fromNumber(100), 'where': new Code('this.a > i', {i:1}),        
+  // 'long': Long.fromNumber(100), 'where': new Code('this.a > i', {i:1}),
   'dbref': new DBRef('namespace', new ObjectID(), 'integration_tests_'),
-  // 'minkey': new MinKey(), 'maxkey': new MaxKey()    
+  // 'minkey': new MinKey(), 'maxkey': new MaxKey()
 }
 
 var doc2 = {a:1, "hello": "world", obj: [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]};
@@ -127,24 +127,23 @@ for(var i = 0; i < 10000; i++) {
 }
 // iterations = 1;
 // warmUpCount = 1;
-console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 0")
-execute(warmUpCount, iterations, serializers, doc0);
-
-console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 1")
-execute(warmUpCount, iterations, serializers, doc1);
+// console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 0")
+// execute(warmUpCount, iterations, serializers, doc0);
+//
+// console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 1")
+// execute(warmUpCount, iterations, serializers, doc1);
 
 console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 2")
 execute(warmUpCount, iterations, serializers, doc2);
 
-console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 3")
-execute(warmUpCount, iterations, serializers, doc3);
+// console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 3")
+// execute(warmUpCount, iterations, serializers, doc3);
+//
+// console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 4")
+// execute(warmUpCount, iterations, serializers, doc4);
 
-console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 4")
-execute(warmUpCount, iterations, serializers, doc4);
-
-var warmUpCount = 100;
-var iterations = 1000;
-
-console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 5")
-execute(warmUpCount, iterations, serializers, doc5);
-
+// var warmUpCount = 100;
+// var iterations = 1000;
+//
+// console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++ TEST 5")
+// execute(warmUpCount, iterations, serializers, doc5);
