@@ -1,3 +1,7 @@
+0.5.5 2016-09-15
+-----------------
+- Added DBPointer up conversion to DBRef
+
 0.5.4 2016-08-23
 -----------------
 - Added promoteValues flag (default to true) allowing user to specify if deserialization should be into wrapper classes only.
