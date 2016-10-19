@@ -131,7 +131,6 @@ exports['Should Correctly convert ObjectID to itself'] = function(test) {
  */
 exports['Should Correctly get BSON types from require'] = function(test) {
   var _mongodb = require('../../lib/bson');
-  console.dir(_mongodb)
   test.ok(_mongodb.ObjectID === ObjectID);
   test.ok(_mongodb.Binary === Binary);
   test.ok(_mongodb.Long === Long);

@@ -1,3 +1,7 @@
+0.5.6 2016-10-19
+-----------------
+- Detects cyclic dependencies in documents and throws error if one is found.
+
 0.5.5 2016-09-15
 -----------------
 - Added DBPointer up conversion to DBRef
