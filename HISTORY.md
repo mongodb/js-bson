@@ -1,6 +1,7 @@
 0.5.6 2016-10-19
 -----------------
-- Detects cyclic dependencies in documents and throws error if one is found.
+- NODE-833, Detects cyclic dependencies in documents and throws error if one is found.
+- Fix(deserializer): corrected the check for (size + index) comparison… (Issue #195, https://github.com/JoelParke).
 
 0.5.5 2016-09-15
 -----------------
