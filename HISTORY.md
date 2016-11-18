@@ -1,3 +1,7 @@
+0.5.7 2016-11-18
+-----------------
+- NODE-848 BSON Regex flags must be alphabetically ordered.
+
 0.5.6 2016-10-19
 -----------------
 - NODE-833, Detects cyclic dependencies in documents and throws error if one is found.
