@@ -1,5 +1,5 @@
-var BSON = require('../../lib/bson/bson'),
-  ObjectId = BSON.ObjectID;
+var BSON = require('../..');
+var ObjectId = BSON.ObjectID;
 
 /**
  * @ignore

@@ -1,5 +1,5 @@
-var M = require('../../lib/bson/map'),
-  BSON = require('../../lib/bson/bson');
+var M = require('../../lib/bson/map');
+var createBSON = require('../utils');
 
 /**
  * @ignore
@@ -80,7 +80,7 @@ exports['should correctly exercise the map'] = function(test) {
 exports['should serialize a map'] = function(test) {
   // Serialize top level map only
   var m = new M([['a', 1], ['b', 2]]);
-  var bson = new BSON.BSON();
+  var bson = createBSON();
   // Serialize the map
   var data = bson.serialize(m, false, true);
   // Deserialize the data
@@ -99,7 +99,7 @@ exports['should serialize a map'] = function(test) {
 
   // Serialize top level map only
   var m = new M([['1', 1], ['0', 2]]);
-  var bson = new BSON.BSON();
+  var bson = createBSON();
   // Serialize the map, validating that the order in the resulting BSON is preserved
   var data = bson.serialize(m, false, true);
   test.equal('13000000103100010000001030000200000000', data.toString('hex'));

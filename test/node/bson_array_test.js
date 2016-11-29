@@ -1,4 +1,4 @@
-var BSON = require('../../lib/bson/bson');
+var BSON = require('../..');
 
 var testCase = require('nodeunit').testCase,
   Buffer = require('buffer').Buffer,
@@ -15,7 +15,7 @@ var testCase = require('nodeunit').testCase,
   MaxKey = require('../../lib/bson/max_key').MaxKey,
   utils = require('./tools/utils');
 
-var bson = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
+var createBSON = require('../utils');
 
 var hexStringToBinary = function(string) {
   var numberofValues = string.length / 2;

@@ -3,20 +3,21 @@
 var sys = require('util'),
   fs = require('fs'),
   Buffer = require('buffer').Buffer,
-  BSON = require('../../lib/bson/bson'),
+  BSON = require('../..'),
   BinaryParser = require('../binary_parser').BinaryParser,
-  Long = require('../../lib/bson/long').Long,
-  ObjectID = require('../../lib/bson/bson').ObjectID,
-  Binary = require('../../lib/bson/bson').Binary,
-  Code = require('../../lib/bson/bson').Code,
-  DBRef = require('../../lib/bson/bson').DBRef,
-  Symbol = require('../../lib/bson/bson').Symbol,
-  Double = require('../../lib/bson/bson').Double,
-  MaxKey = require('../../lib/bson/bson').MaxKey,
-  MinKey = require('../../lib/bson/bson').MinKey,
-  Timestamp = require('../../lib/bson/bson').Timestamp,
-  gleak = require('../../tools/gleak'),
+  Long = BSON.Long,
+  ObjectID = BSON.ObjectID,
+  Binary = BSON.Binary,
+  Code = BSON.Code,
+  DBRef = BSON.DBRef,
+  Symbol = BSON.Symbol,
+  Double = BSON.Double,
+  MaxKey = BSON.MaxKey,
+  MinKey = BSON.MinKey,
+  Timestamp = BSON.Timestamp,
   assert = require('assert');
+
+var createBSON = require('../utils');
 
 // for tests
 var BSON_BINARY_SUBTYPE_DEFAULT = 0;
@@ -87,13 +88,13 @@ exports['Should correctly handle toBson function for an object'] = function(test
 	}
 
 	// Serialize the data
-	var serialized_data = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
-	var deserialized_doc = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);
+	var serialized_data = createBSON().serialize(doc, false, true);
+	var deserialized_doc = createBSON().deserialize(serialized_data);
 	test.deepEqual({b:1}, deserialized_doc);
 
   // Serialize the data
-  var serialized_data = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
-  var deserialized_doc = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);
+  var serialized_data = createBSON().serialize(doc, false, true);
+  var deserialized_doc = createBSON().deserialize(serialized_data);
   test.deepEqual({b:1}, deserialized_doc);
   test.done();
 }
@@ -117,12 +118,12 @@ exports['Should correctly handle embedded toBson function for an object'] = func
   }
 
   // Serialize the data
-  var serialized_data = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
-  var deserialized_doc = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);
+  var serialized_data = createBSON().serialize(doc, false, true);
+  var deserialized_doc = createBSON().deserialize(serialized_data);
   test.deepEqual({e:1}, deserialized_doc.b);
 
-  var serialized_data = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
-  var deserialized_doc = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);
+  var serialized_data = createBSON().serialize(doc, false, true);
+  var deserialized_doc = createBSON().deserialize(serialized_data);
   test.deepEqual({e:1}, deserialized_doc.b);
   test.done();
 }
@@ -146,13 +147,13 @@ exports['Should correctly serialize when embedded non object returned by toBSON'
   }
 
   // Serialize the data
-  var serialized_data = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
-  var deserialized_doc = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);
+  var serialized_data = createBSON().serialize(doc, false, true);
+  var deserialized_doc = createBSON().deserialize(serialized_data);
   test.deepEqual("hello", deserialized_doc.b);
 
   // Serialize the data
-  var serialized_data = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
-  var deserialized_doc = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);
+  var serialized_data = createBSON().serialize(doc, false, true);
+  var deserialized_doc = createBSON().deserialize(serialized_data);
   test.deepEqual("hello", deserialized_doc.b);
   test.done();
 }
@@ -179,15 +180,15 @@ exports['Should fail when top level object returns a non object type'] = functio
   var test2 = false;
 
   try {
-    var serialized_data = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
-    var deserialized_doc = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);
+    var serialized_data = createBSON().serialize(doc, false, true);
+    var deserialized_doc = createBSON().deserialize(serialized_data);
   } catch (err) {
     test1 = true;
   }
 
   try {
-    var serialized_data = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).serialize(doc, false, true);
-    var deserialized_doc = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(serialized_data);
+    var serialized_data = createBSON().serialize(doc, false, true);
+    var deserialized_doc = createBSON().deserialize(serialized_data);
   } catch (err) {
     test2 = true;
   }

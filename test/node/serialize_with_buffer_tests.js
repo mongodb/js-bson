@@ -1,21 +1,24 @@
-var BSON = require('../../lib/bson/bson'),
+var BSON = require('../..'),
   f = require('util').format,
   assert = require('assert');
 
-var bson = new BSON();
+var createBSON = require('../utils');
 
 /**
  * @ignore
  */
 exports['correctly serialize into buffer using serializeWithBufferAndIndex'] = function(test) {
+  var bson = createBSON();
   // Create a buffer
   var b = new Buffer(256);
   // Serialize from index 0
-  var r = bson.serializeWithBufferAndIndex({a:1}, false, b, 0, false, false);
+  var r = bson.serializeWithBufferAndIndex({a:1}, b);
   test.equal(11, r);
 
   // Serialize from index r+1
-  var r = bson.serializeWithBufferAndIndex({a:1}, false, b, r + 1, false, false);
+  var r = bson.serializeWithBufferAndIndex({a:1}, b, {
+    index: r + 1
+  });
   test.equal(23, r);
 
   // Deserialize the buffers

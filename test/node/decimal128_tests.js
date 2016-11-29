@@ -2,6 +2,9 @@ var Decimal128 = require('../../lib/bson/decimal128');
 var NAN = new Buffer([0x7c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
 var INF_NEGATIVE_BUFFER = new Buffer([0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
 var INF_POSITIVE_BUFFER = new Buffer([0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse());
+var BSON = require('../..');
+
+var createBSON = require('../utils');
 
 var shouldFail = function() {
   try {
@@ -511,12 +514,11 @@ exports['toString zeros'] = function(test) {
 }
 
 exports['Serialize and Deserialize tests'] = function(test) {
-  var BSON = require('../../lib/bson/bson');
-  var bson = new BSON();
+  var bson = createBSON();
 
   // Test all methods around a simple serialization at object top level
   var doc = {value: Decimal128.fromString("1")};
-  var buffer = bson.serialize(doc, false, true, true, 0, true)
+  var buffer = bson.serialize(doc)
   var size = bson.calculateObjectSize(doc);
   var back = bson.deserialize(buffer);
 
@@ -527,7 +529,7 @@ exports['Serialize and Deserialize tests'] = function(test) {
 
   // Test all methods around a simple serialization at array top level
   var doc = {value: [Decimal128.fromString("1")]};
-  var buffer = bson.serialize(doc, false, true, true, 0, true)
+  var buffer = bson.serialize(doc)
   var size = bson.calculateObjectSize(doc);
   var back = bson.deserialize(buffer);
 
@@ -537,7 +539,7 @@ exports['Serialize and Deserialize tests'] = function(test) {
 
   // Test all methods around a simple serialization at nested object
   var doc = {value: { a: Decimal128.fromString("1") } };
-  var buffer = bson.serialize(doc, false, true, true, 0, true)
+  var buffer = bson.serialize(doc)
   var size = bson.calculateObjectSize(doc);
   var back = bson.deserialize(buffer);
 
@@ -548,8 +550,7 @@ exports['Serialize and Deserialize tests'] = function(test) {
 }
 
 exports['Support toBSON and toObject methods for custom mapping'] = function(test) {
-  var BSON = require('../../lib/bson/bson');
-  var bson = new BSON();
+  var bson = createBSON()
 
   // Create a custom object
   var MyCustomDecimal = function(value) {
@@ -567,7 +568,7 @@ exports['Support toBSON and toObject methods for custom mapping'] = function(tes
 
   // Test all methods around a simple serialization at object top level
   var doc = {value: new MyCustomDecimal("1")};
-  var buffer = bson.serialize(doc, false, true, true, 0, true)
+  var buffer = bson.serialize(doc)
   var back = bson.deserialize(buffer);
   test.ok(back.value instanceof MyCustomDecimal);
   test.equal("1", back.value.value);

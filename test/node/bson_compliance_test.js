@@ -1,4 +1,4 @@
-var BSON = require('../../lib/bson/bson'),
+var BSON = require('../..'),
   Code = BSON.Code,
   Binary = BSON.Binary,
   Timestamp = BSON.Timestamp,
@@ -8,10 +8,15 @@ var BSON = require('../../lib/bson/bson'),
   ObjectId = BSON.ObjectID,
   Symbol = BSON.Symbol,
   DBRef = BSON.DBRef,
+  Int32 = BSON.Int32,
+  BSONRegExp = BSON.BSONRegExp,
+  Decimal128 = BSON.Decimal128,
   Double = BSON.Double,
   MinKey = BSON.MinKey,
   MaxKey = BSON.MaxKey,
   fs = require('fs');
+
+var createBSON = require('../utils');
 
 /**
  * Retrieve the server information for the current
@@ -41,7 +46,7 @@ exports['Pass all corrupt BSON scenarios ./compliance/corrupt.json'] = function(
   var scenarios = require(__dirname + '/compliance/corrupt');
 
   // Create a new BSON instance
-  var bson = new BSON();
+  var bson = createBSON();
 
   for(var i = 0; i < scenarios.documents.length; i++) {
     var doc = scenarios.documents[i];
@@ -68,7 +73,7 @@ exports['Pass all valid BSON serialization scenarios ./compliance/valid.json'] =
   var scenarios = require(__dirname + '/compliance/valid');
 
   // Create a new BSON instance
-  var bson = new BSON();
+  var bson = createBSON();
 
   // Translate extended json to correctly typed doc
   var translate = function(doc, object) {

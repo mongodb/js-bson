@@ -1,4 +1,4 @@
-var BSON = require('../../lib/bson/bson'),
+var BSON = require('../..'),
   Decimal128 = BSON.Decimal128,
   Long = BSON.Long,
   deserialize = require('../../extended-json').deserialize,
@@ -7,7 +7,8 @@ var BSON = require('../../lib/bson/bson'),
   assert = require('assert'),
   fs = require('fs');
 
-var bson = new BSON();
+var createBSON = require('../utils');
+var bson = createBSON();
 
 function executeValid(spec, scenarios) {
   console.log('  * Starting valid scenario tests');
@@ -41,6 +42,20 @@ function executeValid(spec, scenarios) {
       //
       // Baseline tests
       if(cB) {
+        // console.log("============================================ 0")
+        // console.dir(deserialize(E))
+        // console.dir(bson.deserialize(B, {
+        //   promoteLongs: false, bsonRegExp: true
+        // }))
+        // console.dir(bson.deserialize(bson.serialize(bson.deserialize(B, {
+        //   promoteLongs: false, bsonRegExp: true
+        // }))))
+        // console.log("============================================ 1")
+        // console.dir(B)
+        // console.dir(cB)
+        // console.dir(bson.serialize(bson.deserialize(B, {
+        //   promoteLongs: false, bsonRegExp: true
+        // })))
         assert.deepEqual(cB, bson.serialize(bson.deserialize(B, {
           promoteLongs: false, bsonRegExp: true
         })));
@@ -102,7 +117,11 @@ function executeDecodeError(spec, scenarios) {
       var deserializedObject = bson.deserialize(buffer, {
         promoteLongs: false, bsonRegExp: true
       });
+
+      // console.log("============================ deserializedObject")
+      // console.dir(deserializedObject)
     } catch(err) {
+      // console.log(err)
       failed = true;
     }
 
@@ -164,6 +183,14 @@ exports['Pass all BSON corpus ./specs/bson-corpus/binary.json'] = function(test)
  */
 exports['Pass all BSON corpus ./specs/bson-corpus/boolean.json'] = function(test) {
   executeAll(require(__dirname + '/specs/bson-corpus/boolean'));
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['Pass all BSON corpus ./specs/bson-corpus/code_w_scope.json'] = function(test) {
+  executeAll(require(__dirname + '/specs/bson-corpus/code_w_scope'));
   test.done();
 }
 

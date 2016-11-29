@@ -2,9 +2,8 @@
 
 var testCase = require('nodeunit').testCase,
   Buffer = require('buffer').Buffer,
-  gleak = require('../../tools/gleak'),
   fs = require('fs'),
-  BSON = require('../../lib/bson/bson'),
+  BSON = require('../..'),
   Code = BSON.Code,
   BSONRegExp = BSON.BSONRegExp,
   Binary = BSON.Binary,
@@ -21,6 +20,8 @@ var testCase = require('nodeunit').testCase,
   MaxKey = BSON.MaxKey,
   BinaryParser = require('../binary_parser').BinaryParser,
   vm = require('vm');
+
+var createBSON = require('../utils');
 
 // for tests
 BSON.BSON_BINARY_SUBTYPE_DEFAULT = 0;
@@ -124,7 +125,7 @@ exports['Should Correctly Deserialize object with all wrapper types'] = function
     serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
   }
 
-  var object = new BSON.BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]).deserialize(new Buffer(serialized_data, 'binary'), {promoteValues:false});
+  var object = createBSON().deserialize(new Buffer(serialized_data, 'binary'), {promoteValues:false});
   // Perform tests
   test.equal("hello", object.string);
   test.deepEqual([new Int32(1),new Int32(2),new Int32(3)], object.array);

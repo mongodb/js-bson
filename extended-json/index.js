@@ -1,6 +1,6 @@
 "use strict"
 
-var bson = require('../lib/bson');
+var bson = require('../');
 var Binary = bson.Binary
   , Long = bson.Long
   , MaxKey = bson.MaxKey
