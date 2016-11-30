@@ -14,7 +14,7 @@
     "tools",
     "deserializer_bak.js"
   ],
-  "version": "0.5.7",
+  "version": "1.0.0",
   "author": "Christian Amor Kvalheim <christkv@gmail.com>",
   "contributors": [],
   "repository": "mongodb/js-bson",
@@ -31,7 +31,7 @@
   "config": {
     "native": false
   },
-  "main": "./lib/bson/index",
+  "main": "./index",
   "directories": {
     "lib": "./lib/bson"
   },
