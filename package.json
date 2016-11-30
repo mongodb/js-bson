@@ -8,11 +8,9 @@
   ],
   "files": [
     "lib",
+    "index.js"
     "browser_build",
-    "alternate_parsers",
     "bower.json",
-    "tools",
-    "deserializer_bak.js"
   ],
   "version": "1.0.0",
   "author": "Christian Amor Kvalheim <christkv@gmail.com>",
