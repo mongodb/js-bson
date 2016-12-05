@@ -11,15 +11,18 @@ A simple example of how to use BSON in the browser:
 
 <script>
   function start() {
-    var BSON = bson().BSON
-    var Long = bson().Long
+    // Get the Long type
+    var Long = BSON.Long;
+    // Create a bson parser instance
+    var bson = new BSON();
 
+    // Serialize document
     var doc = { long: Long.fromNumber(100) }
 
     // Serialize a document
-    var data = BSON.serialize(doc, false, true, false)
+    var data = bson.serialize(doc)
     // De serialize it again
-    var doc_2 = BSON.deserialize(data)
+    var doc_2 = bson.deserialize(data)
   }
 </script>
 ```
@@ -27,18 +30,22 @@ A simple example of how to use BSON in the browser:
 A simple example of how to use BSON in `node.js`:
 
 ```js
-var bson = require('bson')
-var BSON = new bson.BSONPure.BSON()
-var Long = bson.BSONPure.Long
+// Get BSON parser class
+var BSON = require('bson')
+// Get the Long type
+var Long = BSON.Long;
+// Create a bson parser instance
+var bson = new BSON();
 
+// Serialize document
 var doc = { long: Long.fromNumber(100) }
 
 // Serialize a document
-var data = BSON.serialize(doc, false, true, false)
+var data = bson.serialize(doc)
 console.log('data:', data)
 
 // Deserialize the resulting Buffer
-var doc_2 = BSON.deserialize(data)
+var doc_2 = bson.deserialize(data)
 console.log('doc_2:', doc_2)
 ```
 
@@ -52,44 +59,81 @@ The API consists of two simple methods to serialize/deserialize objects to/from 
 
 ## API
 
+### BSON types
+
+For all BSON types documentation, please refer to the documentation for the mongodb driver.
+
+https://github.com/mongodb/node-mongodb-native
+
 ### BSON serialization and deserialiation
 
-**`new bson.BSONPure.BSON()`** - Creates a new BSON seralizer/deserializer you can use to serialize and deserialize BSON.
+**`new BSON()`** - Creates a new BSON seralizer/deserializer you can use to serialize and deserialize BSON.
 
-  * BSON.serialize(object, checkKeys, asBuffer, serializeFunctions)
-     * @param {Object} object the Javascript object to serialize.
-     * @param {Boolean} checkKeys the serializer will check if keys are valid.
-     * @param {Boolean} asBuffer return the serialized object as a Buffer object **(ignore)**.
-     * @param {Boolean} serializeFunctions serialize the javascript functions **(default:false)**
-     * @return {TypedArray/Array} returns a TypedArray or Array depending on what your browser supports
+#### BSON.serialize
 
-  * BSON.deserialize(buffer, options, isArray)
-     * Options
-       * **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
-       * **cacheFunctions** {Boolean, default:false}, cache evaluated functions for reuse.
-       * **cacheFunctionsCrc32** {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.
-       * **promoteBuffers** {Boolean, default:false}, deserialize Binary data directly into node.js Buffer object.
-     * @param {TypedArray/Array} a TypedArray/Array containing the BSON data
-     * @param {Object} [options] additional options used for the deserialization.
-     * @param {Boolean} [isArray] ignore used for recursive parsing.
-     * @return {Object} returns the deserialized Javascript Object.
+The BSON serialize method takes a javascript object and an optional options object and returns a Node.js Buffer.
 
-### ObjectId
+  * BSON.serialize(object, options)
+    * @param {Object} object the Javascript object to serialize.
+    * @param {Boolean} [options.checkKeys=false] the serializer will check if keys are valid.
+    * @param {Boolean} [options.serializeFunctions=false] serialize the javascript. functions.
+    * @param {Boolean} [options.ignoreUndefined=true]
+    * @return {Buffer} returns a Buffer instance.
 
-**`bson.ObjectId.isValid(id)`** - Returns true if `id` is a valid number or hexadecimal string representing an ObjectId.
-**`bson.ObjectId.createFromHexString(hexString)`** - Returns the ObjectId the `hexString` represents.
-**`bson.ObjectId.createFromTime(time)`** - Returns an ObjectId containing the passed time.
-* `time` - A Unix timestamp (number of seconds since the epoch).
+#### BSON.serializeWithBufferAndIndex
 
-**`var objectId = new bson.ObjectId(id)`** - Creates a new `ObjectId`.
-* `id` - Must either be a 24-character hex string or a 12 byte binary string.
+The BSON serializeWithBufferAndIndex method takes an object, a target buffer instance and an optional options object and returns the end serialization index in the final buffer.
 
-**`objectId.toJSON()`**
-**`objectId.toString()`**
-**`objectId.toHexString()`** - Returns a hexadecimal string representation of the ObjectId.
+  * BSON.serializeWithBufferAndIndex(object, buffer, options)
+    * @param {Object} object the Javascript object to serialize.
+    * @param {Buffer} buffer the Buffer you pre-allocated to store the serialized BSON object.
+    * @param {Boolean} [options.checkKeys=false] the serializer will check if keys are valid.
+    * @param {Boolean} [options.serializeFunctions=false] serialize the javascript functions.
+    * @param {Boolean} [options.ignoreUndefined=true] ignore undefined fields.
+    * @param {Number} [options.index=0] the index in the buffer where we wish to start serializing into.
+    * @return {Number} returns the index pointing to the last written byte in the buffer.
 
-**`objectId.equals(otherObjectId)`** - Returns true if the ObjectIds are the same, false otherwise.
+#### BSON.calculateObjectSize
 
-**`objectId.getTimestamp()`** - Returns a `Date` object containing the time the objectId was created for.
+The BSON calculateObjectSize method takes a javascript object and an optional options object and returns the size of the BSON object.
 
-**`objectId.getTimestamp()`** - Returns a `Date` object containing the time the objectId contains.
+  * BSON.calculateObjectSize(object, options)
+    * @param {Object} object the Javascript object to serialize.
+    * @param {Boolean} [options.serializeFunctions=false] serialize the javascript. functions.
+    * @param {Boolean} [options.ignoreUndefined=true]
+    * @return {Buffer} returns a Buffer instance.
+
+#### BSON.deserialize
+
+The BSON deserialize method takes a node.js Buffer and an optional options object and returns a deserialized Javascript object.
+
+  * BSON.deserialize(buffer, options)
+    * @param {Object} [options.evalFunctions=false] evaluate functions in the BSON document scoped to the object deserialized.
+    * @param {Object} [options.cacheFunctions=false] cache evaluated functions for reuse.
+    * @param {Object} [options.cacheFunctionsCrc32=false] use a crc32 code for caching, otherwise use the string of the function.
+    * @param {Object} [options.promoteLongs=true] when deserializing a Long will fit it into a Number if it's smaller than 53 bits
+    * @param {Object} [options.promoteBuffers=false] when deserializing a Binary will return it as a node.js Buffer instance.
+    * @param {Object} [options.promoteValues=false] when deserializing will promote BSON values to their Node.js closest equivalent types.
+    * @param {Object} [options.fieldsAsRaw=null] allow to specify if there what fields we wish to return as unserialized raw buffer.
+    * @param {Object} [options.bsonRegExp=false] return BSON regular expressions as BSONRegExp instances.
+    * @return {Number} returns the next index in the buffer after deserialization **x** numbers of documents.
+
+#### BSON.deserializeStream
+
+The BSON deserializeStream method takes a node.js Buffer, startIndex and allow more control over deserialization of a Buffer containing concatenated BSON documents.
+
+  * BSON.deserializeStream(buffer, startIndex, numberOfDocuments, documents, docStartIndex, options)
+    * @param {Buffer} buffer the buffer containing the serialized set of BSON documents.
+    * @param {Number} startIndex the start index in the data Buffer where the deserialization is to start.
+    * @param {Number} numberOfDocuments number of documents to deserialize.
+    * @param {Array} documents an array where to store the deserialized documents.
+    * @param {Number} docStartIndex the index in the documents array from where to start inserting documents.
+    * @param {Object} [options.evalFunctions=false] evaluate functions in the BSON document scoped to the object deserialized.
+    * @param {Object} [options.cacheFunctions=false] cache evaluated functions for reuse.
+    * @param {Object} [options.cacheFunctionsCrc32=false] use a crc32 code for caching, otherwise use the string of the function.
+    * @param {Object} [options.promoteLongs=true] when deserializing a Long will fit it into a Number if it's smaller than 53 bits
+    * @param {Object} [options.promoteBuffers=false] when deserializing a Binary will return it as a node.js Buffer instance.
+    * @param {Object} [options.promoteValues=false] when deserializing will promote BSON values to their Node.js closest equivalent types.
+    * @param {Object} [options.fieldsAsRaw=null] allow to specify if there what fields we wish to return as unserialized raw buffer.
+    * @param {Object} [options.bsonRegExp=false] return BSON regular expressions as BSONRegExp instances.
+    * @return {Object} returns the deserialized Javascript Object.
