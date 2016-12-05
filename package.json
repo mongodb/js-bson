@@ -23,8 +23,15 @@
   "devDependencies": {
     "benchmark": "1.0.0",
     "colors": "1.1.0",
-    "gleak": "0.2.3",
-    "nodeunit": "0.9.0"
+    "nodeunit": "0.9.0",
+    "babel-core": "^6.14.0",
+    "babel-loader": "^6.2.5",
+    "babel-polyfill": "^6.13.0",
+    "babel-preset-es2015": "^6.14.0",
+    "babel-preset-stage-0": "^6.5.0",
+    "babel-register": "^6.14.0",
+    "webpack": "^1.13.2",
+    "webpack-polyfills-plugin": "0.0.9"
   },
   "config": {
     "native": false
@@ -37,7 +44,8 @@
     "node": ">=0.6.19"
   },
   "scripts": {
-    "test": "nodeunit ./test/node"
+    "test": "nodeunit ./test/node",
+    "build": "webpack --config ./webpack.dist.config.js"
   },
   "browser": "lib/bson/bson.js",
   "license": "Apache-2.0"
