@@ -18,3 +18,20 @@ exports['should correctly handle objectId timestamps'] = function(test) {
 
   test.done();
 }
+
+/**
+ * @ignore
+ */
+exports['should correctly create ObjectId from uppercase hexstring'] = function(test) {
+  var a = 'AAAAAAAAAAAAAAAAAAAAAAAA';
+  var b = new ObjectId(a);
+  var c = b.equals(a); // => false
+  test.equal(true, c);
+
+  var a = 'aaaaaaaaaaaaaaaaaaaaaaaa';
+  var b = new ObjectId(a);
+  var c = b.equals(a); // => true
+  test.equal(true, c);
+
+  test.done();
+}
