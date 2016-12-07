@@ -395,8 +395,8 @@ exports['Should correctly serialize undefined array entries as undefined values'
   // console.dir(doc1)
   // console.dir(doc2)
 
-  test.deepEqual(undefined, doc1.doc.notdefined);
-  test.deepEqual(undefined, doc2.doc.notdefined);
+  test.deepEqual(null, doc1.doc.notdefined);
+  test.deepEqual(null, doc2.doc.notdefined);
   test.done();
 }
 

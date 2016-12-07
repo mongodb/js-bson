@@ -1,3 +1,11 @@
+1.0.1 2016-12-06
+----------------
+- Reverse behavior for undefined to be serialized as NULL. MongoDB 3.4 does not allow for undefined comparisons.
+
+1.0.0 2016-12-06
+----------------
+- Introduced new BSON API and documentation.
+
 0.5.7 2016-11-18
 -----------------
 - NODE-848 BSON Regex flags must be alphabetically ordered.
