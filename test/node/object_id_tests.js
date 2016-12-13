@@ -26,12 +26,12 @@ exports['should correctly create ObjectId from uppercase hexstring'] = function(
   var a = 'AAAAAAAAAAAAAAAAAAAAAAAA';
   var b = new ObjectId(a);
   var c = b.equals(a); // => false
-  test.equal(true, c);
+  test.equal(false, c);
 
   var a = 'aaaaaaaaaaaaaaaaaaaaaaaa';
   var b = new ObjectId(a);
   var c = b.equals(a); // => true
-  test.equal(true, c);
+  test.equal(false, c); // a is not an instance
 
   test.done();
 }

@@ -1093,7 +1093,7 @@ exports['Should handle complicated all typed object'] = function(test) {
   }
 
   // Second doc
-  var oid = new ObjectID.createFromHexString(oid.toHexString());
+  var oid = ObjectID.createFromHexString(oid.toHexString());
   var string = 'binstring'
   var bin = new Binary()
   for(var index = 0; index < string.length; index++) {
@@ -1175,7 +1175,7 @@ exports['Should correctly massive doc'] = function(test) {
        _id: oid2 };
 
   var doc2 = { dbref2: new DBRef('namespace', ObjectID.createFromHexString(oid1.toHexString()), 'integration_tests_'),
-      _id: new ObjectID.createFromHexString(oid2.toHexString()) };
+      _id: ObjectID.createFromHexString(oid2.toHexString()) };
 
   var serialized_data = createBSON().serialize(doc);
 
@@ -1818,8 +1818,9 @@ exports['ObjectID should have a correct cached representation of the hexString']
 exports['Should fail to create ObjectID due to illegal hex code'] = function(test) {
   try {
     new ObjectID("zzzzzzzzzzzzzzzzzzzzzzzz");
-    test.ok(false);
   } catch (err) {
+    test.ok(err)
+    test.equal(err.message, "Argument passed in must be a single String of 12 bytes or a string of 24 hex characters");
   }
 
   test.equal(false, ObjectID.isValid(null));
@@ -1843,8 +1844,8 @@ exports['Should fail to create ObjectID due to illegal hex code'] = function(tes
     }
   };
 
-  test.equal(true, tmp.equals(objectIdLike));
-  test.equal(true, tmp.equals(new ObjectId(objectIdLike)));
+  test.equal(false, tmp.equals(objectIdLike));
+  test.equal(false, tmp.equals(new ObjectId(objectIdLike)));
   test.equal(true, ObjectID.isValid(objectIdLike));
 
   test.done();
@@ -1893,7 +1894,7 @@ exports['Should correctly deserialize the BSONRegExp type'] = function(test) {
 exports['Should return boolean for ObjectID equality check'] = function(test) {
   var id = new ObjectID();
   test.equal(true, id.equals(new ObjectID(id.toString())));
-  test.equal(true, id.equals(id.toString()));
+  test.equal(true, id.equals(id));
   test.equal(false, id.equals('1234567890abcdef12345678'));
   test.equal(false, id.equals('zzzzzzzzzzzzzzzzzzzzzzzz'));
   test.equal(false, id.equals('foo'));
