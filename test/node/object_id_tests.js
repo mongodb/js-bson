@@ -52,6 +52,5 @@ exports['should correctly create ObjectId from Buffer'] = function(test) {
   var c = b.equals(a); // => true
   test.equal(a, b.toString());
   test.equal(true, c);
-
   test.done();
 }
