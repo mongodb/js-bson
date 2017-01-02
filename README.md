@@ -57,7 +57,7 @@ console.log('doc_2:', doc_2)
 
 ## Installation
 
-`npm install bson-ext`
+`npm install bson`
 
 ## API
 
