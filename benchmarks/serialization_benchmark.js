@@ -33,7 +33,7 @@ function generateRecord(recnum) {
         fieldval = BSON.Long(recnum + tf) // A 64 bit integer
         break
     }
-    fieldval = Math.PI * tf // A float
+    // fieldval = Math.PI * tf // A float
     // fieldval = new Date(tf * recnum) //A date
     // fieldval = "Lorem ipsum dolor sit amet, consectetur adipiscing elit." //Text
     // fieldval = BSON.Long(recnum + tf) // A 64 bit integer
@@ -59,7 +59,7 @@ function generateRecord(recnum) {
           fieldval = BSON.Long(recnum + tf * el)
           break
       }
-      fieldval = Math.PI * tf * el;
+      // fieldval = Math.PI * tf * el;
       // fieldval = new Date(tf * recnum * el)
       // fieldval = "Nunc finibus pretium dignissim. Aenean ut nisi finibus"
       // fieldval = BSON.Long(recnum + tf * el)
@@ -73,7 +73,7 @@ function generateRecord(recnum) {
 
 var start = new Date();
 var iterations = 100000;
-// var iterations = 10000;
+var iterations = 10000;
 var doc = generateRecord(0)
 var buffer = bson.serialize(doc);
 
