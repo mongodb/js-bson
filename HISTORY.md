@@ -1,4 +1,4 @@
-1.0.2 2016-12-06
+1.0.2 2016-01-02
 ----------------
 - Minor optimizations for ObjectID to use Buffer.from where available.
 
