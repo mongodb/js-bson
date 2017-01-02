@@ -1,3 +1,7 @@
+1.0.2 2016-12-06
+----------------
+- Minor optimizations for ObjectID to use Buffer.from where available.
+
 1.0.1 2016-12-06
 ----------------
 - Reverse behavior for undefined to be serialized as NULL. MongoDB 3.4 does not allow for undefined comparisons.
