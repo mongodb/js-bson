@@ -1,3 +1,7 @@
+1.0.3 2016-01-03
+----------------
+- Fixed toString for ObjectId so it will work with inspect.
+
 1.0.2 2016-01-02
 ----------------
 - Minor optimizations for ObjectID to use Buffer.from where available.
