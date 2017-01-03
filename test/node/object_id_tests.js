@@ -1,4 +1,5 @@
 var BSON = require('../..');
+var util = require('util');
 var ObjectId = BSON.ObjectID;
 
 /**
@@ -52,5 +53,25 @@ exports['should correctly create ObjectId from Buffer'] = function(test) {
   var c = b.equals(a); // => true
   test.equal(a, b.toString());
   test.equal(true, c);
+  test.done();
+}
+
+/**
+ * @ignore
+ */
+exports['should correctly allow for node.js inspect to work with ObjectId'] = function(test) {
+  var a = 'AAAAAAAAAAAAAAAAAAAAAAAA';
+  var b = new ObjectId(a);
+  util.inspect(b);
+
+  // var c = b.equals(a); // => false
+  // test.equal(true, c);
+  //
+  // var a = 'aaaaaaaaaaaaaaaaaaaaaaaa';
+  // var b = new ObjectId(a);
+  // var c = b.equals(a); // => true
+  // test.equal(true, c);
+  // test.equal(a, b.toString());
+
   test.done();
 }
