@@ -1,3 +1,7 @@
+1.0.4 2016-01-11
+----------------
+- #204 remove Buffer.from as it's partially broken in early 4.x.x. series of node releases.
+
 1.0.3 2016-01-03
 ----------------
 - Fixed toString for ObjectId so it will work with inspect.
