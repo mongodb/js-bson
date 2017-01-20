@@ -104,3 +104,18 @@ exports['should serialize a map'] = function(test) {
   var data = bson.serialize(m, false, true);
   test.equal('13000000103100010000001030000200000000', data.toString('hex'));
 }
+
+/**
+ * @ignore
+ */
+exports['should not crash due to object that looks like map'] = function(test) {
+  // Serialize top level map only
+  var m = { entries: "test" };
+  var bson = createBSON();
+  // Serialize the map
+  var data = bson.serialize(m, false, true);
+  // Deserialize the data
+  var object = bson.deserialize(data);
+  test.deepEqual(m, object);
+  test.done();
+}
