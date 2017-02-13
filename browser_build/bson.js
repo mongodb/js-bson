@@ -7308,7 +7308,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	!(function(global) {
 	  "use strict";
 
-	  var hasOwn = Object.prototype.hasOwnProperty;
+	  var Op = Object.prototype;
+	  var hasOwn = Op.hasOwnProperty;
 	  var undefined; // More compressible than void 0.
 	  var $Symbol = typeof Symbol === "function" ? Symbol : {};
 	  var iteratorSymbol = $Symbol.iterator || "@@iterator";
@@ -7380,10 +7381,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function GeneratorFunction() {}
 	  function GeneratorFunctionPrototype() {}
 
-	  var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype;
+	  // This is a polyfill for %IteratorPrototype% for environments that
+	  // don't natively support it.
+	  var IteratorPrototype = {};
+	  IteratorPrototype[iteratorSymbol] = function () {
+	    return this;
+	  };
+
+	  var getProto = Object.getPrototypeOf;
+	  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+	  if (NativeIteratorPrototype &&
+	      NativeIteratorPrototype !== Op &&
+	      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
+	    // This environment has a native %IteratorPrototype%; use it instead
+	    // of the polyfill.
+	    IteratorPrototype = NativeIteratorPrototype;
+	  }
+
+	  var Gp = GeneratorFunctionPrototype.prototype =
+	    Generator.prototype = Object.create(IteratorPrototype);
 	  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
 	  GeneratorFunctionPrototype.constructor = GeneratorFunction;
-	  GeneratorFunctionPrototype[toStringTagSymbol] = GeneratorFunction.displayName = "GeneratorFunction";
+	  GeneratorFunctionPrototype[toStringTagSymbol] =
+	    GeneratorFunction.displayName = "GeneratorFunction";
 
 	  // Helper for defining the .next, .throw, and .return methods of the
 	  // Iterator interface in terms of a single ._invoke method.
@@ -7420,16 +7440,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  // Within the body of any async function, `await x` is transformed to
 	  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
-	  // `value instanceof AwaitArgument` to determine if the yielded value is
-	  // meant to be awaited. Some may consider the name of this method too
-	  // cutesy, but they are curmudgeons.
+	  // `hasOwn.call(value, "__await")` to determine if the yielded value is
+	  // meant to be awaited.
 	  runtime.awrap = function(arg) {
-	    return new AwaitArgument(arg);
+	    return { __await: arg };
 	  };
-
-	  function AwaitArgument(arg) {
-	    this.arg = arg;
-	  }
 
 	  function AsyncIterator(generator) {
 	    function invoke(method, arg, resolve, reject) {
@@ -7439,8 +7454,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      } else {
 	        var result = record.arg;
 	        var value = result.value;
-	        if (value instanceof AwaitArgument) {
-	          return Promise.resolve(value.arg).then(function(value) {
+	        if (value &&
+	            typeof value === "object" &&
+	            hasOwn.call(value, "__await")) {
+	          return Promise.resolve(value.__await).then(function(value) {
 	            invoke("next", value, resolve, reject);
 	          }, function(err) {
 	            invoke("throw", err, resolve, reject);
@@ -7509,6 +7526,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  defineIteratorMethods(AsyncIterator.prototype);
+	  runtime.AsyncIterator = AsyncIterator;
 
 	  // Note that simple async functions are implemented on top of
 	  // AsyncIterator objects; they just return a Promise for the value of
@@ -7668,10 +7686,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Define Generator.prototype.{next,throw,return} in terms of the
 	  // unified ._invoke helper method.
 	  defineIteratorMethods(Gp);
-
-	  Gp[iteratorSymbol] = function() {
-	    return this;
-	  };
 
 	  Gp[toStringTagSymbol] = "Generator";
 
@@ -8291,11 +8305,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
 	  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : true;
 
-	  // console.log("===================================== serialize")
-	  // console.log("checkKeys = " + checkKeys)
-	  // console.log("serializeFunctions = " + serializeFunctions)
-	  // console.log("ignoreUndefined = " + ignoreUndefined)
-
 	  // Attempt to serialize
 	  var serializationIndex = serializer(buffer, object, checkKeys, 0, 0, serializeFunctions, ignoreUndefined, []);
 	  // Create the final buffer
@@ -8326,12 +8335,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : true;
 	  var startIndex = typeof options.index == 'number' ? options.index : 0;
 
-	  // console.log("===================================== serializeWithBufferAndIndex")
-	  // console.log("checkKeys = " + checkKeys)
-	  // console.log("serializeFunctions = " + serializeFunctions)
-	  // console.log("ignoreUndefined = " + ignoreUndefined)
-	  // console.log("startIndex = " + startIndex)
-
 	  // Attempt to serialize
 	  var serializationIndex = serializer(buffer, object, checkKeys, startIndex || 0, 0, serializeFunctions, ignoreUndefined);
 	  buffer.copy(finalBuffer, startIndex, 0, serializationIndex);
@@ -8343,20 +8346,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Deserialize data as BSON.
 	 *
-	 * Options
-	 *  - **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
-	 *  - **cacheFunctions** {Boolean, default:false}, cache evaluated functions for reuse.
-	 *  - **cacheFunctionsCrc32** {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.
-	 *  - **promoteLongs** {Boolean, default:true}, when deserializing a Long will fit it into a Number if it's smaller than 53 bits
-	 *
 	 * @param {Buffer} buffer the buffer containing the serialized set of BSON documents.
-	 * @param {Object} [options] additional options used for the deserialization.
-	 * @param {Boolean} [isArray] ignore used for recursive parsing.
+	 * @param {Object} [options.evalFunctions=false] evaluate functions in the BSON document scoped to the object deserialized.
+	 * @param {Object} [options.cacheFunctions=false] cache evaluated functions for reuse.
+	 * @param {Object} [options.cacheFunctionsCrc32=false] use a crc32 code for caching, otherwise use the string of the function.
+	 * @param {Object} [options.promoteLongs=true] when deserializing a Long will fit it into a Number if it's smaller than 53 bits
+	 * @param {Object} [options.promoteBuffers=false] when deserializing a Binary will return it as a node.js Buffer instance.
+	 * @param {Object} [options.promoteValues=false] when deserializing will promote BSON values to their Node.js closest equivalent types.
+	 * @param {Object} [options.fieldsAsRaw=null] allow to specify if there what fields we wish to return as unserialized raw buffer.
+	 * @param {Object} [options.bsonRegExp=false] return BSON regular expressions as BSONRegExp instances.
 	 * @return {Object} returns the deserialized Javascript Object.
 	 * @api public
 	 */
-	BSON.prototype.deserialize = function (data, options) {
-	  return deserialize(data, options);
+	BSON.prototype.deserialize = function (buffer, options) {
+	  return deserialize(buffer, options);
 	};
 
 	/**
@@ -8380,23 +8383,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Deserialize stream data as BSON documents.
 	 *
-	 * Options
-	 *  - **evalFunctions** {Boolean, default:false}, evaluate functions in the BSON document scoped to the object deserialized.
-	 *  - **cacheFunctions** {Boolean, default:false}, cache evaluated functions for reuse.
-	 *  - **cacheFunctionsCrc32** {Boolean, default:false}, use a crc32 code for caching, otherwise use the string of the function.
-	 *  - **promoteLongs** {Boolean, default:true}, when deserializing a Long will fit it into a Number if it's smaller than 53 bits
-	 *
 	 * @param {Buffer} data the buffer containing the serialized set of BSON documents.
 	 * @param {Number} startIndex the start index in the data Buffer where the deserialization is to start.
 	 * @param {Number} numberOfDocuments number of documents to deserialize.
 	 * @param {Array} documents an array where to store the deserialized documents.
 	 * @param {Number} docStartIndex the index in the documents array from where to start inserting documents.
 	 * @param {Object} [options] additional options used for the deserialization.
+	 * @param {Object} [options.evalFunctions=false] evaluate functions in the BSON document scoped to the object deserialized.
+	 * @param {Object} [options.cacheFunctions=false] cache evaluated functions for reuse.
+	 * @param {Object} [options.cacheFunctionsCrc32=false] use a crc32 code for caching, otherwise use the string of the function.
+	 * @param {Object} [options.promoteLongs=true] when deserializing a Long will fit it into a Number if it's smaller than 53 bits
+	 * @param {Object} [options.promoteBuffers=false] when deserializing a Binary will return it as a node.js Buffer instance.
+	 * @param {Object} [options.promoteValues=false] when deserializing will promote BSON values to their Node.js closest equivalent types.
+	 * @param {Object} [options.fieldsAsRaw=null] allow to specify if there what fields we wish to return as unserialized raw buffer.
+	 * @param {Object} [options.bsonRegExp=false] return BSON regular expressions as BSONRegExp instances.
 	 * @return {Number} returns the next index in the buffer after deserialization **x** numbers of documents.
 	 * @api public
 	 */
 	BSON.prototype.deserializeStream = function (data, startIndex, numberOfDocuments, documents, docStartIndex, options) {
-	  // if(numberOfDocuments !== documents.length) throw new Error("Number of expected results back is less than the number of documents");
 	  options = options != null ? options : {};
 	  var index = startIndex;
 	  // Loop over all documents
@@ -8603,7 +8607,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 300 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(Buffer, global) {/*!
+	/* WEBPACK VAR INJECTION */(function(global) {/*!
 	 * The buffer module from node.js, for the browser.
 	 *
 	 * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
@@ -10393,7 +10397,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return val !== val // eslint-disable-line no-self-compare
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(300).Buffer, (function() { return this; }())))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 301 */
@@ -12626,7 +12630,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 309 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(process, Buffer) {/**
+	/* WEBPACK VAR INJECTION */(function(Buffer, process) {/**
 	 * Machine id.
 	 *
 	 * Create a random 3-byte value (i.e. unique for this
@@ -12638,6 +12642,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	// Regular expression that checks for hex value
 	var checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
+	var hasBufferType = false;
+
+	// Check if buffer exists
+	try {
+	  if (Buffer && Buffer.from) hasBufferType = true;
+	} catch (err) {};
 
 	/**
 	* Create a new ObjectID instance
@@ -12654,17 +12664,26 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  this._bsontype = 'ObjectID';
 
-	  var __id = null;
+	  // The most common usecase (blank id, new objectId instance)
+	  if (id == null || typeof id == 'number') {
+	    // Generate a new id
+	    this.id = this.generate(id);
+	    // If we are caching the hex string
+	    if (ObjectID.cacheHexString) this.__id = this.toString('hex');
+	    // Return the object
+	    return;
+	  }
+
+	  // Check if the passed in id is valid
 	  var valid = ObjectID.isValid(id);
 
 	  // Throw an error if it's not a valid setup
 	  if (!valid && id != null) {
 	    throw new Error("Argument passed in must be a single String of 12 bytes or a string of 24 hex characters");
+	  } else if (valid && typeof id == 'string' && id.length == 24 && hasBufferType) {
+	    return new ObjectID(new Buffer(id, 'hex'));
 	  } else if (valid && typeof id == 'string' && id.length == 24) {
 	    return ObjectID.createFromHexString(id);
-	  } else if (id == null || typeof id == 'number') {
-	    // convert to 12 byte binary string
-	    this.id = this.generate(id);
 	  } else if (id != null && id.length === 12) {
 	    // assume 12 byte string
 	    this.id = id;
@@ -12675,7 +12694,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    throw new Error("Argument passed in must be a single String of 12 bytes or a string of 24 hex characters");
 	  }
 
-	  if (ObjectID.cacheHexString) this.__id = this.toHexString();
+	  if (ObjectID.cacheHexString) this.__id = this.toString('hex');
 	};
 
 	// Allow usage of ObjectId as well as ObjectID
@@ -12777,10 +12796,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	* Converts the id into a 24 byte hex string for printing
 	*
+	* @param {String} format The Buffer toString format parameter.
 	* @return {String} return the 24 byte hex string representation.
 	* @ignore
 	*/
-	ObjectID.prototype.toString = function () {
+	ObjectID.prototype.toString = function (format) {
+	  // Is the id a buffer then use the buffer toString method to return the format
+	  if (this.id && this.id.copy) {
+	    return this.id.toString(typeof format === 'string' ? format : 'hex');
+	  }
+
+	  // if(this.buffer )
 	  return this.toHexString();
 	};
 
@@ -12891,21 +12917,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	*/
 	ObjectID.createFromHexString = function createFromHexString(string) {
 	  // Throw an error if it's not a valid setup
-	  if (typeof string === 'undefined' || string != null && string.length != 24) throw new Error("Argument passed in must be a single String of 12 bytes or a string of 24 hex characters");
-
-	  var length = string.length;
-
-	  if (length > 12 * 2) {
-	    throw new Error('Id cannot be longer than 12 bytes');
+	  if (typeof string === 'undefined' || string != null && string.length != 24) {
+	    throw new Error("Argument passed in must be a single String of 12 bytes or a string of 24 hex characters");
 	  }
 
+	  // Use Buffer.from method if available
+	  if (hasBufferType) return new ObjectID(new Buffer(string, 'hex'));
+
 	  // Calculate lengths
-	  var sizeof = length >> 1;
-	  var array = new _Buffer(sizeof);
+	  var array = new _Buffer(12);
 	  var n = 0;
 	  var i = 0;
 
-	  while (i < length) {
+	  while (i < 24) {
 	    array[n++] = decodeLookup[string.charCodeAt(i++)] << 4 | decodeLookup[string.charCodeAt(i++)];
 	  }
 
@@ -12968,7 +12992,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ObjectID;
 	module.exports.ObjectID = ObjectID;
 	module.exports.ObjectId = ObjectID;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(294), __webpack_require__(300).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(300).Buffer, __webpack_require__(294)))
 
 /***/ },
 /* 310 */
@@ -15683,17 +15707,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return index;
 	};
 
-	var serializeUndefined = function (buffer, key, value, index, isArray) {
-	  // Set long type
-	  buffer[index++] = BSON.BSON_DATA_UNDEFINED;
-	  // Number of written bytes
-	  var numberOfWrittenBytes = !isArray ? buffer.write(key, index, 'utf8') : buffer.write(key, index, 'ascii');
-	  // Encode the name
-	  index = index + numberOfWrittenBytes;
-	  buffer[index++] = 0;
-	  return index;
-	};
-
 	var serializeNull = function (buffer, key, value, index, isArray) {
 	  // Set long type
 	  buffer[index++] = BSON.BSON_DATA_NULL;
@@ -16252,9 +16265,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        index = serializeBoolean(buffer, key, value, index);
 	      } else if (value instanceof Date || isDate(value)) {
 	        index = serializeDate(buffer, key, value, index);
-	      } else if (value === undefined && ignoreUndefined == true) {} else if (value === undefined) {
-	        index = serializeUndefined(buffer, key, value, index);
-	      } else if (value === null) {
+	      } else if (value === undefined && ignoreUndefined == true) {} else if (value === null || value === undefined) {
 	        index = serializeNull(buffer, key, value, index);
 	      } else if (value['_bsontype'] == 'ObjectID') {
 	        index = serializeObjectId(buffer, key, value, index);
@@ -16333,9 +16344,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        index = serializeBoolean(buffer, key, value, index);
 	      } else if (value instanceof Date || isDate(value)) {
 	        index = serializeDate(buffer, key, value, index);
-	      } else if (value === undefined && ignoreUndefined == true) {} else if (value === undefined) {
-	        index = serializeUndefined(buffer, key, value, index);
-	      } else if (value === null) {
+	      } else if (value === undefined && ignoreUndefined == true) {} else if (value === null || value === undefined) {
 	        index = serializeNull(buffer, key, value, index);
 	      } else if (value['_bsontype'] == 'ObjectID') {
 	        index = serializeObjectId(buffer, key, value, index);
