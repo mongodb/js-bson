@@ -42,7 +42,12 @@ exports['should correctly create ObjectId from uppercase hexstring'] = function(
  * @ignore
  */
 exports['should correctly create ObjectId from Buffer'] = function(test) {
-  if(!Buffer.from) return test.done();
+  try {
+    Buffer.from('1234', 'hex');
+  } catch (err) {
+    return test.done();
+  }
+
   var a = 'AAAAAAAAAAAAAAAAAAAAAAAA';
   var b = new ObjectId(new Buffer(a, 'hex'));
   var c = b.equals(a); // => false
