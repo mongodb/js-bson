@@ -123,7 +123,7 @@ The BSON `deserialize` method takes a Node.js Buffer and an optional options obj
     * @param {Object} [options.promoteValues=false] when deserializing will promote BSON values to their Node.js closest equivalent types.
     * @param {Object} [options.fieldsAsRaw=null] allow to specify if there what fields we wish to return as unserialized raw buffer.
     * @param {Object} [options.bsonRegExp=false] return BSON regular expressions as BSONRegExp instances.
-    * @return {Number} returns the next index in the buffer after deserialization **x** numbers of documents.
+    * @return {Object} returns the deserialized Javascript Object.
 
 #### BSON.deserializeStream
 
@@ -143,7 +143,7 @@ The BSON `deserializeStream` method takes a Node.js Buffer, `startIndex` and all
     * @param {Object} [options.promoteValues=false] when deserializing will promote BSON values to their Node.js closest equivalent types.
     * @param {Object} [options.fieldsAsRaw=null] allow to specify if there what fields we wish to return as unserialized raw buffer.
     * @param {Object} [options.bsonRegExp=false] return BSON regular expressions as BSONRegExp instances.
-    * @return {Object} returns the deserialized JavaScript Object.
+    * @return {Number} returns the next index in the buffer after deserialization **x** numbers of documents.
 
 ## FAQ
 
