@@ -997,6 +997,7 @@ exports['Should Correctly Serialize nested doc'] = function(test) {
  */
 exports['Should Correctly Serialize and Deserialize Oid'] = function(test) {
   var doc = { doc: new ObjectID() };
+
   var serialized_data = createBSON().serialize(doc);
 
   var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
@@ -1459,7 +1460,6 @@ exports['Should Correctly Serialize and Deserialize Symbol'] = function(test) {
     assertBuffersEqual(test, serialized_data, serialized_data2, 0);
 
     var deserialized_data = createBSON().deserialize(serialized_data);
-
     expect(doc).to.deep.equal(deserialized_data);
     expect(typeof deserialized_data.b[0]).to.equal('string');
   }
@@ -1540,11 +1540,9 @@ exports['Should handle complicated all typed object'] = function(test) {
 
   var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
   createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
-
   expect(serialized_data).to.deep.equal(serialized_data2);
 
   serialized_data2 = createBSON().serialize(doc2, false, true);
-
   expect(serialized_data).to.deep.equal(serialized_data2);
 
   test.done();
@@ -2005,7 +2003,6 @@ exports[
   // Validate the correctness
   expect(size).to.equal(37);
   expect(index).to.equal(36);
-
   test.done();
 };
 
@@ -2036,7 +2033,6 @@ exports['Should correctly serialize a given javascript object'] = function(test)
   });
   // Validate the correctness
   expect(buffer.length).to.equal(37);
-
   test.done();
 };
 
@@ -2070,7 +2066,6 @@ exports['Should correctly serialize a given javascript object using a bson insta
   });
   // Validate the correctness
   test.equal(37, buffer.length);
-
   test.done();
 };
 
@@ -2305,6 +2300,7 @@ exports['Should correctly serialize the BSONRegExp type'] = function(test) {
   var doc = { regexp: new BSONRegExp('test', 'i') };
   var doc1 = { regexp: /test/i };
   var serialized_data = createBSON().serialize(doc);
+
   var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
   createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
   assertBuffersEqual(test, serialized_data, serialized_data2, 0);
