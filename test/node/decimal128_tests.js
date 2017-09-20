@@ -1,3 +1,5 @@
+'use strict';
+
 var Decimal128 = require('../../lib/bson/decimal128');
 var NAN = new Buffer(
   [

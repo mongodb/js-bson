@@ -1,3 +1,5 @@
+'use strict';
+
 var M = require('../../lib/bson/map');
 var createBSON = require('../utils');
 

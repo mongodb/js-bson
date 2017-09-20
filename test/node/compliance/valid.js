@@ -1,3 +1,5 @@
+'use strict';
+
 var data = {
   description: 'Valid bson documents',
   documents: [

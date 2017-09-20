@@ -1,3 +1,4 @@
+'use strict';
 /**
  * Binary Parser.
  * Jonas Raoni Soares Silva

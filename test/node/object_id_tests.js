@@ -1,3 +1,5 @@
+'use strict';
+
 var BSON = require('../..');
 var util = require('util');
 var ObjectId = BSON.ObjectID;

@@ -1,3 +1,5 @@
+'use strict';
+
 var BSON = require('../..'),
   Decimal128 = BSON.Decimal128,
   deserialize = require('../../extended-json').deserialize,

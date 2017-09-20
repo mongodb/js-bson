@@ -1,3 +1,5 @@
+'use strict';
+
 var BSON = require('../..'),
   Code = BSON.Code,
   Binary = BSON.Binary,

@@ -1,3 +1,5 @@
+'use strict';
+
 var BSON = require('..');
 
 module.exports = function createBSON() {

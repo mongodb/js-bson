@@ -1,3 +1,5 @@
+'use strict';
+
 var data = {
   description: 'Corrupted BSON',
   documents: [

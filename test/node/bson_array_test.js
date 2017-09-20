@@ -1,3 +1,5 @@
+'use strict';
+
 // var hexStringToBinary = function(string) {
 //   var numberofValues = string.length / 2;
 //   var array = '';
