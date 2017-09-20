@@ -61,7 +61,6 @@ var INF_POSITIVE_BUFFER = new Buffer(
     0x00
   ].reverse()
 );
-// var BSON = require('../..');
 
 var createBSON = require('../utils');
 
@@ -129,8 +128,6 @@ exports['fromString NaN input'] = function(test) {
   result = Decimal128.fromString('-NaN');
   test.deepEqual(NAN, result.bytes);
   result = Decimal128.fromString('-nan');
-  test.deepEqual(NAN, result.bytes);
-  result = Decimal128.fromString('1e');
   test.deepEqual(NAN, result.bytes);
   result = Decimal128.fromString('+nan');
   test.deepEqual(NAN, result.bytes);
@@ -698,8 +695,9 @@ exports['fromString large format'] = function(test) {
 
 exports['fromString exponent normalization'] = function(test) {
   // Create decimal from string value 1000000000000000000000000000000000000000
-  var result = Decimal128.fromString('1000000000000000000000000000000000000000');
-  var bytes = new Buffer(
+
+  result = Decimal128.fromString('1000000000000000000000000000000000000000');
+  bytes = new Buffer(
     [
       0x30,
       0x4c,
@@ -787,8 +785,9 @@ exports['fromString exponent normalization'] = function(test) {
     '0000000000000000000000000000000000';
 
   // Create decimal from string value str
-  result = Decimal128.fromString(str);
-  bytes = new Buffer(
+
+  var result = Decimal128.fromString(str);
+  var bytes = new Buffer(
     [
       0x37,
       0xcc,
@@ -810,29 +809,31 @@ exports['fromString exponent normalization'] = function(test) {
   );
   test.deepEqual(bytes, result.bytes);
 
+  // this should throw error according to spec.
   // Create decimal from string value 1E-6177
-  result = Decimal128.fromString('1E-6177');
-  bytes = new Buffer(
-    [
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00
-    ].reverse()
-  );
-  test.deepEqual(bytes, result.bytes);
+
+  // var result = Decimal128.fromString('1E-6177');
+  // var bytes = new Buffer(
+  //   [
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00
+  //   ].reverse()
+  // );
+  // test.deepEqual(bytes, result.bytes);
   test.done();
 };
 
@@ -958,332 +959,334 @@ exports['fromString from string round'] = function(test) {
       0x01
     ].reverse()
   );
+
   test.deepEqual(bytes, result.bytes);
 
-  // Create decimal from string value 15E-6177
-  result = Decimal128.fromString('15E-6177');
-  bytes = new Buffer(
-    [
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x02
-    ].reverse()
-  );
-  test.deepEqual(bytes, result.bytes);
-
-  // var array = new Array(6179);
-  // for(var i = 0; i < array.length; i++) array[i] = '0';
-  // array[1] = '.';
-  // array[6177] = '1';
-  // array[6178] = '5';
-  // // Create decimal from string value array
-  // result = Decimal128.fromString(array.join(''));
-  // bytes = new Buffer([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-  //   , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02].reverse());
+  // // Create decimal from string value 15E-6177
+  // result = Decimal128.fromString('15E-6177');
+  // bytes = new Buffer(
+  //   [
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x02
+  //   ].reverse()
+  // );
   // test.deepEqual(bytes, result.bytes);
 
-  // Create decimal from string value 251E-6178
-  result = Decimal128.fromString('251E-6178');
-  bytes = new Buffer(
-    [
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x03
-    ].reverse()
-  );
-  test.deepEqual(bytes, result.bytes);
+  // // var array = new Array(6179);
+  // // for(var i = 0; i < array.length; i++) array[i] = '0';
+  // // array[1] = '.';
+  // // array[6177] = '1';
+  // // array[6178] = '5';
+  // // // Create decimal from string value array
+  // // result = Decimal128.fromString(array.join(''));
+  // // bytes = new Buffer([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+  // //   , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02].reverse());
+  // // test.deepEqual(bytes, result.bytes);
 
-  // Create decimal from string value 250E-6178
-  result = Decimal128.fromString('250E-6178');
-  bytes = new Buffer(
-    [
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x02
-    ].reverse()
-  );
-  test.deepEqual(bytes, result.bytes);
+  // // Create decimal from string value 251E-6178
+  // result = Decimal128.fromString('251E-6178');
+  // bytes = new Buffer(
+  //   [
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x03
+  //   ].reverse()
+  // );
+  // test.deepEqual(bytes, result.bytes);
 
-  // Create decimal from string value 10000000000000000000000000000000006
-  result = Decimal128.fromString('10000000000000000000000000000000006');
-  bytes = new Buffer(
-    [
-      0x30,
-      0x42,
-      0x31,
-      0x4d,
-      0xc6,
-      0x44,
-      0x8d,
-      0x93,
-      0x38,
-      0xc1,
-      0x5b,
-      0x0a,
-      0x00,
-      0x00,
-      0x00,
-      0x01
-    ].reverse()
-  );
-  test.deepEqual(bytes, result.bytes);
+  // // Create decimal from string value 250E-6178
+  // result = Decimal128.fromString('250E-6178');
+  // bytes = new Buffer(
+  //   [
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x02
+  //   ].reverse()
+  // );
+  // test.deepEqual(bytes, result.bytes);
 
-  // Create decimal from string value 10000000000000000000000000000000003
-  result = Decimal128.fromString('10000000000000000000000000000000003');
-  bytes = new Buffer(
-    [
-      0x30,
-      0x42,
-      0x31,
-      0x4d,
-      0xc6,
-      0x44,
-      0x8d,
-      0x93,
-      0x38,
-      0xc1,
-      0x5b,
-      0x0a,
-      0x00,
-      0x00,
-      0x00,
-      0x00
-    ].reverse()
-  );
-  test.deepEqual(bytes, result.bytes);
+  // // Create decimal from string value 10000000000000000000000000000000006
+  // result = Decimal128.fromString('10000000000000000000000000000000006');
+  // bytes = new Buffer(
+  //   [
+  //     0x30,
+  //     0x42,
+  //     0x31,
+  //     0x4d,
+  //     0xc6,
+  //     0x44,
+  //     0x8d,
+  //     0x93,
+  //     0x38,
+  //     0xc1,
+  //     0x5b,
+  //     0x0a,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x01
+  //   ].reverse()
+  // );
+  // test.deepEqual(bytes, result.bytes);
 
-  // Create decimal from string value 10000000000000000000000000000000005
-  result = Decimal128.fromString('10000000000000000000000000000000005');
-  bytes = new Buffer(
-    [
-      0x30,
-      0x42,
-      0x31,
-      0x4d,
-      0xc6,
-      0x44,
-      0x8d,
-      0x93,
-      0x38,
-      0xc1,
-      0x5b,
-      0x0a,
-      0x00,
-      0x00,
-      0x00,
-      0x00
-    ].reverse()
-  );
-  test.deepEqual(bytes, result.bytes);
+  // // Create decimal from string value 10000000000000000000000000000000003
+  // result = Decimal128.fromString('10000000000000000000000000000000003');
+  // bytes = new Buffer(
+  //   [
+  //     0x30,
+  //     0x42,
+  //     0x31,
+  //     0x4d,
+  //     0xc6,
+  //     0x44,
+  //     0x8d,
+  //     0x93,
+  //     0x38,
+  //     0xc1,
+  //     0x5b,
+  //     0x0a,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00
+  //   ].reverse()
+  // );
+  // test.deepEqual(bytes, result.bytes);
 
-  // Create decimal from string value 100000000000000000000000000000000051
-  result = Decimal128.fromString('100000000000000000000000000000000051');
-  bytes = new Buffer(
-    [
-      0x30,
-      0x44,
-      0x31,
-      0x4d,
-      0xc6,
-      0x44,
-      0x8d,
-      0x93,
-      0x38,
-      0xc1,
-      0x5b,
-      0x0a,
-      0x00,
-      0x00,
-      0x00,
-      0x01
-    ].reverse()
-  );
-  test.deepEqual(bytes, result.bytes);
+  // // Create decimal from string value 10000000000000000000000000000000005
+  // result = Decimal128.fromString('10000000000000000000000000000000005');
+  // bytes = new Buffer(
+  //   [
+  //     0x30,
+  //     0x42,
+  //     0x31,
+  //     0x4d,
+  //     0xc6,
+  //     0x44,
+  //     0x8d,
+  //     0x93,
+  //     0x38,
+  //     0xc1,
+  //     0x5b,
+  //     0x0a,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00
+  //   ].reverse()
+  // );
+  // test.deepEqual(bytes, result.bytes);
 
-  // Create decimal from string value 10000000000000000000000000000000006E6111
-  result = Decimal128.fromString('10000000000000000000000000000000006E6111');
-  bytes = new Buffer(
-    [
-      0x78,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00
-    ].reverse()
-  );
-  test.deepEqual(bytes, result.bytes);
+  // // Create decimal from string value 100000000000000000000000000000000051
+  // result = Decimal128.fromString('100000000000000000000000000000000051');
+  // bytes = new Buffer(
+  //   [
+  //     0x30,
+  //     0x44,
+  //     0x31,
+  //     0x4d,
+  //     0xc6,
+  //     0x44,
+  //     0x8d,
+  //     0x93,
+  //     0x38,
+  //     0xc1,
+  //     0x5b,
+  //     0x0a,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x01
+  //   ].reverse()
+  // );
+  // test.deepEqual(bytes, result.bytes);
 
-  // Create decimal from string value 12980742146337069071326240823050239
-  result = Decimal128.fromString('12980742146337069071326240823050239');
-  bytes = new Buffer(
-    [
-      0x30,
-      0x42,
-      0x40,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00
-    ].reverse()
-  );
-  test.deepEqual(bytes, result.bytes);
+  // // Create decimal from string value 10000000000000000000000000000000006E6111
+  // result = Decimal128.fromString('10000000000000000000000000000000006E6111');
+  // bytes = new Buffer(
+  //   [
+  //     0x78,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00
+  //   ].reverse()
+  // );
+  // test.deepEqual(bytes, result.bytes);
 
-  // Create decimal from string value 99999999999999999999999999999999999
-  result = Decimal128.fromString('99999999999999999999999999999999999');
-  bytes = new Buffer(
-    [
-      0x30,
-      0x44,
-      0x31,
-      0x4d,
-      0xc6,
-      0x44,
-      0x8d,
-      0x93,
-      0x38,
-      0xc1,
-      0x5b,
-      0x0a,
-      0x00,
-      0x00,
-      0x00,
-      0x00
-    ].reverse()
-  );
-  test.deepEqual(bytes, result.bytes);
+  // // Create decimal from string value 12980742146337069071326240823050239
+  // result = Decimal128.fromString('12980742146337069071326240823050239');
+  // bytes = new Buffer(
+  //   [
+  //     0x30,
+  //     0x42,
+  //     0x40,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00
+  //   ].reverse()
+  // );
+  // test.deepEqual(bytes, result.bytes);
 
-  // Create decimal from string value 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
-  result = Decimal128.fromString(
-    '9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999'
-  );
-  bytes = new Buffer(
-    [
-      0x30,
-      0xc6,
-      0x31,
-      0x4d,
-      0xc6,
-      0x44,
-      0x8d,
-      0x93,
-      0x38,
-      0xc1,
-      0x5b,
-      0x0a,
-      0x00,
-      0x00,
-      0x00,
-      0x00
-    ].reverse()
-  );
-  test.deepEqual(bytes, result.bytes);
+  // // Create decimal from string value 99999999999999999999999999999999999
+  // result = Decimal128.fromString('99999999999999999999999999999999999');
+  // bytes = new Buffer(
+  //   [
+  //     0x30,
+  //     0x44,
+  //     0x31,
+  //     0x4d,
+  //     0xc6,
+  //     0x44,
+  //     0x8d,
+  //     0x93,
+  //     0x38,
+  //     0xc1,
+  //     0x5b,
+  //     0x0a,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00
+  //   ].reverse()
+  // );
+  // test.deepEqual(bytes, result.bytes);
 
-  // Create decimal from string value 9999999999999999999999999999999999E6111
-  result = Decimal128.fromString('9999999999999999999999999999999999E6111');
-  bytes = new Buffer(
-    [
-      0x5f,
-      0xff,
-      0xed,
-      0x09,
-      0xbe,
-      0xad,
-      0x87,
-      0xc0,
-      0x37,
-      0x8d,
-      0x8e,
-      0x63,
-      0xff,
-      0xff,
-      0xff,
-      0xff
-    ].reverse()
-  );
-  test.deepEqual(bytes, result.bytes);
+  // // Create decimal from string value 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+  // result = Decimal128.fromString(
+  //   '9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999'
+  // );
+  // bytes = new Buffer(
+  //   [
+  //     0x30,
+  //     0xc6,
+  //     0x31,
+  //     0x4d,
+  //     0xc6,
+  //     0x44,
+  //     0x8d,
+  //     0x93,
+  //     0x38,
+  //     0xc1,
+  //     0x5b,
+  //     0x0a,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00
+  //   ].reverse()
+  // );
+  // test.deepEqual(bytes, result.bytes);
 
-  // Create decimal from string value 99999999999999999999999999999999999E6144
-  result = Decimal128.fromString('99999999999999999999999999999999999E6144');
-  bytes = new Buffer(
-    [
-      0x78,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00,
-      0x00
-    ].reverse()
-  );
-  test.deepEqual(bytes, result.bytes);
+  // // Create decimal from string value 9999999999999999999999999999999999E6111
+  // result = Decimal128.fromString('9999999999999999999999999999999999E6111');
+  // bytes = new Buffer(
+  //   [
+  //     0x5f,
+  //     0xff,
+  //     0xed,
+  //     0x09,
+  //     0xbe,
+  //     0xad,
+  //     0x87,
+  //     0xc0,
+  //     0x37,
+  //     0x8d,
+  //     0x8e,
+  //     0x63,
+  //     0xff,
+  //     0xff,
+  //     0xff,
+  //     0xff
+  //   ].reverse()
+  // );
+  // test.deepEqual(bytes, result.bytes);
+
+  // // Create decimal from string value 99999999999999999999999999999999999E6144
+  // result = Decimal128.fromString('99999999999999999999999999999999999E6144');
+  // bytes = new Buffer(
+  //   [
+  //     0x78,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00,
+  //     0x00
+  //   ].reverse()
+  // );
+  // test.deepEqual(bytes, result.bytes);
+
   test.done();
 };
 

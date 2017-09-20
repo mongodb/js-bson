@@ -4,34 +4,34 @@
     "test_key": "a",
     "valid": [
         {
-            "description": "-1",
-            "bson": "10000000126100FFFFFFFFFFFFFFFF00",
-            "extjson": "{\"a\" : {\"$numberLong\" : \"-1\"}}",
-            "noroundtrip": true
-        },
-        {
             "description": "MinValue",
-            "bson": "10000000126100000000000000008000",
-            "extjson": "{\"a\" : {\"$numberLong\" : \"-9223372036854775808\"}}",
-            "noroundtrip": true
+            "canonical_bson": "10000000126100000000000000008000",
+            "canonical_extjson": "{\"a\" : {\"$numberLong\" : \"-9223372036854775808\"}}",
+            "relaxed_extjson": "{\"a\" : -9223372036854775808}"
         },
         {
             "description": "MaxValue",
-            "bson": "10000000126100FFFFFFFFFFFFFF7F00",
-            "extjson": "{\"a\" : {\"$numberLong\" : \"9223372036854775807\"}}",
-            "noroundtrip": true
+            "canonical_bson": "10000000126100FFFFFFFFFFFFFF7F00",
+            "canonical_extjson": "{\"a\" : {\"$numberLong\" : \"9223372036854775807\"}}",
+            "relaxed_extjson": "{\"a\" : 9223372036854775807}"
+        },
+        {
+            "description": "-1",
+            "canonical_bson": "10000000126100FFFFFFFFFFFFFFFF00",
+            "canonical_extjson": "{\"a\" : {\"$numberLong\" : \"-1\"}}",
+            "relaxed_extjson": "{\"a\" : -1}"
         },
         {
             "description": "0",
-            "bson": "10000000126100000000000000000000",
-            "extjson": "{\"a\" : {\"$numberLong\" : \"0\"}}",
-            "noroundtrip": true
+            "canonical_bson": "10000000126100000000000000000000",
+            "canonical_extjson": "{\"a\" : {\"$numberLong\" : \"0\"}}",
+            "relaxed_extjson": "{\"a\" : 0}"
         },
         {
             "description": "1",
-            "bson": "10000000126100010000000000000000",
-            "extjson": "{\"a\" : {\"$numberLong\" : \"1\"}}",
-            "noroundtrip": true
+            "canonical_bson": "10000000126100010000000000000000",
+            "canonical_extjson": "{\"a\" : {\"$numberLong\" : \"1\"}}",
+            "relaxed_extjson": "{\"a\" : 1}"
         }
     ],
     "decodeErrors": [

@@ -45,5 +45,8 @@
       "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'"
   },
   "browser": "lib/bson/bson.js",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "dependencies": {
+    "chai": "^4.1.2"
+  }
 }
