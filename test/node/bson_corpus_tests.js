@@ -2,386 +2,113 @@
 
 var BSON = require('../..'),
   Decimal128 = BSON.Decimal128,
-  deserialize = require('../../extended-json').deserialize,
-  serialize = require('../../extended-json').serialize,
   f = require('util').format,
-  assert = require('assert');
+  fs = require('fs'),
+  expect = require('chai').expect,
+  path = require('path');
 
 var createBSON = require('../utils');
 var bson = createBSON();
 
-function executeValid(spec, scenarios) {
-  console.log('  * Starting valid scenario tests');
+var deserializeOptions = {
+  bsonRegExp: true,
+  promoteLongs: true,
+  promoteValues: false
+};
 
-  for (var i = 0; i < scenarios.length; i++) {
-    var scenario = scenarios[i];
-    console.log(
-      f(
-        '    - valid scenario [%s] with \n      bson: [%s]  \n      ext-json: [%s]',
-        scenario.description,
-        scenario.bson,
-        scenario.extjson
-      )
-    );
+var serializeOptions = {
+  ignoreUndefined: false
+};
 
-    // Get the scenario bson
-    var B = new Buffer(scenario.bson, 'hex');
-    var E = null;
+// tests from the corpus that we need to skip, and explanations why
 
-    // Get the extended json
-    if (scenario.extjson) E = JSON.parse(scenario.extjson);
+var skip = {
+  'NaN with payload':
+    'passing this would require building a custom type to store the NaN payload data.'
+};
 
-    // If we have a canonical bson use it instead
-    if (scenario.canonical_bson) {
-      var cB = new Buffer(scenario.canonical_bson, 'hex');
-    } else {
-      cB = B;
-    }
+function testScenario(scenario) {
+  if (scenario.valid) {
+    console.log('  * Starting valid scenario tests');
 
-    // If we have cannonical extended json use it
-    if (scenario.canonical_extjson) {
-      var cE = JSON.parse(scenario.canonical_extjson);
-    } else {
-      cE = E;
-    }
+    scenario.valid.forEach(v => {
+      if (skip.hasOwnProperty(v.description)) return;
 
-    //
-    // Baseline tests
-    if (cB) {
-      // console.log("============================================ 0")
-      // console.dir(deserialize(E))
-      // console.dir(bson.deserialize(B, {
-      //   promoteLongs: false, bsonRegExp: true
-      // }))
-      // console.dir(bson.deserialize(bson.serialize(bson.deserialize(B, {
-      //   promoteLongs: false, bsonRegExp: true
-      // }))))
-      // console.log("============================================ 1")
-      // console.dir(B)
-      // console.dir(cB)
-      // console.dir(bson.serialize(bson.deserialize(B, {
-      //   promoteLongs: false, bsonRegExp: true
-      // })))
-      assert.deepEqual(
-        cB,
-        bson.serialize(
-          bson.deserialize(B, {
-            promoteLongs: false,
-            bsonRegExp: true
-          })
+      console.log(
+        f(
+          '    - valid scenario [%s] with \n      bson: [%s]  \n      ext-json: [%s]',
+          v.description,
+          v.canonical_bson,
+          v.canonical_extjson
         )
       );
-    }
 
-    if (cE) {
-      assert.deepEqual(
-        cE,
-        serialize(
-          bson.deserialize(B, {
-            promoteLongs: false,
-            bsonRegExp: true
-          })
-        )
+      var cB = new Buffer(v.canonical_bson, 'hex');
+      if (v.degenerate_bson) var dB = new Buffer(v.degenerate_bson, 'hex');
+      if (v.converted_bson) var convB = new Buffer(v.converted_bson, 'hex');
+
+      var roundTripped = bson.serialize(bson.deserialize(cB, deserializeOptions), serializeOptions);
+
+      if (scenario.deprecated) expect(convB).to.deep.equal(roundTripped);
+      else expect(cB).to.deep.equal(roundTripped);
+
+      if (dB)
+        expect(cB).to.deep.equal(
+          bson.serialize(bson.deserialize(dB, deserializeOptions), serializeOptions)
+        );
+    });
+  }
+
+  if (scenario.decodeErrors) {
+    console.log('  * Starting decode error scenario tests');
+    scenario.decodeErrors.forEach(d => {
+      console.log(f('    - decode error [%s] with \n      bson: [%s]', d.description, d.bson));
+      var B = new Buffer(d.bson, 'hex');
+      expect(() => bson.deserialize(B, deserializeOptions)).to.throw();
+    });
+  }
+
+  if (scenario.parseErrors) {
+    console.log('  * Starting parse error scenario tests');
+    scenario.parseErrors.forEach(scenario => {
+      console.log(
+        f('    - parse error [%s] with \n      string: [%s]', scenario.description, scenario.string)
       );
-      assert.deepEqual(cE, serialize(deserialize(E)));
-    }
-
-    // if "lossy" not in case:
-    if (!scenario.lossy && cB && E) {
-      assert.deepEqual(cB, bson.serialize(deserialize(E)));
-    }
-
-    //
-    // Double check canonical BSON if provided
-    try {
-      var noMatch = false;
-      assert.deepEqual(cB, B);
-    } catch (e) {
-      noMatch = true;
-    }
-
-    if (noMatch) {
-      assert.deepEqual(
-        cB,
-        bson.serialize(
-          bson.deserialize(cB, {
-            promoteLongs: false,
-            bsonRegExp: true
-          })
-        )
-      );
-      assert.deepEqual(
-        cE,
-        serialize(
-          bson.deserialize(cB, {
-            promoteLongs: false,
-            bsonRegExp: true
-          })
-        )
-      );
-    }
-
-    try {
-      noMatch = false;
-      assert.deepEqual(cE, E);
-    } catch (e) {
-      noMatch = true;
-    }
+      expect(() => Decimal128.fromString(scenario.string)).to.throw();
+    });
   }
 }
 
-function executeDecodeError(spec, scenarios) {
-  console.log('  * Starting decode error scenario tests');
-
-  for (var i = 0; i < scenarios.length; i++) {
-    var scenario = scenarios[i];
-    console.log(
-      f('    - decode error [%s] with \n      bson: [%s]', scenario.description, scenario.bson)
-    );
-
-    // Convert the hex string to a binary buffer
-    var buffer = new Buffer(scenario.bson, 'hex');
-    var failed = false;
-
-    try {
-      // Attempt to deserialize the bson
-      bson.deserialize(buffer, {
-        promoteLongs: false,
-        bsonRegExp: true
-      });
-
-      // console.log("============================ deserializedObject")
-      // console.dir(deserializedObject)
-    } catch (err) {
-      // console.log(err)
-      failed = true;
-    }
-
-    assert.ok(failed);
-  }
-}
-
-function executeParseErrors(spec, scenarios) {
-  console.log('  * Starting parse error scenario tests');
-  // var NAN = new Buffer(
-  //   [
-  //     0x7c,
-  //     0x00,
-  //     0x00,
-  //     0x00,
-  //     0x00,
-  //     0x00,
-  //     0x00,
-  //     0x00,
-  //     0x00,
-  //     0x00,
-  //     0x00,
-  //     0x00,
-  //     0x00,
-  //     0x00,
-  //     0x00,
-  //     0x00
-  //   ].reverse()
-  // );
-
-  for (var i = 0; i < scenarios.length; i++) {
-    var scenario = scenarios[i];
-    console.log(
-      f('    - parse error [%s] with \n      string: [%s]', scenario.description, scenario.string)
-    );
-
-    var threw = false;
-    try {
-      var value = Decimal128.fromString(scenario.string);
-      if (value.toString !== scenario.string) threw = true;
-    } catch (e) {
-      threw = true;
-    }
-
-    assert.deepEqual(true, threw);
-  }
-}
-
-function printScenarioInformation(spec) {
+function printScenarioInformation(scenario) {
   console.log(
     f(
       '= Starting %s for bson_type %s with test key %s',
-      spec.description,
-      spec.bson_type,
-      spec.test_key
+      scenario[1].description,
+      scenario[1].bson_type,
+      scenario[1].test_key
     )
   );
 }
 
-function executeAll(spec) {
-  printScenarioInformation(spec);
-  executeValid(spec, spec.valid || []);
-  executeDecodeError(spec, spec.decodeErrors || []);
-  executeParseErrors(spec, spec.parseErrors || []);
+function findScenarios() {
+  return fs
+    .readdirSync(path.join(__dirname, 'specs/bson-corpus'))
+    .filter(x => {
+      return x.indexOf('json') !== -1;
+    })
+    .map(x => {
+      return [x, fs.readFileSync(path.join(__dirname, 'specs/bson-corpus', x), 'utf8')];
+    })
+    .map(x => {
+      return [path.basename(x[0], '.json'), JSON.parse(x[1])];
+    });
 }
 
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/array.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/array'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/binary.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/binary'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/boolean.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/boolean'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/code_w_scope.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/code_w_scope'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/code.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/code'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/datetime.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/datetime'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/document.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/document'));
-  test.done();
-};
-
-// /**
-//  * @ignore
-//  */
-// exports['Pass all BSON corpus ./specs/bson-corpus/double.json'] = function(test) {
-//   executeAll(require(__dirname + '/specs/bson-corpus/double'));
-//   test.done();
-// }
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/int32.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/int32'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/int64.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/int64'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/maxkey.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/maxkey'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/minkey.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/minkey'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/null.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/null'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/oid.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/oid'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/regex.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/regex'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/string.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/string'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/symbol.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/symbol'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/timestamp.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/timestamp'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass all BSON corpus ./specs/bson-corpus/top.json'] = function(test) {
-  executeAll(require(__dirname + '/specs/bson-corpus/top'));
-  test.done();
-};
-
-/**
- * @ignore
- */
-exports['Pass entire Decimal128 corpus ./specs/decimal128/*'] = function(test) {
-  executeAll(require(__dirname + '/specs/decimal128/decimal128-1.json'));
-  executeAll(require(__dirname + '/specs/decimal128/decimal128-2.json'));
-  executeAll(require(__dirname + '/specs/decimal128/decimal128-3.json'));
-  executeAll(require(__dirname + '/specs/decimal128/decimal128-4.json'));
-  executeAll(require(__dirname + '/specs/decimal128/decimal128-5.json'));
-  executeAll(require(__dirname + '/specs/decimal128/decimal128-6.json'));
-  executeAll(require(__dirname + '/specs/decimal128/decimal128-7.json'));
-  test.done();
-};
+findScenarios().forEach(scenario => {
+  var exportName = f('Pass all BSON corpus ./specs/bson-corpus/%s.json', scenario[0]);
+  exports[exportName] = function(test) {
+    printScenarioInformation(scenario);
+    testScenario(scenario[1]);
+    test.done();
+  };
+});

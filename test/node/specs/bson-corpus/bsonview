@@ -60,13 +60,24 @@ my %FIELD_SIZES = (
 );
 
 sub main {
-    my ( $hex, $help );
+    my ( $hex, $file, $help );
     GetOptions(
+        "file=s" => \$file,
         "x"      => \$hex,
         "help|h" => \$help,
     ) or die("Error in command line args");
     pod2usage( { -exitval => 2, -verbose => 2, } ) if $help;
 
+    if ( $file ) {
+        dump_file($file);
+    }
+    else {
+        dump_stdin($hex);
+    }
+}
+
+sub dump_stdin {
+    my $hex = shift;
     while ( defined( my $bson = <STDIN> ) ) {
         chomp $bson;
         if ( !length($bson) ) {
@@ -78,8 +89,22 @@ sub main {
             say $bson;
             next;
         }
+        $bson =~ s[ ][]g if $hex;
         $bson = pack( "H*", $bson ) if $hex;
         dump_document( \$bson );
+        print "\n";
+    }
+}
+
+sub dump_file {
+    my $file = shift;
+    open my $fh, "<", $file;
+    binmode($fh);
+    my $data = do { local $/; <$fh> };
+    while ( length $data ) {
+        my $len = unpack( BSON_INT32, $data );
+        my $bson = substr($data,0,$len,'');
+        dump_document(\$bson);
         print "\n";
     }
 }
