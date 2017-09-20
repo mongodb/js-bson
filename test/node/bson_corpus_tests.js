@@ -5,10 +5,9 @@ var BSON = require('../..'),
   f = require('util').format,
   fs = require('fs'),
   expect = require('chai').expect,
-  path = require('path');
-
-var createBSON = require('../utils');
-var bson = createBSON();
+  path = require('path'),
+  createBSON = require('../utils'),
+  bson = createBSON();
 
 var deserializeOptions = {
   bsonRegExp: true,
