@@ -1,17 +1,8 @@
 {
   "name": "bson",
   "description": "A bson parser for node.js and the browser",
-  "keywords": [
-    "mongodb",
-    "bson",
-    "parser"
-  ],
-  "files": [
-    "lib",
-    "index.js",
-    "browser_build",
-    "bower.json"
-  ],
+  "keywords": ["mongodb", "bson", "parser"],
+  "files": ["lib", "index.js", "browser_build", "bower.json"],
   "version": "1.0.4",
   "author": "Christian Amor Kvalheim <christkv@gmail.com>",
   "contributors": [],
@@ -30,6 +21,9 @@
     "babel-preset-es2015": "^6.14.0",
     "babel-preset-stage-0": "^6.5.0",
     "babel-register": "^6.14.0",
+    "eslint": "^4.5.0",
+    "eslint-plugin-prettier": "^2.2.0",
+    "prettier": "^1.5.3",
     "webpack": "^1.13.2",
     "webpack-polyfills-plugin": "0.0.9"
   },
@@ -45,7 +39,10 @@
   },
   "scripts": {
     "test": "nodeunit ./test/node",
-    "build": "webpack --config ./webpack.dist.config.js"
+    "build": "webpack --config ./webpack.dist.config.js",
+    "lint": "eslint lib test",
+    "format":
+      "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'"
   },
   "browser": "lib/bson/bson.js",
   "license": "Apache-2.0"
