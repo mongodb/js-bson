@@ -1,6 +1,8 @@
 'use strict';
 
-var Decimal128 = require('../../lib/bson/decimal128');
+let Decimal128 = require('../../lib/bson/decimal128'),
+  createBSON = require('../utils');
+
 var NAN = new Buffer(
   [
     0x7c,
@@ -61,15 +63,6 @@ var INF_POSITIVE_BUFFER = new Buffer(
     0x00
   ].reverse()
 );
-
-var createBSON = require('../utils');
-
-// var shouldFail = function() {
-//   try {
-//   } catch (e) {
-//     return false;
-//   }
-// };
 
 /**
  * @ignore
@@ -696,8 +689,8 @@ exports['fromString large format'] = function(test) {
 exports['fromString exponent normalization'] = function(test) {
   // Create decimal from string value 1000000000000000000000000000000000000000
 
-  result = Decimal128.fromString('1000000000000000000000000000000000000000');
-  bytes = new Buffer(
+  var result = Decimal128.fromString('1000000000000000000000000000000000000000');
+  var bytes = new Buffer(
     [
       0x30,
       0x4c,
@@ -786,8 +779,8 @@ exports['fromString exponent normalization'] = function(test) {
 
   // Create decimal from string value str
 
-  var result = Decimal128.fromString(str);
-  var bytes = new Buffer(
+  result = Decimal128.fromString(str);
+  bytes = new Buffer(
     [
       0x37,
       0xcc,
@@ -834,6 +827,7 @@ exports['fromString exponent normalization'] = function(test) {
   //   ].reverse()
   // );
   // test.deepEqual(bytes, result.bytes);
+
   test.done();
 };
 
