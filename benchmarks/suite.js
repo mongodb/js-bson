@@ -1,6 +1,4 @@
 var Benchmark = require('benchmark'),
-  suite = new Benchmark.Suite,
-  colors = require('colors'),
   f = require('util').format;
 
 // Get all the benchmarks
@@ -11,12 +9,12 @@ var legacyBenchmarks = require('./legacy/benchmarks'),
 
 // Shared functions
 var start = function(event) {
-  console.log(f("\nStart Suite: %s", this.name).underline.green);
-}
+  console.log(f('\nStart Suite: %s', this.name).underline.green);
+};
 
 var cycle = function(event) {
   console.log(event.target.toString().bold);
-}
+};
 
 // Benchmark suites
 var legacySuite = new Benchmark.Suite('legacy js parser');
@@ -58,11 +56,11 @@ candidate2Suite.on('cycle', cycle);
 
 // Chain the suites
 legacySuite.on('complete', function() {
-  nativeSuite.run({async: false});
+  nativeSuite.run({ async: false });
 });
 
 nativeSuite.on('complete', function() {
-  candidate1Suite.run({async: false});
+  candidate1Suite.run({ async: false });
 });
 
 candidate1Suite.on('complete', function() {
@@ -70,6 +68,6 @@ candidate1Suite.on('complete', function() {
 });
 
 // Start execution
-legacySuite.run({async: false});
+legacySuite.run({ async: false });
 
 // candidate2Suite.run({async: false});
