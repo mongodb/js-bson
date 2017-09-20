@@ -689,8 +689,8 @@ exports['fromString large format'] = function(test) {
 exports['fromString exponent normalization'] = function(test) {
   // Create decimal from string value 1000000000000000000000000000000000000000
 
-  var result = Decimal128.fromString('1000000000000000000000000000000000000000');
-  var bytes = new Buffer(
+  result = Decimal128.fromString('1000000000000000000000000000000000000000');
+  bytes = new Buffer(
     [
       0x30,
       0x4c,
@@ -827,7 +827,6 @@ exports['fromString exponent normalization'] = function(test) {
   //   ].reverse()
   // );
   // test.deepEqual(bytes, result.bytes);
-
   test.done();
 };
 
