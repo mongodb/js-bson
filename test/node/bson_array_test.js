@@ -1,76 +1,59 @@
-var BSON = require('../..');
+// var hexStringToBinary = function(string) {
+//   var numberofValues = string.length / 2;
+//   var array = '';
 
-var testCase = require('nodeunit').testCase,
-  Buffer = require('buffer').Buffer,
-  fs = require('fs'),
-  Code = require('../../lib/bson/code').Code,
-  Binary = require('../../lib/bson/binary').Binary,
-  Timestamp = require('../../lib/bson/timestamp').Timestamp,
-  Long = require('../../lib/bson/long').Long,
-  ObjectID = require('../../lib/bson/objectid').ObjectID,
-  Symbol = require('../../lib/bson/symbol').Symbol,
-  DBRef = require('../../lib/bson/db_ref').DBRef,
-  Double = require('../../lib/bson/double').Double,
-  MinKey = require('../../lib/bson/min_key').MinKey,
-  MaxKey = require('../../lib/bson/max_key').MaxKey,
-  utils = require('./tools/utils');
+//   for (var i = 0; i < numberofValues; i++) {
+//     array += String.fromCharCode(parseInt(string[i * 2] + string[i * 2 + 1], 16));
+//   }
+//   return array;
+// };
 
-var createBSON = require('../utils');
+// var assertBuffersEqual = function(test, buffer1, buffer2) {
+//   if (buffer1.length !== buffer2.length)
+//     test.fail('Buffers do not have the same length', buffer1, buffer2);
 
-var hexStringToBinary = function(string) {
-  var numberofValues = string.length / 2;
-  var array = "";
-
-  for(var i = 0; i < numberofValues; i++) {
-    array += String.fromCharCode(parseInt(string[i*2] + string[i*2 + 1], 16));
-  }
-  return array;
-}
-
-var assertBuffersEqual = function(test, buffer1, buffer2) {
-  if(buffer1.length != buffer2.length) test.fail("Buffers do not have the same length", buffer1, buffer2);
-
-  for(var i = 0; i < buffer1.length; i++) {
-    test.equal(buffer1[i], buffer2[i]);
-  }
-}
+//   for (var i = 0; i < buffer1.length; i++) {
+//     test.equal(buffer1[i], buffer2[i]);
+//   }
+// };
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
  */
-var ISODate = function (string) {
-  var match;
+// var ISODate = function(string) {
+//   var match;
 
- if (typeof string.getTime === "function")
-   return string;
- else if (match = string.match(/^(\d{4})(-(\d{2})(-(\d{2})(T(\d{2}):(\d{2})(:(\d{2})(\.(\d+))?)?(Z|((\+|-)(\d{2}):(\d{2}))))?)?)?$/)) {
-   var date = new Date();
-   date.setUTCFullYear(Number(match[1]));
-   date.setUTCMonth(Number(match[3]) - 1 || 0);
-   date.setUTCDate(Number(match[5]) || 0);
-   date.setUTCHours(Number(match[7]) || 0);
-   date.setUTCMinutes(Number(match[8]) || 0);
-   date.setUTCSeconds(Number(match[10]) || 0);
-   date.setUTCMilliseconds(Number("." + match[12]) * 1000 || 0);
+//   if (typeof string.getTime === 'function') return string;
+//   else if (
+//     (match = string.match(
+//       /^(\d{4})(-(\d{2})(-(\d{2})(T(\d{2}):(\d{2})(:(\d{2})(\.(\d+))?)?(Z|((\+|-)(\d{2}):(\d{2}))))?)?)?$/
+//     ))
+//   ) {
+//     var date = new Date();
+//     date.setUTCFullYear(Number(match[1]));
+//     date.setUTCMonth(Number(match[3]) - 1 || 0);
+//     date.setUTCDate(Number(match[5]) || 0);
+//     date.setUTCHours(Number(match[7]) || 0);
+//     date.setUTCMinutes(Number(match[8]) || 0);
+//     date.setUTCSeconds(Number(match[10]) || 0);
+//     date.setUTCMilliseconds(Number('.' + match[12]) * 1000 || 0);
 
-   if (match[13] && match[13] !== "Z") {
-     var h = Number(match[16]) || 0,
-         m = Number(match[17]) || 0;
+//     if (match[13] && match[13] !== 'Z') {
+//       var h = Number(match[16]) || 0,
+//         m = Number(match[17]) || 0;
 
-     h *= 3600000;
-     m *= 60000;
+//       h *= 3600000;
+//       m *= 60000;
 
-     var offset = h + m;
-     if (match[15] == "+")
-       offset = -offset;
+//       var offset = h + m;
+//       if (match[15] === '+') offset = -offset;
 
-     date = new Date(date.valueOf() + offset);
-   }
+//       date = new Date(date.valueOf() + offset);
+//     }
 
-   return date;
- } else
-   throw new Error("Invalid ISO 8601 date given.", __filename);
-};
+//     return date;
+//   } else throw new Error('Invalid ISO 8601 date given.', __filename);
+// };
 
 var _Uint8Array = null;
 
@@ -84,7 +67,7 @@ exports.setUp = function(callback) {
   _Uint8Array = global.Uint8Array;
   delete global['Uint8Array'];
   callback();
-}
+};
 
 /**
  * Retrieve the server information for the current
@@ -95,7 +78,7 @@ exports.setUp = function(callback) {
 exports.tearDown = function(callback) {
   global['Uint8Array'] = _Uint8Array;
   callback();
-}
+};
 
 // /**
 //  * @ignore

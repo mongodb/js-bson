@@ -1,7 +1,6 @@
 var libDir = '../../lib/bson';
 
-var Benchmark = require('benchmark'),
-  f = require('util').format
+var f = require('util').format,
   Long = require(libDir).Long,
   ObjectID = require(libDir).ObjectID,
   Binary = require(libDir).Binary,
@@ -20,7 +19,18 @@ var Benchmarks = require('../shared/benchmarks');
 var BSON = require(f('%s/../../alternate_parsers/bson', __dirname)).BSON;
 
 // Create a serializer
-var bson = new BSON([Long, ObjectID, Binary, Code, DBRef, Symbol, Double, Timestamp, MaxKey, MinKey]);
+var bson = new BSON([
+  Long,
+  ObjectID,
+  Binary,
+  Code,
+  DBRef,
+  Symbol,
+  Double,
+  Timestamp,
+  MaxKey,
+  MinKey
+]);
 
 // Export Benchmarks
 module.exports = new Benchmarks(bson);

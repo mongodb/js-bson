@@ -21,13 +21,13 @@ exports['should correctly exercise the map'] = function(test) {
   test.equal(true, iterator.next().done);
 
   // Get the entries
-  var iterator = m.entries();
+  iterator = m.entries();
   test.deepEqual(['a', 3], iterator.next().value);
   test.deepEqual(['b', 2], iterator.next().value);
   test.deepEqual(true, iterator.next().done);
 
   // Get the keys
-  var iterator = m.keys();
+  iterator = m.keys();
   test.deepEqual('a', iterator.next().value);
   test.deepEqual('b', iterator.next().value);
   test.deepEqual(true, iterator.next().done);
@@ -52,27 +52,27 @@ exports['should correctly exercise the map'] = function(test) {
 
   // Validate order is preserved
   // Get the keys
-  var iterator = m.keys();
+  iterator = m.keys();
   test.deepEqual('b', iterator.next().value);
   test.deepEqual('c', iterator.next().value);
   test.deepEqual('a', iterator.next().value);
   test.deepEqual(true, iterator.next().done);
 
   // Get the entries
-  var iterator = m.entries();
+  iterator = m.entries();
   test.deepEqual(['b', 2], iterator.next().value);
   test.deepEqual(['c', 5], iterator.next().value);
   test.deepEqual(['a', 7], iterator.next().value);
   test.deepEqual(true, iterator.next().done);
 
   // Get the values
-  var iterator = m.values();
+  iterator = m.values();
   test.equal(2, iterator.next().value);
   test.equal(5, iterator.next().value);
   test.equal(7, iterator.next().value);
   test.equal(true, iterator.next().done);
   test.done();
-}
+};
 
 /**
  * @ignore
@@ -85,32 +85,32 @@ exports['should serialize a map'] = function(test) {
   var data = bson.serialize(m, false, true);
   // Deserialize the data
   var object = bson.deserialize(data);
-  test.deepEqual({a:1, b:2}, object);
+  test.deepEqual({ a: 1, b: 2 }, object);
 
   // Serialize nested maps
   var m1 = new M([['a', 1], ['b', 2]]);
-  var m = new M([['c', m1]]);
+  m = new M([['c', m1]]);
   // Serialize the map
-  var data = bson.serialize(m, false, true);
+  data = bson.serialize(m, false, true);
   // Deserialize the data
-  var object = bson.deserialize(data);
-  test.deepEqual({c: {a:1, b:2} }, object);
+  object = bson.deserialize(data);
+  test.deepEqual({ c: { a: 1, b: 2 } }, object);
   test.done();
 
   // Serialize top level map only
-  var m = new M([['1', 1], ['0', 2]]);
-  var bson = createBSON();
+  m = new M([['1', 1], ['0', 2]]);
+  bson = createBSON();
   // Serialize the map, validating that the order in the resulting BSON is preserved
-  var data = bson.serialize(m, false, true);
+  data = bson.serialize(m, false, true);
   test.equal('13000000103100010000001030000200000000', data.toString('hex'));
-}
+};
 
 /**
  * @ignore
  */
 exports['should not crash due to object that looks like map'] = function(test) {
   // Serialize top level map only
-  var m = { entries: "test" };
+  var m = { entries: 'test' };
   var bson = createBSON();
   // Serialize the map
   var data = bson.serialize(m, false, true);
@@ -118,4 +118,4 @@ exports['should not crash due to object that looks like map'] = function(test) {
   var object = bson.deserialize(data);
   test.deepEqual(m, object);
   test.done();
-}
+};

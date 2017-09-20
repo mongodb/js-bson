@@ -1,18 +1,12 @@
-const webpack = require('webpack'),
-  PolyfillsPlugin = require('webpack-polyfills-plugin');
-
 module.exports = {
-  entry: [
-    'babel-polyfill',
-    './index.js'
-  ],
+  entry: ['babel-polyfill', './index.js'],
   module: {
     loaders: [
       {
         test: /\.js?$/,
         exclude: /node_modules/,
         loader: 'babel'
-      },
+      }
     ]
   },
   resolve: {
