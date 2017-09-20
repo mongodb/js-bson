@@ -997,7 +997,6 @@ exports['Should Correctly Serialize nested doc'] = function(test) {
  */
 exports['Should Correctly Serialize and Deserialize Oid'] = function(test) {
   var doc = { doc: new ObjectID() };
-
   var serialized_data = createBSON().serialize(doc);
 
   var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
@@ -2066,6 +2065,7 @@ exports['Should correctly serialize a given javascript object using a bson insta
   });
   // Validate the correctness
   test.equal(37, buffer.length);
+
   test.done();
 };
 
@@ -2300,7 +2300,6 @@ exports['Should correctly serialize the BSONRegExp type'] = function(test) {
   var doc = { regexp: new BSONRegExp('test', 'i') };
   var doc1 = { regexp: /test/i };
   var serialized_data = createBSON().serialize(doc);
-
   var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
   createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
   assertBuffersEqual(test, serialized_data, serialized_data2, 0);
