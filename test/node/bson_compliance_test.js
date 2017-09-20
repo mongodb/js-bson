@@ -101,7 +101,7 @@ exports['Pass all valid BSON serialization scenarios ./compliance/valid.json'] =
           parseInt(doc[name]['$timestamp']['i'])
         );
       } else if (doc[name]['$ref']) {
-        object[name] = new DBRef(doc[name]['$ref'], doc[name]['$id']);
+        object[name] = new DBRef(doc[name]['$ref'], doc[name]['$id'], doc[name]['$db']);
       } else if (doc[name]['$minKey']) {
         object[name] = new MinKey();
       } else if (doc[name]['$maxKey']) {
