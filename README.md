@@ -69,7 +69,7 @@ https://github.com/mongodb/node-mongodb-native
 
 ### BSON serialization and deserialiation
 
-**`new BSON()`** - Creates a new BSON seralizer/deserializer you can use to serialize and deserialize BSON.
+**`new BSON()`** - Creates a new BSON serializer/deserializer you can use to serialize and deserialize BSON.
 
 #### BSON.serialize
 
