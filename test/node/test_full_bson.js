@@ -7,760 +7,747 @@ var BSON = require('../..'),
   ObjectID = BSON.ObjectID,
   Binary = BSON.Binary,
   BSONRegExp = BSON.BSONRegExp,
-  assert = require('assert');
+  expect = require('chai').expect;
 
 var createBSON = require('../utils');
 
 // Parsers
 var bson = createBSON();
 
-/**
- * Retrieve the server information for the current
- * instance of the db client
- *
- * @ignore
- */
-exports.setUp = function(callback) {
-  callback();
-};
+describe('Full BSON', function() {
+  /**
+   * @ignore
+   */
+  it('Should Correctly Deserialize object', function(done) {
+    var bytes = [
+      95,
+      0,
+      0,
+      0,
+      2,
+      110,
+      115,
+      0,
+      42,
+      0,
+      0,
+      0,
+      105,
+      110,
+      116,
+      101,
+      103,
+      114,
+      97,
+      116,
+      105,
+      111,
+      110,
+      95,
+      116,
+      101,
+      115,
+      116,
+      115,
+      95,
+      46,
+      116,
+      101,
+      115,
+      116,
+      95,
+      105,
+      110,
+      100,
+      101,
+      120,
+      95,
+      105,
+      110,
+      102,
+      111,
+      114,
+      109,
+      97,
+      116,
+      105,
+      111,
+      110,
+      0,
+      8,
+      117,
+      110,
+      105,
+      113,
+      117,
+      101,
+      0,
+      0,
+      3,
+      107,
+      101,
+      121,
+      0,
+      12,
+      0,
+      0,
+      0,
+      16,
+      97,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      2,
+      110,
+      97,
+      109,
+      101,
+      0,
+      4,
+      0,
+      0,
+      0,
+      97,
+      95,
+      49,
+      0,
+      0
+    ];
+    var serialized_data = '';
+    // Convert to chars
+    for (var i = 0; i < bytes.length; i++) {
+      serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
+    }
 
-/**
- * Retrieve the server information for the current
- * instance of the db client
- *
- * @ignore
- */
-exports.tearDown = function(callback) {
-  callback();
-};
+    var object = bson.deserialize(new Buffer(serialized_data, 'binary'));
+    expect('a_1').to.equal(object.name);
+    expect(false).to.equal(object.unique);
+    expect(1).to.equal(object.key.a);
+    done();
+  });
 
-/**
- * @ignore
- */
-exports['Should Correctly Deserialize object'] = function(test) {
-  var bytes = [
-    95,
-    0,
-    0,
-    0,
-    2,
-    110,
-    115,
-    0,
-    42,
-    0,
-    0,
-    0,
-    105,
-    110,
-    116,
-    101,
-    103,
-    114,
-    97,
-    116,
-    105,
-    111,
-    110,
-    95,
-    116,
-    101,
-    115,
-    116,
-    115,
-    95,
-    46,
-    116,
-    101,
-    115,
-    116,
-    95,
-    105,
-    110,
-    100,
-    101,
-    120,
-    95,
-    105,
-    110,
-    102,
-    111,
-    114,
-    109,
-    97,
-    116,
-    105,
-    111,
-    110,
-    0,
-    8,
-    117,
-    110,
-    105,
-    113,
-    117,
-    101,
-    0,
-    0,
-    3,
-    107,
-    101,
-    121,
-    0,
-    12,
-    0,
-    0,
-    0,
-    16,
-    97,
-    0,
-    1,
-    0,
-    0,
-    0,
-    0,
-    2,
-    110,
-    97,
-    109,
-    101,
-    0,
-    4,
-    0,
-    0,
-    0,
-    97,
-    95,
-    49,
-    0,
-    0
-  ];
-  var serialized_data = '';
-  // Convert to chars
-  for (var i = 0; i < bytes.length; i++) {
-    serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
-  }
+  /**
+   * @ignore
+   */
+  it('Should Correctly Deserialize object with all types', function(done) {
+    var bytes = [
+      26,
+      1,
+      0,
+      0,
+      7,
+      95,
+      105,
+      100,
+      0,
+      161,
+      190,
+      98,
+      75,
+      118,
+      169,
+      3,
+      0,
+      0,
+      3,
+      0,
+      0,
+      4,
+      97,
+      114,
+      114,
+      97,
+      121,
+      0,
+      26,
+      0,
+      0,
+      0,
+      16,
+      48,
+      0,
+      1,
+      0,
+      0,
+      0,
+      16,
+      49,
+      0,
+      2,
+      0,
+      0,
+      0,
+      16,
+      50,
+      0,
+      3,
+      0,
+      0,
+      0,
+      0,
+      2,
+      115,
+      116,
+      114,
+      105,
+      110,
+      103,
+      0,
+      6,
+      0,
+      0,
+      0,
+      104,
+      101,
+      108,
+      108,
+      111,
+      0,
+      3,
+      104,
+      97,
+      115,
+      104,
+      0,
+      19,
+      0,
+      0,
+      0,
+      16,
+      97,
+      0,
+      1,
+      0,
+      0,
+      0,
+      16,
+      98,
+      0,
+      2,
+      0,
+      0,
+      0,
+      0,
+      9,
+      100,
+      97,
+      116,
+      101,
+      0,
+      161,
+      190,
+      98,
+      75,
+      0,
+      0,
+      0,
+      0,
+      7,
+      111,
+      105,
+      100,
+      0,
+      161,
+      190,
+      98,
+      75,
+      90,
+      217,
+      18,
+      0,
+      0,
+      1,
+      0,
+      0,
+      5,
+      98,
+      105,
+      110,
+      97,
+      114,
+      121,
+      0,
+      7,
+      0,
+      0,
+      0,
+      2,
+      3,
+      0,
+      0,
+      0,
+      49,
+      50,
+      51,
+      16,
+      105,
+      110,
+      116,
+      0,
+      42,
+      0,
+      0,
+      0,
+      1,
+      102,
+      108,
+      111,
+      97,
+      116,
+      0,
+      223,
+      224,
+      11,
+      147,
+      169,
+      170,
+      64,
+      64,
+      11,
+      114,
+      101,
+      103,
+      101,
+      120,
+      112,
+      0,
+      102,
+      111,
+      111,
+      98,
+      97,
+      114,
+      0,
+      105,
+      0,
+      8,
+      98,
+      111,
+      111,
+      108,
+      101,
+      97,
+      110,
+      0,
+      1,
+      15,
+      119,
+      104,
+      101,
+      114,
+      101,
+      0,
+      25,
+      0,
+      0,
+      0,
+      12,
+      0,
+      0,
+      0,
+      116,
+      104,
+      105,
+      115,
+      46,
+      120,
+      32,
+      61,
+      61,
+      32,
+      51,
+      0,
+      5,
+      0,
+      0,
+      0,
+      0,
+      3,
+      100,
+      98,
+      114,
+      101,
+      102,
+      0,
+      37,
+      0,
+      0,
+      0,
+      2,
+      36,
+      114,
+      101,
+      102,
+      0,
+      5,
+      0,
+      0,
+      0,
+      116,
+      101,
+      115,
+      116,
+      0,
+      7,
+      36,
+      105,
+      100,
+      0,
+      161,
+      190,
+      98,
+      75,
+      2,
+      180,
+      1,
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      10,
+      110,
+      117,
+      108,
+      108,
+      0,
+      0
+    ];
+    var serialized_data = '';
+    // Convert to chars
+    for (var i = 0; i < bytes.length; i++) {
+      serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
+    }
 
-  var object = bson.deserialize(new Buffer(serialized_data, 'binary'));
-  assert.equal('a_1', object.name);
-  assert.equal(false, object.unique);
-  assert.equal(1, object.key.a);
-  test.done();
-};
+    var object = bson.deserialize(new Buffer(serialized_data, 'binary'));
+    expect('hello').to.equal(object.string);
+    expect([1, 2, 3]).to.deep.equal(object.array);
+    expect(1).to.equal(object.hash.a);
+    expect(2).to.equal(object.hash.b);
+    expect(object.date != null).to.be.ok;
+    expect(object.oid != null).to.be.ok;
+    expect(object.binary != null).to.be.ok;
+    expect(42).to.equal(object.int);
+    expect(33.3333).to.equal(object.float);
+    expect(object.regexp != null).to.be.ok;
+    expect(true).to.equal(object.boolean);
+    expect(object.where != null).to.be.ok;
+    expect(object.dbref != null).to.be.ok;
+    expect(object['null'] == null).to.be.ok;
+    done();
+  });
 
-/**
- * @ignore
- */
-exports['Should Correctly Deserialize object with all types'] = function(test) {
-  var bytes = [
-    26,
-    1,
-    0,
-    0,
-    7,
-    95,
-    105,
-    100,
-    0,
-    161,
-    190,
-    98,
-    75,
-    118,
-    169,
-    3,
-    0,
-    0,
-    3,
-    0,
-    0,
-    4,
-    97,
-    114,
-    114,
-    97,
-    121,
-    0,
-    26,
-    0,
-    0,
-    0,
-    16,
-    48,
-    0,
-    1,
-    0,
-    0,
-    0,
-    16,
-    49,
-    0,
-    2,
-    0,
-    0,
-    0,
-    16,
-    50,
-    0,
-    3,
-    0,
-    0,
-    0,
-    0,
-    2,
-    115,
-    116,
-    114,
-    105,
-    110,
-    103,
-    0,
-    6,
-    0,
-    0,
-    0,
-    104,
-    101,
-    108,
-    108,
-    111,
-    0,
-    3,
-    104,
-    97,
-    115,
-    104,
-    0,
-    19,
-    0,
-    0,
-    0,
-    16,
-    97,
-    0,
-    1,
-    0,
-    0,
-    0,
-    16,
-    98,
-    0,
-    2,
-    0,
-    0,
-    0,
-    0,
-    9,
-    100,
-    97,
-    116,
-    101,
-    0,
-    161,
-    190,
-    98,
-    75,
-    0,
-    0,
-    0,
-    0,
-    7,
-    111,
-    105,
-    100,
-    0,
-    161,
-    190,
-    98,
-    75,
-    90,
-    217,
-    18,
-    0,
-    0,
-    1,
-    0,
-    0,
-    5,
-    98,
-    105,
-    110,
-    97,
-    114,
-    121,
-    0,
-    7,
-    0,
-    0,
-    0,
-    2,
-    3,
-    0,
-    0,
-    0,
-    49,
-    50,
-    51,
-    16,
-    105,
-    110,
-    116,
-    0,
-    42,
-    0,
-    0,
-    0,
-    1,
-    102,
-    108,
-    111,
-    97,
-    116,
-    0,
-    223,
-    224,
-    11,
-    147,
-    169,
-    170,
-    64,
-    64,
-    11,
-    114,
-    101,
-    103,
-    101,
-    120,
-    112,
-    0,
-    102,
-    111,
-    111,
-    98,
-    97,
-    114,
-    0,
-    105,
-    0,
-    8,
-    98,
-    111,
-    111,
-    108,
-    101,
-    97,
-    110,
-    0,
-    1,
-    15,
-    119,
-    104,
-    101,
-    114,
-    101,
-    0,
-    25,
-    0,
-    0,
-    0,
-    12,
-    0,
-    0,
-    0,
-    116,
-    104,
-    105,
-    115,
-    46,
-    120,
-    32,
-    61,
-    61,
-    32,
-    51,
-    0,
-    5,
-    0,
-    0,
-    0,
-    0,
-    3,
-    100,
-    98,
-    114,
-    101,
-    102,
-    0,
-    37,
-    0,
-    0,
-    0,
-    2,
-    36,
-    114,
-    101,
-    102,
-    0,
-    5,
-    0,
-    0,
-    0,
-    116,
-    101,
-    115,
-    116,
-    0,
-    7,
-    36,
-    105,
-    100,
-    0,
-    161,
-    190,
-    98,
-    75,
-    2,
-    180,
-    1,
-    0,
-    0,
-    2,
-    0,
-    0,
-    0,
-    10,
-    110,
-    117,
-    108,
-    108,
-    0,
-    0
-  ];
-  var serialized_data = '';
-  // Convert to chars
-  for (var i = 0; i < bytes.length; i++) {
-    serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
-  }
+  /**
+   * @ignore
+   */
+  it('Should Serialize and Deserialize String', function(done) {
+    var test_string = { hello: 'world' };
+    var serialized_data = bson.serialize(test_string);
+    expect(test_string).to.deep.equal(bson.deserialize(serialized_data));
+    done();
+  });
 
-  var object = bson.deserialize(new Buffer(serialized_data, 'binary'));
-  assert.equal('hello', object.string);
-  assert.deepEqual([1, 2, 3], object.array);
-  assert.equal(1, object.hash.a);
-  assert.equal(2, object.hash.b);
-  assert.ok(object.date != null);
-  assert.ok(object.oid != null);
-  assert.ok(object.binary != null);
-  assert.equal(42, object.int);
-  assert.equal(33.3333, object.float);
-  assert.ok(object.regexp != null);
-  assert.equal(true, object.boolean);
-  assert.ok(object.where != null);
-  assert.ok(object.dbref != null);
-  assert.ok(object['null'] == null);
-  test.done();
-};
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize Integer', function(done) {
+    var test_number = { doc: 5 };
+    var serialized_data = bson.serialize(test_number);
+    expect(test_number).to.deep.equal(bson.deserialize(serialized_data));
+    done();
+  });
 
-/**
- * @ignore
- */
-exports['Should Serialize and Deserialize String'] = function(test) {
-  var test_string = { hello: 'world' };
-  var serialized_data = bson.serialize(test_string);
-  assert.deepEqual(test_string, bson.deserialize(serialized_data));
-  test.done();
-};
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize null value', function(done) {
+    var test_null = { doc: null };
+    var serialized_data = bson.serialize(test_null);
+    var object = bson.deserialize(serialized_data);
+    expect(test_null).to.deep.equal(object);
+    done();
+  });
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize Integer'] = function(test) {
-  var test_number = { doc: 5 };
-  var serialized_data = bson.serialize(test_number);
-  assert.deepEqual(test_number, bson.deserialize(serialized_data));
-  test.done();
-};
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize undefined value', function(done) {
+    var test_undefined = { doc: undefined };
+    var serialized_data = bson.serialize(test_undefined);
+    var object = bson.deserialize(new Buffer(serialized_data, 'binary'));
+    expect(undefined).to.equal(object.doc);
+    done();
+  });
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize null value'] = function(test) {
-  var test_null = { doc: null };
-  var serialized_data = bson.serialize(test_null);
-  var object = bson.deserialize(serialized_data);
-  assert.deepEqual(test_null, object);
-  test.done();
-};
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize Number 3', function(done) {
+    var test_number = { doc: 5.5 };
+    var serialized_data = bson.serialize(test_number);
+    expect(test_number).to.deep.equal(bson.deserialize(serialized_data));
+    done();
+  });
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize undefined value'] = function(test) {
-  var test_undefined = { doc: undefined };
-  var serialized_data = bson.serialize(test_undefined);
-  var object = bson.deserialize(new Buffer(serialized_data, 'binary'));
-  assert.equal(null, object.doc);
-  test.done();
-};
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize Integer', function(done) {
+    var test_int = { doc: 42 };
+    var serialized_data = bson.serialize(test_int);
+    expect(test_int).to.deep.equal(bson.deserialize(serialized_data));
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize Number 3'] = function(test) {
-  var test_number = { doc: 5.5 };
-  var serialized_data = bson.serialize(test_number);
-  assert.deepEqual(test_number, bson.deserialize(serialized_data));
-  test.done();
-};
+    test_int = { doc: -5600 };
+    serialized_data = bson.serialize(test_int);
+    expect(test_int).to.deep.equal(bson.deserialize(serialized_data));
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize Integer'] = function(test) {
-  var test_int = { doc: 42 };
-  var serialized_data = bson.serialize(test_int);
-  assert.deepEqual(test_int, bson.deserialize(serialized_data));
+    test_int = { doc: 2147483647 };
+    serialized_data = bson.serialize(test_int);
+    expect(test_int).to.deep.equal(bson.deserialize(serialized_data));
 
-  test_int = { doc: -5600 };
-  serialized_data = bson.serialize(test_int);
-  assert.deepEqual(test_int, bson.deserialize(serialized_data));
+    test_int = { doc: -2147483648 };
+    serialized_data = bson.serialize(test_int);
+    expect(test_int).to.deep.equal(bson.deserialize(serialized_data));
+    done();
+  });
 
-  test_int = { doc: 2147483647 };
-  serialized_data = bson.serialize(test_int);
-  assert.deepEqual(test_int, bson.deserialize(serialized_data));
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize Object', function(done) {
+    var doc = { doc: { age: 42, name: 'Spongebob', shoe_size: 9.5 } };
+    var serialized_data = bson.serialize(doc);
+    expect(doc).to.deep.equal(bson.deserialize(serialized_data));
+    done();
+  });
 
-  test_int = { doc: -2147483648 };
-  serialized_data = bson.serialize(test_int);
-  assert.deepEqual(test_int, bson.deserialize(serialized_data));
-  test.done();
-};
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize Array', function(done) {
+    var doc = { doc: [1, 2, 'a', 'b'] };
+    var serialized_data = bson.serialize(doc);
+    expect(doc).to.deep.equal(bson.deserialize(serialized_data));
+    done();
+  });
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize Object'] = function(test) {
-  var doc = { doc: { age: 42, name: 'Spongebob', shoe_size: 9.5 } };
-  var serialized_data = bson.serialize(doc);
-  assert.deepEqual(doc, bson.deserialize(serialized_data));
-  test.done();
-};
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize Array with added on functions', function(done) {
+    var doc = { doc: [1, 2, 'a', 'b'] };
+    var serialized_data = bson.serialize(doc);
+    expect(doc).to.deep.equal(bson.deserialize(serialized_data));
+    done();
+  });
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize Array'] = function(test) {
-  var doc = { doc: [1, 2, 'a', 'b'] };
-  var serialized_data = bson.serialize(doc);
-  assert.deepEqual(doc, bson.deserialize(serialized_data));
-  test.done();
-};
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize A Boolean', function(done) {
+    var doc = { doc: true };
+    var serialized_data = bson.serialize(doc);
+    expect(doc).to.deep.equal(bson.deserialize(serialized_data));
+    done();
+  });
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize Array with added on functions'] = function(
-  test
-) {
-  var doc = { doc: [1, 2, 'a', 'b'] };
-  var serialized_data = bson.serialize(doc);
-  assert.deepEqual(doc, bson.deserialize(serialized_data));
-  test.done();
-};
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize a Date', function(done) {
+    var date = new Date();
+    //(2009, 11, 12, 12, 00, 30)
+    date.setUTCDate(12);
+    date.setUTCFullYear(2009);
+    date.setUTCMonth(11 - 1);
+    date.setUTCHours(12);
+    date.setUTCMinutes(0);
+    date.setUTCSeconds(30);
+    var doc = { doc: date };
+    var serialized_data = bson.serialize(doc);
+    expect(doc).to.deep.equal(bson.deserialize(serialized_data));
+    done();
+  });
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize A Boolean'] = function(test) {
-  var doc = { doc: true };
-  var serialized_data = bson.serialize(doc);
-  assert.deepEqual(doc, bson.deserialize(serialized_data));
-  test.done();
-};
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize Oid', function(done) {
+    var doc = { doc: new ObjectID() };
+    var serialized_data = bson.serialize(doc);
+    expect(doc.doc.toHexString()).to.deep.equal(
+      bson.deserialize(serialized_data).doc.toHexString()
+    );
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize a Date'] = function(test) {
-  var date = new Date();
-  //(2009, 11, 12, 12, 00, 30)
-  date.setUTCDate(12);
-  date.setUTCFullYear(2009);
-  date.setUTCMonth(11 - 1);
-  date.setUTCHours(12);
-  date.setUTCMinutes(0);
-  date.setUTCSeconds(30);
-  var doc = { doc: date };
-  var serialized_data = bson.serialize(doc);
-  assert.deepEqual(doc, bson.deserialize(serialized_data));
-  test.done();
-};
+    done();
+  });
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize Oid'] = function(test) {
-  var doc = { doc: new ObjectID() };
-  var serialized_data = bson.serialize(doc);
-  assert.deepEqual(doc.doc.toHexString(), bson.deserialize(serialized_data).doc.toHexString());
-  test.done();
-};
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize Buffer', function(done) {
+    var doc = { doc: new Buffer('123451234512345') };
+    var serialized_data = bson.serialize(doc);
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize Buffer'] = function(test) {
-  var doc = { doc: new Buffer('123451234512345') };
-  var serialized_data = bson.serialize(doc);
+    expect('123451234512345').to.equal(
+      bson.deserialize(serialized_data).doc.buffer.toString('ascii')
+    );
 
-  assert.equal('123451234512345', bson.deserialize(serialized_data).doc.buffer.toString('ascii'));
-  test.done();
-};
+    done();
+  });
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize Buffer with promoteBuffers option'] = function(
-  test
-) {
-  var doc = { doc: new Buffer('123451234512345') };
-  var serialized_data = bson.serialize(doc);
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize Buffer with promoteBuffers option', function(
+    done
+  ) {
+    var doc = { doc: new Buffer('123451234512345') };
+    var serialized_data = bson.serialize(doc);
 
-  var options = { promoteBuffers: true };
-  assert.equal('123451234512345', bson.deserialize(serialized_data, options).doc.toString('ascii'));
-  test.done();
-};
+    var options = { promoteBuffers: true };
+    expect('123451234512345').to.equal(
+      bson.deserialize(serialized_data, options).doc.toString('ascii')
+    );
 
-/**
- * @ignore
- */
-exports['Should Correctly encode Empty Hash'] = function(test) {
-  var test_code = {};
-  var serialized_data = bson.serialize(test_code);
-  assert.deepEqual(test_code, bson.deserialize(serialized_data));
-  test.done();
-};
+    done();
+  });
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize Ordered Hash'] = function(test) {
-  var doc = { doc: { b: 1, a: 2, c: 3, d: 4 } };
-  var serialized_data = bson.serialize(doc);
-  var decoded_hash = bson.deserialize(serialized_data).doc;
-  var keys = [];
-  for (var name in decoded_hash) keys.push(name);
-  assert.deepEqual(['b', 'a', 'c', 'd'], keys);
-  test.done();
-};
+  /**
+   * @ignore
+   */
+  it('Should Correctly encode Empty Hash', function(done) {
+    var test_code = {};
+    var serialized_data = bson.serialize(test_code);
+    expect(test_code).to.deep.equal(bson.deserialize(serialized_data));
+    done();
+  });
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize Regular Expression'] = function(test) {
-  var doc = { doc: /foobar/im };
-  var serialized_data = bson.serialize(doc);
-  var doc2 = bson.deserialize(serialized_data);
-  assert.equal(doc.doc.toString(), doc2.doc.toString());
-  test.done();
-};
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize Ordered Hash', function(done) {
+    var doc = { doc: { b: 1, a: 2, c: 3, d: 4 } };
+    var serialized_data = bson.serialize(doc);
+    var decoded_hash = bson.deserialize(serialized_data).doc;
+    var keys = [];
+    for (var name in decoded_hash) keys.push(name);
+    expect(['b', 'a', 'c', 'd']).to.deep.equal(keys);
+    done();
+  });
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize a Binary object'] = function(test) {
-  var bin = new Binary();
-  var string = 'binstring';
-  for (var index = 0; index < string.length; index++) {
-    bin.put(string.charAt(index));
-  }
-  var doc = { doc: bin };
-  var serialized_data = bson.serialize(doc);
-  var deserialized_data = bson.deserialize(serialized_data);
-  assert.equal(doc.doc.value(), deserialized_data.doc.value());
-  test.done();
-};
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize Regular Expression', function(done) {
+    var doc = { doc: /foobar/im };
+    var serialized_data = bson.serialize(doc);
+    var doc2 = bson.deserialize(serialized_data);
+    expect(doc.doc.toString()).to.equal(doc2.doc.toString());
+    done();
+  });
 
-/**
- * @ignore
- */
-exports['Should Correctly Serialize and Deserialize a big Binary object'] = function(test) {
-  var data = fs.readFileSync('test/node/data/test_gs_weird_bug.png', 'binary');
-  var bin = new Binary();
-  bin.write(data);
-  var doc = { doc: bin };
-  var serialized_data = bson.serialize(doc);
-  var deserialized_data = bson.deserialize(serialized_data);
-  assert.equal(doc.doc.value(), deserialized_data.doc.value());
-  test.done();
-};
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize a Binary object', function(done) {
+    var bin = new Binary();
+    var string = 'binstring';
+    for (var index = 0; index < string.length; index++) {
+      bin.put(string.charAt(index));
+    }
+    var doc = { doc: bin };
+    var serialized_data = bson.serialize(doc);
+    var deserialized_data = bson.deserialize(serialized_data);
+    expect(doc.doc.value()).to.equal(deserialized_data.doc.value());
+    done();
+  });
 
-exports['Should Correctly Deserialize bson file from mongodump'] = function(test) {
-  var data = fs.readFileSync('test/node/data/test.bson', { encoding: null });
-  var docs = [];
-  var bsonIndex = 0;
-  while (bsonIndex < data.length)
-    bsonIndex = bson.deserializeStream(data, bsonIndex, 1, docs, docs.length, { isArray: true });
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize a big Binary object', function(done) {
+    var data = fs.readFileSync('test/node/data/test_gs_weird_bug.png', 'binary');
+    var bin = new Binary();
+    bin.write(data);
+    var doc = { doc: bin };
+    var serialized_data = bson.serialize(doc);
+    var deserialized_data = bson.deserialize(serialized_data);
+    expect(doc.doc.value()).to.equal(deserialized_data.doc.value());
+    done();
+  });
 
-  assert.equal(docs.length, 1);
-  test.done();
-};
+  it('Should Correctly Deserialize bson file from mongodump', function(done) {
+    var data = fs.readFileSync('test/node/data/test.bson', { encoding: null });
+    var docs = [];
+    var bsonIndex = 0;
+    while (bsonIndex < data.length)
+      bsonIndex = bson.deserializeStream(data, bsonIndex, 1, docs, docs.length, { isArray: true });
 
-exports['Should Correctly fail due to attempting serialization of illegal key values'] = function(
-  test
-) {
-  var k = new Buffer(15);
-  for (var i = 0; i < 15; i++) k[i] = 0;
+    expect(docs.length).to.equal(1);
+    done();
+  });
 
-  k.write('hello');
-  k[6] = 0x06;
-  k.write('world', 10);
+  it('Should Correctly fail due to attempting serialization of illegal key values', function(done) {
+    var k = new Buffer(15);
+    for (var i = 0; i < 15; i++) k[i] = 0;
 
-  var v = new Buffer(65801);
-  for (i = 0; i < 65801; i++) v[i] = 1;
-  v[0] = 0x0a;
-  var doc = {};
-  doc[k.toString()] = v.toString();
+    k.write('hello');
+    k[6] = 0x06;
+    k.write('world', 10);
 
-  // Should throw due to null character
-  try {
-    bson.serialize(doc, {
-      checkKeys: true
-    });
-    test.ok(false);
-  } catch (err) {
-    test.ok(true);
-  }
+    var v = new Buffer(65801);
+    for (i = 0; i < 65801; i++) v[i] = 1;
+    v[0] = 0x0a;
+    var doc = {};
+    doc[k.toString()] = v.toString();
 
-  test.done();
-};
+    // Should throw due to null character
+    try {
+      bson.serialize(doc, {
+        checkKeys: true
+      });
+      expect(false).to.be.ok;
+    } catch (err) {
+      expect(true).to.be.ok;
+    }
 
-exports['Should correctly fail to serialize regexp with null bytes'] = function(test) {
-  var doc = {};
-  doc.test = new RegExp('a\0b'); // eslint-disable-line no-control-regex
+    done();
+  });
 
-  try {
-    bson.serialize(doc, {
-      checkKeys: true
-    });
-    test.ok(false);
-  } catch (err) {
-    test.ok(true);
-  }
+  it('Should correctly fail to serialize regexp with null bytes', function(done) {
+    var doc = {};
+    doc.test = new RegExp('a\0b'); // eslint-disable-line no-control-regex
 
-  test.done();
-};
+    try {
+      bson.serialize(doc, {
+        checkKeys: true
+      });
+      expect(false).to.be.ok;
+    } catch (err) {
+      expect(true).to.be.ok;
+    }
 
-exports['Should correctly fail to serialize BSONRegExp with null bytes'] = function(test) {
-  var doc = {};
-  doc.test = new BSONRegExp('a\0b');
+    done();
+  });
 
-  try {
-    bson.serialize(doc, {
-      checkKeys: true
-    });
-    test.ok(false);
-  } catch (err) {
-    test.ok(true);
-  }
+  it('Should correctly fail to serialize BSONRegExp with null bytes', function(done) {
+    var doc = {};
+    doc.test = new BSONRegExp('a\0b');
 
-  test.done();
-};
+    try {
+      bson.serialize(doc, {
+        checkKeys: true
+      });
+      expect(false).to.be.ok;
+    } catch (err) {
+      expect(true).to.be.ok;
+    }
+
+    done();
+  });
+});
