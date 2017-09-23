@@ -65,9 +65,6 @@ var INF_POSITIVE_BUFFER = new Buffer(
   ].reverse()
 );
 
-var createBSON = require('../utils'),
-  expect = require('chai').expect;
-
 describe('Decimal128', function() {
   /**
    * @ignore
