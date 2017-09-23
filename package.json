@@ -5,6 +5,7 @@
   "files": ["lib", "index.js", "browser_build", "bower.json"],
   "version": "1.0.4",
   "author": "Christian Amor Kvalheim <christkv@gmail.com>",
+  "license": "Apache-2.0",
   "contributors": [],
   "repository": "mongodb/js-bson",
   "bugs": {
@@ -12,21 +13,21 @@
     "url": "https://github.com/mongodb/js-bson/issues"
   },
   "devDependencies": {
-    "benchmark": "1.0.0",
-    "colors": "1.1.0",
-    "nodeunit": "0.9.0",
-    "babel-core": "^6.14.0",
-    "babel-loader": "^6.2.5",
-    "babel-polyfill": "^6.13.0",
-    "babel-preset-es2015": "^6.14.0",
-    "babel-preset-stage-0": "^6.5.0",
-    "babel-register": "^6.14.0",
-    "eslint": "^4.5.0",
-    "eslint-plugin-prettier": "^2.2.0",
+    "benchmark": "^2.1.4",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-stage-0": "^6.24.1",
+    "babel-register": "^6.26.0",
+    "chai": "^4.1.2",
+    "eslint": "^4.7.2",
+    "eslint-plugin-prettier": "^2.3.1",
     "istanbul": "^0.4.5",
-    "prettier": "^1.5.3",
-    "webpack": "^1.13.2",
-    "webpack-polyfills-plugin": "0.0.9"
+    "mocha": "^3.5.3",
+    "prettier": "^1.7.0",
+    "webpack": "^3.6.0",
+    "webpack-polyfills-plugin": "0.1.0"
   },
   "config": {
     "native": false
@@ -47,10 +48,5 @@
     "coverage":
       "istanbul cover _mocha -- --recursive --ui tdd test/node"
   },
-  "browser": "lib/bson/bson.js",
-  "license": "Apache-2.0",
-  "dependencies": {
-    "chai": "^4.1.2",
-    "mocha": "^3.5.3"
-  }
+  "browser": "lib/bson/bson.js"
 }
