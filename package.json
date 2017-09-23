@@ -23,6 +23,7 @@
     "babel-register": "^6.14.0",
     "eslint": "^4.5.0",
     "eslint-plugin-prettier": "^2.2.0",
+    "istanbul": "^0.4.5",
     "prettier": "^1.5.3",
     "webpack": "^1.13.2",
     "webpack-polyfills-plugin": "0.0.9"
@@ -38,15 +39,18 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "test": "nodeunit ./test/node",
+    "test": "mocha ./test/node",
     "build": "webpack --config ./webpack.dist.config.js",
     "lint": "eslint lib test",
     "format":
-      "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'"
+      "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
+    "coverage":
+      "istanbul cover _mocha -- --recursive --ui tdd test/node"
   },
   "browser": "lib/bson/bson.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "chai": "^4.1.2"
+    "chai": "^4.1.2",
+    "mocha": "^3.5.3"
   }
 }
