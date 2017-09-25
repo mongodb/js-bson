@@ -66,9 +66,9 @@ var _Uint8Array = null;
  * @ignore
  */
 exports.setUp = function(callback) {
-	_Uint8Array = global.Uint8Array;
-	delete global['Uint8Array'];
-	callback();
+  _Uint8Array = global.Uint8Array;
+  delete global['Uint8Array'];
+  callback();
 };
 
 /**
@@ -78,8 +78,8 @@ exports.setUp = function(callback) {
  * @ignore
  */
 exports.tearDown = function(callback) {
-	global['Uint8Array'] = _Uint8Array;
-	callback();
+  global['Uint8Array'] = _Uint8Array;
+  callback();
 };
 
 // /**
