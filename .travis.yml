@@ -1,4 +1,4 @@
-sudo: required 
+sudo: false
 dist: trusty
 
 language: node_js
@@ -8,27 +8,7 @@ cache:
   directories:
     - node_modules
 
-jobs:
-  include:
-    - stage: tests
-      node_js: 4
-      env: MONGODB_VERSION=2.6.x
-    - stage: tests
-      node_js: 4
-      env: MONGODB_VERSION=3.0.x
-    - stage: tests
-      node_js: 4
-      env: MONGODB_VERSION=3.2.x
-    - stage: tests
-      node_js: 4
-      env: MONGODB_VERSION=3.4.x
-    - stage: tests
-      node_js: 4
-      env: MONGODB_VERSION=3.5.x
-
-    - stage: tests
-      node_js: 6
-      env: MONGODB_VERSION=3.4.x
-    - stage: tests
-      node_js: 8
-      env: MONGODB_VERSION=3.4.x
+node_js:
+  - 4
+  - 6
+  - 8
