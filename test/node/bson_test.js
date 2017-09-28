@@ -1111,8 +1111,8 @@ describe('BSON', function() {
     expect(serialized_data).to.deep.equal(serialized_data2);
 
     var doc2 = b.deserialize(serialized_data);
-    expect('namespace').to.equal(doc2.dbref.$ref);
-    expect(doc2.dbref.$id.toHexString()).to.deep.equal(oid.toHexString());
+    expect(doc).to.deep.equal(doc2);
+    expect(doc2.dbref.oid.toHexString()).to.deep.equal(oid.toHexString());
     done();
   });
 
@@ -1131,8 +1131,8 @@ describe('BSON', function() {
 
     var doc2 = b.deserialize(serialized_data);
     expect('something').to.equal(doc2.name);
-    expect('username').to.equal(doc2.user.$ref);
-    expect(id.toString()).to.equal(doc2.user.$id.toString());
+    expect('username').to.equal(doc2.user.collection);
+    expect(id.toString()).to.equal(doc2.user.oid.toString());
     done();
   });
 
