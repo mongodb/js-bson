@@ -1211,15 +1211,13 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Long Integer and Timestamp as different types', function(
-    done
-  ) {
+  it('Should Correctly Serialize and Deserialize Timestamp as subclass of Long', function(done) {
     var long = Long.fromNumber(9223372036854775807);
     var timestamp = Timestamp.fromNumber(9223372036854775807);
     expect(long instanceof Long).to.be.ok;
     expect(!(long instanceof Timestamp)).to.be.ok;
     expect(timestamp instanceof Timestamp).to.be.ok;
-    expect(!(timestamp instanceof Long)).to.be.ok;
+    expect(timestamp instanceof Long).to.be.ok;
 
     var test_int = { doc: long, doc2: timestamp };
     var serialized_data = createBSON().serialize(test_int);
