@@ -139,3 +139,9 @@ The BSON deserializeStream method takes a node.js Buffer, startIndex and allow m
     * @param {Object} [options.fieldsAsRaw=null] allow to specify if there what fields we wish to return as unserialized raw buffer.
     * @param {Object} [options.bsonRegExp=false] return BSON regular expressions as BSONRegExp instances.
     * @return {Object} returns the deserialized Javascript Object.
+
+## FAQ
+
+#### Why does `undefined` get converted to `null`?
+
+The `undefined` BSON type has been [deprecated for many years](http://bsonspec.org/spec.html), so this library has dropped support for it. Use the `ignoreUndefined` option (for example, from the [driver](http://mongodb.github.io/node-mongodb-native/2.2/api/MongoClient.html#connect) ) to instead remove `undefined` keys.
