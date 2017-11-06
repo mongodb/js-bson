@@ -86,6 +86,19 @@ var ISODate = function(string) {
   } else throw new Error('Invalid ISO 8601 date given.', __filename);
 };
 
+function runTestsOnBytesForBufferAndUint8Array(bytes, testFn) {
+  var serialized_data = '';
+  // Convert to chars
+  for (var i = 0; i < bytes.length; i++) {
+    serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
+  }
+
+  var uint8Array = Uint8Array.from(bytes);
+  var buffer = new Buffer(serialized_data, 'binary');
+
+  [uint8Array, buffer].forEach(testFn);
+}
+
 describe('BSON', function() {
   /**
    * @ignore
@@ -224,16 +237,19 @@ describe('BSON', function() {
       0,
       0
     ];
-    var serialized_data = '';
-    // Convert to chars
-    for (var i = 0; i < bytes.length; i++) {
-      serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
-    }
 
-    var object = createBSON().deserialize(new Buffer(serialized_data, 'binary'));
-    expect('a_1').to.equal(object.name);
-    expect(false).to.equal(object.unique);
-    expect(1).to.equal(object.key.a);
+    runTestsOnBytesForBufferAndUint8Array(bytes, function(data) {
+      var object = createBSON().deserialize(data);
+      expect('a_1').to.equal(object.name);
+      expect(false).to.equal(object.unique);
+      expect(1).to.equal(object.key.a);
+
+      object = createBSON().deserialize(Uint8Array.from(bytes));
+      expect('a_1').to.equal(object.name);
+      expect(false).to.equal(object.unique);
+      expect(1).to.equal(object.key.a);
+    });
+
     done();
   });
 
@@ -525,29 +541,26 @@ describe('BSON', function() {
       0,
       0
     ];
-    var serialized_data = '';
 
-    // Convert to chars
-    for (var i = 0; i < bytes.length; i++) {
-      serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
-    }
+    runTestsOnBytesForBufferAndUint8Array(bytes, function(data) {
+      var object = createBSON().deserialize(data);
+      // Perform tests
+      expect('hello').to.equal(object.string);
+      expect([1, 2, 3]).to.deep.equal(object.array);
+      expect(1).to.equal(object.hash.a);
+      expect(2).to.equal(object.hash.b);
+      expect(object.date != null).to.be.ok;
+      expect(object.oid != null).to.be.ok;
+      expect(object.binary != null).to.be.ok;
+      expect(42).to.equal(object.int);
+      expect(33.3333).to.equal(object.float);
+      expect(object.regexp != null).to.be.ok;
+      expect(true).to.equal(object.boolean);
+      expect(object.where != null).to.be.ok;
+      expect(object.dbref != null).to.be.ok;
+      expect(object[null] == null).to.be.ok;
+    });
 
-    var object = createBSON().deserialize(new Buffer(serialized_data, 'binary'));
-    // Perform tests
-    expect('hello').to.equal(object.string);
-    expect([1, 2, 3]).to.deep.equal(object.array);
-    expect(1).to.equal(object.hash.a);
-    expect(2).to.equal(object.hash.b);
-    expect(object.date != null).to.be.ok;
-    expect(object.oid != null).to.be.ok;
-    expect(object.binary != null).to.be.ok;
-    expect(42).to.equal(object.int);
-    expect(33.3333).to.equal(object.float);
-    expect(object.regexp != null).to.be.ok;
-    expect(true).to.equal(object.boolean);
-    expect(object.where != null).to.be.ok;
-    expect(object.dbref != null).to.be.ok;
-    expect(object[null] == null).to.be.ok;
     done();
   });
 
@@ -2316,5 +2329,21 @@ describe('BSON', function() {
     expect(false).to.equal(id.equals(null));
     expect(false).to.equal(id.equals(undefined));
     done();
+  });
+
+  it('Should serialize the same values to a Buffer and a Uint8Array', function() {
+    const testData = { darmok: 'jalad' };
+
+    const dataLength = createBSON().serialize(testData).length;
+    const buffer = new Buffer(dataLength);
+    const uint8Array = new Uint8Array(dataLength);
+
+    createBSON().serializeWithBufferAndIndex(testData, buffer);
+    createBSON().serializeWithBufferAndIndex(testData, uint8Array);
+
+    const bufferRaw = Array.prototype.slice.call(buffer, 0);
+    const uint8ArrayRaw = Array.prototype.slice.call(uint8Array, 0);
+
+    expect(bufferRaw).to.deep.equal(uint8ArrayRaw);
   });
 });
