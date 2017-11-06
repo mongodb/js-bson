@@ -88,7 +88,7 @@ The BSON serializeWithBufferAndIndex method takes an object, a target buffer ins
 
   * BSON.serializeWithBufferAndIndex(object, buffer, options)
     * @param {Object} object the Javascript object to serialize.
-    * @param {Buffer} buffer the Buffer you pre-allocated to store the serialized BSON object.
+    * @param {Buffer|Uint8Array} buffer the Buffer you pre-allocated to store the serialized BSON object.
     * @param {Boolean} [options.checkKeys=false] the serializer will check if keys are valid.
     * @param {Boolean} [options.serializeFunctions=false] serialize the javascript functions.
     * @param {Boolean} [options.ignoreUndefined=true] ignore undefined fields.
@@ -125,7 +125,7 @@ The BSON deserialize method takes a node.js Buffer and an optional options objec
 The BSON deserializeStream method takes a node.js Buffer, startIndex and allow more control over deserialization of a Buffer containing concatenated BSON documents.
 
   * BSON.deserializeStream(buffer, startIndex, numberOfDocuments, documents, docStartIndex, options)
-    * @param {Buffer} buffer the buffer containing the serialized set of BSON documents.
+    * @param {Buffer|Uint8Array} buffer the buffer containing the serialized set of BSON documents.
     * @param {Number} startIndex the start index in the data Buffer where the deserialization is to start.
     * @param {Number} numberOfDocuments number of documents to deserialize.
     * @param {Array} documents an array where to store the deserialized documents.
