@@ -4,7 +4,7 @@ BSON is short for Bin­ary JSON and is the bin­ary-en­coded seri­al­iz­a­t
 
 This browser version of the BSON parser is compiled using [webpack](https://webpack.js.org/) and the current version is pre-compiled in the `browser_build` directory.
 
-Though this is the default BSON parser, there is a C++ Node.js addon BSON parser as well which is faster and uses less memory but does not support the browser. It can be found at [mongod-js/bson-ext](https://github.com/mongodb-js/bson-ext).
+This is the default BSON parser, however, there is a C++ Node.js addon version as well that does not support the browser. It can be found at [mongod-js/bson-ext](https://github.com/mongodb-js/bson-ext).
 
 ## Usage
 
