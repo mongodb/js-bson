@@ -8,6 +8,7 @@ node_modules/
 
 output
 build
+browser_build
 .bin
 npm-debug.log
 builderror.log

@@ -5,12 +5,12 @@ module.exports = {
       {
         test: /\.js?$/,
         exclude: /node_modules/,
-        loader: 'babel'
+        loader: 'babel-loader',
+        options: {
+          presets: ['env']
+        }
       }
     ]
-  },
-  resolve: {
-    extensions: ['', '.js', '.jsx', '.less']
   },
   output: {
     path: __dirname + '/browser_build',
