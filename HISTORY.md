@@ -1,3 +1,18 @@
+<a name="2.0.0"></a>
+# 2.0.0 (2018-02-26)
+
+
+### Bug Fixes
+
+* **browser:** fixing browser property in package.json ([095fba9](https://github.com/mongodb/js-bson/commit/095fba9))
+* **dbref:** only upgrade objects with allowed $keys to DBRefs ([98eb9e2](https://github.com/mongodb/js-bson/commit/98eb9e2))
+* **decimal128:** add basic guard against REDOS attacks ([511ecc4](https://github.com/mongodb/js-bson/commit/511ecc4))
+* **Decimal128:** update toString and fromString methods to correctly handle the case of too many significant digits ([25ed43e](https://github.com/mongodb/js-bson/commit/25ed43e))
+* **objectid:** if pid is 1, use random value ([e188ae6](https://github.com/mongodb/js-bson/commit/e188ae6))
+* **serializeWithBufferAndIndex:** write documents to start of intermediate buffer ([b4e4ac5](https://github.com/mongodb/js-bson/commit/b4e4ac5))
+
+
+
 1.0.4 2016-01-11
 ----------------
 - #204 remove Buffer.from as it's partially broken in early 4.x.x. series of node releases.
