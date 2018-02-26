@@ -1,3 +1,14 @@
+<a name="1.0.5"></a>
+## 1.0.5 (2018-02-26)
+
+
+### Bug Fixes
+
+* **decimal128:** add basic guard against REDOS attacks ([bd61c45](https://github.com/mongodb/js-bson/commit/bd61c45))
+* **objectid:** if pid is 1, use random value ([e188ae6](https://github.com/mongodb/js-bson/commit/e188ae6))
+
+
+
 1.0.4 2016-01-11
 ----------------
 - #204 remove Buffer.from as it's partially broken in early 4.x.x. series of node releases.
