@@ -1,3 +1,18 @@
+<a name="2.0.1"></a>
+## [2.0.1](https://github.com/mongodb/js-bson/compare/v2.0.0...v2.0.1) (2018-02-28)
+
+
+### Bug Fixes
+
+* **serializer:** ensure RegExp options are alphabetically sorted ([d60659d](https://github.com/mongodb/js-bson/commit/d60659d))
+
+
+### Features
+
+* **db-ref:** support passing a namespace into a DBRef ctor ([604831b](https://github.com/mongodb/js-bson/commit/604831b))
+
+
+
 <a name="2.0.0"></a>
 # 2.0.0 (2018-02-26)
 
