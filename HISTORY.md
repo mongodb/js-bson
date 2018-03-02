@@ -1,3 +1,13 @@
+<a name="2.0.2"></a>
+## [2.0.2](https://github.com/mongodb/js-bson/compare/v2.0.1...v2.0.2) (2018-03-02)
+
+
+### Bug Fixes
+
+* make sure all functions are named consistently ([6df9022](https://github.com/mongodb/js-bson/commit/6df9022))
+
+
+
 <a name="2.0.1"></a>
 ## [2.0.1](https://github.com/mongodb/js-bson/compare/v2.0.0...v2.0.1) (2018-02-28)
 
