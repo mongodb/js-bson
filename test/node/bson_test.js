@@ -800,9 +800,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Buffer with promoteBuffers option', function(
-    done
-  ) {
+  it('Should Correctly Serialize and Deserialize Buffer with promoteBuffers option', function(done) {
     var doc = { doc: new Buffer('hello world') };
     var serialized_data = createBSON().serialize(doc);
 
@@ -1690,9 +1688,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly handle Forced Doubles to ensure we allocate enough space for cap collections', function(
-    done
-  ) {
+  it('Should Correctly handle Forced Doubles to ensure we allocate enough space for cap collections', function(done) {
     if (Double != null) {
       var doubleValue = new Double(100);
       var doc = { value: doubleValue };
@@ -1861,9 +1857,7 @@ describe('BSON', function() {
    * @_function calculateObjectSize
    * @ignore
    */
-  it('Should correctly calculate the size of a given javascript object using instance method', function(
-    done
-  ) {
+  it('Should correctly calculate the size of a given javascript object using instance method', function(done) {
     // Create a simple object
     var doc = { a: 1, func: function() {} };
     // Create a BSON parser instance
@@ -1933,9 +1927,7 @@ describe('BSON', function() {
    * @_function serializeWithBufferAndIndex
    * @ignore
    */
-  it('Should correctly serializeWithBufferAndIndex a given javascript object using a BSON instance', function(
-    done
-  ) {
+  it('Should correctly serializeWithBufferAndIndex a given javascript object using a BSON instance', function(done) {
     // Create a simple object
     var doc = { a: 1, func: function() {} };
     // Create a BSON parser instance

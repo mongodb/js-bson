@@ -29,9 +29,7 @@ describe('serializeWithBuffer', function() {
     done();
   });
 
-  it('correctly serialize 3 different docs into buffer using serializeWithBufferAndIndex', function(
-    done
-  ) {
+  it('correctly serialize 3 different docs into buffer using serializeWithBufferAndIndex', function(done) {
     const MAXSIZE = 1024 * 1024 * 17;
     var bson = createBSON();
     let bf = new Buffer(MAXSIZE);

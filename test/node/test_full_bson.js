@@ -603,9 +603,7 @@ describe('Full BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Buffer with promoteBuffers option', function(
-    done
-  ) {
+  it('Should Correctly Serialize and Deserialize Buffer with promoteBuffers option', function(done) {
     var doc = { doc: new Buffer('123451234512345') };
     var serialized_data = bson.serialize(doc);
 
