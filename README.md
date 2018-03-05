@@ -68,7 +68,7 @@ console.log('doc_2:', doc_2)
 
 ### BSON types
 
-For all BSON types documentation, please refer to the documentation for the [MongoDB Node.js driver](https://github.com/mongodb/node-mongodb-native).
+For all BSON types documentation, please refer to the documentation for the [MongoDB Node.js driver](https://docs.mongodb.com/manual/reference/bson-types/).
 
 ### BSON serialization and deserialiation
 
