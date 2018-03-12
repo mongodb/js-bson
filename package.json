@@ -3,7 +3,7 @@
   "description": "A bson parser for node.js and the browser",
   "keywords": ["mongodb", "bson", "parser"],
   "files": ["lib", "index.js", "browser_build", "bower.json"],
-  "version": "1.0.5",
+  "version": "1.0.6",
   "author": "Christian Amor Kvalheim <christkv@gmail.com>",
   "contributors": [],
   "repository": "mongodb/js-bson",

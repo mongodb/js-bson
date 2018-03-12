@@ -1,3 +1,13 @@
+<a name="1.0.6"></a>
+## [1.0.6](https://github.com/mongodb/js-bson/compare/v1.0.5...v1.0.6) (2018-03-12)
+
+
+### Features
+
+* **serialization:** support arbitrary sizes for the internal serialization buffer ([abe97bc](https://github.com/mongodb/js-bson/commit/abe97bc))
+
+
+
 <a name="1.0.5"></a>
 ## 1.0.5 (2018-02-26)
 
