@@ -13753,9 +13753,10 @@ var deserialize = __webpack_require__(349),
  * @ignore
  * @api private
  */
-// Max Size
+// Default Max Size
 var MAXSIZE = 1024 * 1024 * 17;
-// Max Document Buffer size
+
+// Current Internal Temporary Serialization Buffer
 var buffer = new Buffer(MAXSIZE);
 
 var BSON = function BSON() {};
@@ -13767,6 +13768,7 @@ var BSON = function BSON() {};
  * @param {Boolean} [options.checkKeys] the serializer will check if keys are valid.
  * @param {Boolean} [options.serializeFunctions=false] serialize the javascript functions **(default:false)**.
  * @param {Boolean} [options.ignoreUndefined=true] ignore undefined fields **(default:true)**.
+ * @param {Number} [options.minInternalBufferSize=1024*1024*17] minimum size of the internal temporary serialization buffer **(default:1024*1024*17)**.
  * @return {Buffer} returns the Buffer object containing the serialized object.
  * @api public
  */
@@ -13776,6 +13778,12 @@ BSON.prototype.serialize = function serialize(object, options) {
   var checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : false;
   var serializeFunctions = typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
   var ignoreUndefined = typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : true;
+  var minInternalBufferSize = typeof options.minInternalBufferSize === 'number' ? options.minInternalBufferSize : MAXSIZE;
+
+  // Resize the internal serialization buffer if needed
+  if (buffer.length < minInternalBufferSize) {
+    buffer = new Buffer(minInternalBufferSize);
+  }
 
   // Attempt to serialize
   var serializationIndex = serializer(buffer, object, checkKeys, 0, 0, serializeFunctions, ignoreUndefined, []);
@@ -13808,8 +13816,7 @@ BSON.prototype.serializeWithBufferAndIndex = function (object, finalBuffer, opti
   var startIndex = typeof options.index === 'number' ? options.index : 0;
 
   // Attempt to serialize
-  var serializationIndex = serializer(buffer, object, checkKeys, 0, 0, serializeFunctions, ignoreUndefined);
-  buffer.copy(finalBuffer, startIndex, 0, serializationIndex);
+  var serializationIndex = serializer(finalBuffer, object, checkKeys, 0, 0, serializeFunctions, ignoreUndefined);
 
   // Return the index
   return startIndex + serializationIndex - 1;
