@@ -1,3 +1,13 @@
+<a name="2.0.5"></a>
+## [2.0.5](https://github.com/mongodb/js-bson/compare/v2.0.4...v2.0.5) (2018-04-06)
+
+
+### Bug Fixes
+
+* **regexp:** properly construct new BSONRegExp when constructor called without new ([#242](https://github.com/mongodb/js-bson/issues/242)) ([93ae799](https://github.com/mongodb/js-bson/commit/93ae799))
+
+
+
 <a name="2.0.4"></a>
 ## [2.0.4](https://github.com/mongodb/js-bson/compare/v2.0.3...v2.0.4) (2018-03-12)
 
