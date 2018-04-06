@@ -148,3 +148,21 @@ The BSON `deserializeStream` method takes a Node.js Buffer, `startIndex` and all
 #### Why does `undefined` get converted to `null`?
 
 The `undefined` BSON type has been [deprecated for many years](http://bsonspec.org/spec.html), so this library has dropped support for it. Use the `ignoreUndefined` option (for example, from the [driver](http://mongodb.github.io/node-mongodb-native/2.2/api/MongoClient.html#connect) ) to instead remove `undefined` keys.
+
+#### How do I add custom serialization logic?
+
+This library looks for `toBSON()` functions on every path, and calls the `toBSON()` function to get the value to serialize.
+
+```javascript
+var bson = new BSON();
+
+class CustomSerialize {
+  toBSON() {
+    return 42;
+  }
+}
+
+const obj = { answer: new CustomSerialize() };
+// "{ answer: 42 }"
+console.log(bson.deserialize(bson.serialize(obj)));
+```
