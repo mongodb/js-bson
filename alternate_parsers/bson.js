@@ -526,7 +526,7 @@ BSON.serializeWithBufferAndIndex = function serializeWithBufferAndIndex(
  */
 var serializeObject = function(object, checkKeys, buffer, index, serializeFunctions) {
   if (object.toBSON) {
-    if (typeof object.toBSON !== 'function') throw new Error('toBSON is not a function');
+    if (typeof object.toBSON !== 'function') throw new TypeError('toBSON is not a function');
     object = object.toBSON();
     if (object != null && typeof object !== 'object')
       throw new Error('toBSON function did not return an object');
@@ -1289,7 +1289,7 @@ var packElement = function(name, value, checkKeys, buffer, index, serializeFunct
 BSON.serialize = function(object, checkKeys, asBuffer, serializeFunctions) {
   // Throw error if we are trying serialize an illegal type
   if (object == null || typeof object !== 'object' || Array.isArray(object))
-    throw new Error('Only javascript objects supported');
+    throw new TypeError('Only javascript objects supported');
 
   // Emoty target buffer
   var buffer = null;
