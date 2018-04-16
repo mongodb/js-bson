@@ -2174,6 +2174,23 @@ describe('BSON', function() {
   //   done();
   // }
 
+  it('should properly deserialize multiple documents using deserializeStream', function() {
+    const bson = createBSON();
+    const docs = [{ foo: 'bar' }, { foo: 'baz' }, { foo: 'quux' }];
+
+    // Serialize the test data
+    const serializedDocs = [];
+    for (let i = 0; i < docs.length; i++) {
+      serializedDocs[i] = bson.serialize(docs[i]);
+    }
+    const buf = Buffer.concat(serializedDocs);
+
+    const parsedDocs = [];
+    bson.deserializeStream(buf, 0, docs.length, parsedDocs, 0);
+
+    docs.forEach((doc, i) => expect(doc).to.deep.equal(parsedDocs[i]));
+  });
+
   /**
    * @ignore
    */
