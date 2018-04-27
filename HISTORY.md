@@ -1,3 +1,13 @@
+<a name="2.0.6"></a>
+## [2.0.6](https://github.com/mongodb/js-bson/compare/v2.0.5...v2.0.6) (2018-04-27)
+
+
+### Bug Fixes
+
+* **deserializeStream:** allow multiple documents to be deserialized ([6fc5984](https://github.com/mongodb/js-bson/commit/6fc5984)), closes [#244](https://github.com/mongodb/js-bson/issues/244)
+
+
+
 <a name="2.0.5"></a>
 ## [2.0.5](https://github.com/mongodb/js-bson/compare/v2.0.4...v2.0.5) (2018-04-06)
 
