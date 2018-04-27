@@ -47,7 +47,11 @@ BinaryParser.decodeFloat = function decodeFloat(data, precisionBits, exponentBit
   } while ((precisionBits -= startBit));
 
   return exponent === (bias << 1) + 1
-    ? significand ? NaN : signal ? -Infinity : +Infinity
+    ? significand
+      ? NaN
+      : signal
+        ? -Infinity
+        : +Infinity
     : (1 + signal * -2) *
         (exponent || significand
           ? !exponent
