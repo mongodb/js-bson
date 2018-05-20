@@ -1846,7 +1846,7 @@ describe('BSON', function() {
       serializeFunctions: true
     });
     // Validate the correctness
-    expect(37).to.equal(size);
+    expect(36).to.equal(size);
     done();
   });
 
@@ -1872,7 +1872,7 @@ describe('BSON', function() {
       serializeFunctions: true
     });
     // Validate the correctness
-    expect(37).to.equal(size);
+    expect(36).to.equal(size);
     done();
   });
 
@@ -1915,8 +1915,8 @@ describe('BSON', function() {
     });
 
     // Validate the correctness
-    expect(37).to.equal(size);
-    expect(36).to.equal(index);
+    expect(36).to.equal(size);
+    expect(35).to.equal(index);
     done();
   });
 
@@ -1958,8 +1958,8 @@ describe('BSON', function() {
       serializeFunctions: true
     });
     // Validate the correctness
-    expect(size).to.equal(37);
-    expect(index).to.equal(36);
+    expect(size).to.equal(36);
+    expect(index).to.equal(35);
 
     done();
   });
@@ -1990,7 +1990,7 @@ describe('BSON', function() {
       serializeFunctions: true
     });
     // Validate the correctness
-    expect(buffer.length).to.equal(37);
+    expect(buffer.length).to.equal(36);
 
     done();
   });
@@ -2022,7 +2022,7 @@ describe('BSON', function() {
       serializeFunctions: true
     });
     // Validate the correctness
-    expect(37).to.equal(buffer.length);
+    expect(36).to.equal(buffer.length);
 
     done();
   });
