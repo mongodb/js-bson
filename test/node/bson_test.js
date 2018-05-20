@@ -1886,7 +1886,7 @@ exports['Should correctly calculate the size of a given javascript object'] = fu
     serializeFunctions: true
   });
   // Validate the correctness
-  test.equal(37, size);
+  test.equal(36, size);
   test.done();
 };
 
@@ -1914,7 +1914,7 @@ exports[
     serializeFunctions: true
   });
   // Validate the correctness
-  test.equal(37, size);
+  test.equal(36, size);
   test.done();
 };
 
@@ -1959,8 +1959,8 @@ exports['Should correctly serializeWithBufferAndIndex a given javascript object'
     index: 0
   });
   // Validate the correctness
-  test.equal(37, size);
-  test.equal(36, index);
+  test.equal(36, size);
+  test.equal(35, index);
   test.done();
 };
 
@@ -2004,8 +2004,8 @@ exports[
     serializeFunctions: true
   });
   // Validate the correctness
-  test.equal(37, size);
-  test.equal(36, index);
+  test.equal(36, size);
+  test.equal(35, index);
   test.done();
 };
 
@@ -2035,7 +2035,7 @@ exports['Should correctly serialize a given javascript object'] = function(test)
     serializeFunctions: true
   });
   // Validate the correctness
-  test.equal(37, buffer.length);
+  test.equal(36, buffer.length);
   test.done();
 };
 
@@ -2067,7 +2067,7 @@ exports['Should correctly serialize a given javascript object using a bson insta
     serializeFunctions: true
   });
   // Validate the correctness
-  test.equal(37, buffer.length);
+  test.equal(36, buffer.length);
   test.done();
 };
 
