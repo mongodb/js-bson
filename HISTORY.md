@@ -1,3 +1,13 @@
+<a name="2.0.7"></a>
+## [2.0.7](https://github.com/mongodb/js-bson/compare/v2.0.6...v2.0.7) (2018-05-31)
+
+
+### Bug Fixes
+
+* **binary:** add type checking for buffer ([cbfb25d](https://github.com/mongodb/js-bson/commit/cbfb25d))
+
+
+
 <a name="2.0.6"></a>
 ## [2.0.6](https://github.com/mongodb/js-bson/compare/v2.0.5...v2.0.6) (2018-04-27)
 
