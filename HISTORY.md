@@ -1,3 +1,16 @@
+<a name="1.0.7"></a>
+## [1.0.7](https://github.com/mongodb/js-bson/compare/v1.0.6...v1.0.7) (2018-06-06)
+
+
+### Bug Fixes
+
+* **binary:** add type checking for buffer ([26b05b5](https://github.com/mongodb/js-bson/commit/26b05b5))
+* **bson:** fix custom inspect property ([080323b](https://github.com/mongodb/js-bson/commit/080323b))
+* **readme:** clarify documentation about deserialize methods ([20f764c](https://github.com/mongodb/js-bson/commit/20f764c))
+* **serialization:** normalize function stringification ([1320c10](https://github.com/mongodb/js-bson/commit/1320c10))
+
+
+
 <a name="1.0.6"></a>
 ## [1.0.6](https://github.com/mongodb/js-bson/compare/v1.0.5...v1.0.6) (2018-03-12)
 
