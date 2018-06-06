@@ -1,3 +1,14 @@
+<a name="2.0.8"></a>
+## [2.0.8](https://github.com/mongodb/js-bson/compare/v2.0.7...v2.0.8) (2018-06-06)
+
+
+### Bug Fixes
+
+* **readme:** clarify documentation about deserialize methods ([e311056](https://github.com/mongodb/js-bson/commit/e311056))
+* **serialization:** normalize function stringification ([21eb0b0](https://github.com/mongodb/js-bson/commit/21eb0b0))
+
+
+
 <a name="2.0.7"></a>
 ## [2.0.7](https://github.com/mongodb/js-bson/compare/v2.0.6...v2.0.7) (2018-05-31)
 
