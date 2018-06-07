@@ -17579,11 +17579,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	function normalizedFunctionString(fn) {
-	  return fn.toString().replace('function(', 'function (');
+	  return fn.toString().replace(/function *\(/, 'function (');
 	}
 
 	module.exports = {
-	  normalizedFunctionString
+	  normalizedFunctionString: normalizedFunctionString
 	};
 
 /***/ }),
