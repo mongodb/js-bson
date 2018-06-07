@@ -1,3 +1,13 @@
+<a name="1.0.9"></a>
+## [1.0.9](https://github.com/mongodb/js-bson/compare/v1.0.8...v1.0.9) (2018-06-07)
+
+
+### Bug Fixes
+
+* **serializer:** remove use of `const` ([5feb12f](https://github.com/mongodb/js-bson/commit/5feb12f))
+
+
+
 <a name="1.0.7"></a>
 ## [1.0.7](https://github.com/mongodb/js-bson/compare/v1.0.6...v1.0.7) (2018-06-06)
 
