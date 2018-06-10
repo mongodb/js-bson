@@ -2,7 +2,7 @@
 
 BSON is short for Bin­ary JSON and is the bin­ary-en­coded seri­al­iz­a­tion of JSON-like doc­u­ments. You can learn more about it in [the specification](http://bsonspec.org).
 
-This browser version of the BSON parser is compiled using [webpack](https://webpack.js.org/) and the current version is pre-compiled in the `browser_build` directory.
+This browser version of the BSON parser is compiled using [rollup](https://rollupjs.org/) and the current version is pre-compiled in the `dist` directory.
 
 This is the default BSON parser, however, there is a C++ Node.js addon version as well that does not support the browser. It can be found at [mongod-js/bson-ext](https://github.com/mongodb-js/bson-ext).
 
@@ -18,7 +18,7 @@ npm run build
 A simple example of how to use BSON in the browser:
 
 ```html
-<script src="./browser_build/bson.js"></script>
+<script src="./dist/bson.js"></script>
 
 <script>
   function start() {
