@@ -1,3 +1,15 @@
+<a name="3.0.0"></a>
+# [3.0.0](https://github.com/mongodb/js-bson/compare/v2.0.8...v3.0.0) (2018-06-13)
+
+
+### Features
+
+* **ObjectID:** use FNV-1a hash for objectId ([4f545b1](https://github.com/mongodb/js-bson/commit/4f545b1))
+* **rollup:** initial commit of rollup-generated bundle ([474b8f7](https://github.com/mongodb/js-bson/commit/474b8f7))
+* **rollup:** switch from webpack to rollup for bundling ([98068fa](https://github.com/mongodb/js-bson/commit/98068fa))
+
+
+
 <a name="2.0.8"></a>
 ## [2.0.8](https://github.com/mongodb/js-bson/compare/v2.0.7...v2.0.8) (2018-06-06)
 

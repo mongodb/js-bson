@@ -1109,6 +1109,189 @@ var timestamp = Timestamp;
 var Timestamp_1 = Timestamp;
 timestamp.Timestamp = Timestamp_1;
 
+/*
+The MIT License (MIT)
+
+Copyright (c) 2016 CoderPuppy
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+*/
+var _endianness;
+function endianness() {
+  if (typeof _endianness === 'undefined') {
+    var a = new ArrayBuffer(2);
+    var b = new Uint8Array(a);
+    var c = new Uint16Array(a);
+    b[0] = 1;
+    b[1] = 2;
+    if (c[0] === 258) {
+      _endianness = 'BE';
+    } else if (c[0] === 513) {
+      _endianness = 'LE';
+    } else {
+      throw new Error('unable to figure out endianess');
+    }
+  }
+  return _endianness;
+}
+
+function hostname() {
+  if (typeof global.location !== 'undefined') {
+    return global.location.hostname;
+  } else return '';
+}
+
+function loadavg() {
+  return [];
+}
+
+function uptime() {
+  return 0;
+}
+
+function freemem() {
+  return Number.MAX_VALUE;
+}
+
+function totalmem() {
+  return Number.MAX_VALUE;
+}
+
+function cpus() {
+  return [];
+}
+
+function type() {
+  return 'Browser';
+}
+
+function release() {
+  if (typeof global.navigator !== 'undefined') {
+    return global.navigator.appVersion;
+  }
+  return '';
+}
+
+function networkInterfaces() {}
+function getNetworkInterfaces() {}
+
+function arch() {
+  return 'javascript';
+}
+
+function platform() {
+  return 'browser';
+}
+
+function tmpDir() {
+  return '/tmp';
+}
+var tmpdir = tmpDir;
+
+var EOL = '\n';
+var os = {
+  EOL: EOL,
+  tmpdir: tmpdir,
+  tmpDir: tmpDir,
+  networkInterfaces: networkInterfaces,
+  getNetworkInterfaces: getNetworkInterfaces,
+  release: release,
+  type: type,
+  cpus: cpus,
+  totalmem: totalmem,
+  freemem: freemem,
+  uptime: uptime,
+  loadavg: loadavg,
+  hostname: hostname,
+  endianness: endianness
+};
+
+var os$1 = Object.freeze({
+	endianness: endianness,
+	hostname: hostname,
+	loadavg: loadavg,
+	uptime: uptime,
+	freemem: freemem,
+	totalmem: totalmem,
+	cpus: cpus,
+	type: type,
+	release: release,
+	networkInterfaces: networkInterfaces,
+	getNetworkInterfaces: getNetworkInterfaces,
+	arch: arch,
+	platform: platform,
+	tmpDir: tmpDir,
+	tmpdir: tmpdir,
+	EOL: EOL,
+	default: os
+});
+
+var MASK_8 = 0xff;
+var MASK_24 = 0xffffff;
+var MASK_32 = 0xffffffff;
+
+// See http://www.isthe.com/chongo/tech/comp/fnv/#FNV-param for the definition of these parameters;
+var FNV_PRIME = new long_1(16777619, 0);
+var OFFSET_BASIS = new long_1(2166136261, 0);
+var FNV_MASK = new long_1(MASK_32, 0);
+
+/**
+ * Implementation of the FNV-1a hash for a 32-bit hash value
+ * Algorithm can be found here: http://www.isthe.com/chongo/tech/comp/fnv/#FNV-1a
+ * @ignore
+ */
+function fnv1a32(input, encoding) {
+  encoding = encoding || 'utf8';
+  var octets = Buffer.from(input, encoding);
+
+  var hash = OFFSET_BASIS;
+  for (var i = 0; i < octets.length; i += 1) {
+    hash = hash.xor(new long_1(octets[i], 0));
+    hash = hash.multiply(FNV_PRIME);
+    hash = hash.and(FNV_MASK);
+  }
+  return hash.getLowBitsUnsigned();
+}
+
+/**
+ * Implements FNV-1a to generate 32-bit hash, then uses xor-folding
+ * to convert to a 24-bit hash. See here for more info:
+ * http://www.isthe.com/chongo/tech/comp/fnv/#xor-fold
+ * @ignore
+ */
+function fnv1a24(input, encoding) {
+  var _32bit = fnv1a32(input, encoding);
+  var base = _32bit & MASK_24;
+  var top = _32bit >>> 24 & MASK_8;
+  var final = (base ^ top) & MASK_24;
+
+  return final;
+}
+
+var fnv1a = { fnv1a24: fnv1a24, fnv1a32: fnv1a32 };
+
+var require$$0 = ( os$1 && os ) || os$1;
+
+var hostname$1 = require$$0.hostname;
+var fnv1a24$1 = fnv1a.fnv1a24;
+
 /**
  * Machine id.
  *
@@ -1117,8 +1300,7 @@ timestamp.Timestamp = Timestamp_1;
  * that would mean an asyc call to gethostname, so we don't bother.
  * @ignore
  */
-
-var MACHINE_ID = parseInt(Math.random() * 0xffffff, 10);
+var MACHINE_ID = fnv1a24$1(hostname$1);
 
 // Regular expression that checks for hex value
 var checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
