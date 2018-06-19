@@ -87,7 +87,7 @@ var ISODate = function(string) {
 };
 
 function runTestsOnBytesForBufferAndUint8Array(bytes, testFn) {
-  var serialized_data = '';
+  let serialized_data = '';
   // Convert to chars
   for (var i = 0; i < bytes.length; i++) {
     serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
@@ -238,7 +238,7 @@ describe('BSON', function() {
       0
     ];
 
-    runTestsOnBytesForBufferAndUint8Array(bytes, function(data) {
+    runTestsOnBytesForBufferAndUint8Array(bytes, data => {
       var object = createBSON().deserialize(data);
       expect('a_1').to.equal(object.name);
       expect(false).to.equal(object.unique);
@@ -542,7 +542,7 @@ describe('BSON', function() {
       0
     ];
 
-    runTestsOnBytesForBufferAndUint8Array(bytes, function(data) {
+    runTestsOnBytesForBufferAndUint8Array(bytes, data => {
       var object = createBSON().deserialize(data);
       // Perform tests
       expect('hello').to.equal(object.string);
