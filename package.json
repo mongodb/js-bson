@@ -58,8 +58,8 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "test": "mocha ./test/node",
-    "test-karma": "./node_modules/karma/bin/karma start karma.conf.js",
+    "test": "node ./tools/load_scenarios.js; mocha ./test/node",
+    "test-karma": "node ./tools/load_scenarios.js; ./node_modules/karma/bin/karma start karma.conf.js",
     "build": "rollup -c",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",

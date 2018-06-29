@@ -16,8 +16,6 @@ module.exports = function(config) {
 
     files: [{ pattern: 'test/node/*.js', watched: false }],
 
-    exclude: ['test/node/bson_corpus_tests.js'],
-
     preprocessors: {
       'test/node/*.js': ['rollup']
     },
