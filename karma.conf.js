@@ -14,10 +14,10 @@ module.exports = function(config) {
 
     reporters: ['mocha'],
 
-    files: [{ pattern: 'test/node/*.js', watched: false }],
+    files: [{ pattern: 'test/node/!(bson_node_only_test).js', watched: false }],
 
     preprocessors: {
-      'test/node/*.js': 'rollup'
+      'test/node/!(bson_node_only_test).js': 'rollup'
     },
 
     rollupPreprocessor: rollupConfig,
