@@ -33,7 +33,6 @@
     "istanbul": "^0.4.5",
     "karma": "^2.0.4",
     "karma-chrome-launcher": "^2.2.0",
-    "karma-junit-reporter": "^1.2.0",
     "karma-mocha": "^1.3.0",
     "karma-mocha-reporter": "^2.2.5",
     "karma-rollup-preprocessor": "^6.0.0",
@@ -59,9 +58,9 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "test": "node ./tools/loadTestFiles.js; mocha ./test/node && ./node_modules/karma/bin/karma start karma.conf.js; node ./tools/deleteTestFiles.js",
-    "karma-test": "node ./tools/loadTestFiles.js; ./node_modules/karma/bin/karma start karma.conf.js; node ./tools/deleteTestFiles.js",
-    "node-test": "node ./tools/loadTestFiles.js; mocha ./test/node; node ./tools/deleteTestFiles.js",
+    "test": "node ./tools/loadTestFiles.js && mocha ./test/node && ./node_modules/karma/bin/karma start karma.conf.js && node ./tools/deleteTestFiles.js || node ./tools/deleteTestFiles.js 1",
+    "karma-test": "node ./tools/loadTestFiles.js && ./node_modules/karma/bin/karma start karma.conf.js && node ./tools/deleteTestFiles.js",
+    "node-test": "node ./tools/loadTestFiles.js && mocha ./test/node && node ./tools/deleteTestFiles.js",
     "build": "rollup -c",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",

@@ -12,12 +12,12 @@ module.exports = function(config) {
 
     frameworks: ['mocha'],
 
-    reporters: ['mocha', 'karma-junit-reporter'],
+    reporters: ['mocha'],
 
-    files: [{ pattern: 'test/node/!(bson_node_only_test).js', watched: false }],
+    files: [{ pattern: 'test/node/*.js', watched: false }],
 
     preprocessors: {
-      'test/node/!(bson_node_only_test).js': 'rollup'
+      'test/node/*.js': 'rollup'
     },
 
     rollupPreprocessor: rollupConfig,
