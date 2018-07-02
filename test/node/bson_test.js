@@ -1,7 +1,6 @@
 'use strict';
 
 var Buffer = require('buffer').Buffer,
-  fs = require('fs'),
   expect = require('chai').expect,
   BSON = require('../..'),
   Code = BSON.Code,
@@ -22,6 +21,7 @@ var Buffer = require('buffer').Buffer,
   vm = require('vm');
 
 var createBSON = require('../utils');
+const gsWeirdBugData = require('../../tools/gsWeirdBugData.json').data;
 
 // for tests
 BSON.BSON_BINARY_SUBTYPE_DEFAULT = 0;
@@ -1093,9 +1093,8 @@ describe('BSON', function() {
    * @ignore
    */
   it('Should Correctly Serialize and Deserialize a big Binary object', function(done) {
-    var data = fs.readFileSync('test/node/data/test_gs_weird_bug.png', 'binary');
     var bin = new Binary();
-    bin.write(data);
+    bin.write(gsWeirdBugData);
     var doc = { doc: bin };
     var serialized_data = createBSON().serialize(doc);
 

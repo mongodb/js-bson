@@ -22,10 +22,10 @@
     "url": "https://github.com/mongodb/js-bson/issues"
   },
   "devDependencies": {
-    "benchmark": "^2.1.4",
     "babel-core": "^6.26.0",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-env": "^1.6.0",
+    "benchmark": "^2.1.4",
     "chai": "^4.1.2",
     "conventional-changelog-cli": "^1.3.5",
     "eslint": "^4.7.2",
@@ -58,8 +58,8 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "test": "node ./tools/load_scenarios.js; mocha ./test/node; node ./tools/delete_scenarios.js",
-    "test-karma": "node ./tools/load_scenarios.js; ./node_modules/karma/bin/karma start karma.conf.js; node ./tools/delete_scenarios.js",
+    "test": "node ./tools/loadTestFiles.js; mocha ./test/node; node ./tools/deleteTestFiles.js",
+    "karma": "node ./tools/loadTestFiles.js; ./node_modules/karma/bin/karma start karma.conf.js; node ./tools/deleteTestFiles.js",
     "build": "rollup -c",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",

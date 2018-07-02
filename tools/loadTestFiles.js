@@ -2,6 +2,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const gsWeirdBugData = fs.readFileSync('test/node/data/test_gs_weird_bug.png', 'binary');
+const bugDataObj = { data: gsWeirdBugData };
 
 const scenarios = fs
   .readdirSync(path.join(__dirname, '../test/node/specs/bson-corpus'))
@@ -16,10 +18,8 @@ fs.writeFile('./tools/scenarios.json', JSON.stringify(scenarios, null, 2), funct
   }
 });
 
-// const gsWeirdBugData = fs.readFileSync('test/node/data/test_gs_weird_bug.png', 'binary').toString();
-
-// fs.writeFile('./tools/gsWeirdBugData.txt', gsWeirdBugData, function(err) {
-//   if (err) {
-//     return console.log(err);
-//   }
-// });
+fs.writeFile('./tools/gsWeirdBugData.json', JSON.stringify(bugDataObj, null, 2), function(err) {
+  if (err) {
+    return console.log(err);
+  }
+});
