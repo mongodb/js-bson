@@ -12,7 +12,7 @@ module.exports = function(config) {
 
     frameworks: ['mocha'],
 
-    reporters: ['mocha'],
+    reporters: ['mocha', 'karma-junit-reporter'],
 
     files: [{ pattern: 'test/node/!(bson_node_only_test).js', watched: false }],
 
