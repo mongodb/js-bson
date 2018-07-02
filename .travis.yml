@@ -8,6 +8,10 @@ cache:
   directories:
     - node_modules
 
+before_script:
+    - "sudo chown root /opt/google/chrome/chrome-sandbox"
+    - "sudo chmod 4755 /opt/google/chrome/chrome-sandbox"
+
 node_js:
   - 4
   - 6
