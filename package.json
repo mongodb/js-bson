@@ -58,7 +58,7 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "test": "node ./tools/loadTestFiles.js && mocha ./test/node && ./node_modules/karma/bin/karma start karma.conf.js && node ./tools/deleteTestFiles.js || node ./tools/deleteTestFiles.js 1",
+    "test": "chmod +x ./tools/run_tests.sh && ./tools/run_tests.sh",
     "karma-test": "node ./tools/loadTestFiles.js && ./node_modules/karma/bin/karma start karma.conf.js && node ./tools/deleteTestFiles.js",
     "node-test": "node ./tools/loadTestFiles.js && mocha ./test/node && node ./tools/deleteTestFiles.js",
     "build": "rollup -c",
