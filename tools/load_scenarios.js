@@ -16,9 +16,9 @@ fs.writeFile('./tools/scenarios.json', JSON.stringify(scenarios, null, 2), funct
   }
 });
 
-// const gsWeirdBugData = fs.readFileSync('test/node/data/test_gs_weird_bug.png', 'binary');
+// const gsWeirdBugData = fs.readFileSync('test/node/data/test_gs_weird_bug.png', 'binary').toString();
 
-// fs.writeFile('./tools/gsWeirdBugData.bson', gsWeirdBugData, 'binary', function(err) {
+// fs.writeFile('./tools/gsWeirdBugData.txt', gsWeirdBugData, function(err) {
 //   if (err) {
 //     return console.log(err);
 //   }
