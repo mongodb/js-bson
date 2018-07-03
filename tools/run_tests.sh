@@ -3,10 +3,10 @@
  # run setup script
 node ./tools/loadTestFiles.js && 
 
-# if no arguments
+# if no arguments run both tests
 if [ $# -eq 0 ]; then
 
-    # run node test
+    # run node tests
     mocha ./test/node
 
     node_exit_code=$?
