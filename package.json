@@ -59,8 +59,8 @@
   },
   "scripts": {
     "test": "./tools/run_tests.sh",
-    "karma-test": "./tools/run_tests.sh karma",
-    "node-test": "./tools/run_tests.sh node",
+    "test-browser": "./tools/run_tests.sh karma",
+    "test-node": "./tools/run_tests.sh node",
     "build": "rollup -c",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",

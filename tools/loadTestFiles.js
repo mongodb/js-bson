@@ -14,12 +14,14 @@ const scenarios = fs
 
 fs.writeFile('./tools/scenarios.json', JSON.stringify(scenarios, null, 2), function(err) {
   if (err) {
-    return console.log(err);
+    console.error(err.message);
+    process.exit(1);
   }
 });
 
 fs.writeFile('./tools/gsWeirdBugData.json', JSON.stringify(bugDataObj, null, 2), function(err) {
   if (err) {
-    return console.log(err);
+    console.error(err.message);
+    process.exit(1);
   }
 });

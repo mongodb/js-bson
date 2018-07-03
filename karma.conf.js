@@ -9,31 +9,19 @@ delete rollupConfig.input;
 module.exports = function(config) {
   config.set({
     basePath: '',
-
     frameworks: ['mocha'],
-
     reporters: ['mocha'],
-
     files: [{ pattern: 'test/node/!(bson_node_only_test).js', watched: false }],
-
     preprocessors: {
       'test/node/!(bson_node_only_test).js': 'rollup'
     },
-
     rollupPreprocessor: rollupConfig,
-
     port: 9876,
-
     colors: true,
-
     logLevel: config.LOG_INFO,
-
     autoWatch: true,
-
     browsers: ['ChromeHeadless'],
-
     singleRun: true,
-
     concurrency: Infinity
   });
 };
