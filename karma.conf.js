@@ -1,7 +1,13 @@
 'use strict';
 
 const rollupConfig = require('./rollup.config.js');
-delete rollupConfig.input;
+
+const onwarn = warning => {
+  if (warning.code === 'CIRCULAR_DEPENDENCY' || warning.code === 'EVAL') return;
+  console.warn(warning.toString());
+};
+
+rollupConfig.onwarn = onwarn;
 
 // Karma configuration
 // Generated on Thu Jun 28 2018 14:24:01 GMT-0400 (EDT)
