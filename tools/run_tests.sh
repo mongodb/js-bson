@@ -1,10 +1,13 @@
 #!/bin/bash
 
+# node path variable
+node=node
+
 # get node version
 node_version=$(node --version)
 
  # run setup script
-node ./tools/loadTestFiles.js && 
+$node ./tools/loadTestFiles.js && 
 
 # if no arguments run both tests
 if [ $# -eq 0 ]; then
@@ -15,7 +18,7 @@ if [ $# -eq 0 ]; then
     node_exit_code=$?
 
     # if node exit status not ok, run cleanup and exit with code
-    if [[ $node_exit_code != 0 ]] ; then node ./tools/deleteTestFiles.js; exit $node_exit_code ; fi
+    if [[ $node_exit_code != 0 ]] ; then $node ./tools/deleteTestFiles.js; exit $node_exit_code ; fi
 
     # check if Node version > 4.x.x
     if [[ $node_version != v4* ]] ; then
@@ -41,7 +44,7 @@ fi
 exit_code=$?
 
 # run cleanup script no matter what
-node ./tools/deleteTestFiles.js &&
+$node ./tools/deleteTestFiles.js &&
 
 # exit with code
 exit $exit_code
