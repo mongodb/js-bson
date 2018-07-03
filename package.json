@@ -59,8 +59,8 @@
   },
   "scripts": {
     "test": "chmod +x ./tools/run_tests.sh && ./tools/run_tests.sh",
-    "karma-test": "node ./tools/loadTestFiles.js && ./node_modules/karma/bin/karma start karma.conf.js && node ./tools/deleteTestFiles.js",
-    "node-test": "node ./tools/loadTestFiles.js && mocha ./test/node && node ./tools/deleteTestFiles.js",
+    "karma-test": "chmod +x ./tools/run_tests.sh && ./tools/run_tests.sh karma",
+    "node-test": "chmod +x ./tools/run_tests.sh && ./tools/run_tests.sh node",
     "build": "rollup -c",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
