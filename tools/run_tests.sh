@@ -32,5 +32,5 @@ exit_code=$?
 # run cleanup script no matter what
 node ./tools/deleteTestFiles.js
 
-# exit with code if not ok
-if [[ $exit_code != 0 ]] ; then exit $exit_code ; fi
+# exit with code
+exit $exit_code
