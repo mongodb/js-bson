@@ -4,7 +4,7 @@
 node=node
 
 # get node version
-node_version=$(node --version)
+node_version=$($node --version)
 
  # run setup script
 $node ./tools/loadTestFiles.js && 
