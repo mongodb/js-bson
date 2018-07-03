@@ -10,7 +10,7 @@ node ./tools/loadTestFiles.js &&
 if [ $# -eq 0 ]; then
 
     # run node tests
-    npx mocha ./test/node
+    mocha ./test/node
 
     node_exit_code=$?
 
@@ -27,7 +27,7 @@ if [ $# -eq 0 ]; then
 
 elif [ $1 = "node" ]; then
     # run node tests
-    npx mocha ./test/node
+    mocha ./test/node
 
 elif [[ $node_version == v4* ]]; then
     echo "Karma tests not supported on Node version 4.x.x. Use a higher version of Node."
