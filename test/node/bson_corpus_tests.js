@@ -6,8 +6,6 @@ var BSON = require('../..'),
   createBSON = require('../utils'),
   bson = createBSON();
 
-const scenarios = require('../../tools/scenarios.json');
-
 var deserializeOptions = {
   bsonRegExp: true,
   promoteLongs: true,
@@ -25,8 +23,26 @@ var skip = {
     'passing this would require building a custom type to store the NaN payload data.'
 };
 
+function findScenarios() {
+  const path = require('path');
+  const fs = require('fs');
+  return fs
+    .readdirSync(path.join(__dirname, 'specs/bson-corpus'))
+    .filter(x => x.indexOf('json') !== -1)
+    .map(x => JSON.parse(fs.readFileSync(path.join(__dirname, 'specs/bson-corpus', x), 'utf8')));
+}
+
+let corpus;
+// needs to be a better way to do this, but check if process.env is empty or not, always empty in browser, is there a case where it's not empty in node?
+if (Object.keys(process.env).length === 0) {
+  corpus = require('scenarios').code; // this will be the plugin
+  // corpus = require('../../tools/scenarios.json'); // will get rid of this at some point
+} else {
+  corpus = findScenarios();
+}
+
 describe('BSON Corpus', function() {
-  scenarios.forEach(scenario => {
+  corpus.forEach(scenario => {
     describe(scenario.description, function() {
       if (scenario.valid) {
         describe('valid', function() {
