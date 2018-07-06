@@ -18,10 +18,10 @@ var Buffer = require('buffer').Buffer,
   MinKey = BSON.MinKey,
   MaxKey = BSON.MaxKey,
   BinaryParser = require('../binary_parser').BinaryParser,
-  vm = require('vm');
+  vm = require('vm'),
+  assertBuffersEqual = require('./tools/utils').assertBuffersEqual;
 
 var createBSON = require('../utils');
-const gsWeirdBugData = require('../../tools/gsWeirdBugData.json').data;
 
 // for tests
 BSON.BSON_BINARY_SUBTYPE_DEFAULT = 0;
@@ -37,16 +37,6 @@ BSON.BSON_BINARY_SUBTYPE_BYTE_ARRAY = 2;
 BSON.BSON_BINARY_SUBTYPE_UUID = 3;
 BSON.BSON_BINARY_SUBTYPE_MD5 = 4;
 BSON.BSON_BINARY_SUBTYPE_USER_DEFINED = 128;
-
-var assertBuffersEqual = function(done, buffer1, buffer2) {
-  if (buffer1.length !== buffer2.length) {
-    done('Buffers do not have the same length', buffer1, buffer2);
-  }
-
-  for (var i = 0; i < buffer1.length; i++) {
-    expect(buffer1[i]).to.equal(buffer2[i]);
-  }
-};
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
@@ -1085,24 +1075,6 @@ describe('BSON', function() {
 
     var deserialized_data = createBSON().deserialize(serialized_data);
 
-    expect(doc.doc.value()).to.deep.equal(deserialized_data.doc.value());
-    done();
-  });
-
-  /**
-   * @ignore
-   */
-  it('Should Correctly Serialize and Deserialize a big Binary object', function(done) {
-    var bin = new Binary();
-    bin.write(gsWeirdBugData);
-    var doc = { doc: bin };
-    var serialized_data = createBSON().serialize(doc);
-
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
-    assertBuffersEqual(done, serialized_data, serialized_data2, 0);
-
-    var deserialized_data = createBSON().deserialize(serialized_data);
     expect(doc.doc.value()).to.deep.equal(deserialized_data.doc.value());
     done();
   });
