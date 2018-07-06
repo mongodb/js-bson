@@ -6,21 +6,22 @@ const nodeBuiltins = require('rollup-plugin-node-builtins');
 const nodeResolve = require('rollup-plugin-node-resolve');
 const jsonPlugin = require('rollup-plugin-json');
 const babel = require('rollup-plugin-babel');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
 
 const scenariosPlugin = options => { // eslint-disable-line
   return {
     name: 'scenarios',
     transform(json, id) {
-      if (id.slice(-9) === 'scenarios') {
-        const filepath = './test/node/specs/bson-corpus';
-        const scenarios = fs
-          .readdirSync(path.join(__dirname, filepath))
+      if (id.includes('bson_corpus_test_loader.js')) {
+        const corpus = fs
+          .readdirSync(path.join(__dirname, './test/node/specs/bson-corpus'))
           .filter(x => x.indexOf('json') !== -1)
-          .map(x => JSON.parse(fs.readFileSync(path.join(__dirname, filepath, x), 'utf8')));
+          .map(x =>
+            fs.readFileSync(path.join(__dirname, './test/node/specs/bson-corpus', x), 'utf8')
+          );
         return {
-          code: `export default ${JSON.stringify(scenarios)};\n`,
+          code: `export default [ ${corpus.join(',')} ];\n`,
           map: { mappings: '' }
         };
       }

@@ -23,23 +23,24 @@ var skip = {
     'passing this would require building a custom type to store the NaN payload data.'
 };
 
-function findScenarios() {
-  const path = require('path');
-  const fs = require('fs');
-  return fs
-    .readdirSync(path.join(__dirname, 'specs/bson-corpus'))
-    .filter(x => x.indexOf('json') !== -1)
-    .map(x => JSON.parse(fs.readFileSync(path.join(__dirname, 'specs/bson-corpus', x), 'utf8')));
-}
+// function findScenarios() {
+//   const path = require('path');
+//   const fs = require('fs');
+//   return fs
+//     .readdirSync(path.join(__dirname, 'specs/bson-corpus'))
+//     .filter(x => x.indexOf('json') !== -1)
+//     .map(x => JSON.parse(fs.readFileSync(path.join(__dirname, 'specs/bson-corpus', x), 'utf8')));
+// }
 
-let corpus;
-// needs to be a better way to do this, but check if process.env is empty or not, always empty in browser, is there a case where it's not empty in node?
-if (Object.keys(process.env).length === 0) {
-  corpus = require('scenarios'); // this will be the plugin
-  // corpus = require('../../tools/scenarios.json'); // will get rid of this at some point
-} else {
-  corpus = findScenarios();
-}
+const corpus = require('./tools/bson_corpus_test_loader');
+
+// // needs to be a better way to do this, but check if process.env is empty or not, always empty in browser, is there a case where it's not empty in node?
+// if (Object.keys(process.env).length === 0) {
+//   corpus = require('scenarios'); // this will be the plugin
+//   // corpus = require('../../tools/scenarios.json'); // will get rid of this at some point
+// } else {
+//   corpus = findScenarios();
+// }
 
 describe('BSON Corpus', function() {
   corpus.forEach(scenario => {
