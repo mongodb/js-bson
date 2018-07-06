@@ -1,46 +1,55 @@
-var BSON = require('./lib/bson/bson'),
-  Binary = require('./lib/bson/binary'),
-  Code = require('./lib/bson/code'),
-  DBRef = require('./lib/bson/db_ref'),
-  Decimal128 = require('./lib/bson/decimal128'),
-  Double = require('./lib/bson/double'),
-  Int32 = require('./lib/bson/int_32'),
-  Long = require('./lib/bson/long'),
-  Map = require('./lib/bson/map'),
-  MaxKey = require('./lib/bson/max_key'),
-  MinKey = require('./lib/bson/min_key'),
-  ObjectId = require('./lib/bson/objectid'),
-  BSONRegExp = require('./lib/bson/regexp'),
-  Symbol = require('./lib/bson/symbol'),
-  Timestamp = require('./lib/bson/timestamp');
+var BSON = require('./lib/bson/bson');
 
-// BSON MAX VALUES
-BSON.BSON_INT32_MAX = 0x7fffffff;
-BSON.BSON_INT32_MIN = -0x80000000;
-
-BSON.BSON_INT64_MAX = Math.pow(2, 63) - 1;
-BSON.BSON_INT64_MIN = -Math.pow(2, 63);
-
-// JS MAX PRECISE VALUES
-BSON.JS_INT_MAX = 0x20000000000000; // Any integer up to 2^53 can be precisely represented by a double.
-BSON.JS_INT_MIN = -0x20000000000000; // Any integer down to -2^53 can be precisely represented by a double.
-
-// Add BSON types to function creation
-BSON.Binary = Binary;
-BSON.Code = Code;
-BSON.DBRef = DBRef;
-BSON.Decimal128 = Decimal128;
-BSON.Double = Double;
-BSON.Int32 = Int32;
-BSON.Long = Long;
-BSON.Map = Map;
-BSON.MaxKey = MaxKey;
-BSON.MinKey = MinKey;
-BSON.ObjectId = ObjectId;
-BSON.ObjectID = ObjectId;
-BSON.BSONRegExp = BSONRegExp;
-BSON.Symbol = Symbol;
-BSON.Timestamp = Timestamp;
-
-// Return the BSON
-module.exports = BSON;
+module.exports = {
+  serialize: BSON.serialize,
+  serializeWithBufferAndIndex: BSON.serializeWithBufferAndIndex,
+  deserialize: BSON.deserialize,
+  calculateObjectSize: BSON.calculateObjectSize,
+  deserializeStream: BSON.deserializeStream,
+  BSON_INT32_MAX: BSON.BSON_INT32_MAX,
+  BSON_INT32_MIN: BSON.BSON_INT32_MIN,
+  BSON_INT64_MAX: BSON.BSON_INT64_MAX,
+  BSON_INT64_MIN: BSON.BSON_INT64_MIN,
+  JS_INT_MAX: BSON.JS_INT_MAX,
+  JS_INT_MIN: BSON.JS_INT_MIN,
+  BSON_DATA_NUMBER: BSON.BSON_DATA_NUMBER,
+  BSON_DATA_STRING: BSON.BSON_DATA_STRING,
+  BSON_DATA_OBJECT: BSON.BSON_DATA_OBJECT,
+  BSON_DATA_ARRAY: BSON.BSON_DATA_ARRAY,
+  BSON_DATA_BINARY: BSON.BSON_DATA_BINARY,
+  BSON_DATA_OID: BSON.BSON_DATA_OID,
+  BSON_DATA_BOOLEAN: BSON.BSON_DATA_BOOLEAN,
+  BSON_DATA_DATE: BSON.BSON_DATA_DATE,
+  BSON_DATA_NULL: BSON.BSON_DATA_NULL,
+  BSON_DATA_REGEXP: BSON.BSON_DATA_REGEXP,
+  BSON_DATA_CODE: BSON.BSON_DATA_CODE,
+  BSON_DATA_SYMBOL: BSON.BSON_DATA_SYMBOL,
+  BSON_DATA_CODE_W_SCOPE: BSON.BSON_DATA_CODE_W_SCOPE,
+  BSON_DATA_INT: BSON.BSON_DATA_INT,
+  BSON_DATA_TIMESTAMP: BSON.BSON_DATA_TIMESTAMP,
+  BSON_DATA_LONG: BSON.BSON_DATA_LONG,
+  BSON_DATA_MIN_KEY: BSON.BSON_DATA_MIN_KEY,
+  BSON_DATA_MAX_KEY: BSON.BSON_DATA_MAX_KEY,
+  BSON_BINARY_SUBTYPE_DEFAULT: BSON.BSON_BINARY_SUBTYPE_DEFAULT,
+  BSON_BINARY_SUBTYPE_FUNCTION: BSON.BSON_BINARY_SUBTYPE_FUNCTION,
+  BSON_BINARY_SUBTYPE_BYTE_ARRAY: BSON.BSON_BINARY_SUBTYPE_BYTE_ARRAY,
+  BSON_BINARY_SUBTYPE_UUID: BSON.BSON_BINARY_SUBTYPE_UUID,
+  BSON_BINARY_SUBTYPE_MD5: BSON.BSON_BINARY_SUBTYPE_MD5,
+  BSON_BINARY_SUBTYPE_USER_DEFINED: BSON.BSON_BINARY_SUBTYPE_USER_DEFINED,
+  Code: BSON.Code,
+  Map: BSON.Map,
+  Symbol: BSON.Symbol,
+  BSON: BSON.BSON,
+  DBRef: BSON.DBRef,
+  Binary: BSON.Binary,
+  ObjectID: BSON.ObjectID,
+  ObjectId: BSON.ObjectID,
+  Long: BSON.Long,
+  Timestamp: BSON.Timestamp,
+  Double: BSON.Double,
+  Int32: BSON.Int32,
+  MinKey: BSON.MinKey,
+  MaxKey: BSON.MaxKey,
+  BSONRegExp: BSON.BSONRegExp,
+  Decimal128: BSON.Decimal128
+};
