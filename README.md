@@ -18,7 +18,7 @@ npm run build
 A simple example of how to use BSON in the browser:
 
 ```html
-<script src="./dist/bson.js"></script>
+<script src="./dist/bson.bundle.js"></script>
 
 <script>
   function start() {

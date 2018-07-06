@@ -1,5 +1,6 @@
 'use strict';
 
+const Buffer = require('buffer').Buffer;
 const ensureBuffer = require('../../lib/bson/ensure_buffer');
 const expect = require('chai').expect;
 
