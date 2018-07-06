@@ -9,7 +9,7 @@ const babel = require('rollup-plugin-babel');
 const path = require('path');
 const fs = require('fs');
 
-const scenariosPlugin = options => { // eslint-disable-line
+const scenariosPlugin = () => {
   return {
     name: 'scenarios',
     transform(json, id) {

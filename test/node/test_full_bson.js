@@ -9,7 +9,6 @@ var BSON = require('../..'),
   expect = require('chai').expect;
 
 var createBSON = require('../utils');
-const gsWeirdBugData = require('../../tools/gsWeirdBugData.json').data;
 
 // Parsers
 var bson = createBSON();
@@ -658,19 +657,6 @@ describe('Full BSON', function() {
     for (var index = 0; index < string.length; index++) {
       bin.put(string.charAt(index));
     }
-    var doc = { doc: bin };
-    var serialized_data = bson.serialize(doc);
-    var deserialized_data = bson.deserialize(serialized_data);
-    expect(doc.doc.value()).to.equal(deserialized_data.doc.value());
-    done();
-  });
-
-  /**
-   * @ignore
-   */
-  it('Should Correctly Serialize and Deserialize a big Binary object', function(done) {
-    var bin = new Binary();
-    bin.write(gsWeirdBugData);
     var doc = { doc: bin };
     var serialized_data = bson.serialize(doc);
     var deserialized_data = bson.deserialize(serialized_data);
