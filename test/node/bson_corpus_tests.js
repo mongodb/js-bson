@@ -35,7 +35,7 @@ function findScenarios() {
 let corpus;
 // needs to be a better way to do this, but check if process.env is empty or not, always empty in browser, is there a case where it's not empty in node?
 if (Object.keys(process.env).length === 0) {
-  corpus = require('scenarios').code; // this will be the plugin
+  corpus = require('scenarios'); // this will be the plugin
   // corpus = require('../../tools/scenarios.json'); // will get rid of this at some point
 } else {
   corpus = findScenarios();
