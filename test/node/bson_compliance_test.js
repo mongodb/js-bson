@@ -1,17 +1,17 @@
 'use strict';
 
-var BSON = require('../..'),
-  Code = BSON.Code,
-  Binary = BSON.Binary,
-  Timestamp = BSON.Timestamp,
-  Long = BSON.Long,
-  ObjectID = BSON.ObjectID,
-  DBRef = BSON.DBRef,
-  MinKey = BSON.MinKey,
-  MaxKey = BSON.MaxKey,
-  expect = require('chai').expect;
+const BSON = require('../..');
+const Code = BSON.Code;
+const Binary = BSON.Binary;
+const Timestamp = BSON.Timestamp;
+const Long = BSON.Long;
+const ObjectID = BSON.ObjectID;
+const DBRef = BSON.DBRef;
+const MinKey = BSON.MinKey;
+const MaxKey = BSON.MaxKey;
+const expect = require('chai').expect;
 
-var createBSON = require('../utils');
+const createBSON = require('../utils');
 
 describe('BSON Compliance', function() {
   /**
