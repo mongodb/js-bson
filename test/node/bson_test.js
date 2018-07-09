@@ -22,6 +22,7 @@ const vm = require('vm');
 const assertBuffersEqual = require('./tools/utils').assertBuffersEqual;
 
 const createBSON = require('../utils');
+const normalizedFunctionString = require('../../lib/bson/parser/utils').normalizedFunctionString;
 
 // for tests
 BSON.BSON_BINARY_SUBTYPE_DEFAULT = 0;
@@ -2316,5 +2317,18 @@ describe('BSON', function() {
     const uint8ArrayRaw = Array.prototype.slice.call(uint8Array, 0);
 
     expect(bufferRaw).to.deep.equal(uint8ArrayRaw);
+  });
+
+  it('Should normalize variations of the same function to the same string', function() {
+    const testObj = { test: function() {}, test2: function test2() {} };
+    const testFuncs = [
+      function() {},
+      function func() {},
+      function fUnCtIoN() {},
+      testObj['test'],
+      testObj['test2']
+    ];
+    const expectedString = 'function () {}';
+    testFuncs.forEach(fn => expect(normalizedFunctionString(fn)).to.equal(expectedString));
   });
 });
