@@ -4877,7 +4877,6 @@ var deserialize = function deserialize(buffer$$1, options, isArray) {
   }
 
   if (!options.allowObjectSmallerThanBufferSize && Buffer$4.byteLength(buffer$$1) !== size) {
-    console.log(buffer$$1, buffer$$1.length, Buffer$4.byteLength(buffer$$1));
     throw new Error('buffer length ' + Buffer$4.byteLength(buffer$$1) + ' must === bson size ' + size);
   }
 

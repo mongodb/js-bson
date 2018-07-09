@@ -166,3 +166,10 @@ const obj = { answer: new CustomSerialize() };
 // "{ answer: 42 }"
 console.log(bson.deserialize(bson.serialize(obj)));
 ```
+
+#### What are the various files in dist?
+
+* `bson.bundle.js` is a bundled up version of the library that is suitable for inclusion in an HTML page via a `<script>` tag.
+* `bson.esm.js` is a rolled up version of the library that is suitable for interoperation with bundlers that work better with ES modules.
+* `bson.browser.esm.js` is similar to `bson.esm.js` but is ultimately intened for consumers producing browser bundles. It also pulls in any browser specific dependencies/code that may be needed.
+* `bson.browser.umd.js` is similar to the source code of this library but is ultimately intened for consumers producing browser bundlers expecting a UMD format. It also pulls in any browser specific dependencies/code that may be needed.
