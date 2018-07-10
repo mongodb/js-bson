@@ -1,5 +1,6 @@
 'use strict';
 
+const Buffer = require('buffer').Buffer;
 var BSON = require('../..'),
   Decimal128 = BSON.Decimal128,
   fs = require('fs'),

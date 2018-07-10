@@ -1,5 +1,6 @@
 'use strict';
 
+const Buffer = require('buffer').Buffer;
 var BSON = require('../..'),
   ObjectID = BSON.ObjectID,
   createBSON = require('../utils'),

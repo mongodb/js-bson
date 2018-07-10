@@ -681,6 +681,7 @@ describe('Full BSON', function() {
 
   it('Should Correctly Deserialize bson file from mongodump', function(done) {
     var data = fs.readFileSync('test/node/data/test.bson', { encoding: null });
+    data = new Buffer(data);
     var docs = [];
     var bsonIndex = 0;
     while (bsonIndex < data.length)
