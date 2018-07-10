@@ -6,7 +6,6 @@ const nodeBuiltins = require('rollup-plugin-node-builtins');
 const nodeResolve = require('rollup-plugin-node-resolve');
 const jsonPlugin = require('rollup-plugin-json');
 const babel = require('rollup-plugin-babel');
-const scenariosPlugin = require('./tools/scenarios-plugin');
 
 module.exports = {
   input: 'index.js',
@@ -16,7 +15,6 @@ module.exports = {
     name: 'bson'
   },
   plugins: [
-    scenariosPlugin(),
     jsonPlugin(),
     nodeBuiltins(),
     nodeResolve(),

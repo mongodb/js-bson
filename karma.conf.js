@@ -1,6 +1,7 @@
 'use strict';
 
 const rollupConfig = require('./rollup.config.js');
+const scenariosPlugin = require('./tools/scenarios-plugin');
 
 const onwarn = warning => {
   if (warning.code === 'CIRCULAR_DEPENDENCY' || warning.code === 'EVAL') return;
@@ -8,6 +9,7 @@ const onwarn = warning => {
 };
 
 rollupConfig.onwarn = onwarn;
+rollupConfig.plugins.push(scenariosPlugin());
 
 // Karma configuration
 // Generated on Thu Jun 28 2018 14:24:01 GMT-0400 (EDT)
