@@ -4,7 +4,6 @@ const commonjs = require('rollup-plugin-commonjs');
 const nodeGlobals = require('rollup-plugin-node-globals');
 const nodeBuiltins = require('rollup-plugin-node-builtins');
 const nodeResolve = require('rollup-plugin-node-resolve');
-const jsonPlugin = require('rollup-plugin-json');
 const babel = require('rollup-plugin-babel');
 
 module.exports = {
@@ -15,7 +14,6 @@ module.exports = {
     name: 'bson'
   },
   plugins: [
-    jsonPlugin(),
     nodeBuiltins(),
     nodeResolve(),
     commonjs(),
