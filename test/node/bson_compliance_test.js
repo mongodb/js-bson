@@ -1,5 +1,6 @@
 'use strict';
 
+const Buffer = require('buffer').Buffer;
 const BSON = require('../..');
 const Code = BSON.Code;
 const Binary = BSON.Binary;

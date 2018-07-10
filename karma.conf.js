@@ -1,6 +1,6 @@
 'use strict';
 
-const rollupConfig = require('./rollup.config.js');
+const rollupPlugins = require('./rollup.config.js')[1].plugins;
 const scenariosPlugin = require('./tools/scenarios-plugin');
 const jsonPlugin = require('rollup-plugin-json');
 
@@ -9,8 +9,8 @@ const onwarn = warning => {
   console.warn(warning.toString());
 };
 
-rollupConfig.onwarn = onwarn;
-rollupConfig.plugins.unshift(scenariosPlugin(), jsonPlugin());
+// rollupConfig.onwarn = onwarn;
+rollupPlugins.unshift(scenariosPlugin(), jsonPlugin());
 
 // Karma configuration
 // Generated on Thu Jun 28 2018 14:24:01 GMT-0400 (EDT)
@@ -24,7 +24,14 @@ module.exports = function(config) {
     preprocessors: {
       'test/node/!(bson_node_only_test).js': 'rollup'
     },
-    rollupPreprocessor: rollupConfig,
+    rollupPreprocessor: {
+      output: {
+        format: 'umd',
+        name: 'BSON'
+      },
+      onwarn: onwarn,
+      plugins: rollupPlugins
+    },
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
