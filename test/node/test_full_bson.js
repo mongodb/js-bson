@@ -1,14 +1,14 @@
 'use strict';
 
-var BSON = require('../..'),
-  Buffer = require('buffer').Buffer,
-  BinaryParser = require('../binary_parser').BinaryParser,
-  ObjectID = BSON.ObjectID,
-  Binary = BSON.Binary,
-  BSONRegExp = BSON.BSONRegExp,
-  expect = require('chai').expect;
+const BSON = require('../..');
+const Buffer = require('buffer').Buffer;
+const BinaryParser = require('../binary_parser').BinaryParser;
+const ObjectID = BSON.ObjectID;
+const Binary = BSON.Binary;
+const BSONRegExp = BSON.BSONRegExp;
+const expect = require('chai').expect;
 
-var createBSON = require('../utils');
+const createBSON = require('../utils');
 
 // Parsers
 var bson = createBSON();

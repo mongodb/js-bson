@@ -1,27 +1,28 @@
 'use strict';
 
-var Buffer = require('buffer').Buffer,
-  expect = require('chai').expect,
-  BSON = require('../..'),
-  Code = BSON.Code,
-  BSONRegExp = BSON.BSONRegExp,
-  Binary = BSON.Binary,
-  Timestamp = BSON.Timestamp,
-  Long = BSON.Long,
-  ObjectID = BSON.ObjectID,
-  ObjectId = BSON.ObjectID,
-  Symbol = BSON.Symbol,
-  DBRef = BSON.DBRef,
-  Decimal128 = BSON.Decimal128,
-  Int32 = BSON.Int32,
-  Double = BSON.Double,
-  MinKey = BSON.MinKey,
-  MaxKey = BSON.MaxKey,
-  BinaryParser = require('../binary_parser').BinaryParser,
-  vm = require('vm'),
-  assertBuffersEqual = require('./tools/utils').assertBuffersEqual;
+const Buffer = require('buffer').Buffer;
+const expect = require('chai').expect;
+const BSON = require('../..');
+const Code = BSON.Code;
+const BSONRegExp = BSON.BSONRegExp;
+const Binary = BSON.Binary;
+const Timestamp = BSON.Timestamp;
+const Long = BSON.Long;
+const ObjectID = BSON.ObjectID;
+const ObjectId = BSON.ObjectID;
+const Symbol = BSON.Symbol;
+const DBRef = BSON.DBRef;
+const Decimal128 = BSON.Decimal128;
+const Int32 = BSON.Int32;
+const Double = BSON.Double;
+const MinKey = BSON.MinKey;
+const MaxKey = BSON.MaxKey;
+const BinaryParser = require('../binary_parser').BinaryParser;
+const vm = require('vm');
+const assertBuffersEqual = require('./tools/utils').assertBuffersEqual;
 
-var createBSON = require('../utils');
+const createBSON = require('../utils');
+const normalizedFunctionString = require('../../lib/bson/parser/utils').normalizedFunctionString;
 
 // for tests
 BSON.BSON_BINARY_SUBTYPE_DEFAULT = 0;
@@ -2316,5 +2317,18 @@ describe('BSON', function() {
     const uint8ArrayRaw = Array.prototype.slice.call(uint8Array, 0);
 
     expect(bufferRaw).to.deep.equal(uint8ArrayRaw);
+  });
+
+  it('Should normalize variations of the same function to the same string', function() {
+    const testObj = { test: function() {}, test2: function test2() {} };
+    const testFuncs = [
+      function() {},
+      function func() {},
+      function fUnCtIoN() {},
+      testObj['test'],
+      testObj['test2']
+    ];
+    const expectedString = 'function () {}';
+    testFuncs.forEach(fn => expect(normalizedFunctionString(fn)).to.equal(expectedString));
   });
 });

@@ -1,7 +1,7 @@
 'use strict';
 
-let createBSON = require('../utils'),
-  expect = require('chai').expect;
+const createBSON = require('../utils');
+const expect = require('chai').expect;
 
 describe('serializeWithBuffer', function() {
   /**

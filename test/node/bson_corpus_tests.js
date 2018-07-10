@@ -1,10 +1,10 @@
 'use strict';
 
-var BSON = require('../..'),
-  Decimal128 = BSON.Decimal128,
-  expect = require('chai').expect,
-  createBSON = require('../utils'),
-  bson = createBSON();
+const BSON = require('../..');
+const Decimal128 = BSON.Decimal128;
+const expect = require('chai').expect;
+const createBSON = require('../utils');
+const bson = createBSON();
 
 var deserializeOptions = {
   bsonRegExp: true,
