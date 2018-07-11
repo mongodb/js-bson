@@ -62,9 +62,9 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "test": "./tools/run_tests.sh",
-    "test-browser": "./tools/run_tests.sh karma",
-    "test-node": "./tools/run_tests.sh node",
+    "test": "npm run-script test-node && npm run-script test-browser",
+    "test-node": "mocha ./test/node",
+    "test-browser": "npm run-script build && karma start",
     "build": "rollup -c",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
