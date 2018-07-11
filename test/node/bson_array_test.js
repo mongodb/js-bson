@@ -57,30 +57,30 @@
 //   } else throw new Error('Invalid ISO 8601 date given.', __filename);
 // };
 
-var _Uint8Array = null;
+// var _Uint8Array = null;
 
-/**
- * Retrieve the server information for the current
- * instance of the db client
- *
- * @ignore
- */
-exports.setUp = function(callback) {
-  _Uint8Array = global.Uint8Array;
-  delete global['Uint8Array'];
-  callback();
-};
+// /**
+//  * Retrieve the server information for the current
+//  * instance of the db client
+//  *
+//  * @ignore
+//  */
+// exports.setUp = function(callback) {
+//   _Uint8Array = global.Uint8Array;
+//   delete global['Uint8Array'];
+//   callback();
+// };
 
-/**
- * Retrieve the server information for the current
- * instance of the db client
- *
- * @ignore
- */
-exports.tearDown = function(callback) {
-  global['Uint8Array'] = _Uint8Array;
-  callback();
-};
+// /**
+//  * Retrieve the server information for the current
+//  * instance of the db client
+//  *
+//  * @ignore
+//  */
+// exports.tearDown = function(callback) {
+//   global['Uint8Array'] = _Uint8Array;
+//   callback();
+// };
 
 // /**
 //  * @ignore

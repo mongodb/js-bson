@@ -1,16 +1,43 @@
 'use strict';
 
-const rollupPlugins = require('./rollup.config.js')[1].plugins;
 const scenariosPlugin = require('./tools/scenarios-plugin');
 const jsonPlugin = require('rollup-plugin-json');
+const nodeGlobals = require('rollup-plugin-node-globals');
+const nodeBuiltins = require('rollup-plugin-node-builtins');
+const commonjs = require('rollup-plugin-commonjs');
+const nodeResolve = require('rollup-plugin-node-resolve');
+
+const rollupPlugins = [
+  scenariosPlugin(),
+  nodeResolve({
+    browser: true,
+    preferBuiltins: false
+  }),
+  commonjs({
+    namedExports: {
+      'node_modules/buffer/index.js': ['isBuffer']
+    }
+  }),
+  nodeBuiltins(),
+  nodeGlobals(),
+  jsonPlugin()
+];
+
+const rollupConfig = {
+  plugins: rollupPlugins,
+  output: {
+    format: 'iife',
+    name: 'BSONtest',
+    exports: 'named'
+  }
+};
 
 const onwarn = warning => {
   if (warning.code === 'CIRCULAR_DEPENDENCY' || warning.code === 'EVAL') return;
   console.warn(warning.toString());
 };
 
-// rollupConfig.onwarn = onwarn;
-rollupPlugins.unshift(scenariosPlugin(), jsonPlugin());
+rollupConfig.onwarn = onwarn;
 
 // Karma configuration
 // Generated on Thu Jun 28 2018 14:24:01 GMT-0400 (EDT)
@@ -24,14 +51,7 @@ module.exports = function(config) {
     preprocessors: {
       'test/node/!(bson_node_only_test).js': 'rollup'
     },
-    rollupPreprocessor: {
-      output: {
-        format: 'umd',
-        name: 'BSON'
-      },
-      onwarn: onwarn,
-      plugins: rollupPlugins
-    },
+    rollupPreprocessor: rollupConfig,
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,

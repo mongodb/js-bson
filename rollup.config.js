@@ -2,17 +2,15 @@
 
 const pkg = require('./package.json');
 const commonjs = require('rollup-plugin-commonjs');
-const nodeGlobals = require('rollup-plugin-node-globals');
 const nodeBuiltins = require('rollup-plugin-node-builtins');
 const nodeResolve = require('rollup-plugin-node-resolve');
 const babel = require('rollup-plugin-babel');
 
 const input = 'index.js';
 const plugins = [
+  nodeBuiltins(),
   nodeResolve(),
   commonjs(),
-  nodeBuiltins(),
-  nodeGlobals(),
   babel({
     plugins: ['external-helpers'],
     presets: [
@@ -26,13 +24,12 @@ const plugins = [
   })
 ];
 const browserPlugins = [
+  nodeBuiltins(),
   nodeResolve({
     browser: true,
     preferBuiltins: false
   }),
   commonjs(),
-  nodeBuiltins(),
-  nodeGlobals(),
   babel({
     plugins: ['external-helpers'],
     presets: [
