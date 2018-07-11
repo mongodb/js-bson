@@ -8,9 +8,9 @@ const babel = require('rollup-plugin-babel');
 
 const input = 'index.js';
 const plugins = [
-  nodeBuiltins(),
   nodeResolve(),
   commonjs(),
+  nodeBuiltins(),
   babel({
     plugins: ['external-helpers'],
     presets: [
@@ -24,12 +24,12 @@ const plugins = [
   })
 ];
 const browserPlugins = [
-  nodeBuiltins(),
   nodeResolve({
     browser: true,
     preferBuiltins: false
   }),
   commonjs(),
+  nodeBuiltins(),
   babel({
     plugins: ['external-helpers'],
     presets: [
