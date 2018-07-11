@@ -1,27 +1,27 @@
 'use strict';
 
-var Buffer = require('buffer').Buffer,
-  fs = require('fs'),
-  expect = require('chai').expect,
-  BSON = require('../..'),
-  Code = BSON.Code,
-  BSONRegExp = BSON.BSONRegExp,
-  Binary = BSON.Binary,
-  Timestamp = BSON.Timestamp,
-  Long = BSON.Long,
-  ObjectID = BSON.ObjectID,
-  ObjectId = BSON.ObjectID,
-  Symbol = BSON.Symbol,
-  DBRef = BSON.DBRef,
-  Decimal128 = BSON.Decimal128,
-  Int32 = BSON.Int32,
-  Double = BSON.Double,
-  MinKey = BSON.MinKey,
-  MaxKey = BSON.MaxKey,
-  BinaryParser = require('../binary_parser').BinaryParser,
-  vm = require('vm');
+const Buffer = require('buffer').Buffer;
+const expect = require('chai').expect;
+const BSON = require('../..');
+const Code = BSON.Code;
+const BSONRegExp = BSON.BSONRegExp;
+const Binary = BSON.Binary;
+const Timestamp = BSON.Timestamp;
+const Long = BSON.Long;
+const ObjectID = BSON.ObjectID;
+const ObjectId = BSON.ObjectID;
+const Symbol = BSON.Symbol;
+const DBRef = BSON.DBRef;
+const Decimal128 = BSON.Decimal128;
+const Int32 = BSON.Int32;
+const Double = BSON.Double;
+const MinKey = BSON.MinKey;
+const MaxKey = BSON.MaxKey;
+const BinaryParser = require('../binary_parser').BinaryParser;
+const vm = require('vm');
+const assertBuffersEqual = require('./tools/utils').assertBuffersEqual;
 
-var createBSON = require('../utils');
+const createBSON = require('../utils');
 const normalizedFunctionString = require('../../lib/bson/parser/utils').normalizedFunctionString;
 
 // for tests
@@ -38,16 +38,6 @@ BSON.BSON_BINARY_SUBTYPE_BYTE_ARRAY = 2;
 BSON.BSON_BINARY_SUBTYPE_UUID = 3;
 BSON.BSON_BINARY_SUBTYPE_MD5 = 4;
 BSON.BSON_BINARY_SUBTYPE_USER_DEFINED = 128;
-
-var assertBuffersEqual = function(done, buffer1, buffer2) {
-  if (buffer1.length !== buffer2.length) {
-    done('Buffers do not have the same length', buffer1, buffer2);
-  }
-
-  for (var i = 0; i < buffer1.length; i++) {
-    expect(buffer1[i]).to.equal(buffer2[i]);
-  }
-};
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
@@ -1086,25 +1076,6 @@ describe('BSON', function() {
 
     var deserialized_data = createBSON().deserialize(serialized_data);
 
-    expect(doc.doc.value()).to.deep.equal(deserialized_data.doc.value());
-    done();
-  });
-
-  /**
-   * @ignore
-   */
-  it('Should Correctly Serialize and Deserialize a big Binary object', function(done) {
-    var data = fs.readFileSync('test/node/data/test_gs_weird_bug.png', 'binary');
-    var bin = new Binary();
-    bin.write(data);
-    var doc = { doc: bin };
-    var serialized_data = createBSON().serialize(doc);
-
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
-    assertBuffersEqual(done, serialized_data, serialized_data2, 0);
-
-    var deserialized_data = createBSON().deserialize(serialized_data);
     expect(doc.doc.value()).to.deep.equal(deserialized_data.doc.value());
     done();
   });

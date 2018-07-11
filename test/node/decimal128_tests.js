@@ -1,9 +1,10 @@
 'use strict';
 
 const Buffer = require('buffer').Buffer;
-let Decimal128 = require('../../lib/bson/decimal128'),
-  expect = require('chai').expect,
-  createBSON = require('../utils');
+const BSON = require('../..');
+const Decimal128 = BSON.Decimal128;
+const expect = require('chai').expect;
+const createBSON = require('../utils');
 
 var NAN = new Buffer(
   [

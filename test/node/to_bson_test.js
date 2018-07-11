@@ -1,10 +1,9 @@
 'use strict';
 
-const Buffer = require('buffer').Buffer;
-var BSON = require('../..'),
-  ObjectID = BSON.ObjectID,
-  createBSON = require('../utils'),
-  expect = require('chai').expect;
+const BSON = require('../..');
+const ObjectID = BSON.ObjectID;
+const createBSON = require('../utils');
+const expect = require('chai').expect;
 
 describe('toBSON', function() {
   /**

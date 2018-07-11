@@ -1,15 +1,14 @@
 'use strict';
 
-var BSON = require('../..'),
-  fs = require('fs'),
-  Buffer = require('buffer').Buffer,
-  BinaryParser = require('../binary_parser').BinaryParser,
-  ObjectID = BSON.ObjectID,
-  Binary = BSON.Binary,
-  BSONRegExp = BSON.BSONRegExp,
-  expect = require('chai').expect;
+const BSON = require('../..');
+const Buffer = require('buffer').Buffer;
+const BinaryParser = require('../binary_parser').BinaryParser;
+const ObjectID = BSON.ObjectID;
+const Binary = BSON.Binary;
+const BSONRegExp = BSON.BSONRegExp;
+const expect = require('chai').expect;
 
-var createBSON = require('../utils');
+const createBSON = require('../utils');
 
 // Parsers
 var bson = createBSON();
@@ -662,32 +661,6 @@ describe('Full BSON', function() {
     var serialized_data = bson.serialize(doc);
     var deserialized_data = bson.deserialize(serialized_data);
     expect(doc.doc.value()).to.equal(deserialized_data.doc.value());
-    done();
-  });
-
-  /**
-   * @ignore
-   */
-  it('Should Correctly Serialize and Deserialize a big Binary object', function(done) {
-    var data = fs.readFileSync('test/node/data/test_gs_weird_bug.png', 'binary');
-    var bin = new Binary();
-    bin.write(data);
-    var doc = { doc: bin };
-    var serialized_data = bson.serialize(doc);
-    var deserialized_data = bson.deserialize(serialized_data);
-    expect(doc.doc.value()).to.equal(deserialized_data.doc.value());
-    done();
-  });
-
-  it('Should Correctly Deserialize bson file from mongodump', function(done) {
-    var data = fs.readFileSync('test/node/data/test.bson', { encoding: null });
-    data = new Buffer(data);
-    var docs = [];
-    var bsonIndex = 0;
-    while (bsonIndex < data.length)
-      bsonIndex = bson.deserializeStream(data, bsonIndex, 1, docs, docs.length, { isArray: true });
-
-    expect(docs.length).to.equal(1);
     done();
   });
 

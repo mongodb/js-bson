@@ -1,8 +1,10 @@
-import pkg from './package.json';
-import commonjs from 'rollup-plugin-commonjs';
-import nodeBuiltins from 'rollup-plugin-node-builtins';
-import nodeResolve from 'rollup-plugin-node-resolve';
-import babel from 'rollup-plugin-babel';
+'use strict';
+
+const pkg = require('./package.json');
+const commonjs = require('rollup-plugin-commonjs');
+const nodeBuiltins = require('rollup-plugin-node-builtins');
+const nodeResolve = require('rollup-plugin-node-resolve');
+const babel = require('rollup-plugin-babel');
 
 const input = 'index.js';
 const plugins = [
@@ -10,7 +12,7 @@ const plugins = [
   commonjs(),
   nodeBuiltins(),
   babel({
-    plugins: [ 'external-helpers' ],
+    plugins: ['external-helpers'],
     presets: [
       [
         'env',
@@ -29,7 +31,7 @@ const browserPlugins = [
   commonjs(),
   nodeBuiltins(),
   babel({
-    plugins: [ 'external-helpers' ],
+    plugins: ['external-helpers'],
     presets: [
       [
         'env',
@@ -43,7 +45,7 @@ const browserPlugins = [
 const external = Object.keys(pkg.dependencies || {});
 const defaultName = 'BSON';
 
-export default [
+module.exports = [
   {
     input,
     output: {
