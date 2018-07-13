@@ -1,13 +1,13 @@
 'use strict';
 
-const Buffer = require('buffer').Buffer;
-const BSON = require('../..');
-const Int32 = BSON.Int32;
-const Double = BSON.Double;
-const BinaryParser = require('../binary_parser').BinaryParser;
-const expect = require('chai').expect;
+var Buffer = require('buffer').Buffer,
+  BSON = require('../..'),
+  Int32 = BSON.Int32,
+  Double = BSON.Double,
+  BinaryParser = require('../binary_parser').BinaryParser,
+  expect = require('chai').expect;
 
-const createBSON = require('../utils');
+var createBSON = require('../utils');
 
 // for tests
 BSON.BSON_BINARY_SUBTYPE_DEFAULT = 0;

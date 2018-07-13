@@ -1,28 +1,27 @@
 'use strict';
 
-const Buffer = require('buffer').Buffer;
-const expect = require('chai').expect;
-const BSON = require('../..');
-const Code = BSON.Code;
-const BSONRegExp = BSON.BSONRegExp;
-const Binary = BSON.Binary;
-const Timestamp = BSON.Timestamp;
-const Long = BSON.Long;
-const ObjectID = BSON.ObjectID;
-const ObjectId = BSON.ObjectID;
-const Symbol = BSON.Symbol;
-const DBRef = BSON.DBRef;
-const Decimal128 = BSON.Decimal128;
-const Int32 = BSON.Int32;
-const Double = BSON.Double;
-const MinKey = BSON.MinKey;
-const MaxKey = BSON.MaxKey;
-const BinaryParser = require('../binary_parser').BinaryParser;
-const vm = require('vm');
-const assertBuffersEqual = require('./tools/utils').assertBuffersEqual;
+var Buffer = require('buffer').Buffer,
+  fs = require('fs'),
+  expect = require('chai').expect,
+  BSON = require('../..'),
+  Code = BSON.Code,
+  BSONRegExp = BSON.BSONRegExp,
+  Binary = BSON.Binary,
+  Timestamp = BSON.Timestamp,
+  Long = BSON.Long,
+  ObjectID = BSON.ObjectID,
+  ObjectId = BSON.ObjectID,
+  Symbol = BSON.Symbol,
+  DBRef = BSON.DBRef,
+  Decimal128 = BSON.Decimal128,
+  Int32 = BSON.Int32,
+  Double = BSON.Double,
+  MinKey = BSON.MinKey,
+  MaxKey = BSON.MaxKey,
+  BinaryParser = require('../binary_parser').BinaryParser,
+  vm = require('vm');
 
-const createBSON = require('../utils');
-const normalizedFunctionString = require('../../lib/bson/parser/utils').normalizedFunctionString;
+var createBSON = require('../utils');
 
 // for tests
 BSON.BSON_BINARY_SUBTYPE_DEFAULT = 0;
@@ -38,6 +37,16 @@ BSON.BSON_BINARY_SUBTYPE_BYTE_ARRAY = 2;
 BSON.BSON_BINARY_SUBTYPE_UUID = 3;
 BSON.BSON_BINARY_SUBTYPE_MD5 = 4;
 BSON.BSON_BINARY_SUBTYPE_USER_DEFINED = 128;
+
+var assertBuffersEqual = function(done, buffer1, buffer2) {
+  if (buffer1.length !== buffer2.length) {
+    done('Buffers do not have the same length', buffer1, buffer2);
+  }
+
+  for (var i = 0; i < buffer1.length; i++) {
+    expect(buffer1[i]).to.equal(buffer2[i]);
+  }
+};
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
@@ -76,19 +85,6 @@ var ISODate = function(string) {
     return date;
   } else throw new Error('Invalid ISO 8601 date given.', __filename);
 };
-
-function runTestsOnBytesForBufferAndUint8Array(bytes, testFn) {
-  let serialized_data = '';
-  // Convert to chars
-  for (let i = 0; i < bytes.length; i++) {
-    serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
-  }
-
-  const uint8Array = Uint8Array.from(bytes);
-  const buffer = new Buffer(serialized_data, 'binary');
-
-  [uint8Array, buffer].forEach(testFn);
-}
 
 describe('BSON', function() {
   /**
@@ -228,19 +224,16 @@ describe('BSON', function() {
       0,
       0
     ];
+    var serialized_data = '';
+    // Convert to chars
+    for (var i = 0; i < bytes.length; i++) {
+      serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
+    }
 
-    runTestsOnBytesForBufferAndUint8Array(bytes, data => {
-      let object = createBSON().deserialize(data);
-      expect('a_1').to.equal(object.name);
-      expect(false).to.equal(object.unique);
-      expect(1).to.equal(object.key.a);
-
-      object = createBSON().deserialize(Uint8Array.from(bytes));
-      expect('a_1').to.equal(object.name);
-      expect(false).to.equal(object.unique);
-      expect(1).to.equal(object.key.a);
-    });
-
+    var object = createBSON().deserialize(new Buffer(serialized_data, 'binary'));
+    expect('a_1').to.equal(object.name);
+    expect(false).to.equal(object.unique);
+    expect(1).to.equal(object.key.a);
     done();
   });
 
@@ -532,26 +525,29 @@ describe('BSON', function() {
       0,
       0
     ];
+    var serialized_data = '';
 
-    runTestsOnBytesForBufferAndUint8Array(bytes, data => {
-      const object = createBSON().deserialize(data);
-      // Perform tests
-      expect('hello').to.equal(object.string);
-      expect([1, 2, 3]).to.deep.equal(object.array);
-      expect(1).to.equal(object.hash.a);
-      expect(2).to.equal(object.hash.b);
-      expect(object.date != null).to.be.ok;
-      expect(object.oid != null).to.be.ok;
-      expect(object.binary != null).to.be.ok;
-      expect(42).to.equal(object.int);
-      expect(33.3333).to.equal(object.float);
-      expect(object.regexp != null).to.be.ok;
-      expect(true).to.equal(object.boolean);
-      expect(object.where != null).to.be.ok;
-      expect(object.dbref != null).to.be.ok;
-      expect(object[null] == null).to.be.ok;
-    });
+    // Convert to chars
+    for (var i = 0; i < bytes.length; i++) {
+      serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
+    }
 
+    var object = createBSON().deserialize(new Buffer(serialized_data, 'binary'));
+    // Perform tests
+    expect('hello').to.equal(object.string);
+    expect([1, 2, 3]).to.deep.equal(object.array);
+    expect(1).to.equal(object.hash.a);
+    expect(2).to.equal(object.hash.b);
+    expect(object.date != null).to.be.ok;
+    expect(object.oid != null).to.be.ok;
+    expect(object.binary != null).to.be.ok;
+    expect(42).to.equal(object.int);
+    expect(33.3333).to.equal(object.float);
+    expect(object.regexp != null).to.be.ok;
+    expect(true).to.equal(object.boolean);
+    expect(object.where != null).to.be.ok;
+    expect(object.dbref != null).to.be.ok;
+    expect(object[null] == null).to.be.ok;
     done();
   });
 
@@ -1076,6 +1072,25 @@ describe('BSON', function() {
 
     var deserialized_data = createBSON().deserialize(serialized_data);
 
+    expect(doc.doc.value()).to.deep.equal(deserialized_data.doc.value());
+    done();
+  });
+
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize a big Binary object', function(done) {
+    var data = fs.readFileSync('test/node/data/test_gs_weird_bug.png', 'binary');
+    var bin = new Binary();
+    bin.write(data);
+    var doc = { doc: bin };
+    var serialized_data = createBSON().serialize(doc);
+
+    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
+    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    assertBuffersEqual(done, serialized_data, serialized_data2, 0);
+
+    var deserialized_data = createBSON().deserialize(serialized_data);
     expect(doc.doc.value()).to.deep.equal(deserialized_data.doc.value());
     done();
   });
@@ -2301,34 +2316,5 @@ describe('BSON', function() {
     expect(false).to.equal(id.equals(null));
     expect(false).to.equal(id.equals(undefined));
     done();
-  });
-
-  it('Should serialize the same values to a Buffer and a Uint8Array', function() {
-    const testData = { darmok: 'jalad' };
-
-    const dataLength = createBSON().serialize(testData).length;
-    const buffer = new Buffer(dataLength);
-    const uint8Array = new Uint8Array(dataLength);
-
-    createBSON().serializeWithBufferAndIndex(testData, buffer);
-    createBSON().serializeWithBufferAndIndex(testData, uint8Array);
-
-    const bufferRaw = Array.prototype.slice.call(buffer, 0);
-    const uint8ArrayRaw = Array.prototype.slice.call(uint8Array, 0);
-
-    expect(bufferRaw).to.deep.equal(uint8ArrayRaw);
-  });
-
-  it('Should normalize variations of the same function to the same string', function() {
-    const testObj = { test: function() {}, test2: function test2() {} };
-    const testFuncs = [
-      function() {},
-      function func() {},
-      function fUnCtIoN() {},
-      testObj['test'],
-      testObj['test2']
-    ];
-    const expectedString = 'function () {}';
-    testFuncs.forEach(fn => expect(normalizedFunctionString(fn)).to.equal(expectedString));
   });
 });

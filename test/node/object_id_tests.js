@@ -1,9 +1,8 @@
 'use strict';
 
-const Buffer = require('buffer').Buffer;
-const BSON = require('../..');
-const util = require('util');
-const ObjectId = BSON.ObjectID;
+var BSON = require('../..');
+var util = require('util');
+var ObjectId = BSON.ObjectID;
 const expect = require('chai').expect;
 
 describe('ObjectId', function() {

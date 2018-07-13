@@ -1,11 +1,12 @@
 'use strict';
 
-const Buffer = require('buffer').Buffer;
-const BSON = require('../..');
-const Decimal128 = BSON.Decimal128;
-const expect = require('chai').expect;
-const createBSON = require('../utils');
-const bson = createBSON();
+var BSON = require('../..'),
+  Decimal128 = BSON.Decimal128,
+  fs = require('fs'),
+  expect = require('chai').expect,
+  path = require('path'),
+  createBSON = require('../utils'),
+  bson = createBSON();
 
 var deserializeOptions = {
   bsonRegExp: true,
@@ -24,10 +25,15 @@ var skip = {
     'passing this would require building a custom type to store the NaN payload data.'
 };
 
-const corpus = require('./tools/bson_corpus_test_loader');
+function findScenarios() {
+  return fs
+    .readdirSync(path.join(__dirname, 'specs/bson-corpus'))
+    .filter(x => x.indexOf('json') !== -1)
+    .map(x => JSON.parse(fs.readFileSync(path.join(__dirname, 'specs/bson-corpus', x), 'utf8')));
+}
 
 describe('BSON Corpus', function() {
-  corpus.forEach(scenario => {
+  findScenarios().forEach(scenario => {
     describe(scenario.description, function() {
       if (scenario.valid) {
         describe('valid', function() {

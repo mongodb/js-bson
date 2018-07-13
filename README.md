@@ -18,7 +18,7 @@ npm run build
 A simple example of how to use BSON in the browser:
 
 ```html
-<script src="./dist/bson.bundle.js"></script>
+<script src="./dist/bson.js"></script>
 
 <script>
   function start() {
@@ -91,7 +91,7 @@ The BSON `serializeWithBufferAndIndex` method takes an object, a target buffer i
 
   * `BSON.serializeWithBufferAndIndex(object, buffer, options)`
     * @param {Object} object the JavaScript object to serialize.
-    * @param {Buffer|Uint8Array} buffer the Buffer you pre-allocated to store the serialized BSON object.
+    * @param {Buffer} buffer the Buffer you pre-allocated to store the serialized BSON object.
     * @param {Boolean} [options.checkKeys=false] the serializer will check if keys are valid.
     * @param {Boolean} [options.serializeFunctions=false] serialize the JavaScript functions.
     * @param {Boolean} [options.ignoreUndefined=true] ignore undefined fields.
@@ -128,7 +128,7 @@ The BSON `deserialize` method takes a Node.js Buffer and an optional options obj
 The BSON `deserializeStream` method takes a Node.js Buffer, `startIndex` and allow more control over deserialization of a Buffer containing concatenated BSON documents.
 
   * `BSON.deserializeStream(buffer, startIndex, numberOfDocuments, documents, docStartIndex, options)`
-    * @param {Buffer|Uint8Array} buffer the buffer containing the serialized set of BSON documents.
+    * @param {Buffer} buffer the buffer containing the serialized set of BSON documents.
     * @param {Number} startIndex the start index in the data Buffer where the deserialization is to start.
     * @param {Number} numberOfDocuments number of documents to deserialize.
     * @param {Array} documents an array where to store the deserialized documents.
@@ -166,10 +166,3 @@ const obj = { answer: new CustomSerialize() };
 // "{ answer: 42 }"
 console.log(bson.deserialize(bson.serialize(obj)));
 ```
-
-#### What are the various files in dist?
-
-* `bson.bundle.js` is a bundled up version of the library that is suitable for inclusion in an HTML page via a `<script>` tag.
-* `bson.esm.js` is a rolled up version of the library that is suitable for interoperation with bundlers that work better with ES modules.
-* `bson.browser.esm.js` is similar to `bson.esm.js` but is ultimately intened for consumers producing browser bundles. It also pulls in any browser specific dependencies/code that may be needed.
-* `bson.browser.umd.js` is similar to the source code of this library but is ultimately intened for consumers producing browser bundlers expecting a UMD format. It also pulls in any browser specific dependencies/code that may be needed.

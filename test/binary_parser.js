@@ -1,7 +1,4 @@
 'use strict';
-
-const Buffer = require('buffer').Buffer;
-
 /**
  * Binary Parser.
  * Jonas Raoni Soares Silva

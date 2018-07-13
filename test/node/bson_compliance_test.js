@@ -1,18 +1,17 @@
 'use strict';
 
-const Buffer = require('buffer').Buffer;
-const BSON = require('../..');
-const Code = BSON.Code;
-const Binary = BSON.Binary;
-const Timestamp = BSON.Timestamp;
-const Long = BSON.Long;
-const ObjectID = BSON.ObjectID;
-const DBRef = BSON.DBRef;
-const MinKey = BSON.MinKey;
-const MaxKey = BSON.MaxKey;
-const expect = require('chai').expect;
+var BSON = require('../..'),
+  Code = BSON.Code,
+  Binary = BSON.Binary,
+  Timestamp = BSON.Timestamp,
+  Long = BSON.Long,
+  ObjectID = BSON.ObjectID,
+  DBRef = BSON.DBRef,
+  MinKey = BSON.MinKey,
+  MaxKey = BSON.MaxKey,
+  expect = require('chai').expect;
 
-const createBSON = require('../utils');
+var createBSON = require('../utils');
 
 describe('BSON Compliance', function() {
   /**
@@ -20,7 +19,7 @@ describe('BSON Compliance', function() {
    */
   it('Pass all corrupt BSON scenarios ./compliance/corrupt.json', function(done) {
     // Read and parse the json file
-    const scenarios = require('./compliance/corrupt');
+    var scenarios = require(__dirname + '/compliance/corrupt');
 
     // Create a new BSON instance
     var bson = createBSON();
@@ -48,7 +47,7 @@ describe('BSON Compliance', function() {
    */
   it('Pass all valid BSON serialization scenarios ./compliance/valid.json', function(done) {
     // Read and parse the json file
-    const scenarios = require('./compliance/valid');
+    var scenarios = require(__dirname + '/compliance/valid');
 
     // Create a new BSON instance
     var bson = createBSON();

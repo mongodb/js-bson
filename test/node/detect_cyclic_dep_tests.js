@@ -1,7 +1,7 @@
 'use strict';
 
-const createBSON = require('../utils');
-const expect = require('chai').expect;
+var createBSON = require('../utils'),
+  expect = require('chai').expect;
 
 describe('Cyclic Dependencies', function() {
   /**

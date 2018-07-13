@@ -1,20 +1,3 @@
-<a name="3.0.1"></a>
-## [3.0.1](https://github.com/mongodb/js-bson/compare/v3.0.0...v3.0.1) (2018-07-12)
-
-
-### Bug Fixes
-
-* **bson:** normalizedFunctionString handles named functions ([6b49c23](https://github.com/mongodb/js-bson/commit/6b49c23))
-* **rollup:** fixup dist and bundle in Buffer ([3620ef8](https://github.com/mongodb/js-bson/commit/3620ef8))
-
-
-### Features
-
-* **bson:** test bson in browser ([223fbdf](https://github.com/mongodb/js-bson/commit/223fbdf))
-* **UintArray:** Adds support for Uint8Arrays ([2a54053](https://github.com/mongodb/js-bson/commit/2a54053))
-
-
-
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/mongodb/js-bson/compare/v2.0.8...v3.0.0) (2018-06-13)
 

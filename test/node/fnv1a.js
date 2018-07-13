@@ -1,6 +1,5 @@
 'use strict';
 
-const Buffer = require('buffer').Buffer;
 const fnv1a = require('../../lib/bson/fnv1a');
 const fnv1a24 = fnv1a.fnv1a24;
 const expect = require('chai').expect;
