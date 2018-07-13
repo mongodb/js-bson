@@ -1,3 +1,13 @@
+<a name="3.0.2"></a>
+## [3.0.2](https://github.com/mongodb/js-bson/compare/v3.0.1...v3.0.2) (2018-07-13)
+
+
+### Bug Fixes
+
+* **revert:** Reverting v3.0.1 ([efb0720](https://github.com/mongodb/js-bson/commit/efb0720))
+
+
+
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/mongodb/js-bson/compare/v2.0.8...v3.0.0) (2018-06-13)
 
