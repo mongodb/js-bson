@@ -39,9 +39,6 @@ const onwarn = warning => {
 
 rollupConfig.onwarn = onwarn;
 
-// Karma configuration
-// Generated on Thu Jun 28 2018 14:24:01 GMT-0400 (EDT)
-
 module.exports = function(config) {
   config.set({
     basePath: '',
@@ -56,7 +53,13 @@ module.exports = function(config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: ['ChromeHeadless'],
+    browsers: ['ChromeHeadlessNoSandbox'],
+    customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox']
+      }
+    },
     singleRun: true,
     concurrency: Infinity
   });
