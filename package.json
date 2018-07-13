@@ -49,15 +49,11 @@
   "config": {
     "native": false
   },
-  "main": "index.js",
-  "module": "dist/bson.esm.js",
-  "browser": {
-    "./index.js": "./dist/bson.browser.umd.js",
-    "./dist/bson.esm.js": "./dist/bson.browser.esm.js"
-  },
+  "main": "./index",
   "directories": {
     "lib": "./lib/bson"
   },
+  "browser": "dist/bson.js",
   "engines": {
     "node": ">=4.0.0"
   },
