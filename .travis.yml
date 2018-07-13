@@ -13,3 +13,7 @@ node_js:
   - 6
   - 8
   - 10
+
+  script:
+  - npm run lint && npm run test-node
+  - if [[ $(node --version) != v4* ]] ; then npm run-script test-browser; fi

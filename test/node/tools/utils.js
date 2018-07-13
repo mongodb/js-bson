@@ -81,3 +81,14 @@ exports.Utf8 = {
     return string;
   }
 };
+
+exports.assertBuffersEqual = function(done, buffer1, buffer2) {
+  const expect = require('chai').expect;
+  if (buffer1.length !== buffer2.length) {
+    done('Buffers do not have the same length', buffer1, buffer2);
+  }
+
+  for (var i = 0; i < buffer1.length; i++) {
+    expect(buffer1[i]).to.equal(buffer2[i]);
+  }
+};
