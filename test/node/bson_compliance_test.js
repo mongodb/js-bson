@@ -19,7 +19,7 @@ describe('BSON Compliance', function() {
    */
   it('Pass all corrupt BSON scenarios ./compliance/corrupt.json', function(done) {
     // Read and parse the json file
-    var scenarios = require(__dirname + '/compliance/corrupt');
+    var scenarios = require('./compliance/corrupt');
 
     // Create a new BSON instance
     var bson = createBSON();
@@ -47,7 +47,7 @@ describe('BSON Compliance', function() {
    */
   it('Pass all valid BSON serialization scenarios ./compliance/valid.json', function(done) {
     // Read and parse the json file
-    var scenarios = require(__dirname + '/compliance/valid');
+    var scenarios = require('./compliance/valid');
 
     // Create a new BSON instance
     var bson = createBSON();
