@@ -20,6 +20,7 @@ const BinaryParser = require('../binary_parser').BinaryParser;
 const vm = require('vm');
 const assertBuffersEqual = require('./tools/utils').assertBuffersEqual;
 const createBSON = require('../utils');
+const normalizedFunctionString = require('../../lib/parser/utils').normalizedFunctionString;
 
 // for tests
 BSON.BSON_BINARY_SUBTYPE_DEFAULT = 0;
