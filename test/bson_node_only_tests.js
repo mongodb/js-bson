@@ -3,7 +3,7 @@
 const fs = require('fs');
 const expect = require('chai').expect;
 const BSON = require('../..');
-const Binary = require('../..').Binary;
+const Binary = BSON.Binary;
 const assertBuffersEqual = require('./tools/utils').assertBuffersEqual;
 const Buffer = require('buffer').Buffer;
 
