@@ -1,7 +1,7 @@
 'use strict';
 
 const Buffer = require('buffer').Buffer;
-const BSON = require('../..');
+const BSON = require('../../lib/bson');
 const Decimal128 = BSON.Decimal128;
 const expect = require('chai').expect;
 

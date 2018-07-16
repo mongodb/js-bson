@@ -1,6 +1,6 @@
 'use strict';
 
-const BSON = require('../..');
+const BSON = require('../../lib/bson');
 const expect = require('chai').expect;
 
 describe('Cyclic Dependencies', function() {
