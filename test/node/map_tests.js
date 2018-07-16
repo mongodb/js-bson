@@ -1,7 +1,7 @@
 'use strict';
 
 const M = require('../../lib/map');
-const createBSON = require('../utils');
+const BSON = require('../..');
 const expect = require('chai').expect;
 
 describe('Map', function() {
@@ -84,28 +84,26 @@ describe('Map', function() {
   it('should serialize a map', function(done) {
     // Serialize top level map only
     var m = new M([['a', 1], ['b', 2]]);
-    var bson = createBSON();
     // Serialize the map
-    var data = bson.serialize(m, false, true);
+    var data = BSON.serialize(m, false, true);
     // Deserialize the data
-    var object = bson.deserialize(data);
+    var object = BSON.deserialize(data);
     expect({ a: 1, b: 2 }).to.deep.equal(object);
 
     // Serialize nested maps
     var m1 = new M([['a', 1], ['b', 2]]);
     m = new M([['c', m1]]);
     // Serialize the map
-    data = bson.serialize(m, false, true);
+    data = BSON.serialize(m, false, true);
     // Deserialize the data
-    object = bson.deserialize(data);
+    object = BSON.deserialize(data);
     expect({ c: { a: 1, b: 2 } }).to.deep.equal(object);
     done();
 
     // Serialize top level map only
     m = new M([['1', 1], ['0', 2]]);
-    bson = createBSON();
     // Serialize the map, validating that the order in the resulting BSON is preserved
-    data = bson.serialize(m, false, true);
+    data = BSON.serialize(m, false, true);
     expect('13000000103100010000001030000200000000').to.equal(data.toString('hex'));
   });
 
@@ -115,11 +113,10 @@ describe('Map', function() {
   it('should not crash due to object that looks like map', function(done) {
     // Serialize top level map only
     var m = { entries: 'test' };
-    var bson = createBSON();
     // Serialize the map
-    var data = bson.serialize(m, false, true);
+    var data = BSON.serialize(m, false, true);
     // Deserialize the data
-    var object = bson.deserialize(data);
+    var object = BSON.deserialize(data);
     expect(m).to.deep.equal(object);
     done();
   });

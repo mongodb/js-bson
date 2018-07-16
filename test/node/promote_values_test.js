@@ -1,13 +1,11 @@
 'use strict';
 
-var Buffer = require('buffer').Buffer,
-  BSON = require('../..'),
-  Int32 = BSON.Int32,
-  Double = BSON.Double,
-  BinaryParser = require('../binary_parser').BinaryParser,
-  expect = require('chai').expect;
-
-var createBSON = require('../utils');
+const Buffer = require('buffer').Buffer;
+const BSON = require('../..');
+const Int32 = BSON.Int32;
+const Double = BSON.Double;
+const BinaryParser = require('../binary_parser').BinaryParser;
+const expect = require('chai').expect;
 
 // for tests
 BSON.BSON_BINARY_SUBTYPE_DEFAULT = 0;
@@ -320,7 +318,7 @@ describe('promote values', function() {
       serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
     }
 
-    var object = createBSON().deserialize(new Buffer(serialized_data, 'binary'), {
+    var object = BSON.deserialize(new Buffer(serialized_data, 'binary'), {
       promoteValues: false
     });
 
