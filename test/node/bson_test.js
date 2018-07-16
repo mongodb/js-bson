@@ -1449,7 +1449,7 @@ describe('BSON', function() {
     };
 
     // Second doc
-    oid = new ObjectID.createFromHexString(oid.toHexString());
+    oid = ObjectID.createFromHexString(oid.toHexString());
     string = 'binstring';
     bin = new Binary();
     for (index = 0; index < string.length; index++) {
@@ -1540,7 +1540,7 @@ describe('BSON', function() {
         ObjectID.createFromHexString(oid1.toHexString()),
         'integration_tests_'
       ),
-      _id: new ObjectID.createFromHexString(oid2.toHexString())
+      _id: ObjectID.createFromHexString(oid2.toHexString())
     };
 
     var serialized_data = b.serialize(doc);
