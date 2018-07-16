@@ -8,7 +8,6 @@
   ],
   "files": [
     "lib",
-    "index.js",
     "dist",
     "bower.json"
   ],
@@ -49,7 +48,7 @@
   "config": {
     "native": false
   },
-  "main": "index.js",
+  "main": "lib/bson.js",
   "module": "dist/bson.esm.js",
   "browser": {
     "./index.js": "./dist/bson.browser.umd.js",

@@ -3,7 +3,6 @@
 const BSON = require('../..');
 const Decimal128 = BSON.Decimal128;
 const expect = require('chai').expect;
-const createBSON = require('../utils');
 
 var NAN = new Buffer(
   [
@@ -2070,13 +2069,11 @@ describe('Decimal128', function() {
   });
 
   it('Serialize and Deserialize tests', function(done) {
-    var bson = createBSON();
-
     // Test all methods around a simple serialization at object top level
     var doc = { value: Decimal128.fromString('1') };
-    var buffer = bson.serialize(doc);
-    var size = bson.calculateObjectSize(doc);
-    var back = bson.deserialize(buffer);
+    var buffer = BSON.serialize(doc);
+    var size = BSON.calculateObjectSize(doc);
+    var back = BSON.deserialize(buffer);
 
     expect(buffer.length).to.equal(size);
     expect(doc).to.deep.equal(back);
@@ -2085,9 +2082,9 @@ describe('Decimal128', function() {
 
     // Test all methods around a simple serialization at array top level
     doc = { value: [Decimal128.fromString('1')] };
-    buffer = bson.serialize(doc);
-    size = bson.calculateObjectSize(doc);
-    back = bson.deserialize(buffer);
+    buffer = BSON.serialize(doc);
+    size = BSON.calculateObjectSize(doc);
+    back = BSON.deserialize(buffer);
 
     expect(buffer.length).to.equal(size);
     expect(doc).to.deep.equal(back);
@@ -2095,9 +2092,9 @@ describe('Decimal128', function() {
 
     // Test all methods around a simple serialization at nested object
     doc = { value: { a: Decimal128.fromString('1') } };
-    buffer = bson.serialize(doc);
-    size = bson.calculateObjectSize(doc);
-    back = bson.deserialize(buffer);
+    buffer = BSON.serialize(doc);
+    size = BSON.calculateObjectSize(doc);
+    back = BSON.deserialize(buffer);
 
     expect(buffer.length).to.equal(size);
     expect(doc).to.deep.equal(back);
@@ -2106,8 +2103,6 @@ describe('Decimal128', function() {
   });
 
   it('Support toBSON and toObject methods for custom mapping', function(done) {
-    var bson = createBSON();
-
     // Create a custom object
     var MyCustomDecimal = function(value) {
       this.value = value instanceof Decimal128 ? value.toString() : value;
@@ -2124,8 +2119,8 @@ describe('Decimal128', function() {
 
     // Test all methods around a simple serialization at object top level
     var doc = { value: new MyCustomDecimal('1') };
-    var buffer = bson.serialize(doc);
-    var back = bson.deserialize(buffer);
+    var buffer = BSON.serialize(doc);
+    var back = BSON.deserialize(buffer);
     expect(back.value instanceof MyCustomDecimal).to.be.ok;
     expect('1').to.equal(back.value.value);
     done();
