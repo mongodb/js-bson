@@ -1,5 +1,6 @@
 'use strict';
 
+const pkg = require('./package.json');
 const commonjs = require('rollup-plugin-commonjs');
 const nodeBuiltins = require('rollup-plugin-node-builtins');
 const nodeResolve = require('rollup-plugin-node-resolve');

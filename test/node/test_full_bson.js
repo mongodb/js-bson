@@ -1,6 +1,6 @@
 'use strict';
 
-const BSON = require('../..');
+const BSON = require('../../lib/bson');
 const Buffer = require('buffer').Buffer;
 const BinaryParser = require('../binary_parser').BinaryParser;
 const ObjectID = BSON.ObjectID;

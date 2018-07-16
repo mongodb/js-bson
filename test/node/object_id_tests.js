@@ -1,6 +1,7 @@
 'use strict';
 
-const BSON = require('../..');
+const Buffer = require('buffer').Buffer;
+const BSON = require('../../lib/bson');
 const util = require('util');
 const ObjectId = BSON.ObjectID;
 const expect = require('chai').expect;

@@ -1,7 +1,7 @@
 'use strict';
 
 const Buffer = require('buffer').Buffer;
-const BSON = require('../..');
+const BSON = require('../../lib/bson');
 const Int32 = BSON.Int32;
 const Double = BSON.Double;
 const BinaryParser = require('../binary_parser').BinaryParser;

@@ -1,7 +1,7 @@
 'use strict';
 
 const M = require('../../lib/map');
-const BSON = require('../..');
+const BSON = require('../../lib/bson');
 const expect = require('chai').expect;
 
 describe('Map', function() {
