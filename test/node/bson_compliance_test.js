@@ -89,7 +89,7 @@ describe('BSON Compliance', function() {
       }
 
       return object;
-    };
+    }
 
     // Iterate over all the results
     scenarios.documents.forEach(function(doc) {
