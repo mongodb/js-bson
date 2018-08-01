@@ -1,7 +1,7 @@
 'use strict';
 
 const BSON = require('../../lib/bson');
-const ObjectID = BSON.ObjectID;
+const ObjectId = BSON.ObjectId;
 const expect = require('chai').expect;
 
 describe('toBSON', function() {
@@ -11,7 +11,7 @@ describe('toBSON', function() {
   it('Should correctly handle toBson function for an object', function(done) {
     // Test object
     var doc = {
-      hello: new ObjectID(),
+      hello: new ObjectId(),
       a: 1
     };
 
@@ -38,7 +38,7 @@ describe('toBSON', function() {
   it('Should correctly handle embedded toBson function for an object', function(done) {
     // Test object
     var doc = {
-      hello: new ObjectID(),
+      hello: new ObjectId(),
       a: 1,
       b: {
         d: 1
@@ -67,7 +67,7 @@ describe('toBSON', function() {
   it('Should correctly serialize when embedded non object returned by toBSON', function(done) {
     // Test object
     var doc = {
-      hello: new ObjectID(),
+      hello: new ObjectId(),
       a: 1,
       b: {
         d: 1
@@ -97,7 +97,7 @@ describe('toBSON', function() {
   it('Should fail when top level object returns a non object type', function(done) {
     // Test object
     var doc = {
-      hello: new ObjectID(),
+      hello: new ObjectId(),
       a: 1,
       b: {
         d: 1
