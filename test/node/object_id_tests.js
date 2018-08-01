@@ -3,7 +3,7 @@
 const Buffer = require('buffer').Buffer;
 const BSON = require('../../lib/bson');
 const util = require('util');
-const ObjectId = BSON.ObjectID;
+const ObjectId = BSON.ObjectId;
 const expect = require('chai').expect;
 
 describe('ObjectId', function() {

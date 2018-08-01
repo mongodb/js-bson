@@ -3,7 +3,7 @@
 const BSON = require('../../lib/bson');
 const Buffer = require('buffer').Buffer;
 const BinaryParser = require('../binary_parser').BinaryParser;
-const ObjectID = BSON.ObjectID;
+const ObjectId = BSON.ObjectId;
 const Binary = BSON.Binary;
 const BSONRegExp = BSON.BSONRegExp;
 const expect = require('chai').expect;
@@ -571,7 +571,7 @@ describe('Full BSON', function() {
    * @ignore
    */
   it('Should Correctly Serialize and Deserialize Oid', function(done) {
-    var doc = { doc: new ObjectID() };
+    var doc = { doc: new ObjectId() };
     var serialized_data = BSON.serialize(doc);
     expect(doc.doc.toHexString()).to.deep.equal(
       BSON.deserialize(serialized_data).doc.toHexString()
