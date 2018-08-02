@@ -1,9 +1,8 @@
 'use strict';
 
-var BSON = require('../..'),
-  ObjectID = BSON.ObjectID,
-  createBSON = require('../utils'),
-  expect = require('chai').expect;
+const BSON = require('../../lib/bson');
+const ObjectId = BSON.ObjectId;
+const expect = require('chai').expect;
 
 describe('toBSON', function() {
   /**
@@ -12,7 +11,7 @@ describe('toBSON', function() {
   it('Should correctly handle toBson function for an object', function(done) {
     // Test object
     var doc = {
-      hello: new ObjectID(),
+      hello: new ObjectId(),
       a: 1
     };
 
@@ -22,13 +21,13 @@ describe('toBSON', function() {
     };
 
     // Serialize the data
-    var serialized_data = createBSON().serialize(doc, false, true);
-    var deserialized_doc = createBSON().deserialize(serialized_data);
+    var serialized_data = BSON.serialize(doc, false, true);
+    var deserialized_doc = BSON.deserialize(serialized_data);
     expect({ b: 1 }).to.deep.equal(deserialized_doc);
 
     // Serialize the data
-    serialized_data = createBSON().serialize(doc, false, true);
-    deserialized_doc = createBSON().deserialize(serialized_data);
+    serialized_data = BSON.serialize(doc, false, true);
+    deserialized_doc = BSON.deserialize(serialized_data);
     expect({ b: 1 }).to.deep.equal(deserialized_doc);
     done();
   });
@@ -39,7 +38,7 @@ describe('toBSON', function() {
   it('Should correctly handle embedded toBson function for an object', function(done) {
     // Test object
     var doc = {
-      hello: new ObjectID(),
+      hello: new ObjectId(),
       a: 1,
       b: {
         d: 1
@@ -52,12 +51,12 @@ describe('toBSON', function() {
     };
 
     // Serialize the data
-    var serialized_data = createBSON().serialize(doc, false, true);
-    var deserialized_doc = createBSON().deserialize(serialized_data);
+    var serialized_data = BSON.serialize(doc, false, true);
+    var deserialized_doc = BSON.deserialize(serialized_data);
     expect({ e: 1 }).to.deep.equal(deserialized_doc.b);
 
-    serialized_data = createBSON().serialize(doc, false, true);
-    deserialized_doc = createBSON().deserialize(serialized_data);
+    serialized_data = BSON.serialize(doc, false, true);
+    deserialized_doc = BSON.deserialize(serialized_data);
     expect({ e: 1 }).to.deep.equal(deserialized_doc.b);
     done();
   });
@@ -68,7 +67,7 @@ describe('toBSON', function() {
   it('Should correctly serialize when embedded non object returned by toBSON', function(done) {
     // Test object
     var doc = {
-      hello: new ObjectID(),
+      hello: new ObjectId(),
       a: 1,
       b: {
         d: 1
@@ -81,13 +80,13 @@ describe('toBSON', function() {
     };
 
     // Serialize the data
-    var serialized_data = createBSON().serialize(doc, false, true);
-    var deserialized_doc = createBSON().deserialize(serialized_data);
+    var serialized_data = BSON.serialize(doc, false, true);
+    var deserialized_doc = BSON.deserialize(serialized_data);
     expect('hello').to.deep.equal(deserialized_doc.b);
 
     // Serialize the data
-    serialized_data = createBSON().serialize(doc, false, true);
-    deserialized_doc = createBSON().deserialize(serialized_data);
+    serialized_data = BSON.serialize(doc, false, true);
+    deserialized_doc = BSON.deserialize(serialized_data);
     expect('hello').to.deep.equal(deserialized_doc.b);
     done();
   });
@@ -98,7 +97,7 @@ describe('toBSON', function() {
   it('Should fail when top level object returns a non object type', function(done) {
     // Test object
     var doc = {
-      hello: new ObjectID(),
+      hello: new ObjectId(),
       a: 1,
       b: {
         d: 1
@@ -114,15 +113,15 @@ describe('toBSON', function() {
     var test2 = false;
 
     try {
-      var serialized_data = createBSON().serialize(doc, false, true);
-      createBSON().deserialize(serialized_data);
+      var serialized_data = BSON.serialize(doc, false, true);
+      BSON.deserialize(serialized_data);
     } catch (err) {
       test1 = true;
     }
 
     try {
-      serialized_data = createBSON().serialize(doc, false, true);
-      createBSON().deserialize(serialized_data);
+      serialized_data = BSON.serialize(doc, false, true);
+      BSON.deserialize(serialized_data);
     } catch (err) {
       test2 = true;
     }

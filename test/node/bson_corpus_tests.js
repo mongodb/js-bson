@@ -1,10 +1,9 @@
 'use strict';
 
-var BSON = require('../..'),
-  Decimal128 = BSON.Decimal128,
-  expect = require('chai').expect,
-  createBSON = require('../utils'),
-  bson = createBSON();
+const Buffer = require('buffer').Buffer;
+const BSON = require('../../lib/bson');
+const Decimal128 = BSON.Decimal128;
+const expect = require('chai').expect;
 
 var deserializeOptions = {
   bsonRegExp: true,
@@ -41,8 +40,8 @@ describe('BSON Corpus', function() {
               if (v.degenerate_bson) var dB = new Buffer(v.degenerate_bson, 'hex');
               if (v.converted_bson) var convB = new Buffer(v.converted_bson, 'hex');
 
-              var roundTripped = bson.serialize(
-                bson.deserialize(cB, deserializeOptions),
+              var roundTripped = BSON.serialize(
+                BSON.deserialize(cB, deserializeOptions),
                 serializeOptions
               );
 
@@ -51,7 +50,7 @@ describe('BSON Corpus', function() {
 
               if (dB) {
                 expect(cB).to.deep.equal(
-                  bson.serialize(bson.deserialize(dB, deserializeOptions), serializeOptions)
+                  BSON.serialize(BSON.deserialize(dB, deserializeOptions), serializeOptions)
                 );
               }
             });
@@ -64,7 +63,7 @@ describe('BSON Corpus', function() {
           scenario.decodeErrors.forEach(d => {
             it(d.description, function() {
               var B = new Buffer(d.bson, 'hex');
-              expect(() => bson.deserialize(B, deserializeOptions)).to.throw();
+              expect(() => BSON.deserialize(B, deserializeOptions)).to.throw();
             });
           });
         });

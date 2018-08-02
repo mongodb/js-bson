@@ -1,14 +1,14 @@
 'use strict';
 
+const Buffer = require('buffer').Buffer;
 const expect = require('chai').expect;
-const BSON = require('../..');
+const BSON = require('../../lib/bson');
 const Code = BSON.Code;
 const BSONRegExp = BSON.BSONRegExp;
 const Binary = BSON.Binary;
 const Timestamp = BSON.Timestamp;
 const Long = BSON.Long;
-const ObjectID = BSON.ObjectID;
-const ObjectId = BSON.ObjectID;
+const ObjectId = BSON.ObjectId;
 const Symbol = BSON.Symbol;
 const DBRef = BSON.DBRef;
 const Decimal128 = BSON.Decimal128;
@@ -19,7 +19,6 @@ const MaxKey = BSON.MaxKey;
 const BinaryParser = require('../binary_parser').BinaryParser;
 const vm = require('vm');
 const assertBuffersEqual = require('./tools/utils').assertBuffersEqual;
-const createBSON = require('../utils');
 
 // for tests
 BSON.BSON_BINARY_SUBTYPE_DEFAULT = 0;
@@ -78,11 +77,11 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly convert ObjectID to itself', function(done) {
+  it('Should Correctly convert ObjectId to itself', function(done) {
     var myObject, newObject;
     var selfConvertion = function() {
-      myObject = new ObjectID();
-      newObject = ObjectID(myObject);
+      myObject = new ObjectId();
+      newObject = ObjectId(myObject);
     };
 
     expect(selfConvertion).to.not.throw;
@@ -94,8 +93,8 @@ describe('BSON', function() {
    * @ignore
    */
   it('Should Correctly get BSON types from require', function(done) {
-    var _mongodb = require('../..');
-    expect(_mongodb.ObjectID === ObjectID).to.be.ok;
+    var _mongodb = require('../../lib/bson');
+    expect(_mongodb.ObjectId === ObjectId).to.be.ok;
     expect(_mongodb.Binary === Binary).to.be.ok;
     expect(_mongodb.Long === Long).to.be.ok;
     expect(_mongodb.Timestamp === Timestamp).to.be.ok;
@@ -212,13 +211,13 @@ describe('BSON', function() {
       0,
       0
     ];
-    var serialized_data = '';
+    let serialized_data = '';
     // Convert to chars
-    for (var i = 0; i < bytes.length; i++) {
+    for (let i = 0; i < bytes.length; i++) {
       serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
     }
 
-    var object = createBSON().deserialize(new Buffer(serialized_data, 'binary'));
+    var object = BSON.deserialize(new Buffer(serialized_data, 'binary'));
     expect('a_1').to.equal(object.name);
     expect(false).to.equal(object.unique);
     expect(1).to.equal(object.key.a);
@@ -513,14 +512,14 @@ describe('BSON', function() {
       0,
       0
     ];
-    var serialized_data = '';
+    let serialized_data = '';
 
     // Convert to chars
-    for (var i = 0; i < bytes.length; i++) {
+    for (let i = 0; i < bytes.length; i++) {
       serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
     }
 
-    var object = createBSON().deserialize(new Buffer(serialized_data, 'binary'));
+    const object = BSON.deserialize(new Buffer(serialized_data, 'binary'));
     // Perform tests
     expect('hello').to.equal(object.string);
     expect([1, 2, 3]).to.deep.equal(object.array);
@@ -544,16 +543,16 @@ describe('BSON', function() {
    */
   it('Should Serialize and Deserialize String', function(done) {
     var test_string = { hello: 'world' };
-    var serialized_data = createBSON().serialize(test_string, {
+    var serialized_data = BSON.serialize(test_string, {
       checkKeys: false
     });
 
-    createBSON().serializeWithBufferAndIndex(test_string, serialized_data, {
+    BSON.serializeWithBufferAndIndex(test_string, serialized_data, {
       checkKeys: false,
       index: 0
     });
 
-    expect(test_string).to.deep.equal(createBSON().deserialize(serialized_data));
+    expect(test_string).to.deep.equal(BSON.deserialize(serialized_data));
     done();
   });
 
@@ -562,12 +561,12 @@ describe('BSON', function() {
    */
   it('Should Serialize and Deserialize Empty String', function(done) {
     var test_string = { hello: '' };
-    var serialized_data = createBSON().serialize(test_string);
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(test_string));
-    createBSON().serializeWithBufferAndIndex(test_string, serialized_data2);
+    var serialized_data = BSON.serialize(test_string);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(test_string));
+    BSON.serializeWithBufferAndIndex(test_string, serialized_data2);
 
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
-    expect(test_string).to.deep.equal(createBSON().deserialize(serialized_data));
+    expect(test_string).to.deep.equal(BSON.deserialize(serialized_data));
     done();
   });
 
@@ -577,12 +576,12 @@ describe('BSON', function() {
   it('Should Correctly Serialize and Deserialize Integer', function(done) {
     var test_number = { doc: 5 };
 
-    var serialized_data = createBSON().serialize(test_number);
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(test_number));
-    createBSON().serializeWithBufferAndIndex(test_number, serialized_data2);
+    var serialized_data = BSON.serialize(test_number);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(test_number));
+    BSON.serializeWithBufferAndIndex(test_number, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
-    expect(test_number).to.deep.equal(createBSON().deserialize(serialized_data));
-    expect(test_number).to.deep.equal(createBSON().deserialize(serialized_data2));
+    expect(test_number).to.deep.equal(BSON.deserialize(serialized_data));
+    expect(test_number).to.deep.equal(BSON.deserialize(serialized_data2));
     done();
   });
 
@@ -591,13 +590,13 @@ describe('BSON', function() {
    */
   it('Should Correctly Serialize and Deserialize null value', function(done) {
     var test_null = { doc: null };
-    var serialized_data = createBSON().serialize(test_null);
+    var serialized_data = BSON.serialize(test_null);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(test_null));
-    createBSON().serializeWithBufferAndIndex(test_null, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(test_null));
+    BSON.serializeWithBufferAndIndex(test_null, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var object = createBSON().deserialize(serialized_data);
+    var object = BSON.deserialize(serialized_data);
     expect(null).to.equal(object.doc);
     done();
   });
@@ -607,13 +606,13 @@ describe('BSON', function() {
    */
   it('Should Correctly Serialize and Deserialize Number 1', function(done) {
     var test_number = { doc: 5.5 };
-    var serialized_data = createBSON().serialize(test_number);
+    var serialized_data = BSON.serialize(test_number);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(test_number));
-    createBSON().serializeWithBufferAndIndex(test_number, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(test_number));
+    BSON.serializeWithBufferAndIndex(test_number, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    expect(test_number).to.deep.equal(createBSON().deserialize(serialized_data));
+    expect(test_number).to.deep.equal(BSON.deserialize(serialized_data));
     done();
   });
 
@@ -622,36 +621,36 @@ describe('BSON', function() {
    */
   it('Should Correctly Serialize and Deserialize Integer', function(done) {
     var test_int = { doc: 42 };
-    var serialized_data = createBSON().serialize(test_int);
+    var serialized_data = BSON.serialize(test_int);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(test_int));
-    createBSON().serializeWithBufferAndIndex(test_int, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(test_int));
+    BSON.serializeWithBufferAndIndex(test_int, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
-    expect(test_int.doc).to.deep.equal(createBSON().deserialize(serialized_data).doc);
+    expect(test_int.doc).to.deep.equal(BSON.deserialize(serialized_data).doc);
 
     test_int = { doc: -5600 };
-    serialized_data = createBSON().serialize(test_int);
+    serialized_data = BSON.serialize(test_int);
 
-    serialized_data2 = new Buffer(createBSON().calculateObjectSize(test_int));
-    createBSON().serializeWithBufferAndIndex(test_int, serialized_data2);
+    serialized_data2 = new Buffer(BSON.calculateObjectSize(test_int));
+    BSON.serializeWithBufferAndIndex(test_int, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
-    expect(test_int.doc).to.deep.equal(createBSON().deserialize(serialized_data).doc);
+    expect(test_int.doc).to.deep.equal(BSON.deserialize(serialized_data).doc);
 
     test_int = { doc: 2147483647 };
-    serialized_data = createBSON().serialize(test_int);
+    serialized_data = BSON.serialize(test_int);
 
-    serialized_data2 = new Buffer(createBSON().calculateObjectSize(test_int));
-    createBSON().serializeWithBufferAndIndex(test_int, serialized_data2);
+    serialized_data2 = new Buffer(BSON.calculateObjectSize(test_int));
+    BSON.serializeWithBufferAndIndex(test_int, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
-    expect(test_int.doc).to.deep.equal(createBSON().deserialize(serialized_data).doc);
+    expect(test_int.doc).to.deep.equal(BSON.deserialize(serialized_data).doc);
 
     test_int = { doc: -2147483648 };
-    serialized_data = createBSON().serialize(test_int);
+    serialized_data = BSON.serialize(test_int);
 
-    serialized_data2 = new Buffer(createBSON().calculateObjectSize(test_int));
-    createBSON().serializeWithBufferAndIndex(test_int, serialized_data2);
+    serialized_data2 = new Buffer(BSON.calculateObjectSize(test_int));
+    BSON.serializeWithBufferAndIndex(test_int, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
-    expect(test_int.doc).to.deep.equal(createBSON().deserialize(serialized_data).doc);
+    expect(test_int.doc).to.deep.equal(BSON.deserialize(serialized_data).doc);
     done();
   });
 
@@ -660,17 +659,15 @@ describe('BSON', function() {
    */
   it('Should Correctly Serialize and Deserialize Object', function(done) {
     var doc = { doc: { age: 42, name: 'Spongebob', shoe_size: 9.5 } };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    expect(doc.doc.age).to.deep.equal(createBSON().deserialize(serialized_data).doc.age);
-    expect(doc.doc.name).to.deep.equal(createBSON().deserialize(serialized_data).doc.name);
-    expect(doc.doc.shoe_size).to.deep.equal(
-      createBSON().deserialize(serialized_data).doc.shoe_size
-    );
+    expect(doc.doc.age).to.deep.equal(BSON.deserialize(serialized_data).doc.age);
+    expect(doc.doc.name).to.deep.equal(BSON.deserialize(serialized_data).doc.name);
+    expect(doc.doc.shoe_size).to.deep.equal(BSON.deserialize(serialized_data).doc.shoe_size);
 
     done();
   });
@@ -680,20 +677,20 @@ describe('BSON', function() {
    */
   it('Should correctly ignore undefined values in arrays', function(done) {
     var doc = { doc: { notdefined: undefined } };
-    var serialized_data = createBSON().serialize(doc, {
+    var serialized_data = BSON.serialize(doc, {
       ignoreUndefined: true
     });
     var serialized_data2 = new Buffer(
-      createBSON().calculateObjectSize(doc, {
+      BSON.calculateObjectSize(doc, {
         ignoreUndefined: true
       })
     );
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2, {
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2, {
       ignoreUndefined: true
     });
 
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
-    var doc1 = createBSON().deserialize(serialized_data);
+    var doc1 = BSON.deserialize(serialized_data);
 
     expect(undefined).to.deep.equal(doc1.doc.notdefined);
     done();
@@ -701,19 +698,19 @@ describe('BSON', function() {
 
   it('Should correctly serialize undefined array entries as null values', function(done) {
     var doc = { doc: { notdefined: undefined }, a: [1, 2, undefined, 3] };
-    var serialized_data = createBSON().serialize(doc, {
+    var serialized_data = BSON.serialize(doc, {
       ignoreUndefined: true
     });
     var serialized_data2 = new Buffer(
-      createBSON().calculateObjectSize(doc, {
+      BSON.calculateObjectSize(doc, {
         ignoreUndefined: true
       })
     );
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2, {
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2, {
       ignoreUndefined: true
     });
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
-    var doc1 = createBSON().deserialize(serialized_data);
+    var doc1 = BSON.deserialize(serialized_data);
     expect(undefined).to.deep.equal(doc1.doc.notdefined);
     expect(null).to.equal(doc1.a[2]);
     done();
@@ -721,15 +718,15 @@ describe('BSON', function() {
 
   it('Should correctly serialize undefined array entries as undefined values', function(done) {
     var doc = { doc: { notdefined: undefined }, a: [1, 2, undefined, 3] };
-    var serialized_data = createBSON().serialize(doc, {
+    var serialized_data = BSON.serialize(doc, {
       ignoreUndefined: false
     });
     var serialized_data2 = new Buffer(
-      createBSON().calculateObjectSize(doc, {
+      BSON.calculateObjectSize(doc, {
         ignoreUndefined: false
       })
     );
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2, {
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2, {
       ignoreUndefined: false
     });
 
@@ -738,8 +735,8 @@ describe('BSON', function() {
     // console.log(serialized_data2.toString('hex'))
 
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
-    var doc1 = createBSON().deserialize(serialized_data);
-    var doc2 = createBSON().deserialize(serialized_data2);
+    var doc1 = BSON.deserialize(serialized_data);
+    var doc2 = BSON.deserialize(serialized_data2);
     // console.log("======================================== 0")
     // console.dir(doc1)
     // console.dir(doc2)
@@ -754,13 +751,13 @@ describe('BSON', function() {
    */
   it('Should Correctly Serialize and Deserialize Array', function(done) {
     var doc = { doc: [1, 2, 'a', 'b'] };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized = createBSON().deserialize(serialized_data);
+    var deserialized = BSON.deserialize(serialized_data);
     expect(doc.doc[0]).to.equal(deserialized.doc[0]);
     expect(doc.doc[1]).to.equal(deserialized.doc[1]);
     expect(doc.doc[2]).to.equal(deserialized.doc[2]);
@@ -773,13 +770,13 @@ describe('BSON', function() {
    */
   it('Should Correctly Serialize and Deserialize Buffer', function(done) {
     var doc = { doc: new Buffer('hello world') };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized = createBSON().deserialize(serialized_data);
+    var deserialized = BSON.deserialize(serialized_data);
     expect(deserialized.doc instanceof Binary).to.be.ok;
     expect('hello world').to.equal(deserialized.doc.toString());
     done();
@@ -790,13 +787,13 @@ describe('BSON', function() {
    */
   it('Should Correctly Serialize and Deserialize Buffer with promoteBuffers option', function(done) {
     var doc = { doc: new Buffer('hello world') };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized = createBSON().deserialize(serialized_data, {
+    var deserialized = BSON.deserialize(serialized_data, {
       promoteBuffers: true
     });
     expect(deserialized.doc instanceof Buffer).to.be.ok;
@@ -809,13 +806,13 @@ describe('BSON', function() {
    */
   it('Should Correctly Serialize and Deserialize Number 4', function(done) {
     var doc = { doc: BSON.BSON_INT32_MAX + 10 };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized = createBSON().deserialize(serialized_data);
+    var deserialized = BSON.deserialize(serialized_data);
     // expect(deserialized.doc instanceof Binary).to.be.ok;
     expect(BSON.BSON_INT32_MAX + 10).to.equal(deserialized.doc);
     done();
@@ -827,13 +824,13 @@ describe('BSON', function() {
   it('Should Correctly Serialize and Deserialize Array with added on functions', function(done) {
     Array.prototype.toXml = function() {};
     var doc = { doc: [1, 2, 'a', 'b'] };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized = createBSON().deserialize(serialized_data);
+    var deserialized = BSON.deserialize(serialized_data);
     expect(doc.doc[0]).to.equal(deserialized.doc[0]);
     expect(doc.doc[1]).to.equal(deserialized.doc[1]);
     expect(doc.doc[2]).to.equal(deserialized.doc[2]);
@@ -846,13 +843,13 @@ describe('BSON', function() {
    */
   it('Should correctly deserialize a nested object', function(done) {
     var doc = { doc: { doc: 1 } };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    expect(doc.doc.doc).to.deep.equal(createBSON().deserialize(serialized_data).doc.doc);
+    expect(doc.doc.doc).to.deep.equal(BSON.deserialize(serialized_data).doc.doc);
     done();
   });
 
@@ -861,13 +858,13 @@ describe('BSON', function() {
    */
   it('Should Correctly Serialize and Deserialize A Boolean', function(done) {
     var doc = { doc: true };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    expect(doc.doc).to.equal(createBSON().deserialize(serialized_data).doc);
+    expect(doc.doc).to.equal(BSON.deserialize(serialized_data).doc);
     done();
   });
 
@@ -884,13 +881,13 @@ describe('BSON', function() {
     date.setUTCMinutes(0);
     date.setUTCSeconds(30);
     var doc = { doc: date };
-    var serialized_data = createBSON().serialize(doc);
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data = BSON.serialize(doc);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
 
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var doc1 = createBSON().deserialize(serialized_data);
+    var doc1 = BSON.deserialize(serialized_data);
     expect(doc).to.deep.equal(doc1);
     done();
   });
@@ -914,12 +911,12 @@ describe('BSON', function() {
     date.setUTCMinutes(0);
     date.setUTCSeconds(30);
     var doc = { doc: date };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
-    expect(doc.date).to.equal(createBSON().deserialize(serialized_data).doc.date);
+    expect(doc.date).to.equal(BSON.deserialize(serialized_data).doc.date);
     done();
   });
 
@@ -942,10 +939,10 @@ describe('BSON', function() {
       anotherString: 'another string'
     };
 
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
     done();
@@ -955,14 +952,14 @@ describe('BSON', function() {
    * @ignore
    */
   it('Should Correctly Serialize and Deserialize Oid', function(done) {
-    var doc = { doc: new ObjectID() };
-    var serialized_data = createBSON().serialize(doc);
+    var doc = { doc: new ObjectId() };
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    expect(doc).to.deep.equal(createBSON().deserialize(serialized_data));
+    expect(doc).to.deep.equal(BSON.deserialize(serialized_data));
     done();
   });
 
@@ -971,13 +968,13 @@ describe('BSON', function() {
    */
   it('Should Correctly encode Empty Hash', function(done) {
     var doc = {};
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    expect(doc).to.deep.equal(createBSON().deserialize(serialized_data));
+    expect(doc).to.deep.equal(BSON.deserialize(serialized_data));
     done();
   });
 
@@ -986,13 +983,13 @@ describe('BSON', function() {
    */
   it('Should Correctly Serialize and Deserialize Ordered Hash', function(done) {
     var doc = { doc: { b: 1, a: 2, c: 3, d: 4 } };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var decoded_hash = createBSON().deserialize(serialized_data).doc;
+    var decoded_hash = BSON.deserialize(serialized_data).doc;
     var keys = [];
 
     for (var name in decoded_hash) keys.push(name);
@@ -1006,13 +1003,13 @@ describe('BSON', function() {
   it('Should Correctly Serialize and Deserialize Regular Expression', function(done) {
     // Serialize the regular expression
     var doc = { doc: /foobar/im };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var doc2 = createBSON().deserialize(serialized_data);
+    var doc2 = BSON.deserialize(serialized_data);
 
     expect(doc.doc.toString()).to.deep.equal(doc2.doc.toString());
     done();
@@ -1029,13 +1026,13 @@ describe('BSON', function() {
     }
 
     var doc = { doc: bin };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized_data = createBSON().deserialize(serialized_data);
+    var deserialized_data = BSON.deserialize(serialized_data);
 
     expect(doc.doc.value()).to.deep.equal(deserialized_data.doc.value());
     done();
@@ -1052,13 +1049,13 @@ describe('BSON', function() {
     }
 
     var doc = { doc: bin };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized_data = createBSON().deserialize(serialized_data);
+    var deserialized_data = BSON.deserialize(serialized_data);
 
     expect(doc.doc.value()).to.deep.equal(deserialized_data.doc.value());
     done();
@@ -1068,9 +1065,9 @@ describe('BSON', function() {
    * @ignore
    */
   it('Should Correctly Serialize and Deserialize DBRef', function(done) {
-    var oid = new ObjectID();
+    var oid = new ObjectId();
     var doc = { dbref: new DBRef('namespace', oid, null, {}) };
-    var b = createBSON();
+    var b = BSON;
 
     var serialized_data = b.serialize(doc);
     var serialized_data2 = new Buffer(b.calculateObjectSize(doc));
@@ -1087,9 +1084,9 @@ describe('BSON', function() {
    * @ignore
    */
   it('Should Correctly Serialize and Deserialize partial DBRef', function(done) {
-    var id = new ObjectID();
+    var id = new ObjectId();
     var doc = { name: 'something', user: { $ref: 'username', $id: id } };
-    var b = createBSON();
+    var b = BSON;
     var serialized_data = b.serialize(doc);
 
     var serialized_data2 = new Buffer(b.calculateObjectSize(doc));
@@ -1108,13 +1105,13 @@ describe('BSON', function() {
    */
   it('Should Correctly Serialize and Deserialize simple Int', function(done) {
     var doc = { doc: 2147483648 };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var doc2 = createBSON().deserialize(serialized_data);
+    var doc2 = BSON.deserialize(serialized_data);
     expect(doc.doc).to.deep.equal(doc2.doc);
     done();
   });
@@ -1124,23 +1121,23 @@ describe('BSON', function() {
    */
   it('Should Correctly Serialize and Deserialize Long Integer', function(done) {
     var doc = { doc: Long.fromNumber(9223372036854775807) };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized_data = createBSON().deserialize(serialized_data);
+    var deserialized_data = BSON.deserialize(serialized_data);
     expect(doc.doc).to.deep.equal(deserialized_data.doc);
 
     doc = { doc: Long.fromNumber(-9223372036854775) };
-    serialized_data = createBSON().serialize(doc);
-    deserialized_data = createBSON().deserialize(serialized_data);
+    serialized_data = BSON.serialize(doc);
+    deserialized_data = BSON.deserialize(serialized_data);
     expect(doc.doc).to.deep.equal(deserialized_data.doc);
 
     doc = { doc: Long.fromNumber(-9223372036854775809) };
-    serialized_data = createBSON().serialize(doc);
-    deserialized_data = createBSON().deserialize(serialized_data);
+    serialized_data = BSON.serialize(doc);
+    deserialized_data = BSON.deserialize(serialized_data);
     expect(doc.doc).to.deep.equal(deserialized_data.doc);
     done();
   });
@@ -1151,13 +1148,13 @@ describe('BSON', function() {
   it('Should Deserialize Large Integers as Number not Long', function(done) {
     function roundTrip(val) {
       var doc = { doc: val };
-      var serialized_data = createBSON().serialize(doc);
+      var serialized_data = BSON.serialize(doc);
 
-      var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-      createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+      var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+      BSON.serializeWithBufferAndIndex(doc, serialized_data2);
       assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-      var deserialized_data = createBSON().deserialize(serialized_data);
+      var deserialized_data = BSON.deserialize(serialized_data);
       expect(doc.doc).to.deep.equal(deserialized_data.doc);
     }
 
@@ -1187,13 +1184,13 @@ describe('BSON', function() {
     expect(timestamp instanceof Long).to.be.ok;
 
     var test_int = { doc: long, doc2: timestamp };
-    var serialized_data = createBSON().serialize(test_int);
+    var serialized_data = BSON.serialize(test_int);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(test_int));
-    createBSON().serializeWithBufferAndIndex(test_int, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(test_int));
+    BSON.serializeWithBufferAndIndex(test_int, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized_data = createBSON().deserialize(serialized_data);
+    var deserialized_data = BSON.deserialize(serialized_data);
     expect(test_int.doc).to.deep.equal(deserialized_data.doc);
     done();
   });
@@ -1203,13 +1200,13 @@ describe('BSON', function() {
    */
   it('Should Always put the id as the first item in a hash', function(done) {
     var hash = { doc: { not_id: 1, _id: 2 } };
-    var serialized_data = createBSON().serialize(hash);
+    var serialized_data = BSON.serialize(hash);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(hash));
-    createBSON().serializeWithBufferAndIndex(hash, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(hash));
+    BSON.serializeWithBufferAndIndex(hash, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized_data = createBSON().deserialize(serialized_data);
+    var deserialized_data = BSON.deserialize(serialized_data);
     var keys = [];
 
     for (var name in deserialized_data.doc) {
@@ -1232,12 +1229,12 @@ describe('BSON', function() {
     }
 
     var doc = { doc: bin };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
-    var deserialized_data = createBSON().deserialize(serialized_data);
+    var deserialized_data = BSON.deserialize(serialized_data);
 
     expect(deserialized_data.doc.sub_type).to.deep.equal(BSON.BSON_BINARY_SUBTYPE_USER_DEFINED);
     expect(doc.doc.value()).to.deep.equal(deserialized_data.doc.value());
@@ -1249,12 +1246,12 @@ describe('BSON', function() {
    */
   it('Should Correclty Serialize and Deserialize a Code object', function(done) {
     var doc = { doc: { doc2: new Code('this.a > i', { i: 1 }) } };
-    var serialized_data = createBSON().serialize(doc);
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data = BSON.serialize(doc);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized_data = createBSON().deserialize(serialized_data);
+    var deserialized_data = BSON.deserialize(serialized_data);
     expect(doc.doc.doc2.code).to.deep.equal(deserialized_data.doc.doc2.code);
     expect(doc.doc.doc2.scope.i).to.deep.equal(deserialized_data.doc.doc2.scope.i);
     done();
@@ -1286,13 +1283,13 @@ describe('BSON', function() {
       ]
     };
 
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized_data = createBSON().deserialize(serialized_data);
+    var deserialized_data = BSON.deserialize(serialized_data);
     expect(doc.a).to.deep.equal(deserialized_data.a);
     expect(doc.b).to.deep.equal(deserialized_data.b);
     done();
@@ -1316,13 +1313,13 @@ describe('BSON', function() {
         洪水警報本荘地域に洪水警報本荘由利: '本荘由利地域に洪水警報'
       }
     };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized_data = createBSON().deserialize(serialized_data);
+    var deserialized_data = BSON.deserialize(serialized_data);
     expect(doc).to.deep.equal(deserialized_data);
     done();
   });
@@ -1332,13 +1329,13 @@ describe('BSON', function() {
    */
   it('Should Correctly Serialize and Deserialize query object', function(done) {
     var doc = { count: 'remove_with_no_callback_bug_test', query: {}, fields: null };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized_data = createBSON().deserialize(serialized_data);
+    var deserialized_data = BSON.deserialize(serialized_data);
     expect(doc).to.deep.equal(deserialized_data);
     done();
   });
@@ -1348,13 +1345,13 @@ describe('BSON', function() {
    */
   it('Should Correctly Serialize and Deserialize empty query object', function(done) {
     var doc = {};
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized_data = createBSON().deserialize(serialized_data);
+    var deserialized_data = BSON.deserialize(serialized_data);
     expect(doc).to.deep.equal(deserialized_data);
     done();
   });
@@ -1363,14 +1360,14 @@ describe('BSON', function() {
    * @ignore
    */
   it('Should Correctly Serialize and Deserialize array based doc', function(done) {
-    var doc = { b: [1, 2, 3], _id: new ObjectID() };
-    var serialized_data = createBSON().serialize(doc);
+    var doc = { b: [1, 2, 3], _id: new ObjectId() };
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized_data = createBSON().deserialize(serialized_data);
+    var deserialized_data = BSON.deserialize(serialized_data);
     expect(doc.b).to.deep.equal(deserialized_data.b);
     expect(doc).to.deep.equal(deserialized_data);
     done();
@@ -1386,12 +1383,12 @@ describe('BSON', function() {
       //var doc = { b: [new Symbol('test')] };
 
       var doc = { b: ['test'] };
-      var serialized_data = createBSON().serialize(doc);
-      var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-      createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+      var serialized_data = BSON.serialize(doc);
+      var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+      BSON.serializeWithBufferAndIndex(doc, serialized_data2);
       assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-      var deserialized_data = createBSON().deserialize(serialized_data);
+      var deserialized_data = BSON.deserialize(serialized_data);
       expect(doc).to.deep.equal(deserialized_data);
       expect(typeof deserialized_data.b[0]).to.equal('string');
     }
@@ -1404,13 +1401,13 @@ describe('BSON', function() {
    */
   it('Should handle Deeply nested document', function(done) {
     var doc = { a: { b: { c: { d: 2 } } } };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var deserialized_data = createBSON().deserialize(serialized_data);
+    var deserialized_data = BSON.deserialize(serialized_data);
     expect(doc).to.deep.equal(deserialized_data);
     done();
   });
@@ -1421,7 +1418,7 @@ describe('BSON', function() {
   it('Should handle complicated all typed object', function(done) {
     // First doc
     var date = new Date();
-    var oid = new ObjectID();
+    var oid = new ObjectId();
     var string = 'binstring';
     var bin = new Binary();
     for (var index = 0; index < string.length; index++) {
@@ -1445,7 +1442,7 @@ describe('BSON', function() {
     };
 
     // Second doc
-    oid = new ObjectID.createFromHexString(oid.toHexString());
+    oid = ObjectId.createFromHexString(oid.toHexString());
     string = 'binstring';
     bin = new Binary();
     for (index = 0; index < string.length; index++) {
@@ -1468,14 +1465,14 @@ describe('BSON', function() {
       dbref: new DBRef('namespace', oid, 'integration_tests_')
     };
 
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
 
     expect(serialized_data).to.deep.equal(serialized_data2);
 
-    serialized_data2 = createBSON().serialize(doc2, false, true);
+    serialized_data2 = BSON.serialize(doc2, false, true);
 
     expect(serialized_data).to.deep.equal(serialized_data2);
 
@@ -1495,18 +1492,18 @@ describe('BSON', function() {
       password_salt: 'salty',
       profile_fields: [],
       username: 'amit',
-      _id: new ObjectID()
+      _id: new ObjectId()
     };
 
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
     var doc2 = doc;
-    doc2._id = ObjectID.createFromHexString(doc2._id.toHexString());
-    serialized_data2 = createBSON().serialize(doc2, false, true);
+    doc2._id = ObjectId.createFromHexString(doc2._id.toHexString());
+    serialized_data2 = BSON.serialize(doc2, false, true);
 
     for (var i = 0; i < serialized_data2.length; i++) {
       require('assert').equal(serialized_data2[i], serialized_data[i]);
@@ -1519,10 +1516,10 @@ describe('BSON', function() {
    * @ignore
    */
   it('Should correctly massive doc', function(done) {
-    var oid1 = new ObjectID();
-    var oid2 = new ObjectID();
+    var oid1 = new ObjectId();
+    var oid2 = new ObjectId();
 
-    var b = createBSON();
+    var b = BSON;
 
     // JS doc
     var doc = {
@@ -1533,10 +1530,10 @@ describe('BSON', function() {
     var doc2 = {
       dbref2: new DBRef(
         'namespace',
-        ObjectID.createFromHexString(oid1.toHexString()),
+        ObjectId.createFromHexString(oid1.toHexString()),
         'integration_tests_'
       ),
-      _id: new ObjectID.createFromHexString(oid2.toHexString())
+      _id: ObjectId.createFromHexString(oid2.toHexString())
     };
 
     var serialized_data = b.serialize(doc);
@@ -1555,13 +1552,13 @@ describe('BSON', function() {
   it('Should Correctly Serialize/Deserialize regexp object', function(done) {
     var doc = { b: /foobaré/ };
 
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    serialized_data2 = createBSON().serialize(doc);
+    serialized_data2 = BSON.serialize(doc);
 
     for (var i = 0; i < serialized_data2.length; i++) {
       require('assert').equal(serialized_data2[i], serialized_data[i]);
@@ -1574,15 +1571,15 @@ describe('BSON', function() {
    * @ignore
    */
   it('Should Correctly Serialize/Deserialize complicated object', function(done) {
-    var doc = { a: { b: { c: [new ObjectID(), new ObjectID()] } }, d: { f: 1332.3323 } };
+    var doc = { a: { b: { c: [new ObjectId(), new ObjectId()] } }, d: { f: 1332.3323 } };
 
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var doc2 = createBSON().deserialize(serialized_data);
+    var doc2 = BSON.deserialize(serialized_data);
 
     expect(doc).to.deep.equal(doc2);
     done();
@@ -1602,13 +1599,13 @@ describe('BSON', function() {
       }
     };
 
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var doc2 = createBSON().deserialize(serialized_data);
+    var doc2 = BSON.deserialize(serialized_data);
 
     expect(doc).to.deep.equal(doc2);
     done();
@@ -1628,13 +1625,13 @@ describe('BSON', function() {
       }
     };
 
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var doc2 = createBSON().deserialize(serialized_data);
+    var doc2 = BSON.deserialize(serialized_data);
     expect(doc).to.deep.equal(doc2);
     done();
   });
@@ -1647,8 +1644,8 @@ describe('BSON', function() {
       '': 'test',
       bbbb: 1
     };
-    var serialized_data = createBSON().serialize(doc);
-    var doc2 = createBSON().deserialize(serialized_data);
+    var serialized_data = BSON.serialize(doc);
+    var doc2 = BSON.deserialize(serialized_data);
     expect(doc2['']).to.equal('test');
     expect(doc2['bbbb']).to.equal(1);
     done();
@@ -1663,13 +1660,13 @@ describe('BSON', function() {
       var doc = { value: doubleValue };
 
       // Serialize
-      var serialized_data = createBSON().serialize(doc);
+      var serialized_data = BSON.serialize(doc);
 
-      var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-      createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+      var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+      BSON.serializeWithBufferAndIndex(doc, serialized_data2);
       assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-      var doc2 = createBSON().deserialize(serialized_data);
+      var doc2 = BSON.deserialize(serialized_data);
       expect({ value: 100 }).to.deep.equal(doc2);
     }
 
@@ -1681,7 +1678,7 @@ describe('BSON', function() {
    */
   it('Should deserialize correctly', function(done) {
     var doc = {
-      _id: new ObjectID('4e886e687ff7ef5e00000162'),
+      _id: new ObjectId('4e886e687ff7ef5e00000162'),
       str: 'foreign',
       type: 2,
       timestamp: ISODate('2011-10-02T14:00:08.383Z'),
@@ -1690,11 +1687,11 @@ describe('BSON', function() {
       ]
     };
 
-    var serialized_data = createBSON().serialize(doc);
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data = BSON.serialize(doc);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
-    var doc2 = createBSON().deserialize(serialized_data);
+    var doc2 = BSON.deserialize(serialized_data);
 
     expect(JSON.stringify(doc)).to.deep.equal(JSON.stringify(doc2));
     done();
@@ -1705,16 +1702,16 @@ describe('BSON', function() {
    */
   it('Should correctly serialize and deserialize MinKey and MaxKey values', function(done) {
     var doc = {
-      _id: new ObjectID('4e886e687ff7ef5e00000162'),
+      _id: new ObjectId('4e886e687ff7ef5e00000162'),
       minKey: new MinKey(),
       maxKey: new MaxKey()
     };
 
-    var serialized_data = createBSON().serialize(doc);
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data = BSON.serialize(doc);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
-    var doc2 = createBSON().deserialize(serialized_data);
+    var doc2 = BSON.deserialize(serialized_data);
 
     // Peform equality checks
     expect(JSON.stringify(doc)).to.equal(JSON.stringify(doc2));
@@ -1733,11 +1730,11 @@ describe('BSON', function() {
       value: new Double(34343.2222)
     };
 
-    var serialized_data = createBSON().serialize(doc);
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data = BSON.serialize(doc);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
-    var doc2 = createBSON().deserialize(serialized_data);
+    var doc2 = BSON.deserialize(serialized_data);
 
     expect(doc.value.valueOf(), doc2.value).to.be.ok;
     expect(doc.value.value, doc2.value).to.be.ok;
@@ -1747,10 +1744,10 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('ObjectID should correctly create objects', function(done) {
+  it('ObjectId should correctly create objects', function(done) {
     try {
-      ObjectID.createFromHexString('000000000000000000000001');
-      ObjectID.createFromHexString('00000000000000000000001');
+      ObjectId.createFromHexString('000000000000000000000001');
+      ObjectId.createFromHexString('00000000000000000000001');
       expect(false).to.be.ok;
     } catch (err) {
       expect(err != null).to.be.ok;
@@ -1762,9 +1759,9 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('ObjectID should correctly retrieve timestamp', function(done) {
+  it('ObjectId should correctly retrieve timestamp', function(done) {
     var testDate = new Date();
-    var object1 = new ObjectID();
+    var object1 = new ObjectId();
     expect(Math.floor(testDate.getTime() / 1000)).to.equal(
       Math.floor(object1.getTimestamp().getTime() / 1000)
     );
@@ -1777,7 +1774,7 @@ describe('BSON', function() {
    */
   it('Should Correctly throw error on bsonparser errors', function(done) {
     var data = new Buffer(3);
-    var parser = createBSON();
+    var parser = BSON;
 
     expect(() => {
       parser.deserialize(data);
@@ -1804,7 +1801,7 @@ describe('BSON', function() {
   it('Should correctly calculate the size of a given javascript object', function(done) {
     // Create a simple object
     var doc = { a: 1, func: function() {} };
-    var bson = createBSON();
+    var bson = BSON;
     // Calculate the size of the object without serializing the function
     var size = bson.calculateObjectSize(doc, {
       serializeFunctions: false
@@ -1830,7 +1827,7 @@ describe('BSON', function() {
     // Create a simple object
     var doc = { a: 1, func: function() {} };
     // Create a BSON parser instance
-    var bson = createBSON();
+    var bson = BSON;
     // Calculate the size of the object without serializing the function
     var size = bson.calculateObjectSize(doc, {
       serializeFunctions: false
@@ -1855,7 +1852,7 @@ describe('BSON', function() {
   it('Should correctly serializeWithBufferAndIndex a given javascript object', function(done) {
     // Create a simple object
     var doc = { a: 1, func: function() {} };
-    var bson = createBSON();
+    var bson = BSON;
 
     // Calculate the size of the document, no function serialization
     var size = bson.calculateObjectSize(doc, { serializeFunctions: false });
@@ -1900,7 +1897,7 @@ describe('BSON', function() {
     // Create a simple object
     var doc = { a: 1, func: function() {} };
     // Create a BSON parser instance
-    var bson = createBSON();
+    var bson = BSON;
     // Calculate the size of the document, no function serialization
     var size = bson.calculateObjectSize(doc, {
       serializeFunctions: false
@@ -1944,7 +1941,7 @@ describe('BSON', function() {
     // Create a simple object
     var doc = { a: 1, func: function() {} };
     // Create a BSON parser instance
-    var bson = createBSON();
+    var bson = BSON;
 
     var buffer = bson.serialize(doc, {
       checkKeys: true,
@@ -1975,7 +1972,7 @@ describe('BSON', function() {
     // Create a simple object
     var doc = { a: 1, func: function() {} };
     // Create a BSON parser instance
-    var bson = createBSON();
+    var bson = BSON;
 
     // Serialize the object to a buffer, checking keys and not serializing functions
     var buffer = bson.serialize(doc, {
@@ -2007,7 +2004,7 @@ describe('BSON', function() {
   //   // Create a simple object
   //   var doc = {a: 1, func:function(){ console.log('hello world'); }}
   //   // Create a BSON parser instance
-  //   var bson = createBSON();
+  //   var bson = BSON;
   //   // Serialize the object to a buffer, checking keys and serializing functions
   //   var buffer = bson.serialize(doc, {
   //     checkKeys: true,
@@ -2041,7 +2038,7 @@ describe('BSON', function() {
   //   // Create a simple object
   //   var doc = {a: 1, func:function(){ console.log('hello world'); }}
   //   // Create a BSON parser instance
-  //   var bson = createBSON();
+  //   var bson = BSON;
   //   // Serialize the object to a buffer, checking keys and serializing functions
   //   var buffer = bson.serialize(doc, true, true, true);
   //   // Validate the correctness
@@ -2071,7 +2068,7 @@ describe('BSON', function() {
   // it('Should correctly deserializeStream a buffer object', function(done) {
   //   // Create a simple object
   //   var doc = {a: 1, func:function(){ console.log('hello world'); }}
-  //   var bson = createBSON();
+  //   var bson = BSON;
   //   // Serialize the object to a buffer, checking keys and serializing functions
   //   var buffer = bson.serialize(doc, {
   //     checkKeys: true,
@@ -2114,7 +2111,7 @@ describe('BSON', function() {
   //   // Create a simple object
   //   var doc = {a: 1, func:function(){ console.log('hello world'); }}
   //   // Create a BSON parser instance
-  //   var bson = createBSON();
+  //   var bson = BSON;
   //   // Serialize the object to a buffer, checking keys and serializing functions
   //   var buffer = bson.serialize(doc, true, true, true);
   //   // Validate the correctness
@@ -2144,7 +2141,7 @@ describe('BSON', function() {
   // }
 
   it('should properly deserialize multiple documents using deserializeStream', function() {
-    const bson = createBSON();
+    const bson = BSON;
     const docs = [{ foo: 'bar' }, { foo: 'baz' }, { foo: 'quux' }];
 
     // Serialize the test data
@@ -2163,24 +2160,24 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('ObjectID should have a correct cached representation of the hexString', function(done) {
-    ObjectID.cacheHexString = true;
-    var a = new ObjectID();
+  it('ObjectId should have a correct cached representation of the hexString', function(done) {
+    ObjectId.cacheHexString = true;
+    var a = new ObjectId();
     var __id = a.__id;
     expect(__id).to.equal(a.toHexString());
 
     // hexString
-    a = new ObjectID(__id);
+    a = new ObjectId(__id);
     expect(__id).to.equal(a.toHexString());
 
     // fromHexString
-    a = ObjectID.createFromHexString(__id);
+    a = ObjectId.createFromHexString(__id);
     expect(a.__id).to.equal(a.toHexString());
     expect(__id).to.equal(a.toHexString());
 
     // number
     var genTime = a.generationTime;
-    a = new ObjectID(genTime);
+    a = new ObjectId(genTime);
     __id = a.__id;
     expect(__id).to.equal(a.toHexString());
 
@@ -2201,27 +2198,27 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should fail to create ObjectID due to illegal hex code', function(done) {
+  it('Should fail to create ObjectId due to illegal hex code', function(done) {
     try {
-      new ObjectID('zzzzzzzzzzzzzzzzzzzzzzzz');
+      new ObjectId('zzzzzzzzzzzzzzzzzzzzzzzz');
       expect(false).to.be.ok;
     } catch (err) {
       expect(true).to.be.ok;
     }
 
-    expect(false).to.equal(ObjectID.isValid(null));
-    expect(false).to.equal(ObjectID.isValid({}));
-    expect(false).to.equal(ObjectID.isValid({ length: 12 }));
-    expect(false).to.equal(ObjectID.isValid([]));
-    expect(false).to.equal(ObjectID.isValid(true));
-    expect(true).to.equal(ObjectID.isValid(0));
-    expect(false).to.equal(ObjectID.isValid('invalid'));
-    expect(true).to.equal(ObjectID.isValid('zzzzzzzzzzzz'));
-    expect(false).to.equal(ObjectID.isValid('zzzzzzzzzzzzzzzzzzzzzzzz'));
-    expect(true).to.equal(ObjectID.isValid('000000000000000000000000'));
-    expect(true).to.equal(ObjectID.isValid(new ObjectID('thisis12char')));
+    expect(false).to.equal(ObjectId.isValid(null));
+    expect(false).to.equal(ObjectId.isValid({}));
+    expect(false).to.equal(ObjectId.isValid({ length: 12 }));
+    expect(false).to.equal(ObjectId.isValid([]));
+    expect(false).to.equal(ObjectId.isValid(true));
+    expect(true).to.equal(ObjectId.isValid(0));
+    expect(false).to.equal(ObjectId.isValid('invalid'));
+    expect(true).to.equal(ObjectId.isValid('zzzzzzzzzzzz'));
+    expect(false).to.equal(ObjectId.isValid('zzzzzzzzzzzzzzzzzzzzzzzz'));
+    expect(true).to.equal(ObjectId.isValid('000000000000000000000000'));
+    expect(true).to.equal(ObjectId.isValid(new ObjectId('thisis12char')));
 
-    var tmp = new ObjectID();
+    var tmp = new ObjectId();
     // Cloning tmp so that instanceof fails to fake import from different version/instance of the same npm package
     var objectIdLike = {
       id: tmp.id,
@@ -2232,7 +2229,7 @@ describe('BSON', function() {
 
     expect(true).to.equal(tmp.equals(objectIdLike));
     expect(true).to.equal(tmp.equals(new ObjectId(objectIdLike)));
-    expect(true).to.equal(ObjectID.isValid(objectIdLike));
+    expect(true).to.equal(ObjectId.isValid(objectIdLike));
 
     done();
   });
@@ -2243,12 +2240,12 @@ describe('BSON', function() {
   it('Should correctly serialize the BSONRegExp type', function(done) {
     var doc = { regexp: new BSONRegExp('test', 'i') };
     var doc1 = { regexp: /test/i };
-    var serialized_data = createBSON().serialize(doc);
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data = BSON.serialize(doc);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    doc1 = createBSON().deserialize(serialized_data);
+    doc1 = BSON.deserialize(serialized_data);
     var regexp = new RegExp('test', 'i');
     expect(regexp).to.deep.equal(doc1.regexp);
     done();
@@ -2259,13 +2256,13 @@ describe('BSON', function() {
    */
   it('Should correctly deserialize the BSONRegExp type', function(done) {
     var doc = { regexp: new BSONRegExp('test', 'i') };
-    var serialized_data = createBSON().serialize(doc);
+    var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
-    createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    var doc1 = createBSON().deserialize(serialized_data, { bsonRegExp: true });
+    var doc1 = BSON.deserialize(serialized_data, { bsonRegExp: true });
     expect(doc1.regexp instanceof BSONRegExp).to.be.ok;
     expect('test').to.equal(doc1.regexp.pattern);
     expect('i').to.equal(doc1.regexp.options);
@@ -2275,9 +2272,9 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should return boolean for ObjectID equality check', function(done) {
-    var id = new ObjectID();
-    expect(true).to.equal(id.equals(new ObjectID(id.toString())));
+  it('Should return boolean for ObjectId equality check', function(done) {
+    var id = new ObjectId();
+    expect(true).to.equal(id.equals(new ObjectId(id.toString())));
     expect(true).to.equal(id.equals(id.toString()));
     expect(false).to.equal(id.equals('1234567890abcdef12345678'));
     expect(false).to.equal(id.equals('zzzzzzzzzzzzzzzzzzzzzzzz'));

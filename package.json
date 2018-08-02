@@ -8,7 +8,6 @@
   ],
   "files": [
     "lib",
-    "index.js",
     "dist",
     "bower.json"
   ],
@@ -49,11 +48,12 @@
   "config": {
     "native": false
   },
-  "main": "./index",
-  "directories": {
-    "lib": "./lib/bson"
+  "main": "lib/bson.js",
+  "module": "dist/bson.esm.js",
+  "browser": {
+    "./index.js": "./dist/bson.browser.umd.js",
+    "./dist/bson.esm.js": "./dist/bson.browser.esm.js"
   },
-  "browser": "dist/bson.js",
   "engines": {
     "node": ">=4.0.0"
   },
@@ -69,6 +69,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "buffer": "^5.1.0"
+    "buffer": "^5.1.0",
+    "long": "^4.0.0"
   }
 }

@@ -1,17 +1,16 @@
 'use strict';
 
-var BSON = require('../..'),
-  Code = BSON.Code,
-  Binary = BSON.Binary,
-  Timestamp = BSON.Timestamp,
-  Long = BSON.Long,
-  ObjectID = BSON.ObjectID,
-  DBRef = BSON.DBRef,
-  MinKey = BSON.MinKey,
-  MaxKey = BSON.MaxKey,
-  expect = require('chai').expect;
-
-var createBSON = require('../utils');
+const Buffer = require('buffer').Buffer;
+const BSON = require('../../lib/bson');
+const Code = BSON.Code;
+const Binary = BSON.Binary;
+const Timestamp = BSON.Timestamp;
+const Long = BSON.Long;
+const ObjectId = BSON.ObjectId;
+const DBRef = BSON.DBRef;
+const MinKey = BSON.MinKey;
+const MaxKey = BSON.MaxKey;
+const expect = require('chai').expect;
 
 describe('BSON Compliance', function() {
   /**
@@ -19,20 +18,17 @@ describe('BSON Compliance', function() {
    */
   it('Pass all corrupt BSON scenarios ./compliance/corrupt.json', function(done) {
     // Read and parse the json file
-    var scenarios = require('./compliance/corrupt');
+    const scenarios = require('./compliance/corrupt');
 
-    // Create a new BSON instance
-    var bson = createBSON();
-
-    for (var i = 0; i < scenarios.documents.length; i++) {
-      var doc = scenarios.documents[i];
+    for (let i = 0; i < scenarios.documents.length; i++) {
+      const doc = scenarios.documents[i];
       if (doc.skip) continue;
 
       try {
         // Create a buffer containing the payload
-        var buffer = new Buffer(doc.encoded, 'hex');
+        const buffer = new Buffer(doc.encoded, 'hex');
         // Attempt to deserialize
-        bson.deserialize(buffer);
+        BSON.deserialize(buffer);
         expect(false).to.be.ok;
       } catch (err) {
         expect(true).to.be.ok;
@@ -47,14 +43,11 @@ describe('BSON Compliance', function() {
    */
   it('Pass all valid BSON serialization scenarios ./compliance/valid.json', function(done) {
     // Read and parse the json file
-    var scenarios = require('./compliance/valid');
-
-    // Create a new BSON instance
-    var bson = createBSON();
+    const scenarios = require('./compliance/valid');
 
     // Translate extended json to correctly typed doc
-    var translate = function(doc, object) {
-      for (var name in doc) {
+    function translate(doc, object) {
+      for (let name in doc) {
         if (
           typeof doc[name] === 'number' ||
           typeof doc[name] === 'string' ||
@@ -68,13 +61,13 @@ describe('BSON Compliance', function() {
         } else if (doc[name]['$undefined']) {
           object[name] = null;
         } else if (doc[name]['$date']) {
-          var date = new Date();
+          const date = new Date();
           date.setTime(parseInt(doc[name]['$date']['$numberLong'], 10));
           object[name] = date;
         } else if (doc[name]['$regexp']) {
           object[name] = new RegExp(doc[name]['$regexp'], doc[name]['$options'] || '');
         } else if (doc[name]['$oid']) {
-          object[name] = new ObjectID(doc[name]['$oid']);
+          object[name] = new ObjectId(doc[name]['$oid']);
         } else if (doc[name]['$binary']) {
           object[name] = new Binary(doc[name]['$binary'], doc[name]['$type'] || 1);
         } else if (doc[name]['$timestamp']) {
@@ -96,21 +89,21 @@ describe('BSON Compliance', function() {
       }
 
       return object;
-    };
+    }
 
     // Iterate over all the results
     scenarios.documents.forEach(function(doc) {
       if (doc.skip) return;
       // Create a buffer containing the payload
-      var expectedData = new Buffer(doc.encoded, 'hex');
+      const expectedData = new Buffer(doc.encoded, 'hex');
       // Get the expectedDocument
-      var expectedDocument = translate(doc.document, {});
+      const expectedDocument = translate(doc.document, {});
       // Serialize to buffer
-      var buffer = bson.serialize(expectedDocument);
+      const buffer = BSON.serialize(expectedDocument);
       // Validate the output
       expect(expectedData.toString('hex')).to.equal(buffer.toString('hex'));
       // Attempt to deserialize
-      var object = bson.deserialize(buffer, { promoteLongs: false });
+      const object = BSON.deserialize(buffer, { promoteLongs: false });
       // // Validate the object
       expect(JSON.stringify(expectedDocument)).to.deep.equal(JSON.stringify(object));
     });

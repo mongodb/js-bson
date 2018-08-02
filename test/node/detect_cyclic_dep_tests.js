@@ -1,7 +1,7 @@
 'use strict';
 
-var createBSON = require('../utils'),
-  expect = require('chai').expect;
+const BSON = require('../../lib/bson');
+const expect = require('chai').expect;
 
 describe('Cyclic Dependencies', function() {
   /**
@@ -13,7 +13,7 @@ describe('Cyclic Dependencies', function() {
     a.b.c = a;
     try {
       // Attempt to serialize cyclic dependency
-      createBSON().serialize(a);
+      BSON.serialize(a);
     } catch (err) {
       expect('cyclic dependency detected').to.equal(err.message);
     }
@@ -31,7 +31,7 @@ describe('Cyclic Dependencies', function() {
 
     try {
       // Attempt to serialize cyclic dependency
-      createBSON().serialize(a);
+      BSON.serialize(a);
     } catch (err) {
       expect('cyclic dependency detected').to.equal(err.message);
     }
@@ -48,7 +48,7 @@ describe('Cyclic Dependencies', function() {
     a.b.c = [a];
     try {
       // Attempt to serialize cyclic dependency
-      createBSON().serialize(a);
+      BSON.serialize(a);
     } catch (err) {
       expect('cyclic dependency detected').to.equal(err.message);
     }
