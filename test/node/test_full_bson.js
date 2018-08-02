@@ -116,7 +116,7 @@ describe('Full BSON', function() {
       serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
     }
 
-    var object = BSON.deserialize(new Buffer(serialized_data, 'binary'));
+    var object = BSON.deserialize(Buffer.from(serialized_data, 'binary'));
     expect('a_1').to.equal(object.name);
     expect(false).to.equal(object.unique);
     expect(1).to.equal(object.key.a);
@@ -417,7 +417,7 @@ describe('Full BSON', function() {
       serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
     }
 
-    var object = BSON.deserialize(new Buffer(serialized_data, 'binary'));
+    var object = BSON.deserialize(Buffer.from(serialized_data, 'binary'));
     expect('hello').to.equal(object.string);
     expect([1, 2, 3]).to.deep.equal(object.array);
     expect(1).to.equal(object.hash.a);
@@ -472,7 +472,7 @@ describe('Full BSON', function() {
   it('Should Correctly Serialize and Deserialize undefined value', function(done) {
     var test_undefined = { doc: undefined };
     var serialized_data = BSON.serialize(test_undefined);
-    var object = BSON.deserialize(new Buffer(serialized_data, 'binary'));
+    var object = BSON.deserialize(Buffer.from(serialized_data, 'binary'));
     expect(undefined).to.equal(object.doc);
     done();
   });
@@ -584,7 +584,7 @@ describe('Full BSON', function() {
    * @ignore
    */
   it('Should Correctly Serialize and Deserialize Buffer', function(done) {
-    var doc = { doc: new Buffer('123451234512345') };
+    var doc = { doc: Buffer.from('123451234512345') };
     var serialized_data = BSON.serialize(doc);
 
     expect('123451234512345').to.equal(
@@ -598,7 +598,7 @@ describe('Full BSON', function() {
    * @ignore
    */
   it('Should Correctly Serialize and Deserialize Buffer with promoteBuffers option', function(done) {
-    var doc = { doc: new Buffer('123451234512345') };
+    var doc = { doc: Buffer.from('123451234512345') };
     var serialized_data = BSON.serialize(doc);
 
     var options = { promoteBuffers: true };
@@ -660,14 +660,14 @@ describe('Full BSON', function() {
   });
 
   it('Should Correctly fail due to attempting serialization of illegal key values', function(done) {
-    var k = new Buffer(15);
+    var k = Buffer.alloc(15);
     for (var i = 0; i < 15; i++) k[i] = 0;
 
     k.write('hello');
     k[6] = 0x06;
     k.write('world', 10);
 
-    var v = new Buffer(65801);
+    var v = Buffer.alloc(65801);
     for (i = 0; i < 65801; i++) v[i] = 1;
     v[0] = 0x0a;
     var doc = {};

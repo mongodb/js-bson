@@ -13,12 +13,12 @@ describe('ObjectId', function() {
   it('should correctly handle objectId timestamps', function(done) {
     // var test_number = {id: ObjectI()};
     var a = ObjectId.createFromTime(1);
-    expect(new Buffer([0, 0, 0, 1])).to.deep.equal(a.id.slice(0, 4));
+    expect(Buffer.from([0, 0, 0, 1])).to.deep.equal(a.id.slice(0, 4));
     expect(1000).to.equal(a.getTimestamp().getTime());
 
     var b = new ObjectId();
     b.generationTime = 1;
-    expect(new Buffer([0, 0, 0, 1])).to.deep.equal(b.id.slice(0, 4));
+    expect(Buffer.from([0, 0, 0, 1])).to.deep.equal(b.id.slice(0, 4));
     expect(1).to.equal(b.generationTime);
     expect(1000).to.equal(b.getTimestamp().getTime());
 
@@ -49,12 +49,12 @@ describe('ObjectId', function() {
   it('should correctly create ObjectId from Buffer', function(done) {
     if (!Buffer.from) return done();
     var a = 'AAAAAAAAAAAAAAAAAAAAAAAA';
-    var b = new ObjectId(new Buffer(a, 'hex'));
+    var b = new ObjectId(Buffer.from(a, 'hex'));
     var c = b.equals(a); // => false
     expect(true).to.equal(c);
 
     a = 'aaaaaaaaaaaaaaaaaaaaaaaa';
-    b = new ObjectId(new Buffer(a, 'hex'));
+    b = new ObjectId(Buffer.from(a, 'hex'));
     c = b.equals(a); // => true
     expect(a).to.equal(b.toString());
     expect(true).to.equal(c);

@@ -15,7 +15,7 @@ describe('BSON - Node only', function() {
     var doc = { doc: bin };
     var serialized_data = BSON.serialize(doc);
 
-    var serialized_data2 = new Buffer(BSON.calculateObjectSize(doc));
+    var serialized_data2 = Buffer.alloc(BSON.calculateObjectSize(doc));
     BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
@@ -39,7 +39,7 @@ describe('Full BSON - Node only', function() {
 
   it('Should Correctly Deserialize bson file from mongodump', function(done) {
     var data = fs.readFileSync('test/node/data/test.bson', { encoding: null });
-    data = new Buffer(data);
+    data = Buffer.from(data);
     var docs = [];
     var bsonIndex = 0;
     while (bsonIndex < data.length)
