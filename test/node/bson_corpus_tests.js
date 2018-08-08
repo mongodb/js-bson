@@ -36,9 +36,9 @@ describe('BSON Corpus', function() {
             }
 
             it(v.description, function() {
-              var cB = new Buffer(v.canonical_bson, 'hex');
-              if (v.degenerate_bson) var dB = new Buffer(v.degenerate_bson, 'hex');
-              if (v.converted_bson) var convB = new Buffer(v.converted_bson, 'hex');
+              var cB = Buffer.from(v.canonical_bson, 'hex');
+              if (v.degenerate_bson) var dB = Buffer.from(v.degenerate_bson, 'hex');
+              if (v.converted_bson) var convB = Buffer.from(v.converted_bson, 'hex');
 
               var roundTripped = BSON.serialize(
                 BSON.deserialize(cB, deserializeOptions),
@@ -62,7 +62,7 @@ describe('BSON Corpus', function() {
         describe('decodeErrors', function() {
           scenario.decodeErrors.forEach(d => {
             it(d.description, function() {
-              var B = new Buffer(d.bson, 'hex');
+              var B = Buffer.from(d.bson, 'hex');
               expect(() => BSON.deserialize(B, deserializeOptions)).to.throw();
             });
           });
