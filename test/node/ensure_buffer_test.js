@@ -10,7 +10,7 @@ describe('ensureBuffer tests', function() {
   });
 
   it('should return the exact same buffer if a buffer is passed in', function() {
-    const bufferIn = new Buffer(10);
+    const bufferIn = Buffer.alloc(10);
     let bufferOut;
 
     expect(function() {

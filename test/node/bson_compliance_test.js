@@ -26,7 +26,7 @@ describe('BSON Compliance', function() {
 
       try {
         // Create a buffer containing the payload
-        const buffer = new Buffer(doc.encoded, 'hex');
+        const buffer = Buffer.from(doc.encoded, 'hex');
         // Attempt to deserialize
         BSON.deserialize(buffer);
         expect(false).to.be.ok;
@@ -95,7 +95,7 @@ describe('BSON Compliance', function() {
     scenarios.documents.forEach(function(doc) {
       if (doc.skip) return;
       // Create a buffer containing the payload
-      const expectedData = new Buffer(doc.encoded, 'hex');
+      const expectedData = Buffer.from(doc.encoded, 'hex');
       // Get the expectedDocument
       const expectedDocument = translate(doc.document, {});
       // Serialize to buffer

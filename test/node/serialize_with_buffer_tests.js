@@ -10,7 +10,7 @@ describe('serializeWithBuffer', function() {
    */
   it('correctly serialize into buffer using serializeWithBufferAndIndex', function(done) {
     // Create a buffer
-    var b = new Buffer(256);
+    var b = Buffer.alloc(256);
     // Serialize from index 0
     var r = BSON.serializeWithBufferAndIndex({ a: 1 }, b);
     expect(11).to.equal(r);
@@ -31,7 +31,7 @@ describe('serializeWithBuffer', function() {
 
   it('correctly serialize 3 different docs into buffer using serializeWithBufferAndIndex', function(done) {
     const MAXSIZE = 1024 * 1024 * 17;
-    let bf = new Buffer(MAXSIZE);
+    let bf = Buffer.alloc(MAXSIZE);
 
     const data = [
       {

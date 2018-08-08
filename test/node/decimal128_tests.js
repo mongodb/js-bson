@@ -4,7 +4,7 @@ const BSON = require('../../lib/bson');
 const Decimal128 = BSON.Decimal128;
 const expect = require('chai').expect;
 
-var NAN = new Buffer(
+var NAN = Buffer.from(
   [
     0x7c,
     0x00,
@@ -24,7 +24,7 @@ var NAN = new Buffer(
     0x00
   ].reverse()
 );
-var INF_NEGATIVE_BUFFER = new Buffer(
+var INF_NEGATIVE_BUFFER = Buffer.from(
   [
     0xf8,
     0x00,
@@ -44,7 +44,7 @@ var INF_NEGATIVE_BUFFER = new Buffer(
     0x00
   ].reverse()
 );
-var INF_POSITIVE_BUFFER = new Buffer(
+var INF_POSITIVE_BUFFER = Buffer.from(
   [
     0x78,
     0x00,
@@ -154,7 +154,7 @@ describe('Decimal128', function() {
   it('fromString simple', function(done) {
     // Create decimal from string value 1
     var result = Decimal128.fromString('1');
-    var bytes = new Buffer(
+    var bytes = Buffer.from(
       [
         0x30,
         0x40,
@@ -178,7 +178,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 0
     result = Decimal128.fromString('0');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x30,
         0x40,
@@ -202,7 +202,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value -0
     result = Decimal128.fromString('-0');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0xb0,
         0x40,
@@ -226,7 +226,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value -1
     result = Decimal128.fromString('-1');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0xb0,
         0x40,
@@ -250,7 +250,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 12345678901234567
     result = Decimal128.fromString('12345678901234567');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x30,
         0x40,
@@ -274,7 +274,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 989898983458
     result = Decimal128.fromString('989898983458');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x30,
         0x40,
@@ -298,7 +298,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value -12345678901234567
     result = Decimal128.fromString('-12345678901234567');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0xb0,
         0x40,
@@ -322,7 +322,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 0.12345
     result = Decimal128.fromString('0.12345');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x30,
         0x36,
@@ -346,7 +346,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 0.0012345
     result = Decimal128.fromString('0.0012345');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x30,
         0x32,
@@ -370,7 +370,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 00012345678901234567
     result = Decimal128.fromString('00012345678901234567');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x30,
         0x40,
@@ -397,7 +397,7 @@ describe('Decimal128', function() {
   it('fromString scientific format', function(done) {
     // Create decimal from string value 10e0
     var result = Decimal128.fromString('10e0');
-    var bytes = new Buffer(
+    var bytes = Buffer.from(
       [
         0x30,
         0x40,
@@ -421,7 +421,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 1e1
     result = Decimal128.fromString('1e1');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x30,
         0x42,
@@ -445,7 +445,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 10e-1
     result = Decimal128.fromString('10e-1');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x30,
         0x3e,
@@ -469,7 +469,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 12345678901234567e6111
     result = Decimal128.fromString('12345678901234567e6111');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x5f,
         0xfe,
@@ -493,7 +493,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 1e-6176
     result = Decimal128.fromString('1e-6176');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x00,
         0x00,
@@ -517,7 +517,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value "-100E-10
     result = Decimal128.fromString('-100E-10');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0xb0,
         0x2c,
@@ -541,7 +541,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 10.50E8
     result = Decimal128.fromString('10.50E8');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x30,
         0x4c,
@@ -568,7 +568,7 @@ describe('Decimal128', function() {
   it('fromString large format', function(done) {
     // Create decimal from string value 12345689012345789012345
     var result = Decimal128.fromString('12345689012345789012345');
-    var bytes = new Buffer(
+    var bytes = Buffer.from(
       [
         0x30,
         0x40,
@@ -592,7 +592,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 1234567890123456789012345678901234
     result = Decimal128.fromString('1234567890123456789012345678901234');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x30,
         0x40,
@@ -616,7 +616,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 9.999999999999999999999999999999999E+6144
     result = Decimal128.fromString('9.999999999999999999999999999999999E+6144');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x5f,
         0xff,
@@ -640,7 +640,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 9.999999999999999999999999999999999E-6143
     result = Decimal128.fromString('9.999999999999999999999999999999999E-6143');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x00,
         0x01,
@@ -664,7 +664,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 5.192296858534827628530496329220095E+33
     result = Decimal128.fromString('5.192296858534827628530496329220095E+33');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x30,
         0x40,
@@ -692,7 +692,7 @@ describe('Decimal128', function() {
     // Create decimal from string value 1000000000000000000000000000000000000000
 
     result = Decimal128.fromString('1000000000000000000000000000000000000000');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x30,
         0x4c,
@@ -716,7 +716,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 10000000000000000000000000000000000
     result = Decimal128.fromString('10000000000000000000000000000000000');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x30,
         0x42,
@@ -740,7 +740,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 1000000000000000000000000000000000
     result = Decimal128.fromString('1000000000000000000000000000000000');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x30,
         0x40,
@@ -782,7 +782,7 @@ describe('Decimal128', function() {
     // Create decimal from string value str
 
     var result = Decimal128.fromString(str);
-    var bytes = new Buffer(
+    var bytes = Buffer.from(
       [
         0x37,
         0xcc,
@@ -808,7 +808,7 @@ describe('Decimal128', function() {
     // Create decimal from string value 1E-6177
 
     // var result = Decimal128.fromString('1E-6177');
-    // var bytes = new Buffer(
+    // var bytes = Buffer.from(
     //   [
     //     0x00,
     //     0x00,
@@ -835,7 +835,7 @@ describe('Decimal128', function() {
   it('fromString from string zeros', function(done) {
     // Create decimal from string value 0
     var result = Decimal128.fromString('0');
-    var bytes = new Buffer(
+    var bytes = Buffer.from(
       [
         0x30,
         0x40,
@@ -859,7 +859,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 0e-611
     result = Decimal128.fromString('0e-611');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x2b,
         0x7a,
@@ -883,7 +883,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 0e+6000
     result = Decimal128.fromString('0e+6000');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0x5f,
         0x20,
@@ -907,7 +907,7 @@ describe('Decimal128', function() {
 
     // Create decimal from string value 1E-6177
     result = Decimal128.fromString('-0e-1');
-    bytes = new Buffer(
+    bytes = Buffer.from(
       [
         0xb0,
         0x3e,
@@ -934,7 +934,7 @@ describe('Decimal128', function() {
   it('fromString from string round', function(done) {
     // Create decimal from string value 10E-6177
     var result = Decimal128.fromString('10E-6177');
-    var bytes = new Buffer(
+    var bytes = Buffer.from(
       [
         0x00,
         0x00,
@@ -959,7 +959,7 @@ describe('Decimal128', function() {
 
     // // Create decimal from string value 15E-6177
     // result = Decimal128.fromString('15E-6177');
-    // bytes = new Buffer(
+    // bytes = Buffer.from(
     //   [
     //     0x00,
     //     0x00,
@@ -988,13 +988,13 @@ describe('Decimal128', function() {
     // // array[6178] = '5';
     // // // Create decimal from string value array
     // // result = Decimal128.fromString(array.join(''));
-    // // bytes = new Buffer([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    // // bytes = Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     // //   , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02].reverse());
     // // expect(bytes).to.deep.equal(result.bytes);
 
     // // Create decimal from string value 251E-6178
     // result = Decimal128.fromString('251E-6178');
-    // bytes = new Buffer(
+    // bytes = Buffer.from(
     //   [
     //     0x00,
     //     0x00,
@@ -1018,7 +1018,7 @@ describe('Decimal128', function() {
 
     // // Create decimal from string value 250E-6178
     // result = Decimal128.fromString('250E-6178');
-    // bytes = new Buffer(
+    // bytes = Buffer.from(
     //   [
     //     0x00,
     //     0x00,
@@ -1042,7 +1042,7 @@ describe('Decimal128', function() {
 
     // // Create decimal from string value 10000000000000000000000000000000006
     // result = Decimal128.fromString('10000000000000000000000000000000006');
-    // bytes = new Buffer(
+    // bytes = Buffer.from(
     //   [
     //     0x30,
     //     0x42,
@@ -1066,7 +1066,7 @@ describe('Decimal128', function() {
 
     // // Create decimal from string value 10000000000000000000000000000000003
     // result = Decimal128.fromString('10000000000000000000000000000000003');
-    // bytes = new Buffer(
+    // bytes = Buffer.from(
     //   [
     //     0x30,
     //     0x42,
@@ -1090,7 +1090,7 @@ describe('Decimal128', function() {
 
     // // Create decimal from string value 10000000000000000000000000000000005
     // result = Decimal128.fromString('10000000000000000000000000000000005');
-    // bytes = new Buffer(
+    // bytes = Buffer.from(
     //   [
     //     0x30,
     //     0x42,
@@ -1114,7 +1114,7 @@ describe('Decimal128', function() {
 
     // // Create decimal from string value 100000000000000000000000000000000051
     // result = Decimal128.fromString('100000000000000000000000000000000051');
-    // bytes = new Buffer(
+    // bytes = Buffer.from(
     //   [
     //     0x30,
     //     0x44,
@@ -1138,7 +1138,7 @@ describe('Decimal128', function() {
 
     // // Create decimal from string value 10000000000000000000000000000000006E6111
     // result = Decimal128.fromString('10000000000000000000000000000000006E6111');
-    // bytes = new Buffer(
+    // bytes = Buffer.from(
     //   [
     //     0x78,
     //     0x00,
@@ -1162,7 +1162,7 @@ describe('Decimal128', function() {
 
     // // Create decimal from string value 12980742146337069071326240823050239
     // result = Decimal128.fromString('12980742146337069071326240823050239');
-    // bytes = new Buffer(
+    // bytes = Buffer.from(
     //   [
     //     0x30,
     //     0x42,
@@ -1186,7 +1186,7 @@ describe('Decimal128', function() {
 
     // // Create decimal from string value 99999999999999999999999999999999999
     // result = Decimal128.fromString('99999999999999999999999999999999999');
-    // bytes = new Buffer(
+    // bytes = Buffer.from(
     //   [
     //     0x30,
     //     0x44,
@@ -1212,7 +1212,7 @@ describe('Decimal128', function() {
     // result = Decimal128.fromString(
     //   '9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999'
     // );
-    // bytes = new Buffer(
+    // bytes = Buffer.from(
     //   [
     //     0x30,
     //     0xc6,
@@ -1236,7 +1236,7 @@ describe('Decimal128', function() {
 
     // // Create decimal from string value 9999999999999999999999999999999999E6111
     // result = Decimal128.fromString('9999999999999999999999999999999999E6111');
-    // bytes = new Buffer(
+    // bytes = Buffer.from(
     //   [
     //     0x5f,
     //     0xff,
@@ -1260,7 +1260,7 @@ describe('Decimal128', function() {
 
     // // Create decimal from string value 99999999999999999999999999999999999E6144
     // result = Decimal128.fromString('99999999999999999999999999999999999E6144');
-    // bytes = new Buffer(
+    // bytes = Buffer.from(
     //   [
     //     0x78,
     //     0x00,
@@ -1287,7 +1287,7 @@ describe('Decimal128', function() {
 
   it('toString infinity', function(done) {
     var decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x78,
           0x00,
@@ -1311,7 +1311,7 @@ describe('Decimal128', function() {
     expect('Infinity').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0xf8,
           0x00,
@@ -1338,7 +1338,7 @@ describe('Decimal128', function() {
 
   it('toString NaN', function(done) {
     var decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x7c,
           0x00,
@@ -1362,7 +1362,7 @@ describe('Decimal128', function() {
     expect('NaN').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0xfc,
           0x00,
@@ -1386,7 +1386,7 @@ describe('Decimal128', function() {
     expect('NaN').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x7e,
           0x00,
@@ -1410,7 +1410,7 @@ describe('Decimal128', function() {
     expect('NaN').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0xfe,
           0x00,
@@ -1434,7 +1434,7 @@ describe('Decimal128', function() {
     expect('NaN').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x7e,
           0x00,
@@ -1461,7 +1461,7 @@ describe('Decimal128', function() {
 
   it('toString regular', function(done) {
     var decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x30,
           0x40,
@@ -1485,7 +1485,7 @@ describe('Decimal128', function() {
     expect('1').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x30,
           0x40,
@@ -1509,7 +1509,7 @@ describe('Decimal128', function() {
     expect('0').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x30,
           0x40,
@@ -1533,7 +1533,7 @@ describe('Decimal128', function() {
     expect('2').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0xb0,
           0x40,
@@ -1557,7 +1557,7 @@ describe('Decimal128', function() {
     expect('-1').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0xb0,
           0x40,
@@ -1581,7 +1581,7 @@ describe('Decimal128', function() {
     expect('-0').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x30,
           0x3e,
@@ -1605,7 +1605,7 @@ describe('Decimal128', function() {
     expect('0.1').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x30,
           0x34,
@@ -1629,7 +1629,7 @@ describe('Decimal128', function() {
     expect('0.001234').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x30,
           0x40,
@@ -1653,7 +1653,7 @@ describe('Decimal128', function() {
     expect('123456789012').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x30,
           0x2a,
@@ -1677,7 +1677,7 @@ describe('Decimal128', function() {
     expect('0.00123400000').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x2f,
           0xfc,
@@ -1704,7 +1704,7 @@ describe('Decimal128', function() {
 
   it('toString scientific', function(done) {
     var decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x5f,
           0xfe,
@@ -1728,7 +1728,7 @@ describe('Decimal128', function() {
     expect('1.000000000000000000000000000000000E+6144').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x00,
           0x00,
@@ -1752,7 +1752,7 @@ describe('Decimal128', function() {
     expect('1E-6176').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x80,
           0x00,
@@ -1776,7 +1776,7 @@ describe('Decimal128', function() {
     expect('-1E-6176').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x31,
           0x08,
@@ -1800,7 +1800,7 @@ describe('Decimal128', function() {
     expect('9.999987654321E+112').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x5f,
           0xff,
@@ -1824,7 +1824,7 @@ describe('Decimal128', function() {
     expect('9.999999999999999999999999999999999E+6144').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x00,
           0x01,
@@ -1848,7 +1848,7 @@ describe('Decimal128', function() {
     expect('9.999999999999999999999999999999999E-6143').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x30,
           0x40,
@@ -1872,7 +1872,7 @@ describe('Decimal128', function() {
     expect('5192296858534827628530496329220095').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x30,
           0x4c,
@@ -1896,7 +1896,7 @@ describe('Decimal128', function() {
     expect('1.050E+9').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x30,
           0x42,
@@ -1920,7 +1920,7 @@ describe('Decimal128', function() {
     expect('1.050E+4').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x30,
           0x40,
@@ -1944,7 +1944,7 @@ describe('Decimal128', function() {
     expect('105').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x30,
           0x42,
@@ -1968,7 +1968,7 @@ describe('Decimal128', function() {
     expect('1.05E+3').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x30,
           0x46,
@@ -1995,7 +1995,7 @@ describe('Decimal128', function() {
 
   it('toString zeros', function(done) {
     var decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x30,
           0x40,
@@ -2019,7 +2019,7 @@ describe('Decimal128', function() {
     expect('0').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x32,
           0x98,
@@ -2043,7 +2043,7 @@ describe('Decimal128', function() {
     expect('0E+300').to.equal(decimal.toString());
 
     decimal = new Decimal128(
-      new Buffer(
+      Buffer.from(
         [
           0x2b,
           0x90,

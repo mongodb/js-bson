@@ -318,7 +318,7 @@ describe('promote values', function() {
       serialized_data = serialized_data + BinaryParser.fromByte(bytes[i]);
     }
 
-    var object = BSON.deserialize(new Buffer(serialized_data, 'binary'), {
+    var object = BSON.deserialize(Buffer.from(serialized_data, 'binary'), {
       promoteValues: false
     });
 
