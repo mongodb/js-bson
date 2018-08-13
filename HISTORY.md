@@ -1,3 +1,13 @@
+<a name="1.1.0"></a>
+# [1.1.0](https://github.com/mongodb/js-bson/compare/v1.0.9...v1.1.0) (2018-08-13)
+
+
+### Bug Fixes
+
+* **serializer:** do not use checkKeys for $clusterTime ([573e141](https://github.com/mongodb/js-bson/commit/573e141))
+
+
+
 <a name="1.0.9"></a>
 ## [1.0.9](https://github.com/mongodb/js-bson/compare/v1.0.8...v1.0.9) (2018-06-07)
 
