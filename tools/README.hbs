@@ -1,0 +1,86 @@
+# BSON parser
+
+BSON is short for Bin­ary JSON and is the bin­ary-en­coded seri­al­iz­a­tion of JSON-like doc­u­ments. You can learn more about it in [the specification](http://bsonspec.org).
+
+This browser version of the BSON parser is compiled using [rollup](https://rollupjs.org/) and the current version is pre-compiled in the `dist` directory.
+
+This is the default BSON parser, however, there is a C++ Node.js addon version as well that does not support the browser. It can be found at [mongod-js/bson-ext](https://github.com/mongodb-js/bson-ext).
+
+## Usage
+
+To build a new version perform the following operations:
+
+```
+npm install
+npm run build
+```
+
+A simple example of how to use BSON in the browser:
+
+```html
+<script src="./dist/bson.js"></script>
+
+<script>
+  function start() {
+    // Get the Long type
+    const Long = BSON.Long;
+
+    // Serialize document
+    const doc = { long: Long.fromNumber(100) }
+
+    // Serialize a document
+    const data = BSON.serialize(doc)
+    // De serialize it again
+    const doc_2 = BSON.deserialize(data)
+  }
+</script>
+```
+
+A simple example of how to use BSON in `Node.js`:
+
+```js
+const BSON = require('bson');
+const Long = BSON.Long;
+
+const doc = { long: Long.fromNumber(100) };
+
+// Serialize a document
+const data = BSON.serialize(doc);
+console.log('data:', data);
+
+// Deserialize the resulting Buffer
+const doc_2 = BSON.deserialize(data);
+console.log('doc_2:', doc_2);
+```
+
+## Installation
+
+`npm install bson`
+
+## Documentation
+
+{{>main}}
+
+## FAQ
+
+#### Why does `undefined` get converted to `null`?
+
+The `undefined` BSON type has been [deprecated for many years](http://bsonspec.org/spec.html), so this library has dropped support for it. Use the `ignoreUndefined` option (for example, from the [driver](http://mongodb.github.io/node-mongodb-native/2.2/api/MongoClient.html#connect) ) to instead remove `undefined` keys.
+
+#### How do I add custom serialization logic?
+
+This library looks for `toBSON()` functions on every path, and calls the `toBSON()` function to get the value to serialize.
+
+```javascript
+const BSON = require('bson');
+
+class CustomSerialize {
+  toBSON() {
+    return 42;
+  }
+}
+
+const obj = { answer: new CustomSerialize() };
+// "{ answer: 42 }"
+console.log(BSON.deserialize(BSON.serialize(obj)));
+```
