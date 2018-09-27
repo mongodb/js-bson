@@ -9,7 +9,8 @@
   "globals": {
     "Promise": true,
     "Uint8Array" : true,
-    "ArrayBuffer" : true
+    "ArrayBuffer" : true,
+    "Set": true
   },
   "parserOptions": {
     "ecmaVersion": 2017
