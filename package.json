@@ -60,7 +60,7 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "docs": "jsdoc2md --heading-depth 3 --template tools/README.hbs --plugin dmd-clear --files lib/bson.js > README.md",
+    "docs": "jsdoc2md --heading-depth 3 --template tools/README.hbs --plugin dmd-clear --files lib/bson.js lib/extended_json.js > README.md",
     "test": "npm run-script test-node && npm run-script test-browser",
     "test-node": "mocha ./test/node",
     "test-browser": "karma start",
