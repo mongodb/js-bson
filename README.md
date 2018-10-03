@@ -119,7 +119,7 @@ string.
 
 **Example**  
 ```js
-const EJSON = require('mongodb-extjson');
+const { EJSON } = require('bson');
 const text = '{ "int32": { "$numberInt": "10" } }';
 
 // prints { int32: { [String: '10'] _bsontype: 'Int32', value: '10' } }
@@ -146,7 +146,7 @@ is specified.
 
 **Example**  
 ```js
-const EJSON = require('mongodb-extjson');
+const { EJSON } = require('bson');
 const Int32 = require('mongodb').Int32;
 const doc = { int32: new Int32(10) };
 
