@@ -17,7 +17,7 @@ const MaxKey = BSON.MaxKey;
 const MinKey = BSON.MinKey;
 const ObjectID = BSON.ObjectID;
 const BSONRegExp = BSON.BSONRegExp;
-const Symbol = BSON.Symbol;
+const BSONSymbol = BSON.BSONSymbol;
 const Timestamp = BSON.Timestamp;
 
 describe('Extended JSON', function() {
@@ -43,7 +43,7 @@ describe('Extended JSON', function() {
       minKey: new MinKey(),
       objectId: ObjectID.createFromHexString('111111111111111111111111'),
       regexp: new BSONRegExp('hello world', 'i'),
-      symbol: new Symbol('symbol'),
+      symbol: new BSONSymbol('symbol'),
       timestamp: Timestamp.fromNumber(1000),
       int32Number: 300,
       doubleNumber: 200.2,
@@ -172,7 +172,7 @@ describe('Extended JSON', function() {
       minKey: new MinKey(),
       objectID: ObjectID.createFromHexString('111111111111111111111111'),
       bsonRegExp: new BSONRegExp('hello world', 'i'),
-      symbol: new Symbol('symbol'),
+      symbol: new BSONSymbol('symbol'),
       timestamp: new Timestamp()
     };
 

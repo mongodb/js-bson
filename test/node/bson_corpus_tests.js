@@ -177,6 +177,7 @@ describe('BSON Corpus', function() {
                 const dEJ = normalize(v.degenerate_extjson);
                 const roundTrippedDEJ = nativeToCEJSON(jsonToNative(dEJ));
                 expect(roundTrippedDEJ).to.equal(cEJ);
+
                 if (!v.lossy) {
                   expect(nativeToBson(jsonToNative(dEJ))).to.deep.equal(cB);
                 }
@@ -195,6 +196,7 @@ describe('BSON Corpus', function() {
                 let rEJ = normalize(v.relaxed_extjson);
                 // BSON -> native -> relaxed EJSON matches provided
                 expect(nativeToREJSON(nativeFromCB)).to.equal(rEJ);
+
                 // relaxed EJSON -> native -> relaxed EJSON unchanged
                 expect(nativeToREJSON(jsonToNative(rEJ))).to.equal(rEJ);
               }

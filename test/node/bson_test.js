@@ -9,7 +9,7 @@ const Binary = BSON.Binary;
 const Timestamp = BSON.Timestamp;
 const Long = BSON.Long;
 const ObjectId = BSON.ObjectId;
-const Symbol = BSON.Symbol;
+const BSONSymbol = BSON.BSONSymbol;
 const DBRef = BSON.DBRef;
 const Decimal128 = BSON.Decimal128;
 const Int32 = BSON.Int32;
@@ -100,7 +100,7 @@ describe('BSON', function() {
     expect(_mongodb.Timestamp === Timestamp).to.be.ok;
     expect(_mongodb.Code === Code).to.be.ok;
     expect(_mongodb.DBRef === DBRef).to.be.ok;
-    expect(_mongodb.Symbol === Symbol).to.be.ok;
+    expect(_mongodb.BSONSymbol === BSONSymbol).to.be.ok;
     expect(_mongodb.MinKey === MinKey).to.be.ok;
     expect(_mongodb.MaxKey === MaxKey).to.be.ok;
     expect(_mongodb.Double === Double).to.be.ok;
@@ -1377,10 +1377,10 @@ describe('BSON', function() {
    * @ignore
    */
   it('Should Correctly Serialize and Deserialize Symbol', function(done) {
-    if (Symbol != null) {
+    if (BSONSymbol != null) {
       // symbols are deprecated, so upgrade to strings... so I'm not sure
       // we really need this test anymore...
-      //var doc = { b: [new Symbol('test')] };
+      //var doc = { b: [new BSONSymbol('test')] };
 
       var doc = { b: ['test'] };
       var serialized_data = BSON.serialize(doc);
