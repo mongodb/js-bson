@@ -53,7 +53,7 @@
   "main": "lib/bson.js",
   "module": "dist/bson.esm.js",
   "browser": {
-    "./index.js": "./dist/bson.browser.umd.js",
+    "./lib/bson.js": "./dist/bson.browser.umd.js",
     "./dist/bson.esm.js": "./dist/bson.browser.esm.js"
   },
   "engines": {
