@@ -3,16 +3,16 @@
 const Buffer = require('buffer').Buffer;
 const BSON = require('../../lib/bson');
 const Decimal128 = BSON.Decimal128;
+const EJSON = BSON.EJSON;
 const expect = require('chai').expect;
-const EJSON = require('../../lib/extended_json');
 
-var deserializeOptions = {
+const deserializeOptions = {
   bsonRegExp: true,
   promoteLongs: true,
   promoteValues: false
 };
 
-var serializeOptions = {
+const serializeOptions = {
   ignoreUndefined: false
 };
 
@@ -25,7 +25,7 @@ function nativeToBson(native) {
 }
 
 function bsonToNative(bson) {
-  var deserializeOptions = {
+  const deserializeOptions = {
     bsonRegExp: true,
     promoteLongs: true,
     promoteValues: false
@@ -209,7 +209,7 @@ describe('BSON Corpus', function() {
         describe('decodeErrors', function() {
           scenario.decodeErrors.forEach(d => {
             it(d.description, function() {
-              var B = Buffer.from(d.bson, 'hex');
+              const B = Buffer.from(d.bson, 'hex');
               expect(() => BSON.deserialize(B, deserializeOptions)).to.throw();
             });
           });
