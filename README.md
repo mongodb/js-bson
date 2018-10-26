@@ -1,5 +1,7 @@
 # BSON parser
 
+**NOTE: This is usage documentation for the current 4.0.0 beta. You can find documentation for the 3.0 version of js-bson [here](https://github.com/mongodb/js-bson/blob/v3.0.2/README.md)**
+
 BSON is short for Bin­ary JSON and is the bin­ary-en­coded seri­al­iz­a­tion of JSON-like doc­u­ments. You can learn more about it in [the specification](http://bsonspec.org).
 
 This browser version of the BSON parser is compiled using [rollup](https://rollupjs.org/) and the current version is pre-compiled in the `dist` directory.
