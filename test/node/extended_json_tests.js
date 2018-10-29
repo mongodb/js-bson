@@ -247,4 +247,10 @@ describe('Extended JSON', function() {
     // timestamp
     expect(result.timestamp).to.be.an.instanceOf(BSON.Timestamp);
   });
+
+  it('should return a native number for a double in relaxed mode', function() {
+    const result = EJSON.deserialize({ test: 34.12 }, { relaxed: true });
+    expect(result.test).to.equal(34.12);
+    expect(result.test).to.be.a('number');
+  });
 });
