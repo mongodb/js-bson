@@ -80,4 +80,18 @@ describe('ObjectId', function() {
 
     done();
   });
+
+  /**
+   * @ignore
+   */
+  it('should isValid check input Buffer length', function(done) {
+    var buffTooShort = new Buffer ([]);
+    var buffTooLong = new Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
+    var buff12Bytes = new Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+
+    expect(ObjectId.isValid(buffTooShort)).to.be.false;
+    expect(ObjectId.isValid(buffTooLong)).to.be.false;
+    expect(ObjectId.isValid(buff12Bytes)).to.be.true;
+    done();
+  });
 });
