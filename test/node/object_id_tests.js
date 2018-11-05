@@ -94,4 +94,9 @@ describe('ObjectId', function() {
     expect(ObjectId.isValid(buff12Bytes)).to.be.true;
     done();
   });
+
+  it('should throw if a 12-char string is passed in with character codes greater than 256', function() {
+    expect(() => new ObjectId('abcdefghijkl').toHexString()).to.not.throw();
+    expect(() => new ObjectId('abcdefŽhijkl').toHexString()).to.throw(TypeError);
+  });
 });
