@@ -12,10 +12,10 @@ const plugins = [
   commonjs(),
   nodeBuiltins(),
   babel({
-    plugins: ['external-helpers'],
+    externalHelpers: true,
     presets: [
       [
-        'env',
+        '@babel/env',
         {
           modules: false
         }
@@ -32,10 +32,10 @@ const browserPlugins = [
   commonjs(),
   nodeBuiltins(),
   babel({
-    plugins: ['external-helpers'],
+    externalHelpers: true,
     presets: [
       [
-        'env',
+        '@babel/env',
         {
           modules: false
         }

@@ -21,9 +21,8 @@
     "url": "https://github.com/mongodb/js-bson/issues"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-preset-env": "^1.7.0",
+    "@babel/core": "^7.1.5",
+    "@babel/preset-env": "^7.1.5",
     "benchmark": "^2.1.4",
     "chai": "^4.2.0",
     "dmd-clear": "^0.1.2",
