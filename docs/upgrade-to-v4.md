@@ -13,7 +13,7 @@ detailed list of the changes in this release.
 
 ### Node
 
-To use new ES2015 features, bson v4 requires at least Node v6 or above.
+This module now requires Node.js v6 or above, because we are using ES2015 features in non-transpiled code, and lesser versions are deprecated.
 
 ### BSON
 
