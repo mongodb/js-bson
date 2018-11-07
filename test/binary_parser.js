@@ -50,8 +50,8 @@ BinaryParser.decodeFloat = function decodeFloat(data, precisionBits, exponentBit
     ? significand
       ? NaN
       : signal
-        ? -Infinity
-        : +Infinity
+      ? -Infinity
+      : +Infinity
     : (1 + signal * -2) *
         (exponent || significand
           ? !exponent
@@ -137,7 +137,7 @@ BinaryParser.encodeFloat = function encodeFloat(data, precisionBits, exponentBit
   for (
     n = Math.abs(exp + bias), j = exponentBits + 1, result = '';
     --j;
-    result = n % 2 + result, n = n >>= 1
+    result = (n % 2) + result, n = n >>= 1
   );
 
   var r;
