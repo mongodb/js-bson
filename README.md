@@ -8,6 +8,23 @@ This browser version of the BSON parser is compiled using [rollup](https://rollu
 
 This is the default BSON parser, however, there is a C++ Node.js addon version as well that does not support the browser. It can be found at [mongod-js/bson-ext](https://github.com/mongodb-js/bson-ext).
 
+### Table of Contents
+- [Usage](#usage)
+- [Bugs/Feature Requests](#bugs--feature-requests)
+- [Installation](#installation)
+- [Documentation](#documentation)
+- [FAQ](#faq)
+
+## Bugs / Feature Requests
+
+Think you've found a bug? Want to see a new feature in `bson`? Please open a case in our issue management tool, JIRA:
+
+1. Create an account and login: [jira.mongodb.org](https://jira.mongodb.org)
+2. Navigate to the NODE project: [jira.mongodb.org/browse/NODE](https://jira.mongodb.org/browse/NODE)
+3. Click **Create Issue** - Please provide as much information as possible about the issue and how to reproduce it.
+
+Bug reports in JIRA for all driver projects (i.e. NODE, PYTHON, CSHARP, JAVA) and the Core Server (i.e. SERVER) project are **public**.
+
 ## Usage
 
 To build a new version perform the following operations:
