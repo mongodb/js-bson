@@ -45,7 +45,8 @@
     "rollup-plugin-json": "^3.0.0",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.2.1",
-    "rollup-plugin-node-resolve": "^3.0.3"
+    "rollup-plugin-node-resolve": "^3.0.3",
+    "standard-version": "^4.4.0"
   },
   "config": {
     "native": false
@@ -67,9 +68,9 @@
     "build": "rollup -c",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
-    "changelog": "conventional-changelog -p angular -i HISTORY.md -s",
     "coverage": "istanbul cover _mocha -- --recursive --ui tdd test/node",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "release": "standard-version -i HISTORY.md"
   },
   "dependencies": {
     "buffer": "^5.1.0",
