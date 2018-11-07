@@ -56,7 +56,7 @@
     "./dist/bson.esm.js": "./dist/bson.browser.esm.js"
   },
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=6.9.0"
   },
   "scripts": {
     "docs": "jsdoc2md --heading-depth 3 --template tools/README.hbs --plugin dmd-clear --files lib/bson.js lib/extended_json.js > README.md",
