@@ -17,8 +17,7 @@ To use new ES2015 features, bson v4 requires at least Node v6 or above.
 
 ### BSON
 
-* You no longer need to (or can) create an instance of the `BSON` object. Instead, `BSON` acts as a
-namespace, similar to `JSON`
+* The module no longer exports a `BSON` type to be instantiated. Instead it exports a namespace, similar to `JSON`:
 
   **Old**
   ```js
