@@ -11,7 +11,7 @@
     "dist",
     "bower.json"
   ],
-  "version": "4.0.0-rc8",
+  "version": "4.0.0",
   "author": "Christian Amor Kvalheim <christkv@gmail.com>",
   "license": "Apache-2.0",
   "contributors": [],

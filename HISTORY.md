@@ -1,3 +1,50 @@
+# Change Log
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+<a name="4.0.0"></a>
+# [4.0.0](https://github.com/mongodb/js-bson/compare/v3.0.2...v4.0.0) (2018-11-13)
+
+
+### Bug Fixes
+
+* **buffer:** replace deprecated Buffer constructor ([5acdebf](https://github.com/mongodb/js-bson/commit/5acdebf))
+* **dbPointer:** fix utf8 bug for dbPointer ([018c769](https://github.com/mongodb/js-bson/commit/018c769))
+* **deserialize:** fix deserialization of 0xFFFD ([c682ae3](https://github.com/mongodb/js-bson/commit/c682ae3)), closes [#277](https://github.com/mongodb/js-bson/issues/277)
+* **ext-json:** deserialize doubles as `Number` in relaxed mode ([a767fa1](https://github.com/mongodb/js-bson/commit/a767fa1))
+* **ObjectId:** will now throw if an invalid character is passed ([6f30b4e](https://github.com/mongodb/js-bson/commit/6f30b4e))
+* **ObjectID:** ObjectId.isValid should check buffer length ([06af813](https://github.com/mongodb/js-bson/commit/06af813))
+* **package:** `browser` section needs to point to correct index ([08337e3](https://github.com/mongodb/js-bson/commit/08337e3))
+* **random-bytes:** fallback to insecure path if require is null ([963b12b](https://github.com/mongodb/js-bson/commit/963b12b))
+* **random-bytes:** wrap crypto require in try/catch for fallback ([47fd5f7](https://github.com/mongodb/js-bson/commit/47fd5f7))
+* **serializer:** do not use checkKeys for $clusterTime ([cbb4724](https://github.com/mongodb/js-bson/commit/cbb4724))
+* **serializer:** map insert expects only string keys ([aba3a18](https://github.com/mongodb/js-bson/commit/aba3a18))
+
+
+### Code Refactoring
+
+* **symbol:** rename Symbol to BSONSymbol ([5d5b3d2](https://github.com/mongodb/js-bson/commit/5d5b3d2))
+
+
+### Features
+
+* **BSON:** simplify and flatten module exports ([f8920c6](https://github.com/mongodb/js-bson/commit/f8920c6))
+* **bsontype:** move all `_bsontypes` to non-enumerable properties ([16f5bf6](https://github.com/mongodb/js-bson/commit/16f5bf6))
+* **ext-json:** add extended JSON codecs directly to BSON types ([10e5f00](https://github.com/mongodb/js-bson/commit/10e5f00))
+* **ext-json:** add extended JSON support to the bson library ([d6b71ab](https://github.com/mongodb/js-bson/commit/d6b71ab))
+* **ext-json:** export EJSON at top level of module ([c356a5a](https://github.com/mongodb/js-bson/commit/c356a5a))
+* **karma:** test bson in the browser ([cd593ca](https://github.com/mongodb/js-bson/commit/cd593ca))
+* **long:** replace long implementatin with long.js ([545900d](https://github.com/mongodb/js-bson/commit/545900d))
+
+
+### BREAKING CHANGES
+
+* **ObjectId:** Where code was previously silently erroring, users may now
+experience TypeErrors
+* **symbol:** This was conflicting with the ES6 Symbol type
+
+
+
 <a name="3.0.2"></a>
 ## [3.0.2](https://github.com/mongodb/js-bson/compare/v3.0.1...v3.0.2) (2018-07-13)
 
