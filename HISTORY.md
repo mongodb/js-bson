@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file. See [standa
 <a name="4.0.0"></a>
 # [4.0.0](https://github.com/mongodb/js-bson/compare/v3.0.2...v4.0.0) (2018-11-13)
 
+### Migration Guide
+
+Please see the [migration guide](https://github.com/mongodb/js-bson/blob/master/docs/upgrade-to-v4.md) for detailed discussion of breaking changes in this release.
 
 ### Bug Fixes
 
