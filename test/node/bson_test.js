@@ -2284,4 +2284,50 @@ describe('BSON', function() {
     expect(false).to.equal(id.equals(undefined));
     done();
   });
+
+  it('should serialize ObjectIds from old bson versions', function() {
+    // create a wrapper simulating the old ObjectID class
+    class ObjectID {
+      constructor() {
+        this.oid = new ObjectId();
+      }
+      get id() {
+        return this.oid.id;
+      }
+      toString() {
+        return this.oid.toString();
+      }
+    }
+    Object.defineProperty(ObjectID.prototype, '_bsontype', { value: 'ObjectID' });
+
+    // Array
+    const array = [new ObjectID(), new ObjectId()];
+    const deserializedArrayAsMap = BSON.deserialize(BSON.serialize(array));
+    const deserializedArray = Object.keys(deserializedArrayAsMap).map(
+      x => deserializedArrayAsMap[x]
+    );
+    expect(deserializedArray.map(x => x.toString())).to.eql(array.map(x => x.toString()));
+
+    // Map
+    const map = new Map();
+    map.set('oldBsonType', new ObjectID());
+    map.set('newBsonType', new ObjectId());
+    const deserializedMapAsObject = BSON.deserialize(BSON.serialize(map), { relaxed: false });
+    const deserializedMap = new Map(
+      Object.keys(deserializedMapAsObject).map(k => [k, deserializedMapAsObject[k]])
+    );
+
+    map.forEach((value, key) => {
+      expect(deserializedMap.has(key)).to.be.true;
+      const deserializedMapValue = deserializedMap.get(key);
+      expect(deserializedMapValue.toString()).to.equal(value.toString());
+    });
+
+    // Object
+    const record = { oldBsonType: new ObjectID(), newBsonType: new ObjectId() };
+    const deserializedObject = BSON.deserialize(BSON.serialize(record));
+    expect(deserializedObject).to.have.keys(['oldBsonType', 'newBsonType']);
+    expect(record.oldBsonType.toString()).to.equal(deserializedObject.oldBsonType.toString());
+    expect(record.newBsonType.toString()).to.equal(deserializedObject.newBsonType.toString());
+  });
 });
