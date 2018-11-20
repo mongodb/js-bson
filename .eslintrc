@@ -10,7 +10,8 @@
     "Promise": true,
     "Uint8Array" : true,
     "ArrayBuffer" : true,
-    "Set": true
+    "Set": true,
+    "Map": true
   },
   "parserOptions": {
     "ecmaVersion": 2017
