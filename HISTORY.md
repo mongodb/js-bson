@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="4.0.1"></a>
+## [4.0.1](https://github.com/mongodb/js-bson/compare/v4.0.0...v4.0.1) (2018-12-06)
+
+
+### Bug Fixes
+
+* **object-id:** correct serialization of old ObjectID types ([8d57a8c](https://github.com/mongodb/js-bson/commit/8d57a8c))
+
+
+
 <a name="4.0.0"></a>
 # [4.0.0](https://github.com/mongodb/js-bson/compare/v3.0.2...v4.0.0) (2018-11-13)
 
