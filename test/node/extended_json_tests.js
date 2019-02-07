@@ -253,23 +253,22 @@ describe('Extended JSON', function() {
     expect(result.test).to.equal(34.12);
     expect(result.test).to.be.a('number');
   });
-  
-  it('should work for function-valued and array-valued replacer parameters', function() {
+
+  it('should work for function-valued and array-valued replacer parameters', async function() {
     const doc = { a: new Int32(10), b: new Int32(10) };
 
-    var replacerArray = ['a'];
+    var replacerArray = ['a', '$numberInt'];
     var serialized = EJSON.stringify(doc, replacerArray, 0, { relaxed: false });
     expect(serialized).to.equal('{"a":{"$numberInt":"10"}}');
 
     serialized = EJSON.stringify(doc, replacerArray);
     expect(serialized).to.equal('{"a":10}');
 
-    var replacerFunc = function (key) { return key === 'a' ? '5' : undefined; }
+    var replacerFunc = function (key, value) { return key === 'b' ? undefined : value; }
     serialized = EJSON.stringify(doc, replacerFunc, 0, { relaxed: false });
-    expect(serialized).to.equal('{"a":{"$numberInt":"5"}}');
+    expect(serialized).to.equal('{"a":{"$numberInt":"10"}}');
 
     serialized = EJSON.stringify(doc, replacerFunc);
-    expect(serialized).to.equal('{"a":5}');
+    expect(serialized).to.equal('{"a":10}');
   });
-
 });
