@@ -254,7 +254,7 @@ describe('Extended JSON', function() {
     expect(result.test).to.be.a('number');
   });
 
-  it('should work for function-valued and array-valued replacer parameters', async function() {
+  it('should work for function-valued and array-valued replacer parameters', function() {
     const doc = { a: new Int32(10), b: new Int32(10) };
 
     var replacerArray = ['a', '$numberInt'];
