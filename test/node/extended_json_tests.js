@@ -15,7 +15,9 @@ const Int32 = BSON.Int32;
 const Long = BSON.Long;
 const MaxKey = BSON.MaxKey;
 const MinKey = BSON.MinKey;
+const OldObjectID = require('mongodb').ObjectID; // use old ObjectID class because MongoDB drivers still return it
 const ObjectID = BSON.ObjectID;
+const ObjectId = BSON.ObjectId;
 const BSONRegExp = BSON.BSONRegExp;
 const BSONSymbol = BSON.BSONSymbol;
 const Timestamp = BSON.Timestamp;
@@ -41,7 +43,9 @@ describe('Extended JSON', function() {
       long: Long.fromNumber(200),
       maxKey: new MaxKey(),
       minKey: new MinKey(),
-      objectId: ObjectID.createFromHexString('111111111111111111111111'),
+      objectId: ObjectId.createFromHexString('111111111111111111111111'),
+      objectID: ObjectID.createFromHexString('111111111111111111111111'),
+      oldObjectID: OldObjectID.createFromHexString('111111111111111111111111'),
       regexp: new BSONRegExp('hello world', 'i'),
       symbol: new BSONSymbol('symbol'),
       timestamp: Timestamp.fromNumber(1000),
@@ -55,7 +59,7 @@ describe('Extended JSON', function() {
   it('should correctly extend an existing mongodb module', function() {
     // Serialize the document
     var json =
-      '{"_id":{"$numberInt":"100"},"gh":{"$numberInt":"1"},"binary":{"$binary":{"base64":"AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+Pw==","subType":"00"}},"date":{"$date":{"$numberLong":"1488372056737"}},"code":{"$code":"function() {}","$scope":{"a":{"$numberInt":"1"}}},"dbRef":{"$ref":"tests","$id":{"$numberInt":"1"},"$db":"test"},"decimal":{"$numberDecimal":"100"},"double":{"$numberDouble":"10.1"},"int32":{"$numberInt":"10"},"long":{"$numberLong":"200"},"maxKey":{"$maxKey":1},"minKey":{"$minKey":1},"objectId":{"$oid":"111111111111111111111111"},"regexp":{"$regularExpression":{"pattern":"hello world","options":"i"}},"symbol":{"$symbol":"symbol"},"timestamp":{"$timestamp":{"t":0,"i":1000}},"int32Number":{"$numberInt":"300"},"doubleNumber":{"$numberDouble":"200.2"},"longNumberIntFit":{"$numberLong":"7036874417766400"},"doubleNumberIntFit":{"$numberLong":"19007199250000000"}}';
+      '{"_id":{"$numberInt":"100"},"gh":{"$numberInt":"1"},"binary":{"$binary":{"base64":"AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+Pw==","subType":"00"}},"date":{"$date":{"$numberLong":"1488372056737"}},"code":{"$code":"function() {}","$scope":{"a":{"$numberInt":"1"}}},"dbRef":{"$ref":"tests","$id":{"$numberInt":"1"},"$db":"test"},"decimal":{"$numberDecimal":"100"},"double":{"$numberDouble":"10.1"},"int32":{"$numberInt":"10"},"long":{"$numberLong":"200"},"maxKey":{"$maxKey":1},"minKey":{"$minKey":1},"objectId":{"$oid":"111111111111111111111111"},"objectID":{"$oid":"111111111111111111111111"},"oldObjectID":{"$oid":"111111111111111111111111"},"regexp":{"$regularExpression":{"pattern":"hello world","options":"i"}},"symbol":{"$symbol":"symbol"},"timestamp":{"$timestamp":{"t":0,"i":1000}},"int32Number":{"$numberInt":"300"},"doubleNumber":{"$numberDouble":"200.2"},"longNumberIntFit":{"$numberLong":"7036874417766400"},"doubleNumberIntFit":{"$numberLong":"19007199250000000"}}';
 
     assert.equal(json, EJSON.stringify(doc, null, 0, { relaxed: false }));
   });
@@ -98,13 +102,32 @@ describe('Extended JSON', function() {
   });
 
   it('should correctly serialize bson types when they are values', function() {
-    var serialized = EJSON.stringify(new ObjectID('591801a468f9e7024b6235ea'), { relaxed: false });
+    var serialized = EJSON.stringify(new ObjectId('591801a468f9e7024b6235ea'), { relaxed: false });
     expect(serialized).to.equal('{"$oid":"591801a468f9e7024b6235ea"}');
+    serialized = EJSON.stringify(new ObjectID('591801a468f9e7024b6235ea'), { relaxed: false });
+    expect(serialized).to.equal('{"$oid":"591801a468f9e7024b6235ea"}');
+    serialized = EJSON.stringify(new OldObjectID('591801a468f9e7024b6235ea'), { relaxed: false });
+    expect(serialized).to.equal('{"$oid":"591801a468f9e7024b6235ea"}');
+
     serialized = EJSON.stringify(new Int32(42), { relaxed: false });
     expect(serialized).to.equal('{"$numberInt":"42"}');
     serialized = EJSON.stringify(
       {
+        _id: { $nin: [new ObjectId('591801a468f9e7024b6235ea')] }
+      },
+      { relaxed: false }
+    );
+    expect(serialized).to.equal('{"_id":{"$nin":[{"$oid":"591801a468f9e7024b6235ea"}]}}');
+    serialized = EJSON.stringify(
+      {
         _id: { $nin: [new ObjectID('591801a468f9e7024b6235ea')] }
+      },
+      { relaxed: false }
+    );
+    expect(serialized).to.equal('{"_id":{"$nin":[{"$oid":"591801a468f9e7024b6235ea"}]}}');
+    serialized = EJSON.stringify(
+      {
+        _id: { $nin: [new OldObjectID('591801a468f9e7024b6235ea')] }
       },
       { relaxed: false }
     );
@@ -122,7 +145,7 @@ describe('Extended JSON', function() {
     var parsed = EJSON.parse(input);
 
     expect(parsed).to.deep.equal({
-      result: [{ _id: new ObjectID('591801a468f9e7024b623939'), emptyField: null }]
+      result: [{ _id: new ObjectId('591801a468f9e7024b623939'), emptyField: null }]
     });
   });
 
@@ -170,7 +193,9 @@ describe('Extended JSON', function() {
       long: new Long(234),
       maxKey: new MaxKey(),
       minKey: new MinKey(),
+      objectId: ObjectId.createFromHexString('111111111111111111111111'),
       objectID: ObjectID.createFromHexString('111111111111111111111111'),
+      oldObjectID: OldObjectID.createFromHexString('111111111111111111111111'),
       bsonRegExp: new BSONRegExp('hello world', 'i'),
       symbol: new BSONSymbol('symbol'),
       timestamp: new Timestamp()
@@ -187,7 +212,9 @@ describe('Extended JSON', function() {
       long: { $numberLong: '234' },
       maxKey: { $maxKey: 1 },
       minKey: { $minKey: 1 },
+      objectId: { $oid: '111111111111111111111111' },
       objectID: { $oid: '111111111111111111111111' },
+      oldObjectID: { $oid: '111111111111111111111111' },
       bsonRegExp: { $regularExpression: { pattern: 'hello world', options: 'i' } },
       symbol: { $symbol: 'symbol' },
       timestamp: { $timestamp: { t: 0, i: 0 } }
@@ -205,7 +232,9 @@ describe('Extended JSON', function() {
       long: { $numberLong: '234' },
       maxKey: { $maxKey: 1 },
       minKey: { $minKey: 1 },
+      objectId: { $oid: '111111111111111111111111' },
       objectID: { $oid: '111111111111111111111111' },
+      oldObjectID: { $oid: '111111111111111111111111' },
       bsonRegExp: { $regularExpression: { pattern: 'hello world', options: 'i' } },
       symbol: { $symbol: 'symbol' },
       timestamp: { $timestamp: { t: 0, i: 0 } }
@@ -237,7 +266,9 @@ describe('Extended JSON', function() {
     // minKey
     expect(result.minKey).to.be.an.instanceOf(BSON.MinKey);
     // objectID
+    expect(result.objectId.toString()).to.equal('111111111111111111111111');
     expect(result.objectID.toString()).to.equal('111111111111111111111111');
+    expect(result.oldObjectID.toString()).to.equal('111111111111111111111111');
     //bsonRegExp
     expect(result.bsonRegExp).to.be.an.instanceOf(BSON.BSONRegExp);
     expect(result.bsonRegExp.pattern).to.equal('hello world');
