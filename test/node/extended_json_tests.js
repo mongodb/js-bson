@@ -15,12 +15,21 @@ const Int32 = BSON.Int32;
 const Long = BSON.Long;
 const MaxKey = BSON.MaxKey;
 const MinKey = BSON.MinKey;
-const OldObjectID = require('mongodb').ObjectID; // use old ObjectID class because MongoDB drivers still return it
 const ObjectID = BSON.ObjectID;
 const ObjectId = BSON.ObjectId;
 const BSONRegExp = BSON.BSONRegExp;
 const BSONSymbol = BSON.BSONSymbol;
 const Timestamp = BSON.Timestamp;
+
+// support old ObjectID class because MongoDB drivers still return it
+const OldObjectID = (function() {
+  try {
+    return require('mongodb').ObjectID;
+  }
+  catch {
+    return ObjectId; // if mongo is unavailable, e.g. browsers, just re-use BSON's
+  }
+})();
 
 describe('Extended JSON', function() {
   let doc = {};
