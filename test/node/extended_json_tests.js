@@ -21,15 +21,19 @@ const BSONRegExp = BSON.BSONRegExp;
 const BSONSymbol = BSON.BSONSymbol;
 const Timestamp = BSON.Timestamp;
 
-// support old ObjectID class because MongoDB drivers still return it
-const OldObjectID = (function() {
+// test the old ObjectID class because MongoDB drivers still return it
+// fall back to BSON's ObjectId in browser tests
+function getOldObjectID() {
   try {
-    return require('mongodb').ObjectID;
+    const file = require.resolve('mongodb'); // apparently this will fail faster in browser tests
+    return require(file).ObjectID;
   }
   catch (e) {
     return ObjectId; // if mongo is unavailable, e.g. browsers, just re-use BSON's
   }
-})();
+}
+
+const OldObjectID = getOldObjectID();
 
 describe('Extended JSON', function() {
   let doc = {};
