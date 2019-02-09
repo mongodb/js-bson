@@ -26,7 +26,7 @@ const OldObjectID = (function() {
   try {
     return require('mongodb').ObjectID;
   }
-  catch {
+  catch (e) {
     return ObjectId; // if mongo is unavailable, e.g. browsers, just re-use BSON's
   }
 })();
