@@ -158,10 +158,10 @@ describe('BSON Corpus', function() {
               // just use canonical.
               let cB, cEJ;
               if (deprecated) {
-                cB = new Buffer(v.converted_bson, 'hex');
+                cB = Buffer.from(v.converted_bson, 'hex');
                 cEJ = normalize(v.converted_extjson);
               } else {
-                cB = new Buffer(v.canonical_bson, 'hex');
+                cB = Buffer.from(v.canonical_bson, 'hex');
                 cEJ = normalize(v.canonical_extjson);
               }
 

@@ -40,7 +40,7 @@ describe('Extended JSON', function() {
   let doc = {};
 
   before(function() {
-    const buffer = new Buffer(64);
+    const buffer = Buffer.alloc(64);
     for (var i = 0; i < buffer.length; i++) buffer[i] = i;
     const date = new Date();
     date.setTime(1488372056737);
