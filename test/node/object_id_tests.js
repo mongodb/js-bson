@@ -102,6 +102,8 @@ describe('ObjectId', function() {
 
   it('should correctly interpret timestamps beyond 2038', function() {
     var farFuture = new Date('2040-01-01T00:00:00.000Z').getTime();
-    expect(new BSON.ObjectId(BSON.ObjectId.generate(farFuture/1000)).getTimestamp().getTime()).to.equal(farFuture);
+    expect(
+      new BSON.ObjectId(BSON.ObjectId.generate(farFuture / 1000)).getTimestamp().getTime()
+    ).to.equal(farFuture);
   });
 });
