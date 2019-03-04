@@ -26,10 +26,9 @@ const Timestamp = BSON.Timestamp;
 function getOldObjectID() {
   try {
     // do a dynamic resolve to avoid exception when running browser tests
-    const file = require.resolve('mongodb'); 
+    const file = require.resolve('mongodb');
     return require(file).ObjectID;
-  }
-  catch (e) {
+  } catch (e) {
     return ObjectId; // if mongo is unavailable, e.g. browsers, just re-use BSON's
   }
 }
@@ -309,7 +308,9 @@ describe('Extended JSON', function() {
     serialized = EJSON.stringify(doc, replacerArray);
     expect(serialized).to.equal('{"a":10}');
 
-    var replacerFunc = function (key, value) { return key === 'b' ? undefined : value; }
+    var replacerFunc = function(key, value) {
+      return key === 'b' ? undefined : value;
+    };
     serialized = EJSON.stringify(doc, replacerFunc, 0, { relaxed: false });
     expect(serialized).to.equal('{"a":{"$numberInt":"10"}}');
 
