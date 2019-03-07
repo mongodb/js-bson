@@ -16447,11 +16447,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var writeIEEE754 = __webpack_require__(353).writeIEEE754,
 	    Long = __webpack_require__(334).Long,
-	    MinKey = __webpack_require__(347).MinKey,
 	    Map = __webpack_require__(333),
 	    Binary = __webpack_require__(350).Binary;
 
-	const normalizedFunctionString = __webpack_require__(354).normalizedFunctionString;
+	var normalizedFunctionString = __webpack_require__(354).normalizedFunctionString;
 
 	// try {
 	//   var _Buffer = Uint8Array;
@@ -16460,6 +16459,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// }
 
 	var regexp = /\x00/; // eslint-disable-line no-control-regex
+	var ignoreKeys = ['$db', '$ref', '$id', '$clusterTime'];
 
 	// To ensure that 0.4 of node works correctly
 	var isDate = function isDate(d) {
@@ -16666,7 +16666,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Write the type of either min or max key
 	  if (value === null) {
 	    buffer[index++] = BSON.BSON_DATA_NULL;
-	  } else if (value instanceof MinKey) {
+	  } else if (value._bsontype === 'MinKey') {
 	    buffer[index++] = BSON.BSON_DATA_MIN_KEY;
 	  } else {
 	    buffer[index++] = BSON.BSON_DATA_MAX_KEY;
@@ -17044,7 +17044,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        index = serializeNull(buffer, key, value, index, true);
 	      } else if (value === null) {
 	        index = serializeNull(buffer, key, value, index, true);
-	      } else if (value['_bsontype'] === 'ObjectID') {
+	      } else if (value['_bsontype'] === 'ObjectID' || value['_bsontype'] === 'ObjectId') {
 	        index = serializeObjectId(buffer, key, value, index, true);
 	      } else if (Buffer.isBuffer(value)) {
 	        index = serializeBuffer(buffer, key, value, index, true);
@@ -17095,7 +17095,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      type = typeof value;
 
 	      // Check the key and throw error if it's illegal
-	      if (key !== '$db' && key !== '$ref' && key !== '$id') {
+	      if (typeof key === 'string' && ignoreKeys.indexOf(key) === -1) {
 	        if (key.match(regexp) != null) {
 	          // The BSON spec doesn't allow keys with null bytes because keys are
 	          // null-terminated.
@@ -17122,7 +17122,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // } else if (value === undefined && ignoreUndefined === true) {
 	      } else if (value === null || value === undefined && ignoreUndefined === false) {
 	        index = serializeNull(buffer, key, value, index);
-	      } else if (value['_bsontype'] === 'ObjectID') {
+	      } else if (value['_bsontype'] === 'ObjectID' || value['_bsontype'] === 'ObjectId') {
 	        index = serializeObjectId(buffer, key, value, index);
 	      } else if (Buffer.isBuffer(value)) {
 	        index = serializeBuffer(buffer, key, value, index);
@@ -17175,7 +17175,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      type = typeof value;
 
 	      // Check the key and throw error if it's illegal
-	      if (key !== '$db' && key !== '$ref' && key !== '$id') {
+	      if (typeof key === 'string' && ignoreKeys.indexOf(key) === -1) {
 	        if (key.match(regexp) != null) {
 	          // The BSON spec doesn't allow keys with null bytes because keys are
 	          // null-terminated.
@@ -17203,7 +17203,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (ignoreUndefined === false) index = serializeNull(buffer, key, value, index);
 	      } else if (value === null) {
 	        index = serializeNull(buffer, key, value, index);
-	      } else if (value['_bsontype'] === 'ObjectID') {
+	      } else if (value['_bsontype'] === 'ObjectID' || value['_bsontype'] === 'ObjectId') {
 	        index = serializeObjectId(buffer, key, value, index);
 	      } else if (Buffer.isBuffer(value)) {
 	        index = serializeBuffer(buffer, key, value, index);
@@ -17667,7 +17667,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    case 'object':
 	      if (value == null || value instanceof MinKey || value instanceof MaxKey || value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
 	        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + 1;
-	      } else if (value instanceof ObjectID || value['_bsontype'] === 'ObjectID') {
+	      } else if (value instanceof ObjectID || value['_bsontype'] === 'ObjectID' || value['_bsontype'] === 'ObjectId') {
 	        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (12 + 1);
 	      } else if (value instanceof Date || isDate(value)) {
 	        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (8 + 1);

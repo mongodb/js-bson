@@ -2346,3 +2346,57 @@ exports['Should return boolean for ObjectID equality check'] = function(test) {
   test.equal(false, id.equals(undefined));
   test.done();
 };
+
+/**
+ * @ignore
+ */
+exports['Should correctly serialize MinKey from another library version'] = function(test) {
+  // clone the class defn to simulate another library sending us a MinKey instance
+  // note that the 1.x library tests need to run on Node 0.12.48 which doesn't support 
+  // the JS "class" keyword so the 4.x defn of MinKey was ported to pre-ES5 syntax.
+  function MinKey4x() {
+    this.toExtendedJSON = function() {
+      return { $minKey: 1 };
+    }
+  };
+  MinKey4x.prototype.fromExtendedJSON = function() {
+    return new MinKey4x();
+  }
+  MinKey4x.prototype._bsontype = 'MinKey';
+
+  var doc = {
+    _id: new ObjectId('4e886e687ff7ef5e00000162'),
+    minKey: new MinKey4x()
+  };
+
+  var serialized_data = createBSON().serialize(doc);
+  var doc2 = createBSON().deserialize(serialized_data);
+
+  // Ensure that MinKey can be round-tripped through the serializer (see #310)
+  test.ok(doc2.minKey instanceof MinKey);
+  test.done();
+};
+
+/**
+ * @ignore
+ */
+exports['Should serialize _bsontype=ObjectID (capital D) from v4.0.0/4.0.1'] = function(test) {
+  // The ObjectId implementation in /4x-interop was copied from 4.0.1 to ensure that interop works
+  // In 4.0.0 and 4.0.1, ObjectID._bsontype was changed to 'ObjectId' (lowercase "d"). 
+  // This broke interop with 1.x. Releases after 4.0.1 reverted back to use _bsontype==='ObjectID',
+  // which fixed interop with 1.x, but because we had to rev 1.x anyways to fix #310 for interop
+  // with MinKey, it made sense to also fix interop with 4.0.0/4.0.1 ObjectId.
+  // The ObjectId implementation in /4x-interop was copied from 4.0.1 source and slightly modified
+  // so it could run the Node 0.12 tests where class, const, let, etc. are not supported.
+  var ObjectId401 = require('./4x-interop/objectid');
+  var id = new ObjectId401();
+  var doc = { _id: id };
+  var serialized_data = createBSON().serialize(doc);
+
+  var serialized_data2 = new Buffer(createBSON().calculateObjectSize(doc));
+  createBSON().serializeWithBufferAndIndex(doc, serialized_data2);
+  assertBuffersEqual(test, serialized_data, serialized_data2, 0);
+
+  test.equal(doc._id.toHexString(), createBSON().deserialize(serialized_data)._id.toHexString());
+  test.done();
+};
