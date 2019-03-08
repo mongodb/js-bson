@@ -1,3 +1,18 @@
+<a name="1.1.1"></a>
+## [1.1.1](https://github.com/mongodb/js-bson/compare/v1.1.0...v1.1.1) (2019-03-08)
+
+
+### Bug Fixes
+
+* **object-id:** support 4.x->1.x interop for MinKey and ObjectId ([53419a5](https://github.com/mongodb/js-bson/commit/53419a5))
+
+
+### Features
+
+* replace new Buffer with modern versions ([24aefba](https://github.com/mongodb/js-bson/commit/24aefba))
+
+
+
 <a name="1.1.0"></a>
 # [1.1.0](https://github.com/mongodb/js-bson/compare/v1.0.9...v1.1.0) (2018-08-13)
 
