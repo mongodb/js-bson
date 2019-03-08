@@ -2113,16 +2113,23 @@ describe('Decimal128', function() {
     };
 
     // Add a custom mapper for the type
-    Decimal128.prototype.toObject = function() {
-      return new MyCustomDecimal(this);
-    };
+    const saveToObject = Decimal128.prototype.toObject;
+    try {
+      Decimal128.prototype.toObject = function() {
+        return new MyCustomDecimal(this);
+      };
 
-    // Test all methods around a simple serialization at object top level
-    var doc = { value: new MyCustomDecimal('1') };
-    var buffer = BSON.serialize(doc);
-    var back = BSON.deserialize(buffer);
-    expect(back.value instanceof MyCustomDecimal).to.be.ok;
-    expect('1').to.equal(back.value.value);
+      // Test all methods around a simple serialization at object top level
+      var doc = { value: new MyCustomDecimal('1') };
+      var buffer = BSON.serialize(doc);
+      var back = BSON.deserialize(buffer);
+      expect(back.value instanceof MyCustomDecimal).to.be.ok;
+      expect('1').to.equal(back.value.value);
+    } finally {
+      // prevent this test from breaking later tests which may re-use the same class
+      Decimal128.prototype.toObject = saveToObject;
+    }
+
     done();
   });
 });
