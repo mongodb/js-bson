@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="4.0.2"></a>
+## [4.0.2](https://github.com/mongodb/js-bson/compare/v4.0.0...v4.0.2) (2019-03-08)
+
+
+### Bug Fixes
+
+* **buffer:** don't use deprecated Buffer constructors ([7bb9c57](https://github.com/mongodb/js-bson/commit/7bb9c57))
+* **Buffer:** import buffer for binary, decimal128, and fnv1a ([6be7b8d](https://github.com/mongodb/js-bson/commit/6be7b8d))
+* **ejson:** enable serialization of legacy `ObjectID` ([ba98ccb](https://github.com/mongodb/js-bson/commit/ba98ccb)), closes [#303](https://github.com/mongodb/js-bson/issues/303)
+* **ejson:** support array for replacer parameter in `EJSON.stringify` ([9f43809](https://github.com/mongodb/js-bson/commit/9f43809)), closes [#303](https://github.com/mongodb/js-bson/issues/303) [#302](https://github.com/mongodb/js-bson/issues/302) [#303](https://github.com/mongodb/js-bson/issues/303)
+* **ejson-serialize:** prevent double serialization for nested documents ([ab790c9](https://github.com/mongodb/js-bson/commit/ab790c9)), closes [#303](https://github.com/mongodb/js-bson/issues/303)
+* **object-id:** correct serialization of old ObjectID types ([8d57a8c](https://github.com/mongodb/js-bson/commit/8d57a8c))
+* **timestamp:** getTimestamp support times beyond 2038 ([a0820d5](https://github.com/mongodb/js-bson/commit/a0820d5))
+* 4.x-1.x interop (incl. ObjectID _bsontype) ([f4b16d9](https://github.com/mongodb/js-bson/commit/f4b16d9))
+
+
+
 <a name="4.0.1"></a>
 ## [4.0.1](https://github.com/mongodb/js-bson/compare/v4.0.0...v4.0.1) (2018-12-06)
 
