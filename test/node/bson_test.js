@@ -2351,7 +2351,11 @@ describe('BSON', function() {
     });
 
     // Object
-    const record = { oldBsonType: new ObjectIdv400(), reallyOldBsonType: new OldObjectID, newBsonType: new ObjectId() };
+    const record = {
+      oldBsonType: new ObjectIdv400(),
+      reallyOldBsonType: new OldObjectID(),
+      newBsonType: new ObjectId()
+    };
     const deserializedObject = BSON.deserialize(BSON.serialize(record));
     expect(deserializedObject).to.have.keys(['oldBsonType', 'reallyOldBsonType', 'newBsonType']);
     expect(record.oldBsonType.toString()).to.equal(deserializedObject.oldBsonType.toString());

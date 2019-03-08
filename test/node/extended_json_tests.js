@@ -331,7 +331,6 @@ describe('Extended JSON', function() {
     it.skip('skipping 4.x/1.x interop tests', () => {});
   } else {
     it('should interoperate 4.x with 1.x versions of this library', function() {
-
       const buffer = Buffer.alloc(64);
       for (var i = 0; i < buffer.length; i++) {
         buffer[i] = i;
@@ -363,10 +362,11 @@ describe('Extended JSON', function() {
         oldObjectOldSerializer: OldBSON.serialize(oldBsonObject, serializationOptions),
         oldObjectNewSerializer: BSON.serialize(oldBsonObject, serializationOptions),
         newObjectOldSerializer: OldBSON.serialize(newBsonObject, serializationOptions),
-        newObjectNewSerializer: BSON.serialize(newBsonObject, serializationOptions),
+        newObjectNewSerializer: BSON.serialize(newBsonObject, serializationOptions)
       };
 
-      const expectedBufferBase64 = 'VgEAAAViaW5hcnkAQAAAAAAAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/DWNvZGUADgAAAGZ1bmN0aW9uKCkge30AA2RiUmVmACwAAAACJHJlZgAGAAAAdGVzdHMAECRpZAABAAAAAiRkYgAFAAAAdGVzdAAAE2RlY2ltYWwxMjgA//837RjxE6AdAgAAAABAMAFkb3VibGUAMzMzMzMzJEAQaW50MzIACgAAABJsb25nAP//38RiSvoQf21heEtleQAHb2JqZWN0SWQAERERERERERERERERB29iamVjdElEABEREREREREREREREQtic29uUmVnRXhwAGhlbGxvIHdvcmxkAGkADnN5bWJvbAAHAAAAc3ltYm9sABF0aW1lc3RhbXAAAAAAAAAAAAAA';
+      const expectedBufferBase64 =
+        'VgEAAAViaW5hcnkAQAAAAAAAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/DWNvZGUADgAAAGZ1bmN0aW9uKCkge30AA2RiUmVmACwAAAACJHJlZgAGAAAAdGVzdHMAECRpZAABAAAAAiRkYgAFAAAAdGVzdAAAE2RlY2ltYWwxMjgA//837RjxE6AdAgAAAABAMAFkb3VibGUAMzMzMzMzJEAQaW50MzIACgAAABJsb25nAP//38RiSvoQf21heEtleQAHb2JqZWN0SWQAERERERERERERERERB29iamVjdElEABEREREREREREREREQtic29uUmVnRXhwAGhlbGxvIHdvcmxkAGkADnN5bWJvbAAHAAAAc3ltYm9sABF0aW1lc3RhbXAAAAAAAAAAAAAA';
       const expectedBuffer = Buffer.from(expectedBufferBase64, 'base64');
 
       // Regardless of which library version created the objects, and which library version
@@ -383,20 +383,28 @@ describe('Extended JSON', function() {
       const deserializationOptions = { promoteValues: false };
       const deserialized = {
         usingOldDeserializer: OldBSON.deserialize(expectedBuffer, deserializationOptions),
-        usingNewDeserializer: BSON.deserialize(expectedBuffer, deserializationOptions),
+        usingNewDeserializer: BSON.deserialize(expectedBuffer, deserializationOptions)
       };
       // Apparently the Symbol BSON type was deprecated in V4. Symbols in BSON are deserialized as strings in V4
       // Therefore, for this type we know there will be a difference between the V1 library and the V4 library,
       // so remove Symbol from the list of BSON types that are being compared.
       // Browser tests currently don't handle BSON Symbol correctly, so only test this under Node where OldBSON !=== BSON module.
       if (BSON !== OldBSON) {
-        expect(deserialized.usingOldDeserializer['symbol'].value).to.equal(deserialized.usingNewDeserializer['symbol']);
+        expect(deserialized.usingOldDeserializer['symbol'].value).to.equal(
+          deserialized.usingNewDeserializer['symbol']
+        );
       }
       delete deserialized.usingOldDeserializer['symbol'];
       delete deserialized.usingNewDeserializer['symbol'];
 
       const ejsonExpected = {
-        binary: { $binary: { base64: 'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+Pw==', subType: '00' } },
+        binary: {
+          $binary: {
+            base64:
+              'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+Pw==',
+            subType: '00'
+          }
+        },
         code: { $code: 'function() {}' },
         dbRef: { $ref: 'tests', $id: { $numberInt: '1' }, $db: 'test' },
         decimal128: { $numberDecimal: '9991223372036854775807' },
@@ -412,9 +420,15 @@ describe('Extended JSON', function() {
         timestamp: { $timestamp: { t: 0, i: 0 } }
       };
       const ejsonSerializationOptions = { relaxed: false };
-      const resultOld = EJSON.serialize(deserialized.usingOldDeserializer, ejsonSerializationOptions);
+      const resultOld = EJSON.serialize(
+        deserialized.usingOldDeserializer,
+        ejsonSerializationOptions
+      );
       expect(resultOld).to.deep.equal(ejsonExpected);
-      const resultNew = EJSON.serialize(deserialized.usingNewDeserializer, ejsonSerializationOptions);
+      const resultNew = EJSON.serialize(
+        deserialized.usingNewDeserializer,
+        ejsonSerializationOptions
+      );
       expect(resultNew).to.deep.equal(ejsonExpected);
     });
 
@@ -444,7 +458,7 @@ describe('Extended JSON', function() {
         oldObjectOldSerializer: OldBSON.serialize(oldMinKey, serializationOptions),
         oldObjectNewSerializer: BSON.serialize(oldMinKey, serializationOptions),
         newObjectOldSerializer: OldBSON.serialize(newMinKey, serializationOptions),
-        newObjectNewSerializer: BSON.serialize(newMinKey, serializationOptions),
+        newObjectNewSerializer: BSON.serialize(newMinKey, serializationOptions)
       };
 
       expect(expectedBufferMinKey).to.deep.equal(bsonBuffersMinKey.newObjectNewSerializer);
@@ -453,17 +467,23 @@ describe('Extended JSON', function() {
       expect(expectedBufferMinKey).to.deep.equal(bsonBuffersMinKey.oldObjectOldSerializer);
 
       const ejsonExpected = {
-        minKey: { $minKey: 1 },
+        minKey: { $minKey: 1 }
       };
 
       const deserialized = {
         usingOldDeserializer: OldBSON.deserialize(expectedBufferMinKey, deserializationOptions),
-        usingNewDeserializer: BSON.deserialize(expectedBufferMinKey, deserializationOptions),
+        usingNewDeserializer: BSON.deserialize(expectedBufferMinKey, deserializationOptions)
       };
       const ejsonSerializationOptions = { relaxed: false };
-      const resultOld = EJSON.serialize(deserialized.usingOldDeserializer, ejsonSerializationOptions);
+      const resultOld = EJSON.serialize(
+        deserialized.usingOldDeserializer,
+        ejsonSerializationOptions
+      );
       expect(resultOld).to.deep.equal(ejsonExpected);
-      const resultNew = EJSON.serialize(deserialized.usingNewDeserializer, ejsonSerializationOptions);
+      const resultNew = EJSON.serialize(
+        deserialized.usingNewDeserializer,
+        ejsonSerializationOptions
+      );
       expect(resultNew).to.deep.equal(ejsonExpected);
     });
   }
