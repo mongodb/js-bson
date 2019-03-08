@@ -8914,20 +8914,20 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ (function(module, exports, __webpack_require__) {
 
 	var BSON = __webpack_require__(328),
-	    Binary = __webpack_require__(350),
-	    Code = __webpack_require__(345),
-	    DBRef = __webpack_require__(349),
-	    Decimal128 = __webpack_require__(346),
-	    Double = __webpack_require__(335),
-	    Int32 = __webpack_require__(344),
-	    Long = __webpack_require__(334),
-	    Map = __webpack_require__(333),
-	    MaxKey = __webpack_require__(348),
-	    MinKey = __webpack_require__(347),
-	    ObjectId = __webpack_require__(337),
-	    BSONRegExp = __webpack_require__(342),
-	    Symbol = __webpack_require__(343),
-	    Timestamp = __webpack_require__(336);
+	    Binary = __webpack_require__(351),
+	    Code = __webpack_require__(346),
+	    DBRef = __webpack_require__(350),
+	    Decimal128 = __webpack_require__(347),
+	    Double = __webpack_require__(331),
+	    Int32 = __webpack_require__(345),
+	    Long = __webpack_require__(330),
+	    Map = __webpack_require__(329),
+	    MaxKey = __webpack_require__(349),
+	    MinKey = __webpack_require__(348),
+	    ObjectId = __webpack_require__(333),
+	    BSONRegExp = __webpack_require__(343),
+	    Symbol = __webpack_require__(344),
+	    Timestamp = __webpack_require__(332);
 
 	// BSON MAX VALUES
 	BSON.BSON_INT32_MAX = 0x7fffffff;
@@ -8964,27 +8964,28 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 328 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(Buffer) {'use strict';
+	'use strict';
 
-	var Map = __webpack_require__(333),
-	    Long = __webpack_require__(334),
-	    Double = __webpack_require__(335),
-	    Timestamp = __webpack_require__(336),
-	    ObjectID = __webpack_require__(337),
-	    BSONRegExp = __webpack_require__(342),
-	    Symbol = __webpack_require__(343),
-	    Int32 = __webpack_require__(344),
-	    Code = __webpack_require__(345),
-	    Decimal128 = __webpack_require__(346),
-	    MinKey = __webpack_require__(347),
-	    MaxKey = __webpack_require__(348),
-	    DBRef = __webpack_require__(349),
-	    Binary = __webpack_require__(350);
+	var Map = __webpack_require__(329),
+	    Long = __webpack_require__(330),
+	    Double = __webpack_require__(331),
+	    Timestamp = __webpack_require__(332),
+	    ObjectID = __webpack_require__(333),
+	    BSONRegExp = __webpack_require__(343),
+	    Symbol = __webpack_require__(344),
+	    Int32 = __webpack_require__(345),
+	    Code = __webpack_require__(346),
+	    Decimal128 = __webpack_require__(347),
+	    MinKey = __webpack_require__(348),
+	    MaxKey = __webpack_require__(349),
+	    DBRef = __webpack_require__(350),
+	    Binary = __webpack_require__(351);
 
 	// Parts of the parser
-	var deserialize = __webpack_require__(351),
-	    serializer = __webpack_require__(352),
-	    calculateObjectSize = __webpack_require__(355);
+	var deserialize = __webpack_require__(352),
+	    serializer = __webpack_require__(353),
+	    calculateObjectSize = __webpack_require__(355),
+	    utils = __webpack_require__(339);
 
 	/**
 	 * @ignore
@@ -8994,7 +8995,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var MAXSIZE = 1024 * 1024 * 17;
 
 	// Current Internal Temporary Serialization Buffer
-	var buffer = new Buffer(MAXSIZE);
+	var buffer = utils.allocBuffer(MAXSIZE);
 
 	var BSON = function () {};
 
@@ -9019,13 +9020,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  // Resize the internal serialization buffer if needed
 	  if (buffer.length < minInternalBufferSize) {
-	    buffer = new Buffer(minInternalBufferSize);
+	    buffer = utils.allocBuffer(minInternalBufferSize);
 	  }
 
 	  // Attempt to serialize
 	  var serializationIndex = serializer(buffer, object, checkKeys, 0, 0, serializeFunctions, ignoreUndefined, []);
 	  // Create the final buffer
-	  var finishedBuffer = new Buffer(serializationIndex);
+	  var finishedBuffer = utils.allocBuffer(serializationIndex);
 	  // Copy into the finished buffer
 	  buffer.copy(finishedBuffer, 0, 0, finishedBuffer.length);
 	  // Return the buffer
@@ -9317,10 +9318,2263 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports.MaxKey = MaxKey;
 	module.exports.BSONRegExp = BSONRegExp;
 	module.exports.Decimal128 = Decimal128;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(329).Buffer))
 
 /***/ }),
 /* 329 */
+/***/ (function(module, exports) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
+
+	// We have an ES6 Map available, return the native instance
+
+	if (typeof global.Map !== 'undefined') {
+	  module.exports = global.Map;
+	  module.exports.Map = global.Map;
+	} else {
+	  // We will return a polyfill
+	  var Map = function (array) {
+	    this._keys = [];
+	    this._values = {};
+
+	    for (var i = 0; i < array.length; i++) {
+	      if (array[i] == null) continue; // skip null and undefined
+	      var entry = array[i];
+	      var key = entry[0];
+	      var value = entry[1];
+	      // Add the key to the list of keys in order
+	      this._keys.push(key);
+	      // Add the key and value to the values dictionary with a point
+	      // to the location in the ordered keys list
+	      this._values[key] = { v: value, i: this._keys.length - 1 };
+	    }
+	  };
+
+	  Map.prototype.clear = function () {
+	    this._keys = [];
+	    this._values = {};
+	  };
+
+	  Map.prototype.delete = function (key) {
+	    var value = this._values[key];
+	    if (value == null) return false;
+	    // Delete entry
+	    delete this._values[key];
+	    // Remove the key from the ordered keys list
+	    this._keys.splice(value.i, 1);
+	    return true;
+	  };
+
+	  Map.prototype.entries = function () {
+	    var self = this;
+	    var index = 0;
+
+	    return {
+	      next: function () {
+	        var key = self._keys[index++];
+	        return {
+	          value: key !== undefined ? [key, self._values[key].v] : undefined,
+	          done: key !== undefined ? false : true
+	        };
+	      }
+	    };
+	  };
+
+	  Map.prototype.forEach = function (callback, self) {
+	    self = self || this;
+
+	    for (var i = 0; i < this._keys.length; i++) {
+	      var key = this._keys[i];
+	      // Call the forEach callback
+	      callback.call(self, this._values[key].v, key, self);
+	    }
+	  };
+
+	  Map.prototype.get = function (key) {
+	    return this._values[key] ? this._values[key].v : undefined;
+	  };
+
+	  Map.prototype.has = function (key) {
+	    return this._values[key] != null;
+	  };
+
+	  Map.prototype.keys = function () {
+	    var self = this;
+	    var index = 0;
+
+	    return {
+	      next: function () {
+	        var key = self._keys[index++];
+	        return {
+	          value: key !== undefined ? key : undefined,
+	          done: key !== undefined ? false : true
+	        };
+	      }
+	    };
+	  };
+
+	  Map.prototype.set = function (key, value) {
+	    if (this._values[key]) {
+	      this._values[key].v = value;
+	      return this;
+	    }
+
+	    // Add the key to the list of keys in order
+	    this._keys.push(key);
+	    // Add the key and value to the values dictionary with a point
+	    // to the location in the ordered keys list
+	    this._values[key] = { v: value, i: this._keys.length - 1 };
+	    return this;
+	  };
+
+	  Map.prototype.values = function () {
+	    var self = this;
+	    var index = 0;
+
+	    return {
+	      next: function () {
+	        var key = self._keys[index++];
+	        return {
+	          value: key !== undefined ? self._values[key].v : undefined,
+	          done: key !== undefined ? false : true
+	        };
+	      }
+	    };
+	  };
+
+	  // Last ismaster
+	  Object.defineProperty(Map.prototype, 'size', {
+	    enumerable: true,
+	    get: function () {
+	      return this._keys.length;
+	    }
+	  });
+
+	  module.exports = Map;
+	  module.exports.Map = Map;
+	}
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ }),
+/* 330 */
+/***/ (function(module, exports) {
+
+	// Licensed under the Apache License, Version 2.0 (the "License");
+	// you may not use this file except in compliance with the License.
+	// You may obtain a copy of the License at
+	//
+	//     http://www.apache.org/licenses/LICENSE-2.0
+	//
+	// Unless required by applicable law or agreed to in writing, software
+	// distributed under the License is distributed on an "AS IS" BASIS,
+	// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	// See the License for the specific language governing permissions and
+	// limitations under the License.
+	//
+	// Copyright 2009 Google Inc. All Rights Reserved
+
+	/**
+	 * Defines a Long class for representing a 64-bit two's-complement
+	 * integer value, which faithfully simulates the behavior of a Java "Long". This
+	 * implementation is derived from LongLib in GWT.
+	 *
+	 * Constructs a 64-bit two's-complement integer, given its low and high 32-bit
+	 * values as *signed* integers.  See the from* functions below for more
+	 * convenient ways of constructing Longs.
+	 *
+	 * The internal representation of a Long is the two given signed, 32-bit values.
+	 * We use 32-bit pieces because these are the size of integers on which
+	 * Javascript performs bit-operations.  For operations like addition and
+	 * multiplication, we split each number into 16-bit pieces, which can easily be
+	 * multiplied within Javascript's floating-point representation without overflow
+	 * or change in sign.
+	 *
+	 * In the algorithms below, we frequently reduce the negative case to the
+	 * positive case by negating the input(s) and then post-processing the result.
+	 * Note that we must ALWAYS check specially whether those values are MIN_VALUE
+	 * (-2^63) because -MIN_VALUE == MIN_VALUE (since 2^63 cannot be represented as
+	 * a positive number, it overflows back into a negative).  Not handling this
+	 * case would often result in infinite recursion.
+	 *
+	 * @class
+	 * @param {number} low  the low (signed) 32 bits of the Long.
+	 * @param {number} high the high (signed) 32 bits of the Long.
+	 * @return {Long}
+	 */
+	function Long(low, high) {
+	  if (!(this instanceof Long)) return new Long(low, high);
+
+	  this._bsontype = 'Long';
+	  /**
+	   * @type {number}
+	   * @ignore
+	   */
+	  this.low_ = low | 0; // force into 32 signed bits.
+
+	  /**
+	   * @type {number}
+	   * @ignore
+	   */
+	  this.high_ = high | 0; // force into 32 signed bits.
+	}
+
+	/**
+	 * Return the int value.
+	 *
+	 * @method
+	 * @return {number} the value, assuming it is a 32-bit integer.
+	 */
+	Long.prototype.toInt = function () {
+	  return this.low_;
+	};
+
+	/**
+	 * Return the Number value.
+	 *
+	 * @method
+	 * @return {number} the closest floating-point representation to this value.
+	 */
+	Long.prototype.toNumber = function () {
+	  return this.high_ * Long.TWO_PWR_32_DBL_ + this.getLowBitsUnsigned();
+	};
+
+	/**
+	 * Return the JSON value.
+	 *
+	 * @method
+	 * @return {string} the JSON representation.
+	 */
+	Long.prototype.toJSON = function () {
+	  return this.toString();
+	};
+
+	/**
+	 * Return the String value.
+	 *
+	 * @method
+	 * @param {number} [opt_radix] the radix in which the text should be written.
+	 * @return {string} the textual representation of this value.
+	 */
+	Long.prototype.toString = function (opt_radix) {
+	  var radix = opt_radix || 10;
+	  if (radix < 2 || 36 < radix) {
+	    throw Error('radix out of range: ' + radix);
+	  }
+
+	  if (this.isZero()) {
+	    return '0';
+	  }
+
+	  if (this.isNegative()) {
+	    if (this.equals(Long.MIN_VALUE)) {
+	      // We need to change the Long value before it can be negated, so we remove
+	      // the bottom-most digit in this base and then recurse to do the rest.
+	      var radixLong = Long.fromNumber(radix);
+	      var div = this.div(radixLong);
+	      var rem = div.multiply(radixLong).subtract(this);
+	      return div.toString(radix) + rem.toInt().toString(radix);
+	    } else {
+	      return '-' + this.negate().toString(radix);
+	    }
+	  }
+
+	  // Do several (6) digits each time through the loop, so as to
+	  // minimize the calls to the very expensive emulated div.
+	  var radixToPower = Long.fromNumber(Math.pow(radix, 6));
+
+	  rem = this;
+	  var result = '';
+
+	  while (!rem.isZero()) {
+	    var remDiv = rem.div(radixToPower);
+	    var intval = rem.subtract(remDiv.multiply(radixToPower)).toInt();
+	    var digits = intval.toString(radix);
+
+	    rem = remDiv;
+	    if (rem.isZero()) {
+	      return digits + result;
+	    } else {
+	      while (digits.length < 6) {
+	        digits = '0' + digits;
+	      }
+	      result = '' + digits + result;
+	    }
+	  }
+	};
+
+	/**
+	 * Return the high 32-bits value.
+	 *
+	 * @method
+	 * @return {number} the high 32-bits as a signed value.
+	 */
+	Long.prototype.getHighBits = function () {
+	  return this.high_;
+	};
+
+	/**
+	 * Return the low 32-bits value.
+	 *
+	 * @method
+	 * @return {number} the low 32-bits as a signed value.
+	 */
+	Long.prototype.getLowBits = function () {
+	  return this.low_;
+	};
+
+	/**
+	 * Return the low unsigned 32-bits value.
+	 *
+	 * @method
+	 * @return {number} the low 32-bits as an unsigned value.
+	 */
+	Long.prototype.getLowBitsUnsigned = function () {
+	  return this.low_ >= 0 ? this.low_ : Long.TWO_PWR_32_DBL_ + this.low_;
+	};
+
+	/**
+	 * Returns the number of bits needed to represent the absolute value of this Long.
+	 *
+	 * @method
+	 * @return {number} Returns the number of bits needed to represent the absolute value of this Long.
+	 */
+	Long.prototype.getNumBitsAbs = function () {
+	  if (this.isNegative()) {
+	    if (this.equals(Long.MIN_VALUE)) {
+	      return 64;
+	    } else {
+	      return this.negate().getNumBitsAbs();
+	    }
+	  } else {
+	    var val = this.high_ !== 0 ? this.high_ : this.low_;
+	    for (var bit = 31; bit > 0; bit--) {
+	      if ((val & 1 << bit) !== 0) {
+	        break;
+	      }
+	    }
+	    return this.high_ !== 0 ? bit + 33 : bit + 1;
+	  }
+	};
+
+	/**
+	 * Return whether this value is zero.
+	 *
+	 * @method
+	 * @return {boolean} whether this value is zero.
+	 */
+	Long.prototype.isZero = function () {
+	  return this.high_ === 0 && this.low_ === 0;
+	};
+
+	/**
+	 * Return whether this value is negative.
+	 *
+	 * @method
+	 * @return {boolean} whether this value is negative.
+	 */
+	Long.prototype.isNegative = function () {
+	  return this.high_ < 0;
+	};
+
+	/**
+	 * Return whether this value is odd.
+	 *
+	 * @method
+	 * @return {boolean} whether this value is odd.
+	 */
+	Long.prototype.isOdd = function () {
+	  return (this.low_ & 1) === 1;
+	};
+
+	/**
+	 * Return whether this Long equals the other
+	 *
+	 * @method
+	 * @param {Long} other Long to compare against.
+	 * @return {boolean} whether this Long equals the other
+	 */
+	Long.prototype.equals = function (other) {
+	  return this.high_ === other.high_ && this.low_ === other.low_;
+	};
+
+	/**
+	 * Return whether this Long does not equal the other.
+	 *
+	 * @method
+	 * @param {Long} other Long to compare against.
+	 * @return {boolean} whether this Long does not equal the other.
+	 */
+	Long.prototype.notEquals = function (other) {
+	  return this.high_ !== other.high_ || this.low_ !== other.low_;
+	};
+
+	/**
+	 * Return whether this Long is less than the other.
+	 *
+	 * @method
+	 * @param {Long} other Long to compare against.
+	 * @return {boolean} whether this Long is less than the other.
+	 */
+	Long.prototype.lessThan = function (other) {
+	  return this.compare(other) < 0;
+	};
+
+	/**
+	 * Return whether this Long is less than or equal to the other.
+	 *
+	 * @method
+	 * @param {Long} other Long to compare against.
+	 * @return {boolean} whether this Long is less than or equal to the other.
+	 */
+	Long.prototype.lessThanOrEqual = function (other) {
+	  return this.compare(other) <= 0;
+	};
+
+	/**
+	 * Return whether this Long is greater than the other.
+	 *
+	 * @method
+	 * @param {Long} other Long to compare against.
+	 * @return {boolean} whether this Long is greater than the other.
+	 */
+	Long.prototype.greaterThan = function (other) {
+	  return this.compare(other) > 0;
+	};
+
+	/**
+	 * Return whether this Long is greater than or equal to the other.
+	 *
+	 * @method
+	 * @param {Long} other Long to compare against.
+	 * @return {boolean} whether this Long is greater than or equal to the other.
+	 */
+	Long.prototype.greaterThanOrEqual = function (other) {
+	  return this.compare(other) >= 0;
+	};
+
+	/**
+	 * Compares this Long with the given one.
+	 *
+	 * @method
+	 * @param {Long} other Long to compare against.
+	 * @return {boolean} 0 if they are the same, 1 if the this is greater, and -1 if the given one is greater.
+	 */
+	Long.prototype.compare = function (other) {
+	  if (this.equals(other)) {
+	    return 0;
+	  }
+
+	  var thisNeg = this.isNegative();
+	  var otherNeg = other.isNegative();
+	  if (thisNeg && !otherNeg) {
+	    return -1;
+	  }
+	  if (!thisNeg && otherNeg) {
+	    return 1;
+	  }
+
+	  // at this point, the signs are the same, so subtraction will not overflow
+	  if (this.subtract(other).isNegative()) {
+	    return -1;
+	  } else {
+	    return 1;
+	  }
+	};
+
+	/**
+	 * The negation of this value.
+	 *
+	 * @method
+	 * @return {Long} the negation of this value.
+	 */
+	Long.prototype.negate = function () {
+	  if (this.equals(Long.MIN_VALUE)) {
+	    return Long.MIN_VALUE;
+	  } else {
+	    return this.not().add(Long.ONE);
+	  }
+	};
+
+	/**
+	 * Returns the sum of this and the given Long.
+	 *
+	 * @method
+	 * @param {Long} other Long to add to this one.
+	 * @return {Long} the sum of this and the given Long.
+	 */
+	Long.prototype.add = function (other) {
+	  // Divide each number into 4 chunks of 16 bits, and then sum the chunks.
+
+	  var a48 = this.high_ >>> 16;
+	  var a32 = this.high_ & 0xffff;
+	  var a16 = this.low_ >>> 16;
+	  var a00 = this.low_ & 0xffff;
+
+	  var b48 = other.high_ >>> 16;
+	  var b32 = other.high_ & 0xffff;
+	  var b16 = other.low_ >>> 16;
+	  var b00 = other.low_ & 0xffff;
+
+	  var c48 = 0,
+	      c32 = 0,
+	      c16 = 0,
+	      c00 = 0;
+	  c00 += a00 + b00;
+	  c16 += c00 >>> 16;
+	  c00 &= 0xffff;
+	  c16 += a16 + b16;
+	  c32 += c16 >>> 16;
+	  c16 &= 0xffff;
+	  c32 += a32 + b32;
+	  c48 += c32 >>> 16;
+	  c32 &= 0xffff;
+	  c48 += a48 + b48;
+	  c48 &= 0xffff;
+	  return Long.fromBits(c16 << 16 | c00, c48 << 16 | c32);
+	};
+
+	/**
+	 * Returns the difference of this and the given Long.
+	 *
+	 * @method
+	 * @param {Long} other Long to subtract from this.
+	 * @return {Long} the difference of this and the given Long.
+	 */
+	Long.prototype.subtract = function (other) {
+	  return this.add(other.negate());
+	};
+
+	/**
+	 * Returns the product of this and the given Long.
+	 *
+	 * @method
+	 * @param {Long} other Long to multiply with this.
+	 * @return {Long} the product of this and the other.
+	 */
+	Long.prototype.multiply = function (other) {
+	  if (this.isZero()) {
+	    return Long.ZERO;
+	  } else if (other.isZero()) {
+	    return Long.ZERO;
+	  }
+
+	  if (this.equals(Long.MIN_VALUE)) {
+	    return other.isOdd() ? Long.MIN_VALUE : Long.ZERO;
+	  } else if (other.equals(Long.MIN_VALUE)) {
+	    return this.isOdd() ? Long.MIN_VALUE : Long.ZERO;
+	  }
+
+	  if (this.isNegative()) {
+	    if (other.isNegative()) {
+	      return this.negate().multiply(other.negate());
+	    } else {
+	      return this.negate().multiply(other).negate();
+	    }
+	  } else if (other.isNegative()) {
+	    return this.multiply(other.negate()).negate();
+	  }
+
+	  // If both Longs are small, use float multiplication
+	  if (this.lessThan(Long.TWO_PWR_24_) && other.lessThan(Long.TWO_PWR_24_)) {
+	    return Long.fromNumber(this.toNumber() * other.toNumber());
+	  }
+
+	  // Divide each Long into 4 chunks of 16 bits, and then add up 4x4 products.
+	  // We can skip products that would overflow.
+
+	  var a48 = this.high_ >>> 16;
+	  var a32 = this.high_ & 0xffff;
+	  var a16 = this.low_ >>> 16;
+	  var a00 = this.low_ & 0xffff;
+
+	  var b48 = other.high_ >>> 16;
+	  var b32 = other.high_ & 0xffff;
+	  var b16 = other.low_ >>> 16;
+	  var b00 = other.low_ & 0xffff;
+
+	  var c48 = 0,
+	      c32 = 0,
+	      c16 = 0,
+	      c00 = 0;
+	  c00 += a00 * b00;
+	  c16 += c00 >>> 16;
+	  c00 &= 0xffff;
+	  c16 += a16 * b00;
+	  c32 += c16 >>> 16;
+	  c16 &= 0xffff;
+	  c16 += a00 * b16;
+	  c32 += c16 >>> 16;
+	  c16 &= 0xffff;
+	  c32 += a32 * b00;
+	  c48 += c32 >>> 16;
+	  c32 &= 0xffff;
+	  c32 += a16 * b16;
+	  c48 += c32 >>> 16;
+	  c32 &= 0xffff;
+	  c32 += a00 * b32;
+	  c48 += c32 >>> 16;
+	  c32 &= 0xffff;
+	  c48 += a48 * b00 + a32 * b16 + a16 * b32 + a00 * b48;
+	  c48 &= 0xffff;
+	  return Long.fromBits(c16 << 16 | c00, c48 << 16 | c32);
+	};
+
+	/**
+	 * Returns this Long divided by the given one.
+	 *
+	 * @method
+	 * @param {Long} other Long by which to divide.
+	 * @return {Long} this Long divided by the given one.
+	 */
+	Long.prototype.div = function (other) {
+	  if (other.isZero()) {
+	    throw Error('division by zero');
+	  } else if (this.isZero()) {
+	    return Long.ZERO;
+	  }
+
+	  if (this.equals(Long.MIN_VALUE)) {
+	    if (other.equals(Long.ONE) || other.equals(Long.NEG_ONE)) {
+	      return Long.MIN_VALUE; // recall that -MIN_VALUE == MIN_VALUE
+	    } else if (other.equals(Long.MIN_VALUE)) {
+	      return Long.ONE;
+	    } else {
+	      // At this point, we have |other| >= 2, so |this/other| < |MIN_VALUE|.
+	      var halfThis = this.shiftRight(1);
+	      var approx = halfThis.div(other).shiftLeft(1);
+	      if (approx.equals(Long.ZERO)) {
+	        return other.isNegative() ? Long.ONE : Long.NEG_ONE;
+	      } else {
+	        var rem = this.subtract(other.multiply(approx));
+	        var result = approx.add(rem.div(other));
+	        return result;
+	      }
+	    }
+	  } else if (other.equals(Long.MIN_VALUE)) {
+	    return Long.ZERO;
+	  }
+
+	  if (this.isNegative()) {
+	    if (other.isNegative()) {
+	      return this.negate().div(other.negate());
+	    } else {
+	      return this.negate().div(other).negate();
+	    }
+	  } else if (other.isNegative()) {
+	    return this.div(other.negate()).negate();
+	  }
+
+	  // Repeat the following until the remainder is less than other:  find a
+	  // floating-point that approximates remainder / other *from below*, add this
+	  // into the result, and subtract it from the remainder.  It is critical that
+	  // the approximate value is less than or equal to the real value so that the
+	  // remainder never becomes negative.
+	  var res = Long.ZERO;
+	  rem = this;
+	  while (rem.greaterThanOrEqual(other)) {
+	    // Approximate the result of division. This may be a little greater or
+	    // smaller than the actual value.
+	    approx = Math.max(1, Math.floor(rem.toNumber() / other.toNumber()));
+
+	    // We will tweak the approximate result by changing it in the 48-th digit or
+	    // the smallest non-fractional digit, whichever is larger.
+	    var log2 = Math.ceil(Math.log(approx) / Math.LN2);
+	    var delta = log2 <= 48 ? 1 : Math.pow(2, log2 - 48);
+
+	    // Decrease the approximation until it is smaller than the remainder.  Note
+	    // that if it is too large, the product overflows and is negative.
+	    var approxRes = Long.fromNumber(approx);
+	    var approxRem = approxRes.multiply(other);
+	    while (approxRem.isNegative() || approxRem.greaterThan(rem)) {
+	      approx -= delta;
+	      approxRes = Long.fromNumber(approx);
+	      approxRem = approxRes.multiply(other);
+	    }
+
+	    // We know the answer can't be zero... and actually, zero would cause
+	    // infinite recursion since we would make no progress.
+	    if (approxRes.isZero()) {
+	      approxRes = Long.ONE;
+	    }
+
+	    res = res.add(approxRes);
+	    rem = rem.subtract(approxRem);
+	  }
+	  return res;
+	};
+
+	/**
+	 * Returns this Long modulo the given one.
+	 *
+	 * @method
+	 * @param {Long} other Long by which to mod.
+	 * @return {Long} this Long modulo the given one.
+	 */
+	Long.prototype.modulo = function (other) {
+	  return this.subtract(this.div(other).multiply(other));
+	};
+
+	/**
+	 * The bitwise-NOT of this value.
+	 *
+	 * @method
+	 * @return {Long} the bitwise-NOT of this value.
+	 */
+	Long.prototype.not = function () {
+	  return Long.fromBits(~this.low_, ~this.high_);
+	};
+
+	/**
+	 * Returns the bitwise-AND of this Long and the given one.
+	 *
+	 * @method
+	 * @param {Long} other the Long with which to AND.
+	 * @return {Long} the bitwise-AND of this and the other.
+	 */
+	Long.prototype.and = function (other) {
+	  return Long.fromBits(this.low_ & other.low_, this.high_ & other.high_);
+	};
+
+	/**
+	 * Returns the bitwise-OR of this Long and the given one.
+	 *
+	 * @method
+	 * @param {Long} other the Long with which to OR.
+	 * @return {Long} the bitwise-OR of this and the other.
+	 */
+	Long.prototype.or = function (other) {
+	  return Long.fromBits(this.low_ | other.low_, this.high_ | other.high_);
+	};
+
+	/**
+	 * Returns the bitwise-XOR of this Long and the given one.
+	 *
+	 * @method
+	 * @param {Long} other the Long with which to XOR.
+	 * @return {Long} the bitwise-XOR of this and the other.
+	 */
+	Long.prototype.xor = function (other) {
+	  return Long.fromBits(this.low_ ^ other.low_, this.high_ ^ other.high_);
+	};
+
+	/**
+	 * Returns this Long with bits shifted to the left by the given amount.
+	 *
+	 * @method
+	 * @param {number} numBits the number of bits by which to shift.
+	 * @return {Long} this shifted to the left by the given amount.
+	 */
+	Long.prototype.shiftLeft = function (numBits) {
+	  numBits &= 63;
+	  if (numBits === 0) {
+	    return this;
+	  } else {
+	    var low = this.low_;
+	    if (numBits < 32) {
+	      var high = this.high_;
+	      return Long.fromBits(low << numBits, high << numBits | low >>> 32 - numBits);
+	    } else {
+	      return Long.fromBits(0, low << numBits - 32);
+	    }
+	  }
+	};
+
+	/**
+	 * Returns this Long with bits shifted to the right by the given amount.
+	 *
+	 * @method
+	 * @param {number} numBits the number of bits by which to shift.
+	 * @return {Long} this shifted to the right by the given amount.
+	 */
+	Long.prototype.shiftRight = function (numBits) {
+	  numBits &= 63;
+	  if (numBits === 0) {
+	    return this;
+	  } else {
+	    var high = this.high_;
+	    if (numBits < 32) {
+	      var low = this.low_;
+	      return Long.fromBits(low >>> numBits | high << 32 - numBits, high >> numBits);
+	    } else {
+	      return Long.fromBits(high >> numBits - 32, high >= 0 ? 0 : -1);
+	    }
+	  }
+	};
+
+	/**
+	 * Returns this Long with bits shifted to the right by the given amount, with the new top bits matching the current sign bit.
+	 *
+	 * @method
+	 * @param {number} numBits the number of bits by which to shift.
+	 * @return {Long} this shifted to the right by the given amount, with zeros placed into the new leading bits.
+	 */
+	Long.prototype.shiftRightUnsigned = function (numBits) {
+	  numBits &= 63;
+	  if (numBits === 0) {
+	    return this;
+	  } else {
+	    var high = this.high_;
+	    if (numBits < 32) {
+	      var low = this.low_;
+	      return Long.fromBits(low >>> numBits | high << 32 - numBits, high >>> numBits);
+	    } else if (numBits === 32) {
+	      return Long.fromBits(high, 0);
+	    } else {
+	      return Long.fromBits(high >>> numBits - 32, 0);
+	    }
+	  }
+	};
+
+	/**
+	 * Returns a Long representing the given (32-bit) integer value.
+	 *
+	 * @method
+	 * @param {number} value the 32-bit integer in question.
+	 * @return {Long} the corresponding Long value.
+	 */
+	Long.fromInt = function (value) {
+	  if (-128 <= value && value < 128) {
+	    var cachedObj = Long.INT_CACHE_[value];
+	    if (cachedObj) {
+	      return cachedObj;
+	    }
+	  }
+
+	  var obj = new Long(value | 0, value < 0 ? -1 : 0);
+	  if (-128 <= value && value < 128) {
+	    Long.INT_CACHE_[value] = obj;
+	  }
+	  return obj;
+	};
+
+	/**
+	 * Returns a Long representing the given value, provided that it is a finite number. Otherwise, zero is returned.
+	 *
+	 * @method
+	 * @param {number} value the number in question.
+	 * @return {Long} the corresponding Long value.
+	 */
+	Long.fromNumber = function (value) {
+	  if (isNaN(value) || !isFinite(value)) {
+	    return Long.ZERO;
+	  } else if (value <= -Long.TWO_PWR_63_DBL_) {
+	    return Long.MIN_VALUE;
+	  } else if (value + 1 >= Long.TWO_PWR_63_DBL_) {
+	    return Long.MAX_VALUE;
+	  } else if (value < 0) {
+	    return Long.fromNumber(-value).negate();
+	  } else {
+	    return new Long(value % Long.TWO_PWR_32_DBL_ | 0, value / Long.TWO_PWR_32_DBL_ | 0);
+	  }
+	};
+
+	/**
+	 * Returns a Long representing the 64-bit integer that comes by concatenating the given high and low bits. Each is assumed to use 32 bits.
+	 *
+	 * @method
+	 * @param {number} lowBits the low 32-bits.
+	 * @param {number} highBits the high 32-bits.
+	 * @return {Long} the corresponding Long value.
+	 */
+	Long.fromBits = function (lowBits, highBits) {
+	  return new Long(lowBits, highBits);
+	};
+
+	/**
+	 * Returns a Long representation of the given string, written using the given radix.
+	 *
+	 * @method
+	 * @param {string} str the textual representation of the Long.
+	 * @param {number} opt_radix the radix in which the text is written.
+	 * @return {Long} the corresponding Long value.
+	 */
+	Long.fromString = function (str, opt_radix) {
+	  if (str.length === 0) {
+	    throw Error('number format error: empty string');
+	  }
+
+	  var radix = opt_radix || 10;
+	  if (radix < 2 || 36 < radix) {
+	    throw Error('radix out of range: ' + radix);
+	  }
+
+	  if (str.charAt(0) === '-') {
+	    return Long.fromString(str.substring(1), radix).negate();
+	  } else if (str.indexOf('-') >= 0) {
+	    throw Error('number format error: interior "-" character: ' + str);
+	  }
+
+	  // Do several (8) digits each time through the loop, so as to
+	  // minimize the calls to the very expensive emulated div.
+	  var radixToPower = Long.fromNumber(Math.pow(radix, 8));
+
+	  var result = Long.ZERO;
+	  for (var i = 0; i < str.length; i += 8) {
+	    var size = Math.min(8, str.length - i);
+	    var value = parseInt(str.substring(i, i + size), radix);
+	    if (size < 8) {
+	      var power = Long.fromNumber(Math.pow(radix, size));
+	      result = result.multiply(power).add(Long.fromNumber(value));
+	    } else {
+	      result = result.multiply(radixToPower);
+	      result = result.add(Long.fromNumber(value));
+	    }
+	  }
+	  return result;
+	};
+
+	// NOTE: Common constant values ZERO, ONE, NEG_ONE, etc. are defined below the
+	// from* methods on which they depend.
+
+	/**
+	 * A cache of the Long representations of small integer values.
+	 * @type {Object}
+	 * @ignore
+	 */
+	Long.INT_CACHE_ = {};
+
+	// NOTE: the compiler should inline these constant values below and then remove
+	// these variables, so there should be no runtime penalty for these.
+
+	/**
+	 * Number used repeated below in calculations.  This must appear before the
+	 * first call to any from* function below.
+	 * @type {number}
+	 * @ignore
+	 */
+	Long.TWO_PWR_16_DBL_ = 1 << 16;
+
+	/**
+	 * @type {number}
+	 * @ignore
+	 */
+	Long.TWO_PWR_24_DBL_ = 1 << 24;
+
+	/**
+	 * @type {number}
+	 * @ignore
+	 */
+	Long.TWO_PWR_32_DBL_ = Long.TWO_PWR_16_DBL_ * Long.TWO_PWR_16_DBL_;
+
+	/**
+	 * @type {number}
+	 * @ignore
+	 */
+	Long.TWO_PWR_31_DBL_ = Long.TWO_PWR_32_DBL_ / 2;
+
+	/**
+	 * @type {number}
+	 * @ignore
+	 */
+	Long.TWO_PWR_48_DBL_ = Long.TWO_PWR_32_DBL_ * Long.TWO_PWR_16_DBL_;
+
+	/**
+	 * @type {number}
+	 * @ignore
+	 */
+	Long.TWO_PWR_64_DBL_ = Long.TWO_PWR_32_DBL_ * Long.TWO_PWR_32_DBL_;
+
+	/**
+	 * @type {number}
+	 * @ignore
+	 */
+	Long.TWO_PWR_63_DBL_ = Long.TWO_PWR_64_DBL_ / 2;
+
+	/** @type {Long} */
+	Long.ZERO = Long.fromInt(0);
+
+	/** @type {Long} */
+	Long.ONE = Long.fromInt(1);
+
+	/** @type {Long} */
+	Long.NEG_ONE = Long.fromInt(-1);
+
+	/** @type {Long} */
+	Long.MAX_VALUE = Long.fromBits(0xffffffff | 0, 0x7fffffff | 0);
+
+	/** @type {Long} */
+	Long.MIN_VALUE = Long.fromBits(0, 0x80000000 | 0);
+
+	/**
+	 * @type {Long}
+	 * @ignore
+	 */
+	Long.TWO_PWR_24_ = Long.fromInt(1 << 24);
+
+	/**
+	 * Expose.
+	 */
+	module.exports = Long;
+	module.exports.Long = Long;
+
+/***/ }),
+/* 331 */
+/***/ (function(module, exports) {
+
+	/**
+	 * A class representation of the BSON Double type.
+	 *
+	 * @class
+	 * @param {number} value the number we want to represent as a double.
+	 * @return {Double}
+	 */
+	function Double(value) {
+	  if (!(this instanceof Double)) return new Double(value);
+
+	  this._bsontype = 'Double';
+	  this.value = value;
+	}
+
+	/**
+	 * Access the number value.
+	 *
+	 * @method
+	 * @return {number} returns the wrapped double number.
+	 */
+	Double.prototype.valueOf = function () {
+	  return this.value;
+	};
+
+	/**
+	 * @ignore
+	 */
+	Double.prototype.toJSON = function () {
+	  return this.value;
+	};
+
+	module.exports = Double;
+	module.exports.Double = Double;
+
+/***/ }),
+/* 332 */
+/***/ (function(module, exports) {
+
+	// Licensed under the Apache License, Version 2.0 (the "License");
+	// you may not use this file except in compliance with the License.
+	// You may obtain a copy of the License at
+	//
+	//     http://www.apache.org/licenses/LICENSE-2.0
+	//
+	// Unless required by applicable law or agreed to in writing, software
+	// distributed under the License is distributed on an "AS IS" BASIS,
+	// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	// See the License for the specific language governing permissions and
+	// limitations under the License.
+	//
+	// Copyright 2009 Google Inc. All Rights Reserved
+
+	/**
+	 * This type is for INTERNAL use in MongoDB only and should not be used in applications.
+	 * The appropriate corresponding type is the JavaScript Date type.
+	 * 
+	 * Defines a Timestamp class for representing a 64-bit two's-complement
+	 * integer value, which faithfully simulates the behavior of a Java "Timestamp". This
+	 * implementation is derived from TimestampLib in GWT.
+	 *
+	 * Constructs a 64-bit two's-complement integer, given its low and high 32-bit
+	 * values as *signed* integers.  See the from* functions below for more
+	 * convenient ways of constructing Timestamps.
+	 *
+	 * The internal representation of a Timestamp is the two given signed, 32-bit values.
+	 * We use 32-bit pieces because these are the size of integers on which
+	 * Javascript performs bit-operations.  For operations like addition and
+	 * multiplication, we split each number into 16-bit pieces, which can easily be
+	 * multiplied within Javascript's floating-point representation without overflow
+	 * or change in sign.
+	 *
+	 * In the algorithms below, we frequently reduce the negative case to the
+	 * positive case by negating the input(s) and then post-processing the result.
+	 * Note that we must ALWAYS check specially whether those values are MIN_VALUE
+	 * (-2^63) because -MIN_VALUE == MIN_VALUE (since 2^63 cannot be represented as
+	 * a positive number, it overflows back into a negative).  Not handling this
+	 * case would often result in infinite recursion.
+	 *
+	 * @class
+	 * @param {number} low  the low (signed) 32 bits of the Timestamp.
+	 * @param {number} high the high (signed) 32 bits of the Timestamp.
+	 */
+	function Timestamp(low, high) {
+	  if (!(this instanceof Timestamp)) return new Timestamp(low, high);
+	  this._bsontype = 'Timestamp';
+	  /**
+	   * @type {number}
+	   * @ignore
+	   */
+	  this.low_ = low | 0; // force into 32 signed bits.
+
+	  /**
+	   * @type {number}
+	   * @ignore
+	   */
+	  this.high_ = high | 0; // force into 32 signed bits.
+	}
+
+	/**
+	 * Return the int value.
+	 *
+	 * @return {number} the value, assuming it is a 32-bit integer.
+	 */
+	Timestamp.prototype.toInt = function () {
+	  return this.low_;
+	};
+
+	/**
+	 * Return the Number value.
+	 *
+	 * @method
+	 * @return {number} the closest floating-point representation to this value.
+	 */
+	Timestamp.prototype.toNumber = function () {
+	  return this.high_ * Timestamp.TWO_PWR_32_DBL_ + this.getLowBitsUnsigned();
+	};
+
+	/**
+	 * Return the JSON value.
+	 *
+	 * @method
+	 * @return {string} the JSON representation.
+	 */
+	Timestamp.prototype.toJSON = function () {
+	  return this.toString();
+	};
+
+	/**
+	 * Return the String value.
+	 *
+	 * @method
+	 * @param {number} [opt_radix] the radix in which the text should be written.
+	 * @return {string} the textual representation of this value.
+	 */
+	Timestamp.prototype.toString = function (opt_radix) {
+	  var radix = opt_radix || 10;
+	  if (radix < 2 || 36 < radix) {
+	    throw Error('radix out of range: ' + radix);
+	  }
+
+	  if (this.isZero()) {
+	    return '0';
+	  }
+
+	  if (this.isNegative()) {
+	    if (this.equals(Timestamp.MIN_VALUE)) {
+	      // We need to change the Timestamp value before it can be negated, so we remove
+	      // the bottom-most digit in this base and then recurse to do the rest.
+	      var radixTimestamp = Timestamp.fromNumber(radix);
+	      var div = this.div(radixTimestamp);
+	      var rem = div.multiply(radixTimestamp).subtract(this);
+	      return div.toString(radix) + rem.toInt().toString(radix);
+	    } else {
+	      return '-' + this.negate().toString(radix);
+	    }
+	  }
+
+	  // Do several (6) digits each time through the loop, so as to
+	  // minimize the calls to the very expensive emulated div.
+	  var radixToPower = Timestamp.fromNumber(Math.pow(radix, 6));
+
+	  rem = this;
+	  var result = '';
+
+	  while (!rem.isZero()) {
+	    var remDiv = rem.div(radixToPower);
+	    var intval = rem.subtract(remDiv.multiply(radixToPower)).toInt();
+	    var digits = intval.toString(radix);
+
+	    rem = remDiv;
+	    if (rem.isZero()) {
+	      return digits + result;
+	    } else {
+	      while (digits.length < 6) {
+	        digits = '0' + digits;
+	      }
+	      result = '' + digits + result;
+	    }
+	  }
+	};
+
+	/**
+	 * Return the high 32-bits value.
+	 *
+	 * @method
+	 * @return {number} the high 32-bits as a signed value.
+	 */
+	Timestamp.prototype.getHighBits = function () {
+	  return this.high_;
+	};
+
+	/**
+	 * Return the low 32-bits value.
+	 *
+	 * @method
+	 * @return {number} the low 32-bits as a signed value.
+	 */
+	Timestamp.prototype.getLowBits = function () {
+	  return this.low_;
+	};
+
+	/**
+	 * Return the low unsigned 32-bits value.
+	 *
+	 * @method
+	 * @return {number} the low 32-bits as an unsigned value.
+	 */
+	Timestamp.prototype.getLowBitsUnsigned = function () {
+	  return this.low_ >= 0 ? this.low_ : Timestamp.TWO_PWR_32_DBL_ + this.low_;
+	};
+
+	/**
+	 * Returns the number of bits needed to represent the absolute value of this Timestamp.
+	 *
+	 * @method
+	 * @return {number} Returns the number of bits needed to represent the absolute value of this Timestamp.
+	 */
+	Timestamp.prototype.getNumBitsAbs = function () {
+	  if (this.isNegative()) {
+	    if (this.equals(Timestamp.MIN_VALUE)) {
+	      return 64;
+	    } else {
+	      return this.negate().getNumBitsAbs();
+	    }
+	  } else {
+	    var val = this.high_ !== 0 ? this.high_ : this.low_;
+	    for (var bit = 31; bit > 0; bit--) {
+	      if ((val & 1 << bit) !== 0) {
+	        break;
+	      }
+	    }
+	    return this.high_ !== 0 ? bit + 33 : bit + 1;
+	  }
+	};
+
+	/**
+	 * Return whether this value is zero.
+	 *
+	 * @method
+	 * @return {boolean} whether this value is zero.
+	 */
+	Timestamp.prototype.isZero = function () {
+	  return this.high_ === 0 && this.low_ === 0;
+	};
+
+	/**
+	 * Return whether this value is negative.
+	 *
+	 * @method
+	 * @return {boolean} whether this value is negative.
+	 */
+	Timestamp.prototype.isNegative = function () {
+	  return this.high_ < 0;
+	};
+
+	/**
+	 * Return whether this value is odd.
+	 *
+	 * @method
+	 * @return {boolean} whether this value is odd.
+	 */
+	Timestamp.prototype.isOdd = function () {
+	  return (this.low_ & 1) === 1;
+	};
+
+	/**
+	 * Return whether this Timestamp equals the other
+	 *
+	 * @method
+	 * @param {Timestamp} other Timestamp to compare against.
+	 * @return {boolean} whether this Timestamp equals the other
+	 */
+	Timestamp.prototype.equals = function (other) {
+	  return this.high_ === other.high_ && this.low_ === other.low_;
+	};
+
+	/**
+	 * Return whether this Timestamp does not equal the other.
+	 *
+	 * @method
+	 * @param {Timestamp} other Timestamp to compare against.
+	 * @return {boolean} whether this Timestamp does not equal the other.
+	 */
+	Timestamp.prototype.notEquals = function (other) {
+	  return this.high_ !== other.high_ || this.low_ !== other.low_;
+	};
+
+	/**
+	 * Return whether this Timestamp is less than the other.
+	 *
+	 * @method
+	 * @param {Timestamp} other Timestamp to compare against.
+	 * @return {boolean} whether this Timestamp is less than the other.
+	 */
+	Timestamp.prototype.lessThan = function (other) {
+	  return this.compare(other) < 0;
+	};
+
+	/**
+	 * Return whether this Timestamp is less than or equal to the other.
+	 *
+	 * @method
+	 * @param {Timestamp} other Timestamp to compare against.
+	 * @return {boolean} whether this Timestamp is less than or equal to the other.
+	 */
+	Timestamp.prototype.lessThanOrEqual = function (other) {
+	  return this.compare(other) <= 0;
+	};
+
+	/**
+	 * Return whether this Timestamp is greater than the other.
+	 *
+	 * @method
+	 * @param {Timestamp} other Timestamp to compare against.
+	 * @return {boolean} whether this Timestamp is greater than the other.
+	 */
+	Timestamp.prototype.greaterThan = function (other) {
+	  return this.compare(other) > 0;
+	};
+
+	/**
+	 * Return whether this Timestamp is greater than or equal to the other.
+	 *
+	 * @method
+	 * @param {Timestamp} other Timestamp to compare against.
+	 * @return {boolean} whether this Timestamp is greater than or equal to the other.
+	 */
+	Timestamp.prototype.greaterThanOrEqual = function (other) {
+	  return this.compare(other) >= 0;
+	};
+
+	/**
+	 * Compares this Timestamp with the given one.
+	 *
+	 * @method
+	 * @param {Timestamp} other Timestamp to compare against.
+	 * @return {boolean} 0 if they are the same, 1 if the this is greater, and -1 if the given one is greater.
+	 */
+	Timestamp.prototype.compare = function (other) {
+	  if (this.equals(other)) {
+	    return 0;
+	  }
+
+	  var thisNeg = this.isNegative();
+	  var otherNeg = other.isNegative();
+	  if (thisNeg && !otherNeg) {
+	    return -1;
+	  }
+	  if (!thisNeg && otherNeg) {
+	    return 1;
+	  }
+
+	  // at this point, the signs are the same, so subtraction will not overflow
+	  if (this.subtract(other).isNegative()) {
+	    return -1;
+	  } else {
+	    return 1;
+	  }
+	};
+
+	/**
+	 * The negation of this value.
+	 *
+	 * @method
+	 * @return {Timestamp} the negation of this value.
+	 */
+	Timestamp.prototype.negate = function () {
+	  if (this.equals(Timestamp.MIN_VALUE)) {
+	    return Timestamp.MIN_VALUE;
+	  } else {
+	    return this.not().add(Timestamp.ONE);
+	  }
+	};
+
+	/**
+	 * Returns the sum of this and the given Timestamp.
+	 *
+	 * @method
+	 * @param {Timestamp} other Timestamp to add to this one.
+	 * @return {Timestamp} the sum of this and the given Timestamp.
+	 */
+	Timestamp.prototype.add = function (other) {
+	  // Divide each number into 4 chunks of 16 bits, and then sum the chunks.
+
+	  var a48 = this.high_ >>> 16;
+	  var a32 = this.high_ & 0xffff;
+	  var a16 = this.low_ >>> 16;
+	  var a00 = this.low_ & 0xffff;
+
+	  var b48 = other.high_ >>> 16;
+	  var b32 = other.high_ & 0xffff;
+	  var b16 = other.low_ >>> 16;
+	  var b00 = other.low_ & 0xffff;
+
+	  var c48 = 0,
+	      c32 = 0,
+	      c16 = 0,
+	      c00 = 0;
+	  c00 += a00 + b00;
+	  c16 += c00 >>> 16;
+	  c00 &= 0xffff;
+	  c16 += a16 + b16;
+	  c32 += c16 >>> 16;
+	  c16 &= 0xffff;
+	  c32 += a32 + b32;
+	  c48 += c32 >>> 16;
+	  c32 &= 0xffff;
+	  c48 += a48 + b48;
+	  c48 &= 0xffff;
+	  return Timestamp.fromBits(c16 << 16 | c00, c48 << 16 | c32);
+	};
+
+	/**
+	 * Returns the difference of this and the given Timestamp.
+	 *
+	 * @method
+	 * @param {Timestamp} other Timestamp to subtract from this.
+	 * @return {Timestamp} the difference of this and the given Timestamp.
+	 */
+	Timestamp.prototype.subtract = function (other) {
+	  return this.add(other.negate());
+	};
+
+	/**
+	 * Returns the product of this and the given Timestamp.
+	 *
+	 * @method
+	 * @param {Timestamp} other Timestamp to multiply with this.
+	 * @return {Timestamp} the product of this and the other.
+	 */
+	Timestamp.prototype.multiply = function (other) {
+	  if (this.isZero()) {
+	    return Timestamp.ZERO;
+	  } else if (other.isZero()) {
+	    return Timestamp.ZERO;
+	  }
+
+	  if (this.equals(Timestamp.MIN_VALUE)) {
+	    return other.isOdd() ? Timestamp.MIN_VALUE : Timestamp.ZERO;
+	  } else if (other.equals(Timestamp.MIN_VALUE)) {
+	    return this.isOdd() ? Timestamp.MIN_VALUE : Timestamp.ZERO;
+	  }
+
+	  if (this.isNegative()) {
+	    if (other.isNegative()) {
+	      return this.negate().multiply(other.negate());
+	    } else {
+	      return this.negate().multiply(other).negate();
+	    }
+	  } else if (other.isNegative()) {
+	    return this.multiply(other.negate()).negate();
+	  }
+
+	  // If both Timestamps are small, use float multiplication
+	  if (this.lessThan(Timestamp.TWO_PWR_24_) && other.lessThan(Timestamp.TWO_PWR_24_)) {
+	    return Timestamp.fromNumber(this.toNumber() * other.toNumber());
+	  }
+
+	  // Divide each Timestamp into 4 chunks of 16 bits, and then add up 4x4 products.
+	  // We can skip products that would overflow.
+
+	  var a48 = this.high_ >>> 16;
+	  var a32 = this.high_ & 0xffff;
+	  var a16 = this.low_ >>> 16;
+	  var a00 = this.low_ & 0xffff;
+
+	  var b48 = other.high_ >>> 16;
+	  var b32 = other.high_ & 0xffff;
+	  var b16 = other.low_ >>> 16;
+	  var b00 = other.low_ & 0xffff;
+
+	  var c48 = 0,
+	      c32 = 0,
+	      c16 = 0,
+	      c00 = 0;
+	  c00 += a00 * b00;
+	  c16 += c00 >>> 16;
+	  c00 &= 0xffff;
+	  c16 += a16 * b00;
+	  c32 += c16 >>> 16;
+	  c16 &= 0xffff;
+	  c16 += a00 * b16;
+	  c32 += c16 >>> 16;
+	  c16 &= 0xffff;
+	  c32 += a32 * b00;
+	  c48 += c32 >>> 16;
+	  c32 &= 0xffff;
+	  c32 += a16 * b16;
+	  c48 += c32 >>> 16;
+	  c32 &= 0xffff;
+	  c32 += a00 * b32;
+	  c48 += c32 >>> 16;
+	  c32 &= 0xffff;
+	  c48 += a48 * b00 + a32 * b16 + a16 * b32 + a00 * b48;
+	  c48 &= 0xffff;
+	  return Timestamp.fromBits(c16 << 16 | c00, c48 << 16 | c32);
+	};
+
+	/**
+	 * Returns this Timestamp divided by the given one.
+	 *
+	 * @method
+	 * @param {Timestamp} other Timestamp by which to divide.
+	 * @return {Timestamp} this Timestamp divided by the given one.
+	 */
+	Timestamp.prototype.div = function (other) {
+	  if (other.isZero()) {
+	    throw Error('division by zero');
+	  } else if (this.isZero()) {
+	    return Timestamp.ZERO;
+	  }
+
+	  if (this.equals(Timestamp.MIN_VALUE)) {
+	    if (other.equals(Timestamp.ONE) || other.equals(Timestamp.NEG_ONE)) {
+	      return Timestamp.MIN_VALUE; // recall that -MIN_VALUE == MIN_VALUE
+	    } else if (other.equals(Timestamp.MIN_VALUE)) {
+	      return Timestamp.ONE;
+	    } else {
+	      // At this point, we have |other| >= 2, so |this/other| < |MIN_VALUE|.
+	      var halfThis = this.shiftRight(1);
+	      var approx = halfThis.div(other).shiftLeft(1);
+	      if (approx.equals(Timestamp.ZERO)) {
+	        return other.isNegative() ? Timestamp.ONE : Timestamp.NEG_ONE;
+	      } else {
+	        var rem = this.subtract(other.multiply(approx));
+	        var result = approx.add(rem.div(other));
+	        return result;
+	      }
+	    }
+	  } else if (other.equals(Timestamp.MIN_VALUE)) {
+	    return Timestamp.ZERO;
+	  }
+
+	  if (this.isNegative()) {
+	    if (other.isNegative()) {
+	      return this.negate().div(other.negate());
+	    } else {
+	      return this.negate().div(other).negate();
+	    }
+	  } else if (other.isNegative()) {
+	    return this.div(other.negate()).negate();
+	  }
+
+	  // Repeat the following until the remainder is less than other:  find a
+	  // floating-point that approximates remainder / other *from below*, add this
+	  // into the result, and subtract it from the remainder.  It is critical that
+	  // the approximate value is less than or equal to the real value so that the
+	  // remainder never becomes negative.
+	  var res = Timestamp.ZERO;
+	  rem = this;
+	  while (rem.greaterThanOrEqual(other)) {
+	    // Approximate the result of division. This may be a little greater or
+	    // smaller than the actual value.
+	    approx = Math.max(1, Math.floor(rem.toNumber() / other.toNumber()));
+
+	    // We will tweak the approximate result by changing it in the 48-th digit or
+	    // the smallest non-fractional digit, whichever is larger.
+	    var log2 = Math.ceil(Math.log(approx) / Math.LN2);
+	    var delta = log2 <= 48 ? 1 : Math.pow(2, log2 - 48);
+
+	    // Decrease the approximation until it is smaller than the remainder.  Note
+	    // that if it is too large, the product overflows and is negative.
+	    var approxRes = Timestamp.fromNumber(approx);
+	    var approxRem = approxRes.multiply(other);
+	    while (approxRem.isNegative() || approxRem.greaterThan(rem)) {
+	      approx -= delta;
+	      approxRes = Timestamp.fromNumber(approx);
+	      approxRem = approxRes.multiply(other);
+	    }
+
+	    // We know the answer can't be zero... and actually, zero would cause
+	    // infinite recursion since we would make no progress.
+	    if (approxRes.isZero()) {
+	      approxRes = Timestamp.ONE;
+	    }
+
+	    res = res.add(approxRes);
+	    rem = rem.subtract(approxRem);
+	  }
+	  return res;
+	};
+
+	/**
+	 * Returns this Timestamp modulo the given one.
+	 *
+	 * @method
+	 * @param {Timestamp} other Timestamp by which to mod.
+	 * @return {Timestamp} this Timestamp modulo the given one.
+	 */
+	Timestamp.prototype.modulo = function (other) {
+	  return this.subtract(this.div(other).multiply(other));
+	};
+
+	/**
+	 * The bitwise-NOT of this value.
+	 *
+	 * @method
+	 * @return {Timestamp} the bitwise-NOT of this value.
+	 */
+	Timestamp.prototype.not = function () {
+	  return Timestamp.fromBits(~this.low_, ~this.high_);
+	};
+
+	/**
+	 * Returns the bitwise-AND of this Timestamp and the given one.
+	 *
+	 * @method
+	 * @param {Timestamp} other the Timestamp with which to AND.
+	 * @return {Timestamp} the bitwise-AND of this and the other.
+	 */
+	Timestamp.prototype.and = function (other) {
+	  return Timestamp.fromBits(this.low_ & other.low_, this.high_ & other.high_);
+	};
+
+	/**
+	 * Returns the bitwise-OR of this Timestamp and the given one.
+	 *
+	 * @method
+	 * @param {Timestamp} other the Timestamp with which to OR.
+	 * @return {Timestamp} the bitwise-OR of this and the other.
+	 */
+	Timestamp.prototype.or = function (other) {
+	  return Timestamp.fromBits(this.low_ | other.low_, this.high_ | other.high_);
+	};
+
+	/**
+	 * Returns the bitwise-XOR of this Timestamp and the given one.
+	 *
+	 * @method
+	 * @param {Timestamp} other the Timestamp with which to XOR.
+	 * @return {Timestamp} the bitwise-XOR of this and the other.
+	 */
+	Timestamp.prototype.xor = function (other) {
+	  return Timestamp.fromBits(this.low_ ^ other.low_, this.high_ ^ other.high_);
+	};
+
+	/**
+	 * Returns this Timestamp with bits shifted to the left by the given amount.
+	 *
+	 * @method
+	 * @param {number} numBits the number of bits by which to shift.
+	 * @return {Timestamp} this shifted to the left by the given amount.
+	 */
+	Timestamp.prototype.shiftLeft = function (numBits) {
+	  numBits &= 63;
+	  if (numBits === 0) {
+	    return this;
+	  } else {
+	    var low = this.low_;
+	    if (numBits < 32) {
+	      var high = this.high_;
+	      return Timestamp.fromBits(low << numBits, high << numBits | low >>> 32 - numBits);
+	    } else {
+	      return Timestamp.fromBits(0, low << numBits - 32);
+	    }
+	  }
+	};
+
+	/**
+	 * Returns this Timestamp with bits shifted to the right by the given amount.
+	 *
+	 * @method
+	 * @param {number} numBits the number of bits by which to shift.
+	 * @return {Timestamp} this shifted to the right by the given amount.
+	 */
+	Timestamp.prototype.shiftRight = function (numBits) {
+	  numBits &= 63;
+	  if (numBits === 0) {
+	    return this;
+	  } else {
+	    var high = this.high_;
+	    if (numBits < 32) {
+	      var low = this.low_;
+	      return Timestamp.fromBits(low >>> numBits | high << 32 - numBits, high >> numBits);
+	    } else {
+	      return Timestamp.fromBits(high >> numBits - 32, high >= 0 ? 0 : -1);
+	    }
+	  }
+	};
+
+	/**
+	 * Returns this Timestamp with bits shifted to the right by the given amount, with the new top bits matching the current sign bit.
+	 *
+	 * @method
+	 * @param {number} numBits the number of bits by which to shift.
+	 * @return {Timestamp} this shifted to the right by the given amount, with zeros placed into the new leading bits.
+	 */
+	Timestamp.prototype.shiftRightUnsigned = function (numBits) {
+	  numBits &= 63;
+	  if (numBits === 0) {
+	    return this;
+	  } else {
+	    var high = this.high_;
+	    if (numBits < 32) {
+	      var low = this.low_;
+	      return Timestamp.fromBits(low >>> numBits | high << 32 - numBits, high >>> numBits);
+	    } else if (numBits === 32) {
+	      return Timestamp.fromBits(high, 0);
+	    } else {
+	      return Timestamp.fromBits(high >>> numBits - 32, 0);
+	    }
+	  }
+	};
+
+	/**
+	 * Returns a Timestamp representing the given (32-bit) integer value.
+	 *
+	 * @method
+	 * @param {number} value the 32-bit integer in question.
+	 * @return {Timestamp} the corresponding Timestamp value.
+	 */
+	Timestamp.fromInt = function (value) {
+	  if (-128 <= value && value < 128) {
+	    var cachedObj = Timestamp.INT_CACHE_[value];
+	    if (cachedObj) {
+	      return cachedObj;
+	    }
+	  }
+
+	  var obj = new Timestamp(value | 0, value < 0 ? -1 : 0);
+	  if (-128 <= value && value < 128) {
+	    Timestamp.INT_CACHE_[value] = obj;
+	  }
+	  return obj;
+	};
+
+	/**
+	 * Returns a Timestamp representing the given value, provided that it is a finite number. Otherwise, zero is returned.
+	 *
+	 * @method
+	 * @param {number} value the number in question.
+	 * @return {Timestamp} the corresponding Timestamp value.
+	 */
+	Timestamp.fromNumber = function (value) {
+	  if (isNaN(value) || !isFinite(value)) {
+	    return Timestamp.ZERO;
+	  } else if (value <= -Timestamp.TWO_PWR_63_DBL_) {
+	    return Timestamp.MIN_VALUE;
+	  } else if (value + 1 >= Timestamp.TWO_PWR_63_DBL_) {
+	    return Timestamp.MAX_VALUE;
+	  } else if (value < 0) {
+	    return Timestamp.fromNumber(-value).negate();
+	  } else {
+	    return new Timestamp(value % Timestamp.TWO_PWR_32_DBL_ | 0, value / Timestamp.TWO_PWR_32_DBL_ | 0);
+	  }
+	};
+
+	/**
+	 * Returns a Timestamp representing the 64-bit integer that comes by concatenating the given high and low bits. Each is assumed to use 32 bits.
+	 *
+	 * @method
+	 * @param {number} lowBits the low 32-bits.
+	 * @param {number} highBits the high 32-bits.
+	 * @return {Timestamp} the corresponding Timestamp value.
+	 */
+	Timestamp.fromBits = function (lowBits, highBits) {
+	  return new Timestamp(lowBits, highBits);
+	};
+
+	/**
+	 * Returns a Timestamp representation of the given string, written using the given radix.
+	 *
+	 * @method
+	 * @param {string} str the textual representation of the Timestamp.
+	 * @param {number} opt_radix the radix in which the text is written.
+	 * @return {Timestamp} the corresponding Timestamp value.
+	 */
+	Timestamp.fromString = function (str, opt_radix) {
+	  if (str.length === 0) {
+	    throw Error('number format error: empty string');
+	  }
+
+	  var radix = opt_radix || 10;
+	  if (radix < 2 || 36 < radix) {
+	    throw Error('radix out of range: ' + radix);
+	  }
+
+	  if (str.charAt(0) === '-') {
+	    return Timestamp.fromString(str.substring(1), radix).negate();
+	  } else if (str.indexOf('-') >= 0) {
+	    throw Error('number format error: interior "-" character: ' + str);
+	  }
+
+	  // Do several (8) digits each time through the loop, so as to
+	  // minimize the calls to the very expensive emulated div.
+	  var radixToPower = Timestamp.fromNumber(Math.pow(radix, 8));
+
+	  var result = Timestamp.ZERO;
+	  for (var i = 0; i < str.length; i += 8) {
+	    var size = Math.min(8, str.length - i);
+	    var value = parseInt(str.substring(i, i + size), radix);
+	    if (size < 8) {
+	      var power = Timestamp.fromNumber(Math.pow(radix, size));
+	      result = result.multiply(power).add(Timestamp.fromNumber(value));
+	    } else {
+	      result = result.multiply(radixToPower);
+	      result = result.add(Timestamp.fromNumber(value));
+	    }
+	  }
+	  return result;
+	};
+
+	// NOTE: Common constant values ZERO, ONE, NEG_ONE, etc. are defined below the
+	// from* methods on which they depend.
+
+	/**
+	 * A cache of the Timestamp representations of small integer values.
+	 * @type {Object}
+	 * @ignore
+	 */
+	Timestamp.INT_CACHE_ = {};
+
+	// NOTE: the compiler should inline these constant values below and then remove
+	// these variables, so there should be no runtime penalty for these.
+
+	/**
+	 * Number used repeated below in calculations.  This must appear before the
+	 * first call to any from* function below.
+	 * @type {number}
+	 * @ignore
+	 */
+	Timestamp.TWO_PWR_16_DBL_ = 1 << 16;
+
+	/**
+	 * @type {number}
+	 * @ignore
+	 */
+	Timestamp.TWO_PWR_24_DBL_ = 1 << 24;
+
+	/**
+	 * @type {number}
+	 * @ignore
+	 */
+	Timestamp.TWO_PWR_32_DBL_ = Timestamp.TWO_PWR_16_DBL_ * Timestamp.TWO_PWR_16_DBL_;
+
+	/**
+	 * @type {number}
+	 * @ignore
+	 */
+	Timestamp.TWO_PWR_31_DBL_ = Timestamp.TWO_PWR_32_DBL_ / 2;
+
+	/**
+	 * @type {number}
+	 * @ignore
+	 */
+	Timestamp.TWO_PWR_48_DBL_ = Timestamp.TWO_PWR_32_DBL_ * Timestamp.TWO_PWR_16_DBL_;
+
+	/**
+	 * @type {number}
+	 * @ignore
+	 */
+	Timestamp.TWO_PWR_64_DBL_ = Timestamp.TWO_PWR_32_DBL_ * Timestamp.TWO_PWR_32_DBL_;
+
+	/**
+	 * @type {number}
+	 * @ignore
+	 */
+	Timestamp.TWO_PWR_63_DBL_ = Timestamp.TWO_PWR_64_DBL_ / 2;
+
+	/** @type {Timestamp} */
+	Timestamp.ZERO = Timestamp.fromInt(0);
+
+	/** @type {Timestamp} */
+	Timestamp.ONE = Timestamp.fromInt(1);
+
+	/** @type {Timestamp} */
+	Timestamp.NEG_ONE = Timestamp.fromInt(-1);
+
+	/** @type {Timestamp} */
+	Timestamp.MAX_VALUE = Timestamp.fromBits(0xffffffff | 0, 0x7fffffff | 0);
+
+	/** @type {Timestamp} */
+	Timestamp.MIN_VALUE = Timestamp.fromBits(0, 0x80000000 | 0);
+
+	/**
+	 * @type {Timestamp}
+	 * @ignore
+	 */
+	Timestamp.TWO_PWR_24_ = Timestamp.fromInt(1 << 24);
+
+	/**
+	 * Expose.
+	 */
+	module.exports = Timestamp;
+	module.exports.Timestamp = Timestamp;
+
+/***/ }),
+/* 333 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(Buffer, process) {// Custom inspect property name / symbol.
+	var inspect = 'inspect';
+
+	var utils = __webpack_require__(339);
+
+	/**
+	 * Machine id.
+	 *
+	 * Create a random 3-byte value (i.e. unique for this
+	 * process). Other drivers use a md5 of the machine id here, but
+	 * that would mean an asyc call to gethostname, so we don't bother.
+	 * @ignore
+	 */
+	var MACHINE_ID = parseInt(Math.random() * 0xffffff, 10);
+
+	// Regular expression that checks for hex value
+	var checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
+
+	// Check if buffer exists
+	try {
+	  if (Buffer && Buffer.from) {
+	    var hasBufferType = true;
+	    inspect = __webpack_require__(340).inspect.custom || 'inspect';
+	  }
+	} catch (err) {
+	  hasBufferType = false;
+	}
+
+	/**
+	* Create a new ObjectID instance
+	*
+	* @class
+	* @param {(string|number)} id Can be a 24 byte hex string, 12 byte binary string or a Number.
+	* @property {number} generationTime The generation time of this ObjectId instance
+	* @return {ObjectID} instance of ObjectID.
+	*/
+	var ObjectID = function ObjectID(id) {
+	  // Duck-typing to support ObjectId from different npm packages
+	  if (id instanceof ObjectID) return id;
+	  if (!(this instanceof ObjectID)) return new ObjectID(id);
+
+	  this._bsontype = 'ObjectID';
+
+	  // The most common usecase (blank id, new objectId instance)
+	  if (id == null || typeof id === 'number') {
+	    // Generate a new id
+	    this.id = this.generate(id);
+	    // If we are caching the hex string
+	    if (ObjectID.cacheHexString) this.__id = this.toString('hex');
+	    // Return the object
+	    return;
+	  }
+
+	  // Check if the passed in id is valid
+	  var valid = ObjectID.isValid(id);
+
+	  // Throw an error if it's not a valid setup
+	  if (!valid && id != null) {
+	    throw new Error('Argument passed in must be a single String of 12 bytes or a string of 24 hex characters');
+	  } else if (valid && typeof id === 'string' && id.length === 24 && hasBufferType) {
+	    return new ObjectID(utils.toBuffer(id, 'hex'));
+	  } else if (valid && typeof id === 'string' && id.length === 24) {
+	    return ObjectID.createFromHexString(id);
+	  } else if (id != null && id.length === 12) {
+	    // assume 12 byte string
+	    this.id = id;
+	  } else if (id != null && id.toHexString) {
+	    // Duck-typing to support ObjectId from different npm packages
+	    return id;
+	  } else {
+	    throw new Error('Argument passed in must be a single String of 12 bytes or a string of 24 hex characters');
+	  }
+
+	  if (ObjectID.cacheHexString) this.__id = this.toString('hex');
+	};
+
+	// Allow usage of ObjectId as well as ObjectID
+	// var ObjectId = ObjectID;
+
+	// Precomputed hex table enables speedy hex string conversion
+	var hexTable = [];
+	for (var i = 0; i < 256; i++) {
+	  hexTable[i] = (i <= 15 ? '0' : '') + i.toString(16);
+	}
+
+	/**
+	* Return the ObjectID id as a 24 byte hex string representation
+	*
+	* @method
+	* @return {string} return the 24 byte hex string representation.
+	*/
+	ObjectID.prototype.toHexString = function () {
+	  if (ObjectID.cacheHexString && this.__id) return this.__id;
+
+	  var hexString = '';
+	  if (!this.id || !this.id.length) {
+	    throw new Error('invalid ObjectId, ObjectId.id must be either a string or a Buffer, but is [' + JSON.stringify(this.id) + ']');
+	  }
+
+	  if (this.id instanceof _Buffer) {
+	    hexString = convertToHex(this.id);
+	    if (ObjectID.cacheHexString) this.__id = hexString;
+	    return hexString;
+	  }
+
+	  for (var i = 0; i < this.id.length; i++) {
+	    hexString += hexTable[this.id.charCodeAt(i)];
+	  }
+
+	  if (ObjectID.cacheHexString) this.__id = hexString;
+	  return hexString;
+	};
+
+	/**
+	* Update the ObjectID index used in generating new ObjectID's on the driver
+	*
+	* @method
+	* @return {number} returns next index value.
+	* @ignore
+	*/
+	ObjectID.prototype.get_inc = function () {
+	  return ObjectID.index = (ObjectID.index + 1) % 0xffffff;
+	};
+
+	/**
+	* Update the ObjectID index used in generating new ObjectID's on the driver
+	*
+	* @method
+	* @return {number} returns next index value.
+	* @ignore
+	*/
+	ObjectID.prototype.getInc = function () {
+	  return this.get_inc();
+	};
+
+	/**
+	* Generate a 12 byte id buffer used in ObjectID's
+	*
+	* @method
+	* @param {number} [time] optional parameter allowing to pass in a second based timestamp.
+	* @return {Buffer} return the 12 byte id buffer string.
+	*/
+	ObjectID.prototype.generate = function (time) {
+	  if ('number' !== typeof time) {
+	    time = ~~(Date.now() / 1000);
+	  }
+
+	  // Use pid
+	  var pid = (typeof process === 'undefined' || process.pid === 1 ? Math.floor(Math.random() * 100000) : process.pid) % 0xffff;
+	  var inc = this.get_inc();
+	  // Buffer used
+	  var buffer = utils.allocBuffer(12);
+	  // Encode time
+	  buffer[3] = time & 0xff;
+	  buffer[2] = time >> 8 & 0xff;
+	  buffer[1] = time >> 16 & 0xff;
+	  buffer[0] = time >> 24 & 0xff;
+	  // Encode machine
+	  buffer[6] = MACHINE_ID & 0xff;
+	  buffer[5] = MACHINE_ID >> 8 & 0xff;
+	  buffer[4] = MACHINE_ID >> 16 & 0xff;
+	  // Encode pid
+	  buffer[8] = pid & 0xff;
+	  buffer[7] = pid >> 8 & 0xff;
+	  // Encode index
+	  buffer[11] = inc & 0xff;
+	  buffer[10] = inc >> 8 & 0xff;
+	  buffer[9] = inc >> 16 & 0xff;
+	  // Return the buffer
+	  return buffer;
+	};
+
+	/**
+	* Converts the id into a 24 byte hex string for printing
+	*
+	* @param {String} format The Buffer toString format parameter.
+	* @return {String} return the 24 byte hex string representation.
+	* @ignore
+	*/
+	ObjectID.prototype.toString = function (format) {
+	  // Is the id a buffer then use the buffer toString method to return the format
+	  if (this.id && this.id.copy) {
+	    return this.id.toString(typeof format === 'string' ? format : 'hex');
+	  }
+
+	  // if(this.buffer )
+	  return this.toHexString();
+	};
+
+	/**
+	* Converts to a string representation of this Id.
+	*
+	* @return {String} return the 24 byte hex string representation.
+	* @ignore
+	*/
+	ObjectID.prototype[inspect] = ObjectID.prototype.toString;
+
+	/**
+	* Converts to its JSON representation.
+	*
+	* @return {String} return the 24 byte hex string representation.
+	* @ignore
+	*/
+	ObjectID.prototype.toJSON = function () {
+	  return this.toHexString();
+	};
+
+	/**
+	* Compares the equality of this ObjectID with `otherID`.
+	*
+	* @method
+	* @param {object} otherID ObjectID instance to compare against.
+	* @return {boolean} the result of comparing two ObjectID's
+	*/
+	ObjectID.prototype.equals = function equals(otherId) {
+	  // var id;
+
+	  if (otherId instanceof ObjectID) {
+	    return this.toString() === otherId.toString();
+	  } else if (typeof otherId === 'string' && ObjectID.isValid(otherId) && otherId.length === 12 && this.id instanceof _Buffer) {
+	    return otherId === this.id.toString('binary');
+	  } else if (typeof otherId === 'string' && ObjectID.isValid(otherId) && otherId.length === 24) {
+	    return otherId.toLowerCase() === this.toHexString();
+	  } else if (typeof otherId === 'string' && ObjectID.isValid(otherId) && otherId.length === 12) {
+	    return otherId === this.id;
+	  } else if (otherId != null && (otherId instanceof ObjectID || otherId.toHexString)) {
+	    return otherId.toHexString() === this.toHexString();
+	  } else {
+	    return false;
+	  }
+	};
+
+	/**
+	* Returns the generation date (accurate up to the second) that this ID was generated.
+	*
+	* @method
+	* @return {date} the generation date
+	*/
+	ObjectID.prototype.getTimestamp = function () {
+	  var timestamp = new Date();
+	  var time = this.id[3] | this.id[2] << 8 | this.id[1] << 16 | this.id[0] << 24;
+	  timestamp.setTime(Math.floor(time) * 1000);
+	  return timestamp;
+	};
+
+	/**
+	* @ignore
+	*/
+	ObjectID.index = ~~(Math.random() * 0xffffff);
+
+	/**
+	* @ignore
+	*/
+	ObjectID.createPk = function createPk() {
+	  return new ObjectID();
+	};
+
+	/**
+	* Creates an ObjectID from a second based number, with the rest of the ObjectID zeroed out. Used for comparisons or sorting the ObjectID.
+	*
+	* @method
+	* @param {number} time an integer number representing a number of seconds.
+	* @return {ObjectID} return the created ObjectID
+	*/
+	ObjectID.createFromTime = function createFromTime(time) {
+	  var buffer = utils.toBuffer([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+	  // Encode time into first 4 bytes
+	  buffer[3] = time & 0xff;
+	  buffer[2] = time >> 8 & 0xff;
+	  buffer[1] = time >> 16 & 0xff;
+	  buffer[0] = time >> 24 & 0xff;
+	  // Return the new objectId
+	  return new ObjectID(buffer);
+	};
+
+	// Lookup tables
+	//var encodeLookup = '0123456789abcdef'.split('');
+	var decodeLookup = [];
+	i = 0;
+	while (i < 10) decodeLookup[0x30 + i] = i++;
+	while (i < 16) decodeLookup[0x41 - 10 + i] = decodeLookup[0x61 - 10 + i] = i++;
+
+	var _Buffer = Buffer;
+	var convertToHex = function (bytes) {
+	  return bytes.toString('hex');
+	};
+
+	/**
+	* Creates an ObjectID from a hex string representation of an ObjectID.
+	*
+	* @method
+	* @param {string} hexString create a ObjectID from a passed in 24 byte hexstring.
+	* @return {ObjectID} return the created ObjectID
+	*/
+	ObjectID.createFromHexString = function createFromHexString(string) {
+	  // Throw an error if it's not a valid setup
+	  if (typeof string === 'undefined' || string != null && string.length !== 24) {
+	    throw new Error('Argument passed in must be a single String of 12 bytes or a string of 24 hex characters');
+	  }
+
+	  // Use Buffer.from method if available
+	  if (hasBufferType) return new ObjectID(utils.toBuffer(string, 'hex'));
+
+	  // Calculate lengths
+	  var array = new _Buffer(12);
+	  var n = 0;
+	  var i = 0;
+
+	  while (i < 24) {
+	    array[n++] = decodeLookup[string.charCodeAt(i++)] << 4 | decodeLookup[string.charCodeAt(i++)];
+	  }
+
+	  return new ObjectID(array);
+	};
+
+	/**
+	* Checks if a value is a valid bson ObjectId
+	*
+	* @method
+	* @return {boolean} return true if the value is a valid bson ObjectId, return false otherwise.
+	*/
+	ObjectID.isValid = function isValid(id) {
+	  if (id == null) return false;
+
+	  if (typeof id === 'number') {
+	    return true;
+	  }
+
+	  if (typeof id === 'string') {
+	    return id.length === 12 || id.length === 24 && checkForHexRegExp.test(id);
+	  }
+
+	  if (id instanceof ObjectID) {
+	    return true;
+	  }
+
+	  if (id instanceof _Buffer) {
+	    return true;
+	  }
+
+	  // Duck-Typing detection of ObjectId like objects
+	  if (id.toHexString) {
+	    return id.id.length === 12 || id.id.length === 24 && checkForHexRegExp.test(id.id);
+	  }
+
+	  return false;
+	};
+
+	/**
+	* @ignore
+	*/
+	Object.defineProperty(ObjectID.prototype, 'generationTime', {
+	  enumerable: true,
+	  get: function () {
+	    return this.id[3] | this.id[2] << 8 | this.id[1] << 16 | this.id[0] << 24;
+	  },
+	  set: function (value) {
+	    // Encode time into first 4 bytes
+	    this.id[3] = value & 0xff;
+	    this.id[2] = value >> 8 & 0xff;
+	    this.id[1] = value >> 16 & 0xff;
+	    this.id[0] = value >> 24 & 0xff;
+	  }
+	});
+
+	/**
+	 * Expose.
+	 */
+	module.exports = ObjectID;
+	module.exports.ObjectID = ObjectID;
+	module.exports.ObjectId = ObjectID;
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(334).Buffer, __webpack_require__(338)))
+
+/***/ }),
+/* 334 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*!
@@ -9333,9 +11587,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict'
 
-	var base64 = __webpack_require__(330)
-	var ieee754 = __webpack_require__(331)
-	var isArray = __webpack_require__(332)
+	var base64 = __webpack_require__(335)
+	var ieee754 = __webpack_require__(336)
+	var isArray = __webpack_require__(337)
 
 	exports.Buffer = Buffer
 	exports.SlowBuffer = SlowBuffer
@@ -11116,7 +13370,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ }),
-/* 330 */
+/* 335 */
 /***/ (function(module, exports) {
 
 	'use strict'
@@ -11273,7 +13527,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 331 */
+/* 336 */
 /***/ (function(module, exports) {
 
 	exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -11363,7 +13617,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 332 */
+/* 337 */
 /***/ (function(module, exports) {
 
 	var toString = {}.toString;
@@ -11372,2258 +13626,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return toString.call(arr) == '[object Array]';
 	};
 
-
-/***/ }),
-/* 333 */
-/***/ (function(module, exports) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
-
-	// We have an ES6 Map available, return the native instance
-
-	if (typeof global.Map !== 'undefined') {
-	  module.exports = global.Map;
-	  module.exports.Map = global.Map;
-	} else {
-	  // We will return a polyfill
-	  var Map = function (array) {
-	    this._keys = [];
-	    this._values = {};
-
-	    for (var i = 0; i < array.length; i++) {
-	      if (array[i] == null) continue; // skip null and undefined
-	      var entry = array[i];
-	      var key = entry[0];
-	      var value = entry[1];
-	      // Add the key to the list of keys in order
-	      this._keys.push(key);
-	      // Add the key and value to the values dictionary with a point
-	      // to the location in the ordered keys list
-	      this._values[key] = { v: value, i: this._keys.length - 1 };
-	    }
-	  };
-
-	  Map.prototype.clear = function () {
-	    this._keys = [];
-	    this._values = {};
-	  };
-
-	  Map.prototype.delete = function (key) {
-	    var value = this._values[key];
-	    if (value == null) return false;
-	    // Delete entry
-	    delete this._values[key];
-	    // Remove the key from the ordered keys list
-	    this._keys.splice(value.i, 1);
-	    return true;
-	  };
-
-	  Map.prototype.entries = function () {
-	    var self = this;
-	    var index = 0;
-
-	    return {
-	      next: function () {
-	        var key = self._keys[index++];
-	        return {
-	          value: key !== undefined ? [key, self._values[key].v] : undefined,
-	          done: key !== undefined ? false : true
-	        };
-	      }
-	    };
-	  };
-
-	  Map.prototype.forEach = function (callback, self) {
-	    self = self || this;
-
-	    for (var i = 0; i < this._keys.length; i++) {
-	      var key = this._keys[i];
-	      // Call the forEach callback
-	      callback.call(self, this._values[key].v, key, self);
-	    }
-	  };
-
-	  Map.prototype.get = function (key) {
-	    return this._values[key] ? this._values[key].v : undefined;
-	  };
-
-	  Map.prototype.has = function (key) {
-	    return this._values[key] != null;
-	  };
-
-	  Map.prototype.keys = function () {
-	    var self = this;
-	    var index = 0;
-
-	    return {
-	      next: function () {
-	        var key = self._keys[index++];
-	        return {
-	          value: key !== undefined ? key : undefined,
-	          done: key !== undefined ? false : true
-	        };
-	      }
-	    };
-	  };
-
-	  Map.prototype.set = function (key, value) {
-	    if (this._values[key]) {
-	      this._values[key].v = value;
-	      return this;
-	    }
-
-	    // Add the key to the list of keys in order
-	    this._keys.push(key);
-	    // Add the key and value to the values dictionary with a point
-	    // to the location in the ordered keys list
-	    this._values[key] = { v: value, i: this._keys.length - 1 };
-	    return this;
-	  };
-
-	  Map.prototype.values = function () {
-	    var self = this;
-	    var index = 0;
-
-	    return {
-	      next: function () {
-	        var key = self._keys[index++];
-	        return {
-	          value: key !== undefined ? self._values[key].v : undefined,
-	          done: key !== undefined ? false : true
-	        };
-	      }
-	    };
-	  };
-
-	  // Last ismaster
-	  Object.defineProperty(Map.prototype, 'size', {
-	    enumerable: true,
-	    get: function () {
-	      return this._keys.length;
-	    }
-	  });
-
-	  module.exports = Map;
-	  module.exports.Map = Map;
-	}
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ }),
-/* 334 */
-/***/ (function(module, exports) {
-
-	// Licensed under the Apache License, Version 2.0 (the "License");
-	// you may not use this file except in compliance with the License.
-	// You may obtain a copy of the License at
-	//
-	//     http://www.apache.org/licenses/LICENSE-2.0
-	//
-	// Unless required by applicable law or agreed to in writing, software
-	// distributed under the License is distributed on an "AS IS" BASIS,
-	// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	// See the License for the specific language governing permissions and
-	// limitations under the License.
-	//
-	// Copyright 2009 Google Inc. All Rights Reserved
-
-	/**
-	 * Defines a Long class for representing a 64-bit two's-complement
-	 * integer value, which faithfully simulates the behavior of a Java "Long". This
-	 * implementation is derived from LongLib in GWT.
-	 *
-	 * Constructs a 64-bit two's-complement integer, given its low and high 32-bit
-	 * values as *signed* integers.  See the from* functions below for more
-	 * convenient ways of constructing Longs.
-	 *
-	 * The internal representation of a Long is the two given signed, 32-bit values.
-	 * We use 32-bit pieces because these are the size of integers on which
-	 * Javascript performs bit-operations.  For operations like addition and
-	 * multiplication, we split each number into 16-bit pieces, which can easily be
-	 * multiplied within Javascript's floating-point representation without overflow
-	 * or change in sign.
-	 *
-	 * In the algorithms below, we frequently reduce the negative case to the
-	 * positive case by negating the input(s) and then post-processing the result.
-	 * Note that we must ALWAYS check specially whether those values are MIN_VALUE
-	 * (-2^63) because -MIN_VALUE == MIN_VALUE (since 2^63 cannot be represented as
-	 * a positive number, it overflows back into a negative).  Not handling this
-	 * case would often result in infinite recursion.
-	 *
-	 * @class
-	 * @param {number} low  the low (signed) 32 bits of the Long.
-	 * @param {number} high the high (signed) 32 bits of the Long.
-	 * @return {Long}
-	 */
-	function Long(low, high) {
-	  if (!(this instanceof Long)) return new Long(low, high);
-
-	  this._bsontype = 'Long';
-	  /**
-	   * @type {number}
-	   * @ignore
-	   */
-	  this.low_ = low | 0; // force into 32 signed bits.
-
-	  /**
-	   * @type {number}
-	   * @ignore
-	   */
-	  this.high_ = high | 0; // force into 32 signed bits.
-	}
-
-	/**
-	 * Return the int value.
-	 *
-	 * @method
-	 * @return {number} the value, assuming it is a 32-bit integer.
-	 */
-	Long.prototype.toInt = function () {
-	  return this.low_;
-	};
-
-	/**
-	 * Return the Number value.
-	 *
-	 * @method
-	 * @return {number} the closest floating-point representation to this value.
-	 */
-	Long.prototype.toNumber = function () {
-	  return this.high_ * Long.TWO_PWR_32_DBL_ + this.getLowBitsUnsigned();
-	};
-
-	/**
-	 * Return the JSON value.
-	 *
-	 * @method
-	 * @return {string} the JSON representation.
-	 */
-	Long.prototype.toJSON = function () {
-	  return this.toString();
-	};
-
-	/**
-	 * Return the String value.
-	 *
-	 * @method
-	 * @param {number} [opt_radix] the radix in which the text should be written.
-	 * @return {string} the textual representation of this value.
-	 */
-	Long.prototype.toString = function (opt_radix) {
-	  var radix = opt_radix || 10;
-	  if (radix < 2 || 36 < radix) {
-	    throw Error('radix out of range: ' + radix);
-	  }
-
-	  if (this.isZero()) {
-	    return '0';
-	  }
-
-	  if (this.isNegative()) {
-	    if (this.equals(Long.MIN_VALUE)) {
-	      // We need to change the Long value before it can be negated, so we remove
-	      // the bottom-most digit in this base and then recurse to do the rest.
-	      var radixLong = Long.fromNumber(radix);
-	      var div = this.div(radixLong);
-	      var rem = div.multiply(radixLong).subtract(this);
-	      return div.toString(radix) + rem.toInt().toString(radix);
-	    } else {
-	      return '-' + this.negate().toString(radix);
-	    }
-	  }
-
-	  // Do several (6) digits each time through the loop, so as to
-	  // minimize the calls to the very expensive emulated div.
-	  var radixToPower = Long.fromNumber(Math.pow(radix, 6));
-
-	  rem = this;
-	  var result = '';
-
-	  while (!rem.isZero()) {
-	    var remDiv = rem.div(radixToPower);
-	    var intval = rem.subtract(remDiv.multiply(radixToPower)).toInt();
-	    var digits = intval.toString(radix);
-
-	    rem = remDiv;
-	    if (rem.isZero()) {
-	      return digits + result;
-	    } else {
-	      while (digits.length < 6) {
-	        digits = '0' + digits;
-	      }
-	      result = '' + digits + result;
-	    }
-	  }
-	};
-
-	/**
-	 * Return the high 32-bits value.
-	 *
-	 * @method
-	 * @return {number} the high 32-bits as a signed value.
-	 */
-	Long.prototype.getHighBits = function () {
-	  return this.high_;
-	};
-
-	/**
-	 * Return the low 32-bits value.
-	 *
-	 * @method
-	 * @return {number} the low 32-bits as a signed value.
-	 */
-	Long.prototype.getLowBits = function () {
-	  return this.low_;
-	};
-
-	/**
-	 * Return the low unsigned 32-bits value.
-	 *
-	 * @method
-	 * @return {number} the low 32-bits as an unsigned value.
-	 */
-	Long.prototype.getLowBitsUnsigned = function () {
-	  return this.low_ >= 0 ? this.low_ : Long.TWO_PWR_32_DBL_ + this.low_;
-	};
-
-	/**
-	 * Returns the number of bits needed to represent the absolute value of this Long.
-	 *
-	 * @method
-	 * @return {number} Returns the number of bits needed to represent the absolute value of this Long.
-	 */
-	Long.prototype.getNumBitsAbs = function () {
-	  if (this.isNegative()) {
-	    if (this.equals(Long.MIN_VALUE)) {
-	      return 64;
-	    } else {
-	      return this.negate().getNumBitsAbs();
-	    }
-	  } else {
-	    var val = this.high_ !== 0 ? this.high_ : this.low_;
-	    for (var bit = 31; bit > 0; bit--) {
-	      if ((val & 1 << bit) !== 0) {
-	        break;
-	      }
-	    }
-	    return this.high_ !== 0 ? bit + 33 : bit + 1;
-	  }
-	};
-
-	/**
-	 * Return whether this value is zero.
-	 *
-	 * @method
-	 * @return {boolean} whether this value is zero.
-	 */
-	Long.prototype.isZero = function () {
-	  return this.high_ === 0 && this.low_ === 0;
-	};
-
-	/**
-	 * Return whether this value is negative.
-	 *
-	 * @method
-	 * @return {boolean} whether this value is negative.
-	 */
-	Long.prototype.isNegative = function () {
-	  return this.high_ < 0;
-	};
-
-	/**
-	 * Return whether this value is odd.
-	 *
-	 * @method
-	 * @return {boolean} whether this value is odd.
-	 */
-	Long.prototype.isOdd = function () {
-	  return (this.low_ & 1) === 1;
-	};
-
-	/**
-	 * Return whether this Long equals the other
-	 *
-	 * @method
-	 * @param {Long} other Long to compare against.
-	 * @return {boolean} whether this Long equals the other
-	 */
-	Long.prototype.equals = function (other) {
-	  return this.high_ === other.high_ && this.low_ === other.low_;
-	};
-
-	/**
-	 * Return whether this Long does not equal the other.
-	 *
-	 * @method
-	 * @param {Long} other Long to compare against.
-	 * @return {boolean} whether this Long does not equal the other.
-	 */
-	Long.prototype.notEquals = function (other) {
-	  return this.high_ !== other.high_ || this.low_ !== other.low_;
-	};
-
-	/**
-	 * Return whether this Long is less than the other.
-	 *
-	 * @method
-	 * @param {Long} other Long to compare against.
-	 * @return {boolean} whether this Long is less than the other.
-	 */
-	Long.prototype.lessThan = function (other) {
-	  return this.compare(other) < 0;
-	};
-
-	/**
-	 * Return whether this Long is less than or equal to the other.
-	 *
-	 * @method
-	 * @param {Long} other Long to compare against.
-	 * @return {boolean} whether this Long is less than or equal to the other.
-	 */
-	Long.prototype.lessThanOrEqual = function (other) {
-	  return this.compare(other) <= 0;
-	};
-
-	/**
-	 * Return whether this Long is greater than the other.
-	 *
-	 * @method
-	 * @param {Long} other Long to compare against.
-	 * @return {boolean} whether this Long is greater than the other.
-	 */
-	Long.prototype.greaterThan = function (other) {
-	  return this.compare(other) > 0;
-	};
-
-	/**
-	 * Return whether this Long is greater than or equal to the other.
-	 *
-	 * @method
-	 * @param {Long} other Long to compare against.
-	 * @return {boolean} whether this Long is greater than or equal to the other.
-	 */
-	Long.prototype.greaterThanOrEqual = function (other) {
-	  return this.compare(other) >= 0;
-	};
-
-	/**
-	 * Compares this Long with the given one.
-	 *
-	 * @method
-	 * @param {Long} other Long to compare against.
-	 * @return {boolean} 0 if they are the same, 1 if the this is greater, and -1 if the given one is greater.
-	 */
-	Long.prototype.compare = function (other) {
-	  if (this.equals(other)) {
-	    return 0;
-	  }
-
-	  var thisNeg = this.isNegative();
-	  var otherNeg = other.isNegative();
-	  if (thisNeg && !otherNeg) {
-	    return -1;
-	  }
-	  if (!thisNeg && otherNeg) {
-	    return 1;
-	  }
-
-	  // at this point, the signs are the same, so subtraction will not overflow
-	  if (this.subtract(other).isNegative()) {
-	    return -1;
-	  } else {
-	    return 1;
-	  }
-	};
-
-	/**
-	 * The negation of this value.
-	 *
-	 * @method
-	 * @return {Long} the negation of this value.
-	 */
-	Long.prototype.negate = function () {
-	  if (this.equals(Long.MIN_VALUE)) {
-	    return Long.MIN_VALUE;
-	  } else {
-	    return this.not().add(Long.ONE);
-	  }
-	};
-
-	/**
-	 * Returns the sum of this and the given Long.
-	 *
-	 * @method
-	 * @param {Long} other Long to add to this one.
-	 * @return {Long} the sum of this and the given Long.
-	 */
-	Long.prototype.add = function (other) {
-	  // Divide each number into 4 chunks of 16 bits, and then sum the chunks.
-
-	  var a48 = this.high_ >>> 16;
-	  var a32 = this.high_ & 0xffff;
-	  var a16 = this.low_ >>> 16;
-	  var a00 = this.low_ & 0xffff;
-
-	  var b48 = other.high_ >>> 16;
-	  var b32 = other.high_ & 0xffff;
-	  var b16 = other.low_ >>> 16;
-	  var b00 = other.low_ & 0xffff;
-
-	  var c48 = 0,
-	      c32 = 0,
-	      c16 = 0,
-	      c00 = 0;
-	  c00 += a00 + b00;
-	  c16 += c00 >>> 16;
-	  c00 &= 0xffff;
-	  c16 += a16 + b16;
-	  c32 += c16 >>> 16;
-	  c16 &= 0xffff;
-	  c32 += a32 + b32;
-	  c48 += c32 >>> 16;
-	  c32 &= 0xffff;
-	  c48 += a48 + b48;
-	  c48 &= 0xffff;
-	  return Long.fromBits(c16 << 16 | c00, c48 << 16 | c32);
-	};
-
-	/**
-	 * Returns the difference of this and the given Long.
-	 *
-	 * @method
-	 * @param {Long} other Long to subtract from this.
-	 * @return {Long} the difference of this and the given Long.
-	 */
-	Long.prototype.subtract = function (other) {
-	  return this.add(other.negate());
-	};
-
-	/**
-	 * Returns the product of this and the given Long.
-	 *
-	 * @method
-	 * @param {Long} other Long to multiply with this.
-	 * @return {Long} the product of this and the other.
-	 */
-	Long.prototype.multiply = function (other) {
-	  if (this.isZero()) {
-	    return Long.ZERO;
-	  } else if (other.isZero()) {
-	    return Long.ZERO;
-	  }
-
-	  if (this.equals(Long.MIN_VALUE)) {
-	    return other.isOdd() ? Long.MIN_VALUE : Long.ZERO;
-	  } else if (other.equals(Long.MIN_VALUE)) {
-	    return this.isOdd() ? Long.MIN_VALUE : Long.ZERO;
-	  }
-
-	  if (this.isNegative()) {
-	    if (other.isNegative()) {
-	      return this.negate().multiply(other.negate());
-	    } else {
-	      return this.negate().multiply(other).negate();
-	    }
-	  } else if (other.isNegative()) {
-	    return this.multiply(other.negate()).negate();
-	  }
-
-	  // If both Longs are small, use float multiplication
-	  if (this.lessThan(Long.TWO_PWR_24_) && other.lessThan(Long.TWO_PWR_24_)) {
-	    return Long.fromNumber(this.toNumber() * other.toNumber());
-	  }
-
-	  // Divide each Long into 4 chunks of 16 bits, and then add up 4x4 products.
-	  // We can skip products that would overflow.
-
-	  var a48 = this.high_ >>> 16;
-	  var a32 = this.high_ & 0xffff;
-	  var a16 = this.low_ >>> 16;
-	  var a00 = this.low_ & 0xffff;
-
-	  var b48 = other.high_ >>> 16;
-	  var b32 = other.high_ & 0xffff;
-	  var b16 = other.low_ >>> 16;
-	  var b00 = other.low_ & 0xffff;
-
-	  var c48 = 0,
-	      c32 = 0,
-	      c16 = 0,
-	      c00 = 0;
-	  c00 += a00 * b00;
-	  c16 += c00 >>> 16;
-	  c00 &= 0xffff;
-	  c16 += a16 * b00;
-	  c32 += c16 >>> 16;
-	  c16 &= 0xffff;
-	  c16 += a00 * b16;
-	  c32 += c16 >>> 16;
-	  c16 &= 0xffff;
-	  c32 += a32 * b00;
-	  c48 += c32 >>> 16;
-	  c32 &= 0xffff;
-	  c32 += a16 * b16;
-	  c48 += c32 >>> 16;
-	  c32 &= 0xffff;
-	  c32 += a00 * b32;
-	  c48 += c32 >>> 16;
-	  c32 &= 0xffff;
-	  c48 += a48 * b00 + a32 * b16 + a16 * b32 + a00 * b48;
-	  c48 &= 0xffff;
-	  return Long.fromBits(c16 << 16 | c00, c48 << 16 | c32);
-	};
-
-	/**
-	 * Returns this Long divided by the given one.
-	 *
-	 * @method
-	 * @param {Long} other Long by which to divide.
-	 * @return {Long} this Long divided by the given one.
-	 */
-	Long.prototype.div = function (other) {
-	  if (other.isZero()) {
-	    throw Error('division by zero');
-	  } else if (this.isZero()) {
-	    return Long.ZERO;
-	  }
-
-	  if (this.equals(Long.MIN_VALUE)) {
-	    if (other.equals(Long.ONE) || other.equals(Long.NEG_ONE)) {
-	      return Long.MIN_VALUE; // recall that -MIN_VALUE == MIN_VALUE
-	    } else if (other.equals(Long.MIN_VALUE)) {
-	      return Long.ONE;
-	    } else {
-	      // At this point, we have |other| >= 2, so |this/other| < |MIN_VALUE|.
-	      var halfThis = this.shiftRight(1);
-	      var approx = halfThis.div(other).shiftLeft(1);
-	      if (approx.equals(Long.ZERO)) {
-	        return other.isNegative() ? Long.ONE : Long.NEG_ONE;
-	      } else {
-	        var rem = this.subtract(other.multiply(approx));
-	        var result = approx.add(rem.div(other));
-	        return result;
-	      }
-	    }
-	  } else if (other.equals(Long.MIN_VALUE)) {
-	    return Long.ZERO;
-	  }
-
-	  if (this.isNegative()) {
-	    if (other.isNegative()) {
-	      return this.negate().div(other.negate());
-	    } else {
-	      return this.negate().div(other).negate();
-	    }
-	  } else if (other.isNegative()) {
-	    return this.div(other.negate()).negate();
-	  }
-
-	  // Repeat the following until the remainder is less than other:  find a
-	  // floating-point that approximates remainder / other *from below*, add this
-	  // into the result, and subtract it from the remainder.  It is critical that
-	  // the approximate value is less than or equal to the real value so that the
-	  // remainder never becomes negative.
-	  var res = Long.ZERO;
-	  rem = this;
-	  while (rem.greaterThanOrEqual(other)) {
-	    // Approximate the result of division. This may be a little greater or
-	    // smaller than the actual value.
-	    approx = Math.max(1, Math.floor(rem.toNumber() / other.toNumber()));
-
-	    // We will tweak the approximate result by changing it in the 48-th digit or
-	    // the smallest non-fractional digit, whichever is larger.
-	    var log2 = Math.ceil(Math.log(approx) / Math.LN2);
-	    var delta = log2 <= 48 ? 1 : Math.pow(2, log2 - 48);
-
-	    // Decrease the approximation until it is smaller than the remainder.  Note
-	    // that if it is too large, the product overflows and is negative.
-	    var approxRes = Long.fromNumber(approx);
-	    var approxRem = approxRes.multiply(other);
-	    while (approxRem.isNegative() || approxRem.greaterThan(rem)) {
-	      approx -= delta;
-	      approxRes = Long.fromNumber(approx);
-	      approxRem = approxRes.multiply(other);
-	    }
-
-	    // We know the answer can't be zero... and actually, zero would cause
-	    // infinite recursion since we would make no progress.
-	    if (approxRes.isZero()) {
-	      approxRes = Long.ONE;
-	    }
-
-	    res = res.add(approxRes);
-	    rem = rem.subtract(approxRem);
-	  }
-	  return res;
-	};
-
-	/**
-	 * Returns this Long modulo the given one.
-	 *
-	 * @method
-	 * @param {Long} other Long by which to mod.
-	 * @return {Long} this Long modulo the given one.
-	 */
-	Long.prototype.modulo = function (other) {
-	  return this.subtract(this.div(other).multiply(other));
-	};
-
-	/**
-	 * The bitwise-NOT of this value.
-	 *
-	 * @method
-	 * @return {Long} the bitwise-NOT of this value.
-	 */
-	Long.prototype.not = function () {
-	  return Long.fromBits(~this.low_, ~this.high_);
-	};
-
-	/**
-	 * Returns the bitwise-AND of this Long and the given one.
-	 *
-	 * @method
-	 * @param {Long} other the Long with which to AND.
-	 * @return {Long} the bitwise-AND of this and the other.
-	 */
-	Long.prototype.and = function (other) {
-	  return Long.fromBits(this.low_ & other.low_, this.high_ & other.high_);
-	};
-
-	/**
-	 * Returns the bitwise-OR of this Long and the given one.
-	 *
-	 * @method
-	 * @param {Long} other the Long with which to OR.
-	 * @return {Long} the bitwise-OR of this and the other.
-	 */
-	Long.prototype.or = function (other) {
-	  return Long.fromBits(this.low_ | other.low_, this.high_ | other.high_);
-	};
-
-	/**
-	 * Returns the bitwise-XOR of this Long and the given one.
-	 *
-	 * @method
-	 * @param {Long} other the Long with which to XOR.
-	 * @return {Long} the bitwise-XOR of this and the other.
-	 */
-	Long.prototype.xor = function (other) {
-	  return Long.fromBits(this.low_ ^ other.low_, this.high_ ^ other.high_);
-	};
-
-	/**
-	 * Returns this Long with bits shifted to the left by the given amount.
-	 *
-	 * @method
-	 * @param {number} numBits the number of bits by which to shift.
-	 * @return {Long} this shifted to the left by the given amount.
-	 */
-	Long.prototype.shiftLeft = function (numBits) {
-	  numBits &= 63;
-	  if (numBits === 0) {
-	    return this;
-	  } else {
-	    var low = this.low_;
-	    if (numBits < 32) {
-	      var high = this.high_;
-	      return Long.fromBits(low << numBits, high << numBits | low >>> 32 - numBits);
-	    } else {
-	      return Long.fromBits(0, low << numBits - 32);
-	    }
-	  }
-	};
-
-	/**
-	 * Returns this Long with bits shifted to the right by the given amount.
-	 *
-	 * @method
-	 * @param {number} numBits the number of bits by which to shift.
-	 * @return {Long} this shifted to the right by the given amount.
-	 */
-	Long.prototype.shiftRight = function (numBits) {
-	  numBits &= 63;
-	  if (numBits === 0) {
-	    return this;
-	  } else {
-	    var high = this.high_;
-	    if (numBits < 32) {
-	      var low = this.low_;
-	      return Long.fromBits(low >>> numBits | high << 32 - numBits, high >> numBits);
-	    } else {
-	      return Long.fromBits(high >> numBits - 32, high >= 0 ? 0 : -1);
-	    }
-	  }
-	};
-
-	/**
-	 * Returns this Long with bits shifted to the right by the given amount, with the new top bits matching the current sign bit.
-	 *
-	 * @method
-	 * @param {number} numBits the number of bits by which to shift.
-	 * @return {Long} this shifted to the right by the given amount, with zeros placed into the new leading bits.
-	 */
-	Long.prototype.shiftRightUnsigned = function (numBits) {
-	  numBits &= 63;
-	  if (numBits === 0) {
-	    return this;
-	  } else {
-	    var high = this.high_;
-	    if (numBits < 32) {
-	      var low = this.low_;
-	      return Long.fromBits(low >>> numBits | high << 32 - numBits, high >>> numBits);
-	    } else if (numBits === 32) {
-	      return Long.fromBits(high, 0);
-	    } else {
-	      return Long.fromBits(high >>> numBits - 32, 0);
-	    }
-	  }
-	};
-
-	/**
-	 * Returns a Long representing the given (32-bit) integer value.
-	 *
-	 * @method
-	 * @param {number} value the 32-bit integer in question.
-	 * @return {Long} the corresponding Long value.
-	 */
-	Long.fromInt = function (value) {
-	  if (-128 <= value && value < 128) {
-	    var cachedObj = Long.INT_CACHE_[value];
-	    if (cachedObj) {
-	      return cachedObj;
-	    }
-	  }
-
-	  var obj = new Long(value | 0, value < 0 ? -1 : 0);
-	  if (-128 <= value && value < 128) {
-	    Long.INT_CACHE_[value] = obj;
-	  }
-	  return obj;
-	};
-
-	/**
-	 * Returns a Long representing the given value, provided that it is a finite number. Otherwise, zero is returned.
-	 *
-	 * @method
-	 * @param {number} value the number in question.
-	 * @return {Long} the corresponding Long value.
-	 */
-	Long.fromNumber = function (value) {
-	  if (isNaN(value) || !isFinite(value)) {
-	    return Long.ZERO;
-	  } else if (value <= -Long.TWO_PWR_63_DBL_) {
-	    return Long.MIN_VALUE;
-	  } else if (value + 1 >= Long.TWO_PWR_63_DBL_) {
-	    return Long.MAX_VALUE;
-	  } else if (value < 0) {
-	    return Long.fromNumber(-value).negate();
-	  } else {
-	    return new Long(value % Long.TWO_PWR_32_DBL_ | 0, value / Long.TWO_PWR_32_DBL_ | 0);
-	  }
-	};
-
-	/**
-	 * Returns a Long representing the 64-bit integer that comes by concatenating the given high and low bits. Each is assumed to use 32 bits.
-	 *
-	 * @method
-	 * @param {number} lowBits the low 32-bits.
-	 * @param {number} highBits the high 32-bits.
-	 * @return {Long} the corresponding Long value.
-	 */
-	Long.fromBits = function (lowBits, highBits) {
-	  return new Long(lowBits, highBits);
-	};
-
-	/**
-	 * Returns a Long representation of the given string, written using the given radix.
-	 *
-	 * @method
-	 * @param {string} str the textual representation of the Long.
-	 * @param {number} opt_radix the radix in which the text is written.
-	 * @return {Long} the corresponding Long value.
-	 */
-	Long.fromString = function (str, opt_radix) {
-	  if (str.length === 0) {
-	    throw Error('number format error: empty string');
-	  }
-
-	  var radix = opt_radix || 10;
-	  if (radix < 2 || 36 < radix) {
-	    throw Error('radix out of range: ' + radix);
-	  }
-
-	  if (str.charAt(0) === '-') {
-	    return Long.fromString(str.substring(1), radix).negate();
-	  } else if (str.indexOf('-') >= 0) {
-	    throw Error('number format error: interior "-" character: ' + str);
-	  }
-
-	  // Do several (8) digits each time through the loop, so as to
-	  // minimize the calls to the very expensive emulated div.
-	  var radixToPower = Long.fromNumber(Math.pow(radix, 8));
-
-	  var result = Long.ZERO;
-	  for (var i = 0; i < str.length; i += 8) {
-	    var size = Math.min(8, str.length - i);
-	    var value = parseInt(str.substring(i, i + size), radix);
-	    if (size < 8) {
-	      var power = Long.fromNumber(Math.pow(radix, size));
-	      result = result.multiply(power).add(Long.fromNumber(value));
-	    } else {
-	      result = result.multiply(radixToPower);
-	      result = result.add(Long.fromNumber(value));
-	    }
-	  }
-	  return result;
-	};
-
-	// NOTE: Common constant values ZERO, ONE, NEG_ONE, etc. are defined below the
-	// from* methods on which they depend.
-
-	/**
-	 * A cache of the Long representations of small integer values.
-	 * @type {Object}
-	 * @ignore
-	 */
-	Long.INT_CACHE_ = {};
-
-	// NOTE: the compiler should inline these constant values below and then remove
-	// these variables, so there should be no runtime penalty for these.
-
-	/**
-	 * Number used repeated below in calculations.  This must appear before the
-	 * first call to any from* function below.
-	 * @type {number}
-	 * @ignore
-	 */
-	Long.TWO_PWR_16_DBL_ = 1 << 16;
-
-	/**
-	 * @type {number}
-	 * @ignore
-	 */
-	Long.TWO_PWR_24_DBL_ = 1 << 24;
-
-	/**
-	 * @type {number}
-	 * @ignore
-	 */
-	Long.TWO_PWR_32_DBL_ = Long.TWO_PWR_16_DBL_ * Long.TWO_PWR_16_DBL_;
-
-	/**
-	 * @type {number}
-	 * @ignore
-	 */
-	Long.TWO_PWR_31_DBL_ = Long.TWO_PWR_32_DBL_ / 2;
-
-	/**
-	 * @type {number}
-	 * @ignore
-	 */
-	Long.TWO_PWR_48_DBL_ = Long.TWO_PWR_32_DBL_ * Long.TWO_PWR_16_DBL_;
-
-	/**
-	 * @type {number}
-	 * @ignore
-	 */
-	Long.TWO_PWR_64_DBL_ = Long.TWO_PWR_32_DBL_ * Long.TWO_PWR_32_DBL_;
-
-	/**
-	 * @type {number}
-	 * @ignore
-	 */
-	Long.TWO_PWR_63_DBL_ = Long.TWO_PWR_64_DBL_ / 2;
-
-	/** @type {Long} */
-	Long.ZERO = Long.fromInt(0);
-
-	/** @type {Long} */
-	Long.ONE = Long.fromInt(1);
-
-	/** @type {Long} */
-	Long.NEG_ONE = Long.fromInt(-1);
-
-	/** @type {Long} */
-	Long.MAX_VALUE = Long.fromBits(0xffffffff | 0, 0x7fffffff | 0);
-
-	/** @type {Long} */
-	Long.MIN_VALUE = Long.fromBits(0, 0x80000000 | 0);
-
-	/**
-	 * @type {Long}
-	 * @ignore
-	 */
-	Long.TWO_PWR_24_ = Long.fromInt(1 << 24);
-
-	/**
-	 * Expose.
-	 */
-	module.exports = Long;
-	module.exports.Long = Long;
-
-/***/ }),
-/* 335 */
-/***/ (function(module, exports) {
-
-	/**
-	 * A class representation of the BSON Double type.
-	 *
-	 * @class
-	 * @param {number} value the number we want to represent as a double.
-	 * @return {Double}
-	 */
-	function Double(value) {
-	  if (!(this instanceof Double)) return new Double(value);
-
-	  this._bsontype = 'Double';
-	  this.value = value;
-	}
-
-	/**
-	 * Access the number value.
-	 *
-	 * @method
-	 * @return {number} returns the wrapped double number.
-	 */
-	Double.prototype.valueOf = function () {
-	  return this.value;
-	};
-
-	/**
-	 * @ignore
-	 */
-	Double.prototype.toJSON = function () {
-	  return this.value;
-	};
-
-	module.exports = Double;
-	module.exports.Double = Double;
-
-/***/ }),
-/* 336 */
-/***/ (function(module, exports) {
-
-	// Licensed under the Apache License, Version 2.0 (the "License");
-	// you may not use this file except in compliance with the License.
-	// You may obtain a copy of the License at
-	//
-	//     http://www.apache.org/licenses/LICENSE-2.0
-	//
-	// Unless required by applicable law or agreed to in writing, software
-	// distributed under the License is distributed on an "AS IS" BASIS,
-	// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	// See the License for the specific language governing permissions and
-	// limitations under the License.
-	//
-	// Copyright 2009 Google Inc. All Rights Reserved
-
-	/**
-	 * This type is for INTERNAL use in MongoDB only and should not be used in applications.
-	 * The appropriate corresponding type is the JavaScript Date type.
-	 * 
-	 * Defines a Timestamp class for representing a 64-bit two's-complement
-	 * integer value, which faithfully simulates the behavior of a Java "Timestamp". This
-	 * implementation is derived from TimestampLib in GWT.
-	 *
-	 * Constructs a 64-bit two's-complement integer, given its low and high 32-bit
-	 * values as *signed* integers.  See the from* functions below for more
-	 * convenient ways of constructing Timestamps.
-	 *
-	 * The internal representation of a Timestamp is the two given signed, 32-bit values.
-	 * We use 32-bit pieces because these are the size of integers on which
-	 * Javascript performs bit-operations.  For operations like addition and
-	 * multiplication, we split each number into 16-bit pieces, which can easily be
-	 * multiplied within Javascript's floating-point representation without overflow
-	 * or change in sign.
-	 *
-	 * In the algorithms below, we frequently reduce the negative case to the
-	 * positive case by negating the input(s) and then post-processing the result.
-	 * Note that we must ALWAYS check specially whether those values are MIN_VALUE
-	 * (-2^63) because -MIN_VALUE == MIN_VALUE (since 2^63 cannot be represented as
-	 * a positive number, it overflows back into a negative).  Not handling this
-	 * case would often result in infinite recursion.
-	 *
-	 * @class
-	 * @param {number} low  the low (signed) 32 bits of the Timestamp.
-	 * @param {number} high the high (signed) 32 bits of the Timestamp.
-	 */
-	function Timestamp(low, high) {
-	  if (!(this instanceof Timestamp)) return new Timestamp(low, high);
-	  this._bsontype = 'Timestamp';
-	  /**
-	   * @type {number}
-	   * @ignore
-	   */
-	  this.low_ = low | 0; // force into 32 signed bits.
-
-	  /**
-	   * @type {number}
-	   * @ignore
-	   */
-	  this.high_ = high | 0; // force into 32 signed bits.
-	}
-
-	/**
-	 * Return the int value.
-	 *
-	 * @return {number} the value, assuming it is a 32-bit integer.
-	 */
-	Timestamp.prototype.toInt = function () {
-	  return this.low_;
-	};
-
-	/**
-	 * Return the Number value.
-	 *
-	 * @method
-	 * @return {number} the closest floating-point representation to this value.
-	 */
-	Timestamp.prototype.toNumber = function () {
-	  return this.high_ * Timestamp.TWO_PWR_32_DBL_ + this.getLowBitsUnsigned();
-	};
-
-	/**
-	 * Return the JSON value.
-	 *
-	 * @method
-	 * @return {string} the JSON representation.
-	 */
-	Timestamp.prototype.toJSON = function () {
-	  return this.toString();
-	};
-
-	/**
-	 * Return the String value.
-	 *
-	 * @method
-	 * @param {number} [opt_radix] the radix in which the text should be written.
-	 * @return {string} the textual representation of this value.
-	 */
-	Timestamp.prototype.toString = function (opt_radix) {
-	  var radix = opt_radix || 10;
-	  if (radix < 2 || 36 < radix) {
-	    throw Error('radix out of range: ' + radix);
-	  }
-
-	  if (this.isZero()) {
-	    return '0';
-	  }
-
-	  if (this.isNegative()) {
-	    if (this.equals(Timestamp.MIN_VALUE)) {
-	      // We need to change the Timestamp value before it can be negated, so we remove
-	      // the bottom-most digit in this base and then recurse to do the rest.
-	      var radixTimestamp = Timestamp.fromNumber(radix);
-	      var div = this.div(radixTimestamp);
-	      var rem = div.multiply(radixTimestamp).subtract(this);
-	      return div.toString(radix) + rem.toInt().toString(radix);
-	    } else {
-	      return '-' + this.negate().toString(radix);
-	    }
-	  }
-
-	  // Do several (6) digits each time through the loop, so as to
-	  // minimize the calls to the very expensive emulated div.
-	  var radixToPower = Timestamp.fromNumber(Math.pow(radix, 6));
-
-	  rem = this;
-	  var result = '';
-
-	  while (!rem.isZero()) {
-	    var remDiv = rem.div(radixToPower);
-	    var intval = rem.subtract(remDiv.multiply(radixToPower)).toInt();
-	    var digits = intval.toString(radix);
-
-	    rem = remDiv;
-	    if (rem.isZero()) {
-	      return digits + result;
-	    } else {
-	      while (digits.length < 6) {
-	        digits = '0' + digits;
-	      }
-	      result = '' + digits + result;
-	    }
-	  }
-	};
-
-	/**
-	 * Return the high 32-bits value.
-	 *
-	 * @method
-	 * @return {number} the high 32-bits as a signed value.
-	 */
-	Timestamp.prototype.getHighBits = function () {
-	  return this.high_;
-	};
-
-	/**
-	 * Return the low 32-bits value.
-	 *
-	 * @method
-	 * @return {number} the low 32-bits as a signed value.
-	 */
-	Timestamp.prototype.getLowBits = function () {
-	  return this.low_;
-	};
-
-	/**
-	 * Return the low unsigned 32-bits value.
-	 *
-	 * @method
-	 * @return {number} the low 32-bits as an unsigned value.
-	 */
-	Timestamp.prototype.getLowBitsUnsigned = function () {
-	  return this.low_ >= 0 ? this.low_ : Timestamp.TWO_PWR_32_DBL_ + this.low_;
-	};
-
-	/**
-	 * Returns the number of bits needed to represent the absolute value of this Timestamp.
-	 *
-	 * @method
-	 * @return {number} Returns the number of bits needed to represent the absolute value of this Timestamp.
-	 */
-	Timestamp.prototype.getNumBitsAbs = function () {
-	  if (this.isNegative()) {
-	    if (this.equals(Timestamp.MIN_VALUE)) {
-	      return 64;
-	    } else {
-	      return this.negate().getNumBitsAbs();
-	    }
-	  } else {
-	    var val = this.high_ !== 0 ? this.high_ : this.low_;
-	    for (var bit = 31; bit > 0; bit--) {
-	      if ((val & 1 << bit) !== 0) {
-	        break;
-	      }
-	    }
-	    return this.high_ !== 0 ? bit + 33 : bit + 1;
-	  }
-	};
-
-	/**
-	 * Return whether this value is zero.
-	 *
-	 * @method
-	 * @return {boolean} whether this value is zero.
-	 */
-	Timestamp.prototype.isZero = function () {
-	  return this.high_ === 0 && this.low_ === 0;
-	};
-
-	/**
-	 * Return whether this value is negative.
-	 *
-	 * @method
-	 * @return {boolean} whether this value is negative.
-	 */
-	Timestamp.prototype.isNegative = function () {
-	  return this.high_ < 0;
-	};
-
-	/**
-	 * Return whether this value is odd.
-	 *
-	 * @method
-	 * @return {boolean} whether this value is odd.
-	 */
-	Timestamp.prototype.isOdd = function () {
-	  return (this.low_ & 1) === 1;
-	};
-
-	/**
-	 * Return whether this Timestamp equals the other
-	 *
-	 * @method
-	 * @param {Timestamp} other Timestamp to compare against.
-	 * @return {boolean} whether this Timestamp equals the other
-	 */
-	Timestamp.prototype.equals = function (other) {
-	  return this.high_ === other.high_ && this.low_ === other.low_;
-	};
-
-	/**
-	 * Return whether this Timestamp does not equal the other.
-	 *
-	 * @method
-	 * @param {Timestamp} other Timestamp to compare against.
-	 * @return {boolean} whether this Timestamp does not equal the other.
-	 */
-	Timestamp.prototype.notEquals = function (other) {
-	  return this.high_ !== other.high_ || this.low_ !== other.low_;
-	};
-
-	/**
-	 * Return whether this Timestamp is less than the other.
-	 *
-	 * @method
-	 * @param {Timestamp} other Timestamp to compare against.
-	 * @return {boolean} whether this Timestamp is less than the other.
-	 */
-	Timestamp.prototype.lessThan = function (other) {
-	  return this.compare(other) < 0;
-	};
-
-	/**
-	 * Return whether this Timestamp is less than or equal to the other.
-	 *
-	 * @method
-	 * @param {Timestamp} other Timestamp to compare against.
-	 * @return {boolean} whether this Timestamp is less than or equal to the other.
-	 */
-	Timestamp.prototype.lessThanOrEqual = function (other) {
-	  return this.compare(other) <= 0;
-	};
-
-	/**
-	 * Return whether this Timestamp is greater than the other.
-	 *
-	 * @method
-	 * @param {Timestamp} other Timestamp to compare against.
-	 * @return {boolean} whether this Timestamp is greater than the other.
-	 */
-	Timestamp.prototype.greaterThan = function (other) {
-	  return this.compare(other) > 0;
-	};
-
-	/**
-	 * Return whether this Timestamp is greater than or equal to the other.
-	 *
-	 * @method
-	 * @param {Timestamp} other Timestamp to compare against.
-	 * @return {boolean} whether this Timestamp is greater than or equal to the other.
-	 */
-	Timestamp.prototype.greaterThanOrEqual = function (other) {
-	  return this.compare(other) >= 0;
-	};
-
-	/**
-	 * Compares this Timestamp with the given one.
-	 *
-	 * @method
-	 * @param {Timestamp} other Timestamp to compare against.
-	 * @return {boolean} 0 if they are the same, 1 if the this is greater, and -1 if the given one is greater.
-	 */
-	Timestamp.prototype.compare = function (other) {
-	  if (this.equals(other)) {
-	    return 0;
-	  }
-
-	  var thisNeg = this.isNegative();
-	  var otherNeg = other.isNegative();
-	  if (thisNeg && !otherNeg) {
-	    return -1;
-	  }
-	  if (!thisNeg && otherNeg) {
-	    return 1;
-	  }
-
-	  // at this point, the signs are the same, so subtraction will not overflow
-	  if (this.subtract(other).isNegative()) {
-	    return -1;
-	  } else {
-	    return 1;
-	  }
-	};
-
-	/**
-	 * The negation of this value.
-	 *
-	 * @method
-	 * @return {Timestamp} the negation of this value.
-	 */
-	Timestamp.prototype.negate = function () {
-	  if (this.equals(Timestamp.MIN_VALUE)) {
-	    return Timestamp.MIN_VALUE;
-	  } else {
-	    return this.not().add(Timestamp.ONE);
-	  }
-	};
-
-	/**
-	 * Returns the sum of this and the given Timestamp.
-	 *
-	 * @method
-	 * @param {Timestamp} other Timestamp to add to this one.
-	 * @return {Timestamp} the sum of this and the given Timestamp.
-	 */
-	Timestamp.prototype.add = function (other) {
-	  // Divide each number into 4 chunks of 16 bits, and then sum the chunks.
-
-	  var a48 = this.high_ >>> 16;
-	  var a32 = this.high_ & 0xffff;
-	  var a16 = this.low_ >>> 16;
-	  var a00 = this.low_ & 0xffff;
-
-	  var b48 = other.high_ >>> 16;
-	  var b32 = other.high_ & 0xffff;
-	  var b16 = other.low_ >>> 16;
-	  var b00 = other.low_ & 0xffff;
-
-	  var c48 = 0,
-	      c32 = 0,
-	      c16 = 0,
-	      c00 = 0;
-	  c00 += a00 + b00;
-	  c16 += c00 >>> 16;
-	  c00 &= 0xffff;
-	  c16 += a16 + b16;
-	  c32 += c16 >>> 16;
-	  c16 &= 0xffff;
-	  c32 += a32 + b32;
-	  c48 += c32 >>> 16;
-	  c32 &= 0xffff;
-	  c48 += a48 + b48;
-	  c48 &= 0xffff;
-	  return Timestamp.fromBits(c16 << 16 | c00, c48 << 16 | c32);
-	};
-
-	/**
-	 * Returns the difference of this and the given Timestamp.
-	 *
-	 * @method
-	 * @param {Timestamp} other Timestamp to subtract from this.
-	 * @return {Timestamp} the difference of this and the given Timestamp.
-	 */
-	Timestamp.prototype.subtract = function (other) {
-	  return this.add(other.negate());
-	};
-
-	/**
-	 * Returns the product of this and the given Timestamp.
-	 *
-	 * @method
-	 * @param {Timestamp} other Timestamp to multiply with this.
-	 * @return {Timestamp} the product of this and the other.
-	 */
-	Timestamp.prototype.multiply = function (other) {
-	  if (this.isZero()) {
-	    return Timestamp.ZERO;
-	  } else if (other.isZero()) {
-	    return Timestamp.ZERO;
-	  }
-
-	  if (this.equals(Timestamp.MIN_VALUE)) {
-	    return other.isOdd() ? Timestamp.MIN_VALUE : Timestamp.ZERO;
-	  } else if (other.equals(Timestamp.MIN_VALUE)) {
-	    return this.isOdd() ? Timestamp.MIN_VALUE : Timestamp.ZERO;
-	  }
-
-	  if (this.isNegative()) {
-	    if (other.isNegative()) {
-	      return this.negate().multiply(other.negate());
-	    } else {
-	      return this.negate().multiply(other).negate();
-	    }
-	  } else if (other.isNegative()) {
-	    return this.multiply(other.negate()).negate();
-	  }
-
-	  // If both Timestamps are small, use float multiplication
-	  if (this.lessThan(Timestamp.TWO_PWR_24_) && other.lessThan(Timestamp.TWO_PWR_24_)) {
-	    return Timestamp.fromNumber(this.toNumber() * other.toNumber());
-	  }
-
-	  // Divide each Timestamp into 4 chunks of 16 bits, and then add up 4x4 products.
-	  // We can skip products that would overflow.
-
-	  var a48 = this.high_ >>> 16;
-	  var a32 = this.high_ & 0xffff;
-	  var a16 = this.low_ >>> 16;
-	  var a00 = this.low_ & 0xffff;
-
-	  var b48 = other.high_ >>> 16;
-	  var b32 = other.high_ & 0xffff;
-	  var b16 = other.low_ >>> 16;
-	  var b00 = other.low_ & 0xffff;
-
-	  var c48 = 0,
-	      c32 = 0,
-	      c16 = 0,
-	      c00 = 0;
-	  c00 += a00 * b00;
-	  c16 += c00 >>> 16;
-	  c00 &= 0xffff;
-	  c16 += a16 * b00;
-	  c32 += c16 >>> 16;
-	  c16 &= 0xffff;
-	  c16 += a00 * b16;
-	  c32 += c16 >>> 16;
-	  c16 &= 0xffff;
-	  c32 += a32 * b00;
-	  c48 += c32 >>> 16;
-	  c32 &= 0xffff;
-	  c32 += a16 * b16;
-	  c48 += c32 >>> 16;
-	  c32 &= 0xffff;
-	  c32 += a00 * b32;
-	  c48 += c32 >>> 16;
-	  c32 &= 0xffff;
-	  c48 += a48 * b00 + a32 * b16 + a16 * b32 + a00 * b48;
-	  c48 &= 0xffff;
-	  return Timestamp.fromBits(c16 << 16 | c00, c48 << 16 | c32);
-	};
-
-	/**
-	 * Returns this Timestamp divided by the given one.
-	 *
-	 * @method
-	 * @param {Timestamp} other Timestamp by which to divide.
-	 * @return {Timestamp} this Timestamp divided by the given one.
-	 */
-	Timestamp.prototype.div = function (other) {
-	  if (other.isZero()) {
-	    throw Error('division by zero');
-	  } else if (this.isZero()) {
-	    return Timestamp.ZERO;
-	  }
-
-	  if (this.equals(Timestamp.MIN_VALUE)) {
-	    if (other.equals(Timestamp.ONE) || other.equals(Timestamp.NEG_ONE)) {
-	      return Timestamp.MIN_VALUE; // recall that -MIN_VALUE == MIN_VALUE
-	    } else if (other.equals(Timestamp.MIN_VALUE)) {
-	      return Timestamp.ONE;
-	    } else {
-	      // At this point, we have |other| >= 2, so |this/other| < |MIN_VALUE|.
-	      var halfThis = this.shiftRight(1);
-	      var approx = halfThis.div(other).shiftLeft(1);
-	      if (approx.equals(Timestamp.ZERO)) {
-	        return other.isNegative() ? Timestamp.ONE : Timestamp.NEG_ONE;
-	      } else {
-	        var rem = this.subtract(other.multiply(approx));
-	        var result = approx.add(rem.div(other));
-	        return result;
-	      }
-	    }
-	  } else if (other.equals(Timestamp.MIN_VALUE)) {
-	    return Timestamp.ZERO;
-	  }
-
-	  if (this.isNegative()) {
-	    if (other.isNegative()) {
-	      return this.negate().div(other.negate());
-	    } else {
-	      return this.negate().div(other).negate();
-	    }
-	  } else if (other.isNegative()) {
-	    return this.div(other.negate()).negate();
-	  }
-
-	  // Repeat the following until the remainder is less than other:  find a
-	  // floating-point that approximates remainder / other *from below*, add this
-	  // into the result, and subtract it from the remainder.  It is critical that
-	  // the approximate value is less than or equal to the real value so that the
-	  // remainder never becomes negative.
-	  var res = Timestamp.ZERO;
-	  rem = this;
-	  while (rem.greaterThanOrEqual(other)) {
-	    // Approximate the result of division. This may be a little greater or
-	    // smaller than the actual value.
-	    approx = Math.max(1, Math.floor(rem.toNumber() / other.toNumber()));
-
-	    // We will tweak the approximate result by changing it in the 48-th digit or
-	    // the smallest non-fractional digit, whichever is larger.
-	    var log2 = Math.ceil(Math.log(approx) / Math.LN2);
-	    var delta = log2 <= 48 ? 1 : Math.pow(2, log2 - 48);
-
-	    // Decrease the approximation until it is smaller than the remainder.  Note
-	    // that if it is too large, the product overflows and is negative.
-	    var approxRes = Timestamp.fromNumber(approx);
-	    var approxRem = approxRes.multiply(other);
-	    while (approxRem.isNegative() || approxRem.greaterThan(rem)) {
-	      approx -= delta;
-	      approxRes = Timestamp.fromNumber(approx);
-	      approxRem = approxRes.multiply(other);
-	    }
-
-	    // We know the answer can't be zero... and actually, zero would cause
-	    // infinite recursion since we would make no progress.
-	    if (approxRes.isZero()) {
-	      approxRes = Timestamp.ONE;
-	    }
-
-	    res = res.add(approxRes);
-	    rem = rem.subtract(approxRem);
-	  }
-	  return res;
-	};
-
-	/**
-	 * Returns this Timestamp modulo the given one.
-	 *
-	 * @method
-	 * @param {Timestamp} other Timestamp by which to mod.
-	 * @return {Timestamp} this Timestamp modulo the given one.
-	 */
-	Timestamp.prototype.modulo = function (other) {
-	  return this.subtract(this.div(other).multiply(other));
-	};
-
-	/**
-	 * The bitwise-NOT of this value.
-	 *
-	 * @method
-	 * @return {Timestamp} the bitwise-NOT of this value.
-	 */
-	Timestamp.prototype.not = function () {
-	  return Timestamp.fromBits(~this.low_, ~this.high_);
-	};
-
-	/**
-	 * Returns the bitwise-AND of this Timestamp and the given one.
-	 *
-	 * @method
-	 * @param {Timestamp} other the Timestamp with which to AND.
-	 * @return {Timestamp} the bitwise-AND of this and the other.
-	 */
-	Timestamp.prototype.and = function (other) {
-	  return Timestamp.fromBits(this.low_ & other.low_, this.high_ & other.high_);
-	};
-
-	/**
-	 * Returns the bitwise-OR of this Timestamp and the given one.
-	 *
-	 * @method
-	 * @param {Timestamp} other the Timestamp with which to OR.
-	 * @return {Timestamp} the bitwise-OR of this and the other.
-	 */
-	Timestamp.prototype.or = function (other) {
-	  return Timestamp.fromBits(this.low_ | other.low_, this.high_ | other.high_);
-	};
-
-	/**
-	 * Returns the bitwise-XOR of this Timestamp and the given one.
-	 *
-	 * @method
-	 * @param {Timestamp} other the Timestamp with which to XOR.
-	 * @return {Timestamp} the bitwise-XOR of this and the other.
-	 */
-	Timestamp.prototype.xor = function (other) {
-	  return Timestamp.fromBits(this.low_ ^ other.low_, this.high_ ^ other.high_);
-	};
-
-	/**
-	 * Returns this Timestamp with bits shifted to the left by the given amount.
-	 *
-	 * @method
-	 * @param {number} numBits the number of bits by which to shift.
-	 * @return {Timestamp} this shifted to the left by the given amount.
-	 */
-	Timestamp.prototype.shiftLeft = function (numBits) {
-	  numBits &= 63;
-	  if (numBits === 0) {
-	    return this;
-	  } else {
-	    var low = this.low_;
-	    if (numBits < 32) {
-	      var high = this.high_;
-	      return Timestamp.fromBits(low << numBits, high << numBits | low >>> 32 - numBits);
-	    } else {
-	      return Timestamp.fromBits(0, low << numBits - 32);
-	    }
-	  }
-	};
-
-	/**
-	 * Returns this Timestamp with bits shifted to the right by the given amount.
-	 *
-	 * @method
-	 * @param {number} numBits the number of bits by which to shift.
-	 * @return {Timestamp} this shifted to the right by the given amount.
-	 */
-	Timestamp.prototype.shiftRight = function (numBits) {
-	  numBits &= 63;
-	  if (numBits === 0) {
-	    return this;
-	  } else {
-	    var high = this.high_;
-	    if (numBits < 32) {
-	      var low = this.low_;
-	      return Timestamp.fromBits(low >>> numBits | high << 32 - numBits, high >> numBits);
-	    } else {
-	      return Timestamp.fromBits(high >> numBits - 32, high >= 0 ? 0 : -1);
-	    }
-	  }
-	};
-
-	/**
-	 * Returns this Timestamp with bits shifted to the right by the given amount, with the new top bits matching the current sign bit.
-	 *
-	 * @method
-	 * @param {number} numBits the number of bits by which to shift.
-	 * @return {Timestamp} this shifted to the right by the given amount, with zeros placed into the new leading bits.
-	 */
-	Timestamp.prototype.shiftRightUnsigned = function (numBits) {
-	  numBits &= 63;
-	  if (numBits === 0) {
-	    return this;
-	  } else {
-	    var high = this.high_;
-	    if (numBits < 32) {
-	      var low = this.low_;
-	      return Timestamp.fromBits(low >>> numBits | high << 32 - numBits, high >>> numBits);
-	    } else if (numBits === 32) {
-	      return Timestamp.fromBits(high, 0);
-	    } else {
-	      return Timestamp.fromBits(high >>> numBits - 32, 0);
-	    }
-	  }
-	};
-
-	/**
-	 * Returns a Timestamp representing the given (32-bit) integer value.
-	 *
-	 * @method
-	 * @param {number} value the 32-bit integer in question.
-	 * @return {Timestamp} the corresponding Timestamp value.
-	 */
-	Timestamp.fromInt = function (value) {
-	  if (-128 <= value && value < 128) {
-	    var cachedObj = Timestamp.INT_CACHE_[value];
-	    if (cachedObj) {
-	      return cachedObj;
-	    }
-	  }
-
-	  var obj = new Timestamp(value | 0, value < 0 ? -1 : 0);
-	  if (-128 <= value && value < 128) {
-	    Timestamp.INT_CACHE_[value] = obj;
-	  }
-	  return obj;
-	};
-
-	/**
-	 * Returns a Timestamp representing the given value, provided that it is a finite number. Otherwise, zero is returned.
-	 *
-	 * @method
-	 * @param {number} value the number in question.
-	 * @return {Timestamp} the corresponding Timestamp value.
-	 */
-	Timestamp.fromNumber = function (value) {
-	  if (isNaN(value) || !isFinite(value)) {
-	    return Timestamp.ZERO;
-	  } else if (value <= -Timestamp.TWO_PWR_63_DBL_) {
-	    return Timestamp.MIN_VALUE;
-	  } else if (value + 1 >= Timestamp.TWO_PWR_63_DBL_) {
-	    return Timestamp.MAX_VALUE;
-	  } else if (value < 0) {
-	    return Timestamp.fromNumber(-value).negate();
-	  } else {
-	    return new Timestamp(value % Timestamp.TWO_PWR_32_DBL_ | 0, value / Timestamp.TWO_PWR_32_DBL_ | 0);
-	  }
-	};
-
-	/**
-	 * Returns a Timestamp representing the 64-bit integer that comes by concatenating the given high and low bits. Each is assumed to use 32 bits.
-	 *
-	 * @method
-	 * @param {number} lowBits the low 32-bits.
-	 * @param {number} highBits the high 32-bits.
-	 * @return {Timestamp} the corresponding Timestamp value.
-	 */
-	Timestamp.fromBits = function (lowBits, highBits) {
-	  return new Timestamp(lowBits, highBits);
-	};
-
-	/**
-	 * Returns a Timestamp representation of the given string, written using the given radix.
-	 *
-	 * @method
-	 * @param {string} str the textual representation of the Timestamp.
-	 * @param {number} opt_radix the radix in which the text is written.
-	 * @return {Timestamp} the corresponding Timestamp value.
-	 */
-	Timestamp.fromString = function (str, opt_radix) {
-	  if (str.length === 0) {
-	    throw Error('number format error: empty string');
-	  }
-
-	  var radix = opt_radix || 10;
-	  if (radix < 2 || 36 < radix) {
-	    throw Error('radix out of range: ' + radix);
-	  }
-
-	  if (str.charAt(0) === '-') {
-	    return Timestamp.fromString(str.substring(1), radix).negate();
-	  } else if (str.indexOf('-') >= 0) {
-	    throw Error('number format error: interior "-" character: ' + str);
-	  }
-
-	  // Do several (8) digits each time through the loop, so as to
-	  // minimize the calls to the very expensive emulated div.
-	  var radixToPower = Timestamp.fromNumber(Math.pow(radix, 8));
-
-	  var result = Timestamp.ZERO;
-	  for (var i = 0; i < str.length; i += 8) {
-	    var size = Math.min(8, str.length - i);
-	    var value = parseInt(str.substring(i, i + size), radix);
-	    if (size < 8) {
-	      var power = Timestamp.fromNumber(Math.pow(radix, size));
-	      result = result.multiply(power).add(Timestamp.fromNumber(value));
-	    } else {
-	      result = result.multiply(radixToPower);
-	      result = result.add(Timestamp.fromNumber(value));
-	    }
-	  }
-	  return result;
-	};
-
-	// NOTE: Common constant values ZERO, ONE, NEG_ONE, etc. are defined below the
-	// from* methods on which they depend.
-
-	/**
-	 * A cache of the Timestamp representations of small integer values.
-	 * @type {Object}
-	 * @ignore
-	 */
-	Timestamp.INT_CACHE_ = {};
-
-	// NOTE: the compiler should inline these constant values below and then remove
-	// these variables, so there should be no runtime penalty for these.
-
-	/**
-	 * Number used repeated below in calculations.  This must appear before the
-	 * first call to any from* function below.
-	 * @type {number}
-	 * @ignore
-	 */
-	Timestamp.TWO_PWR_16_DBL_ = 1 << 16;
-
-	/**
-	 * @type {number}
-	 * @ignore
-	 */
-	Timestamp.TWO_PWR_24_DBL_ = 1 << 24;
-
-	/**
-	 * @type {number}
-	 * @ignore
-	 */
-	Timestamp.TWO_PWR_32_DBL_ = Timestamp.TWO_PWR_16_DBL_ * Timestamp.TWO_PWR_16_DBL_;
-
-	/**
-	 * @type {number}
-	 * @ignore
-	 */
-	Timestamp.TWO_PWR_31_DBL_ = Timestamp.TWO_PWR_32_DBL_ / 2;
-
-	/**
-	 * @type {number}
-	 * @ignore
-	 */
-	Timestamp.TWO_PWR_48_DBL_ = Timestamp.TWO_PWR_32_DBL_ * Timestamp.TWO_PWR_16_DBL_;
-
-	/**
-	 * @type {number}
-	 * @ignore
-	 */
-	Timestamp.TWO_PWR_64_DBL_ = Timestamp.TWO_PWR_32_DBL_ * Timestamp.TWO_PWR_32_DBL_;
-
-	/**
-	 * @type {number}
-	 * @ignore
-	 */
-	Timestamp.TWO_PWR_63_DBL_ = Timestamp.TWO_PWR_64_DBL_ / 2;
-
-	/** @type {Timestamp} */
-	Timestamp.ZERO = Timestamp.fromInt(0);
-
-	/** @type {Timestamp} */
-	Timestamp.ONE = Timestamp.fromInt(1);
-
-	/** @type {Timestamp} */
-	Timestamp.NEG_ONE = Timestamp.fromInt(-1);
-
-	/** @type {Timestamp} */
-	Timestamp.MAX_VALUE = Timestamp.fromBits(0xffffffff | 0, 0x7fffffff | 0);
-
-	/** @type {Timestamp} */
-	Timestamp.MIN_VALUE = Timestamp.fromBits(0, 0x80000000 | 0);
-
-	/**
-	 * @type {Timestamp}
-	 * @ignore
-	 */
-	Timestamp.TWO_PWR_24_ = Timestamp.fromInt(1 << 24);
-
-	/**
-	 * Expose.
-	 */
-	module.exports = Timestamp;
-	module.exports.Timestamp = Timestamp;
-
-/***/ }),
-/* 337 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(Buffer, process) {// Custom inspect property name / symbol.
-	var inspect = 'inspect';
-
-	/**
-	 * Machine id.
-	 *
-	 * Create a random 3-byte value (i.e. unique for this
-	 * process). Other drivers use a md5 of the machine id here, but
-	 * that would mean an asyc call to gethostname, so we don't bother.
-	 * @ignore
-	 */
-	var MACHINE_ID = parseInt(Math.random() * 0xffffff, 10);
-
-	// Regular expression that checks for hex value
-	var checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
-
-	// Check if buffer exists
-	try {
-	  if (Buffer && Buffer.from) {
-	    var hasBufferType = true;
-	    inspect = __webpack_require__(339).inspect.custom || 'inspect';
-	  }
-	} catch (err) {
-	  hasBufferType = false;
-	}
-
-	/**
-	* Create a new ObjectID instance
-	*
-	* @class
-	* @param {(string|number)} id Can be a 24 byte hex string, 12 byte binary string or a Number.
-	* @property {number} generationTime The generation time of this ObjectId instance
-	* @return {ObjectID} instance of ObjectID.
-	*/
-	var ObjectID = function ObjectID(id) {
-	  // Duck-typing to support ObjectId from different npm packages
-	  if (id instanceof ObjectID) return id;
-	  if (!(this instanceof ObjectID)) return new ObjectID(id);
-
-	  this._bsontype = 'ObjectID';
-
-	  // The most common usecase (blank id, new objectId instance)
-	  if (id == null || typeof id === 'number') {
-	    // Generate a new id
-	    this.id = this.generate(id);
-	    // If we are caching the hex string
-	    if (ObjectID.cacheHexString) this.__id = this.toString('hex');
-	    // Return the object
-	    return;
-	  }
-
-	  // Check if the passed in id is valid
-	  var valid = ObjectID.isValid(id);
-
-	  // Throw an error if it's not a valid setup
-	  if (!valid && id != null) {
-	    throw new Error('Argument passed in must be a single String of 12 bytes or a string of 24 hex characters');
-	  } else if (valid && typeof id === 'string' && id.length === 24 && hasBufferType) {
-	    return new ObjectID(new Buffer(id, 'hex'));
-	  } else if (valid && typeof id === 'string' && id.length === 24) {
-	    return ObjectID.createFromHexString(id);
-	  } else if (id != null && id.length === 12) {
-	    // assume 12 byte string
-	    this.id = id;
-	  } else if (id != null && id.toHexString) {
-	    // Duck-typing to support ObjectId from different npm packages
-	    return id;
-	  } else {
-	    throw new Error('Argument passed in must be a single String of 12 bytes or a string of 24 hex characters');
-	  }
-
-	  if (ObjectID.cacheHexString) this.__id = this.toString('hex');
-	};
-
-	// Allow usage of ObjectId as well as ObjectID
-	// var ObjectId = ObjectID;
-
-	// Precomputed hex table enables speedy hex string conversion
-	var hexTable = [];
-	for (var i = 0; i < 256; i++) {
-	  hexTable[i] = (i <= 15 ? '0' : '') + i.toString(16);
-	}
-
-	/**
-	* Return the ObjectID id as a 24 byte hex string representation
-	*
-	* @method
-	* @return {string} return the 24 byte hex string representation.
-	*/
-	ObjectID.prototype.toHexString = function () {
-	  if (ObjectID.cacheHexString && this.__id) return this.__id;
-
-	  var hexString = '';
-	  if (!this.id || !this.id.length) {
-	    throw new Error('invalid ObjectId, ObjectId.id must be either a string or a Buffer, but is [' + JSON.stringify(this.id) + ']');
-	  }
-
-	  if (this.id instanceof _Buffer) {
-	    hexString = convertToHex(this.id);
-	    if (ObjectID.cacheHexString) this.__id = hexString;
-	    return hexString;
-	  }
-
-	  for (var i = 0; i < this.id.length; i++) {
-	    hexString += hexTable[this.id.charCodeAt(i)];
-	  }
-
-	  if (ObjectID.cacheHexString) this.__id = hexString;
-	  return hexString;
-	};
-
-	/**
-	* Update the ObjectID index used in generating new ObjectID's on the driver
-	*
-	* @method
-	* @return {number} returns next index value.
-	* @ignore
-	*/
-	ObjectID.prototype.get_inc = function () {
-	  return ObjectID.index = (ObjectID.index + 1) % 0xffffff;
-	};
-
-	/**
-	* Update the ObjectID index used in generating new ObjectID's on the driver
-	*
-	* @method
-	* @return {number} returns next index value.
-	* @ignore
-	*/
-	ObjectID.prototype.getInc = function () {
-	  return this.get_inc();
-	};
-
-	/**
-	* Generate a 12 byte id buffer used in ObjectID's
-	*
-	* @method
-	* @param {number} [time] optional parameter allowing to pass in a second based timestamp.
-	* @return {Buffer} return the 12 byte id buffer string.
-	*/
-	ObjectID.prototype.generate = function (time) {
-	  if ('number' !== typeof time) {
-	    time = ~~(Date.now() / 1000);
-	  }
-
-	  // Use pid
-	  var pid = (typeof process === 'undefined' || process.pid === 1 ? Math.floor(Math.random() * 100000) : process.pid) % 0xffff;
-	  var inc = this.get_inc();
-	  // Buffer used
-	  var buffer = new Buffer(12);
-	  // Encode time
-	  buffer[3] = time & 0xff;
-	  buffer[2] = time >> 8 & 0xff;
-	  buffer[1] = time >> 16 & 0xff;
-	  buffer[0] = time >> 24 & 0xff;
-	  // Encode machine
-	  buffer[6] = MACHINE_ID & 0xff;
-	  buffer[5] = MACHINE_ID >> 8 & 0xff;
-	  buffer[4] = MACHINE_ID >> 16 & 0xff;
-	  // Encode pid
-	  buffer[8] = pid & 0xff;
-	  buffer[7] = pid >> 8 & 0xff;
-	  // Encode index
-	  buffer[11] = inc & 0xff;
-	  buffer[10] = inc >> 8 & 0xff;
-	  buffer[9] = inc >> 16 & 0xff;
-	  // Return the buffer
-	  return buffer;
-	};
-
-	/**
-	* Converts the id into a 24 byte hex string for printing
-	*
-	* @param {String} format The Buffer toString format parameter.
-	* @return {String} return the 24 byte hex string representation.
-	* @ignore
-	*/
-	ObjectID.prototype.toString = function (format) {
-	  // Is the id a buffer then use the buffer toString method to return the format
-	  if (this.id && this.id.copy) {
-	    return this.id.toString(typeof format === 'string' ? format : 'hex');
-	  }
-
-	  // if(this.buffer )
-	  return this.toHexString();
-	};
-
-	/**
-	* Converts to a string representation of this Id.
-	*
-	* @return {String} return the 24 byte hex string representation.
-	* @ignore
-	*/
-	ObjectID.prototype[inspect] = ObjectID.prototype.toString;
-
-	/**
-	* Converts to its JSON representation.
-	*
-	* @return {String} return the 24 byte hex string representation.
-	* @ignore
-	*/
-	ObjectID.prototype.toJSON = function () {
-	  return this.toHexString();
-	};
-
-	/**
-	* Compares the equality of this ObjectID with `otherID`.
-	*
-	* @method
-	* @param {object} otherID ObjectID instance to compare against.
-	* @return {boolean} the result of comparing two ObjectID's
-	*/
-	ObjectID.prototype.equals = function equals(otherId) {
-	  // var id;
-
-	  if (otherId instanceof ObjectID) {
-	    return this.toString() === otherId.toString();
-	  } else if (typeof otherId === 'string' && ObjectID.isValid(otherId) && otherId.length === 12 && this.id instanceof _Buffer) {
-	    return otherId === this.id.toString('binary');
-	  } else if (typeof otherId === 'string' && ObjectID.isValid(otherId) && otherId.length === 24) {
-	    return otherId.toLowerCase() === this.toHexString();
-	  } else if (typeof otherId === 'string' && ObjectID.isValid(otherId) && otherId.length === 12) {
-	    return otherId === this.id;
-	  } else if (otherId != null && (otherId instanceof ObjectID || otherId.toHexString)) {
-	    return otherId.toHexString() === this.toHexString();
-	  } else {
-	    return false;
-	  }
-	};
-
-	/**
-	* Returns the generation date (accurate up to the second) that this ID was generated.
-	*
-	* @method
-	* @return {date} the generation date
-	*/
-	ObjectID.prototype.getTimestamp = function () {
-	  var timestamp = new Date();
-	  var time = this.id[3] | this.id[2] << 8 | this.id[1] << 16 | this.id[0] << 24;
-	  timestamp.setTime(Math.floor(time) * 1000);
-	  return timestamp;
-	};
-
-	/**
-	* @ignore
-	*/
-	ObjectID.index = ~~(Math.random() * 0xffffff);
-
-	/**
-	* @ignore
-	*/
-	ObjectID.createPk = function createPk() {
-	  return new ObjectID();
-	};
-
-	/**
-	* Creates an ObjectID from a second based number, with the rest of the ObjectID zeroed out. Used for comparisons or sorting the ObjectID.
-	*
-	* @method
-	* @param {number} time an integer number representing a number of seconds.
-	* @return {ObjectID} return the created ObjectID
-	*/
-	ObjectID.createFromTime = function createFromTime(time) {
-	  var buffer = new Buffer([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-	  // Encode time into first 4 bytes
-	  buffer[3] = time & 0xff;
-	  buffer[2] = time >> 8 & 0xff;
-	  buffer[1] = time >> 16 & 0xff;
-	  buffer[0] = time >> 24 & 0xff;
-	  // Return the new objectId
-	  return new ObjectID(buffer);
-	};
-
-	// Lookup tables
-	//var encodeLookup = '0123456789abcdef'.split('');
-	var decodeLookup = [];
-	i = 0;
-	while (i < 10) decodeLookup[0x30 + i] = i++;
-	while (i < 16) decodeLookup[0x41 - 10 + i] = decodeLookup[0x61 - 10 + i] = i++;
-
-	var _Buffer = Buffer;
-	var convertToHex = function (bytes) {
-	  return bytes.toString('hex');
-	};
-
-	/**
-	* Creates an ObjectID from a hex string representation of an ObjectID.
-	*
-	* @method
-	* @param {string} hexString create a ObjectID from a passed in 24 byte hexstring.
-	* @return {ObjectID} return the created ObjectID
-	*/
-	ObjectID.createFromHexString = function createFromHexString(string) {
-	  // Throw an error if it's not a valid setup
-	  if (typeof string === 'undefined' || string != null && string.length !== 24) {
-	    throw new Error('Argument passed in must be a single String of 12 bytes or a string of 24 hex characters');
-	  }
-
-	  // Use Buffer.from method if available
-	  if (hasBufferType) return new ObjectID(new Buffer(string, 'hex'));
-
-	  // Calculate lengths
-	  var array = new _Buffer(12);
-	  var n = 0;
-	  var i = 0;
-
-	  while (i < 24) {
-	    array[n++] = decodeLookup[string.charCodeAt(i++)] << 4 | decodeLookup[string.charCodeAt(i++)];
-	  }
-
-	  return new ObjectID(array);
-	};
-
-	/**
-	* Checks if a value is a valid bson ObjectId
-	*
-	* @method
-	* @return {boolean} return true if the value is a valid bson ObjectId, return false otherwise.
-	*/
-	ObjectID.isValid = function isValid(id) {
-	  if (id == null) return false;
-
-	  if (typeof id === 'number') {
-	    return true;
-	  }
-
-	  if (typeof id === 'string') {
-	    return id.length === 12 || id.length === 24 && checkForHexRegExp.test(id);
-	  }
-
-	  if (id instanceof ObjectID) {
-	    return true;
-	  }
-
-	  if (id instanceof _Buffer) {
-	    return true;
-	  }
-
-	  // Duck-Typing detection of ObjectId like objects
-	  if (id.toHexString) {
-	    return id.id.length === 12 || id.id.length === 24 && checkForHexRegExp.test(id.id);
-	  }
-
-	  return false;
-	};
-
-	/**
-	* @ignore
-	*/
-	Object.defineProperty(ObjectID.prototype, 'generationTime', {
-	  enumerable: true,
-	  get: function () {
-	    return this.id[3] | this.id[2] << 8 | this.id[1] << 16 | this.id[0] << 24;
-	  },
-	  set: function (value) {
-	    // Encode time into first 4 bytes
-	    this.id[3] = value & 0xff;
-	    this.id[2] = value >> 8 & 0xff;
-	    this.id[1] = value >> 16 & 0xff;
-	    this.id[0] = value >> 24 & 0xff;
-	  }
-	});
-
-	/**
-	 * Expose.
-	 */
-	module.exports = ObjectID;
-	module.exports.ObjectID = ObjectID;
-	module.exports.ObjectId = ObjectID;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(329).Buffer, __webpack_require__(338)))
 
 /***/ }),
 /* 338 */
@@ -13817,6 +13819,40 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ }),
 /* 339 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(Buffer) {'use strict';
+
+	/**
+	 * Normalizes our expected stringified form of a function across versions of node
+	 * @param {Function} fn The function to stringify
+	 */
+
+	function normalizedFunctionString(fn) {
+	  return fn.toString().replace(/function *\(/, 'function (');
+	}
+
+	function newBuffer(item, encoding) {
+	  return new Buffer(item, encoding);
+	}
+
+	function allocBuffer() {
+	  return Buffer.alloc.apply(Buffer, arguments);
+	}
+
+	function toBuffer() {
+	  return Buffer.from.apply(Buffer, arguments);
+	}
+
+	module.exports = {
+	  normalizedFunctionString: normalizedFunctionString,
+	  allocBuffer: typeof Buffer.alloc === 'function' ? allocBuffer : newBuffer,
+	  toBuffer: typeof Buffer.from === 'function' ? toBuffer : newBuffer
+	};
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(334).Buffer))
+
+/***/ }),
+/* 340 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global, process) {// Copyright Joyent, Inc. and other Node contributors.
@@ -14344,7 +14380,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.isPrimitive = isPrimitive;
 
-	exports.isBuffer = __webpack_require__(340);
+	exports.isBuffer = __webpack_require__(341);
 
 	function objectToString(o) {
 	  return Object.prototype.toString.call(o);
@@ -14388,7 +14424,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *     prototype.
 	 * @param {function} superCtor Constructor function to inherit prototype from.
 	 */
-	exports.inherits = __webpack_require__(341);
+	exports.inherits = __webpack_require__(342);
 
 	exports._extend = function(origin, add) {
 	  // Don't do anything if add isn't an object
@@ -14409,7 +14445,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(338)))
 
 /***/ }),
-/* 340 */
+/* 341 */
 /***/ (function(module, exports) {
 
 	module.exports = function isBuffer(arg) {
@@ -14420,7 +14456,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ }),
-/* 341 */
+/* 342 */
 /***/ (function(module, exports) {
 
 	if (typeof Object.create === 'function') {
@@ -14449,7 +14485,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ }),
-/* 342 */
+/* 343 */
 /***/ (function(module, exports) {
 
 	/**
@@ -14478,11 +14514,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports.BSONRegExp = BSONRegExp;
 
 /***/ }),
-/* 343 */
+/* 344 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {// Custom inspect property name / symbol.
-	var inspect = Buffer ? __webpack_require__(339).inspect.custom || 'inspect' : 'inspect';
+	var inspect = Buffer ? __webpack_require__(340).inspect.custom || 'inspect' : 'inspect';
 
 	/**
 	 * A class representation of the BSON Symbol type.
@@ -14531,10 +14567,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = Symbol;
 	module.exports.Symbol = Symbol;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(329).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(334).Buffer))
 
 /***/ }),
-/* 344 */
+/* 345 */
 /***/ (function(module, exports) {
 
 	/**
@@ -14572,7 +14608,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports.Int32 = Int32;
 
 /***/ }),
-/* 345 */
+/* 346 */
 /***/ (function(module, exports) {
 
 	/**
@@ -14601,12 +14637,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports.Code = Code;
 
 /***/ }),
-/* 346 */
+/* 347 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(Buffer) {'use strict';
+	'use strict';
 
-	var Long = __webpack_require__(334);
+	var Long = __webpack_require__(330);
 
 	var PARSE_STRING_REGEXP = /^(\+|-)?(\d+|(\d*\.\d*))?(E|e)?([-+])?(\d+)?$/;
 	var PARSE_INF_REGEXP = /^(\+|-)?(Infinity|inf)$/i;
@@ -14624,6 +14660,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var INF_POSITIVE_BUFFER = [0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00].reverse();
 
 	var EXPONENT_REGEX = /^([-+])?(\d+)?$/;
+
+	var utils = __webpack_require__(339);
 
 	// Detect if the value is a digit
 	var isDigit = function (value) {
@@ -14696,7 +14734,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	// var longtoHex = function(value) {
-	//   var buffer = new Buffer(8);
+	//   var buffer = utils.allocBuffer(8);
 	//   var index = 0;
 	//   // Encode the low 64 bits of the decimal
 	//   // Encode low bits
@@ -14713,7 +14751,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// };
 
 	// var int32toHex = function(value) {
-	//   var buffer = new Buffer(4);
+	//   var buffer = utils.allocBuffer(4);
 	//   var index = 0;
 	//   // Encode the low 64 bits of the decimal
 	//   // Encode low bits
@@ -14818,9 +14856,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Check if user passed Infinity or NaN
 	  if (!isDigit(string[index]) && string[index] !== '.') {
 	    if (string[index] === 'i' || string[index] === 'I') {
-	      return new Decimal128(new Buffer(isNegative ? INF_NEGATIVE_BUFFER : INF_POSITIVE_BUFFER));
+	      return new Decimal128(utils.toBuffer(isNegative ? INF_NEGATIVE_BUFFER : INF_POSITIVE_BUFFER));
 	    } else if (string[index] === 'N') {
-	      return new Decimal128(new Buffer(NAN_BUFFER));
+	      return new Decimal128(utils.toBuffer(NAN_BUFFER));
 	    }
 	  }
 
@@ -14828,7 +14866,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  while (isDigit(string[index]) || string[index] === '.') {
 	    if (string[index] === '.') {
 	      if (sawRadix) {
-	        return new Decimal128(new Buffer(NAN_BUFFER));
+	        return new Decimal128(utils.toBuffer(NAN_BUFFER));
 	      }
 
 	      sawRadix = true;
@@ -14873,7 +14911,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    // No digits read
 	    if (!match || !match[2]) {
-	      return new Decimal128(new Buffer(NAN_BUFFER));
+	      return new Decimal128(utils.toBuffer(NAN_BUFFER));
 	    }
 
 	    // Get exponent
@@ -14885,7 +14923,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  // Return not a number
 	  if (string[index]) {
-	    return new Decimal128(new Buffer(NAN_BUFFER));
+	    return new Decimal128(utils.toBuffer(NAN_BUFFER));
 	  }
 
 	  // Done reading input
@@ -14933,7 +14971,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        exponent = EXPONENT_MAX;
 	        break;
 	      } else {
-	        return new Decimal128(new Buffer(isNegative ? INF_NEGATIVE_BUFFER : INF_POSITIVE_BUFFER));
+	        return new Decimal128(utils.toBuffer(isNegative ? INF_NEGATIVE_BUFFER : INF_POSITIVE_BUFFER));
 	      }
 	    }
 
@@ -14965,7 +15003,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        exponent = EXPONENT_MAX;
 	        break;
 	      } else {
-	        return new Decimal128(new Buffer(isNegative ? INF_NEGATIVE_BUFFER : INF_POSITIVE_BUFFER));
+	        return new Decimal128(utils.toBuffer(isNegative ? INF_NEGATIVE_BUFFER : INF_POSITIVE_BUFFER));
 	      }
 	    }
 	  }
@@ -15014,7 +15052,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              exponent = exponent + 1;
 	              digits[dIdx] = 1;
 	            } else {
-	              return new Decimal128(new Buffer(isNegative ? INF_NEGATIVE_BUFFER : INF_POSITIVE_BUFFER));
+	              return new Decimal128(utils.toBuffer(isNegative ? INF_NEGATIVE_BUFFER : INF_POSITIVE_BUFFER));
 	            }
 	          }
 	        } else {
@@ -15091,7 +15129,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  // Encode into a buffer
-	  var buffer = new Buffer(16);
+	  var buffer = utils.allocBuffer(16);
 	  index = 0;
 
 	  // Encode the low 64 bits of the decimal
@@ -15351,10 +15389,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = Decimal128;
 	module.exports.Decimal128 = Decimal128;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(329).Buffer))
 
 /***/ }),
-/* 347 */
+/* 348 */
 /***/ (function(module, exports) {
 
 	/**
@@ -15373,7 +15410,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports.MinKey = MinKey;
 
 /***/ }),
-/* 348 */
+/* 349 */
 /***/ (function(module, exports) {
 
 	/**
@@ -15392,7 +15429,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports.MaxKey = MaxKey;
 
 /***/ }),
-/* 349 */
+/* 350 */
 /***/ (function(module, exports) {
 
 	/**
@@ -15429,7 +15466,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports.DBRef = DBRef;
 
 /***/ }),
-/* 350 */
+/* 351 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -15440,8 +15477,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	// Test if we're in Node via presence of "global" not absence of "window"
 	// to support hybrid environments like Electron
 	if (typeof global !== 'undefined') {
-	  var Buffer = __webpack_require__(329).Buffer; // TODO just use global Buffer
+	  var Buffer = __webpack_require__(334).Buffer; // TODO just use global Buffer
 	}
+
+	var utils = __webpack_require__(339);
 
 	/**
 	 * A class representation of the BSON Binary type.
@@ -15481,7 +15520,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (typeof buffer === 'string') {
 	      // Different ways of writing the length of the string for the different types
 	      if (typeof Buffer !== 'undefined') {
-	        this.buffer = new Buffer(buffer);
+	        this.buffer = utils.toBuffer(buffer);
 	      } else if (typeof Uint8Array !== 'undefined' || Object.prototype.toString.call(buffer) === '[object Array]') {
 	        this.buffer = writeStringToArray(buffer);
 	      } else {
@@ -15493,7 +15532,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.position = buffer.length;
 	  } else {
 	    if (typeof Buffer !== 'undefined') {
-	      this.buffer = new Buffer(Binary.BUFFER_SIZE);
+	      this.buffer = utils.allocBuffer(Binary.BUFFER_SIZE);
 	    } else if (typeof Uint8Array !== 'undefined') {
 	      this.buffer = new Uint8Array(new ArrayBuffer(Binary.BUFFER_SIZE));
 	    } else {
@@ -15530,7 +15569,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  } else {
 	    if (typeof Buffer !== 'undefined' && Buffer.isBuffer(this.buffer)) {
 	      // Create additional overflow buffer
-	      var buffer = new Buffer(Binary.BUFFER_SIZE + this.buffer.length);
+	      var buffer = utils.allocBuffer(Binary.BUFFER_SIZE + this.buffer.length);
 	      // Combine the two buffers together
 	      this.buffer.copy(buffer, 0, 0, this.buffer.length);
 	      this.buffer = buffer;
@@ -15573,7 +15612,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var buffer = null;
 	    // If we are in node.js
 	    if (typeof Buffer !== 'undefined' && Buffer.isBuffer(this.buffer)) {
-	      buffer = new Buffer(this.buffer.length + string.length);
+	      buffer = utils.allocBuffer(this.buffer.length + string.length);
 	      this.buffer.copy(buffer, 0, 0, this.buffer.length);
 	    } else if (Object.prototype.toString.call(this.buffer) === '[object Uint8Array]') {
 	      // Create a new buffer
@@ -15782,24 +15821,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ }),
-/* 351 */
+/* 352 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(Buffer) {'use strict';
+	'use strict';
 
-	var Long = __webpack_require__(334).Long,
-	    Double = __webpack_require__(335).Double,
-	    Timestamp = __webpack_require__(336).Timestamp,
-	    ObjectID = __webpack_require__(337).ObjectID,
-	    Symbol = __webpack_require__(343).Symbol,
-	    Code = __webpack_require__(345).Code,
-	    MinKey = __webpack_require__(347).MinKey,
-	    MaxKey = __webpack_require__(348).MaxKey,
-	    Decimal128 = __webpack_require__(346),
-	    Int32 = __webpack_require__(344),
-	    DBRef = __webpack_require__(349).DBRef,
-	    BSONRegExp = __webpack_require__(342).BSONRegExp,
-	    Binary = __webpack_require__(350).Binary;
+	var Long = __webpack_require__(330).Long,
+	    Double = __webpack_require__(331).Double,
+	    Timestamp = __webpack_require__(332).Timestamp,
+	    ObjectID = __webpack_require__(333).ObjectID,
+	    Symbol = __webpack_require__(344).Symbol,
+	    Code = __webpack_require__(346).Code,
+	    MinKey = __webpack_require__(348).MinKey,
+	    MaxKey = __webpack_require__(349).MaxKey,
+	    Decimal128 = __webpack_require__(347),
+	    Int32 = __webpack_require__(345),
+	    DBRef = __webpack_require__(350).DBRef,
+	    BSONRegExp = __webpack_require__(343).BSONRegExp,
+	    Binary = __webpack_require__(351).Binary;
+
+	var utils = __webpack_require__(339);
 
 	var deserialize = function (buffer, options, isArray) {
 	  options = options == null ? {} : options;
@@ -15887,7 +15928,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      object[name] = buffer.toString('utf8', index, index + stringSize - 1);
 	      index = index + stringSize;
 	    } else if (elementType === BSON.BSON_DATA_OID) {
-	      var oid = new Buffer(12);
+	      var oid = utils.allocBuffer(12);
 	      buffer.copy(oid, 0, index, index + 12);
 	      object[name] = new ObjectID(oid);
 	      index = index + 12;
@@ -15958,7 +15999,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    } else if (elementType === BSON.BSON_DATA_DECIMAL128) {
 	      // Buffer to contain the decimal bytes
-	      var bytes = new Buffer(16);
+	      var bytes = utils.allocBuffer(16);
 	      // Copy the next 16 bytes into the bytes buffer
 	      buffer.copy(bytes, 0, index, index + 16);
 	      // Update index
@@ -16185,7 +16226,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      index = index + stringSize;
 
 	      // Read the oid
-	      var oidBuffer = new Buffer(12);
+	      var oidBuffer = utils.allocBuffer(12);
 	      buffer.copy(oidBuffer, 0, index, index + 12);
 	      oid = new ObjectID(oidBuffer);
 
@@ -16437,20 +16478,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	var JS_INT_MIN_LONG = Long.fromNumber(-0x20000000000000); // Any integer down to -2^53 can be precisely represented by a double.
 
 	module.exports = deserialize;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(329).Buffer))
 
 /***/ }),
-/* 352 */
+/* 353 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {'use strict';
 
-	var writeIEEE754 = __webpack_require__(353).writeIEEE754,
-	    Long = __webpack_require__(334).Long,
-	    Map = __webpack_require__(333),
-	    Binary = __webpack_require__(350).Binary;
+	var writeIEEE754 = __webpack_require__(354).writeIEEE754,
+	    Long = __webpack_require__(330).Long,
+	    Map = __webpack_require__(329),
+	    Binary = __webpack_require__(351).Binary;
 
-	var normalizedFunctionString = __webpack_require__(354).normalizedFunctionString;
+	var normalizedFunctionString = __webpack_require__(339).normalizedFunctionString;
 
 	// try {
 	//   var _Buffer = Uint8Array;
@@ -17436,10 +17476,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	// var JS_INT_MIN_LONG = Long.fromNumber(-0x20000000000000); // Any integer down to -2^53 can be precisely represented by a double.
 
 	module.exports = serializeInto;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(329).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(334).Buffer))
 
 /***/ }),
-/* 353 */
+/* 354 */
 /***/ (function(module, exports) {
 
 	// Copyright (c) 2008, Fair Oaks Labs, Inc.
@@ -17568,44 +17608,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.writeIEEE754 = writeIEEE754;
 
 /***/ }),
-/* 354 */
-/***/ (function(module, exports) {
-
-	'use strict';
-
-	/**
-	 * Normalizes our expected stringified form of a function across versions of node
-	 * @param {Function} fn The function to stringify
-	 */
-
-	function normalizedFunctionString(fn) {
-	  return fn.toString().replace(/function *\(/, 'function (');
-	}
-
-	module.exports = {
-	  normalizedFunctionString: normalizedFunctionString
-	};
-
-/***/ }),
 /* 355 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {'use strict';
 
-	var Long = __webpack_require__(334).Long,
-	    Double = __webpack_require__(335).Double,
-	    Timestamp = __webpack_require__(336).Timestamp,
-	    ObjectID = __webpack_require__(337).ObjectID,
-	    Symbol = __webpack_require__(343).Symbol,
-	    BSONRegExp = __webpack_require__(342).BSONRegExp,
-	    Code = __webpack_require__(345).Code,
-	    Decimal128 = __webpack_require__(346),
-	    MinKey = __webpack_require__(347).MinKey,
-	    MaxKey = __webpack_require__(348).MaxKey,
-	    DBRef = __webpack_require__(349).DBRef,
-	    Binary = __webpack_require__(350).Binary;
+	var Long = __webpack_require__(330).Long,
+	    Double = __webpack_require__(331).Double,
+	    Timestamp = __webpack_require__(332).Timestamp,
+	    ObjectID = __webpack_require__(333).ObjectID,
+	    Symbol = __webpack_require__(344).Symbol,
+	    BSONRegExp = __webpack_require__(343).BSONRegExp,
+	    Code = __webpack_require__(346).Code,
+	    Decimal128 = __webpack_require__(347),
+	    MinKey = __webpack_require__(348).MinKey,
+	    MaxKey = __webpack_require__(349).MaxKey,
+	    DBRef = __webpack_require__(350).DBRef,
+	    Binary = __webpack_require__(351).Binary;
 
-	var normalizedFunctionString = __webpack_require__(354).normalizedFunctionString;
+	var normalizedFunctionString = __webpack_require__(339).normalizedFunctionString;
 
 	// To ensure that 0.4 of node works correctly
 	var isDate = function isDate(d) {
@@ -17740,7 +17761,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	BSON.JS_INT_MIN = -0x20000000000000; // Any integer down to -2^53 can be precisely represented by a double.
 
 	module.exports = calculateObjectSize;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(329).Buffer))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(334).Buffer))
 
 /***/ })
 /******/ ])
