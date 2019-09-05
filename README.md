@@ -32,27 +32,7 @@ npm install
 npm run build
 ```
 
-A simple example of how to use BSON in the browser:
-
-```html
-<script src="./dist/bson.js"></script>
-
-<script>
-  function start() {
-    // Get the Long type
-    const Long = BSON.Long;
-
-    // Serialize document
-    const doc = { long: Long.fromNumber(100) }
-
-    // Serialize a document
-    const data = BSON.serialize(doc)
-    // De serialize it again
-    const doc_2 = BSON.deserialize(data)
-  }
-</script>
-```
-
+### Node (no bundling)
 A simple example of how to use BSON in `Node.js`:
 
 ```js
@@ -69,6 +49,73 @@ console.log('data:', data);
 const doc_2 = BSON.deserialize(data);
 console.log('doc_2:', doc_2);
 ```
+
+### Browser (no bundling)
+
+If you are not using a bundler like webpack, you can include `dist/bson.bundle.js` using a script tag.  It includes polyfills for built-in node types like `Buffer`.
+
+```html
+<script src="./dist/bson.bundle.js"></script>
+
+<script>
+  function start() {
+    // Get the Long type
+    const Long = BSON.Long;
+
+    // Serialize document
+    const doc = { long: Long.fromNumber(100) }
+
+    // Serialize a document
+    const data = BSON.serialize(doc);
+    // De serialize it again
+    const doc_2 = BSON.deserialize(data);
+  }
+</script>
+```
+
+### Using webpack
+
+If using webpack, you can use your normal import/require syntax of your project to pull in the `bson` library.
+
+ES6 Example:
+
+```js
+import { Long, serialize, deserialize } from 'bson';
+
+// Serialize document
+const doc = { long: Long.fromNumber(100) };
+
+// Serialize a document
+const data = serialize(doc);
+// De serialize it again
+const doc_2 = deserialize(data);
+```
+
+ES5 Example:
+
+```js
+const BSON = require('bson');
+const Long = BSON.Long;
+
+const doc = { long: Long.fromNumber(100) };
+
+// Serialize a document
+const data = BSON.serialize(doc);
+console.log('data:', data);
+
+// Deserialize the resulting Buffer
+const doc_2 = BSON.deserialize(data);
+console.log('doc_2:', doc_2);
+```
+
+Depending on your settings, webpack will under the hood resolve to one of the following:
+
+- `dist/bson.browser.esm.js` If your project is in the browser and using ES6 modules (Default for `webworker` and `web` targets)
+- `dist/bson.browser.umd.js` If your project is in the browser and not using ES6 modules
+- `dist/bson.esm.js` If your project is in Node.js and using ES6 modules (Default for `node` targets)
+- `lib/bson.js` (the normal include path) If your project is in Node.js and not using ES6 modules
+
+For more information, see [this page on webpack's `resolve.mainFields`](https://webpack.js.org/configuration/resolve/#resolvemainfields) and [the `package.json` for this project](./package.json#L52)
 
 ## Installation
 
