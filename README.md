@@ -39,9 +39,8 @@ A simple example of how to use BSON in `Node.js`:
 const BSON = require('bson');
 const Long = BSON.Long;
 
-const doc = { long: Long.fromNumber(100) };
-
 // Serialize a document
+const doc = { long: Long.fromNumber(100) };
 const data = BSON.serialize(doc);
 console.log('data:', data);
 
@@ -62,13 +61,14 @@ If you are not using a bundler like webpack, you can include `dist/bson.bundle.j
     // Get the Long type
     const Long = BSON.Long;
 
-    // Serialize document
-    const doc = { long: Long.fromNumber(100) }
-
     // Serialize a document
+    const doc = { long: Long.fromNumber(100) }
     const data = BSON.serialize(doc);
+    console.log('data:', data);
+
     // De serialize it again
     const doc_2 = BSON.deserialize(data);
+    console.log('doc_2:', doc_2);
   }
 </script>
 ```
@@ -82,13 +82,14 @@ ES6 Example:
 ```js
 import { Long, serialize, deserialize } from 'bson';
 
-// Serialize document
-const doc = { long: Long.fromNumber(100) };
-
 // Serialize a document
+const doc = { long: Long.fromNumber(100) };
 const data = serialize(doc);
+console.log('data:', data);
+
 // De serialize it again
 const doc_2 = deserialize(data);
+console.log('doc_2:', doc_2);
 ```
 
 ES5 Example:
@@ -97,9 +98,8 @@ ES5 Example:
 const BSON = require('bson');
 const Long = BSON.Long;
 
-const doc = { long: Long.fromNumber(100) };
-
 // Serialize a document
+const doc = { long: Long.fromNumber(100) };
 const data = BSON.serialize(doc);
 console.log('data:', data);
 
