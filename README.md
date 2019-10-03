@@ -117,6 +117,18 @@ Depending on your settings, webpack will under the hood resolve to one of the fo
 
 For more information, see [this page on webpack's `resolve.mainFields`](https://webpack.js.org/configuration/resolve/#resolvemainfields) and [the `package.json` for this project](./package.json#L52)
 
+### Usage with Angular
+
+Starting with Angular 6, Angular CLI removed the shim for `global` and other node built-in variables (original comment [here](https://github.com/angular/angular-cli/issues/9827#issuecomment-386154063)). If you are using BSON with Angular, you may need to add the following shim to your `polyfills.ts` file:
+
+```js
+// In polyfills.ts
+(window as any).global = window;
+```
+
+- [Original Comment by Angular CLI](https://github.com/angular/angular-cli/issues/9827#issuecomment-386154063)
+- [Original Source for Solution](https://stackoverflow.com/a/50488337/4930088)
+
 ## Installation
 
 `npm install bson`
