@@ -1,3 +1,8 @@
+<a name="1.1.3"></a>
+## [1.1.3](https://github.com/mongodb/js-bson/compare/v1.1.2...v1.1.3) (2019-11-09)
+
+Reverts 1.1.2
+
 <a name="1.1.2"></a>
 ## [1.1.2](https://github.com/mongodb/js-bson/compare/v1.1.1...v1.1.2) (2019-11-08)
 

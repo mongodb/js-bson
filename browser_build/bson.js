@@ -9945,6 +9945,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function Long(low, high) {
 	  if (!(this instanceof Long)) return new Long(low, high);
 
+	  this._bsontype = 'Long';
 	  /**
 	   * @type {number}
 	   * @ignore
@@ -9957,11 +9958,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  this.high_ = high | 0; // force into 32 signed bits.
 	}
-
-	Object.defineProperty(Long.prototype, '_bsontype', {
-	  value: 'Long',
-	  writable: false
-	});
 
 	/**
 	 * Return the int value.
@@ -10766,13 +10762,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	function Double(value) {
 	  if (!(this instanceof Double)) return new Double(value);
 
+	  this._bsontype = 'Double';
 	  this.value = value;
 	}
-
-	Object.defineProperty(Double.prototype, '_bsontype', {
-	  value: 'Double',
-	  writable: false
-	});
 
 	/**
 	 * Access the number value.
@@ -10844,6 +10836,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function Timestamp(low, high) {
 	  if (!(this instanceof Timestamp)) return new Timestamp(low, high);
+	  this._bsontype = 'Timestamp';
 	  /**
 	   * @type {number}
 	   * @ignore
@@ -10856,11 +10849,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 	  this.high_ = high | 0; // force into 32 signed bits.
 	}
-
-	Object.defineProperty(Timestamp.prototype, '_bsontype', {
-	  value: 'Timestamp',
-	  writable: false
-	});
 
 	/**
 	 * Return the int value.
@@ -11695,6 +11683,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (id instanceof ObjectID) return id;
 	  if (!(this instanceof ObjectID)) return new ObjectID(id);
 
+	  this._bsontype = 'ObjectID';
+
 	  // The most common usecase (blank id, new objectId instance)
 	  if (id == null || typeof id === 'number') {
 	    // Generate a new id
@@ -11727,11 +11717,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  if (ObjectID.cacheHexString) this.__id = this.toString('hex');
 	};
-
-	Object.defineProperty(ObjectID.prototype, '_bsontype', {
-	  value: 'ObjectID',
-	  writable: false
-	});
 
 	// Allow usage of ObjectId as well as ObjectID
 	// var ObjectId = ObjectID;
@@ -14956,6 +14941,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (!(this instanceof BSONRegExp)) return new BSONRegExp();
 
 	  // Execute
+	  this._bsontype = 'BSONRegExp';
 	  this.pattern = pattern || '';
 	  this.options = options || '';
 
@@ -14966,11 +14952,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	}
-
-	Object.defineProperty(BSONRegExp.prototype, '_bsontype', {
-	  value: 'BSONRegExp',
-	  writable: false
-	});
 
 	module.exports = BSONRegExp;
 	module.exports.BSONRegExp = BSONRegExp;
@@ -14992,13 +14973,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function Symbol(value) {
 	  if (!(this instanceof Symbol)) return new Symbol(value);
+	  this._bsontype = 'Symbol';
 	  this.value = value;
 	}
-
-	Object.defineProperty(Symbol.prototype, '_bsontype', {
-	  value: 'Symbol',
-	  writable: false
-	});
 
 	/**
 	 * Access the wrapped string value.
@@ -15049,13 +15026,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Int32 = function (value) {
 	  if (!(this instanceof Int32)) return new Int32(value);
 
+	  this._bsontype = 'Int32';
 	  this.value = value;
 	};
-
-	Object.defineProperty(Int32.prototype, '_bsontype', {
-	  value: 'Int32',
-	  writable: false
-	});
 
 	/**
 	 * Access the number value.
@@ -15091,14 +15064,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var Code = function Code(code, scope) {
 	  if (!(this instanceof Code)) return new Code(code, scope);
+	  this._bsontype = 'Code';
 	  this.code = code;
 	  this.scope = scope;
 	};
-
-	Object.defineProperty(Code.prototype, '_bsontype', {
-	  value: 'Code',
-	  writable: false
-	});
 
 	/**
 	 * @ignore
@@ -15244,13 +15213,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {Double}
 	 */
 	var Decimal128 = function (bytes) {
+	  this._bsontype = 'Decimal128';
 	  this.bytes = bytes;
 	};
-
-	Object.defineProperty(Decimal128.prototype, '_bsontype', {
-	  value: 'Decimal128',
-	  writable: false
-	});
 
 	/**
 	 * Create a Decimal128 instance from a string representation
@@ -15880,12 +15845,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function MinKey() {
 	  if (!(this instanceof MinKey)) return new MinKey();
-	}
 
-	Object.defineProperty(MinKey.prototype, '_bsontype', {
-	  value: 'MinKey',
-	  writable: false
-	});
+	  this._bsontype = 'MinKey';
+	}
 
 	module.exports = MinKey;
 	module.exports.MinKey = MinKey;
@@ -15902,12 +15864,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function MaxKey() {
 	  if (!(this instanceof MaxKey)) return new MaxKey();
-	}
 
-	Object.defineProperty(MaxKey.prototype, '_bsontype', {
-	  value: 'MaxKey',
-	  writable: false
-	});
+	  this._bsontype = 'MaxKey';
+	}
 
 	module.exports = MaxKey;
 	module.exports.MaxKey = MaxKey;
@@ -15928,15 +15887,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	function DBRef(namespace, oid, db) {
 	  if (!(this instanceof DBRef)) return new DBRef(namespace, oid, db);
 
+	  this._bsontype = 'DBRef';
 	  this.namespace = namespace;
 	  this.oid = oid;
 	  this.db = db;
 	}
-
-	Object.defineProperty(DBRef.prototype, '_bsontype', {
-	  value: 'DBRef',
-	  writable: false
-	});
 
 	/**
 	 * @ignore
@@ -15993,6 +15948,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    throw new Error('only String, Buffer, Uint8Array or Array accepted');
 	  }
 
+	  this._bsontype = 'Binary';
+
 	  if (buffer instanceof Number) {
 	    this.sub_type = buffer;
 	    this.position = 0;
@@ -16028,11 +15985,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.position = 0;
 	  }
 	}
-
-	Object.defineProperty(Binary.prototype, '_bsontype', {
-	  value: 'Binary',
-	  writable: false
-	});
 
 	/**
 	 * Updates this binary with byte_value.
@@ -17563,9 +17515,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 
 	      var type = typeof value;
-	      var _objPrototype = value && type === 'object' && Object.getPrototypeOf(value);
-	      var _bsontype = _objPrototype && _objPrototype._bsontype || undefined;
-
 	      if (type === 'string') {
 	        index = serializeString(buffer, key, value, index, true);
 	      } else if (type === 'number') {
@@ -17578,38 +17527,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	        index = serializeNull(buffer, key, value, index, true);
 	      } else if (value === null) {
 	        index = serializeNull(buffer, key, value, index, true);
-	      } else if (_bsontype === 'ObjectID' || _bsontype === 'ObjectId') {
+	      } else if (value['_bsontype'] === 'ObjectID' || value['_bsontype'] === 'ObjectId') {
 	        index = serializeObjectId(buffer, key, value, index, true);
 	      } else if (Buffer.isBuffer(value)) {
 	        index = serializeBuffer(buffer, key, value, index, true);
 	      } else if (value instanceof RegExp || isRegExp(value)) {
 	        index = serializeRegExp(buffer, key, value, index, true);
-	      } else if (type === 'object' && _bsontype == null) {
+	      } else if (type === 'object' && value['_bsontype'] == null) {
 	        index = serializeObject(buffer, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, true, path);
-	      } else if (type === 'object' && _bsontype === 'Decimal128') {
+	      } else if (type === 'object' && value['_bsontype'] === 'Decimal128') {
 	        index = serializeDecimal128(buffer, key, value, index, true);
-	      } else if (_bsontype === 'Long' || _bsontype === 'Timestamp') {
+	      } else if (value['_bsontype'] === 'Long' || value['_bsontype'] === 'Timestamp') {
 	        index = serializeLong(buffer, key, value, index, true);
-	      } else if (_bsontype === 'Double') {
+	      } else if (value['_bsontype'] === 'Double') {
 	        index = serializeDouble(buffer, key, value, index, true);
 	      } else if (typeof value === 'function' && serializeFunctions) {
 	        index = serializeFunction(buffer, key, value, index, checkKeys, depth, serializeFunctions, true);
-	      } else if (_bsontype === 'Code') {
+	      } else if (value['_bsontype'] === 'Code') {
 	        index = serializeCode(buffer, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, true);
-	      } else if (_bsontype === 'Binary') {
+	      } else if (value['_bsontype'] === 'Binary') {
 	        index = serializeBinary(buffer, key, value, index, true);
-	      } else if (_bsontype === 'Symbol') {
+	      } else if (value['_bsontype'] === 'Symbol') {
 	        index = serializeSymbol(buffer, key, value, index, true);
-	      } else if (_bsontype === 'DBRef') {
+	      } else if (value['_bsontype'] === 'DBRef') {
 	        index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions, true);
-	      } else if (_bsontype === 'BSONRegExp') {
+	      } else if (value['_bsontype'] === 'BSONRegExp') {
 	        index = serializeBSONRegExp(buffer, key, value, index, true);
-	      } else if (_bsontype === 'Int32') {
+	      } else if (value['_bsontype'] === 'Int32') {
 	        index = serializeInt32(buffer, key, value, index, true);
-	      } else if (_bsontype === 'MinKey' || _bsontype === 'MaxKey') {
+	      } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
 	        index = serializeMinMax(buffer, key, value, index, true);
-	      } else if (typeof value['_bsontype'] !== 'undefined') {
-	        throw new TypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
 	      }
 	    }
 	  } else if (object instanceof Map) {
@@ -17629,9 +17576,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      // Check the type of the value
 	      type = typeof value;
-
-	      var _objPrototype = value && type === 'object' && Object.getPrototypeOf(value);
-	      var _bsontype = _objPrototype && _objPrototype._bsontype || undefined;
 
 	      // Check the key and throw error if it's illegal
 	      if (typeof key === 'string' && ignoreKeys.indexOf(key) === -1) {
@@ -17661,38 +17605,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // } else if (value === undefined && ignoreUndefined === true) {
 	      } else if (value === null || value === undefined && ignoreUndefined === false) {
 	        index = serializeNull(buffer, key, value, index);
-	      } else if (_bsontype === 'ObjectID' || _bsontype === 'ObjectId') {
+	      } else if (value['_bsontype'] === 'ObjectID' || value['_bsontype'] === 'ObjectId') {
 	        index = serializeObjectId(buffer, key, value, index);
 	      } else if (Buffer.isBuffer(value)) {
 	        index = serializeBuffer(buffer, key, value, index);
 	      } else if (value instanceof RegExp || isRegExp(value)) {
 	        index = serializeRegExp(buffer, key, value, index);
-	      } else if (type === 'object' && _bsontype == null) {
+	      } else if (type === 'object' && value['_bsontype'] == null) {
 	        index = serializeObject(buffer, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, false, path);
-	      } else if (type === 'object' && _bsontype === 'Decimal128') {
+	      } else if (type === 'object' && value['_bsontype'] === 'Decimal128') {
 	        index = serializeDecimal128(buffer, key, value, index);
-	      } else if (_bsontype === 'Long' || _bsontype === 'Timestamp') {
+	      } else if (value['_bsontype'] === 'Long' || value['_bsontype'] === 'Timestamp') {
 	        index = serializeLong(buffer, key, value, index);
-	      } else if (_bsontype === 'Double') {
+	      } else if (value['_bsontype'] === 'Double') {
 	        index = serializeDouble(buffer, key, value, index);
-	      } else if (_bsontype === 'Code') {
+	      } else if (value['_bsontype'] === 'Code') {
 	        index = serializeCode(buffer, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined);
 	      } else if (typeof value === 'function' && serializeFunctions) {
 	        index = serializeFunction(buffer, key, value, index, checkKeys, depth, serializeFunctions);
-	      } else if (_bsontype === 'Binary') {
+	      } else if (value['_bsontype'] === 'Binary') {
 	        index = serializeBinary(buffer, key, value, index);
-	      } else if (_bsontype === 'Symbol') {
+	      } else if (value['_bsontype'] === 'Symbol') {
 	        index = serializeSymbol(buffer, key, value, index);
-	      } else if (_bsontype === 'DBRef') {
+	      } else if (value['_bsontype'] === 'DBRef') {
 	        index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions);
-	      } else if (_bsontype === 'BSONRegExp') {
+	      } else if (value['_bsontype'] === 'BSONRegExp') {
 	        index = serializeBSONRegExp(buffer, key, value, index);
-	      } else if (_bsontype === 'Int32') {
+	      } else if (value['_bsontype'] === 'Int32') {
 	        index = serializeInt32(buffer, key, value, index);
-	      } else if (_bsontype === 'MinKey' || _bsontype === 'MaxKey') {
+	      } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
 	        index = serializeMinMax(buffer, key, value, index);
-	      } else if (typeof value['_bsontype'] !== 'undefined') {
-	        throw new TypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
 	      }
 	    }
 	  } else {
@@ -17714,9 +17656,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      // Check the type of the value
 	      type = typeof value;
-
-	      var _objPrototype = value && type === 'object' && Object.getPrototypeOf(value);
-	      var _bsontype = _objPrototype && _objPrototype._bsontype || undefined;
 
 	      // Check the key and throw error if it's illegal
 	      if (typeof key === 'string' && ignoreKeys.indexOf(key) === -1) {
@@ -17747,38 +17686,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (ignoreUndefined === false) index = serializeNull(buffer, key, value, index);
 	      } else if (value === null) {
 	        index = serializeNull(buffer, key, value, index);
-	      } else if (_bsontype === 'ObjectID' || _bsontype === 'ObjectId') {
+	      } else if (value['_bsontype'] === 'ObjectID' || value['_bsontype'] === 'ObjectId') {
 	        index = serializeObjectId(buffer, key, value, index);
 	      } else if (Buffer.isBuffer(value)) {
 	        index = serializeBuffer(buffer, key, value, index);
 	      } else if (value instanceof RegExp || isRegExp(value)) {
 	        index = serializeRegExp(buffer, key, value, index);
-	      } else if (type === 'object' && _bsontype == null) {
+	      } else if (type === 'object' && value['_bsontype'] == null) {
 	        index = serializeObject(buffer, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, false, path);
-	      } else if (type === 'object' && _bsontype === 'Decimal128') {
+	      } else if (type === 'object' && value['_bsontype'] === 'Decimal128') {
 	        index = serializeDecimal128(buffer, key, value, index);
-	      } else if (_bsontype === 'Long' || _bsontype === 'Timestamp') {
+	      } else if (value['_bsontype'] === 'Long' || value['_bsontype'] === 'Timestamp') {
 	        index = serializeLong(buffer, key, value, index);
-	      } else if (_bsontype === 'Double') {
+	      } else if (value['_bsontype'] === 'Double') {
 	        index = serializeDouble(buffer, key, value, index);
-	      } else if (_bsontype === 'Code') {
+	      } else if (value['_bsontype'] === 'Code') {
 	        index = serializeCode(buffer, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined);
 	      } else if (typeof value === 'function' && serializeFunctions) {
 	        index = serializeFunction(buffer, key, value, index, checkKeys, depth, serializeFunctions);
-	      } else if (_bsontype === 'Binary') {
+	      } else if (value['_bsontype'] === 'Binary') {
 	        index = serializeBinary(buffer, key, value, index);
-	      } else if (_bsontype === 'Symbol') {
+	      } else if (value['_bsontype'] === 'Symbol') {
 	        index = serializeSymbol(buffer, key, value, index);
-	      } else if (_bsontype === 'DBRef') {
+	      } else if (value['_bsontype'] === 'DBRef') {
 	        index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions);
-	      } else if (_bsontype === 'BSONRegExp') {
+	      } else if (value['_bsontype'] === 'BSONRegExp') {
 	        index = serializeBSONRegExp(buffer, key, value, index);
-	      } else if (_bsontype === 'Int32') {
+	      } else if (value['_bsontype'] === 'Int32') {
 	        index = serializeInt32(buffer, key, value, index);
-	      } else if (_bsontype === 'MinKey' || _bsontype === 'MaxKey') {
+	      } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
 	        index = serializeMinMax(buffer, key, value, index);
-	      } else if (typeof value['_bsontype'] !== 'undefined') {
-	        throw new TypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
 	      }
 	    }
 	  }
@@ -18170,7 +18107,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (value && value.toBSON) {
 	    value = value.toBSON();
 	  }
-	  var _bsontype, _objPrototype;
 
 	  switch (typeof value) {
 	    case 'string':
@@ -18193,37 +18129,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	    case 'boolean':
 	      return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (1 + 1);
 	    case 'object':
-	      var _objPrototype = value && Object.getPrototypeOf(value);
-	      var _bsontype = _objPrototype && _objPrototype._bsontype || undefined;
-	      if (value == null || value instanceof MinKey || value instanceof MaxKey || _bsontype === 'MinKey' || _bsontype === 'MaxKey') {
+	      if (value == null || value instanceof MinKey || value instanceof MaxKey || value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
 	        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + 1;
-	      } else if (value instanceof ObjectID || _bsontype === 'ObjectID' || _bsontype === 'ObjectId') {
+	      } else if (value instanceof ObjectID || value['_bsontype'] === 'ObjectID' || value['_bsontype'] === 'ObjectId') {
 	        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (12 + 1);
 	      } else if (value instanceof Date || isDate(value)) {
 	        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (8 + 1);
 	      } else if (typeof Buffer !== 'undefined' && Buffer.isBuffer(value)) {
 	        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (1 + 4 + 1) + value.length;
-	      } else if (value instanceof Long || value instanceof Double || value instanceof Timestamp || _bsontype === 'Long' || _bsontype === 'Double' || _bsontype === 'Timestamp') {
+	      } else if (value instanceof Long || value instanceof Double || value instanceof Timestamp || value['_bsontype'] === 'Long' || value['_bsontype'] === 'Double' || value['_bsontype'] === 'Timestamp') {
 	        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (8 + 1);
-	      } else if (value instanceof Decimal128 || _bsontype === 'Decimal128') {
+	      } else if (value instanceof Decimal128 || value['_bsontype'] === 'Decimal128') {
 	        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (16 + 1);
-	      } else if (value instanceof Code || _bsontype === 'Code') {
+	      } else if (value instanceof Code || value['_bsontype'] === 'Code') {
 	        // Calculate size depending on the availability of a scope
 	        if (value.scope != null && Object.keys(value.scope).length > 0) {
 	          return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + 1 + 4 + 4 + Buffer.byteLength(value.code.toString(), 'utf8') + 1 + calculateObjectSize(value.scope, serializeFunctions, ignoreUndefined);
 	        } else {
 	          return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + 1 + 4 + Buffer.byteLength(value.code.toString(), 'utf8') + 1;
 	        }
-	      } else if (value instanceof Binary || _bsontype === 'Binary') {
+	      } else if (value instanceof Binary || value['_bsontype'] === 'Binary') {
 	        // Check what kind of subtype we have
 	        if (value.sub_type === Binary.SUBTYPE_BYTE_ARRAY) {
 	          return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (value.position + 1 + 4 + 1 + 4);
 	        } else {
 	          return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (value.position + 1 + 4 + 1);
 	        }
-	      } else if (value instanceof Symbol || _bsontype === 'Symbol') {
+	      } else if (value instanceof Symbol || value['_bsontype'] === 'Symbol') {
 	        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + Buffer.byteLength(value.value, 'utf8') + 4 + 1 + 1;
-	      } else if (value instanceof DBRef || _bsontype === 'DBRef') {
+	      } else if (value instanceof DBRef || value['_bsontype'] === 'DBRef') {
 	        // Set up correct object for serialization
 	        var ordered_values = {
 	          $ref: value.namespace,
@@ -18238,7 +18172,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + 1 + calculateObjectSize(ordered_values, serializeFunctions, ignoreUndefined);
 	      } else if (value instanceof RegExp || Object.prototype.toString.call(value) === '[object RegExp]') {
 	        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + 1 + Buffer.byteLength(value.source, 'utf8') + 1 + (value.global ? 1 : 0) + (value.ignoreCase ? 1 : 0) + (value.multiline ? 1 : 0) + 1;
-	      } else if (value instanceof BSONRegExp || _bsontype === 'BSONRegExp') {
+	      } else if (value instanceof BSONRegExp || value['_bsontype'] === 'BSONRegExp') {
 	        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + 1 + Buffer.byteLength(value.pattern, 'utf8') + 1 + Buffer.byteLength(value.options, 'utf8') + 1;
 	      } else {
 	        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + calculateObjectSize(value, serializeFunctions, ignoreUndefined) + 1;
