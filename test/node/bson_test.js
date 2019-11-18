@@ -2404,7 +2404,8 @@ exports['Should serialize _bsontype=ObjectID (capital D) from v4.0.0/4.0.1'] = f
 
 exports['should throw if invalid BSON types are input to BSON serializer'] = function(test) {
   var oid = new ObjectId('111111111111111111111111');
-  var badBsonType = Object.assign({}, oid, { _bsontype: 'bogus' });
+  var badBsonType = new ObjectId('111111111111111111111111');
+  badBsonType._bsontype = 'bogus';
   var badDoc = { bad: badBsonType };
   var badArray = [oid, badDoc];
   var badMap = new M([['a', badBsonType], ['b', badDoc], ['c', badArray]]);
