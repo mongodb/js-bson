@@ -21,6 +21,7 @@ var Buffer = require('buffer').Buffer,
   vm = require('vm');
 
 var createBSON = require('../utils');
+var M = require('../../lib/bson/map');
 
 // for tests
 BSON.BSON_BINARY_SUBTYPE_DEFAULT = 0;
@@ -2400,3 +2401,23 @@ exports['Should serialize _bsontype=ObjectID (capital D) from v4.0.0/4.0.1'] = f
   test.equal(doc._id.toHexString(), createBSON().deserialize(serialized_data)._id.toHexString());
   test.done();
 };
+
+exports['should throw if invalid BSON types are input to BSON serializer'] = function(test) {
+  var oid = new ObjectId('111111111111111111111111');
+  var badBsonType = new ObjectId('111111111111111111111111');
+  badBsonType._bsontype = 'bogus';
+  var badDoc = { bad: badBsonType };
+  var badArray = [oid, badDoc];
+  var badMap = new M([['a', badBsonType], ['b', badDoc], ['c', badArray]]);
+  var BSON = createBSON();
+  test.throws(function() {
+    BSON.serialize(badDoc);
+  });
+  test.throws(function() {
+    BSON.serialize(badArray);
+  });
+  test.throws(function() {
+    BSON.serialize(badMap);
+  });
+  test.done();
+}
