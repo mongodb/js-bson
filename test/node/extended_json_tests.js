@@ -525,7 +525,7 @@ describe('Extended JSON', function() {
             const date = new Date(1452124800000);
             const doc = { field: date };
             const json = EJSON.stringify(doc, { legacy: true, relaxed: true });
-            expect(json).to.equal('{"field":{"$date":"1452124800000"}}');
+            expect(json).to.equal('{"field":{"$date":1452124800000}}');
           });
         });
       });
@@ -572,6 +572,83 @@ describe('Extended JSON', function() {
           const doc = { field: doub };
           const json = EJSON.stringify(doc, { legacy: true });
           expect(json).to.equal('{"field":1.1}');
+        });
+      });
+    });
+
+    describe('.parse', function() {
+      context('when deserializing binary', function() {
+        it('parses $binary and $type', function() {
+          const binary = new Binary(new Uint8Array([1, 2, 3, 4, 5]));
+          const doc = { field: binary };
+          const bson = EJSON.parse('{"field":{"$binary":"AQIDBAU=","$type":"00"}}', {
+            legacy: true
+          });
+          expect(bson).to.deep.equal(doc);
+        });
+      });
+
+      context('when deserializing date', function() {
+        context('when using strict mode', function() {
+          it('parses $date with with ISO-8601 string', function() {
+            const date = new Date(1452124800000);
+            const doc = { field: date };
+            const bson = EJSON.parse('{"field":{"$date":"2016-01-07T00:00:00Z"}}', {
+              legacy: true,
+              relaxed: false
+            });
+            expect(bson).to.deep.equal(doc);
+          });
+        });
+
+        context('when using relaxed mode', function() {
+          it('parses $date number with millis since epoch', function() {
+            const date = new Date(1452124800000);
+            const doc = { field: date };
+            const bson = EJSON.parse('{"field":{"$date":1452124800000}}', {
+              legacy: true,
+              relaxed: true
+            });
+            expect(bson).to.deep.equal(doc);
+          });
+        });
+      });
+
+      context('when deserializing regex', function() {
+        it.skip('parses $regex and $options', function() {
+          const regexp = new BSONRegExp('hello world', 'i');
+          const doc = { field: regexp };
+          const bson = EJSON.parse('{"field":{"$regex":"hello world","$options":"i"}}', {
+            legacy: true
+          });
+          expect(bson).to.deep.equal(doc);
+        });
+      });
+
+      context('when deserializing dbref', function() {
+        it.skip('parses $ref and $id', function() {
+          const dbRef = new DBRef('tests', new Int32(1));
+          const doc = { field: dbRef };
+          const bson = EJSON.parse('{"field":{"$ref":"tests","$id":1}}', {
+            legacy: true
+          });
+          expect(bson).to.deep.equal(doc);
+        });
+      });
+
+      context('when deserializing int32', function() {
+        it('parses the number', function() {
+          const doc = { field: 1 };
+          const bson = EJSON.parse('{"field":1}', { legacy: true });
+          expect(bson).to.deep.equal(doc);
+        });
+      });
+
+      context('when deserializing double', function() {
+        it('parses the number', function() {
+          const doc = { field: 1.1 };
+          const bson = EJSON.parse('{"field":1.1}', { legacy: true });
+          expect(bson).to.deep.equal(doc);
         });
       });
     });
