@@ -615,7 +615,7 @@ describe('Extended JSON', function() {
       });
 
       context('when deserializing regex', function() {
-        it.skip('parses $regex and $options', function() {
+        it('parses $regex and $options', function() {
           const regexp = new BSONRegExp('hello world', 'i');
           const doc = { field: regexp };
           const bson = EJSON.parse('{"field":{"$regex":"hello world","$options":"i"}}', {
@@ -626,8 +626,8 @@ describe('Extended JSON', function() {
       });
 
       context('when deserializing dbref', function() {
-        it.skip('parses $ref and $id', function() {
-          const dbRef = new DBRef('tests', new Int32(1));
+        it('parses $ref and $id', function() {
+          const dbRef = new DBRef('tests', 1);
           const doc = { field: dbRef };
           const bson = EJSON.parse('{"field":{"$ref":"tests","$id":1}}', {
             legacy: true
