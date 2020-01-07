@@ -215,6 +215,7 @@ console.log(EJSON.parse(text));
 | [space] | <code>string</code> \| <code>number</code> |  | A String or Number object that's used to insert white space into the output JSON string for readability purposes. |
 | [options] | <code>object</code> |  | Optional settings |
 | [options.relaxed] | <code>boolean</code> | <code>true</code> | Enabled Extended JSON's `relaxed` mode |
+| [options.legacy] | <code>boolean</code> | <code>true</code> | Output in Extended JSON v1 |
 
 Converts a BSON document to an Extended JSON string, optionally replacing values if a replacer
 function is specified or optionally including only the specified properties if a replacer array
