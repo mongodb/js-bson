@@ -506,7 +506,7 @@ describe('Extended JSON', function() {
           const binary = new Binary(new Uint8Array([1, 2, 3, 4, 5]));
           const doc = { field: binary };
           const json = EJSON.stringify(doc, { legacy: true });
-          expect(json).to.equal('{"field":{"$binary":"AQIDBAU=","$type":"00"}}');
+          expect(json).to.equal('{"field":{"$binary":"AQIDBAU=","$type":"0"}}');
         });
       });
 
