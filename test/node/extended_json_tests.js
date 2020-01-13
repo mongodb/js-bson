@@ -506,7 +506,7 @@ describe('Extended JSON', function() {
           const binary = new Binary(new Uint8Array([1, 2, 3, 4, 5]));
           const doc = { field: binary };
           const json = EJSON.stringify(doc, { legacy: true });
-          expect(json).to.equal('{"field":{"$binary":"AQIDBAU=","$type":"00"}}');
+          expect(json).to.equal('{"field":{"$binary":"AQIDBAU=","$type":"0"}}');
         });
       });
 
@@ -517,15 +517,6 @@ describe('Extended JSON', function() {
             const doc = { field: date };
             const json = EJSON.stringify(doc, { legacy: true, relaxed: false });
             expect(json).to.equal('{"field":{"$date":"2016-01-07T00:00:00Z"}}');
-          });
-        });
-
-        context('when using relaxed mode', function() {
-          it('stringifies $date with with millis since epoch', function() {
-            const date = new Date(1452124800000);
-            const doc = { field: date };
-            const json = EJSON.stringify(doc, { legacy: true, relaxed: true });
-            expect(json).to.equal('{"field":{"$date":1452124800000}}');
           });
         });
       });
@@ -540,7 +531,7 @@ describe('Extended JSON', function() {
       });
 
       context('when serializing dbref', function() {
-        it('stringifies $ref and $id', function() {
+        it('stringifies $ref and $id with no db', function() {
           const dbRef = new DBRef('tests', new Int32(1));
           const doc = { field: dbRef };
           const json = EJSON.stringify(doc, { legacy: true });
@@ -550,10 +541,10 @@ describe('Extended JSON', function() {
 
       context('when serializing dbref', function() {
         it('stringifies $ref and $id', function() {
-          const dbRef = new DBRef('tests', new Int32(1));
+          const dbRef = new DBRef('tests', new Int32(1), 'db');
           const doc = { field: dbRef };
           const json = EJSON.stringify(doc, { legacy: true });
-          expect(json).to.equal('{"field":{"$ref":"tests","$id":1}}');
+          expect(json).to.equal('{"field":{"$ref":"db.tests","$id":1}}');
         });
       });
 
@@ -617,7 +608,7 @@ describe('Extended JSON', function() {
       context('when deserializing regex', function() {
         it('parses $regex and $options', function() {
           const regexp = new BSONRegExp('hello world', 'i');
-          const doc = { field: regexp };
+          const doc = { field: new RegExp(regexp.pattern, regexp.options) };
           const bson = EJSON.parse('{"field":{"$regex":"hello world","$options":"i"}}', {
             legacy: true
           });
@@ -627,9 +618,9 @@ describe('Extended JSON', function() {
 
       context('when deserializing dbref', function() {
         it('parses $ref and $id', function() {
-          const dbRef = new DBRef('tests', 1);
+          const dbRef = new DBRef('tests', 1, 'db');
           const doc = { field: dbRef };
-          const bson = EJSON.parse('{"field":{"$ref":"tests","$id":1}}', {
+          const bson = EJSON.parse('{"field":{"$ref":"db.tests","$id":1}}', {
             legacy: true
           });
           expect(bson).to.deep.equal(doc);
