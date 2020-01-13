@@ -519,15 +519,6 @@ describe('Extended JSON', function() {
             expect(json).to.equal('{"field":{"$date":"2016-01-07T00:00:00Z"}}');
           });
         });
-
-        context('when using relaxed mode', function() {
-          it('stringifies $date with with millis since epoch', function() {
-            const date = new Date(1452124800000);
-            const doc = { field: date };
-            const json = EJSON.stringify(doc, { legacy: true, relaxed: true });
-            expect(json).to.equal('{"field":{"$date":1452124800000}}');
-          });
-        });
       });
 
       context('when serializing regex', function() {
@@ -617,7 +608,7 @@ describe('Extended JSON', function() {
       context('when deserializing regex', function() {
         it('parses $regex and $options', function() {
           const regexp = new BSONRegExp('hello world', 'i');
-          const doc = { field: regexp };
+          const doc = { field: new RegExp(regexp.pattern, regexp.options) };
           const bson = EJSON.parse('{"field":{"$regex":"hello world","$options":"i"}}', {
             legacy: true
           });
