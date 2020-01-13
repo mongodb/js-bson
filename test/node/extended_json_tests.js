@@ -540,7 +540,7 @@ describe('Extended JSON', function() {
       });
 
       context('when serializing dbref', function() {
-        it('stringifies $ref and $id', function() {
+        it('stringifies $ref and $id with no db', function() {
           const dbRef = new DBRef('tests', new Int32(1));
           const doc = { field: dbRef };
           const json = EJSON.stringify(doc, { legacy: true });
@@ -550,10 +550,10 @@ describe('Extended JSON', function() {
 
       context('when serializing dbref', function() {
         it('stringifies $ref and $id', function() {
-          const dbRef = new DBRef('tests', new Int32(1));
+          const dbRef = new DBRef('tests', new Int32(1), 'db');
           const doc = { field: dbRef };
           const json = EJSON.stringify(doc, { legacy: true });
-          expect(json).to.equal('{"field":{"$ref":"tests","$id":1}}');
+          expect(json).to.equal('{"field":{"$ref":"db.tests","$id":1}}');
         });
       });
 
@@ -627,9 +627,9 @@ describe('Extended JSON', function() {
 
       context('when deserializing dbref', function() {
         it('parses $ref and $id', function() {
-          const dbRef = new DBRef('tests', 1);
+          const dbRef = new DBRef('tests', 1, 'db');
           const doc = { field: dbRef };
-          const bson = EJSON.parse('{"field":{"$ref":"tests","$id":1}}', {
+          const bson = EJSON.parse('{"field":{"$ref":"db.tests","$id":1}}', {
             legacy: true
           });
           expect(bson).to.deep.equal(doc);
