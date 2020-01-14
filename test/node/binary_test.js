@@ -9,7 +9,7 @@ describe('Binary', function() {
     /* eslint-disable */
     const randomBuffer = crypto.randomBytes
       ? crypto.randomBytes(256)
-      : new Uint32Array(256);
+      : new Uint8Array(256);
     if (!crypto.randomBytes) {
       window.crypto.getRandomValues(randomBuffer);
     }
