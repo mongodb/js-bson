@@ -9,7 +9,7 @@ describe('Binary', function() {
     /* eslint-disable */
     const randomBuffer = crypto.randomBytes
       ? crypto.randomBytes(256)
-      : crypto.getRandomValues(new Uint32Array(256));
+      : window.crypto.getRandomValues(new Uint32Array(256));
     /* eslint-enable */
     const binary1 = new Binary(randomBuffer);
     const binary2 = new Binary(binary1.value(), binary1.sub_type);
