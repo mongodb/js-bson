@@ -9,7 +9,11 @@ describe('Map', function() {
    * @ignore
    */
   it('should correctly exercise the map', function(done) {
-    var m = new M([['a', 1], ['b', 2]]);
+    var m = new M([
+      ['a', 1],
+      ['b', 2]
+    ]);
+
     expect(m.has('a')).to.be.ok;
     expect(m.has('b')).to.be.ok;
     expect(1).to.equal(m.get('a'));
@@ -47,7 +51,10 @@ describe('Map', function() {
       values.push([key, value]);
     }, m);
 
-    expect([['a', 3], ['b', 2]]).to.deep.equal(values);
+    expect([
+      ['a', 3],
+      ['b', 2]
+    ]).to.deep.equal(values);
 
     // Modify the state
     expect(true).to.equal(m.delete('a'));
@@ -83,7 +90,10 @@ describe('Map', function() {
    */
   it('should serialize a map', function(done) {
     // Serialize top level map only
-    var m = new M([['a', 1], ['b', 2]]);
+    var m = new M([
+      ['a', 1],
+      ['b', 2]
+    ]);
     // Serialize the map
     var data = BSON.serialize(m, false, true);
     // Deserialize the data
@@ -91,7 +101,10 @@ describe('Map', function() {
     expect({ a: 1, b: 2 }).to.deep.equal(object);
 
     // Serialize nested maps
-    var m1 = new M([['a', 1], ['b', 2]]);
+    var m1 = new M([
+      ['a', 1],
+      ['b', 2]
+    ]);
     m = new M([['c', m1]]);
     // Serialize the map
     data = BSON.serialize(m, false, true);
@@ -101,7 +114,10 @@ describe('Map', function() {
     done();
 
     // Serialize top level map only
-    m = new M([['1', 1], ['0', 2]]);
+    m = new M([
+      ['1', 1],
+      ['0', 2]
+    ]);
     // Serialize the map, validating that the order in the resulting BSON is preserved
     data = BSON.serialize(m, false, true);
     expect('13000000103100010000001030000200000000').to.equal(data.toString('hex'));
