@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="4.0.4"></a>
+## [4.0.4](https://github.com/mongodb/js-bson/compare/v4.0.3...v4.0.4) (2020-03-26)
+
+
+### Bug Fixes
+
+* improve EJSON generation for previously skipped edge cases ([30f5a8f](https://github.com/mongodb/js-bson/commit/30f5a8f))
+* only upgrade `symbol` to `string` if `promoteValues` is true ([067a7ba](https://github.com/mongodb/js-bson/commit/067a7ba))
+
+
+
 <a name="4.0.3"></a>
 ## [4.0.3](https://github.com/mongodb/js-bson/compare/v4.0.2...v4.0.3) (2020-01-09)
 
