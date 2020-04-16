@@ -2421,3 +2421,18 @@ exports['should throw if invalid BSON types are input to BSON serializer'] = fun
   });
   test.done();
 }
+
+exports['should return an ObjectID when created with an object having toHexString function'] = function(test) {
+  var tmp = new ObjectId();
+  var objectIdLike = {
+    id: tmp.id,
+    toHexString: function() {
+      return tmp.toHexString();
+    }
+  };
+  var objectId = new ObjectId(objectIdLike);
+
+  test.ok(objectId instanceof ObjectId);
+  test.equal(objectId.toHexString(), tmp.toHexString());
+  test.done();
+}
