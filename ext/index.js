@@ -3,16 +3,16 @@ var bson = null;
 try {
 	// Load the precompiled win32 binary
 	if(process.platform == "win32" && process.arch == "x64") {
-	  bson = require('./win32/x64/bson');  
+	  bson = require('./win32/x64/bson');
 	} else if(process.platform == "win32" && process.arch == "ia32") {
-	  bson = require('./win32/ia32/bson');  
+	  bson = require('./win32/ia32/bson');
 	} else {
-	  bson = require('../build/Release/bson');  
-	}	
+	  bson = require('../browser_build/bson');
+	}
 } catch(err) {
 	// Attempt to load the release bson version
 	try {
-		bson = require('../build/Release/bson');
+		bson = require('../browser_build/bson');
 	} catch (err) {
 		console.dir(err)
 		console.error("js-bson: Failed to load c++ bson extension, using pure JS version");
