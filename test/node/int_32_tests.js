@@ -6,6 +6,8 @@ const expect = require('chai').expect;
 
 describe('Int32', function() {
   describe('Constructor', function() {
+    var hexValue = '0x2A';
+    var octalValue = 0o52;
     var value = 42;
 
     it('Primitive number', function(done) {
@@ -15,6 +17,50 @@ describe('Int32', function() {
 
     it('Number object', function(done) {
       expect(new Int32(new Number(value)).valueOf()).to.equal(value);
+      done();
+    });
+
+    it('Hex', function(done) {
+      expect(new Int32(hexValue).valueOf()).to.equal(value);
+      done();
+    });
+
+    it('Octal', function(done) {
+      expect(new Int32(octalValue).valueOf()).to.equal(value);
+      done();
+    });
+
+    it('Cases covering Int32 value conversion using +', function(done) {
+      const string = BSON.serialize({ key: new Int32('fortyTwo') });
+      const plus = BSON.serialize({ key: new Int32(+'fortyTwo') });
+      const intLedString = BSON.serialize({ key: new Int32('42fortyTwo') });
+      const intLedPlus = BSON.serialize({ key: new Int32(+'42fortyTwo') });
+      const fortyTwo = BSON.serialize({ key: new Int32(42) });
+      const hexFortyTwo = BSON.serialize({ key: new Int32('0x2A') });
+      const plusHexFortyTwo = BSON.serialize({ key: new Int32(+'0x2A') });
+      const zero = BSON.serialize({ key: new Int32(0) });
+      const plusZero = BSON.serialize({ key: new Int32(+'0') });
+      const positiveZero = BSON.serialize({ key: new Int32(+0) });
+      const negativeZero = BSON.serialize({ key: new Int32(-0) });
+      const inf = BSON.serialize({ key: new Int32(Infinity) });
+      const strInf = BSON.serialize({ key: new Int32('Infinity') });
+      const plusStrInf = BSON.serialize({ key: new Int32(+'Infinity') });
+      const posInf = BSON.serialize({ key: new Int32(+Infinity) });
+      const negInf = BSON.serialize({ key: new Int32(-Infinity) });
+      expect(string.equals(zero)).to.be.true;
+      expect(plus.equals(zero)).to.be.true;
+      expect(intLedString.equals(zero)).to.be.true;
+      expect(intLedPlus.equals(zero)).to.be.true;
+      expect(hexFortyTwo.equals(fortyTwo)).to.be.true;
+      expect(plusHexFortyTwo.equals(fortyTwo)).to.be.true;
+      expect(plusZero.equals(zero)).to.be.true;
+      expect(positiveZero.equals(zero)).to.be.true;
+      expect(negativeZero.equals(zero)).to.be.true;
+      expect(inf.equals(zero)).to.be.true;
+      expect(strInf.equals(zero)).to.be.true;
+      expect(plusStrInf.equals(zero)).to.be.true;
+      expect(posInf.equals(zero)).to.be.true;
+      expect(negInf.equals(zero)).to.be.true;
       done();
     });
   });
