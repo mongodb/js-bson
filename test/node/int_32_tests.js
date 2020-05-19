@@ -6,9 +6,9 @@ const expect = require('chai').expect;
 
 describe('Int32', function() {
   describe('Constructor', function() {
-    var hexValue = '0x2A';
-    var octalValue = 0o52;
-    var value = 42;
+    const hexValue = '0x2A';
+    const octalValue = 0o52;
+    const value = 42;
 
     it('Primitive number', function(done) {
       expect(new Int32(value).valueOf()).to.equal(value);
@@ -35,9 +35,11 @@ describe('Int32', function() {
       const plus = BSON.serialize({ key: new Int32(+'fortyTwo') });
       const intLedString = BSON.serialize({ key: new Int32('42fortyTwo') });
       const intLedPlus = BSON.serialize({ key: new Int32(+'42fortyTwo') });
-      const fortyTwo = BSON.serialize({ key: new Int32(42) });
-      const hexFortyTwo = BSON.serialize({ key: new Int32('0x2A') });
-      const plusHexFortyTwo = BSON.serialize({ key: new Int32(+'0x2A') });
+      const fortyTwo = BSON.serialize({ key: new Int32(value) });
+      const hexFortyTwo = BSON.serialize({ key: new Int32(hexValue) });
+      const plusHexFortyTwo = BSON.serialize({ key: new Int32(hexValue) });
+      const octal = BSON.serialize({ key: new Int32(octalValue) });
+      const plusOctal = BSON.serialize({ key: new Int32(+octalValue) });
       const zero = BSON.serialize({ key: new Int32(0) });
       const plusZero = BSON.serialize({ key: new Int32(+'0') });
       const positiveZero = BSON.serialize({ key: new Int32(+0) });
@@ -53,6 +55,8 @@ describe('Int32', function() {
       expect(intLedPlus.equals(zero)).to.be.true;
       expect(hexFortyTwo.equals(fortyTwo)).to.be.true;
       expect(plusHexFortyTwo.equals(fortyTwo)).to.be.true;
+      expect(octal.equals(fortyTwo)).to.be.true;
+      expect(plusOctal.equals(fortyTwo)).to.be.true;
       expect(plusZero.equals(zero)).to.be.true;
       expect(positiveZero.equals(zero)).to.be.true;
       expect(negativeZero.equals(zero)).to.be.true;
