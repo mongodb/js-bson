@@ -280,7 +280,7 @@ describe('Extended JSON', function() {
     expect(result.double.value).to.equal(10.1);
     // int32
     expect(result.int32).to.be.an.instanceOf(BSON.Int32);
-    expect(result.int32.value).to.equal('10');
+    expect(result.int32.value).to.equal(10);
     //long
     expect(result.long).to.be.an.instanceOf(BSON.Long);
     // maxKey
@@ -641,6 +641,24 @@ describe('Extended JSON', function() {
           const doc = { field: 1 };
           const bson = EJSON.parse('{"field":1}', { legacy: true });
           expect(bson).to.deep.equal(doc);
+        });
+
+        it('parses the numberInt without doc', function() {
+          const value = 1;
+          const bson = EJSON.parse('{ "$numberInt": "1" }');
+          expect(bson).to.deep.equal(value);
+        });
+
+        it('parses the numberInt', function() {
+          const doc = { field: 1 };
+          const bson = EJSON.parse('{"field": {"$numberInt": "1"}}');
+          expect(bson).to.deep.equal(doc);
+        });
+
+        it('parses the numberInt and stringify', function() {
+          const doc = { field: 1 };
+          const bson = EJSON.parse('{"field": {"$numberInt": "1"}}');
+          expect(EJSON.stringify(bson)).to.deep.equal(JSON.stringify(doc));
         });
       });
 
