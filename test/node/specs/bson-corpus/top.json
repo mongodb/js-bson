@@ -10,13 +10,11 @@
     ],
     "decodeErrors": [
         {
-            "description":
-                "An object size that's too small to even include the object size, but is a well-formed, empty object",
+            "description": "An object size that's too small to even include the object size, but is a well-formed, empty object",
             "bson": "0100000000"
         },
         {
-            "description":
-                "An object size that's only enough for the object size, but is a well-formed, empty object",
+            "description": "An object size that's only enough for the object size, but is a well-formed, empty object",
             "bson": "0400000000"
         },
         {
@@ -24,18 +22,15 @@
             "bson": "05000000"
         },
         {
-            "description":
-                "One object, sized correctly, with a spot for an EOO, but the EOO is 0x01",
+            "description": "One object, sized correctly, with a spot for an EOO, but the EOO is 0x01",
             "bson": "0500000001"
         },
         {
-            "description":
-                "One object, sized correctly, with a spot for an EOO, but the EOO is 0xff",
+            "description": "One object, sized correctly, with a spot for an EOO, but the EOO is 0xff",
             "bson": "05000000FF"
         },
         {
-            "description":
-                "One object, sized correctly, with a spot for an EOO, but the EOO is 0x70",
+            "description": "One object, sized correctly, with a spot for an EOO, but the EOO is 0x70",
             "bson": "0500000070"
         },
         {
@@ -73,13 +68,12 @@
     ],
     "parseErrors": [
         {
-            "description": "Bad $regularExpression (extra field)",
-            "string":
-                "{\"a\" : \"$regularExpression\": {\"pattern\": \"abc\", \"options\": \"\", \"unrelated\": true}}}"
+            "description" : "Bad $regularExpression (extra field)",
+            "string" : "{\"a\" : {\"$regularExpression\": {\"pattern\": \"abc\", \"options\": \"\", \"unrelated\": true}}}"
         },
         {
-            "description": "Bad $regularExpression (missing options field)",
-            "string": "{\"a\" : \"$regularExpression\": {\"pattern\": \"abc\"}}}"
+            "description" : "Bad $regularExpression (missing options field)",
+            "string" : "{\"a\" : {\"$regularExpression\": {\"pattern\": \"abc\"}}}"
         },
         {
             "description": "Bad $regularExpression (pattern is number, not string)",
@@ -90,8 +84,8 @@
             "string": "{\"x\" : {\"$regularExpression\" : { \"pattern\": \"a\", \"$options\" : 0}}}"
         },
         {
-            "description": "Bad $regularExpression (missing pattern field)",
-            "string": "{\"a\" : \"$regularExpression\": {\"options\":\"ix\"}}}"
+            "description" : "Bad $regularExpression (missing pattern field)",
+            "string" : "{\"a\" : {\"$regularExpression\": {\"options\":\"ix\"}}}"
         },
         {
             "description": "Bad $oid (number, not string)",
@@ -151,12 +145,15 @@
         },
         {
             "description": "Bad $binary (extra field)",
-            "string":
-                "{\"x\" : {\"$binary\" : {\"base64\" : \"//8=\", \"subType\" : 0, \"unrelated\": true}}}"
+            "string": "{\"x\" : {\"$binary\" : {\"base64\" : \"//8=\", \"subType\" : 0, \"unrelated\": true}}}"
         },
         {
             "description": "Bad $code (type is number, not string)",
             "string": "{\"a\" : {\"$code\" : 42}}"
+        },
+        {
+            "description": "Bad $code (type is number, not string) when $scope is also present",
+            "string": "{\"a\" : {\"$code\" : 42, \"$scope\" : {}}}"
         },
         {
             "description": "Bad $code (extra field)",
@@ -180,13 +177,11 @@
         },
         {
             "description": "Bad $timestamp (extra field at same level as $timestamp)",
-            "string":
-                "{\"a\" : {\"$timestamp\" : {\"t\" : \"123456789\", \"i\" : \"42\"}, \"unrelated\": true } }"
+            "string": "{\"a\" : {\"$timestamp\" : {\"t\" : \"123456789\", \"i\" : \"42\"}, \"unrelated\": true } }"
         },
         {
             "description": "Bad $timestamp (extra field at same level as t and i)",
-            "string":
-                "{\"a\" : {\"$timestamp\" : {\"t\" : \"123456789\", \"i\" : \"42\", \"unrelated\": true} } }"
+            "string": "{\"a\" : {\"$timestamp\" : {\"t\" : \"123456789\", \"i\" : \"42\", \"unrelated\": true} } }"
         },
         {
             "description": "Bad $timestamp (missing t)",
@@ -202,8 +197,7 @@
         },
         {
             "description": "Bad $date (extra field)",
-            "string":
-                "{\"a\" : {\"$date\" : {\"$numberLong\" : \"1356351330501\"}, \"unrelated\": true}}"
+            "string": "{\"a\" : {\"$date\" : {\"$numberLong\" : \"1356351330501\"}, \"unrelated\": true}}"
         },
         {
             "description": "Bad DBRef (ref is number, not string)",
@@ -239,8 +233,8 @@
         },
         {
             "description": "Bad DBpointer (extra field)",
-            "string":
-                "{\"a\": {\"$dbPointer\": {\"a\": {\"$numberInt\": \"1\"}, \"$id\": {\"$oid\": \"56e1fc72e0c917e9c4714161\"}, \"c\": {\"$numberInt\": \"2\"}, \"$ref\": \"b\"}}}"
+            "string": "{\"a\": {\"$dbPointer\": {\"a\": {\"$numberInt\": \"1\"}, \"$id\": {\"$oid\": \"56e1fc72e0c917e9c4714161\"}, \"c\": {\"$numberInt\": \"2\"}, \"$ref\": \"b\"}}}"
         }
+
     ]
 }
