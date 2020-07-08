@@ -58,9 +58,7 @@ const skipBSON = {
 
 const skipExtendedJSON = {
   'Timestamp with high-order bit set on both seconds and increment':
-    'Current BSON implementation of timestamp/long cannot hold these values - 1 too large.',
-  '1.23456789012345677E+18': 'NODE-2519',
-  '-1.23456789012345677E+18': 'NODE-2519'
+    'Current BSON implementation of timestamp/long cannot hold these values - 1 too large.'
 };
 
 const corpus = require('./tools/bson_corpus_test_loader');

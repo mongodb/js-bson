@@ -1,5 +1,5 @@
 {
-    "description": "Multiple types within the same document (deprecated)",
+    "description": "Multiple types within the same document",
     "bson_type": "0x00",
     "deprecated": true,
     "valid": [
