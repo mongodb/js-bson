@@ -58,6 +58,8 @@ const skipBSON = {
 
 const skipExtendedJSON = {
   'Timestamp with high-order bit set on both seconds and increment':
+    'Current BSON implementation of timestamp/long cannot hold these values - 1 too large.',
+  'Timestamp with high-order bit set on both seconds and increment (not UINT32_MAX)':
     'Current BSON implementation of timestamp/long cannot hold these values - 1 too large.'
 };
 
