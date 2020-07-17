@@ -77,17 +77,17 @@ functions:
 
 pre:
   - func: fetch source
+  - func: install dependencies
+
 
 tasks:
   - name: run-tests-browser
     tags: ["all", "browser"]
     commands:
-      - func: install dependencies
       - func: run tests browser
   - name: run-tests-node
     tags: ["all", "node"]
     commands:
-      - func: install dependencies
       - func: run tests node
 
 axes:
