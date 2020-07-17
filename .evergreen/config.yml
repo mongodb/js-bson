@@ -1,0 +1,146 @@
+# Run previous commits to pinpoint a failure's origin.
+stepback: true
+
+# Mark failures other than test failures with a purple box.
+command_type: system
+
+# Limit maximum test running time.
+exec_timeout_secs: 900   # 15 minutes
+
+# What to do when evergreen hits the timeout
+timeout:
+  - command: shell.exec
+    params:
+      script: |
+        ls -la
+
+functions:
+  fetch source:
+    - command: git.get_project
+      params:
+        directory: src
+    - command: shell.exec
+      params:
+        working_dir: src
+        script: |
+          # Get the current unique version of this checkout
+          if [ "${is_patch}" = "true" ]; then
+             CURRENT_VERSION=$(git describe)-patch-${version_id}
+          else
+             CURRENT_VERSION=latest
+          fi
+          export PROJECT_DIRECTORY="$(pwd)"
+          # Python has cygwin path problems on Windows. Detect prospective mongo-orchestration home directory
+          if [ "Windows_NT" = "$OS" ]; then # Magic variable in cygwin
+             export PROJECT_DIRECTORY=$(cygpath -m $PROJECT_DIRECTORY)
+          fi
+          cat <<EOT > expansion.yml
+          CURRENT_VERSION: "$CURRENT_VERSION"
+          PROJECT_DIRECTORY: "$PROJECT_DIRECTORY"
+          PREPARE_SHELL: |
+             set -o errexit
+             set -o xtrace
+             export PROJECT_DIRECTORY="$PROJECT_DIRECTORY"
+             export PROJECT="${project}"
+          EOT
+          # See what we've done
+          cat expansion.yml
+    - command: expansions.update
+      params:
+        file: src/expansion.yml
+  install dependencies:
+    - command: shell.exec
+      type: setup
+      params:
+        working_dir: src
+        add_expansions_to_env: true
+        script: |
+          ${PREPARE_SHELL}
+          NODE_VERSION=${NODE_VERSION} bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+  run tests browser:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: >
+          ${PREPARE_SHELL}
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh browser
+  run tests node:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: >
+          ${PREPARE_SHELL}
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh node
+  
+
+pre:
+  - func: fetch source
+
+tasks:
+  - name: run-tests-browser
+    tags: ["all", "browser"]
+    commands:
+      - func: install dependencies
+      - func: run tests browser
+  - name: run-tests-node
+    tags: ["all", "node"]
+    commands:
+      - func: install dependencies
+      - func: run tests node
+
+axes:
+  - id: platform
+    display_name: OS
+    values:
+      - id: linux
+        display_name: "Ubuntu 18.04"
+        run_on: ubuntu1804-test
+      - id: mac
+        display_name: MacOS 10.14
+        run_on: macos-1014
+      - id: windows
+        display_name: "Windows 64"
+        run_on: windows-64-vsMulti-small
+
+  - id: runtime
+    display_name: runtime
+    values:
+      - id: node-6
+        display_name: Node v6
+        variables:
+          NODE_VERSION: 6
+      - id: node-8
+        display_name: Node v8
+        variables:
+          NODE_VERSION: 8
+      - id: node-10
+        display_name: Node v10
+        variables:
+          NODE_VERSION: 10
+      - id: node-12
+        display_name: Node v12
+        variables:
+          NODE_VERSION: 12
+      - id: node-14
+        display_name: Node v14
+        variables:
+          NODE_VERSION: 14
+
+buildvariants:
+  - matrix_name: tests
+    matrix_spec:
+      platform:
+        - linux
+        - mac
+        - windows
+      runtime:
+        - node-6
+        - node-8
+        - node-10
+        - node-12
+        - node-14
+    display_name: "${platform} ${runtime}"
+    tasks:
+      - .all
