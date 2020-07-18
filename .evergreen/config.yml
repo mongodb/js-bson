@@ -42,6 +42,8 @@ functions:
              set -o xtrace
              export PROJECT_DIRECTORY="$PROJECT_DIRECTORY"
              export PROJECT="${project}"
+             export NODE_VERSION="${NODE_VERSION}"
+             export NODE_LTS_NAME="${NODE_LTS_NAME}"
           EOT
           # See what we've done
           cat expansion.yml
@@ -56,7 +58,7 @@ functions:
         add_expansions_to_env: true
         script: |
           ${PREPARE_SHELL}
-          NODE_VERSION=${NODE_VERSION} bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+          ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
   run tests:
     - command: shell.exec
       type: test
@@ -64,16 +66,14 @@ functions:
         working_dir: src
         script: >
           ${PREPARE_SHELL}
-          NODE_VERSION=${NODE_VERSION} bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh ${TEST_TARGET}
-
-pre:
-  - func: fetch source
-  - func: install dependencies
+          ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh ${TEST_TARGET}
 
 tasks:
   - name: run-tests
     tags: ["all"]
     commands:
+      - func: fetch source
+      - func: install dependencies
       - func: run tests
 
 axes:
@@ -106,21 +106,21 @@ axes:
     display_name: runtime
     values:
       - id: node-6
-        display_name: Node v6
+        display_name: Node Boron
         variables:
-          NODE_VERSION: "6"
+          NODE_LTS_NAME: boron
       - id: node-8
-        display_name: Node v8
+        display_name: Node Carbon
         variables:
-          NODE_VERSION: "8"
+          NODE_LTS_NAME: carbon
       - id: node-10
-        display_name: Node v10
+        display_name: Node Dubnium
         variables:
-          NODE_VERSION: "10"
+          NODE_LTS_NAME: dubnium
       - id: node-12
-        display_name: Node v12
+        display_name: Node Erbium
         variables:
-          NODE_VERSION: "12"
+          NODE_LTS_NAME: erbium
       - id: node-14
         display_name: Node v14
         variables:
@@ -143,7 +143,7 @@ buildvariants:
       platform:
         - linux
         - mac
-        - windows
+        # - windows
       target:
         - node
       runtime:

@@ -1,11 +1,14 @@
 #!/bin/bash
-set -o xtrace   # Write all commands first to stderr
+# set -o xtrace   # Write all commands first to stderr
 set -o errexit  # Exit the script with error if any of the commands fail
 
-if [ -z "$NODE_VERSION" ]
-then
-  echo "NODE_VERSION environment variable must be specified"
+if [ -z "$NODE_VERSION" ] && [ -z "$NODE_LTS_NAME"]; then
+  echo "NODE_VERSION or NODE_LTS_NAME environment variable must be specified"
   exit 1
+fi
+
+if [ -z "$NODE_VERSION" ]; then
+  NODE_VERSION="--lts=${NODE_LTS_NAME}"
 fi
 
 NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY}/node-artifacts"
@@ -25,7 +28,7 @@ mkdir -p ${NPM_CACHE_DIR}
 mkdir -p "${NPM_TMP_DIR}"
 
 # install Node.js
-echo "Installing Node ${NODE_VERSION}"
+echo "--- Installing Node ${NODE_VERSION} ---     "
 if [ "$OS" == "Windows_NT" ]; then
   export NVM_HOME=`cygpath -w "$NVM_DIR"`
   export NVM_SYMLINK=`cygpath -w "$NODE_ARTIFACTS_PATH/bin"`
@@ -44,13 +47,14 @@ root: $NVM_HOME
 path: $NVM_SYMLINK
 EOT
 
-  nvm install ${NODE_VERSION}
+  INSTALL="nvm install ${NODE_VERSION}"
 else
   curl -o- $NVM_URL | bash
   [ -s "${NVM_DIR}/nvm.sh" ] && \. "${NVM_DIR}/nvm.sh"
 
-  nvm install --no-progress ${NODE_VERSION}
+  INSTALL="nvm install --no-progress ${NODE_VERSION}"
 fi
+$INSTALL
 nvm use ${NODE_VERSION}
 
 # setup npm cache in a local directory
