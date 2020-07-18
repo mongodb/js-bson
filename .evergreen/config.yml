@@ -57,52 +57,50 @@ functions:
         script: |
           ${PREPARE_SHELL}
           NODE_VERSION=${NODE_VERSION} bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
-  run tests browser:
+  run tests:
     - command: shell.exec
       type: test
       params:
         working_dir: src
         script: >
           ${PREPARE_SHELL}
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh browser
-  run tests node:
-    - command: shell.exec
-      type: test
-      params:
-        working_dir: src
-        script: >
-          ${PREPARE_SHELL}
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh node
-  
+          NODE_VERSION=${NODE_VERSION} bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh ${TEST_TARGET}
 
 pre:
   - func: fetch source
   - func: install dependencies
 
-
 tasks:
-  - name: run-tests-browser
-    tags: ["all", "browser"]
+  - name: run-tests
+    tags: ["all"]
     commands:
-      - func: run tests browser
-  - name: run-tests-node
-    tags: ["all", "node"]
-    commands:
-      - func: run tests node
+      - func: run tests
 
 axes:
   - id: platform
     display_name: OS
     values:
       - id: linux
-        display_name: "Ubuntu 18.04"
+        display_name: Ubuntu 18.04
         run_on: ubuntu1804-test
       - id: mac
         display_name: MacOS 10.14
         run_on: macos-1014
       - id: windows
-        display_name: "Windows 64"
+        display_name: Windows 64
         run_on: windows-64-vsMulti-small
+
+  - id: target
+    display_name: Target
+    values:
+      - id: node
+        display_name: Node
+        variables:
+          TEST_TARGET: node
+      - id: browser
+        display_name: Browser
+        variables:
+          TEST_TARGET: browser
 
   - id: runtime
     display_name: runtime
@@ -110,37 +108,51 @@ axes:
       - id: node-6
         display_name: Node v6
         variables:
-          NODE_VERSION: 6
+          NODE_VERSION: "6"
       - id: node-8
         display_name: Node v8
         variables:
-          NODE_VERSION: 8
+          NODE_VERSION: "8"
       - id: node-10
         display_name: Node v10
         variables:
-          NODE_VERSION: 10
+          NODE_VERSION: "10"
       - id: node-12
         display_name: Node v12
         variables:
-          NODE_VERSION: 12
+          NODE_VERSION: "12"
       - id: node-14
         display_name: Node v14
         variables:
-          NODE_VERSION: 14
+          NODE_VERSION: "14"
 
 buildvariants:
-  - matrix_name: tests
+  - matrix_name: browser-tests
+    matrix_spec:
+      platform:
+        - linux
+      runtime:
+        - node-10
+      target:
+        - browser
+    display_name: "${platform} ${runtime} ${target}"
+    tasks:
+      - .all
+  - matrix_name: node-tests
     matrix_spec:
       platform:
         - linux
         - mac
         - windows
+      target:
+        - node
       runtime:
         - node-6
         - node-8
         - node-10
         - node-12
         - node-14
-    display_name: "${platform} ${runtime}"
+    display_name: "${platform} ${runtime} ${target}"
     tasks:
       - .all
+
