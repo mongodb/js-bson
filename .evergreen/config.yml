@@ -30,8 +30,7 @@ functions:
              CURRENT_VERSION=latest
           fi
           export PROJECT_DIRECTORY="$(pwd)"
-          # Python has cygwin path problems on Windows. Detect prospective mongo-orchestration home directory
-          if [ "Windows_NT" = "$OS" ]; then # Magic variable in cygwin
+          if [ "Windows_NT" = "$OS" ]; then
              export PROJECT_DIRECTORY=$(cygpath -m $PROJECT_DIRECTORY)
           fi
 
@@ -47,7 +46,6 @@ functions:
              set -o errexit
              set -o xtrace
              export PROJECT_DIRECTORY="$PROJECT_DIRECTORY"
-             export PROJECT="${project}"
              export NODE_VERSION="$NODE_VERSION"
           EOT
           # See what we've done
