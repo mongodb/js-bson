@@ -135,6 +135,7 @@ tasks:
       - func: run tests
         vars:
           TEST_TARGET: browser
+
 buildvariants:
   - name: linux
     display_name: Ubuntu 18.04

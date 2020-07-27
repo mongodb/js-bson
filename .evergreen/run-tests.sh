@@ -20,7 +20,6 @@ else
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     NODE_TEST="test-node"
 fi
-echo "NODE_TEST = $NODE_TEST"
 
 case $1 in
   "node")
