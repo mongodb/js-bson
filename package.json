@@ -62,6 +62,7 @@
     "docs": "jsdoc2md --heading-depth 3 --template tools/README.hbs --plugin dmd-clear --files lib/bson.js lib/extended_json.js > README.md",
     "test": "npm run-script lint && npm run-script test-node && npm run-script test-browser",
     "test-node": "node --throw-deprecation node_modules/.bin/_mocha ./test/node",
+    "test-node-windows": "node --throw-deprecation node_modules/mocha/bin/_mocha ./test/node",
     "test-browser": "npm run-script build && node --throw-deprecation node_modules/.bin/karma start",
     "build": "rollup -c",
     "lint": "eslint lib test",

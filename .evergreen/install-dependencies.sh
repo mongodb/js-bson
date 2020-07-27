@@ -2,13 +2,9 @@
 # set -o xtrace   # Write all commands first to stderr
 set -o errexit  # Exit the script with error if any of the commands fail
 
-if [ -z "$NODE_VERSION" ] && [ -z "$NODE_LTS_NAME"]; then
-  echo "NODE_VERSION or NODE_LTS_NAME environment variable must be specified"
-  exit 1
-fi
-
 if [ -z "$NODE_VERSION" ]; then
-  NODE_VERSION="--lts=${NODE_LTS_NAME}"
+  echo "NODE_VERSION environment variable must be specified"
+  exit 1
 fi
 
 NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY}/node-artifacts"
@@ -47,14 +43,13 @@ root: $NVM_HOME
 path: $NVM_SYMLINK
 EOT
 
-  INSTALL="nvm install ${NODE_VERSION}"
+  nvm install ${NODE_VERSION}
 else
   curl -o- $NVM_URL | bash
   [ -s "${NVM_DIR}/nvm.sh" ] && \. "${NVM_DIR}/nvm.sh"
 
-  INSTALL="nvm install --no-progress ${NODE_VERSION}"
+  nvm install --no-progress ${NODE_VERSION}
 fi
-$INSTALL
 nvm use ${NODE_VERSION}
 
 # setup npm cache in a local directory

@@ -34,16 +34,21 @@ functions:
           if [ "Windows_NT" = "$OS" ]; then # Magic variable in cygwin
              export PROJECT_DIRECTORY=$(cygpath -m $PROJECT_DIRECTORY)
           fi
+
+          # get the latest version of node for given major version
+          NODE_VERSION=$(curl -sL nodejs.org/download/release/latest-v${NODE_MAJOR_VERSION}.x/SHASUMS256.txt -o - | head -n 1 | tr -s ' ' | cut -d' ' -f2 | cut -d- -f2 | cut -dv -f2)
+          echo "LATEST NODE ${NODE_MAJOR_VERSION}.x = $NODE_VERSION"
+
           cat <<EOT > expansion.yml
           CURRENT_VERSION: "$CURRENT_VERSION"
           PROJECT_DIRECTORY: "$PROJECT_DIRECTORY"
+          NODE_VERSION: "$NODE_VERSION"
           PREPARE_SHELL: |
              set -o errexit
              set -o xtrace
              export PROJECT_DIRECTORY="$PROJECT_DIRECTORY"
              export PROJECT="${project}"
-             export NODE_VERSION="${NODE_VERSION}"
-             export NODE_LTS_NAME="${NODE_LTS_NAME}"
+             export NODE_VERSION="$NODE_VERSION"
           EOT
           # See what we've done
           cat expansion.yml
@@ -55,104 +60,91 @@ functions:
       type: setup
       params:
         working_dir: src
-        add_expansions_to_env: true
         script: |
           ${PREPARE_SHELL}
-          ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+          echo "NODE_VERSION=${NODE_VERSION}"
+          NODE_VERSION=${NODE_VERSION} ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
   run tests:
     - command: shell.exec
       type: test
       params:
         working_dir: src
-        script: >
+        script: |
           ${PREPARE_SHELL}
-          ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh ${TEST_TARGET}
+          echo "NODE_VERSION=${NODE_VERSION} TEST_TARGET=${TEST_TARGET}"
+          NODE_VERSION=${NODE_VERSION} ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh ${TEST_TARGET}
 
 tasks:
-  - name: run-tests
-    tags: ["all"]
+  - name: node-tests-v6
+    tags: ["node"]
     commands:
       - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 6
       - func: install dependencies
       - func: run tests
-
-axes:
-  - id: platform
-    display_name: OS
-    values:
-      - id: linux
-        display_name: Ubuntu 18.04
-        run_on: ubuntu1804-test
-      - id: mac
-        display_name: MacOS 10.14
-        run_on: macos-1014
-      - id: windows
-        display_name: Windows 64
-        run_on: windows-64-vsMulti-small
-
-  - id: target
-    display_name: Target
-    values:
-      - id: node
-        display_name: Node
-        variables:
+        vars:
           TEST_TARGET: node
-      - id: browser
-        display_name: Browser
-        variables:
+  - name: node-tests-v8
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 8
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: node
+  - name: node-tests-v10
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 10
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: node
+  - name: node-tests-v12
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 12
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: node
+  - name: node-tests-v14
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 14
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: node
+  - name: browser-tests
+    tags: ["browser"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 10
+      - func: install dependencies
+      - func: run tests
+        vars:
           TEST_TARGET: browser
-
-  - id: runtime
-    display_name: runtime
-    values:
-      - id: node-6
-        display_name: Node Boron
-        variables:
-          NODE_LTS_NAME: boron
-      - id: node-8
-        display_name: Node Carbon
-        variables:
-          NODE_LTS_NAME: carbon
-      - id: node-10
-        display_name: Node Dubnium
-        variables:
-          NODE_LTS_NAME: dubnium
-      - id: node-12
-        display_name: Node Erbium
-        variables:
-          NODE_LTS_NAME: erbium
-      - id: node-14
-        display_name: Node v14
-        variables:
-          NODE_VERSION: "14"
-
 buildvariants:
-  - matrix_name: browser-tests
-    matrix_spec:
-      platform:
-        - linux
-      runtime:
-        - node-10
-      target:
-        - browser
-    display_name: "${platform} ${runtime} ${target}"
-    tasks:
-      - .all
-  - matrix_name: node-tests
-    matrix_spec:
-      platform:
-        - linux
-        - mac
-        # - windows
-      target:
-        - node
-      runtime:
-        - node-6
-        - node-8
-        - node-10
-        - node-12
-        - node-14
-    display_name: "${platform} ${runtime} ${target}"
-    tasks:
-      - .all
-
+  - name: linux
+    display_name: Ubuntu 18.04
+    run_on: ubuntu1804-test
+    tasks: [".node", ".browser"]
+  - name: mac
+    display_name: MacOS 10.14
+    run_on: macos-1014
+    tasks: [".node"]
+  - name: windows
+    display_name: Windows 64
+    run_on: windows-64-vsMulti-small
+    tasks: [".node"]
