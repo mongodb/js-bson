@@ -1,0 +1,149 @@
+# Run previous commits to pinpoint a failure's origin.
+stepback: true
+
+# Mark failures other than test failures with a purple box.
+command_type: system
+
+# Limit maximum test running time.
+exec_timeout_secs: 900   # 15 minutes
+
+# What to do when evergreen hits the timeout
+timeout:
+  - command: shell.exec
+    params:
+      script: |
+        ls -la
+
+functions:
+  fetch source:
+    - command: git.get_project
+      params:
+        directory: src
+    - command: shell.exec
+      params:
+        working_dir: src
+        script: |
+          # Get the current unique version of this checkout
+          if [ "${is_patch}" = "true" ]; then
+             CURRENT_VERSION=$(git describe)-patch-${version_id}
+          else
+             CURRENT_VERSION=latest
+          fi
+          export PROJECT_DIRECTORY="$(pwd)"
+          if [ "Windows_NT" = "$OS" ]; then
+             export PROJECT_DIRECTORY=$(cygpath -m $PROJECT_DIRECTORY)
+          fi
+
+          # get the latest version of node for given major version
+          NODE_VERSION=$(curl -sL nodejs.org/download/release/latest-v${NODE_MAJOR_VERSION}.x/SHASUMS256.txt -o - | head -n 1 | tr -s ' ' | cut -d' ' -f2 | cut -d- -f2 | cut -dv -f2)
+          echo "LATEST NODE ${NODE_MAJOR_VERSION}.x = $NODE_VERSION"
+
+          cat <<EOT > expansion.yml
+          CURRENT_VERSION: "$CURRENT_VERSION"
+          PROJECT_DIRECTORY: "$PROJECT_DIRECTORY"
+          NODE_VERSION: "$NODE_VERSION"
+          PREPARE_SHELL: |
+             set -o errexit
+             set -o xtrace
+             export PROJECT_DIRECTORY="$PROJECT_DIRECTORY"
+             export NODE_VERSION="$NODE_VERSION"
+          EOT
+          # See what we've done
+          cat expansion.yml
+    - command: expansions.update
+      params:
+        file: src/expansion.yml
+  install dependencies:
+    - command: shell.exec
+      type: setup
+      params:
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          echo "NODE_VERSION=${NODE_VERSION}"
+          NODE_VERSION=${NODE_VERSION} ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+  run tests:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          echo "NODE_VERSION=${NODE_VERSION} TEST_TARGET=${TEST_TARGET}"
+          NODE_VERSION=${NODE_VERSION} ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh ${TEST_TARGET}
+
+tasks:
+  - name: node-tests-v6
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 6
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: node
+  - name: node-tests-v8
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 8
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: node
+  - name: node-tests-v10
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 10
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: node
+  - name: node-tests-v12
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 12
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: node
+  - name: node-tests-v14
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 14
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: node
+  - name: browser-tests
+    tags: ["browser"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 10
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: browser
+
+buildvariants:
+  - name: linux
+    display_name: Ubuntu 18.04
+    run_on: ubuntu1804-test
+    tasks: [".node", ".browser"]
+  - name: mac
+    display_name: MacOS 10.14
+    run_on: macos-1014
+    tasks: [".node"]
+  - name: windows
+    display_name: Windows 64
+    run_on: windows-64-vsMulti-small
+    tasks: [".node"]
