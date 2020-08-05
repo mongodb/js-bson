@@ -26,7 +26,6 @@ if [ "$OS" == "Windows_NT" ]; then
   export NVM_HOME=`cygpath -w "$NVM_DIR"`
   export NVM_SYMLINK=`cygpath -w "$NODE_ARTIFACTS_PATH/bin"`
   export PATH=`cygpath $NVM_SYMLINK`:`cygpath $NVM_HOME`:$PATH
-  export APPDATA=${NVM_HOME}
 
   # download and install nvm
   curl -L $NVM_WINDOWS_URL -o nvm.zip
