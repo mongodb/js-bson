@@ -159,6 +159,16 @@ describe('Extended JSON', function() {
     expect(serialized).to.equal('{"$binary":{"base64":"AQIDBAU=","subType":"00"}}');
   });
 
+  it('should correctly serialize strings', function() {
+    const serialized = EJSON.stringify('new string');
+    expect(serialized).to.equal('"new string"');
+  });
+
+  it('should correctly serialize numbers', function() {
+    const serialized = EJSON.stringify(42);
+    expect(serialized).to.equal('42');
+  });
+
   it('should correctly parse null values', function() {
     expect(EJSON.parse('null')).to.be.null;
     expect(EJSON.parse('[null]')[0]).to.be.null;
