@@ -42,6 +42,7 @@ path: $NVM_SYMLINK
 EOT
 
   nvm install ${NODE_VERSION}
+  nvm on
 else
   curl -o- $NVM_URL | bash
   [ -s "${NVM_DIR}/nvm.sh" ] && \. "${NVM_DIR}/nvm.sh"
