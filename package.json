@@ -12,7 +12,7 @@
     "browser_build",
     "bower.json"
   ],
-  "version": "1.1.4",
+  "version": "1.1.5",
   "author": "Christian Amor Kvalheim <christkv@gmail.com>",
   "contributors": [],
   "repository": "mongodb/js-bson",
@@ -31,6 +31,7 @@
     "babel-preset-stage-0": "^6.5.0",
     "babel-register": "^6.14.0",
     "conventional-changelog-cli": "^1.3.5",
+    "standard-version": "^7.1.0",
     "webpack": "^1.13.2",
     "webpack-polyfills-plugin": "0.0.9"
   },
@@ -49,7 +50,8 @@
     "build": "webpack --config ./webpack.dist.config.js",
     "changelog": "conventional-changelog -p angular -i HISTORY.md -s",
     "lint": "eslint lib test",
-    "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'"
+    "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
+    "release": "standard-version -i HISTORY.md"
   },
   "browser": "lib/bson/bson.js",
   "license": "Apache-2.0"
