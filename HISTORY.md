@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="4.1.0"></a>
+# [4.1.0](https://github.com/mongodb/js-bson/compare/v4.0.4...v4.1.0) (2020-08-10)
+
+
+### Bug Fixes
+
+* spelling in deserializer errors ([4c6f2e4](https://github.com/mongodb/js-bson/commit/4c6f2e4))
+* **object-id:** harden the duck-typing ([4b800ae](https://github.com/mongodb/js-bson/commit/4b800ae))
+* parse value of Int32 in constructor ([5cda40f](https://github.com/mongodb/js-bson/commit/5cda40f))
+* Reduce floating point precision required of extended json implementations ([#369](https://github.com/mongodb/js-bson/issues/369)) ([5e35d1a](https://github.com/mongodb/js-bson/commit/5e35d1a))
+
+
+### Features
+
+* add support for primitives to EJSON.stringify ([329857d](https://github.com/mongodb/js-bson/commit/329857d))
+
+
+
 <a name="4.0.4"></a>
 ## [4.0.4](https://github.com/mongodb/js-bson/compare/v4.0.3...v4.0.4) (2020-03-26)
 
