@@ -78,6 +78,21 @@ describe('Extended JSON', function() {
     };
   });
 
+  it('should correctly convert string of extended json to buffer of serialized bson and then back to extended json', function() {
+    const ejsonStr = EJSON.stringify(doc, null, 0);
+
+    let bsonBuffer = EJSON.toBuffer(ejsonStr);
+
+    expect(bsonBuffer._id).to.equal(100);
+    expect(bsonBuffer.gh).to.equal(1);
+    expect(bsonBuffer.binary.$binary.base64).to.equal(
+      'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+Pw=='
+    );
+
+    let ejsonStrFromBuffer = EJSON.fromBuffer(bsonBuffer);
+    expect(ejsonStrFromBuffer).to.equal(ejsonStr);
+  });
+
   it('should correctly extend an existing mongodb module', function() {
     // Serialize the document
     var json =
