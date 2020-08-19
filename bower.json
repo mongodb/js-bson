@@ -1,18 +1,11 @@
 {
   "name": "bson",
   "description": "A bson parser for node.js and the browser",
-  "keywords": [
-    "mongodb",
-    "bson",
-    "parser"
-  ],
+  "keywords": ["mongodb", "bson", "parser"],
   "author": "Christian Amor Kvalheim <christkv@gmail.com>",
   "main": "./dist/bson.js",
   "license": "Apache-2.0",
-  "moduleType": [
-    "globals",
-    "node"
-  ],
+  "moduleType": ["globals", "node"],
   "ignore": [
     "**/.*",
     "alternate_parsers",

@@ -1,14 +1,14 @@
 'use strict';
 
-const M = require('../../lib/map');
-const BSON = require('../../lib/bson');
+const M = require('../../src/map').Map;
+const BSON = require('../../src/bson');
 const expect = require('chai').expect;
 
-describe('Map', function() {
+describe('Map', function () {
   /**
    * @ignore
    */
-  it('should correctly exercise the map', function(done) {
+  it('should correctly exercise the map', function (done) {
     var m = new M([
       ['a', 1],
       ['b', 2]
@@ -43,7 +43,7 @@ describe('Map', function() {
     // Collect values
     var values = [];
     // Get entries forEach
-    m.forEach(function(value, key, map) {
+    m.forEach(function (value, key, map) {
       expect(value != null).to.be.ok;
       expect(key != null).to.be.ok;
       expect(map != null).to.be.ok;
@@ -88,7 +88,7 @@ describe('Map', function() {
   /**
    * @ignore
    */
-  it('should serialize a map', function(done) {
+  it('should serialize a map', function (done) {
     // Serialize top level map only
     var m = new M([
       ['a', 1],
@@ -126,7 +126,7 @@ describe('Map', function() {
   /**
    * @ignore
    */
-  it('should not crash due to object that looks like map', function(done) {
+  it('should not crash due to object that looks like map', function (done) {
     // Serialize top level map only
     var m = { entries: 'test' };
     // Serialize the map

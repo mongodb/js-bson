@@ -1,0 +1,12 @@
+{
+  "extension": [
+    "js"
+  ],
+  "require": [
+    "ts-node/register",
+    "source-map-support/register"
+  ],
+  "timeout": 10000,
+  "throw-deprecation": true,
+  "parallel": false
+}

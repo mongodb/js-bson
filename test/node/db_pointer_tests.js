@@ -1,6 +1,6 @@
 'use strict';
 
-const BSON = require('../../lib/bson');
+const BSON = require('../../src/bson');
 const expect = require('chai').expect;
 
 // 0x0C foo\0 \0\0\07 String.fromCharCode(0x41, 0x42, 0xfffd, 0x43, 0x44) 12
@@ -51,8 +51,8 @@ const bsonSnippet = Buffer.from([
   0
 ]);
 
-describe('dbpointer tests', function() {
-  it('can serialize and deserialize 0xFFFD in dbpointer name', function() {
+describe('dbpointer tests', function () {
+  it('can serialize and deserialize 0xFFFD in dbpointer name', function () {
     expect(() => BSON.deserialize(bsonSnippet)).to.not.throw();
   });
 });

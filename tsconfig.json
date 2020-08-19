@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "checkJs": false,
+    "strict": false,
+    "declaration": true,
+    "importHelpers": false,
+    "alwaysStrict": true,
+    "target": "ES2017",
+    "module": "commonJS",
+    "moduleResolution": "node",
+    "lib": [
+      "ES2017"
+    ],
+    "noEmitHelpers": true,
+    "noEmitOnError": true,
+    "outDir": "lib",
+    "importsNotUsedAsValues": "error",
+    "sourceMap": true,
+    "types": [
+      "node"
+    ]
+  },
+  "ts-node": {
+    "transpileOnly": true,
+    "compiler": "typescript-cached-transpile"
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

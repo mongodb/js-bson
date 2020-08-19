@@ -1,7 +1,7 @@
 'use strict';
 
 const Buffer = require('buffer').Buffer;
-const BSON = require('../../lib/bson');
+const BSON = require('../../src/bson');
 const Int32 = BSON.Int32;
 const Double = BSON.Double;
 const BinaryParser = require('../binary_parser').BinaryParser;
@@ -22,11 +22,11 @@ BSON.BSON_BINARY_SUBTYPE_UUID = 3;
 BSON.BSON_BINARY_SUBTYPE_MD5 = 4;
 BSON.BSON_BINARY_SUBTYPE_USER_DEFINED = 128;
 
-describe('promote values', function() {
+describe('promote values', function () {
   /**
    * @ignore
    */
-  it('Should Correctly Deserialize object with all wrapper types', function(done) {
+  it('Should Correctly Deserialize object with all wrapper types', function (done) {
     var bytes = [
       26,
       1,

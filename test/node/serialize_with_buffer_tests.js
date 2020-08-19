@@ -1,14 +1,14 @@
 'use strict';
 
 const Buffer = require('buffer').Buffer;
-const BSON = require('../../lib/bson');
+const BSON = require('../../src/bson');
 const expect = require('chai').expect;
 
-describe('serializeWithBuffer', function() {
+describe('serializeWithBuffer', function () {
   /**
    * @ignore
    */
-  it('correctly serialize into buffer using serializeWithBufferAndIndex', function(done) {
+  it('correctly serialize into buffer using serializeWithBufferAndIndex', function (done) {
     // Create a buffer
     var b = Buffer.alloc(256);
     // Serialize from index 0
@@ -29,7 +29,7 @@ describe('serializeWithBuffer', function() {
     done();
   });
 
-  it('correctly serialize 3 different docs into buffer using serializeWithBufferAndIndex', function(done) {
+  it('correctly serialize 3 different docs into buffer using serializeWithBufferAndIndex', function (done) {
     const MAXSIZE = 1024 * 1024 * 17;
     let bf = Buffer.alloc(MAXSIZE);
 

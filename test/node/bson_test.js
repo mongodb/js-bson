@@ -1,8 +1,8 @@
 'use strict';
 
-const Buffer = require('buffer').Buffer;
-const expect = require('chai').expect;
-const BSON = require('../../lib/bson');
+const { Buffer } = require('buffer');
+const { expect } = require('chai');
+const BSON = require('../../src/bson');
 const Code = BSON.Code;
 const BSONRegExp = BSON.BSONRegExp;
 const Binary = BSON.Binary;
@@ -16,9 +16,9 @@ const Int32 = BSON.Int32;
 const Double = BSON.Double;
 const MinKey = BSON.MinKey;
 const MaxKey = BSON.MaxKey;
-const BinaryParser = require('../binary_parser').BinaryParser;
+const { BinaryParser } = require('../binary_parser');
 const vm = require('vm');
-const assertBuffersEqual = require('./tools/utils').assertBuffersEqual;
+const { assertBuffersEqual } = require('./tools/utils');
 
 // for tests
 BSON.BSON_BINARY_SUBTYPE_DEFAULT = 0;
@@ -39,7 +39,7 @@ BSON.BSON_BINARY_SUBTYPE_USER_DEFINED = 128;
  * Module for parsing an ISO 8601 formatted string into a Date object.
  */
 const ISO_REGEX = /^(\d{4})(-(\d{2})(-(\d{2})(T(\d{2}):(\d{2})(:(\d{2})(\.(\d+))?)?(Z|((\+|-)(\d{2}):(\d{2}))))?)?)?$/;
-var ISODate = function(string) {
+var ISODate = function (string) {
   if (typeof string.getTime === 'function') {
     return string;
   }
@@ -74,13 +74,13 @@ var ISODate = function(string) {
   return date;
 };
 
-describe('BSON', function() {
+describe('BSON', function () {
   /**
    * @ignore
    */
-  it('Should Correctly convert ObjectId to itself', function(done) {
+  it('Should Correctly convert ObjectId to itself', function (done) {
     var myObject, newObject;
-    var selfConvertion = function() {
+    var selfConvertion = function () {
       myObject = new ObjectId();
       newObject = ObjectId(myObject);
     };
@@ -93,8 +93,8 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly get BSON types from require', function(done) {
-    var _mongodb = require('../../lib/bson');
+  it('Should Correctly get BSON types from require', function (done) {
+    var _mongodb = require('../../src/bson');
     expect(_mongodb.ObjectId === ObjectId).to.be.ok;
     expect(_mongodb.Binary === Binary).to.be.ok;
     expect(_mongodb.Long === Long).to.be.ok;
@@ -114,7 +114,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Deserialize object', function(done) {
+  it('Should Correctly Deserialize object', function (done) {
     var bytes = [
       95,
       0,
@@ -228,7 +228,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Deserialize object with all types', function(done) {
+  it('Should Correctly Deserialize object with all types', function (done) {
     var bytes = [
       26,
       1,
@@ -542,7 +542,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Serialize and Deserialize String', function(done) {
+  it('Should Serialize and Deserialize String', function (done) {
     var test_string = { hello: 'world' };
     var serialized_data = BSON.serialize(test_string, {
       checkKeys: false
@@ -560,7 +560,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Serialize and Deserialize Empty String', function(done) {
+  it('Should Serialize and Deserialize Empty String', function (done) {
     var test_string = { hello: '' };
     var serialized_data = BSON.serialize(test_string);
     var serialized_data2 = Buffer.alloc(BSON.calculateObjectSize(test_string));
@@ -574,7 +574,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Integer', function(done) {
+  it('Should Correctly Serialize and Deserialize Integer', function (done) {
     var test_number = { doc: 5 };
 
     var serialized_data = BSON.serialize(test_number);
@@ -589,7 +589,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize null value', function(done) {
+  it('Should Correctly Serialize and Deserialize null value', function (done) {
     var test_null = { doc: null };
     var serialized_data = BSON.serialize(test_null);
 
@@ -605,7 +605,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Number 1', function(done) {
+  it('Should Correctly Serialize and Deserialize Number 1', function (done) {
     var test_number = { doc: 5.5 };
     var serialized_data = BSON.serialize(test_number);
 
@@ -620,7 +620,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Integer', function(done) {
+  it('Should Correctly Serialize and Deserialize Integer', function (done) {
     var test_int = { doc: 42 };
     var serialized_data = BSON.serialize(test_int);
 
@@ -658,7 +658,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Object', function(done) {
+  it('Should Correctly Serialize and Deserialize Object', function (done) {
     var doc = { doc: { age: 42, name: 'Spongebob', shoe_size: 9.5 } };
     var serialized_data = BSON.serialize(doc);
 
@@ -676,7 +676,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should correctly ignore undefined values in arrays', function(done) {
+  it('Should correctly ignore undefined values in arrays', function (done) {
     var doc = { doc: { notdefined: undefined } };
     var serialized_data = BSON.serialize(doc, {
       ignoreUndefined: true
@@ -697,7 +697,7 @@ describe('BSON', function() {
     done();
   });
 
-  it('Should correctly serialize undefined array entries as null values', function(done) {
+  it('Should correctly serialize undefined array entries as null values', function (done) {
     var doc = { doc: { notdefined: undefined }, a: [1, 2, undefined, 3] };
     var serialized_data = BSON.serialize(doc, {
       ignoreUndefined: true
@@ -717,7 +717,7 @@ describe('BSON', function() {
     done();
   });
 
-  it('Should correctly serialize undefined array entries as undefined values', function(done) {
+  it('Should correctly serialize undefined array entries as undefined values', function (done) {
     var doc = { doc: { notdefined: undefined }, a: [1, 2, undefined, 3] };
     var serialized_data = BSON.serialize(doc, {
       ignoreUndefined: false
@@ -750,7 +750,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Array', function(done) {
+  it('Should Correctly Serialize and Deserialize Array', function (done) {
     var doc = { doc: [1, 2, 'a', 'b'] };
     var serialized_data = BSON.serialize(doc);
 
@@ -769,7 +769,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Buffer', function(done) {
+  it('Should Correctly Serialize and Deserialize Buffer', function (done) {
     var doc = { doc: Buffer.from('hello world') };
     var serialized_data = BSON.serialize(doc);
 
@@ -786,7 +786,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Buffer with promoteBuffers option', function(done) {
+  it('Should Correctly Serialize and Deserialize Buffer with promoteBuffers option', function (done) {
     var doc = { doc: Buffer.from('hello world') };
     var serialized_data = BSON.serialize(doc);
 
@@ -805,7 +805,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Number 4', function(done) {
+  it('Should Correctly Serialize and Deserialize Number 4', function (done) {
     var doc = { doc: BSON.BSON_INT32_MAX + 10 };
     var serialized_data = BSON.serialize(doc);
 
@@ -822,8 +822,8 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Array with added on functions', function(done) {
-    Array.prototype.toXml = function() {};
+  it('Should Correctly Serialize and Deserialize Array with added on functions', function (done) {
+    Array.prototype.toXml = function () {};
     var doc = { doc: [1, 2, 'a', 'b'] };
     var serialized_data = BSON.serialize(doc);
 
@@ -842,7 +842,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should correctly deserialize a nested object', function(done) {
+  it('Should correctly deserialize a nested object', function (done) {
     var doc = { doc: { doc: 1 } };
     var serialized_data = BSON.serialize(doc);
 
@@ -857,7 +857,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize A Boolean', function(done) {
+  it('Should Correctly Serialize and Deserialize A Boolean', function (done) {
     var doc = { doc: true };
     var serialized_data = BSON.serialize(doc);
 
@@ -872,7 +872,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize a Date', function(done) {
+  it('Should Correctly Serialize and Deserialize a Date', function (done) {
     var date = new Date();
     //(2009, 11, 12, 12, 00, 30)
     date.setUTCDate(12);
@@ -896,7 +896,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize a Date from another VM', function(done) {
+  it('Should Correctly Serialize and Deserialize a Date from another VM', function (done) {
     var script = 'date1 = new Date();',
       ctx = vm.createContext({
         date1: null
@@ -924,7 +924,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize nested doc', function(done) {
+  it('Should Correctly Serialize nested doc', function (done) {
     var doc = {
       string: 'Strings are great',
       decimal: 3.14159265,
@@ -952,7 +952,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Oid', function(done) {
+  it('Should Correctly Serialize and Deserialize Oid', function (done) {
     var doc = { doc: new ObjectId() };
     var serialized_data = BSON.serialize(doc);
 
@@ -960,14 +960,16 @@ describe('BSON', function() {
     BSON.serializeWithBufferAndIndex(doc, serialized_data2);
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
-    expect(doc).to.deep.equal(BSON.deserialize(serialized_data));
+    const deserializedDoc = BSON.deserialize(serialized_data);
+    expect(deserializedDoc.doc).instanceof(ObjectId);
+    expect(doc.doc.toString('hex')).to.equal(deserializedDoc.doc.toString('hex'));
     done();
   });
 
   /**
    * @ignore
    */
-  it('Should Correctly encode Empty Hash', function(done) {
+  it('Should Correctly encode Empty Hash', function (done) {
     var doc = {};
     var serialized_data = BSON.serialize(doc);
 
@@ -982,7 +984,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Ordered Hash', function(done) {
+  it('Should Correctly Serialize and Deserialize Ordered Hash', function (done) {
     var doc = { doc: { b: 1, a: 2, c: 3, d: 4 } };
     var serialized_data = BSON.serialize(doc);
 
@@ -1001,7 +1003,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Regular Expression', function(done) {
+  it('Should Correctly Serialize and Deserialize Regular Expression', function (done) {
     // Serialize the regular expression
     var doc = { doc: /foobar/im };
     var serialized_data = BSON.serialize(doc);
@@ -1019,7 +1021,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize a Binary object', function(done) {
+  it('Should Correctly Serialize and Deserialize a Binary object', function (done) {
     var bin = new Binary();
     var string = 'binstring';
     for (var index = 0; index < string.length; index++) {
@@ -1042,7 +1044,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize a Type 2 Binary object', function(done) {
+  it('Should Correctly Serialize and Deserialize a Type 2 Binary object', function (done) {
     var bin = new Binary(Buffer.from('binstring'), Binary.SUBTYPE_BYTE_ARRAY);
     var string = 'binstring';
     for (var index = 0; index < string.length; index++) {
@@ -1065,7 +1067,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize DBRef', function(done) {
+  it('Should Correctly Serialize and Deserialize DBRef', function (done) {
     var oid = new ObjectId();
     var doc = { dbref: new DBRef('namespace', oid, null, {}) };
     var b = BSON;
@@ -1084,7 +1086,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize partial DBRef', function(done) {
+  it('Should Correctly Serialize and Deserialize partial DBRef', function (done) {
     var id = new ObjectId();
     var doc = { name: 'something', user: { $ref: 'username', $id: id } };
     var b = BSON;
@@ -1104,7 +1106,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize simple Int', function(done) {
+  it('Should Correctly Serialize and Deserialize simple Int', function (done) {
     var doc = { doc: 2147483648 };
     var serialized_data = BSON.serialize(doc);
 
@@ -1120,7 +1122,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Long Integer', function(done) {
+  it('Should Correctly Serialize and Deserialize Long Integer', function (done) {
     var doc = { doc: Long.fromNumber(9223372036854775807) };
     var serialized_data = BSON.serialize(doc);
 
@@ -1146,7 +1148,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Deserialize Large Integers as Number not Long', function(done) {
+  it('Should Deserialize Large Integers as Number not Long', function (done) {
     function roundTrip(val) {
       var doc = { doc: val };
       var serialized_data = BSON.serialize(doc);
@@ -1176,7 +1178,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Timestamp as subclass of Long', function(done) {
+  it('Should Correctly Serialize and Deserialize Timestamp as subclass of Long', function (done) {
     var long = Long.fromNumber(9223372036854775807);
     var timestamp = Timestamp.fromNumber(9223372036854775807);
     expect(long instanceof Long).to.be.ok;
@@ -1199,7 +1201,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Always put the id as the first item in a hash', function(done) {
+  it('Should Always put the id as the first item in a hash', function (done) {
     var hash = { doc: { not_id: 1, _id: 2 } };
     var serialized_data = BSON.serialize(hash);
 
@@ -1221,7 +1223,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize a User defined Binary object', function(done) {
+  it('Should Correctly Serialize and Deserialize a User defined Binary object', function (done) {
     var bin = new Binary();
     bin.sub_type = BSON.BSON_BINARY_SUBTYPE_USER_DEFINED;
     var string = 'binstring';
@@ -1245,7 +1247,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correclty Serialize and Deserialize a Code object', function(done) {
+  it('Should Correctly Serialize and Deserialize a Code object', function (done) {
     var doc = { doc: { doc2: new Code('this.a > i', { i: 1 }) } };
     var serialized_data = BSON.serialize(doc);
     var serialized_data2 = Buffer.alloc(BSON.calculateObjectSize(doc));
@@ -1261,7 +1263,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly serialize and deserialize and embedded array', function(done) {
+  it('Should Correctly serialize and deserialize and embedded array', function (done) {
     var doc = {
       a: 0,
       b: [
@@ -1299,7 +1301,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize UTF8', function(done) {
+  it('Should Correctly Serialize and Deserialize UTF8', function (done) {
     // Serialize utf8
     var doc = {
       name: '本荘由利地域に洪水警報',
@@ -1328,7 +1330,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize query object', function(done) {
+  it('Should Correctly Serialize and Deserialize query object', function (done) {
     var doc = { count: 'remove_with_no_callback_bug_test', query: {}, fields: null };
     var serialized_data = BSON.serialize(doc);
 
@@ -1344,7 +1346,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize empty query object', function(done) {
+  it('Should Correctly Serialize and Deserialize empty query object', function (done) {
     var doc = {};
     var serialized_data = BSON.serialize(doc);
 
@@ -1360,7 +1362,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize array based doc', function(done) {
+  it('Should Correctly Serialize and Deserialize array based doc', function (done) {
     var doc = { b: [1, 2, 3], _id: new ObjectId() };
     var serialized_data = BSON.serialize(doc);
 
@@ -1377,7 +1379,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Symbol', function(done) {
+  it('Should Correctly Serialize and Deserialize Symbol', function (done) {
     if (BSONSymbol != null) {
       // symbols are deprecated, so upgrade to strings... so I'm not sure
       // we really need this test anymore...
@@ -1400,7 +1402,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should handle Deeply nested document', function(done) {
+  it('Should handle Deeply nested document', function (done) {
     var doc = { a: { b: { c: { d: 2 } } } };
     var serialized_data = BSON.serialize(doc);
 
@@ -1416,7 +1418,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should handle complicated all typed object', function(done) {
+  it('Should handle complicated all typed object', function (done) {
     // First doc
     var date = new Date();
     var oid = new ObjectId();
@@ -1483,7 +1485,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize Complex Nested Object', function(done) {
+  it('Should Correctly Serialize Complex Nested Object', function (done) {
     var doc = {
       email: 'email@email.com',
       encrypted_password: 'password',
@@ -1516,7 +1518,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should correctly massive doc', function(done) {
+  it('Should correctly massive doc', function (done) {
     var oid1 = new ObjectId();
     var oid2 = new ObjectId();
 
@@ -1550,7 +1552,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize/Deserialize regexp object', function(done) {
+  it('Should Correctly Serialize/Deserialize regexp object', function (done) {
     var doc = { b: /foobaré/ };
 
     var serialized_data = BSON.serialize(doc);
@@ -1562,7 +1564,7 @@ describe('BSON', function() {
     serialized_data2 = BSON.serialize(doc);
 
     for (var i = 0; i < serialized_data2.length; i++) {
-      require('assert').equal(serialized_data2[i], serialized_data[i]);
+      expect(serialized_data2[i]).to.equal(serialized_data[i]);
     }
 
     done();
@@ -1571,7 +1573,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize/Deserialize complicated object', function(done) {
+  it('Should Correctly Serialize/Deserialize complicated object', function (done) {
     var doc = { a: { b: { c: [new ObjectId(), new ObjectId()] } }, d: { f: 1332.3323 } };
 
     var serialized_data = BSON.serialize(doc);
@@ -1589,7 +1591,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize/Deserialize nested object', function(done) {
+  it('Should Correctly Serialize/Deserialize nested object', function (done) {
     var doc = {
       _id: { date: new Date(), gid: '6f35f74d2bea814e21000000' },
       value: {
@@ -1615,7 +1617,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize/Deserialize nested object with even more nesting', function(done) {
+  it('Should Correctly Serialize/Deserialize nested object with even more nesting', function (done) {
     var doc = {
       _id: { date: { a: 1, b: 2, c: new Date() }, gid: '6f35f74d2bea814e21000000' },
       value: {
@@ -1640,7 +1642,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize empty name object', function(done) {
+  it('Should Correctly Serialize empty name object', function (done) {
     var doc = {
       '': 'test',
       bbbb: 1
@@ -1655,7 +1657,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly handle Forced Doubles to ensure we allocate enough space for cap collections', function(done) {
+  it('Should Correctly handle Forced Doubles to ensure we allocate enough space for cap collections', function (done) {
     if (Double != null) {
       var doubleValue = new Double(100);
       var doc = { value: doubleValue };
@@ -1677,7 +1679,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should deserialize correctly', function(done) {
+  it('Should deserialize correctly', function (done) {
     var doc = {
       _id: new ObjectId('4e886e687ff7ef5e00000162'),
       str: 'foreign',
@@ -1701,7 +1703,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should correctly serialize and deserialize MinKey and MaxKey values', function(done) {
+  it('Should correctly serialize and deserialize MinKey and MaxKey values', function (done) {
     var doc = {
       _id: new ObjectId('4e886e687ff7ef5e00000162'),
       minKey: new MinKey(),
@@ -1726,7 +1728,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should correctly serialize Double value', function(done) {
+  it('Should correctly serialize Double value', function (done) {
     var doc = {
       value: new Double(34343.2222)
     };
@@ -1745,7 +1747,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('ObjectId should correctly create objects', function(done) {
+  it('ObjectId should correctly create objects', function (done) {
     try {
       ObjectId.createFromHexString('000000000000000000000001');
       ObjectId.createFromHexString('00000000000000000000001');
@@ -1760,7 +1762,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('ObjectId should correctly retrieve timestamp', function(done) {
+  it('ObjectId should correctly retrieve timestamp', function (done) {
     var testDate = new Date();
     var object1 = new ObjectId();
     expect(Math.floor(testDate.getTime() / 1000)).to.equal(
@@ -1773,7 +1775,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should Correctly throw error on bsonparser errors', function(done) {
+  it('Should Correctly throw error on bsonparser errors', function (done) {
     var data = Buffer.alloc(3);
     var parser = BSON;
 
@@ -1799,9 +1801,9 @@ describe('BSON', function() {
    * @_function BSON.calculateObjectSize
    * @ignore
    */
-  it('Should correctly calculate the size of a given javascript object', function(done) {
+  it('Should correctly calculate the size of a given javascript object', function (done) {
     // Create a simple object
-    var doc = { a: 1, func: function() {} };
+    var doc = { a: 1, func: function () {} };
     var bson = BSON;
     // Calculate the size of the object without serializing the function
     var size = bson.calculateObjectSize(doc, {
@@ -1824,9 +1826,9 @@ describe('BSON', function() {
    * @_function calculateObjectSize
    * @ignore
    */
-  it('Should correctly calculate the size of a given javascript object using instance method', function(done) {
+  it('Should correctly calculate the size of a given javascript object using instance method', function (done) {
     // Create a simple object
-    var doc = { a: 1, func: function() {} };
+    var doc = { a: 1, func: function () {} };
     // Create a BSON parser instance
     var bson = BSON;
     // Calculate the size of the object without serializing the function
@@ -1850,9 +1852,9 @@ describe('BSON', function() {
    * @_function BSON.serializeWithBufferAndIndex
    * @ignore
    */
-  it('Should correctly serializeWithBufferAndIndex a given javascript object', function(done) {
+  it('Should correctly serializeWithBufferAndIndex a given javascript object', function (done) {
     // Create a simple object
-    var doc = { a: 1, func: function() {} };
+    var doc = { a: 1, func: function () {} };
     var bson = BSON;
 
     // Calculate the size of the document, no function serialization
@@ -1894,9 +1896,9 @@ describe('BSON', function() {
    * @_function serializeWithBufferAndIndex
    * @ignore
    */
-  it('Should correctly serializeWithBufferAndIndex a given javascript object using a BSON instance', function(done) {
+  it('Should correctly serializeWithBufferAndIndex a given javascript object using a BSON instance', function (done) {
     // Create a simple object
-    var doc = { a: 1, func: function() {} };
+    var doc = { a: 1, func: function () {} };
     // Create a BSON parser instance
     var bson = BSON;
     // Calculate the size of the document, no function serialization
@@ -1938,9 +1940,9 @@ describe('BSON', function() {
    * @_function BSON.serialize
    * @ignore
    */
-  it('Should correctly serialize a given javascript object', function(done) {
+  it('Should correctly serialize a given javascript object', function (done) {
     // Create a simple object
-    var doc = { a: 1, func: function() {} };
+    var doc = { a: 1, func: function () {} };
     // Create a BSON parser instance
     var bson = BSON;
 
@@ -1969,9 +1971,9 @@ describe('BSON', function() {
    * @_function serialize
    * @ignore
    */
-  it('Should correctly serialize a given javascript object using a bson instance', function(done) {
+  it('Should correctly serialize a given javascript object using a bson instance', function (done) {
     // Create a simple object
-    var doc = { a: 1, func: function() {} };
+    var doc = { a: 1, func: function () {} };
     // Create a BSON parser instance
     var bson = BSON;
 
@@ -2141,7 +2143,7 @@ describe('BSON', function() {
   //   done();
   // }
 
-  it('should properly deserialize multiple documents using deserializeStream', function() {
+  it('should properly deserialize multiple documents using deserializeStream', function () {
     const bson = BSON;
     const docs = [{ foo: 'bar' }, { foo: 'baz' }, { foo: 'quux' }];
 
@@ -2161,7 +2163,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('ObjectId should have a correct cached representation of the hexString', function(done) {
+  it('ObjectId should have a correct cached representation of the hexString', function (done) {
     ObjectId.cacheHexString = true;
     var a = new ObjectId();
     var __id = a.__id;
@@ -2199,7 +2201,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should fail to create ObjectId due to illegal hex code', function(done) {
+  it('Should fail to create ObjectId due to illegal hex code', function (done) {
     try {
       new ObjectId('zzzzzzzzzzzzzzzzzzzzzzzz');
       expect(false).to.be.ok;
@@ -2223,7 +2225,7 @@ describe('BSON', function() {
     // Cloning tmp so that instanceof fails to fake import from different version/instance of the same npm package
     var objectIdLike = {
       id: tmp.id,
-      toHexString: function() {
+      toHexString: function () {
         return tmp.toHexString();
       }
     };
@@ -2238,7 +2240,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should correctly serialize the BSONRegExp type', function(done) {
+  it('Should correctly serialize the BSONRegExp type', function (done) {
     var doc = { regexp: new BSONRegExp('test', 'i') };
     var doc1 = { regexp: /test/i };
     var serialized_data = BSON.serialize(doc);
@@ -2255,7 +2257,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should correctly deserialize the BSONRegExp type', function(done) {
+  it('Should correctly deserialize the BSONRegExp type', function (done) {
     var doc = { regexp: new BSONRegExp('test', 'i') };
     var serialized_data = BSON.serialize(doc);
 
@@ -2273,7 +2275,7 @@ describe('BSON', function() {
   /**
    * @ignore
    */
-  it('Should return boolean for ObjectId equality check', function(done) {
+  it('Should return boolean for ObjectId equality check', function (done) {
     var id = new ObjectId();
     expect(true).to.equal(id.equals(new ObjectId(id.toString())));
     expect(true).to.equal(id.equals(id.toString()));
@@ -2285,7 +2287,7 @@ describe('BSON', function() {
     done();
   });
 
-  it('should serialize ObjectIds from old bson versions', function() {
+  it('should serialize ObjectIds from old bson versions', function () {
     // In versions 4.0.0 and 4.0.1, we used _bsontype="ObjectId" which broke
     // backwards compatibility with mongodb-core and other code. It was reverted
     // back to "ObjectID" (capital D) in later library versions.
@@ -2362,7 +2364,7 @@ describe('BSON', function() {
     expect(record.newBsonType.toString()).to.equal(deserializedObject.newBsonType.toString());
   });
 
-  it('should throw if invalid BSON types are input to BSON serializer', function() {
+  it('should throw if invalid BSON types are input to BSON serializer', function () {
     const oid = new ObjectId('111111111111111111111111');
     const badBsonType = Object.assign({}, oid, { _bsontype: 'bogus' });
     const badDoc = { bad: badBsonType };

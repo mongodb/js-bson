@@ -1,42 +1,42 @@
 'use strict';
 
-const BSON = require('../../lib/bson');
+const BSON = require('../../src/bson');
 const Int32 = BSON.Int32;
 const expect = require('chai').expect;
 
-describe('Int32', function() {
-  context('Constructor', function() {
+describe('Int32', function () {
+  context('Constructor', function () {
     const strHexValue = '0x2a';
     const hexValue = 0x2a;
     const octalValue = 0o52;
     const value = 42;
 
-    it('Primitive number', function(done) {
+    it('Primitive number', function (done) {
       expect(new Int32(value).valueOf()).to.equal(value);
       done();
     });
 
-    it('Number object', function(done) {
+    it('Number object', function (done) {
       expect(new Int32(new Number(value)).valueOf()).to.equal(value);
       done();
     });
 
-    it('String Hex', function(done) {
+    it('String Hex', function (done) {
       expect(new Int32(strHexValue).valueOf()).to.equal(value);
       done();
     });
 
-    it('Hex', function(done) {
+    it('Hex', function (done) {
       expect(new Int32(hexValue).valueOf()).to.equal(value);
       done();
     });
 
-    it('Octal', function(done) {
+    it('Octal', function (done) {
       expect(new Int32(octalValue).valueOf()).to.equal(value);
       done();
     });
 
-    it('should equal zero', function() {
+    it('should equal zero', function () {
       const prop = 'key';
       const zero = BSON.serialize({ [prop]: new Int32(0) }).toString();
       // should equal zero
@@ -46,7 +46,7 @@ describe('Int32', function() {
       });
     });
 
-    it('should equal fortyTwo', function() {
+    it('should equal fortyTwo', function () {
       const prop = 'key';
       const fortyTwo = BSON.serialize({ [prop]: new Int32(value) }).toString();
       // should equal fortyTwo
