@@ -7,12 +7,13 @@
     "importHelpers": false,
     "alwaysStrict": true,
     "target": "ES2017",
-    "module": "commonJS",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "lib": [
       "ES2017"
     ],
-    "noEmitHelpers": true,
+    "allowSyntheticDefaultImports": true,
+    "noEmitHelpers": false,
     "noEmitOnError": true,
     "outDir": "lib",
     "importsNotUsedAsValues": "error",

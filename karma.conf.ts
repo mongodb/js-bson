@@ -1,11 +1,10 @@
-'use strict';
-
 const scenariosPlugin = require('./tools/scenarios-plugin');
-const jsonPlugin = require('rollup-plugin-json');
-const nodeGlobals = require('rollup-plugin-node-globals');
-const nodeBuiltins = require('rollup-plugin-node-builtins');
-const commonjs = require('rollup-plugin-commonjs');
-const nodeResolve = require('rollup-plugin-node-resolve');
+
+import commonjs from '@rollup/plugin-commonjs';
+import jsonPlugin from '@rollup/plugin-json';
+import nodeResolve from '@rollup/plugin-node-resolve';
+import nodeBuiltins from 'rollup-plugin-node-builtins';
+import nodeGlobals from 'rollup-plugin-node-globals';
 
 const rollupPlugins = [
   scenariosPlugin(),
@@ -17,7 +16,7 @@ const rollupPlugins = [
     namedExports: {
       'node_modules/buffer/index.js': ['isBuffer']
     }
-  }),
+  } as any),
   nodeBuiltins(),
   nodeGlobals(),
   jsonPlugin()
@@ -37,9 +36,9 @@ const onwarn = warning => {
   console.warn(warning.toString());
 };
 
-rollupConfig.onwarn = onwarn;
+(rollupConfig as any).onwarn = onwarn;
 
-module.exports = function(config) {
+export default function (config) {
   config.set({
     basePath: '',
     frameworks: ['mocha'],
@@ -63,4 +62,4 @@ module.exports = function(config) {
     singleRun: true,
     concurrency: Infinity
   });
-};
+}

@@ -3,13 +3,6 @@
  */
 export class MaxKey {
   /**
-   * Create a MaxKey type
-   *
-   * @return {MaxKey} A MaxKey instance
-   */
-  constructor() {}
-
-  /**
    * @ignore
    */
   toExtendedJSON() {

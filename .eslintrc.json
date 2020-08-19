@@ -20,7 +20,9 @@
   "parserOptions": {
     "ecmaVersion": 2017
   },
-  "plugins": ["prettier"],
+  "plugins": [
+    "prettier"
+  ],
   "rules": {
     "prettier/prettier": "error",
     "no-console": "off",
@@ -31,6 +33,11 @@
         "null": "ignore"
       }
     ],
-    "strict": ["error", "global"]
+    "strict": [
+      "error",
+      "global"
+    ],
+    "@typescript-eslint/ban-types": "off",
+    "@typescript-eslint/no-var-requires": "off"
   }
 }

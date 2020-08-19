@@ -66,7 +66,8 @@ function deserializeObject(buffer, index, options, isArray) {
   const cacheFunctionsCrc32 =
     options['cacheFunctionsCrc32'] == null ? false : options['cacheFunctionsCrc32'];
 
-  if (!cacheFunctionsCrc32) var crc32 = null;
+  let crc32;
+  if (!cacheFunctionsCrc32) crc32 = null;
 
   const fieldsAsRaw = options['fieldsAsRaw'] == null ? null : options['fieldsAsRaw'];
 

@@ -31,16 +31,16 @@
 // Modifications to writeIEEE754 to support negative zeroes made by Brian White
 
 export function readIEEE754(buffer, offset, endian, mLen, nBytes) {
-  let e,
-    m,
-    bBE = endian === 'big',
-    eLen = nBytes * 8 - mLen - 1,
-    eMax = (1 << eLen) - 1,
-    eBias = eMax >> 1,
-    nBits = -7,
-    i = bBE ? 0 : nBytes - 1,
-    d = bBE ? 1 : -1,
-    s = buffer[offset + i];
+  let e;
+  let m;
+  const bBE = endian === 'big';
+  const eLen = nBytes * 8 - mLen - 1;
+  const eMax = (1 << eLen) - 1;
+  const eBias = eMax >> 1;
+  let nBits = -7;
+  let i = bBE ? 0 : nBytes - 1;
+  const d = bBE ? 1 : -1;
+  let s = buffer[offset + i];
 
   i += d;
 
@@ -66,17 +66,17 @@ export function readIEEE754(buffer, offset, endian, mLen, nBytes) {
 }
 
 export function writeIEEE754(buffer, value, offset, endian, mLen, nBytes) {
-  let e,
-    m,
-    c,
-    bBE = endian === 'big',
-    eLen = nBytes * 8 - mLen - 1,
-    eMax = (1 << eLen) - 1,
-    eBias = eMax >> 1,
-    rt = mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0,
-    i = bBE ? nBytes - 1 : 0,
-    d = bBE ? -1 : 1,
-    s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
+  let e;
+  let m;
+  let c;
+  const bBE = endian === 'big';
+  let eLen = nBytes * 8 - mLen - 1;
+  const eMax = (1 << eLen) - 1;
+  const eBias = eMax >> 1;
+  const rt = mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0;
+  let i = bBE ? nBytes - 1 : 0;
+  const d = bBE ? -1 : 1;
+  const s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
 
   value = Math.abs(value);
 

@@ -563,16 +563,6 @@ Decimal128.prototype.toString = function () {
   // Note: bits in this routine are referred to starting at 0,
   // from the sign bit, towards the coefficient.
 
-  // bits 0 - 31
-  let high;
-  // bits 32 - 63
-  let midh;
-  // bits 64 - 95
-  let midl;
-  // bits 96 - 127
-  let low;
-  // bits 1 - 5
-  let combination;
   // decoded biased exponent (14 bits)
   let biased_exponent;
   // the number of significand digits
@@ -583,15 +573,10 @@ Decimal128.prototype.toString = function () {
   // read pointer into significand
   let index = 0;
 
-  // unbiased exponent
-  let exponent;
-  // the exponent if scientific notation is used
-  let scientific_exponent;
-
   // true if the number is zero
   let is_zero = false;
 
-  // the most signifcant significand bits (50-46)
+  // the most significant significand bits (50-46)
   let significand_msb;
   // temporary storage for significand decoding
   let significand128 = { parts: new Array(4) };
@@ -608,15 +593,19 @@ Decimal128.prototype.toString = function () {
   const buffer = this.bytes;
 
   // Unpack the low 64bits into a long
-  low =
+  // bits 96 - 127
+  const low =
     buffer[index++] | (buffer[index++] << 8) | (buffer[index++] << 16) | (buffer[index++] << 24);
-  midl =
+  // bits 64 - 95
+  const midl =
     buffer[index++] | (buffer[index++] << 8) | (buffer[index++] << 16) | (buffer[index++] << 24);
 
   // Unpack the high 64bits into a long
-  midh =
+  // bits 32 - 63
+  const midh =
     buffer[index++] | (buffer[index++] << 8) | (buffer[index++] << 16) | (buffer[index++] << 24);
-  high =
+  // bits 0 - 31
+  const high =
     buffer[index++] | (buffer[index++] << 8) | (buffer[index++] << 16) | (buffer[index++] << 24);
 
   // Unpack index
@@ -633,7 +622,8 @@ Decimal128.prototype.toString = function () {
   }
 
   // Decode combination field and exponent
-  combination = (high >> 26) & COMBINATION_MASK;
+  // bits 1 - 5
+  const combination = (high >> 26) & COMBINATION_MASK;
 
   if (combination >> 3 === 3) {
     // Check for 'special' values
@@ -650,7 +640,8 @@ Decimal128.prototype.toString = function () {
     biased_exponent = (high >> 17) & EXPONENT_MASK;
   }
 
-  exponent = biased_exponent - EXPONENT_BIAS;
+  // unbiased exponent
+  const exponent = biased_exponent - EXPONENT_BIAS;
 
   // Create string of significand digits
 
@@ -705,7 +696,8 @@ Decimal128.prototype.toString = function () {
     }
   }
 
-  scientific_exponent = significand_digits - 1 + exponent;
+  // the exponent if scientific notation is used
+  const scientific_exponent = significand_digits - 1 + exponent;
 
   // The scientific exponent checks are dictated by the string conversion
   // specification and are somewhat arbitrary cutoffs.

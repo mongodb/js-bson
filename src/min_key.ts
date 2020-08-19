@@ -3,13 +3,6 @@
  */
 export class MinKey {
   /**
-   * Create a MinKey type
-   *
-   * @return {MinKey} A MinKey instance
-   */
-  constructor() {}
-
-  /**
    * @ignore
    */
   toExtendedJSON() {

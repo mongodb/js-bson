@@ -74,7 +74,7 @@ describe('BSON Corpus', function () {
       if (valid) {
         describe('valid-bson', function () {
           valid.forEach(v => {
-            if (skipBSON.hasOwnProperty(v.description)) {
+            if (Reflect.has(skipBSON, v.description)) {
               it.skip(v.description, () => {});
               return;
             }
@@ -119,7 +119,7 @@ describe('BSON Corpus', function () {
 
         describe('valid-extjson', function () {
           valid.forEach(v => {
-            if (skipExtendedJSON.hasOwnProperty(v.description)) {
+            if (Reflect.has(skipExtendedJSON, v.description)) {
               it.skip(v.description, () => {});
               return;
             }
