@@ -1,26 +1,24 @@
 {
   "compilerOptions": {
-    "allowJs": false,
+    "allowJs": true,
     "checkJs": false,
     "strict": false,
     "declaration": true,
     "importHelpers": false,
     "alwaysStrict": true,
     "target": "ES2017",
-    "module": "CommonJS",
+    "module": "esnext",
     "moduleResolution": "node",
     "lib": [
-      "ES2017"
+      "ES2017",
+      "DOM"
     ],
-    "allowSyntheticDefaultImports": true,
     "noEmitHelpers": false,
     "noEmitOnError": true,
     "outDir": "lib",
     "importsNotUsedAsValues": "error",
     "sourceMap": true,
-    "types": [
-      "node"
-    ]
+    "declarationMap": true
   },
   "ts-node": {
     "transpileOnly": true,

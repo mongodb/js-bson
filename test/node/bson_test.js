@@ -1116,17 +1116,17 @@ describe('BSON', function () {
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
     var deserialized_data = BSON.deserialize(serialized_data);
-    expect(doc.doc).to.deep.equal(deserialized_data.doc);
+    expect(doc.doc.equals(deserialized_data.doc)).to.be.true;
 
     doc = { doc: Long.fromNumber(-9223372036854775) };
     serialized_data = BSON.serialize(doc);
     deserialized_data = BSON.deserialize(serialized_data);
-    expect(doc.doc).to.deep.equal(deserialized_data.doc);
+    expect(doc.doc.equals(deserialized_data.doc)).to.be.true;
 
     doc = { doc: Long.fromNumber(-9223372036854775809) };
     serialized_data = BSON.serialize(doc);
     deserialized_data = BSON.deserialize(serialized_data);
-    expect(doc.doc).to.deep.equal(deserialized_data.doc);
+    expect(doc.doc.equals(deserialized_data.doc)).to.be.true;
     done();
   });
 
@@ -1179,7 +1179,7 @@ describe('BSON', function () {
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
     var deserialized_data = BSON.deserialize(serialized_data);
-    expect(test_int.doc).to.deep.equal(deserialized_data.doc);
+    expect(test_int.doc.equals(deserialized_data.doc)).to.be.true;
     done();
   });
 
@@ -1800,7 +1800,7 @@ describe('BSON', function () {
       serializeFunctions: true
     });
     // Validate the correctness
-    expect(37).to.equal(size);
+    expect(38).to.equal(size);
     done();
   });
 
@@ -1826,7 +1826,7 @@ describe('BSON', function () {
       serializeFunctions: true
     });
     // Validate the correctness
-    expect(37).to.equal(size);
+    expect(38).to.equal(size);
     done();
   });
 
@@ -1869,8 +1869,8 @@ describe('BSON', function () {
     });
 
     // Validate the correctness
-    expect(37).to.equal(size);
-    expect(36).to.equal(index);
+    expect(38).to.equal(size);
+    expect(37).to.equal(index);
     done();
   });
 
@@ -1912,8 +1912,8 @@ describe('BSON', function () {
       serializeFunctions: true
     });
     // Validate the correctness
-    expect(size).to.equal(37);
-    expect(index).to.equal(36);
+    expect(size).to.equal(38);
+    expect(index).to.equal(37);
 
     done();
   });
@@ -1944,7 +1944,7 @@ describe('BSON', function () {
       serializeFunctions: true
     });
     // Validate the correctness
-    expect(buffer.length).to.equal(37);
+    expect(buffer.length).to.equal(38);
 
     done();
   });
@@ -1976,7 +1976,7 @@ describe('BSON', function () {
       serializeFunctions: true
     });
     // Validate the correctness
-    expect(37).to.equal(buffer.length);
+    expect(38).to.equal(buffer.length);
 
     done();
   });

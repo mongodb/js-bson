@@ -609,13 +609,9 @@ function deserializeObject(buffer, index, options, isArray) {
  * @api private
  */
 function isolateEvalWithHash(functionCache, hash, functionString, object) {
-  // Contains the value we are going to set
-  const value = null;
-
   // Check for cache hit, eval if missing and return cached function
   if (functionCache[hash] == null) {
-    eval('value = ' + functionString);
-    functionCache[hash] = value;
+    functionCache[hash] = new Function(functionString);
   }
 
   // Set the object
@@ -629,9 +625,5 @@ function isolateEvalWithHash(functionCache, hash, functionString, object) {
  * @api private
  */
 function isolateEval(functionString) {
-  // Contains the value we are going to set
-  const value = null;
-  // Eval the function
-  eval('value = ' + functionString);
-  return value;
+  return new Function(functionString);
 }

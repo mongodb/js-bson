@@ -1,104 +1,27 @@
-import { exec } from 'child_process';
-import { readdirSync, unlinkSync, writeFileSync } from 'fs';
+import { spawnSync } from 'child_process';
 import * as gulp from 'gulp';
 import * as ts from 'gulp-typescript';
-import { basename } from 'path';
-import { promisify } from 'util';
 
 import tsConfig = require('./tsconfig.json');
-const run = promisify(exec);
+const run = (cmd: string) => {
+  const [program, ...args] = cmd.split(' ');
+  return spawnSync(program, args, { stdio: 'inherit' });
+};
 
-gulp.task('typedoc', async () => {
-  function generateTypeDocConfig() {
-    const tutorials = readdirSync('docs/reference/content/tutorials')
-      .filter(filename => filename.endsWith('.md'))
-      .map(filename => `docs/reference/content/tutorials/${filename}`);
-
-    const docOptions = {
-      entryPoint: 'types/mongodb.d.ts',
-      mode: 'file',
-      out: 'docs/gen',
-      theme: 'pages-plugin',
-      excludeNotExported: true,
-      stripInternal: true,
-      pages: {
-        enableSearch: true,
-        listInvalidSymbolLinks: true,
-        output: 'pages',
-        groups: [
-          {
-            title: 'Documentation',
-            pages: [
-              {
-                title: 'FAQ',
-                source: 'docs/reference/content/reference/faq/index.md'
-              }
-            ]
-          },
-          {
-            title: 'Tutorials',
-            pages: [
-              {
-                title: 'Quick Start',
-                source: 'docs/reference/content/quick-start/quick-start.md',
-                children: tutorials.map(filepath => ({
-                  title: basename(filepath).replace('.md', ''),
-                  source: filepath
-                }))
-              }
-            ]
-          }
-        ]
-      }
-    };
-
-    return docOptions;
-  }
-
-  const docOptions = generateTypeDocConfig();
-
-  writeFileSync('./typedoc.json', JSON.stringify(docOptions, undefined, 2), {
-    encoding: 'utf8'
-  });
-
-  try {
-    await run('npx typedoc');
-  } catch (err) {
-    console.error('typedoc encountered an error:');
-    console.error((err.stdout as string).trim());
-    console.error((err.stderr as string).trim());
-    console.error('typedoc settings:');
-    console.error(JSON.stringify(docOptions, undefined, 2));
-  } finally {
-    unlinkSync('./typedoc.json');
-  }
-});
-
-gulp.task('api-extractor', async () => {
-  try {
-    const { stdout, stderr } = await run('npx api-extractor run --local');
-    console.log(stdout);
-    console.log(stderr);
-    await run('npx rimraf lib/*.d.ts lib/**/*.d.ts');
-    await run('npx prettier types/bson.d.ts --write');
-  } catch (err) {
-    console.error('encountered an error:');
-    console.error((err.stdout as string).trim());
-    console.error((err.stderr as string).trim());
-  }
+gulp.task('api-extractor', done => {
+  run('npx api-extractor run --local');
+  run('npx rimraf lib/*.d.ts lib/**/*.d.ts');
+  done();
 });
 
 gulp.task('compile', () => {
-  try {
-    return gulp.src('./src/**/*.ts').pipe(ts(tsConfig.compilerOptions)).pipe(gulp.dest('./lib'));
-  } catch (err) {
-    console.error('encountered an error:');
-    console.error((err.stdout as string).trim());
-    console.error((err.stderr as string).trim());
-  }
+  return gulp.src('./src/**/*.ts').pipe(ts(tsConfig.compilerOptions)).pipe(gulp.dest('./lib'));
+});
+
+gulp.task('bundle', done => {
+  run('rollup -c rollup.config.ts');
+  done();
 });
 
 gulp.task('definition', gulp.series('compile', 'api-extractor'));
-gulp.task('doc', gulp.series('definition', 'typedoc'));
-
-gulp.task('default', gulp.series('compile', 'api-extractor', 'typedoc'));
+gulp.task('default', gulp.series('compile', 'bundle', 'api-extractor'));

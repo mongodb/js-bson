@@ -13,6 +13,7 @@ export class Timestamp extends Long {
     } else {
       super(low, high, true);
     }
+    this._bsontype = 'Timestamp';
   }
 
   /**
@@ -76,7 +77,7 @@ export class Timestamp extends Long {
   /**
    * @ignore
    */
-  toExtendedJSON() {
+  toExtendedJSON(options): any {
     return { $timestamp: { t: this.high >>> 0, i: this.low >>> 0 } };
   }
 
@@ -87,7 +88,5 @@ export class Timestamp extends Long {
     return new Timestamp(doc.$timestamp.i, doc.$timestamp.t);
   }
 }
-
-Object.defineProperty(Timestamp.prototype, '_bsontype', { value: 'Timestamp' });
 
 Timestamp.MAX_VALUE = Timestamp.MAX_UNSIGNED_VALUE;

@@ -4,8 +4,10 @@
  * Normalizes our expected stringified form of a function across versions of node
  * @param {Function} fn The function to stringify
  */
-export function normalizedFunctionString(fn) {
-  return fn.toString().replace('function(', 'function (');
+export function normalizedFunctionString(fn: Function): string {
+  const fnStr = fn.toString();
+  const updateFnStr = fnStr.replace('function(', 'function (');
+  return updateFnStr;
 }
 
 function insecureRandomBytes(size) {

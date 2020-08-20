@@ -1,13 +1,16 @@
-const pkg = require('./package.json');
-import babel from '@rollup/plugin-babel';
+import { getBabelOutputPlugin } from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import sucrase from '@rollup/plugin-sucrase';
 import builtins from 'rollup-plugin-node-builtins';
 import globals from 'rollup-plugin-node-globals';
+import pkg from './package.json';
 
-function listPlugins(browser = false) {
+const input = 'src/bson.ts';
+
+function listPlugins(browser = false, morePlugins = []) {
   return [
+    ...morePlugins,
     resolve({
       extensions: ['.js', '.ts'],
       browser,
@@ -19,25 +22,13 @@ function listPlugins(browser = false) {
     }),
     globals(),
     builtins(),
-    commonjs(),
-    babel({
-      babelHelpers: 'external',
-      plugins: ['@babel/plugin-external-helpers'],
-      presets: [
-        [
-          '@babel/env',
-          {
-            modules: false
-          }
-        ]
-      ]
-    })
+    commonjs()
   ];
 }
 
 export default [
   {
-    input: 'src/bson.ts',
+    input,
     output: {
       file: 'dist/bundle.js',
       format: 'cjs'
@@ -46,7 +37,7 @@ export default [
     plugins: listPlugins()
   },
   {
-    input: 'src/bson.ts',
+    input,
     output: {
       file: 'dist/bson.esm.js',
       format: 'es',
@@ -56,7 +47,7 @@ export default [
     plugins: listPlugins()
   },
   {
-    input: 'src/bson.ts',
+    input,
     output: {
       file: 'dist/bson.browser.esm.js',
       format: 'es',
@@ -66,10 +57,10 @@ export default [
     plugins: listPlugins(true)
   },
   {
-    input: 'src/bson.ts',
+    input,
     output: {
       file: 'dist/bson.umd.js',
-      format: 'umd',
+      format: 'esm',
       name: 'BSON',
       exports: 'named',
       globals: {
@@ -77,14 +68,21 @@ export default [
       }
     },
     external: Object.keys(pkg.dependencies || {}),
-    plugins: listPlugins(true)
+    plugins: listPlugins(true, [
+      getBabelOutputPlugin({
+        // babelHelpers: 'runtime',
+        presets: [['@babel/preset-env', { modules: 'umd' }]],
+        plugins: ['@babel/plugin-transform-modules-umd']
+      })
+    ])
   },
   {
-    input: 'src/bson.ts',
+    input,
     output: {
       file: 'dist/bson.bundle.js',
       format: 'iife',
-      exports: 'named'
+      exports: 'named',
+      name: 'BSON'
     },
     external: Object.keys(pkg.dependencies || {}),
     plugins: listPlugins(true)
