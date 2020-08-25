@@ -147,9 +147,10 @@ tasks:
     tags:
       - run-checks
     commands:
-      - func: install dependencies
+      - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 10
+          NODE_MAJOR_VERSION: 12
+      - func: install dependencies
       - func: run checks
 
 buildvariants:

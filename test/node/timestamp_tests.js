@@ -1,7 +1,6 @@
 'use strict';
 
 const BSON = require('../../src/bson');
-const expect = require('chai').expect;
 
 describe('Timestamp', function () {
   it('should have a MAX_VALUE equal to Long.MAX_UNSIGNED_VALUE', function () {

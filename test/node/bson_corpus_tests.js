@@ -4,7 +4,6 @@ const Buffer = require('buffer').Buffer;
 const BSON = require('../../src/bson');
 const Decimal128 = BSON.Decimal128;
 const EJSON = BSON.EJSON;
-const expect = require('chai').expect;
 
 const deserializeOptions = {
   bsonRegExp: true,

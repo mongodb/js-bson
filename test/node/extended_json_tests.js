@@ -1,6 +1,5 @@
 'use strict';
 
-const expect = require('chai').expect;
 const BSON = require('../../src/bson');
 const EJSON = BSON.EJSON;
 

@@ -5,10 +5,16 @@
     "mocha": true,
     "es6": true
   },
+  "globals": {
+    "expect": true
+  },
   "parserOptions": {
     "ecmaVersion": 2018
   },
-  "extends": ["eslint:recommended", "plugin:prettier/recommended"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:prettier/recommended"
+  ],
   "rules": {
     "prettier/prettier": "error",
     "no-console": "off",
@@ -19,7 +25,10 @@
         "null": "ignore"
       }
     ],
-    "strict": ["error", "global"],
+    "strict": [
+      "error",
+      "global"
+    ],
     "promise/no-native": "off"
   }
 }

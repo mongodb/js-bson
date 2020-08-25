@@ -2,7 +2,6 @@
 
 const BSON = require('../../src/bson');
 const Int32 = BSON.Int32;
-const expect = require('chai').expect;
 
 describe('Int32', function () {
   context('Constructor', function () {

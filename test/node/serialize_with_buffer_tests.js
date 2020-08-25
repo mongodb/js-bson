@@ -2,7 +2,6 @@
 
 const Buffer = require('buffer').Buffer;
 const BSON = require('../../src/bson');
-const expect = require('chai').expect;
 
 describe('serializeWithBuffer', function () {
   /**

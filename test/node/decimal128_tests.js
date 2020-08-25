@@ -2,7 +2,6 @@
 
 const BSON = require('../../src/bson');
 const Decimal128 = BSON.Decimal128;
-const expect = require('chai').expect;
 
 var NAN = Buffer.from(
   [

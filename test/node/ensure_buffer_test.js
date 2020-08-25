@@ -2,7 +2,6 @@
 
 const { Buffer } = require('buffer');
 const { ensureBuffer } = require('../../src/ensure_buffer');
-const { expect } = require('chai');
 
 describe('ensureBuffer tests', function () {
   it('should be a function', function () {

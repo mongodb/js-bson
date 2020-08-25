@@ -1,7 +1,6 @@
 'use strict';
 
 const { Buffer } = require('buffer');
-const { expect } = require('chai');
 const BSON = require('../../src/bson');
 const Code = BSON.Code;
 const BSONRegExp = BSON.BSONRegExp;
@@ -65,12 +64,12 @@ describe('BSON', function () {
    */
   it('Should Correctly convert ObjectId to itself', function (done) {
     var myObject, newObject;
-    var selfConvertion = function () {
+    var selfConversion = function () {
       myObject = new ObjectId();
       newObject = ObjectId(myObject);
     };
 
-    expect(selfConvertion).to.not.throw;
+    expect(selfConversion).to.not.throw;
     expect(myObject).to.equal(newObject);
     done();
   });
@@ -1494,7 +1493,7 @@ describe('BSON', function () {
     serialized_data2 = BSON.serialize(doc2, false, true);
 
     for (var i = 0; i < serialized_data2.length; i++) {
-      require('assert').equal(serialized_data2[i], serialized_data[i]);
+      expect(serialized_data2[i]).to.equal(serialized_data[i]);
     }
 
     done();
@@ -1800,7 +1799,7 @@ describe('BSON', function () {
       serializeFunctions: true
     });
     // Validate the correctness
-    expect(38).to.equal(size);
+    expect(37).to.equal(size);
     done();
   });
 
@@ -1826,7 +1825,7 @@ describe('BSON', function () {
       serializeFunctions: true
     });
     // Validate the correctness
-    expect(38).to.equal(size);
+    expect(37).to.equal(size);
     done();
   });
 
@@ -1869,8 +1868,8 @@ describe('BSON', function () {
     });
 
     // Validate the correctness
-    expect(38).to.equal(size);
-    expect(37).to.equal(index);
+    expect(37).to.equal(size);
+    expect(36).to.equal(index);
     done();
   });
 
@@ -1912,8 +1911,8 @@ describe('BSON', function () {
       serializeFunctions: true
     });
     // Validate the correctness
-    expect(size).to.equal(38);
-    expect(index).to.equal(37);
+    expect(size).to.equal(37);
+    expect(index).to.equal(36);
 
     done();
   });
@@ -1944,7 +1943,7 @@ describe('BSON', function () {
       serializeFunctions: true
     });
     // Validate the correctness
-    expect(buffer.length).to.equal(38);
+    expect(buffer.length).to.equal(37);
 
     done();
   });
@@ -1976,7 +1975,7 @@ describe('BSON', function () {
       serializeFunctions: true
     });
     // Validate the correctness
-    expect(38).to.equal(buffer.length);
+    expect(37).to.equal(buffer.length);
 
     done();
   });

@@ -6,7 +6,6 @@ const BinaryParser = require('../binary_parser').BinaryParser;
 const ObjectId = BSON.ObjectId;
 const Binary = BSON.Binary;
 const BSONRegExp = BSON.BSONRegExp;
-const expect = require('chai').expect;
 
 describe('Full BSON', function () {
   /**

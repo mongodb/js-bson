@@ -2,7 +2,6 @@
 
 const BSON = require('../../src/bson');
 const Double = BSON.Double;
-const expect = require('chai').expect;
 
 describe('Double', function () {
   describe('Constructor', function () {

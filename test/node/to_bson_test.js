@@ -2,7 +2,6 @@
 
 const BSON = require('../../src/bson');
 const ObjectId = BSON.ObjectId;
-const expect = require('chai').expect;
 
 describe('toBSON', function () {
   /**

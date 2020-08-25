@@ -10,7 +10,6 @@ const ObjectId = BSON.ObjectId;
 const DBRef = BSON.DBRef;
 const MinKey = BSON.MinKey;
 const MaxKey = BSON.MaxKey;
-const expect = require('chai').expect;
 
 describe('BSON Compliance', function () {
   /**

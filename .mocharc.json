@@ -3,6 +3,7 @@
     "js"
   ],
   "require": [
+    "chai/register-expect",
     "ts-node/register",
     "source-map-support/register"
   ],

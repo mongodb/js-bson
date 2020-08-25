@@ -3,7 +3,6 @@
 const Buffer = require('buffer').Buffer;
 const fnv1a = require('../../src/fnv1a');
 const fnv1a24 = fnv1a.fnv1a24;
-const expect = require('chai').expect;
 
 describe('fnv1a', function () {
   require('./specs/object-id/vectors.json').vectors.forEach(testCase => {

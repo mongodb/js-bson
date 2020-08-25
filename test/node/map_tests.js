@@ -2,7 +2,6 @@
 
 const M = require('../../src/map').Map;
 const BSON = require('../../src/bson');
-const expect = require('chai').expect;
 
 describe('Map', function () {
   /**

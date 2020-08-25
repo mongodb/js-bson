@@ -1,7 +1,6 @@
 'use strict';
 
 const fs = require('fs');
-const expect = require('chai').expect;
 const BSON = require('../src/bson');
 const Binary = BSON.Binary;
 const { assertBuffersEqual } = require('./node/tools/utils');
