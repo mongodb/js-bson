@@ -26,9 +26,6 @@ import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
 export * from './constants';
 export {
-  // constants
-  // NOTE: this is done this way because rollup can't resolve an `Object.assign`ed export
-  // wrapped types
   Code,
   Map,
   BSONSymbol,
