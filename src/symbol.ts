@@ -2,12 +2,15 @@
  * A class representation of the BSON Symbol type.
  */
 export class BSONSymbol {
+  public value: string;
   /**
    * Create a Symbol type
    *
    * @param {string} value the string representing the symbol.
    */
-  constructor(public value: string) {}
+  constructor(value: string) {
+    this.value = value;
+  }
 
   /**
    * Access the wrapped string value.
