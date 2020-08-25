@@ -11,6 +11,7 @@
       "ES2017",
       "DOM" // This is included to get the global WebAssembly type in long.ts (it is present in node too)
     ],
+    "outDir": "lib",
     // We don't make use of tslib helpers
     "importHelpers": true,
     "noEmitHelpers": false,
@@ -22,9 +23,8 @@
     "inlineSourceMap": false,
     "inlineSources": true,
     // API-extractor makes use of the declarations, npm script should be cleaning these up
-    "declarationDir": "lib",
     "declaration": true,
-    "declarationMap": true,
+    "declarationMap": true
   },
   "ts-node": {
     "transpileOnly": true,
@@ -32,10 +32,5 @@
   },
   "include": [
     "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "rollup.config.js",
-    "karma.config.ts"
   ]
 }

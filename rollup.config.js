@@ -6,7 +6,7 @@ const JSON5 = require('json5');
 const { terser } = require('rollup-plugin-terser');
 
 // TSConfig has comments so we need a json5 parser
-const { compilerOptions, exclude, include } = JSON5.parse(
+const { compilerOptions, include } = JSON5.parse(
   readFileSync('./tsconfig.json', { encoding: 'utf8' })
 );
 
@@ -14,6 +14,7 @@ const { compilerOptions, exclude, include } = JSON5.parse(
 // remove all settings relating to declarations
 delete compilerOptions.declarationDir;
 delete compilerOptions.emitDeclarationOnly;
+delete compilerOptions.outDir;
 
 const allTSSettings = {
   ...compilerOptions,
@@ -27,12 +28,11 @@ const allTSSettings = {
   // old browsers
   target: 'es3',
   tsconfig: false,
-  include,
-  exclude
+  include
 };
 
 // Entry point of the library
-const input = 'src/bson.ts';
+const input = './src/bson.ts';
 
 module.exports = [
   {
@@ -63,10 +63,10 @@ module.exports = [
       }
     ],
     plugins: [
-      typescript(allTSSettings),
-      terser(),
+      nodeResolve({ preferBuiltins: false }),
       commonjs(),
-      nodeResolve({ preferBuiltins: false })
+      typescript(allTSSettings),
+      terser()
     ]
   },
   /* ESM bundle with externals */
@@ -84,10 +84,10 @@ module.exports = [
       return id === 'buffer' || id.includes('core-js');
     },
     plugins: [
-      typescript(allTSSettings),
-      terser(),
+      nodeResolve({ preferBuiltins: true }),
       commonjs(),
-      nodeResolve({ preferBuiltins: true })
+      typescript(allTSSettings),
+      terser()
     ]
   }
 ];
