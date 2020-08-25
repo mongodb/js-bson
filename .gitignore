@@ -17,3 +17,4 @@ bson.sublime-project
 bson.sublime-workspace
 
 lib
+types/

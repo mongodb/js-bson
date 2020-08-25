@@ -1,6 +1,5 @@
 import { Buffer } from 'buffer';
-import { deprecate, inspect } from 'util';
-import { randomBytes } from './parser/utils';
+import { deprecate, randomBytes } from './parser/utils';
 
 // constants
 const PROCESS_UNIQUE = randomBytes(5);
@@ -191,7 +190,7 @@ export class ObjectId {
    * @return {String} return the 24 byte hex string representation.
    * @ignore
    */
-  toString(format?: string): string {
+  toString(format?: BufferEncoding): string {
     // Is the id a buffer then use the buffer toString method to return the format
     if (this.id && 'copy' in (this.id as any)) {
       return this.id.toString(typeof format === 'string' ? format : 'hex');
@@ -414,7 +413,7 @@ Object.defineProperty(ObjectId, 'get_inc', {
  * @return {String} return the 24 byte hex string representation.
  * @ignore
  */
-ObjectId.prototype[inspect.custom || 'inspect'] = ObjectId.prototype.toString;
+ObjectId.prototype['inspect'] = ObjectId.prototype.toString;
 
 // In 4.0.0 and 4.0.1, this property name was changed to ObjectId to match the class name.
 // This caused interoperability problems with previous versions of the library, so in

@@ -204,7 +204,7 @@ export class Binary {
       typeof string === 'string' &&
       Buffer.isBuffer(this.buffer)
     ) {
-      this.buffer.write(string, offset, 'binary');
+      this.buffer.write(string, offset, string.length, 'binary');
       this.position =
         offset + string.length > this.position ? offset + string.length : this.position;
       // offset = string.length;

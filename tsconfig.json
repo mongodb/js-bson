@@ -1,24 +1,30 @@
 {
   "compilerOptions": {
-    "allowJs": true,
+    "allowJs": false,
     "checkJs": false,
     "strict": false,
-    "declaration": true,
-    "importHelpers": false,
     "alwaysStrict": true,
     "target": "ES2017",
-    "module": "esnext",
+    "module": "commonjs",
     "moduleResolution": "node",
     "lib": [
       "ES2017",
-      "DOM"
+      "DOM" // This is included to get the global WebAssembly type in long.ts (it is present in node too)
     ],
+    // We don't make use of tslib helpers
+    "importHelpers": true,
     "noEmitHelpers": false,
     "noEmitOnError": true,
-    "outDir": "lib",
+    // make use of import type where applicable
     "importsNotUsedAsValues": "error",
+    // Generate separate source maps files with sourceContent included
     "sourceMap": true,
-    "declarationMap": true
+    "inlineSourceMap": false,
+    "inlineSources": true,
+    // API-extractor makes use of the declarations, npm script should be cleaning these up
+    "declarationDir": "lib",
+    "declaration": true,
+    "declarationMap": true,
   },
   "ts-node": {
     "transpileOnly": true,
@@ -26,5 +32,10 @@
   },
   "include": [
     "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "rollup.config.js",
+    "karma.config.ts"
   ]
 }

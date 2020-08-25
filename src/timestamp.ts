@@ -7,6 +7,8 @@ import { Long } from './long';
  * @return {Timestamp}
  */
 export class Timestamp extends Long {
+  constructor(low: Long);
+  constructor(low: number, high: number);
   constructor(low: number | Long, high?: number) {
     if (Long.isLong(low)) {
       super(low.low, low.high, true);
