@@ -51,6 +51,10 @@ export const EJSON = {
   deserialize: EJSON_deserialize
 };
 
+export interface Document {
+  [key: string]: any;
+}
+
 /**
  * @ignore
  */

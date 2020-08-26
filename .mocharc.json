@@ -3,8 +3,8 @@
     "js"
   ],
   "require": [
-    "chai/register-expect",
     "ts-node/register",
+    "chai/register-expect",
     "source-map-support/register"
   ],
   "timeout": 10000,

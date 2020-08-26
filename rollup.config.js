@@ -3,7 +3,6 @@ const { nodeResolve } = require('@rollup/plugin-node-resolve');
 const typescript = require('@rollup/plugin-typescript');
 const { readFileSync } = require('fs');
 const JSON5 = require('json5');
-const { terser } = require('rollup-plugin-terser');
 
 // TSConfig has comments so we need a json5 parser
 const { compilerOptions, include } = JSON5.parse(
@@ -62,12 +61,7 @@ module.exports = [
         name: 'BSON'
       }
     ],
-    plugins: [
-      nodeResolve({ preferBuiltins: false }),
-      commonjs(),
-      typescript(allTSSettings),
-      terser()
-    ]
+    plugins: [nodeResolve({ preferBuiltins: false }), commonjs(), typescript(allTSSettings)]
   },
   /* ESM bundle with externals */
   {
@@ -83,11 +77,6 @@ module.exports = [
     external(id) {
       return id === 'buffer' || id.includes('core-js');
     },
-    plugins: [
-      nodeResolve({ preferBuiltins: true }),
-      commonjs(),
-      typescript(allTSSettings),
-      terser()
-    ]
+    plugins: [nodeResolve({ preferBuiltins: true }), commonjs(), typescript(allTSSettings)]
   }
 ];

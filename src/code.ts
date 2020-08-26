@@ -1,4 +1,4 @@
-import type { Document } from './document';
+import type { Document } from './bson';
 
 /**
  * A class representation of the BSON Code type.

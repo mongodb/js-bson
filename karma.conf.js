@@ -1,14 +1,15 @@
+const { scenariosPlugin } = require('./tools/scenarios-plugin');
 const commonjs = require('@rollup/plugin-commonjs');
 const { nodeResolve } = require('@rollup/plugin-node-resolve');
-const builtins = require('rollup-plugin-node-builtins');
-const globals = require('rollup-plugin-node-globals');
+const nodeGlobals = require('rollup-plugin-node-globals');
+const nodeBuiltins = require('rollup-plugin-node-builtins');
 const typescript = require('@rollup/plugin-typescript');
 const rollupJson = require('@rollup/plugin-json');
 const { readFileSync } = require('fs');
 const JSON5 = require('json5');
 
 // TSConfig has comments so we need a json5 parser
-const { compilerOptions, exclude, include } = JSON5.parse(
+const { compilerOptions, include } = JSON5.parse(
   readFileSync('./tsconfig.json', { encoding: 'utf8' })
 );
 
@@ -16,10 +17,11 @@ const { compilerOptions, exclude, include } = JSON5.parse(
 // remove all settings relating to declarations
 delete compilerOptions.declarationDir;
 delete compilerOptions.emitDeclarationOnly;
+delete compilerOptions.outDir;
 
 const allTSSettings = {
   ...compilerOptions,
-  sourceMap: false,
+  sourceMap: true,
   inlineSourceMap: false,
   inlineSources: false,
   declarationMap: false,
@@ -29,8 +31,7 @@ const allTSSettings = {
   // old browsers
   target: 'es3',
   tsconfig: false,
-  include,
-  exclude
+  include
 };
 
 module.exports = function (config) {
@@ -40,36 +41,34 @@ module.exports = function (config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'chai', 'karma-typescript'],
+    frameworks: ['mocha', 'chai'],
 
     // list of files / patterns to load in the browser
-    files: ['test/**/*.js'],
+    files: [{ pattern: 'test/node/!(bson_node_only_tests).js', watched: false }],
 
     // list of files / patterns to exclude
-    exclude: ['test/node/bson_node_only_tests.js'],
-    require: [],
+    exclude: ['src/**/*.ts'],
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'test/**/*.js': ['rollup'],
-      'src/**/*.ts': ['karma-typescript']
+      'test/node/!(bson_node_only_tests).js': ['rollup']
     },
 
     rollupPreprocessor: {
       plugins: [
         typescript(allTSSettings),
-        commonjs({ sourceMap: false }),
-        builtins(),
-        globals(),
-        rollupJson(),
-        nodeResolve({ preferBuiltins: false })
+        scenariosPlugin(),
+        nodeResolve({ browser: true, preferBuiltins: false }),
+        commonjs(),
+        nodeBuiltins({ buffer: true }),
+        nodeGlobals({ buffer: true }),
+        rollupJson()
       ],
-      treeshake: false,
       output: {
         format: 'iife',
         name: 'BSONtest',
-        sourcemap: false,
+        sourcemap: true,
         exports: 'named'
       }
     },

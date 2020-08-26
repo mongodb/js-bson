@@ -6,7 +6,9 @@
     "es6": true
   },
   "globals": {
-    "expect": true
+    "expect": true,
+    "BSON": false,
+    "Buffer": false
   },
   "parserOptions": {
     "ecmaVersion": 2018
