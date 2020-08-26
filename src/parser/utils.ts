@@ -33,27 +33,3 @@ if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomVal
     randomBytes = insecureRandomBytes;
   }
 }
-
-export function deprecate(fn, msg): any {
-  if ('undefined' === typeof process) return fn;
-  if (typeof process !== 'undefined' && (process as any).noDeprecation === true) {
-    return fn;
-  }
-
-  let warned = false;
-  function deprecated(...args) {
-    if (!warned) {
-      if ((process as any).throwDeprecation) {
-        throw new Error(msg);
-      } else if ((process as any).traceDeprecation) {
-        console.trace(msg);
-      } else {
-        console.error(msg);
-      }
-      warned = true;
-    }
-    return fn.apply(this, args);
-  }
-
-  return deprecated;
-}

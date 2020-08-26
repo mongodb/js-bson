@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
-import { deprecate, randomBytes } from './parser/utils';
+import { deprecate, inspect } from 'util';
+import { randomBytes } from './parser/utils';
 
 // constants
 const PROCESS_UNIQUE = randomBytes(5);
@@ -413,7 +414,7 @@ Object.defineProperty(ObjectId, 'get_inc', {
  * @return {String} return the 24 byte hex string representation.
  * @ignore
  */
-ObjectId.prototype['inspect'] = ObjectId.prototype.toString;
+ObjectId.prototype[(inspect as any) || 'inspect'] = ObjectId.prototype.toString;
 
 // In 4.0.0 and 4.0.1, this property name was changed to ObjectId to match the class name.
 // This caused interoperability problems with previous versions of the library, so in
