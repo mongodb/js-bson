@@ -43,7 +43,7 @@
     "karma-mocha": "^2.0.1",
     "karma-mocha-reporter": "^2.2.5",
     "karma-rollup-preprocessor": "^7.0.5",
-    "mocha": "^8.1.2",
+    "mocha": "5.2.0",
     "nyc": "^15.1.0",
     "prettier": "^2.1.1",
     "rimraf": "^3.0.2",

@@ -5,9 +5,7 @@
  * @param {Function} fn The function to stringify
  */
 export function normalizedFunctionString(fn: Function): string {
-  const fnStr = fn.toString();
-  const updateFnStr = fnStr.replace('function(', 'function (');
-  return updateFnStr;
+  return fn.toString().replace('function(', 'function (');
 }
 
 function insecureRandomBytes(size) {
