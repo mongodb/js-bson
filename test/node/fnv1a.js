@@ -1,8 +1,7 @@
 'use strict';
 
 const Buffer = require('buffer').Buffer;
-const fnv1a = require('../../src/fnv1a');
-const fnv1a24 = fnv1a.fnv1a24;
+const { fnv1a24 } = require('../register-bson');
 
 describe('fnv1a', function () {
   require('./specs/object-id/vectors.json').vectors.forEach(testCase => {

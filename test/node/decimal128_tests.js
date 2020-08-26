@@ -1,6 +1,6 @@
 'use strict';
 
-const BSON = require('../../src/bson');
+const BSON = require('../register-bson');
 const Decimal128 = BSON.Decimal128;
 
 var NAN = Buffer.from(

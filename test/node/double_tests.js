@@ -1,6 +1,6 @@
 'use strict';
 
-const BSON = require('../../src/bson');
+const BSON = require('../register-bson');
 const Double = BSON.Double;
 
 describe('Double', function () {

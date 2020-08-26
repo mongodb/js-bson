@@ -1,7 +1,7 @@
 'use strict';
 
-const M = require('../../src/map').Map;
-const BSON = require('../../src/bson');
+const BSON = require('../register-bson');
+const M = BSON.Map;
 
 describe('Map', function () {
   /**

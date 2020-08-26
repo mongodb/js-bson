@@ -1,7 +1,7 @@
 'use strict';
 
 const fs = require('fs');
-const BSON = require('../src/bson');
+const BSON = require('./register-bson');
 const Binary = BSON.Binary;
 const { assertBuffersEqual } = require('./node/tools/utils');
 const Buffer = require('buffer').Buffer;

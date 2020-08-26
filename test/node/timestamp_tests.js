@@ -1,6 +1,6 @@
 'use strict';
 
-const BSON = require('../../src/bson');
+const BSON = require('../register-bson');
 
 describe('Timestamp', function () {
   it('should have a MAX_VALUE equal to Long.MAX_UNSIGNED_VALUE', function () {

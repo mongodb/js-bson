@@ -1,1 +1,2 @@
-export { Map } from 'core-js';
+const myMap = Map;
+export { myMap as Map };

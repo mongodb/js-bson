@@ -1,7 +1,7 @@
 'use strict';
 
 const { Buffer } = require('buffer');
-const { ensureBuffer } = require('../../src/ensure_buffer');
+const { ensureBuffer } = require('../register-bson');
 
 describe('ensureBuffer tests', function () {
   it('should be a function', function () {

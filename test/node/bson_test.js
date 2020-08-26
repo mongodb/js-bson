@@ -1,7 +1,7 @@
 'use strict';
 
 const { Buffer } = require('buffer');
-const BSON = require('../../src/bson');
+const BSON = require('../register-bson');
 const Code = BSON.Code;
 const BSONRegExp = BSON.BSONRegExp;
 const Binary = BSON.Binary;
@@ -78,7 +78,7 @@ describe('BSON', function () {
    * @ignore
    */
   it('Should Correctly get BSON types from require', function (done) {
-    var _mongodb = require('../../src/bson');
+    var _mongodb = require('../register-bson');
     expect(_mongodb.ObjectId === ObjectId).to.be.ok;
     expect(_mongodb.Binary === Binary).to.be.ok;
     expect(_mongodb.Long === Long).to.be.ok;

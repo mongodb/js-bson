@@ -3,36 +3,7 @@ const commonjs = require('@rollup/plugin-commonjs');
 const { nodeResolve } = require('@rollup/plugin-node-resolve');
 const nodeGlobals = require('rollup-plugin-node-globals');
 const nodeBuiltins = require('rollup-plugin-node-builtins');
-const typescript = require('@rollup/plugin-typescript');
-const rollupJson = require('@rollup/plugin-json');
-const { readFileSync } = require('fs');
-const JSON5 = require('json5');
-
-// TSConfig has comments so we need a json5 parser
-const { compilerOptions, include } = JSON5.parse(
-  readFileSync('./tsconfig.json', { encoding: 'utf8' })
-);
-
-// Modify ts config options for use with rollup
-// remove all settings relating to declarations
-delete compilerOptions.declarationDir;
-delete compilerOptions.emitDeclarationOnly;
-delete compilerOptions.outDir;
-
-const allTSSettings = {
-  ...compilerOptions,
-  sourceMap: true,
-  inlineSourceMap: false,
-  inlineSources: false,
-  declarationMap: false,
-  declaration: false,
-  // rollup understands esm modules
-  module: 'esnext',
-  // old browsers
-  target: 'es3',
-  tsconfig: false,
-  include
-};
+const jsonPlugin = require('@rollup/plugin-json');
 
 module.exports = function (config) {
   config.set({
@@ -57,13 +28,14 @@ module.exports = function (config) {
 
     rollupPreprocessor: {
       plugins: [
-        typescript(allTSSettings),
         scenariosPlugin(),
-        nodeResolve({ browser: true, preferBuiltins: false }),
+        nodeResolve({
+          preferBuiltins: false
+        }),
         commonjs(),
-        nodeBuiltins({ buffer: true }),
-        nodeGlobals({ buffer: true }),
-        rollupJson()
+        nodeBuiltins(),
+        nodeGlobals(),
+        jsonPlugin()
       ],
       output: {
         format: 'iife',

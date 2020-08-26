@@ -1,7 +1,7 @@
 'use strict';
 
 const Buffer = require('buffer').Buffer;
-const BSON = require('../../src/bson');
+const BSON = require('../register-bson');
 const Code = BSON.Code;
 const Binary = BSON.Binary;
 const Timestamp = BSON.Timestamp;
