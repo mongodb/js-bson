@@ -20,3 +20,6 @@ lib
 types/
 .nyc_output/
 coverage/
+*.d.ts
+*.tgz
+docs/public
