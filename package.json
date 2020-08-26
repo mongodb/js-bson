@@ -48,6 +48,7 @@
     "prettier": "^2.1.1",
     "rimraf": "^3.0.2",
     "rollup": "^2.26.5",
+    "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-polyfills": "^0.2.1",
     "standard-version": "^8.0.1",
     "ts-node": "^9.0.0",

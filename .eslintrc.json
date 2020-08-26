@@ -15,7 +15,7 @@
     "Uint8Array": true,
     "ArrayBuffer": true,
     "Set": true,
-    "Map": true
+    "Map": false
   },
   "parserOptions": {
     "ecmaVersion": 2017

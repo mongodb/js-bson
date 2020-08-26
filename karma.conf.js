@@ -2,7 +2,7 @@ const { scenariosPlugin } = require('./tools/scenarios-plugin');
 const commonjs = require('@rollup/plugin-commonjs');
 const { nodeResolve } = require('@rollup/plugin-node-resolve');
 const nodeGlobals = require('rollup-plugin-node-globals');
-const nodeBuiltins = require('rollup-plugin-node-builtins');
+const nodePolyfills = require('rollup-plugin-node-polyfills');
 const jsonPlugin = require('@rollup/plugin-json');
 
 module.exports = function (config) {
@@ -33,7 +33,7 @@ module.exports = function (config) {
           preferBuiltins: false
         }),
         commonjs(),
-        nodeBuiltins(),
+        nodePolyfills(),
         nodeGlobals(),
         jsonPlugin()
       ],
