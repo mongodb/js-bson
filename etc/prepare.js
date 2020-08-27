@@ -5,7 +5,7 @@ var fs = require('fs');
 var nodeMajorVersion = +process.version.match(/^v(\d+)\.\d+/)[1];
 
 if (fs.existsSync('src') && nodeMajorVersion >= 10) {
-  cp.spawnSync('npm', ['run', 'build'], { stdio: 'inherit' });
+  cp.spawnSync('npm', ['run', 'build'], { stdio: 'inherit', shell: true });
 } else {
   if (!fs.existsSync('lib')) {
     console.warn('BSON: No compiled javascript present, the library is not installed correctly.');
