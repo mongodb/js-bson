@@ -1,12 +1,12 @@
 import type { ObjectId } from './objectid';
 
-export interface DBRefShape {
+export interface DBRefLike {
   $ref: string;
   $id: ObjectId;
   $db?: string;
 }
 
-export function isDBRefShaped(o: any): o is DBRefShape {
+export function isDBRefLike(o: any): o is DBRefLike {
   return o['$id'] != null && o['$ref'] != null;
 }
 
@@ -62,7 +62,7 @@ export class DBRef {
    */
   toExtendedJSON(options) {
     options = options || {};
-    let o: DBRefShape = {
+    let o: DBRefLike = {
       $ref: this.collection,
       $id: this.oid
     };

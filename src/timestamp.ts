@@ -7,6 +7,8 @@ import { Long } from './long';
  * @return {Timestamp}
  */
 export class Timestamp extends Long {
+  _bsontype: string;
+
   constructor(low: Long);
   constructor(low: number, high: number);
   constructor(low: number | Long, high?: number) {
@@ -15,7 +17,12 @@ export class Timestamp extends Long {
     } else {
       super(low, high, true);
     }
-    this._bsontype = 'Timestamp';
+    Object.defineProperty(this, '_bsontype', {
+      value: 'Timestamp',
+      writable: false,
+      configurable: false,
+      enumerable: false
+    });
   }
 
   /**

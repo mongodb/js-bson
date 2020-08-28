@@ -55,9 +55,9 @@ export default [
     },
     // Notice the external buffer, and preferBuiltins false,
     // this bundle doesn't pull in 'buffer' or Map from 'core-js'
-    external: ['buffer', 'tslib'],
+    external: ['buffer'],
     plugins: [
-      nodeResolve({ preferBuiltins: false }),
+      nodeResolve({ preferBuiltins: true }),
       commonjs(),
       nodePolyfills(),
       babel({

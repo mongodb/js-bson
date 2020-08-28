@@ -414,7 +414,7 @@ Object.defineProperty(ObjectId, 'get_inc', {
  * @return {String} return the 24 byte hex string representation.
  * @ignore
  */
-ObjectId.prototype[(inspect as any) || 'inspect'] = ObjectId.prototype.toString;
+ObjectId.prototype[(inspect.custom as any) || 'inspect'] = ObjectId.prototype.toString;
 
 // In 4.0.0 and 4.0.1, this property name was changed to ObjectId to match the class name.
 // This caused interoperability problems with previous versions of the library, so in

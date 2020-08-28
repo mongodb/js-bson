@@ -2,7 +2,7 @@ import { Buffer } from 'buffer';
 import { Binary } from '../binary';
 import { Code } from '../code';
 import * as constants from '../constants';
-import { DBRef, isDBRefShaped } from '../db_ref';
+import { DBRef, isDBRefLike } from '../db_ref';
 import { Decimal128 } from '../decimal128';
 import { Double } from '../double';
 import { Int32 } from '../int_32';
@@ -591,7 +591,7 @@ function deserializeObject(buffer, index, options, isArray) {
   // if a $key not in "$ref", "$id", "$db", don't make a DBRef
   if (!valid) return object;
 
-  if (isDBRefShaped(object)) {
+  if (isDBRefLike(object)) {
     const copy = Object.assign({}, object);
     delete copy.$ref;
     delete copy.$id;

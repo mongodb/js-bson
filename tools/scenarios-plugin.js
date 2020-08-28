@@ -1,3 +1,5 @@
+'use strict';
+
 const scenariosPlugin = () => {
   return {
     name: 'scenarios',
@@ -13,4 +15,4 @@ const scenariosPlugin = () => {
   };
 };
 
-module.exports.scenariosPlugin = scenariosPlugin;
+module.exports = { scenariosPlugin };
