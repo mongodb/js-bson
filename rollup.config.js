@@ -56,21 +56,6 @@ export default [
     // Notice the external buffer, and preferBuiltins false,
     // this bundle doesn't pull in 'buffer' or Map from 'core-js'
     external: ['buffer'],
-    plugins: [
-      nodeResolve({ preferBuiltins: true }),
-      commonjs(),
-      nodePolyfills(),
-      babel({
-        babelHelpers: 'bundled',
-        presets: [
-          [
-            '@babel/env',
-            {
-              modules: false
-            }
-          ]
-        ]
-      })
-    ]
+    plugins: [nodeResolve({ preferBuiltins: true }), commonjs()]
   }
 ];

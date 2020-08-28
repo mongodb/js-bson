@@ -314,10 +314,8 @@ try {
  */
 export class Long {
   __isLong__: true;
-  _bsontype: string;
 
   constructor(low = 0, high = 0, unsigned?: boolean) {
-    this._bsontype = 'Long';
     /**
      * The low 32 bits as a signed value.
      * @type {number}
@@ -1957,3 +1955,5 @@ Long.fromBytesBE = function fromBytesBE(bytes, unsigned) {
     unsigned
   );
 };
+
+Object.defineProperty(Long.prototype, '_bsontype', { value: 'Long' });
