@@ -1,7 +1,7 @@
 'use strict';
 
 const Buffer = require('buffer').Buffer;
-const BSON = require('../../lib/bson');
+const BSON = require('../register-bson');
 const Code = BSON.Code;
 const Binary = BSON.Binary;
 const Timestamp = BSON.Timestamp;
@@ -10,13 +10,12 @@ const ObjectId = BSON.ObjectId;
 const DBRef = BSON.DBRef;
 const MinKey = BSON.MinKey;
 const MaxKey = BSON.MaxKey;
-const expect = require('chai').expect;
 
-describe('BSON Compliance', function() {
+describe('BSON Compliance', function () {
   /**
    * @ignore
    */
-  it('Pass all corrupt BSON scenarios ./compliance/corrupt.json', function(done) {
+  it('Pass all corrupt BSON scenarios ./compliance/corrupt.json', function (done) {
     // Read and parse the json file
     const scenarios = require('./compliance/corrupt');
 
@@ -41,7 +40,7 @@ describe('BSON Compliance', function() {
   /**
    * @ignore
    */
-  it('Pass all valid BSON serialization scenarios ./compliance/valid.json', function(done) {
+  it('Pass all valid BSON serialization scenarios ./compliance/valid.json', function (done) {
     // Read and parse the json file
     const scenarios = require('./compliance/valid');
 
@@ -92,7 +91,7 @@ describe('BSON Compliance', function() {
     }
 
     // Iterate over all the results
-    scenarios.documents.forEach(function(doc) {
+    scenarios.documents.forEach(function (doc) {
       if (doc.skip) return;
       // Create a buffer containing the payload
       const expectedData = Buffer.from(doc.encoded, 'hex');

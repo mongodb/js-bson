@@ -18,10 +18,10 @@ fi
 
 case $1 in
   "node")
-    npm run lint && npm run test-node
+    npm run test-node
     ;;
   "browser")
-    npm run lint && npm run test-browser
+    npm run test-browser
     ;;
   *)
     npm test

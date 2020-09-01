@@ -1,10 +1,9 @@
 'use strict';
 
 const Buffer = require('buffer').Buffer;
-const BSON = require('../../lib/bson');
+const BSON = require('../register-bson');
 const Decimal128 = BSON.Decimal128;
 const EJSON = BSON.EJSON;
-const expect = require('chai').expect;
 
 const deserializeOptions = {
   bsonRegExp: true,
@@ -64,22 +63,22 @@ const skipExtendedJSON = {
 };
 
 const corpus = require('./tools/bson_corpus_test_loader');
-describe('BSON Corpus', function() {
+describe('BSON Corpus', function () {
   corpus.forEach(scenario => {
     const deprecated = scenario.deprecated;
     const description = scenario.description;
     const valid = scenario.valid || [];
 
-    describe(description, function() {
+    describe(description, function () {
       if (valid) {
-        describe('valid-bson', function() {
+        describe('valid-bson', function () {
           valid.forEach(v => {
-            if (skipBSON.hasOwnProperty(v.description)) {
+            if (Reflect.has(skipBSON, v.description)) {
               it.skip(v.description, () => {});
               return;
             }
 
-            it(v.description, function() {
+            it(v.description, function () {
               if (v.description === 'All BSON types' && deprecated) {
                 // there is just too much variation in the specified expectation to make this work
                 this.skip();
@@ -117,14 +116,14 @@ describe('BSON Corpus', function() {
           });
         });
 
-        describe('valid-extjson', function() {
+        describe('valid-extjson', function () {
           valid.forEach(v => {
-            if (skipExtendedJSON.hasOwnProperty(v.description)) {
+            if (Reflect.has(skipExtendedJSON, v.description)) {
               it.skip(v.description, () => {});
               return;
             }
 
-            it(v.description, function() {
+            it(v.description, function () {
               // read in test case data. if this scenario is for a deprecated
               // type, we want to use the "converted" BSON and EJSON, which
               // use the upgraded version of the deprecated type. otherwise,
@@ -179,9 +178,9 @@ describe('BSON Corpus', function() {
       }
 
       if (scenario.decodeErrors) {
-        describe('decodeErrors', function() {
+        describe('decodeErrors', function () {
           scenario.decodeErrors.forEach(d => {
-            it(d.description, function() {
+            it(d.description, function () {
               const B = Buffer.from(d.bson, 'hex');
               expect(() => BSON.deserialize(B, deserializeOptions)).to.throw();
             });
@@ -190,9 +189,9 @@ describe('BSON Corpus', function() {
       }
 
       if (scenario.parseErrors) {
-        describe('parseErrors', function() {
+        describe('parseErrors', function () {
           scenario.parseErrors.forEach(p => {
-            it(p.description, function() {
+            it(p.description, function () {
               expect(() => Decimal128.fromString(scenario.string)).to.throw();
             });
           });

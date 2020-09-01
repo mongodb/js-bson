@@ -1,14 +1,13 @@
 'use strict';
 
 const fs = require('fs');
-const expect = require('chai').expect;
-const BSON = require('../..');
+const BSON = require('./register-bson');
 const Binary = BSON.Binary;
-const assertBuffersEqual = require('./tools/utils').assertBuffersEqual;
+const { assertBuffersEqual } = require('./node/tools/utils');
 const Buffer = require('buffer').Buffer;
 
-describe('BSON - Node only', function() {
-  it('Should Correctly Serialize and Deserialize a big Binary object', function(done) {
+describe('BSON - Node only', function () {
+  it('Should Correctly Serialize and Deserialize a big Binary object', function (done) {
     var data = fs.readFileSync('test/node/data/test_gs_weird_bug.png', 'binary');
     var bin = new Binary();
     bin.write(data);
@@ -25,8 +24,8 @@ describe('BSON - Node only', function() {
   });
 });
 
-describe('Full BSON - Node only', function() {
-  it('Should Correctly Serialize and Deserialize a big Binary object', function(done) {
+describe('Full BSON - Node only', function () {
+  it('Should Correctly Serialize and Deserialize a big Binary object', function (done) {
     var data = fs.readFileSync('test/node/data/test_gs_weird_bug.png', 'binary');
     var bin = new Binary();
     bin.write(data);
@@ -37,7 +36,7 @@ describe('Full BSON - Node only', function() {
     done();
   });
 
-  it('Should Correctly Deserialize bson file from mongodump', function(done) {
+  it('Should Correctly Deserialize bson file from mongodump', function (done) {
     var data = fs.readFileSync('test/node/data/test.bson', { encoding: null });
     data = Buffer.from(data);
     var docs = [];
