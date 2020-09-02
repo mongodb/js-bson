@@ -11,12 +11,11 @@ const CONTINUING_CHAR = 0x80;
 
 /**
  * Determines if the passed in bytes are valid utf8
- * @param {Buffer|Uint8Array} bytes An array of 8-bit bytes. Must be indexable and have length property
- * @param {Number} start The index to start validating
- * @param {Number} end The index to end validating
- * @returns {boolean} True if valid utf8
+ * @param bytes - An array of 8-bit bytes. Must be indexable and have length property
+ * @param start - The index to start validating
+ * @param end - The index to end validating
  */
-export function validateUtf8(bytes, start, end) {
+export function validateUtf8(bytes: Buffer | Uint8Array, start: number, end: number): boolean {
   let continuation = 0;
 
   for (let i = start; i < end; i += 1) {

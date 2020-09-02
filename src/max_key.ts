@@ -2,17 +2,15 @@
  * A class representation of the BSON MaxKey type.
  */
 export class MaxKey {
-  /**
-   * @ignore
-   */
-  toExtendedJSON() {
+  _bsontype!: 'MaxKey';
+
+  /** @internal */
+  toExtendedJSON(): { $maxKey: 1 } {
     return { $maxKey: 1 };
   }
 
-  /**
-   * @ignore
-   */
-  static fromExtendedJSON() {
+  /** @internal */
+  static fromExtendedJSON(): MaxKey {
     return new MaxKey();
   }
 }

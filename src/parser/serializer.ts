@@ -1,10 +1,25 @@
 import { Buffer } from 'buffer';
 import { Binary } from '../binary';
+import type { BSONDocument } from '../bson';
 import * as constants from '../constants';
+import type { DBRefLike } from '../db_ref';
 import { writeIEEE754 } from '../float_parser';
 import { Long } from '../long';
 import { Map } from '../map';
 import { normalizedFunctionString } from './utils';
+
+export interface SerializationOptions {
+  /** the serializer will check if keys are valid. */
+  checkKeys?: boolean;
+  /** serialize the javascript functions **(default:false)**. */
+  serializeFunctions?: boolean;
+  /** serialize will not emit undefined fields **(default:true)** */
+  ignoreUndefined?: boolean;
+  /** @internal Resize internal buffer */
+  minInternalBufferSize?: number;
+  /** the index in the buffer where we wish to start serializing into */
+  index?: number;
+}
 
 const regexp = /\x00/; // eslint-disable-line no-control-regex
 const ignoreKeys = new Set(['$db', '$ref', '$id', '$clusterTime']);
@@ -626,12 +641,14 @@ function serializeDBRef(buffer, key, value, index, depth, serializeFunctions, is
   buffer[index++] = 0;
 
   let startIndex = index;
-  let output = {
+  let output: DBRefLike = {
     $ref: value.collection || value.namespace, // "namespace" was what library 1.x called "collection"
     $id: value.oid
   };
 
-  if (value.db != null) (output as any).$db = value.db;
+  if (value.db != null) {
+    output.$db = value.db;
+  }
 
   output = Object.assign(output, value.fields);
   const endIndex = serializeInto(buffer, output, false, index, depth + 1, serializeFunctions);
@@ -648,15 +665,15 @@ function serializeDBRef(buffer, key, value, index, depth, serializeFunctions, is
 }
 
 export function serializeInto(
-  buffer,
-  object,
-  checkKeys,
-  startingIndex,
-  depth,
+  buffer: Buffer,
+  object: BSONDocument,
+  checkKeys?: boolean,
+  startingIndex?: number,
+  depth?: number,
   serializeFunctions?: boolean,
   ignoreUndefined?: boolean,
-  path?: any[]
-) {
+  path?: BSONDocument[]
+): number {
   startingIndex = startingIndex || 0;
   path = path || [];
 

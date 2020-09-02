@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
 import { Binary } from '../binary';
+import type { BSONDocument } from '../bson';
 import * as constants from '../constants';
 import { normalizedFunctionString } from './utils';
 
@@ -8,7 +9,11 @@ function isDate(d) {
   return typeof d === 'object' && Object.prototype.toString.call(d) === '[object Date]';
 }
 
-export function calculateObjectSize(object, serializeFunctions, ignoreUndefined) {
+export function calculateObjectSize(
+  object: BSONDocument,
+  serializeFunctions?: boolean,
+  ignoreUndefined?: boolean
+): number {
   let totalLength = 4 + 1;
 
   if (Array.isArray(object)) {
@@ -37,10 +42,7 @@ export function calculateObjectSize(object, serializeFunctions, ignoreUndefined)
   return totalLength;
 }
 
-/**
- * @ignore
- * @api private
- */
+/** @internal */
 function calculateElement(name, value, serializeFunctions, isArray, ignoreUndefined) {
   // If we have toBSON defined, override the current object
   if (value && value.toBSON) {

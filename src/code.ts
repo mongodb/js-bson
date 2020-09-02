@@ -1,34 +1,29 @@
-import type { Document } from './bson';
+import type { BSONDocument } from './bson';
 
-/**
- * A class representation of the BSON Code type.
- */
+export type CodeFunction = (...args: unknown[]) => unknown;
+
+/** A class representation of the BSON Code type. */
 export class Code {
-  code: string | Function;
-  scope: Document;
+  _bsontype!: 'Code';
+
+  code: string | CodeFunction;
+  scope: BSONDocument;
   /**
-   * Create a Code type
-   *
-   * @param {(string|function)} code a string or function.
-   * @param {Object} [scope] an optional scope for the function.
-   * @return {Code}
+   * @param code - a string or function.
+   * @param scope - an optional scope for the function.
    */
-  constructor(code: string | Function, scope?: Document) {
+  constructor(code: string | CodeFunction, scope?: BSONDocument) {
     this.code = code;
     this.scope = scope;
   }
 
-  /**
-   * @ignore
-   */
-  toJSON() {
-    return { scope: this.scope, code: this.code };
+  /** @internal */
+  toJSON(): { code: string | CodeFunction; scope: BSONDocument } {
+    return { code: this.code, scope: this.scope };
   }
 
-  /**
-   * @ignore
-   */
-  toExtendedJSON() {
+  /** @internal */
+  toExtendedJSON(): { $code: string | CodeFunction; $scope?: BSONDocument } {
     if (this.scope) {
       return { $code: this.code, $scope: this.scope };
     }
@@ -36,10 +31,8 @@ export class Code {
     return { $code: this.code };
   }
 
-  /**
-   * @ignore
-   */
-  static fromExtendedJSON(doc) {
+  /** @internal */
+  static fromExtendedJSON(doc: { $code: string | CodeFunction; $scope?: BSONDocument }): Code {
     return new Code(doc.$code, doc.$scope);
   }
 }

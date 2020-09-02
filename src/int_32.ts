@@ -1,16 +1,17 @@
-/**
- * A class representation of a BSON Int32 type.
- */
+import type { EJSONOptions } from './extended_json';
+
+/** A class representation of a BSON Int32 type. */
 export class Int32 {
+  _bsontype!: 'Int32';
+
   value: number;
   /**
    * Create an Int32 type
    *
-   * @param {*} value the number we want to represent as an int32.
-   * @return {Int32}
+   * @param value - the number we want to represent as an int32.
    */
-  constructor(value) {
-    if (value instanceof Number) {
+  constructor(value: number | string) {
+    if ((value as unknown) instanceof Number) {
       value = value.valueOf();
     }
 
@@ -20,32 +21,25 @@ export class Int32 {
   /**
    * Access the number value.
    *
-   * @method
-   * @return {number} returns the wrapped int32 number.
+   * @returns returns the wrapped int32 number.
    */
-  valueOf() {
+  valueOf(): number {
     return this.value;
   }
 
-  /**
-   * @ignore
-   */
-  toJSON() {
+  /** @internal */
+  toJSON(): number {
     return this.value;
   }
 
-  /**
-   * @ignore
-   */
-  toExtendedJSON(options) {
+  /** @internal */
+  toExtendedJSON(options?: EJSONOptions): number | { $numberInt: string } {
     if (options && (options.relaxed || options.legacy)) return this.value;
     return { $numberInt: this.value.toString() };
   }
 
-  /**
-   * @ignore
-   */
-  static fromExtendedJSON(doc, options) {
+  /** @internal */
+  static fromExtendedJSON(doc: { $numberInt: string }, options?: EJSONOptions): number | Int32 {
     return options && options.relaxed ? parseInt(doc.$numberInt, 10) : new Int32(doc.$numberInt);
   }
 }

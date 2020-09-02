@@ -1,59 +1,42 @@
-/**
- * A class representation of the BSON Symbol type.
- */
+/** A class representation of the BSON Symbol type. */
 export class BSONSymbol {
-  public value: string;
+  _bsontype!: 'Symbol';
+
+  value: string;
   /**
-   * Create a Symbol type
-   *
-   * @param {string} value the string representing the symbol.
+   * @param value - the string representing the symbol.
    */
   constructor(value: string) {
     this.value = value;
   }
 
-  /**
-   * Access the wrapped string value.
-   *
-   * @method
-   * @return {String} returns the wrapped string.
-   */
-  valueOf() {
+  /** Access the wrapped string value. */
+  valueOf(): string {
     return this.value;
   }
 
-  /**
-   * @ignore
-   */
-  toString() {
+  /** @internal */
+  toString(): string {
     return this.value;
   }
 
-  /**
-   * @ignore
-   */
-  inspect() {
+  /** @internal */
+  inspect(): string {
     return this.value;
   }
 
-  /**
-   * @ignore
-   */
-  toJSON() {
+  /** @internal */
+  toJSON(): string {
     return this.value;
   }
 
-  /**
-   * @ignore
-   */
-  toExtendedJSON() {
+  /** @internal */
+  toExtendedJSON(): { $symbol: string } {
     return { $symbol: this.value };
   }
 
-  /**
-   * @ignore
-   */
-  static fromExtendedJSON(doc) {
+  /** @internal */
+  static fromExtendedJSON(doc: { $symbol: string }): BSONSymbol {
     return new BSONSymbol(doc.$symbol);
   }
 }

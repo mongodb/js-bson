@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
 import { Binary } from '../binary';
+import type { BSONDocument } from '../bson';
 import { Code } from '../code';
 import * as constants from '../constants';
 import { DBRef, isDBRefLike } from '../db_ref';
@@ -15,13 +16,40 @@ import { BSONSymbol } from '../symbol';
 import { Timestamp } from '../timestamp';
 import { validateUtf8 } from '../validate_utf8';
 
+export interface DeserializationOptions {
+  /** evaluate functions in the BSON document scoped to the object deserialized. */
+  evalFunctions?: boolean;
+  /** cache evaluated functions for reuse. */
+  cacheFunctions?: boolean;
+  /** use a crc32 code for caching, otherwise use the string of the function. */
+  cacheFunctionsCrc32?: boolean;
+  /** when deserializing a Long will fit it into a Number if it's smaller than 53 bits */
+  promoteLongs?: boolean;
+  /** when deserializing a Binary will return it as a node.js Buffer instance. */
+  promoteBuffers?: boolean;
+  /** when deserializing will promote BSON values to their Node.js closest equivalent types. */
+  promoteValues?: boolean;
+  /** allow to specify if there what fields we wish to return as unserialized raw buffer. */
+  fieldsAsRaw?: Document;
+  /** return BSON regular expressions as BSONRegExp instances. */
+  bsonRegExp?: boolean;
+  /** allows the buffer to be larger than the parsed BSON object */
+  allowObjectSmallerThanBufferSize?: boolean;
+  /** Offset into buffer to begin reading document from */
+  index?: number;
+}
+
 // Internal long versions
 const JS_INT_MAX_LONG = Long.fromNumber(constants.JS_INT_MAX);
 const JS_INT_MIN_LONG = Long.fromNumber(constants.JS_INT_MIN);
 
 const functionCache = {};
 
-export function deserialize(buffer, options, isArray?: boolean) {
+export function deserialize(
+  buffer: Buffer,
+  options: DeserializationOptions,
+  isArray?: boolean
+): BSONDocument {
   options = options == null ? {} : options;
   const index = options && options.index ? options.index : 0;
   // Read the document size
@@ -255,9 +283,13 @@ function deserializeObject(buffer, index, options, isArray) {
       // Update index
       index = index + 16;
       // Assign the new Decimal128 value
-      const decimal128 = new Decimal128(bytes);
+      const decimal128 = new Decimal128(bytes) as Decimal128 | { toObject(): unknown };
       // If we have an alternative mapper use that
-      object[name] = decimal128.toObject ? decimal128.toObject() : decimal128;
+      if ('toObject' in decimal128 && typeof decimal128.toObject === 'function') {
+        object[name] = decimal128.toObject();
+      } else {
+        object[name] = decimal128;
+      }
     } else if (elementType === constants.BSON_DATA_BINARY) {
       let binarySize =
         buffer[index++] |
@@ -603,10 +635,9 @@ function deserializeObject(buffer, index, options, isArray) {
 }
 
 /**
- * Ensure eval is isolated.
+ * Ensure eval is isolated, store the result in functionCache.
  *
- * @ignore
- * @api private
+ * @internal
  */
 function isolateEvalWithHash(functionCache, hash, functionString, object) {
   // Check for cache hit, eval if missing and return cached function
@@ -621,8 +652,7 @@ function isolateEvalWithHash(functionCache, hash, functionString, object) {
 /**
  * Ensure eval is isolated.
  *
- * @ignore
- * @api private
+ * @internal
  */
 function isolateEval(functionString) {
   return new Function(functionString);

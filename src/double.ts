@@ -1,43 +1,41 @@
+import type { EJSONOptions } from './extended_json';
+
 /**
  * A class representation of the BSON Double type.
  */
 export class Double {
+  _bsontype!: 'Double';
+
   value: number;
   /**
    * Create a Double type
    *
-   * @param {number|Number} value the number we want to represent as a double.
-   * @return {Double}
+   * @param value - the number we want to represent as a double.
    */
-  constructor(value) {
-    if (value instanceof Number) {
+  constructor(value: number) {
+    if ((value as unknown) instanceof Number) {
       value = value.valueOf();
     }
 
-    this.value = value;
+    this.value = +value;
   }
 
   /**
    * Access the number value.
    *
-   * @method
-   * @return {number} returns the wrapped double number.
+   * @returns returns the wrapped double number.
    */
-  valueOf() {
+  valueOf(): number {
     return this.value;
   }
 
-  /**
-   * @ignore
-   */
-  toJSON() {
+  /** @internal */
+  toJSON(): number {
     return this.value;
   }
 
-  /**
-   * @ignore
-   */
-  toExtendedJSON(options) {
+  /** @internal */
+  toExtendedJSON(options?: EJSONOptions): number | { $numberDouble: string } {
     if (options && (options.legacy || (options.relaxed && isFinite(this.value)))) {
       return this.value;
     }
@@ -48,7 +46,7 @@ export class Double {
       return { $numberDouble: `-${this.value.toFixed(1)}` };
     }
 
-    let $numberDouble;
+    let $numberDouble: string;
     if (Number.isInteger(this.value)) {
       $numberDouble = this.value.toFixed(1);
       if ($numberDouble.length >= 13) {
@@ -61,10 +59,8 @@ export class Double {
     return { $numberDouble };
   }
 
-  /**
-   * @ignore
-   */
-  static fromExtendedJSON(doc, options) {
+  /** @internal */
+  static fromExtendedJSON(doc: { $numberDouble: string }, options?: EJSONOptions): number | Double {
     const doubleValue = parseFloat(doc.$numberDouble);
     return options && options.relaxed ? doubleValue : new Double(doubleValue);
   }

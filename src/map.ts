@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // We have an ES6 Map available, return the native instance
 
 let bsonMap: MapConstructor;
