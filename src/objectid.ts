@@ -9,22 +9,22 @@ const PROCESS_UNIQUE = randomBytes(5);
 const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
 
 // Precomputed hex table enables speedy hex string conversion
-const hexTable = [];
+const hexTable: string[] = [];
 for (let i = 0; i < 256; i++) {
   hexTable[i] = (i <= 15 ? '0' : '') + i.toString(16);
 }
 
 // Lookup tables
-const decodeLookup = [];
+const decodeLookup: number[] = [];
 let i = 0;
 while (i < 10) decodeLookup[0x30 + i] = i++;
 while (i < 16) decodeLookup[0x41 - 10 + i] = decodeLookup[0x61 - 10 + i] = i++;
 
-function convertToHex(bytes) {
+function convertToHex(bytes: Buffer): string {
   return bytes.toString('hex');
 }
 
-function makeObjectIdError(invalidString, index) {
+function makeObjectIdError(invalidString: string, index: number) {
   const invalidCharacter = invalidString[index];
   return new TypeError(
     `ObjectId string "${invalidString}" contains invalid character "${invalidCharacter}" with character code (${invalidString.charCodeAt(
@@ -58,7 +58,11 @@ export class ObjectId {
    */
   constructor(id?: string | Buffer | number | ObjectIdLike | ObjectId) {
     // Duck-typing to support ObjectId from different npm packages
-    if (id instanceof ObjectId) return id;
+    if (id instanceof ObjectId) {
+      this.id = id.id;
+      this.__id = id.__id;
+      return;
+    }
 
     // The most common use case (blank id, new objectId instance)
     if (id == null || typeof id === 'number') {
@@ -79,10 +83,11 @@ export class ObjectId {
         'Argument passed in must be a single String of 12 bytes or a string of 24 hex characters'
       );
     } else if (valid && typeof id === 'string' && id.length === 24 && haveBuffer()) {
-      return new ObjectId(Buffer.from(id, 'hex'));
+      this.id = Buffer.from(id, 'hex');
     } else if (valid && typeof id === 'string' && id.length === 24) {
-      return ObjectId.createFromHexString(id);
-    } else if (id['length'] === 12) {
+      this.id = ObjectId.createFromHexString(id).id;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } else if ((id as any)['length'] === 12) {
       // assume 12 byte string
       this.id = id as string | Buffer;
     } else if (
@@ -91,7 +96,7 @@ export class ObjectId {
       typeof id.toHexString === 'function'
     ) {
       // Duck-typing to support ObjectId from different npm packages
-      return ObjectId.createFromHexString(id.toHexString());
+      this.id = ObjectId.createFromHexString(id.toHexString()).id;
     } else {
       throw new TypeError(
         'Argument passed in must be a single String of 12 bytes or a string of 24 hex characters'
@@ -394,7 +399,7 @@ export class ObjectId {
 // Deprecated methods
 Object.defineProperty(ObjectId.prototype, 'generate', {
   value: deprecate(
-    time => ObjectId.generate(time),
+    (time: number) => ObjectId.generate(time),
     'Please use the static `ObjectId.generate(time)` instead'
   )
 });

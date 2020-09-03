@@ -35,6 +35,12 @@
         "null": "ignore"
       }
     ],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ],
     "strict": [
       "error",
       "global"

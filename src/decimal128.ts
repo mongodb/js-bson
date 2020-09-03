@@ -79,12 +79,12 @@ const COMBINATION_INFINITY = 30;
 const COMBINATION_NAN = 31;
 
 // Detect if the value is a digit
-function isDigit(value) {
+function isDigit(value: string): boolean {
   return !isNaN(parseInt(value, 10));
 }
 
 // Divide two uint128 values
-function divideu128(value) {
+function divideu128(value: { parts: [number, number, number, number] }) {
   const DIVISOR = Long.fromNumber(1000 * 1000 * 1000);
   let _rem = Long.fromNumber(0);
 
@@ -105,7 +105,7 @@ function divideu128(value) {
 }
 
 // Multiply two Long values and return the 128 bit value
-function multiply64x2(left, right) {
+function multiply64x2(left: Long, right: Long): { high: Long; low: Long } {
   if (!left && !right) {
     return { high: Long.fromNumber(0), low: Long.fromNumber(0) };
   }
@@ -132,7 +132,7 @@ function multiply64x2(left, right) {
   return { high: productHigh, low: productLow };
 }
 
-function lessThan(left, right) {
+function lessThan(left: Long, right: Long): boolean {
   // Make values unsigned
   const uhleft = left.high >>> 0;
   const uhright = right.high >>> 0;
@@ -149,7 +149,7 @@ function lessThan(left, right) {
   return false;
 }
 
-function invalidErr(string, message) {
+function invalidErr(string: string, message: string) {
   throw new TypeError(`"${string}" is not a valid Decimal128 string - ${message}`);
 }
 
@@ -157,7 +157,7 @@ function invalidErr(string, message) {
 export class Decimal128 {
   _bsontype!: 'Decimal128';
 
-  private readonly bytes: Buffer;
+  readonly bytes: Buffer;
 
   /** @param bytes - a buffer containing the raw Decimal128 bytes in little endian order */
   constructor(bytes: Buffer) {
@@ -564,7 +564,7 @@ export class Decimal128 {
     // the number of significand digits
     let significand_digits = 0;
     // the base-10 digits in the significand
-    const significand = new Array(36);
+    const significand = new Array<number>(36);
     for (let i = 0; i < significand.length; i++) significand[i] = 0;
     // read pointer into significand
     let index = 0;
@@ -575,12 +575,12 @@ export class Decimal128 {
     // the most significant significand bits (50-46)
     let significand_msb;
     // temporary storage for significand decoding
-    let significand128 = { parts: new Array(4) };
+    let significand128: { parts: [number, number, number, number] } = { parts: [0, 0, 0, 0] };
     // indexing variables
     let j, k;
 
     // Output string
-    const string = [];
+    const string: string[] = [];
 
     // Unpack index
     index = 0;
@@ -709,13 +709,13 @@ export class Decimal128 {
       // as + or - 0 and using the non-scientific exponent (this is for the "invalid
       // representation should be treated as 0/-0" spec cases in decimal128-1.json)
       if (significand_digits > 34) {
-        string.push(0);
+        string.push(`${0}`);
         if (exponent > 0) string.push('E+' + exponent);
         else if (exponent < 0) string.push('E' + exponent);
         return string.join('');
       }
 
-      string.push(significand[index++]);
+      string.push(`${significand[index++]}`);
       significand_digits = significand_digits - 1;
 
       if (significand_digits) {
@@ -723,7 +723,7 @@ export class Decimal128 {
       }
 
       for (let i = 0; i < significand_digits; i++) {
-        string.push(significand[index++]);
+        string.push(`${significand[index++]}`);
       }
 
       // Exponent
@@ -731,13 +731,13 @@ export class Decimal128 {
       if (scientific_exponent > 0) {
         string.push('+' + scientific_exponent);
       } else {
-        string.push(scientific_exponent);
+        string.push(`${scientific_exponent}`);
       }
     } else {
       // Regular format with no decimal place
       if (exponent >= 0) {
         for (let i = 0; i < significand_digits; i++) {
-          string.push(significand[index++]);
+          string.push(`${significand[index++]}`);
         }
       } else {
         let radix_position = significand_digits + exponent;
@@ -745,7 +745,7 @@ export class Decimal128 {
         // non-zero digits before radix
         if (radix_position > 0) {
           for (let i = 0; i < radix_position; i++) {
-            string.push(significand[index++]);
+            string.push(`${significand[index++]}`);
           }
         } else {
           string.push('0');
@@ -758,7 +758,7 @@ export class Decimal128 {
         }
 
         for (let i = 0; i < significand_digits - Math.max(radix_position - 1, 0); i++) {
-          string.push(significand[index++]);
+          string.push(`${significand[index++]}`);
         }
       }
     }

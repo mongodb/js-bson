@@ -1,6 +1,7 @@
 import type { BSONDocument } from './bson';
 import type { EJSONOptions } from './extended_json';
 import type { ObjectId } from './objectid';
+import { isObjectLike } from './parser/utils';
 
 export interface DBRefLike {
   $ref: string;
@@ -8,33 +9,31 @@ export interface DBRefLike {
   $db?: string;
 }
 
-export function isDBRefLike(o: unknown): o is DBRefLike {
-  return o['$id'] != null && o['$ref'] != null;
+export function isDBRefLike(value: unknown): value is DBRefLike {
+  return isObjectLike(value) && value['$id'] != null && value['$ref'] != null;
 }
 
-/**
- * A class representation of the BSON DBRef type.
- */
+/** A class representation of the BSON DBRef type. */
 export class DBRef {
   _bsontype!: 'DBRef';
 
   collection: string;
   oid: ObjectId;
-  db: string;
+  db?: string | null;
   fields: BSONDocument;
+
   /**
-   * Create a DBRef type
-   *
    * @param collection - the collection name.
    * @param oid - the reference ObjectId.
    * @param db - optional db name, if omitted the reference is local to the current db.
    */
-  constructor(collection: string, oid: ObjectId, db?: string, fields?: BSONDocument) {
+  constructor(collection: string, oid: ObjectId, db?: string | null, fields?: BSONDocument) {
     // check if namespace has been provided
     const parts = collection.split('.');
     if (parts.length === 2) {
       db = parts.shift();
-      collection = parts.shift();
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      collection = parts.shift()!;
     }
 
     this.collection = collection;
@@ -85,8 +84,10 @@ export class DBRef {
 
   /** @internal */
   static fromExtendedJSON(doc: DBRefLike): DBRef {
-    const copy = Object.assign({}, doc);
-    ['$ref', '$id', '$db'].forEach(k => delete copy[k]);
+    const copy = Object.assign({}, doc) as Partial<DBRefLike>;
+    delete copy.$ref;
+    delete copy.$id;
+    delete copy.$db;
     return new DBRef(doc.$ref, doc.$id, doc.$db, copy);
   }
 }

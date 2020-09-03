@@ -1,13 +1,14 @@
 import type { BSONDocument } from './bson';
 
-export type CodeFunction = (...args: unknown[]) => unknown;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type CodeFunction = (...args: any[]) => any;
 
 /** A class representation of the BSON Code type. */
 export class Code {
   _bsontype!: 'Code';
 
   code: string | CodeFunction;
-  scope: BSONDocument;
+  scope?: BSONDocument;
   /**
    * @param code - a string or function.
    * @param scope - an optional scope for the function.
@@ -18,7 +19,7 @@ export class Code {
   }
 
   /** @internal */
-  toJSON(): { code: string | CodeFunction; scope: BSONDocument } {
+  toJSON(): { code: string | CodeFunction; scope?: BSONDocument } {
     return { code: this.code, scope: this.scope };
   }
 

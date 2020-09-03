@@ -92,23 +92,27 @@ export class Binary {
    */
   put(byteValue: string | number | Uint8Array | Buffer | number[]): void {
     // If it's a string and a has more than one character throw an error
-    if (byteValue['length'] != null && typeof byteValue !== 'number' && byteValue.length !== 1)
-      throw new TypeError('only accepts single character String, Uint8Array or Array');
-    if (typeof byteValue === 'number' && (byteValue < 0 || byteValue > 255))
-      throw new TypeError('only accepts number in a valid unsigned byte range 0-255');
+    if (typeof byteValue === 'string' && byteValue.length !== 1) {
+      throw new TypeError('only accepts single character String');
+    } else if (typeof byteValue !== 'number' && byteValue.length !== 1)
+      throw new TypeError('only accepts single character Uint8Array or Array');
 
     // Decode the byte value once
-    let decoded_byte = null;
+    let decodedByte: number;
     if (typeof byteValue === 'string') {
-      decoded_byte = byteValue.charCodeAt(0);
-    } else if (byteValue['length'] != null) {
-      decoded_byte = byteValue[0];
+      decodedByte = byteValue.charCodeAt(0);
+    } else if (typeof byteValue === 'number') {
+      decodedByte = byteValue;
     } else {
-      decoded_byte = byteValue;
+      decodedByte = byteValue[0];
+    }
+
+    if (decodedByte < 0 || decodedByte > 255) {
+      throw new TypeError('only accepts number in a valid unsigned byte range 0-255');
     }
 
     if (this.buffer.length > this.position) {
-      this.buffer[this.position++] = decoded_byte;
+      this.buffer[this.position++] = decodedByte;
     } else {
       if (isBuffer(this.buffer)) {
         // Create additional overflow buffer
@@ -116,9 +120,9 @@ export class Binary {
         // Combine the two buffers together
         this.buffer.copy(buffer, 0, 0, this.buffer.length);
         this.buffer = buffer;
-        this.buffer[this.position++] = decoded_byte;
+        this.buffer[this.position++] = decodedByte;
       } else {
-        let buffer = null;
+        let buffer: Uint8Array | number[];
         // Create a new buffer (typed or normal array)
         if (isUint8Array(this.buffer)) {
           buffer = new Uint8Array(new ArrayBuffer(Binary.BUFFER_SIZE + this.buffer.length));
@@ -134,7 +138,7 @@ export class Binary {
         // Reassign the buffer
         this.buffer = buffer;
         // Write the byte
-        this.buffer[this.position++] = decoded_byte;
+        this.buffer[this.position++] = decodedByte;
       }
     }
   }
@@ -150,7 +154,7 @@ export class Binary {
 
     // If the buffer is to small let's extend the buffer
     if (this.buffer.length < offset + sequence.length) {
-      let buffer = null;
+      let buffer: Buffer | Uint8Array | null = null;
       // If we are in node.js
       if (isBuffer(this.buffer)) {
         buffer = Buffer.alloc(this.buffer.length + sequence.length);
@@ -165,7 +169,8 @@ export class Binary {
       }
 
       // Assign the new buffer
-      this.buffer = buffer;
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.buffer = buffer!;
     }
 
     if (isBuffer(sequence) && isBuffer(this.buffer)) {
@@ -308,7 +313,8 @@ export class Binary {
     options?: EJSONOptions
   ): Binary {
     options = options || {};
-    let data, type;
+    let data: Buffer | undefined;
+    let type;
     if (options.legacy && typeof doc.$binary === 'string') {
       type = doc.$type ? parseInt(doc.$type, 16) : 0;
       data = Buffer.from(doc.$binary, 'base64');
@@ -317,6 +323,9 @@ export class Binary {
         type = doc.$binary.subType ? parseInt(doc.$binary.subType, 16) : 0;
         data = Buffer.from(doc.$binary.base64, 'base64');
       }
+    }
+    if (!data) {
+      throw new TypeError(`Unexpected Binary Extended JSON format ${JSON.stringify(doc)}`);
     }
     return new Binary(data, type);
   }
@@ -329,7 +338,7 @@ export class Binary {
 const BSON_BINARY_SUBTYPE_DEFAULT = 0;
 
 /** @internal */
-function writeStringToArray(data) {
+function writeStringToArray(data: string) {
   // Create a buffer
   const buffer =
     typeof Uint8Array !== 'undefined'
@@ -349,7 +358,11 @@ function writeStringToArray(data) {
  *
  * @internal
  */
-function convertArraytoUtf8BinaryString(byteArray, startIndex, endIndex) {
+function convertArraytoUtf8BinaryString(
+  byteArray: number[] | Uint8Array,
+  startIndex: number,
+  endIndex: number
+) {
   let result = '';
   for (let i = startIndex; i < endIndex; i++) {
     result = result + String.fromCharCode(byteArray[i]);

@@ -10,7 +10,7 @@ export type BSONRegExpEJSON =
 
 /** A class representation of the BSON RegExp type. */
 export class BSONRegExp {
-  _bsontype: 'BSONRegExp';
+  _bsontype!: 'BSONRegExp';
 
   pattern: string;
   options: string;
@@ -72,6 +72,7 @@ export class BSONRegExp {
         BSONRegExp.parseOptions(doc.$regularExpression.options)
       );
     }
+    throw new TypeError(`Unexpected BSONRegExp EJSON object form: ${JSON.stringify(doc)}`);
   }
 }
 

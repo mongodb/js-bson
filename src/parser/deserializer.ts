@@ -1,9 +1,9 @@
 import { Buffer } from 'buffer';
 import { Binary } from '../binary';
 import type { BSONDocument } from '../bson';
-import { Code } from '../code';
+import { Code, CodeFunction } from '../code';
 import * as constants from '../constants';
-import { DBRef, isDBRefLike } from '../db_ref';
+import { DBRef, DBRefLike, isDBRefLike } from '../db_ref';
 import { Decimal128 } from '../decimal128';
 import { Double } from '../double';
 import { Int32 } from '../int_32';
@@ -30,20 +30,22 @@ export interface DeserializationOptions {
   /** when deserializing will promote BSON values to their Node.js closest equivalent types. */
   promoteValues?: boolean;
   /** allow to specify if there what fields we wish to return as unserialized raw buffer. */
-  fieldsAsRaw?: Document;
+  fieldsAsRaw?: BSONDocument;
   /** return BSON regular expressions as BSONRegExp instances. */
   bsonRegExp?: boolean;
   /** allows the buffer to be larger than the parsed BSON object */
   allowObjectSmallerThanBufferSize?: boolean;
   /** Offset into buffer to begin reading document from */
   index?: number;
+
+  raw?: boolean;
 }
 
 // Internal long versions
 const JS_INT_MAX_LONG = Long.fromNumber(constants.JS_INT_MAX);
 const JS_INT_MIN_LONG = Long.fromNumber(constants.JS_INT_MIN);
 
-const functionCache = {};
+const functionCache: { [hash: string]: CodeFunction } = {};
 
 export function deserialize(
   buffer: Buffer,
@@ -88,14 +90,23 @@ export function deserialize(
   return deserializeObject(buffer, index, options, isArray);
 }
 
-function deserializeObject(buffer, index, options, isArray) {
+function deserializeObject(
+  buffer: Buffer,
+  index: number,
+  options: DeserializationOptions,
+  isArray = false
+) {
   const evalFunctions = options['evalFunctions'] == null ? false : options['evalFunctions'];
   const cacheFunctions = options['cacheFunctions'] == null ? false : options['cacheFunctions'];
   const cacheFunctionsCrc32 =
     options['cacheFunctionsCrc32'] == null ? false : options['cacheFunctionsCrc32'];
 
   let crc32;
-  if (!cacheFunctionsCrc32) crc32 = null;
+  if (!cacheFunctionsCrc32) {
+    crc32 = null;
+  } else {
+    crc32 = (v: string) => v; // FIXME(NODE-2770): This is a bug, hashing function is missing.
+  }
 
   const fieldsAsRaw = options['fieldsAsRaw'] == null ? null : options['fieldsAsRaw'];
 
@@ -124,7 +135,7 @@ function deserializeObject(buffer, index, options, isArray) {
   if (size < 5 || size > buffer.length) throw new Error('corrupt bson message');
 
   // Create holding object
-  const object = isArray ? [] : {};
+  const object: BSONDocument = isArray ? [] : {};
   // Used for arrays to skip having to perform utf8 decoding
   let arrayIndex = 0;
   const done = false;
@@ -240,7 +251,11 @@ function deserializeObject(buffer, index, options, isArray) {
       // All elements of array to be returned as raw bson
       if (fieldsAsRaw && fieldsAsRaw[name]) {
         arrayOptions = {};
-        for (const n in options) arrayOptions[n] = options[n];
+        for (const n in options) {
+          (arrayOptions as {
+            [key: string]: DeserializationOptions[keyof DeserializationOptions];
+          })[n] = options[n as keyof DeserializationOptions];
+        }
         arrayOptions['raw'] = true;
       }
 
@@ -484,7 +499,7 @@ function deserializeObject(buffer, index, options, isArray) {
       if (evalFunctions) {
         // If we have cache enabled let's look for the md5 of the function in the cache
         if (cacheFunctions) {
-          const hash = cacheFunctionsCrc32 ? crc32(functionString) : functionString;
+          const hash = cacheFunctionsCrc32 && crc32 ? crc32(functionString) : functionString;
           // Got to do this to avoid V8 deoptimizing the call due to finding eval
           object[name] = isolateEvalWithHash(functionCache, hash, functionString, object);
         } else {
@@ -553,7 +568,7 @@ function deserializeObject(buffer, index, options, isArray) {
       if (evalFunctions) {
         // If we have cache enabled let's look for the md5 of the function in the cache
         if (cacheFunctions) {
-          const hash = cacheFunctionsCrc32 ? crc32(functionString) : functionString;
+          const hash = cacheFunctionsCrc32 && crc32 ? crc32(functionString) : functionString;
           // Got to do this to avoid V8 deoptimizing the call due to finding eval
           object[name] = isolateEvalWithHash(functionCache, hash, functionString, object);
         } else {
@@ -624,7 +639,7 @@ function deserializeObject(buffer, index, options, isArray) {
   if (!valid) return object;
 
   if (isDBRefLike(object)) {
-    const copy = Object.assign({}, object);
+    const copy = Object.assign({}, object) as Partial<DBRefLike>;
     delete copy.$ref;
     delete copy.$id;
     delete copy.$db;
@@ -639,10 +654,15 @@ function deserializeObject(buffer, index, options, isArray) {
  *
  * @internal
  */
-function isolateEvalWithHash(functionCache, hash, functionString, object) {
+function isolateEvalWithHash(
+  functionCache: { [hash: string]: CodeFunction },
+  hash: string,
+  functionString: string,
+  object: BSONDocument
+) {
   // Check for cache hit, eval if missing and return cached function
   if (functionCache[hash] == null) {
-    functionCache[hash] = new Function(functionString);
+    functionCache[hash] = new Function(functionString) as CodeFunction;
   }
 
   // Set the object
@@ -654,6 +674,6 @@ function isolateEvalWithHash(functionCache, hash, functionString, object) {
  *
  * @internal
  */
-function isolateEval(functionString) {
-  return new Function(functionString);
+function isolateEval(functionString: string): CodeFunction {
+  return new Function(functionString) as CodeFunction;
 }

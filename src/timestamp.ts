@@ -4,7 +4,7 @@ type TimestampOverrides = '_bsontype' | 'toExtendedJSON' | 'fromExtendedJSON';
 type LongWithoutOverrides = new (low: number | Long, high?: number, unsigned?: boolean) => {
   [P in Exclude<keyof Long, TimestampOverrides>]: Long[P];
 };
-const LongWithoutOverridesClass: LongWithoutOverrides = Long;
+const LongWithoutOverridesClass: LongWithoutOverrides = (Long as unknown) as LongWithoutOverrides;
 
 export class Timestamp extends LongWithoutOverridesClass {
   _bsontype!: 'Timestamp';

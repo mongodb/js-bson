@@ -2,7 +2,7 @@
  * A class representation of the BSON MinKey type.
  */
 export class MinKey {
-  _bsontype!: 'MaxKey';
+  _bsontype!: 'MinKey';
 
   /** @internal */
   toExtendedJSON(): { $minKey: 1 } {

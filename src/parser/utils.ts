@@ -1,8 +1,10 @@
+import type { CodeFunction } from '../code';
+
 /**
  * Normalizes our expected stringified form of a function across versions of node
  * @param fn - The function to stringify
  */
-export function normalizedFunctionString(fn: (...args: unknown[]) => unknown): string {
+export function normalizedFunctionString(fn: CodeFunction): string {
   return fn.toString().replace('function(', 'function (');
 }
 
@@ -44,4 +46,18 @@ export function haveBuffer(): boolean {
 /** Callable in any environment to check if value is a Buffer */
 export function isBuffer(value: unknown): value is Buffer {
   return haveBuffer() && Buffer.isBuffer(value);
+}
+
+// To ensure that 0.4 of node works correctly
+export function isDate(d: unknown): d is Date {
+  return isObjectLike(d) && Object.prototype.toString.call(d) === '[object Date]';
+}
+
+/**
+ * @internal
+ * this is to solve the `'someKey' in x` problem where x is unknown.
+ * https://github.com/typescript-eslint/typescript-eslint/issues/1071#issuecomment-541955753
+ */
+export function isObjectLike(candidate: unknown): candidate is Record<string, unknown> {
+  return typeof candidate === 'object' && candidate !== null;
 }
