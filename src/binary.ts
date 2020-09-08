@@ -277,12 +277,16 @@ export class Binary {
 
   /** @internal */
   toJSON(): string {
-    return this.buffer != null ? this.buffer.toString('base64') : '';
+    if (!this.buffer) return '';
+    const buffer = Buffer.from(this.buffer as Uint8Array);
+    return buffer.toString('base64');
   }
 
   /** @internal */
   toString(format: BufferEncoding): string {
-    return this.buffer != null ? this.buffer.slice(0, this.position).toString(format) : '';
+    if (!this.buffer) return '';
+    const buffer = Buffer.from(this.buffer.slice(0, this.position) as Uint8Array);
+    return buffer.toString(format);
   }
 
   /** @internal */

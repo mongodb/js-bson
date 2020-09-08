@@ -115,7 +115,7 @@ function serializeNumber(
       buffer[index++] = 0;
       // Write float
       writeIEEE754(buffer, value, index, 'little', 52, 8);
-      // Ajust index
+      // Adjust index
       index = index + 8;
     } else {
       // Set long type
@@ -153,7 +153,7 @@ function serializeNumber(
     buffer[index++] = 0;
     // Write float
     writeIEEE754(buffer, value, index, 'little', 52, 8);
-    // Ajust index
+    // Adjust index
     index = index + 8;
   }
 

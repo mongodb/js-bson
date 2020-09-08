@@ -40,15 +40,19 @@ module.exports = function (config) {
       output: {
         format: 'iife',
         name: 'BSONtest',
-        sourcemap: true,
+        sourcemap: 'inline',
         exports: 'named'
+      },
+      onwarn(warning) {
+        if (warning.code === 'CIRCULAR_DEPENDENCY') return;
+        console.warn(warning.toString());
       }
     },
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress'],
+    reporters: ['mocha'],
 
     // web server port
     port: 9876,
@@ -79,6 +83,9 @@ module.exports = function (config) {
 
     // Concurrency level
     // how many browser should be started simultaneous
-    concurrency: 1
+    concurrency: 1,
+
+    // Console log print outs will be prefaced with `LOG:` for grep
+    client: { captureConsole: true }
   });
 };
