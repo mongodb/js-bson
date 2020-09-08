@@ -21,6 +21,10 @@ interface LongWASMHelpers {
  */
 let wasm: LongWASMHelpers | undefined = undefined;
 
+/* We do not want to have to include DOM types just for this check */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare const WebAssembly: any;
+
 try {
   wasm = (new WebAssembly.Instance(
     new WebAssembly.Module(

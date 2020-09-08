@@ -14,6 +14,7 @@ function insecureRandomBytes(size: number): Uint8Array {
   return result;
 }
 
+/* We do not want to have to include DOM types just for this check */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare let window: any;
 

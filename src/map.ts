@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // We have an ES6 Map available, return the native instance
 
+/* We do not want to have to include DOM types just for this check */
+declare const window: unknown;
+declare const self: unknown;
+
 let bsonMap: MapConstructor;
 
 const check = function (potentialGlobal: any) {
