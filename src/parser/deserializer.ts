@@ -643,7 +643,7 @@ function deserializeObject(
     delete copy.$ref;
     delete copy.$id;
     delete copy.$db;
-    return new DBRef(object.$ref, object.$id, object.$db || null, copy);
+    return new DBRef(object.$ref, object.$id, object.$db, copy);
   }
 
   return object;

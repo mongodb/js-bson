@@ -27,7 +27,7 @@ export class DBRef {
    * @param oid - the reference ObjectId.
    * @param db - optional db name, if omitted the reference is local to the current db.
    */
-  constructor(collection: string, oid: ObjectId, db?: string | null, fields?: BSONDocument) {
+  constructor(collection: string, oid: ObjectId, db?: string, fields?: BSONDocument) {
     // check if namespace has been provided
     const parts = collection.split('.');
     if (parts.length === 2) {
@@ -42,11 +42,14 @@ export class DBRef {
     this.fields = fields || {};
   }
 
-  // the 1.x parser used a "namespace" property, while 4.x uses "collection". To ensure backwards
-  // compatibility, let's expose "namespace"
+  // Property provided for compatibility with the 1.x parser
+  // the 1.x parser used a "namespace" property, while 4.x uses "collection"
+
+  /** @internal */
   get namespace(): string {
     return this.collection;
   }
+  /** @internal */
   set namespace(value: string) {
     this.collection = value;
   }

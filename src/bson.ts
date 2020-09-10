@@ -20,7 +20,11 @@ import { ObjectId } from './objectid';
 import { calculateObjectSize as internalCalculateObjectSize } from './parser/calculate_size';
 // Parts of the parser
 import { DeserializationOptions, deserialize as internalDeserialize } from './parser/deserializer';
-import { SerializationOptions, serializeInto as internalSerialize } from './parser/serializer';
+import {
+  SerializableTypes,
+  SerializationOptions,
+  serializeInto as internalSerialize
+} from './parser/serializer';
 import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
@@ -164,7 +168,7 @@ export function serialize(object: BSONDocument, options: SerializationOptions = 
  * @returns the index pointing to the last written byte in the buffer.
  */
 export function serializeWithBufferAndIndex(
-  object: BSONDocument,
+  object: SerializableTypes,
   finalBuffer: Buffer,
   options: SerializationOptions = {}
 ): number {

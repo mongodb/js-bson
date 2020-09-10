@@ -15,7 +15,11 @@ const CONTINUING_CHAR = 0x80;
  * @param start - The index to start validating
  * @param end - The index to end validating
  */
-export function validateUtf8(bytes: Buffer | Uint8Array, start: number, end: number): boolean {
+export function validateUtf8(
+  bytes: { [index: number]: number },
+  start: number,
+  end: number
+): boolean {
   let continuation = 0;
 
   for (let i = start; i < end; i += 1) {

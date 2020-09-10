@@ -6,6 +6,7 @@ import * as constants from '../constants';
 import type { DBRefLike } from '../db_ref';
 import type { Decimal128 } from '../decimal128';
 import type { Double } from '../double';
+import { isBSONType } from '../extended_json';
 import { writeIEEE754 } from '../float_parser';
 import type { Int32 } from '../int_32';
 import { Long } from '../long';
@@ -769,15 +770,18 @@ function serializeDBRef(
   return endIndex;
 }
 
+export type JSONPrimitive = string | number | boolean | null;
+export type SerializableTypes = BSONDocument | Array<JSONPrimitive | BSONDocument> | JSONPrimitive;
+
 export function serializeInto(
   buffer: Buffer,
-  object: BSONDocument,
+  object: any,
   checkKeys = false,
   startingIndex = 0,
   depth = 0,
   serializeFunctions = false,
   ignoreUndefined = true,
-  path: BSONDocument[] = []
+  path: any[] = []
 ): number {
   startingIndex = startingIndex || 0;
   path = path || [];
@@ -801,12 +805,11 @@ export function serializeInto(
         value = value.toBSON();
       }
 
-      const type = typeof value;
-      if (type === 'string') {
+      if (typeof value === 'string') {
         index = serializeString(buffer, key, value, index, true);
-      } else if (type === 'number') {
+      } else if (typeof value === 'number') {
         index = serializeNumber(buffer, key, value, index, true);
-      } else if (type === 'boolean') {
+      } else if (typeof value === 'boolean') {
         index = serializeBoolean(buffer, key, value, index, true);
       } else if (value instanceof Date || isDate(value)) {
         index = serializeDate(buffer, key, value, index, true);
@@ -820,7 +823,7 @@ export function serializeInto(
         index = serializeBuffer(buffer, key, value, index, true);
       } else if (value instanceof RegExp || isRegExp(value)) {
         index = serializeRegExp(buffer, key, value, index, true);
-      } else if (type === 'object' && value['_bsontype'] == null) {
+      } else if (typeof value === 'object' && value['_bsontype'] == null) {
         index = serializeObject(
           buffer,
           key,
@@ -833,7 +836,11 @@ export function serializeInto(
           true,
           path
         );
-      } else if (type === 'object' && value['_bsontype'] === 'Decimal128') {
+      } else if (
+        typeof value === 'object' &&
+        isBSONType(value) &&
+        value._bsontype === 'Decimal128'
+      ) {
         index = serializeDecimal128(buffer, key, value, index, true);
       } else if (value['_bsontype'] === 'Long' || value['_bsontype'] === 'Timestamp') {
         index = serializeLong(buffer, key, value, index, true);

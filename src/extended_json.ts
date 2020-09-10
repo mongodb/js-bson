@@ -42,7 +42,10 @@ export interface EJSONOptions {
   legacy?: boolean;
   /** Enable Extended JSON's `relaxed` mode, which attempts to return native JS types where possible, rather than BSON types */
   relaxed?: boolean;
-  /** Disable Extended JSON's `relaxed` mode, which attempts to return BSON types where possible, rather than native JS types */
+  /**
+   * Disable Extended JSON's `relaxed` mode, which attempts to return BSON types where possible, rather than native JS types
+   * @deprecated Please use the relaxed property instead
+   */
   strict?: boolean;
 }
 
@@ -313,7 +316,7 @@ const BSON_TYPE_MAPPINGS = {
     collection: string;
     namespace: string;
     oid: ObjectId;
-    db: string | null | undefined;
+    db: string | undefined;
     fields: BSONDocument | undefined;
   }) => new DBRef(o.collection || o.namespace, o.oid, o.db, o.fields), // "namespace" for 1.x library backwards compat
   Decimal128: (o: { bytes: Buffer }) => new Decimal128(o.bytes),
