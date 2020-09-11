@@ -41,16 +41,14 @@ path: $NVM_SYMLINK
 EOT
 
   nvm install ${NODE_VERSION}
-  nvm install 10.22.0 # install lts for compilation only
   nvm on
 else
   curl -o- $NVM_URL | bash
   [ -s "${NVM_DIR}/nvm.sh" ] && \. "${NVM_DIR}/nvm.sh"
 
   nvm install --no-progress ${NODE_VERSION}
-  nvm install --no-progress 10.22.0 # install lts for compilation only
 fi
-nvm use 10.22.0 # use lts for setup, runtime node can be different
+nvm use ${NODE_VERSION}
 
 # setup npm cache in a local directory
 cat <<EOT > .npmrc
@@ -62,5 +60,4 @@ registry=https://registry.npmjs.org
 EOT
 
 # install node dependencies
-npm install # npm prepare runs after install and will compile the library
-nvm use ${NODE_VERSION} # Switch to the node version we want to test against
+npm install

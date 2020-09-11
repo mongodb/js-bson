@@ -1,6 +1,8 @@
 'use strict';
 
-const BSON = require('../register-bson');
+const assert = require('assert');
+const expect = require('chai').expect;
+const BSON = require('../../lib/bson');
 const EJSON = BSON.EJSON;
 
 // BSON types
@@ -42,10 +44,10 @@ const OldBSON = getOldBSON();
 const OldObjectID = OldBSON === BSON ? BSON.ObjectId : OldBSON.ObjectID;
 const usingOldBSON = OldBSON !== BSON;
 
-describe('Extended JSON', function () {
+describe('Extended JSON', function() {
   let doc = {};
 
-  before(function () {
+  before(function() {
     const buffer = Buffer.alloc(64);
     for (var i = 0; i < buffer.length; i++) buffer[i] = i;
     const date = new Date();
@@ -76,23 +78,23 @@ describe('Extended JSON', function () {
     };
   });
 
-  it('should correctly extend an existing mongodb module', function () {
+  it('should correctly extend an existing mongodb module', function() {
     // Serialize the document
     var json =
       '{"_id":{"$numberInt":"100"},"gh":{"$numberInt":"1"},"binary":{"$binary":{"base64":"AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+Pw==","subType":"00"}},"date":{"$date":{"$numberLong":"1488372056737"}},"code":{"$code":"function() {}","$scope":{"a":{"$numberInt":"1"}}},"dbRef":{"$ref":"tests","$id":{"$numberInt":"1"},"$db":"test"},"decimal":{"$numberDecimal":"100"},"double":{"$numberDouble":"10.1"},"int32":{"$numberInt":"10"},"long":{"$numberLong":"200"},"maxKey":{"$maxKey":1},"minKey":{"$minKey":1},"objectId":{"$oid":"111111111111111111111111"},"objectID":{"$oid":"111111111111111111111111"},"oldObjectID":{"$oid":"111111111111111111111111"},"regexp":{"$regularExpression":{"pattern":"hello world","options":"i"}},"symbol":{"$symbol":"symbol"},"timestamp":{"$timestamp":{"t":0,"i":1000}},"int32Number":{"$numberInt":"300"},"doubleNumber":{"$numberDouble":"200.2"},"longNumberIntFit":{"$numberLong":"7036874417766400"},"doubleNumberIntFit":{"$numberLong":"19007199250000000"}}';
 
-    expect(json).to.equal(EJSON.stringify(doc, null, 0, { relaxed: false }));
+    assert.equal(json, EJSON.stringify(doc, null, 0, { relaxed: false }));
   });
 
-  it('should correctly deserialize using the default relaxed mode', function () {
+  it('should correctly deserialize using the default relaxed mode', function() {
     // Deserialize the document using non strict mode
     var doc1 = EJSON.parse(EJSON.stringify(doc, null, 0));
 
     // Validate the values
-    expect(300).to.equal(doc1.int32Number);
-    expect(200.2).to.equal(doc1.doubleNumber);
-    expect(0x19000000000000).to.equal(doc1.longNumberIntFit);
-    expect(19007199250000000.12).to.equal(doc1.doubleNumberIntFit);
+    assert.equal(300, doc1.int32Number);
+    assert.equal(200.2, doc1.doubleNumber);
+    assert.equal(0x19000000000000, doc1.longNumberIntFit);
+    assert.equal(19007199250000000.12, doc1.doubleNumberIntFit);
 
     // Deserialize the document using strict mode
     doc1 = EJSON.parse(EJSON.stringify(doc, null, 0), { relaxed: false });
@@ -104,7 +106,7 @@ describe('Extended JSON', function () {
     expect(doc1.doubleNumberIntFit._bsontype).to.equal('Long');
   });
 
-  it('should correctly serialize, and deserialize using built-in BSON', function () {
+  it('should correctly serialize, and deserialize using built-in BSON', function() {
     // Create a doc
     var doc1 = {
       int32: new Int32(10)
@@ -121,7 +123,7 @@ describe('Extended JSON', function () {
     expect(doc2.int32).to.equal(10);
   });
 
-  it('should correctly serialize bson types when they are values', function () {
+  it('should correctly serialize bson types when they are values', function() {
     var serialized = EJSON.stringify(new ObjectId('591801a468f9e7024b6235ea'), { relaxed: false });
     expect(serialized).to.equal('{"$oid":"591801a468f9e7024b6235ea"}');
     serialized = EJSON.stringify(new ObjectID('591801a468f9e7024b6235ea'), { relaxed: false });
@@ -157,17 +159,17 @@ describe('Extended JSON', function () {
     expect(serialized).to.equal('{"$binary":{"base64":"AQIDBAU=","subType":"00"}}');
   });
 
-  it('should correctly serialize strings', function () {
+  it('should correctly serialize strings', function() {
     const serialized = EJSON.stringify('new string');
     expect(serialized).to.equal('"new string"');
   });
 
-  it('should correctly serialize numbers', function () {
+  it('should correctly serialize numbers', function() {
     const serialized = EJSON.stringify(42);
     expect(serialized).to.equal('42');
   });
 
-  it('should correctly parse null values', function () {
+  it('should correctly parse null values', function() {
     expect(EJSON.parse('null')).to.be.null;
     expect(EJSON.parse('[null]')[0]).to.be.null;
 
@@ -179,13 +181,13 @@ describe('Extended JSON', function () {
     });
   });
 
-  it('should correctly throw when passed a non-string to parse', function () {
+  it('should correctly throw when passed a non-string to parse', function() {
     expect(() => {
       EJSON.parse({});
     }).to.throw;
   });
 
-  it('should allow relaxed parsing by default', function () {
+  it('should allow relaxed parsing by default', function() {
     const dt = new Date(1452124800000);
     const inputObject = {
       int: { $numberInt: '500' },
@@ -203,7 +205,7 @@ describe('Extended JSON', function () {
     });
   });
 
-  it('should allow regexp', function () {
+  it('should allow regexp', function() {
     const parsedRegExp = EJSON.stringify({ test: /some-regex/i });
     const parsedBSONRegExp = EJSON.stringify(
       { test: new BSONRegExp('some-regex', 'i') },
@@ -212,7 +214,7 @@ describe('Extended JSON', function () {
     expect(parsedRegExp).to.eql(parsedBSONRegExp);
   });
 
-  it('should serialize from BSON object to EJSON object', function () {
+  it('should serialize from BSON object to EJSON object', function() {
     const doc = {
       binary: new Binary(''),
       code: new Code('function() {}'),
@@ -251,7 +253,7 @@ describe('Extended JSON', function () {
     });
   });
 
-  it('should deserialize from EJSON object to BSON object', function () {
+  it('should deserialize from EJSON object to BSON object', function() {
     const doc = {
       binary: { $binary: { base64: '', subType: '00' } },
       code: { $code: 'function() {}' },
@@ -309,13 +311,13 @@ describe('Extended JSON', function () {
     expect(result.timestamp).to.be.an.instanceOf(BSON.Timestamp);
   });
 
-  it('should return a native number for a double in relaxed mode', function () {
+  it('should return a native number for a double in relaxed mode', function() {
     const result = EJSON.deserialize({ test: 34.12 }, { relaxed: true });
     expect(result.test).to.equal(34.12);
     expect(result.test).to.be.a('number');
   });
 
-  it('should work for function-valued and array-valued replacer parameters', function () {
+  it('should work for function-valued and array-valued replacer parameters', function() {
     const doc = { a: new Int32(10), b: new Int32(10) };
 
     var replacerArray = ['a', '$numberInt'];
@@ -325,7 +327,7 @@ describe('Extended JSON', function () {
     serialized = EJSON.stringify(doc, replacerArray);
     expect(serialized).to.equal('{"a":10}');
 
-    var replacerFunc = function (key, value) {
+    var replacerFunc = function(key, value) {
       return key === 'b' ? undefined : value;
     };
     serialized = EJSON.stringify(doc, replacerFunc, 0, { relaxed: false });
@@ -338,7 +340,7 @@ describe('Extended JSON', function () {
   if (!usingOldBSON) {
     it.skip('skipping 4.x/1.x interop tests', () => {});
   } else {
-    it('should interoperate 4.x with 1.x versions of this library', function () {
+    it('should interoperate 4.x with 1.x versions of this library', function() {
       const buffer = Buffer.alloc(64);
       for (var i = 0; i < buffer.length; i++) {
         buffer[i] = i;
@@ -442,7 +444,7 @@ describe('Extended JSON', function () {
 
     // Must special-case the test for MinKey, because of #310.  When #310 is fixed and is picked up
     // by mongodb-core, then remove this test case and uncomment the MinKey checks in the test case above
-    it('should interop with MinKey 1.x and 4.x, except the case that #310 breaks', function () {
+    it('should interop with MinKey 1.x and 4.x, except the case that #310 breaks', function() {
       if (!usingOldBSON) {
         it.skip('interop tests', () => {});
         return;
@@ -496,7 +498,7 @@ describe('Extended JSON', function () {
     });
   }
 
-  it('should throw if invalid BSON types are input to EJSON serializer', function () {
+  it('should throw if invalid BSON types are input to EJSON serializer', function() {
     const oid = new ObjectId('111111111111111111111111');
     const badBsonType = Object.assign({}, oid, { _bsontype: 'bogus' });
     const badDoc = { bad: badBsonType };
@@ -507,10 +509,10 @@ describe('Extended JSON', function () {
     // expect(() => EJSON.serialize(badMap)).to.throw(); // uncomment when EJSON supports ES6 Map
   });
 
-  context('when dealing with legacy extended json', function () {
-    describe('.stringify', function () {
-      context('when serializing binary', function () {
-        it('stringifies $binary and $type', function () {
+  context('when dealing with legacy extended json', function() {
+    describe('.stringify', function() {
+      context('when serializing binary', function() {
+        it('stringifies $binary and $type', function() {
           const binary = new Binary(new Uint8Array([1, 2, 3, 4, 5]));
           const doc = { field: binary };
           const json = EJSON.stringify(doc, { legacy: true });
@@ -518,9 +520,9 @@ describe('Extended JSON', function () {
         });
       });
 
-      context('when serializing date', function () {
-        context('when using strict mode', function () {
-          it('stringifies $date with with ISO-8601 string', function () {
+      context('when serializing date', function() {
+        context('when using strict mode', function() {
+          it('stringifies $date with with ISO-8601 string', function() {
             const date = new Date(1452124800000);
             const doc = { field: date };
             const json = EJSON.stringify(doc, { legacy: true, relaxed: false });
@@ -528,8 +530,8 @@ describe('Extended JSON', function () {
           });
         });
 
-        context('when using relaxed mode', function () {
-          it('stringifies $date with with millis since epoch', function () {
+        context('when using relaxed mode', function() {
+          it('stringifies $date with with millis since epoch', function() {
             const date = new Date(1452124800000);
             const doc = { field: date };
             const json = EJSON.stringify(doc, { legacy: true, relaxed: true });
@@ -538,8 +540,8 @@ describe('Extended JSON', function () {
         });
       });
 
-      context('when serializing regex', function () {
-        it('stringifies $regex and $options', function () {
+      context('when serializing regex', function() {
+        it('stringifies $regex and $options', function() {
           const regexp = new BSONRegExp('hello world', 'i');
           const doc = { field: regexp };
           const json = EJSON.stringify(doc, { legacy: true });
@@ -547,8 +549,8 @@ describe('Extended JSON', function () {
         });
       });
 
-      context('when serializing dbref', function () {
-        it('stringifies $ref and $id', function () {
+      context('when serializing dbref', function() {
+        it('stringifies $ref and $id', function() {
           const dbRef = new DBRef('tests', new Int32(1));
           const doc = { field: dbRef };
           const json = EJSON.stringify(doc, { legacy: true });
@@ -556,8 +558,8 @@ describe('Extended JSON', function () {
         });
       });
 
-      context('when serializing dbref', function () {
-        it('stringifies $ref and $id', function () {
+      context('when serializing dbref', function() {
+        it('stringifies $ref and $id', function() {
           const dbRef = new DBRef('tests', new Int32(1));
           const doc = { field: dbRef };
           const json = EJSON.stringify(doc, { legacy: true });
@@ -565,8 +567,8 @@ describe('Extended JSON', function () {
         });
       });
 
-      context('when serializing int32', function () {
-        it('stringifies the number', function () {
+      context('when serializing int32', function() {
+        it('stringifies the number', function() {
           const int32 = new Int32(1);
           const doc = { field: int32 };
           const json = EJSON.stringify(doc, { legacy: true });
@@ -574,8 +576,8 @@ describe('Extended JSON', function () {
         });
       });
 
-      context('when serializing double', function () {
-        it('stringifies the number', function () {
+      context('when serializing double', function() {
+        it('stringifies the number', function() {
           const doub = new Double(1.1);
           const doc = { field: doub };
           const json = EJSON.stringify(doc, { legacy: true });
@@ -584,9 +586,9 @@ describe('Extended JSON', function () {
       });
     });
 
-    describe('.parse', function () {
-      context('when deserializing binary', function () {
-        it('parses $binary and $type', function () {
+    describe('.parse', function() {
+      context('when deserializing binary', function() {
+        it('parses $binary and $type', function() {
           const binary = new Binary(new Uint8Array([1, 2, 3, 4, 5]));
           const doc = { field: binary };
           const bson = EJSON.parse('{"field":{"$binary":"AQIDBAU=","$type":"00"}}', {
@@ -596,9 +598,9 @@ describe('Extended JSON', function () {
         });
       });
 
-      context('when deserializing date', function () {
-        context('when using strict mode', function () {
-          it('parses $date with with ISO-8601 string', function () {
+      context('when deserializing date', function() {
+        context('when using strict mode', function() {
+          it('parses $date with with ISO-8601 string', function() {
             const date = new Date(1452124800000);
             const doc = { field: date };
             const bson = EJSON.parse('{"field":{"$date":"2016-01-07T00:00:00Z"}}', {
@@ -609,8 +611,8 @@ describe('Extended JSON', function () {
           });
         });
 
-        context('when using relaxed mode', function () {
-          it('parses $date number with millis since epoch', function () {
+        context('when using relaxed mode', function() {
+          it('parses $date number with millis since epoch', function() {
             const date = new Date(1452124800000);
             const doc = { field: date };
             const bson = EJSON.parse('{"field":{"$date":1452124800000}}', {
@@ -622,8 +624,8 @@ describe('Extended JSON', function () {
         });
       });
 
-      context('when deserializing regex', function () {
-        it('parses $regex and $options', function () {
+      context('when deserializing regex', function() {
+        it('parses $regex and $options', function() {
           const regexp = new BSONRegExp('hello world', 'i');
           const doc = { field: regexp };
           const bson = EJSON.parse('{"field":{"$regex":"hello world","$options":"i"}}', {
@@ -633,8 +635,8 @@ describe('Extended JSON', function () {
         });
       });
 
-      context('when deserializing dbref', function () {
-        it('parses $ref and $id', function () {
+      context('when deserializing dbref', function() {
+        it('parses $ref and $id', function() {
           const dbRef = new DBRef('tests', 1);
           const doc = { field: dbRef };
           const bson = EJSON.parse('{"field":{"$ref":"tests","$id":1}}', {
@@ -644,34 +646,34 @@ describe('Extended JSON', function () {
         });
       });
 
-      context('when deserializing int32', function () {
-        it('parses the number', function () {
+      context('when deserializing int32', function() {
+        it('parses the number', function() {
           const doc = { field: 1 };
           const bson = EJSON.parse('{"field":1}', { legacy: true });
           expect(bson).to.deep.equal(doc);
         });
 
-        it('parses the numberInt without doc', function () {
+        it('parses the numberInt without doc', function() {
           const value = 1;
           const bson = EJSON.parse('{ "$numberInt": "1" }');
           expect(bson).to.deep.equal(value);
         });
 
-        it('parses the numberInt', function () {
+        it('parses the numberInt', function() {
           const doc = { field: 1 };
           const bson = EJSON.parse('{"field": {"$numberInt": "1"}}');
           expect(bson).to.deep.equal(doc);
         });
 
-        it('parses the numberInt and stringify', function () {
+        it('parses the numberInt and stringify', function() {
           const doc = { field: 1 };
           const bson = EJSON.parse('{"field": {"$numberInt": "1"}}');
           expect(EJSON.stringify(bson)).to.deep.equal(JSON.stringify(doc));
         });
       });
 
-      context('when deserializing double', function () {
-        it('parses the number', function () {
+      context('when deserializing double', function() {
+        it('parses the number', function() {
           const doc = { field: 1.1 };
           const bson = EJSON.parse('{"field":1.1}', { legacy: true });
           expect(bson).to.deep.equal(doc);

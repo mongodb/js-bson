@@ -15,11 +15,3 @@ builderror.log
 
 bson.sublime-project
 bson.sublime-workspace
-
-lib
-types/
-.nyc_output/
-coverage/
-*.d.ts
-*.tgz
-docs/public

@@ -1,13 +1,14 @@
 'use strict';
 
-const BSON = require('../register-bson');
+const BSON = require('../../lib/bson');
 const ObjectId = BSON.ObjectId;
+const expect = require('chai').expect;
 
-describe('toBSON', function () {
+describe('toBSON', function() {
   /**
    * @ignore
    */
-  it('Should correctly handle toBson function for an object', function (done) {
+  it('Should correctly handle toBson function for an object', function(done) {
     // Test object
     var doc = {
       hello: new ObjectId(),
@@ -15,7 +16,7 @@ describe('toBSON', function () {
     };
 
     // Add a toBson method to the object
-    doc.toBSON = function () {
+    doc.toBSON = function() {
       return { b: 1 };
     };
 
@@ -34,7 +35,7 @@ describe('toBSON', function () {
   /**
    * @ignore
    */
-  it('Should correctly handle embedded toBson function for an object', function (done) {
+  it('Should correctly handle embedded toBson function for an object', function(done) {
     // Test object
     var doc = {
       hello: new ObjectId(),
@@ -45,7 +46,7 @@ describe('toBSON', function () {
     };
 
     // Add a toBson method to the object
-    doc.b.toBSON = function () {
+    doc.b.toBSON = function() {
       return { e: 1 };
     };
 
@@ -63,7 +64,7 @@ describe('toBSON', function () {
   /**
    * @ignore
    */
-  it('Should correctly serialize when embedded non object returned by toBSON', function (done) {
+  it('Should correctly serialize when embedded non object returned by toBSON', function(done) {
     // Test object
     var doc = {
       hello: new ObjectId(),
@@ -74,7 +75,7 @@ describe('toBSON', function () {
     };
 
     // Add a toBson method to the object
-    doc.b.toBSON = function () {
+    doc.b.toBSON = function() {
       return 'hello';
     };
 
@@ -93,7 +94,7 @@ describe('toBSON', function () {
   /**
    * @ignore
    */
-  it('Should fail when top level object returns a non object type', function (done) {
+  it('Should fail when top level object returns a non object type', function(done) {
     // Test object
     var doc = {
       hello: new ObjectId(),
@@ -104,7 +105,7 @@ describe('toBSON', function () {
     };
 
     // Add a toBson method to the object
-    doc.toBSON = function () {
+    doc.toBSON = function() {
       return 'hello';
     };
 

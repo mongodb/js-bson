@@ -1,12 +1,13 @@
 'use strict';
 
-const BSON = require('../register-bson');
+const BSON = require('../../lib/bson');
+const expect = require('chai').expect;
 
-describe('Cyclic Dependencies', function () {
+describe('Cyclic Dependencies', function() {
   /**
    * @ignore
    */
-  it('Should correctly detect cyclic dependency in nested objects', function (done) {
+  it('Should correctly detect cyclic dependency in nested objects', function(done) {
     // Force cyclic dependency
     var a = { b: {} };
     a.b.c = a;
@@ -23,7 +24,7 @@ describe('Cyclic Dependencies', function () {
   /**
    * @ignore
    */
-  it('Should correctly detect cyclic dependency in deeploy nested objects', function (done) {
+  it('Should correctly detect cyclic dependency in deeploy nested objects', function(done) {
     // Force cyclic dependency
     var a = { b: { c: [{ d: {} }] } };
     a.b.c[0].d.a = a;
@@ -41,7 +42,7 @@ describe('Cyclic Dependencies', function () {
   /**
    * @ignore
    */
-  it('Should correctly detect cyclic dependency in nested array', function (done) {
+  it('Should correctly detect cyclic dependency in nested array', function(done) {
     // Force cyclic dependency
     var a = { b: {} };
     a.b.c = [a];

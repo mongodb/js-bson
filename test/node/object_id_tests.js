@@ -1,15 +1,16 @@
 'use strict';
 
 const Buffer = require('buffer').Buffer;
-const BSON = require('../register-bson');
+const BSON = require('../../lib/bson');
 const util = require('util');
 const ObjectId = BSON.ObjectId;
+const expect = require('chai').expect;
 
-describe('ObjectId', function () {
+describe('ObjectId', function() {
   /**
    * @ignore
    */
-  it('should correctly handle objectId timestamps', function (done) {
+  it('should correctly handle objectId timestamps', function(done) {
     // var test_number = {id: ObjectI()};
     var a = ObjectId.createFromTime(1);
     expect(Buffer.from([0, 0, 0, 1])).to.deep.equal(a.id.slice(0, 4));
@@ -27,7 +28,7 @@ describe('ObjectId', function () {
   /**
    * @ignore
    */
-  it('should correctly create ObjectId from uppercase hexstring', function (done) {
+  it('should correctly create ObjectId from uppercase hexstring', function(done) {
     var a = 'AAAAAAAAAAAAAAAAAAAAAAAA';
     var b = new ObjectId(a);
     var c = b.equals(a); // => false
@@ -45,7 +46,7 @@ describe('ObjectId', function () {
   /**
    * @ignore
    */
-  it('should correctly create ObjectId from Buffer', function (done) {
+  it('should correctly create ObjectId from Buffer', function(done) {
     if (!Buffer.from) return done();
     var a = 'AAAAAAAAAAAAAAAAAAAAAAAA';
     var b = new ObjectId(Buffer.from(a, 'hex'));
@@ -63,7 +64,7 @@ describe('ObjectId', function () {
   /**
    * @ignore
    */
-  it('should correctly allow for node.js inspect to work with ObjectId', function (done) {
+  it('should correctly allow for node.js inspect to work with ObjectId', function(done) {
     var a = 'AAAAAAAAAAAAAAAAAAAAAAAA';
     var b = new ObjectId(a);
     util.inspect(b);
@@ -83,7 +84,7 @@ describe('ObjectId', function () {
   /**
    * @ignore
    */
-  it('should isValid check input Buffer length', function (done) {
+  it('should isValid check input Buffer length', function(done) {
     var buffTooShort = Buffer.from([]);
     var buffTooLong = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
     var buff12Bytes = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
@@ -94,12 +95,12 @@ describe('ObjectId', function () {
     done();
   });
 
-  it('should throw if a 12-char string is passed in with character codes greater than 256', function () {
+  it('should throw if a 12-char string is passed in with character codes greater than 256', function() {
     expect(() => new ObjectId('abcdefghijkl').toHexString()).to.not.throw();
     expect(() => new ObjectId('abcdefŽhijkl').toHexString()).to.throw(TypeError);
   });
 
-  it('should correctly interpret timestamps beyond 2038', function () {
+  it('should correctly interpret timestamps beyond 2038', function() {
     var farFuture = new Date('2040-01-01T00:00:00.000Z').getTime();
     expect(
       new BSON.ObjectId(BSON.ObjectId.generate(farFuture / 1000)).getTimestamp().getTime()

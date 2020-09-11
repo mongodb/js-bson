@@ -1,6 +1,6 @@
 'use strict';
 
-exports.assertArrayEqual = function (array1, array2) {
+exports.assertArrayEqual = function(array1, array2) {
   if (array1.length !== array2.length) return false;
   for (var i = 0; i < array1.length; i++) {
     if (array1[i] !== array2[i]) return false;
@@ -10,7 +10,7 @@ exports.assertArrayEqual = function (array1, array2) {
 };
 
 // String to arraybuffer
-exports.stringToArrayBuffer = function (string) {
+exports.stringToArrayBuffer = function(string) {
   var dataBuffer = new Uint8Array(new ArrayBuffer(string.length));
   // Return the strings
   for (var i = 0; i < string.length; i++) {
@@ -21,7 +21,7 @@ exports.stringToArrayBuffer = function (string) {
 };
 
 // String to arraybuffer
-exports.stringToArray = function (string) {
+exports.stringToArray = function(string) {
   var dataBuffer = new Array(string.length);
   // Return the strings
   for (var i = 0; i < string.length; i++) {
@@ -33,7 +33,7 @@ exports.stringToArray = function (string) {
 
 exports.Utf8 = {
   // public method for url encoding
-  encode: function (string) {
+  encode: function(string) {
     string = string.replace(/\r\n/g, '\n');
     var utftext = '';
 
@@ -55,7 +55,7 @@ exports.Utf8 = {
   },
 
   // public method for url decoding
-  decode: function (utftext) {
+  decode: function(utftext) {
     var string = '';
     var i = 0;
     var c = 0,
@@ -82,7 +82,8 @@ exports.Utf8 = {
   }
 };
 
-exports.assertBuffersEqual = function (done, buffer1, buffer2) {
+exports.assertBuffersEqual = function(done, buffer1, buffer2) {
+  const expect = require('chai').expect;
   if (buffer1.length !== buffer2.length) {
     done('Buffers do not have the same length', buffer1, buffer2);
   }
