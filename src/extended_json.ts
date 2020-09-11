@@ -158,7 +158,7 @@ function deserializeValue(value: any, options: EJSONOptions = {}) {
  * console.log(EJSON.parse(text));
  * ```
  */
-export function parse(text: string, options?: EJSONOptions): BSONDocument {
+export function parse(text: string, options?: EJSONOptions): SerializableTypes {
   const finalOptions = Object.assign({}, { relaxed: true, legacy: false }, options);
 
   // relaxed implies not strict
@@ -173,6 +173,9 @@ const BSON_INT32_MAX = 0x7fffffff;
 const BSON_INT32_MIN = -0x80000000;
 const BSON_INT64_MAX = 0x7fffffffffffffff;
 const BSON_INT64_MIN = -0x8000000000000000;
+
+export type JSONPrimitive = string | number | boolean | null;
+export type SerializableTypes = BSONDocument | Array<JSONPrimitive | BSONDocument> | JSONPrimitive;
 
 /**
  * Converts a BSON document to an Extended JSON string, optionally replacing values if a replacer
@@ -197,10 +200,10 @@ const BSON_INT64_MIN = -0x8000000000000000;
  * console.log(EJSON.stringify(doc));
  * ```
  */
-export function stringify(value: BSONDocument): string;
-export function stringify(value: BSONDocument, options?: EJSONOptions): string;
+export function stringify(value: SerializableTypes): string;
+export function stringify(value: SerializableTypes, options?: EJSONOptions): string;
 export function stringify(
-  value: BSONDocument,
+  value: SerializableTypes,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   replacer?: (number | string)[] | ((this: any, key: string, value: any) => any) | EJSONOptions,
   space?: string | number,
@@ -227,7 +230,7 @@ export function stringify(
  * @param value - The object to serialize
  * @param options - Optional settings passed to the `stringify` function
  */
-export function serialize(value: BSONDocument, options?: EJSONOptions): EJSONDocument {
+export function serialize(value: SerializableTypes, options?: EJSONOptions): EJSONDocument {
   options = options || {};
   return JSON.parse(stringify(value, options));
 }
@@ -238,7 +241,7 @@ export function serialize(value: BSONDocument, options?: EJSONOptions): EJSONDoc
  * @param ejson - The Extended JSON object to deserialize
  * @param options - Optional settings passed to the parse method
  */
-export function deserialize(ejson: EJSONDocument, options?: EJSONOptions): BSONDocument {
+export function deserialize(ejson: EJSONDocument, options?: EJSONOptions): SerializableTypes {
   options = options || {};
   return parse(JSON.stringify(ejson), options);
 }

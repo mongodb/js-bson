@@ -770,18 +770,15 @@ function serializeDBRef(
   return endIndex;
 }
 
-export type JSONPrimitive = string | number | boolean | null;
-export type SerializableTypes = BSONDocument | Array<JSONPrimitive | BSONDocument> | JSONPrimitive;
-
 export function serializeInto(
   buffer: Buffer,
-  object: any,
+  object: BSONDocument,
   checkKeys = false,
   startingIndex = 0,
   depth = 0,
   serializeFunctions = false,
   ignoreUndefined = true,
-  path: any[] = []
+  path: BSONDocument[] = []
 ): number {
   startingIndex = startingIndex || 0;
   path = path || [];
