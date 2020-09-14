@@ -71,6 +71,16 @@ functions:
           ${PREPARE_SHELL}
           echo "NODE_VERSION=${NODE_VERSION} TEST_TARGET=${TEST_TARGET}"
           NODE_VERSION=${NODE_VERSION} ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh ${TEST_TARGET}
+  run checks:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          ${PREPARE_SHELL}
+          echo "NODE_VERSION=${NODE_VERSION} TEST_TARGET=${TEST_TARGET}"
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-checks.sh
+
 
 tasks:
   - name: node-tests-v6
@@ -133,6 +143,15 @@ tasks:
       - func: run tests
         vars:
           TEST_TARGET: browser
+  - name: run-checks
+    tags:
+      - run-checks
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 12
+      - func: install dependencies
+      - func: run checks
 
 buildvariants:
   - name: linux
@@ -147,3 +166,8 @@ buildvariants:
     display_name: Windows 64
     run_on: windows-64-vsMulti-small
     tasks: [".node"]
+  - name: lint
+    display_name: lint
+    run_on: rhel70
+    tasks:
+      - run-checks

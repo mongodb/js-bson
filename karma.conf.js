@@ -1,58 +1,70 @@
-'use strict';
-
-const scenariosPlugin = require('./tools/scenarios-plugin');
-const jsonPlugin = require('rollup-plugin-json');
+const { scenariosPlugin } = require('./tools/scenarios-plugin');
+const commonjs = require('@rollup/plugin-commonjs');
+const { nodeResolve } = require('@rollup/plugin-node-resolve');
 const nodeGlobals = require('rollup-plugin-node-globals');
-const nodeBuiltins = require('rollup-plugin-node-builtins');
-const commonjs = require('rollup-plugin-commonjs');
-const nodeResolve = require('rollup-plugin-node-resolve');
+const nodePolyfills = require('rollup-plugin-node-polyfills');
+const jsonPlugin = require('@rollup/plugin-json');
 
-const rollupPlugins = [
-  scenariosPlugin(),
-  nodeResolve({
-    browser: true,
-    preferBuiltins: false
-  }),
-  commonjs({
-    namedExports: {
-      'node_modules/buffer/index.js': ['isBuffer']
-    }
-  }),
-  nodeBuiltins(),
-  nodeGlobals(),
-  jsonPlugin()
-];
-
-const rollupConfig = {
-  plugins: rollupPlugins,
-  output: {
-    format: 'iife',
-    name: 'BSONtest',
-    exports: 'named'
-  }
-};
-
-const onwarn = warning => {
-  if (warning.code === 'CIRCULAR_DEPENDENCY' || warning.code === 'EVAL') return;
-  console.warn(warning.toString());
-};
-
-rollupConfig.onwarn = onwarn;
-
-module.exports = function(config) {
+module.exports = function (config) {
   config.set({
+    // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
-    frameworks: ['mocha'],
-    reporters: ['mocha'],
+
+    // frameworks to use
+    // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
+    frameworks: ['mocha', 'chai'],
+
+    // list of files / patterns to load in the browser
     files: [{ pattern: 'test/node/!(bson_node_only_tests).js', watched: false }],
+
+    // list of files / patterns to exclude
+    exclude: ['src/**/*.ts'],
+
+    // preprocess matching files before serving them to the browser
+    // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'test/node/!(bson_node_only_tests).js': 'rollup'
+      'test/node/!(bson_node_only_tests).js': ['rollup']
     },
-    rollupPreprocessor: rollupConfig,
+
+    rollupPreprocessor: {
+      plugins: [
+        scenariosPlugin(),
+        nodeResolve({
+          preferBuiltins: false
+        }),
+        commonjs(),
+        nodePolyfills(),
+        nodeGlobals(),
+        jsonPlugin()
+      ],
+      output: {
+        format: 'iife',
+        name: 'BSONtest',
+        sourcemap: true,
+        exports: 'named'
+      }
+    },
+
+    // test results reporter to use
+    // possible values: 'dots', 'progress'
+    // available reporters: https://npmjs.org/browse/keyword/karma-reporter
+    reporters: ['progress'],
+
+    // web server port
     port: 9876,
+
+    // enable / disable colors in the output (reporters and logs)
     colors: true,
+
+    // level of logging
+    // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
     logLevel: config.LOG_INFO,
-    autoWatch: true,
+
+    // enable / disable watching file and executing tests whenever any file changes
+    autoWatch: false,
+
+    // start these browsers
+    // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     browsers: ['ChromeHeadlessNoSandbox'],
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
@@ -60,7 +72,13 @@ module.exports = function(config) {
         flags: ['--no-sandbox']
       }
     },
+
+    // Continuous Integration mode
+    // if true, Karma captures browsers, runs the tests and exits
     singleRun: true,
-    concurrency: Infinity
+
+    // Concurrency level
+    // how many browser should be started simultaneous
+    concurrency: 1
   });
 };

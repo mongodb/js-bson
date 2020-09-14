@@ -1,32 +1,16 @@
 'use strict';
 
 const Buffer = require('buffer').Buffer;
-const BSON = require('../../lib/bson');
+const BSON = require('../register-bson');
 const Int32 = BSON.Int32;
 const Double = BSON.Double;
 const BinaryParser = require('../binary_parser').BinaryParser;
-const expect = require('chai').expect;
 
-// for tests
-BSON.BSON_BINARY_SUBTYPE_DEFAULT = 0;
-BSON.BSON_BINARY_SUBTYPE_FUNCTION = 1;
-BSON.BSON_BINARY_SUBTYPE_BYTE_ARRAY = 2;
-BSON.BSON_BINARY_SUBTYPE_UUID = 3;
-BSON.BSON_BINARY_SUBTYPE_MD5 = 4;
-BSON.BSON_BINARY_SUBTYPE_USER_DEFINED = 128;
-
-BSON.BSON_BINARY_SUBTYPE_DEFAULT = 0;
-BSON.BSON_BINARY_SUBTYPE_FUNCTION = 1;
-BSON.BSON_BINARY_SUBTYPE_BYTE_ARRAY = 2;
-BSON.BSON_BINARY_SUBTYPE_UUID = 3;
-BSON.BSON_BINARY_SUBTYPE_MD5 = 4;
-BSON.BSON_BINARY_SUBTYPE_USER_DEFINED = 128;
-
-describe('promote values', function() {
+describe('promote values', function () {
   /**
    * @ignore
    */
-  it('Should Correctly Deserialize object with all wrapper types', function(done) {
+  it('Should Correctly Deserialize object with all wrapper types', function (done) {
     var bytes = [
       26,
       1,
