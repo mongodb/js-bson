@@ -1,4 +1,4 @@
-import type { BSONDocument } from './bson';
+import type { Document } from './bson';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type CodeFunction = (...args: any[]) => any;
@@ -8,23 +8,23 @@ export class Code {
   _bsontype!: 'Code';
 
   code: string | CodeFunction;
-  scope?: BSONDocument;
+  scope?: Document;
   /**
    * @param code - a string or function.
    * @param scope - an optional scope for the function.
    */
-  constructor(code: string | CodeFunction, scope?: BSONDocument) {
+  constructor(code: string | CodeFunction, scope?: Document) {
     this.code = code;
     this.scope = scope;
   }
 
   /** @internal */
-  toJSON(): { code: string | CodeFunction; scope?: BSONDocument } {
+  toJSON(): { code: string | CodeFunction; scope?: Document } {
     return { code: this.code, scope: this.scope };
   }
 
   /** @internal */
-  toExtendedJSON(): { $code: string | CodeFunction; $scope?: BSONDocument } {
+  toExtendedJSON(): { $code: string | CodeFunction; $scope?: Document } {
     if (this.scope) {
       return { $code: this.code, $scope: this.scope };
     }
@@ -33,7 +33,7 @@ export class Code {
   }
 
   /** @internal */
-  static fromExtendedJSON(doc: { $code: string | CodeFunction; $scope?: BSONDocument }): Code {
+  static fromExtendedJSON(doc: { $code: string | CodeFunction; $scope?: Document }): Code {
     return new Code(doc.$code, doc.$scope);
   }
 }

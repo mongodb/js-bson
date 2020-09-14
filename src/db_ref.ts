@@ -1,4 +1,4 @@
-import type { BSONDocument } from './bson';
+import type { Document } from './bson';
 import type { EJSONOptions } from './extended_json';
 import type { ObjectId } from './objectid';
 import { isObjectLike } from './parser/utils';
@@ -20,14 +20,14 @@ export class DBRef {
   collection: string;
   oid: ObjectId;
   db?: string;
-  fields: BSONDocument;
+  fields: Document;
 
   /**
    * @param collection - the collection name.
    * @param oid - the reference ObjectId.
    * @param db - optional db name, if omitted the reference is local to the current db.
    */
-  constructor(collection: string, oid: ObjectId, db?: string, fields?: BSONDocument) {
+  constructor(collection: string, oid: ObjectId, db?: string, fields?: Document) {
     // check if namespace has been provided
     const parts = collection.split('.');
     if (parts.length === 2) {
@@ -55,7 +55,7 @@ export class DBRef {
   }
 
   /** @internal */
-  toJSON(): DBRefLike & BSONDocument {
+  toJSON(): DBRefLike & Document {
     const o = Object.assign(
       {
         $ref: this.collection,

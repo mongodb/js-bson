@@ -1,11 +1,11 @@
 import { Buffer } from 'buffer';
 import { Binary } from '../binary';
-import type { BSONDocument } from '../bson';
+import type { Document } from '../bson';
 import * as constants from '../constants';
 import { isDate, normalizedFunctionString } from './utils';
 
 export function calculateObjectSize(
-  object: BSONDocument,
+  object: Document,
   serializeFunctions?: boolean,
   ignoreUndefined?: boolean
 ): number {

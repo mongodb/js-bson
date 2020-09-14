@@ -1,5 +1,5 @@
 import { Binary } from './binary';
-import type { BSONDocument } from './bson';
+import type { Document } from './bson';
 import { Code } from './code';
 import { DBRef } from './db_ref';
 import { Decimal128 } from './decimal128';
@@ -34,8 +34,6 @@ export function isBSONType(value: unknown): value is BSONType {
     isObjectLike(value) && Reflect.has(value, '_bsontype') && typeof value._bsontype === 'string'
   );
 }
-
-export type EJSONDocument = { [key: string]: ReturnType<BSONType['toExtendedJSON']> };
 
 export interface EJSONOptions {
   /** Output using the Extended JSON v1 spec */
@@ -175,7 +173,7 @@ const BSON_INT64_MAX = 0x7fffffffffffffff;
 const BSON_INT64_MIN = -0x8000000000000000;
 
 export type JSONPrimitive = string | number | boolean | null;
-export type SerializableTypes = BSONDocument | Array<JSONPrimitive | BSONDocument> | JSONPrimitive;
+export type SerializableTypes = Document | Array<JSONPrimitive | Document> | JSONPrimitive;
 
 /**
  * Converts a BSON document to an Extended JSON string, optionally replacing values if a replacer
@@ -230,7 +228,7 @@ export function stringify(
  * @param value - The object to serialize
  * @param options - Optional settings passed to the `stringify` function
  */
-export function serialize(value: SerializableTypes, options?: EJSONOptions): EJSONDocument {
+export function serialize(value: SerializableTypes, options?: EJSONOptions): Document {
   options = options || {};
   return JSON.parse(stringify(value, options));
 }
@@ -241,7 +239,7 @@ export function serialize(value: SerializableTypes, options?: EJSONOptions): EJS
  * @param ejson - The Extended JSON object to deserialize
  * @param options - Optional settings passed to the parse method
  */
-export function deserialize(ejson: EJSONDocument, options?: EJSONOptions): SerializableTypes {
+export function deserialize(ejson: Document, options?: EJSONOptions): SerializableTypes {
   options = options || {};
   return parse(JSON.stringify(ejson), options);
 }
@@ -344,7 +342,7 @@ function serializeDocument(doc: any, options: EJSONOptions) {
   const bsontype: BSONType['_bsontype'] = doc._bsontype;
   if (typeof bsontype === 'undefined') {
     // It's a regular object. Recursively serialize its property values.
-    const _doc: BSONDocument = {};
+    const _doc: Document = {};
     for (const name in doc) {
       _doc[name] = serializeValue(doc[name], options);
     }

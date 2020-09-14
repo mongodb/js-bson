@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 import { Binary } from '../binary';
-import type { BSONDocument, BSONSymbol, DBRef, MaxKey } from '../bson';
+import type { BSONSymbol, DBRef, Document, MaxKey } from '../bson';
 import type { Code, CodeFunction } from '../code';
 import * as constants from '../constants';
 import type { DBRefLike } from '../db_ref';
@@ -386,14 +386,14 @@ function serializeBuffer(
 function serializeObject(
   buffer: Buffer,
   key: string,
-  value: BSONDocument,
+  value: Document,
   index: number,
   checkKeys = false,
   depth = 0,
   serializeFunctions = false,
   ignoreUndefined = true,
   isArray = false,
-  path: BSONDocument[] = []
+  path: Document[] = []
 ) {
   for (let i = 0; i < path.length; i++) {
     if (path[i] === value) throw new Error('cyclic dependency detected');
@@ -772,13 +772,13 @@ function serializeDBRef(
 
 export function serializeInto(
   buffer: Buffer,
-  object: BSONDocument,
+  object: Document,
   checkKeys = false,
   startingIndex = 0,
   depth = 0,
   serializeFunctions = false,
   ignoreUndefined = true,
-  path: BSONDocument[] = []
+  path: Document[] = []
 ): number {
   startingIndex = startingIndex || 0;
   path = path || [];

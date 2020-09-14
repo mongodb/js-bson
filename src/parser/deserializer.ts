@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 import { Binary } from '../binary';
-import type { BSONDocument } from '../bson';
+import type { Document } from '../bson';
 import { Code, CodeFunction } from '../code';
 import * as constants from '../constants';
 import { DBRef, DBRefLike, isDBRefLike } from '../db_ref';
@@ -30,7 +30,7 @@ export interface DeserializationOptions {
   /** when deserializing will promote BSON values to their Node.js closest equivalent types. */
   promoteValues?: boolean;
   /** allow to specify if there what fields we wish to return as unserialized raw buffer. */
-  fieldsAsRaw?: BSONDocument;
+  fieldsAsRaw?: Document;
   /** return BSON regular expressions as BSONRegExp instances. */
   bsonRegExp?: boolean;
   /** allows the buffer to be larger than the parsed BSON object */
@@ -51,7 +51,7 @@ export function deserialize(
   buffer: Buffer,
   options: DeserializationOptions,
   isArray?: boolean
-): BSONDocument {
+): Document {
   options = options == null ? {} : options;
   const index = options && options.index ? options.index : 0;
   // Read the document size
@@ -135,7 +135,7 @@ function deserializeObject(
   if (size < 5 || size > buffer.length) throw new Error('corrupt bson message');
 
   // Create holding object
-  const object: BSONDocument = isArray ? [] : {};
+  const object: Document = isArray ? [] : {};
   // Used for arrays to skip having to perform utf8 decoding
   let arrayIndex = 0;
   const done = false;
@@ -658,7 +658,7 @@ function isolateEvalWithHash(
   functionCache: { [hash: string]: CodeFunction },
   hash: string,
   functionString: string,
-  object: BSONDocument
+  object: Document
 ) {
   // Check for cache hit, eval if missing and return cached function
   if (functionCache[hash] == null) {

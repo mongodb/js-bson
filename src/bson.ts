@@ -88,7 +88,7 @@ export const EJSON = {
   deserialize: EJSON_deserialize
 };
 
-export interface BSONDocument {
+export interface Document {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
@@ -118,7 +118,7 @@ export function setInternalBufferSize(size: number): void {
  * @param object - the Javascript object to serialize.
  * @returns Buffer object containing the serialized object.
  */
-export function serialize(object: BSONDocument, options: SerializationOptions = {}): Buffer {
+export function serialize(object: Document, options: SerializationOptions = {}): Buffer {
   // Unpack the options
   const checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : false;
   const serializeFunctions =
@@ -164,7 +164,7 @@ export function serialize(object: BSONDocument, options: SerializationOptions = 
  * @returns the index pointing to the last written byte in the buffer.
  */
 export function serializeWithBufferAndIndex(
-  object: BSONDocument,
+  object: Document,
   finalBuffer: Buffer,
   options: SerializationOptions = {}
 ): number {
@@ -198,7 +198,7 @@ export function serializeWithBufferAndIndex(
  * @param buffer - the buffer containing the serialized set of BSON documents.
  * @returns returns the deserialized Javascript Object.
  */
-export function deserialize(buffer: Buffer, options: DeserializationOptions = {}): BSONDocument {
+export function deserialize(buffer: Buffer, options: DeserializationOptions = {}): Document {
   buffer = ensureBuffer(buffer);
   return internalDeserialize(buffer, options);
 }
@@ -215,7 +215,7 @@ export type CalculateObjectSizeOptions = Pick<
  * @returns size of BSON object in bytes
  */
 export function calculateObjectSize(
-  object: BSONDocument,
+  object: Document,
   options: CalculateObjectSizeOptions = {}
 ): number {
   options = options || {};
@@ -243,7 +243,7 @@ export function deserializeStream(
   data: Buffer,
   startIndex: number,
   numberOfDocuments: number,
-  documents: BSONDocument[],
+  documents: Document[],
   docStartIndex: number,
   options: DeserializationOptions
 ): number {
