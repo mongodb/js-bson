@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "checkJs": false,
+    "strict": false,
+    "alwaysStrict": true,
+    "target": "ES2017",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "lib": [
+      "ES2017",
+      "DOM" // This is included to get the global WebAssembly type in long.ts (it is present in node too)
+    ],
+    "outDir": "lib",
+    // We don't make use of tslib helpers
+    "importHelpers": true,
+    "noEmitHelpers": false,
+    "noEmitOnError": true,
+    // make use of import type where applicable
+    "importsNotUsedAsValues": "error",
+    // Generate separate source maps files with sourceContent included
+    "sourceMap": true,
+    "inlineSourceMap": false,
+    "inlineSources": true,
+    // API-extractor makes use of the declarations, npm script should be cleaning these up
+    "declaration": true,
+    "declarationMap": true
+  },
+  "ts-node": {
+    "transpileOnly": true,
+    "compiler": "typescript-cached-transpile"
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

@@ -185,64 +185,64 @@ BinaryParser.encodeInt = function encodeInt(data, bits, signed, forceBigEndian) 
   return (this.bigEndian || forceBigEndian ? r.reverse() : r).join('');
 };
 
-BinaryParser.toSmall = function(data) {
+BinaryParser.toSmall = function (data) {
   return this.decodeInt(data, 8, true);
 };
-BinaryParser.fromSmall = function(data) {
+BinaryParser.fromSmall = function (data) {
   return this.encodeInt(data, 8, true);
 };
-BinaryParser.toByte = function(data) {
+BinaryParser.toByte = function (data) {
   return this.decodeInt(data, 8, false);
 };
-BinaryParser.fromByte = function(data) {
+BinaryParser.fromByte = function (data) {
   return this.encodeInt(data, 8, false);
 };
-BinaryParser.toShort = function(data) {
+BinaryParser.toShort = function (data) {
   return this.decodeInt(data, 16, true);
 };
-BinaryParser.fromShort = function(data) {
+BinaryParser.fromShort = function (data) {
   return this.encodeInt(data, 16, true);
 };
-BinaryParser.toWord = function(data) {
+BinaryParser.toWord = function (data) {
   return this.decodeInt(data, 16, false);
 };
-BinaryParser.fromWord = function(data) {
+BinaryParser.fromWord = function (data) {
   return this.encodeInt(data, 16, false);
 };
-BinaryParser.toInt = function(data) {
+BinaryParser.toInt = function (data) {
   return this.decodeInt(data, 32, true);
 };
-BinaryParser.fromInt = function(data) {
+BinaryParser.fromInt = function (data) {
   return this.encodeInt(data, 32, true);
 };
-BinaryParser.toLong = function(data) {
+BinaryParser.toLong = function (data) {
   return this.decodeInt(data, 64, true);
 };
-BinaryParser.fromLong = function(data) {
+BinaryParser.fromLong = function (data) {
   return this.encodeInt(data, 64, true);
 };
-BinaryParser.toDWord = function(data) {
+BinaryParser.toDWord = function (data) {
   return this.decodeInt(data, 32, false);
 };
-BinaryParser.fromDWord = function(data) {
+BinaryParser.fromDWord = function (data) {
   return this.encodeInt(data, 32, false);
 };
-BinaryParser.toQWord = function(data) {
+BinaryParser.toQWord = function (data) {
   return this.decodeInt(data, 64, true);
 };
-BinaryParser.fromQWord = function(data) {
+BinaryParser.fromQWord = function (data) {
   return this.encodeInt(data, 64, true);
 };
-BinaryParser.toFloat = function(data) {
+BinaryParser.toFloat = function (data) {
   return this.decodeFloat(data, 23, 8);
 };
-BinaryParser.fromFloat = function(data) {
+BinaryParser.fromFloat = function (data) {
   return this.encodeFloat(data, 23, 8);
 };
-BinaryParser.toDouble = function(data) {
+BinaryParser.toDouble = function (data) {
   return this.decodeFloat(data, 52, 11);
 };
-BinaryParser.fromDouble = function(data) {
+BinaryParser.fromDouble = function (data) {
   return this.encodeFloat(data, 52, 11);
 };
 

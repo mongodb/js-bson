@@ -1,8 +1,7 @@
 'use strict';
 
-const BSON = require('../../lib/bson');
+const BSON = require('../register-bson');
 const Decimal128 = BSON.Decimal128;
-const expect = require('chai').expect;
 
 var NAN = Buffer.from(
   [
@@ -65,57 +64,57 @@ var INF_POSITIVE_BUFFER = Buffer.from(
   ].reverse()
 );
 
-describe('Decimal128', function() {
+describe('Decimal128', function () {
   /**
    * @ignore
    */
-  it('fromString invalid input', function(done) {
-    expect(function() {
+  it('fromString invalid input', function (done) {
+    expect(function () {
       Decimal128.fromString('E02');
     }).to.throw;
-    expect(function() {
+    expect(function () {
       Decimal128.fromString('E+02');
     }).to.throw;
-    expect(function() {
+    expect(function () {
       Decimal128.fromString('e+02');
     }).to.throw;
-    expect(function() {
+    expect(function () {
       Decimal128.fromString('.');
     }).to.throw;
-    expect(function() {
+    expect(function () {
       Decimal128.fromString('.e');
     }).to.throw;
-    expect(function() {
+    expect(function () {
       Decimal128.fromString('');
     }).to.throw;
-    expect(function() {
+    expect(function () {
       Decimal128.fromString('invalid');
     }).to.throw;
-    expect(function() {
+    expect(function () {
       Decimal128.fromString('in');
     }).to.throw;
-    expect(function() {
+    expect(function () {
       Decimal128.fromString('i');
     }).to.throw;
-    expect(function() {
+    expect(function () {
       Decimal128.fromString('..1');
     }).to.throw;
-    expect(function() {
+    expect(function () {
       Decimal128.fromString('1abcede');
     }).to.throw;
-    expect(function() {
+    expect(function () {
       Decimal128.fromString('1.24abc');
     }).to.throw;
-    expect(function() {
+    expect(function () {
       Decimal128.fromString('1.24abcE+02');
     }).to.throw;
-    expect(function() {
+    expect(function () {
       Decimal128.fromString('1.24E+02abc2d');
     }).to.throw;
     done();
   });
 
-  it('fromString NaN input', function(done) {
+  it('fromString NaN input', function (done) {
     var result = Decimal128.fromString('NaN');
     expect(NAN).to.deep.equal(result.bytes);
     result = Decimal128.fromString('+NaN');
@@ -137,7 +136,7 @@ describe('Decimal128', function() {
     done();
   });
 
-  it('fromString infinity input', function(done) {
+  it('fromString infinity input', function (done) {
     var result = Decimal128.fromString('Infinity');
     expect(INF_POSITIVE_BUFFER).to.deep.equal(result.bytes);
     result = Decimal128.fromString('+Infinity');
@@ -151,7 +150,7 @@ describe('Decimal128', function() {
     done();
   });
 
-  it('fromString simple', function(done) {
+  it('fromString simple', function (done) {
     // Create decimal from string value 1
     var result = Decimal128.fromString('1');
     var bytes = Buffer.from(
@@ -394,7 +393,7 @@ describe('Decimal128', function() {
     done();
   });
 
-  it('fromString scientific format', function(done) {
+  it('fromString scientific format', function (done) {
     // Create decimal from string value 10e0
     var result = Decimal128.fromString('10e0');
     var bytes = Buffer.from(
@@ -565,7 +564,7 @@ describe('Decimal128', function() {
     done();
   });
 
-  it('fromString large format', function(done) {
+  it('fromString large format', function (done) {
     // Create decimal from string value 12345689012345789012345
     var result = Decimal128.fromString('12345689012345789012345');
     var bytes = Buffer.from(
@@ -688,7 +687,7 @@ describe('Decimal128', function() {
     done();
   });
 
-  it('fromString exponent normalization', function(done) {
+  it('fromString exponent normalization', function (done) {
     // Create decimal from string value 1000000000000000000000000000000000000000
 
     result = Decimal128.fromString('1000000000000000000000000000000000000000');
@@ -832,7 +831,7 @@ describe('Decimal128', function() {
     done();
   });
 
-  it('fromString from string zeros', function(done) {
+  it('fromString from string zeros', function (done) {
     // Create decimal from string value 0
     var result = Decimal128.fromString('0');
     var bytes = Buffer.from(
@@ -931,7 +930,7 @@ describe('Decimal128', function() {
     done();
   });
 
-  it('fromString from string round', function(done) {
+  it('fromString from string round', function (done) {
     // Create decimal from string value 10E-6177
     var result = Decimal128.fromString('10E-6177');
     var bytes = Buffer.from(
@@ -1285,7 +1284,7 @@ describe('Decimal128', function() {
     done();
   });
 
-  it('toString infinity', function(done) {
+  it('toString infinity', function (done) {
     var decimal = new Decimal128(
       Buffer.from(
         [
@@ -1336,7 +1335,7 @@ describe('Decimal128', function() {
     done();
   });
 
-  it('toString NaN', function(done) {
+  it('toString NaN', function (done) {
     var decimal = new Decimal128(
       Buffer.from(
         [
@@ -1459,7 +1458,7 @@ describe('Decimal128', function() {
     done();
   });
 
-  it('toString regular', function(done) {
+  it('toString regular', function (done) {
     var decimal = new Decimal128(
       Buffer.from(
         [
@@ -1702,7 +1701,7 @@ describe('Decimal128', function() {
     done();
   });
 
-  it('toString scientific', function(done) {
+  it('toString scientific', function (done) {
     var decimal = new Decimal128(
       Buffer.from(
         [
@@ -1993,7 +1992,7 @@ describe('Decimal128', function() {
     done();
   });
 
-  it('toString zeros', function(done) {
+  it('toString zeros', function (done) {
     var decimal = new Decimal128(
       Buffer.from(
         [
@@ -2068,7 +2067,7 @@ describe('Decimal128', function() {
     done();
   });
 
-  it('Serialize and Deserialize tests', function(done) {
+  it('Serialize and Deserialize tests', function (done) {
     // Test all methods around a simple serialization at object top level
     var doc = { value: Decimal128.fromString('1') };
     var buffer = BSON.serialize(doc);
@@ -2102,20 +2101,20 @@ describe('Decimal128', function() {
     done();
   });
 
-  it('Support toBSON and toObject methods for custom mapping', function(done) {
+  it('Support toBSON and toObject methods for custom mapping', function (done) {
     // Create a custom object
-    var MyCustomDecimal = function(value) {
+    var MyCustomDecimal = function (value) {
       this.value = value instanceof Decimal128 ? value.toString() : value;
     };
 
-    MyCustomDecimal.prototype.toBSON = function() {
+    MyCustomDecimal.prototype.toBSON = function () {
       return Decimal128.fromString(this.value);
     };
 
     // Add a custom mapper for the type
     const saveToObject = Decimal128.prototype.toObject;
     try {
-      Decimal128.prototype.toObject = function() {
+      Decimal128.prototype.toObject = function () {
         return new MyCustomDecimal(this);
       };
 
