@@ -1,6 +1,6 @@
 import { Binary } from './binary';
 import type { BSONDocument } from './bson';
-import { Code, CodeFunction } from './code';
+import { Code } from './code';
 import { DBRef } from './db_ref';
 import { Decimal128 } from './decimal128';
 import { Double } from './double';
@@ -8,7 +8,7 @@ import { Int32 } from './int_32';
 import { Long } from './long';
 import { MaxKey } from './max_key';
 import { MinKey } from './min_key';
-import { ObjectId, ObjectIdLike } from './objectid';
+import { ObjectId } from './objectid';
 import { isObjectLike } from './parser/utils';
 import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
@@ -309,30 +309,19 @@ function serializeValue(value: any, options: EJSONOptions): any {
 }
 
 const BSON_TYPE_MAPPINGS = {
-  Binary: (o: {
-    value: () => string | Buffer | Uint8Array | number[];
-    subtype: number | undefined;
-  }) => new Binary(o.value(), o.subtype),
-  Code: (o: { code: string | CodeFunction; scope: BSONDocument | undefined }) =>
-    new Code(o.code, o.scope),
-  DBRef: (o: {
-    collection: string;
-    namespace: string;
-    oid: ObjectId;
-    db: string | undefined;
-    fields: BSONDocument | undefined;
-  }) => new DBRef(o.collection || o.namespace, o.oid, o.db, o.fields), // "namespace" for 1.x library backwards compat
-  Decimal128: (o: { bytes: Buffer }) => new Decimal128(o.bytes),
-  Double: (o: { value: number }) => new Double(o.value),
-  Int32: (o: { value: string | number }) => new Int32(o.value),
-  Long: (o: {
-    low: number | null;
-    low_: number;
-    high: number;
-    high_: number;
-    unsigned: boolean | undefined;
-    unsigned_: boolean | undefined;
-  }) =>
+  Binary: (o: Binary) => new Binary(o.value(), o.sub_type),
+  Code: (o: Code) => new Code(o.code, o.scope),
+  DBRef: (o: DBRef) => new DBRef(o.collection || o.namespace, o.oid, o.db, o.fields), // "namespace" for 1.x library backwards compat
+  Decimal128: (o: Decimal128) => new Decimal128(o.bytes),
+  Double: (o: Double) => new Double(o.value),
+  Int32: (o: Int32) => new Int32(o.value),
+  Long: (
+    o: Long & {
+      low_: number;
+      high_: number;
+      unsigned_: boolean | undefined;
+    }
+  ) =>
     Long.fromBits(
       // underscore variants for 1.x backwards compatibility
       o.low != null ? o.low : o.low_,
@@ -341,12 +330,11 @@ const BSON_TYPE_MAPPINGS = {
     ),
   MaxKey: () => new MaxKey(),
   MinKey: () => new MinKey(),
-  ObjectID: (o: string | number | ObjectId | Buffer | ObjectIdLike | undefined) => new ObjectId(o),
-  ObjectId: (o: string | number | ObjectId | Buffer | ObjectIdLike | undefined) => new ObjectId(o), // support 4.0.0/4.0.1 before _bsontype was reverted back to ObjectID
-  BSONRegExp: (o: { pattern: string; options: string | undefined }) =>
-    new BSONRegExp(o.pattern, o.options),
-  Symbol: (o: { value: string }) => new BSONSymbol(o.value),
-  Timestamp: (o: { low: number; high: number }) => Timestamp.fromBits(o.low, o.high)
+  ObjectID: (o: ObjectId) => new ObjectId(o),
+  ObjectId: (o: ObjectId) => new ObjectId(o), // support 4.0.0/4.0.1 before _bsontype was reverted back to ObjectID
+  BSONRegExp: (o: BSONRegExp) => new BSONRegExp(o.pattern, o.options),
+  Symbol: (o: BSONSymbol) => new BSONSymbol(o.value),
+  Timestamp: (o: Timestamp) => Timestamp.fromBits(o.low, o.high)
 } as const;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

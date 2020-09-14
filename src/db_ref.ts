@@ -19,7 +19,7 @@ export class DBRef {
 
   collection: string;
   oid: ObjectId;
-  db?: string | null;
+  db?: string;
   fields: BSONDocument;
 
   /**
