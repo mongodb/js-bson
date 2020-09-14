@@ -1,5 +1,0 @@
-{
-  "extends": "@istanbuljs/nyc-config-typescript",
-  "include": ["src/**/*.ts"],
-  "reporter": ["lcovonly", "text-summary"]
-}

@@ -1,61 +1,97 @@
-import babel from '@rollup/plugin-babel';
-const commonjs = require('@rollup/plugin-commonjs');
-const { nodeResolve } = require('@rollup/plugin-node-resolve');
-const nodePolyfills = require('rollup-plugin-node-polyfills');
+'use strict';
 
-// Entry point of the library
-const input = './lib/bson.js';
+const pkg = require('./package.json');
+const commonjs = require('rollup-plugin-commonjs');
+const nodeBuiltins = require('rollup-plugin-node-builtins');
+const nodeResolve = require('rollup-plugin-node-resolve');
+const babel = require('rollup-plugin-babel');
 
-export default [
-  {
-    input,
-    output: [
-      /* Browser ESM bundle */
-      {
-        file: 'dist/bson.browser.esm.js',
-        format: 'es'
-      },
-      /* Browser UMD bundle */
-      {
-        file: 'dist/bson.browser.umd.js',
-        format: 'umd',
-        name: 'BSON'
-      },
-      /* Browser IIFE bundle */
-      {
-        file: 'dist/bson.bundle.js',
-        format: 'iife',
-        name: 'BSON'
-      }
-    ],
-
-    plugins: [
-      nodeResolve({ preferBuiltins: false }),
-      commonjs(),
-      nodePolyfills(),
-      babel({
-        babelHelpers: 'bundled',
-        presets: [
-          [
-            '@babel/env',
-            {
-              modules: false
-            }
-          ]
-        ]
-      })
+const input = 'lib/bson.js';
+const plugins = [
+  nodeResolve(),
+  commonjs(),
+  nodeBuiltins(),
+  babel({
+    externalHelpers: true,
+    presets: [
+      [
+        '@babel/env',
+        {
+          modules: false
+        }
+      ]
     ]
-  },
-  /* ESM bundle with externals */
+  })
+];
+
+const browserPlugins = [
+  nodeResolve({
+    browser: true,
+    preferBuiltins: false
+  }),
+  commonjs(),
+  nodeBuiltins(),
+  babel({
+    externalHelpers: true,
+    presets: [
+      [
+        '@babel/env',
+        {
+          modules: false
+        }
+      ]
+    ]
+  })
+];
+
+const external = Object.keys(pkg.dependencies || {});
+const defaultName = 'BSON';
+
+module.exports = [
   {
     input,
     output: {
       file: 'dist/bson.esm.js',
-      format: 'es'
+      format: 'es',
+      name: defaultName,
+      exports: 'named'
     },
-    // Notice the external buffer, and preferBuiltins false,
-    // this bundle doesn't pull in 'buffer' or Map from 'core-js'
-    external: ['buffer'],
-    plugins: [nodeResolve({ preferBuiltins: true }), commonjs()]
+    plugins,
+    external
+  },
+  {
+    input,
+    output: {
+      file: 'dist/bson.browser.umd.js',
+      format: 'umd',
+      name: defaultName,
+      exports: 'named',
+      globals: {
+        buffer: 'Buffer'
+      }
+    },
+    plugins: browserPlugins,
+    external
+  },
+  {
+    input,
+    output: {
+      file: 'dist/bson.browser.esm.js',
+      format: 'es',
+      name: defaultName,
+      exports: 'named'
+    },
+    plugins: browserPlugins,
+    external
+  },
+  {
+    input,
+    output: {
+      file: 'dist/bson.bundle.js',
+      format: 'iife',
+      name: defaultName,
+      exports: 'named'
+    },
+    plugins: browserPlugins
   }
 ];

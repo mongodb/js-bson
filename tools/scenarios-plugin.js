@@ -15,4 +15,4 @@ const scenariosPlugin = () => {
   };
 };
 
-module.exports = { scenariosPlugin };
+module.exports = scenariosPlugin;
