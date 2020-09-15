@@ -1,34 +1,27 @@
 import type { Document } from './bson';
 
-/**
- * A class representation of the BSON Code type.
- */
+/** A class representation of the BSON Code type. */
 export class Code {
+  _bsontype!: 'Code';
+
   code: string | Function;
-  scope: Document;
+  scope?: Document;
   /**
-   * Create a Code type
-   *
-   * @param {(string|function)} code a string or function.
-   * @param {Object} [scope] an optional scope for the function.
-   * @return {Code}
+   * @param code - a string or function.
+   * @param scope - an optional scope for the function.
    */
   constructor(code: string | Function, scope?: Document) {
     this.code = code;
     this.scope = scope;
   }
 
-  /**
-   * @ignore
-   */
-  toJSON() {
-    return { scope: this.scope, code: this.code };
+  /** @internal */
+  toJSON(): { code: string | Function; scope?: Document } {
+    return { code: this.code, scope: this.scope };
   }
 
-  /**
-   * @ignore
-   */
-  toExtendedJSON() {
+  /** @internal */
+  toExtendedJSON(): { $code: string | Function; $scope?: Document } {
     if (this.scope) {
       return { $code: this.code, $scope: this.scope };
     }
@@ -36,10 +29,8 @@ export class Code {
     return { $code: this.code };
   }
 
-  /**
-   * @ignore
-   */
-  static fromExtendedJSON(doc) {
+  /** @internal */
+  static fromExtendedJSON(doc: { $code: string | Function; $scope?: Document }): Code {
     return new Code(doc.$code, doc.$scope);
   }
 }

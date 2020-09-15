@@ -26,7 +26,7 @@
         "logLevel": "warning"
       },
       "ae-internal-missing-underscore": {
-        "logLevel": "none",
+        "logLevel": "error",
         "addToApiReportFile": false
       },
       "ae-missing-release-tag": {
@@ -39,7 +39,7 @@
       },
       "ae-unresolved-link": {
         "addToApiReportFile": false,
-        "logLevel": "none"
+        "logLevel": "error"
       }
     },
     "tsdocMessageReporting": {

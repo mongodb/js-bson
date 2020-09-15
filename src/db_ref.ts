@@ -1,4 +1,7 @@
+import type { Document } from './bson';
+import type { EJSONOptions } from './extended_json';
 import type { ObjectId } from './objectid';
+import { isObjectLike } from './parser/utils';
 
 export interface DBRefLike {
   $ref: string;
@@ -6,32 +9,31 @@ export interface DBRefLike {
   $db?: string;
 }
 
-export function isDBRefLike(o: any): o is DBRefLike {
-  return o['$id'] != null && o['$ref'] != null;
+export function isDBRefLike(value: unknown): value is DBRefLike {
+  return isObjectLike(value) && value['$id'] != null && value['$ref'] != null;
 }
 
-/**
- * A class representation of the BSON DBRef type.
- */
+/** A class representation of the BSON DBRef type. */
 export class DBRef {
+  _bsontype!: 'DBRef';
+
   collection: string;
   oid: ObjectId;
-  db: string;
-  fields: any;
+  db?: string;
+  fields: Document;
+
   /**
-   * Create a DBRef type
-   *
-   * @param {string} collection the collection name.
-   * @param {ObjectId} oid the reference ObjectId.
-   * @param {string} [db] optional db name, if omitted the reference is local to the current db.
-   * @return {DBRef}
+   * @param collection - the collection name.
+   * @param oid - the reference ObjectId.
+   * @param db - optional db name, if omitted the reference is local to the current db.
    */
-  constructor(collection, oid, db?: string, fields?: any) {
+  constructor(collection: string, oid: ObjectId, db?: string, fields?: Document) {
     // check if namespace has been provided
     const parts = collection.split('.');
     if (parts.length === 2) {
       db = parts.shift();
-      collection = parts.shift();
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      collection = parts.shift()!;
     }
 
     this.collection = collection;
@@ -40,11 +42,20 @@ export class DBRef {
     this.fields = fields || {};
   }
 
-  /**
-   * @ignore
-   * @api private
-   */
-  toJSON() {
+  // Property provided for compatibility with the 1.x parser
+  // the 1.x parser used a "namespace" property, while 4.x uses "collection"
+
+  /** @internal */
+  get namespace(): string {
+    return this.collection;
+  }
+  /** @internal */
+  set namespace(value: string) {
+    this.collection = value;
+  }
+
+  /** @internal */
+  toJSON(): DBRefLike & Document {
     const o = Object.assign(
       {
         $ref: this.collection,
@@ -57,10 +68,8 @@ export class DBRef {
     return o;
   }
 
-  /**
-   * @ignore
-   */
-  toExtendedJSON(options) {
+  /** @internal */
+  toExtendedJSON(options?: EJSONOptions): DBRefLike {
     options = options || {};
     let o: DBRefLike = {
       $ref: this.collection,
@@ -76,25 +85,14 @@ export class DBRef {
     return o;
   }
 
-  /**
-   * @ignore
-   */
-  static fromExtendedJSON(doc) {
-    const copy = Object.assign({}, doc);
-    ['$ref', '$id', '$db'].forEach(k => delete copy[k]);
+  /** @internal */
+  static fromExtendedJSON(doc: DBRefLike): DBRef {
+    const copy = Object.assign({}, doc) as Partial<DBRefLike>;
+    delete copy.$ref;
+    delete copy.$id;
+    delete copy.$db;
     return new DBRef(doc.$ref, doc.$id, doc.$db, copy);
   }
 }
 
 Object.defineProperty(DBRef.prototype, '_bsontype', { value: 'DBRef' });
-// the 1.x parser used a "namespace" property, while 4.x uses "collection". To ensure backwards
-// compatibility, let's expose "namespace"
-Object.defineProperty(DBRef.prototype, 'namespace', {
-  get() {
-    return this.collection;
-  },
-  set(val) {
-    this.collection = val;
-  },
-  configurable: false
-});

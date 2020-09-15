@@ -1,8 +1,9 @@
 import { Buffer } from 'buffer';
 import { Binary } from '../binary';
+import type { Document } from '../bson';
 import { Code } from '../code';
 import * as constants from '../constants';
-import { DBRef, isDBRefLike } from '../db_ref';
+import { DBRef, DBRefLike, isDBRefLike } from '../db_ref';
 import { Decimal128 } from '../decimal128';
 import { Double } from '../double';
 import { Int32 } from '../int_32';
@@ -15,13 +16,42 @@ import { BSONSymbol } from '../symbol';
 import { Timestamp } from '../timestamp';
 import { validateUtf8 } from '../validate_utf8';
 
+export interface DeserializationOptions {
+  /** evaluate functions in the BSON document scoped to the object deserialized. */
+  evalFunctions?: boolean;
+  /** cache evaluated functions for reuse. */
+  cacheFunctions?: boolean;
+  /** use a crc32 code for caching, otherwise use the string of the function. */
+  cacheFunctionsCrc32?: boolean;
+  /** when deserializing a Long will fit it into a Number if it's smaller than 53 bits */
+  promoteLongs?: boolean;
+  /** when deserializing a Binary will return it as a node.js Buffer instance. */
+  promoteBuffers?: boolean;
+  /** when deserializing will promote BSON values to their Node.js closest equivalent types. */
+  promoteValues?: boolean;
+  /** allow to specify if there what fields we wish to return as unserialized raw buffer. */
+  fieldsAsRaw?: Document;
+  /** return BSON regular expressions as BSONRegExp instances. */
+  bsonRegExp?: boolean;
+  /** allows the buffer to be larger than the parsed BSON object */
+  allowObjectSmallerThanBufferSize?: boolean;
+  /** Offset into buffer to begin reading document from */
+  index?: number;
+
+  raw?: boolean;
+}
+
 // Internal long versions
 const JS_INT_MAX_LONG = Long.fromNumber(constants.JS_INT_MAX);
 const JS_INT_MIN_LONG = Long.fromNumber(constants.JS_INT_MIN);
 
-const functionCache = {};
+const functionCache: { [hash: string]: Function } = {};
 
-export function deserialize(buffer, options, isArray?: boolean) {
+export function deserialize(
+  buffer: Buffer,
+  options: DeserializationOptions,
+  isArray?: boolean
+): Document {
   options = options == null ? {} : options;
   const index = options && options.index ? options.index : 0;
   // Read the document size
@@ -60,14 +90,23 @@ export function deserialize(buffer, options, isArray?: boolean) {
   return deserializeObject(buffer, index, options, isArray);
 }
 
-function deserializeObject(buffer, index, options, isArray) {
+function deserializeObject(
+  buffer: Buffer,
+  index: number,
+  options: DeserializationOptions,
+  isArray = false
+) {
   const evalFunctions = options['evalFunctions'] == null ? false : options['evalFunctions'];
   const cacheFunctions = options['cacheFunctions'] == null ? false : options['cacheFunctions'];
   const cacheFunctionsCrc32 =
     options['cacheFunctionsCrc32'] == null ? false : options['cacheFunctionsCrc32'];
 
   let crc32;
-  if (!cacheFunctionsCrc32) crc32 = null;
+  if (!cacheFunctionsCrc32) {
+    crc32 = null;
+  } else {
+    crc32 = (v: string) => v; // FIXME(NODE-2770): This is a bug, hashing function is missing.
+  }
 
   const fieldsAsRaw = options['fieldsAsRaw'] == null ? null : options['fieldsAsRaw'];
 
@@ -96,7 +135,7 @@ function deserializeObject(buffer, index, options, isArray) {
   if (size < 5 || size > buffer.length) throw new Error('corrupt bson message');
 
   // Create holding object
-  const object = isArray ? [] : {};
+  const object: Document = isArray ? [] : {};
   // Used for arrays to skip having to perform utf8 decoding
   let arrayIndex = 0;
   const done = false;
@@ -212,7 +251,11 @@ function deserializeObject(buffer, index, options, isArray) {
       // All elements of array to be returned as raw bson
       if (fieldsAsRaw && fieldsAsRaw[name]) {
         arrayOptions = {};
-        for (const n in options) arrayOptions[n] = options[n];
+        for (const n in options) {
+          (arrayOptions as {
+            [key: string]: DeserializationOptions[keyof DeserializationOptions];
+          })[n] = options[n as keyof DeserializationOptions];
+        }
         arrayOptions['raw'] = true;
       }
 
@@ -255,9 +298,13 @@ function deserializeObject(buffer, index, options, isArray) {
       // Update index
       index = index + 16;
       // Assign the new Decimal128 value
-      const decimal128 = new Decimal128(bytes);
+      const decimal128 = new Decimal128(bytes) as Decimal128 | { toObject(): unknown };
       // If we have an alternative mapper use that
-      object[name] = decimal128.toObject ? decimal128.toObject() : decimal128;
+      if ('toObject' in decimal128 && typeof decimal128.toObject === 'function') {
+        object[name] = decimal128.toObject();
+      } else {
+        object[name] = decimal128;
+      }
     } else if (elementType === constants.BSON_DATA_BINARY) {
       let binarySize =
         buffer[index++] |
@@ -452,7 +499,7 @@ function deserializeObject(buffer, index, options, isArray) {
       if (evalFunctions) {
         // If we have cache enabled let's look for the md5 of the function in the cache
         if (cacheFunctions) {
-          const hash = cacheFunctionsCrc32 ? crc32(functionString) : functionString;
+          const hash = cacheFunctionsCrc32 && crc32 ? crc32(functionString) : functionString;
           // Got to do this to avoid V8 deoptimizing the call due to finding eval
           object[name] = isolateEvalWithHash(functionCache, hash, functionString, object);
         } else {
@@ -521,7 +568,7 @@ function deserializeObject(buffer, index, options, isArray) {
       if (evalFunctions) {
         // If we have cache enabled let's look for the md5 of the function in the cache
         if (cacheFunctions) {
-          const hash = cacheFunctionsCrc32 ? crc32(functionString) : functionString;
+          const hash = cacheFunctionsCrc32 && crc32 ? crc32(functionString) : functionString;
           // Got to do this to avoid V8 deoptimizing the call due to finding eval
           object[name] = isolateEvalWithHash(functionCache, hash, functionString, object);
         } else {
@@ -592,23 +639,27 @@ function deserializeObject(buffer, index, options, isArray) {
   if (!valid) return object;
 
   if (isDBRefLike(object)) {
-    const copy = Object.assign({}, object);
+    const copy = Object.assign({}, object) as Partial<DBRefLike>;
     delete copy.$ref;
     delete copy.$id;
     delete copy.$db;
-    return new DBRef(object.$ref, object.$id, object.$db || null, copy);
+    return new DBRef(object.$ref, object.$id, object.$db, copy);
   }
 
   return object;
 }
 
 /**
- * Ensure eval is isolated.
+ * Ensure eval is isolated, store the result in functionCache.
  *
- * @ignore
- * @api private
+ * @internal
  */
-function isolateEvalWithHash(functionCache, hash, functionString, object) {
+function isolateEvalWithHash(
+  functionCache: { [hash: string]: Function },
+  hash: string,
+  functionString: string,
+  object: Document
+) {
   // Check for cache hit, eval if missing and return cached function
   if (functionCache[hash] == null) {
     functionCache[hash] = new Function(functionString);
@@ -621,9 +672,8 @@ function isolateEvalWithHash(functionCache, hash, functionString, object) {
 /**
  * Ensure eval is isolated.
  *
- * @ignore
- * @api private
+ * @internal
  */
-function isolateEval(functionString) {
+function isolateEval(functionString: string): Function {
   return new Function(functionString);
 }

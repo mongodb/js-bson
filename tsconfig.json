@@ -2,14 +2,13 @@
   "compilerOptions": {
     "allowJs": false,
     "checkJs": false,
-    "strict": false,
+    "strict": true,
     "alwaysStrict": true,
     "target": "ES2017",
     "module": "commonjs",
     "moduleResolution": "node",
     "lib": [
-      "ES2017",
-      "DOM" // This is included to get the global WebAssembly type in long.ts (it is present in node too)
+      "ES2017"
     ],
     "outDir": "lib",
     // We don't make use of tslib helpers

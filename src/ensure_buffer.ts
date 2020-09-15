@@ -3,12 +3,12 @@ import { Buffer } from 'buffer';
 /**
  * Makes sure that, if a Uint8Array is passed in, it is wrapped in a Buffer.
  *
- * @param {Buffer|Uint8Array} potentialBuffer The potential buffer
- * @returns {Buffer} the input if potentialBuffer is a buffer, or a buffer that
+ * @param potentialBuffer - The potential buffer
+ * @returns Buffer the input if potentialBuffer is a buffer, or a buffer that
  * wraps a passed in Uint8Array
- * @throws {TypeError} If anything other than a Buffer or Uint8Array is passed in
+ * @throws TypeError If anything other than a Buffer or Uint8Array is passed in
  */
-export function ensureBuffer(potentialBuffer) {
+export function ensureBuffer(potentialBuffer: Buffer | Uint8Array): Buffer {
   if (potentialBuffer instanceof Buffer) {
     return potentialBuffer;
   }

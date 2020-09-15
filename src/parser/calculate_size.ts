@@ -1,14 +1,14 @@
 import { Buffer } from 'buffer';
 import { Binary } from '../binary';
+import type { Document } from '../bson';
 import * as constants from '../constants';
-import { normalizedFunctionString } from './utils';
+import { isDate, normalizedFunctionString } from './utils';
 
-// To ensure that 0.4 of node works correctly
-function isDate(d) {
-  return typeof d === 'object' && Object.prototype.toString.call(d) === '[object Date]';
-}
-
-export function calculateObjectSize(object, serializeFunctions, ignoreUndefined) {
+export function calculateObjectSize(
+  object: Document,
+  serializeFunctions?: boolean,
+  ignoreUndefined?: boolean
+): number {
   let totalLength = 4 + 1;
 
   if (Array.isArray(object)) {
@@ -37,11 +37,15 @@ export function calculateObjectSize(object, serializeFunctions, ignoreUndefined)
   return totalLength;
 }
 
-/**
- * @ignore
- * @api private
- */
-function calculateElement(name, value, serializeFunctions, isArray, ignoreUndefined) {
+/** @internal */
+function calculateElement(
+  name: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value: any,
+  serializeFunctions = false,
+  isArray = false,
+  ignoreUndefined = false
+) {
   // If we have toBSON defined, override the current object
   if (value && value.toBSON) {
     value = value.toBSON();

@@ -21,10 +21,12 @@
     "ecmaVersion": 2017
   },
   "plugins": [
-    "prettier"
+    "prettier",
+    "eslint-plugin-tsdoc"
   ],
   "rules": {
     "prettier/prettier": "error",
+    "tsdoc/syntax": "warn",
     "no-console": "off",
     "eqeqeq": [
       "error",
@@ -33,11 +35,23 @@
         "null": "ignore"
       }
     ],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ],
     "strict": [
       "error",
       "global"
     ],
-    "@typescript-eslint/ban-types": "off",
-    "@typescript-eslint/no-var-requires": "off"
+    "@typescript-eslint/ban-types": [
+      "error",
+      {
+        "types": {
+          "Function": false
+        }
+      }
+    ]
   }
 }

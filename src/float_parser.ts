@@ -30,9 +30,17 @@
 //
 // Modifications to writeIEEE754 to support negative zeroes made by Brian White
 
-export function readIEEE754(buffer, offset, endian, mLen, nBytes) {
-  let e;
-  let m;
+type NumericalSequence = { [index: number]: number };
+
+export function readIEEE754(
+  buffer: NumericalSequence,
+  offset: number,
+  endian: 'big' | 'little',
+  mLen: number,
+  nBytes: number
+): number {
+  let e: number;
+  let m: number;
   const bBE = endian === 'big';
   const eLen = nBytes * 8 - mLen - 1;
   const eMax = (1 << eLen) - 1;
@@ -65,10 +73,17 @@ export function readIEEE754(buffer, offset, endian, mLen, nBytes) {
   return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
 }
 
-export function writeIEEE754(buffer, value, offset, endian, mLen, nBytes) {
-  let e;
-  let m;
-  let c;
+export function writeIEEE754(
+  buffer: NumericalSequence,
+  value: number,
+  offset: number,
+  endian: 'big' | 'little',
+  mLen: number,
+  nBytes: number
+): void {
+  let e: number;
+  let m: number;
+  let c: number;
   const bBE = endian === 'big';
   let eLen = nBytes * 8 - mLen - 1;
   const eMax = (1 << eLen) - 1;

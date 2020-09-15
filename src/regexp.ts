@@ -1,18 +1,26 @@
-function alphabetize(str) {
+import type { EJSONOptions } from './extended_json';
+
+function alphabetize(str: string): string {
   return str.split('').sort().join('');
 }
 
-/**
- * A class representation of the BSON RegExp type.
- */
+export type BSONRegExpEJSON =
+  | { $regex: string | BSONRegExp; $options: string }
+  | { $regularExpression: { pattern: string; options: string } };
+
+/** A class representation of the BSON RegExp type. */
 export class BSONRegExp {
+  _bsontype!: 'BSONRegExp';
+
+  pattern: string;
+  options: string;
   /**
-   * Create a RegExp type
-   *
-   * @param {string} pattern The regular expression pattern to match
-   * @param {string} options The regular expression options
+   * @param pattern - The regular expression pattern to match
+   * @param options - The regular expression options
    */
-  constructor(public pattern = '', public options = '') {
+  constructor(pattern: string, options?: string) {
+    this.pattern = pattern;
+    this.options = options ?? '';
     // Execute
     alphabetize(this.options);
 
@@ -33,14 +41,12 @@ export class BSONRegExp {
     }
   }
 
-  static parseOptions(options) {
+  static parseOptions(options?: string): string {
     return options ? options.split('').sort().join('') : '';
   }
 
-  /**
-   * @ignore
-   */
-  toExtendedJSON(options) {
+  /** @internal */
+  toExtendedJSON(options?: EJSONOptions): BSONRegExpEJSON {
     options = options || {};
     if (options.legacy) {
       return { $regex: this.pattern, $options: this.options };
@@ -48,21 +54,25 @@ export class BSONRegExp {
     return { $regularExpression: { pattern: this.pattern, options: this.options } };
   }
 
-  /**
-   * @ignore
-   */
-  static fromExtendedJSON(doc) {
-    if (doc.$regex) {
-      // This is for $regex query operators that have extended json values.
-      if (doc.$regex._bsontype === 'BSONRegExp') {
-        return doc;
+  /** @internal */
+  static fromExtendedJSON(doc: BSONRegExpEJSON): BSONRegExp {
+    if ('$regex' in doc) {
+      if (typeof doc.$regex !== 'string') {
+        // This is for $regex query operators that have extended json values.
+        if (doc.$regex._bsontype === 'BSONRegExp') {
+          return (doc as unknown) as BSONRegExp;
+        }
+      } else {
+        return new BSONRegExp(doc.$regex, BSONRegExp.parseOptions(doc.$options));
       }
-      return new BSONRegExp(doc.$regex, BSONRegExp.parseOptions(doc.$options));
     }
-    return new BSONRegExp(
-      doc.$regularExpression.pattern,
-      BSONRegExp.parseOptions(doc.$regularExpression.options)
-    );
+    if ('$regularExpression' in doc) {
+      return new BSONRegExp(
+        doc.$regularExpression.pattern,
+        BSONRegExp.parseOptions(doc.$regularExpression.options)
+      );
+    }
+    throw new TypeError(`Unexpected BSONRegExp EJSON object form: ${JSON.stringify(doc)}`);
   }
 }
 

@@ -1053,7 +1053,7 @@ describe('BSON', function () {
    */
   it('Should Correctly Serialize and Deserialize DBRef', function (done) {
     var oid = new ObjectId();
-    var doc = { dbref: new DBRef('namespace', oid, null, {}) };
+    var doc = { dbref: new DBRef('namespace', oid, undefined, {}) };
     var b = BSON;
 
     var serialized_data = b.serialize(doc);

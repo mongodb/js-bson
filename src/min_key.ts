@@ -2,17 +2,15 @@
  * A class representation of the BSON MinKey type.
  */
 export class MinKey {
-  /**
-   * @ignore
-   */
-  toExtendedJSON() {
+  _bsontype!: 'MinKey';
+
+  /** @internal */
+  toExtendedJSON(): { $minKey: 1 } {
     return { $minKey: 1 };
   }
 
-  /**
-   * @ignore
-   */
-  static fromExtendedJSON() {
+  /** @internal */
+  static fromExtendedJSON(): MinKey {
     return new MinKey();
   }
 }

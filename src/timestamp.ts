@@ -1,15 +1,24 @@
 import { Long } from './long';
 
-/**
- * @class
- * @param {number} low  the low (signed) 32 bits of the Timestamp.
- * @param {number} high the high (signed) 32 bits of the Timestamp.
- * @return {Timestamp}
- */
-export class Timestamp extends Long {
-  _bsontype: string;
+type TimestampOverrides = '_bsontype' | 'toExtendedJSON' | 'fromExtendedJSON';
+type LongWithoutOverrides = new (low: number | Long, high?: number, unsigned?: boolean) => {
+  [P in Exclude<keyof Long, TimestampOverrides>]: Long[P];
+};
+const LongWithoutOverridesClass: LongWithoutOverrides = (Long as unknown) as LongWithoutOverrides;
 
+export class Timestamp extends LongWithoutOverridesClass {
+  _bsontype!: 'Timestamp';
+
+  static readonly MAX_VALUE = Long.MAX_UNSIGNED_VALUE;
+
+  /**
+   * @param low - A 64-bit Long representing the Timestamp.
+   */
   constructor(low: Long);
+  /**
+   * @param low - the low (signed) 32 bits of the Timestamp.
+   * @param high - the high (signed) 32 bits of the Timestamp.
+   */
   constructor(low: number, high: number);
   constructor(low: number | Long, high?: number) {
     if (Long.isLong(low)) {
@@ -25,77 +34,49 @@ export class Timestamp extends Long {
     });
   }
 
-  /**
-   * Return the JSON value.
-   *
-   * @method
-   * @return {String} the JSON representation.
-   */
-  toJSON() {
+  toJSON(): { $timestamp: string } {
     return {
       $timestamp: this.toString()
     };
   }
 
-  /**
-   * Returns a Timestamp represented by the given (32-bit) integer value.
-   *
-   * @method
-   * @param {number} value the 32-bit integer in question.
-   * @return {Timestamp} the timestamp.
-   */
-  static fromInt(value) {
+  /** Returns a Timestamp represented by the given (32-bit) integer value. */
+  static fromInt(value: number): Timestamp {
     return new Timestamp(Long.fromInt(value, true));
   }
 
-  /**
-   * Returns a Timestamp representing the given number value, provided that it is a finite number. Otherwise, zero is returned.
-   *
-   * @method
-   * @param {number} value the number in question.
-   * @return {Timestamp} the timestamp.
-   */
-  static fromNumber(value) {
+  /** Returns a Timestamp representing the given number value, provided that it is a finite number. Otherwise, zero is returned. */
+  static fromNumber(value: number): Timestamp {
     return new Timestamp(Long.fromNumber(value, true));
   }
 
   /**
    * Returns a Timestamp for the given high and low bits. Each is assumed to use 32 bits.
    *
-   * @method
-   * @param {number} lowBits the low 32-bits.
-   * @param {number} highBits the high 32-bits.
-   * @return {Timestamp} the timestamp.
+   * @param lowBits - the low 32-bits.
+   * @param highBits - the high 32-bits.
    */
-  static fromBits(lowBits, highBits) {
+  static fromBits(lowBits: number, highBits: number): Timestamp {
     return new Timestamp(lowBits, highBits);
   }
 
   /**
    * Returns a Timestamp from the given string, optionally using the given radix.
    *
-   * @method
-   * @param {String} str the textual representation of the Timestamp.
-   * @param {number} [opt_radix] the radix in which the text is written.
-   * @return {Timestamp} the timestamp.
+   * @param str - the textual representation of the Timestamp.
+   * @param optRadix - the radix in which the text is written.
    */
-  static fromString(str, opt_radix) {
-    return new Timestamp(Long.fromString(str, true, opt_radix));
+  static fromString(str: string, optRadix: number): Timestamp {
+    return new Timestamp(Long.fromString(str, true, optRadix));
   }
 
-  /**
-   * @ignore
-   */
-  toExtendedJSON(options): any {
+  /** @internal */
+  toExtendedJSON(): { $timestamp: { t: number; i: number } } {
     return { $timestamp: { t: this.high >>> 0, i: this.low >>> 0 } };
   }
 
-  /**
-   * @ignore
-   */
-  static fromExtendedJSON(doc) {
+  /** @internal */
+  static fromExtendedJSON(doc: { $timestamp: { t: number; i: number } }): Timestamp {
     return new Timestamp(doc.$timestamp.i, doc.$timestamp.t);
   }
 }
-
-Timestamp.MAX_VALUE = Timestamp.MAX_UNSIGNED_VALUE;
