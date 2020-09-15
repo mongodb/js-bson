@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer';
 import { Binary } from '../binary';
 import type { Document } from '../bson';
-import { Code, CodeFunction } from '../code';
+import { Code } from '../code';
 import * as constants from '../constants';
 import { DBRef, DBRefLike, isDBRefLike } from '../db_ref';
 import { Decimal128 } from '../decimal128';
@@ -45,7 +45,7 @@ export interface DeserializationOptions {
 const JS_INT_MAX_LONG = Long.fromNumber(constants.JS_INT_MAX);
 const JS_INT_MIN_LONG = Long.fromNumber(constants.JS_INT_MIN);
 
-const functionCache: { [hash: string]: CodeFunction } = {};
+const functionCache: { [hash: string]: Function } = {};
 
 export function deserialize(
   buffer: Buffer,
@@ -655,14 +655,14 @@ function deserializeObject(
  * @internal
  */
 function isolateEvalWithHash(
-  functionCache: { [hash: string]: CodeFunction },
+  functionCache: { [hash: string]: Function },
   hash: string,
   functionString: string,
   object: Document
 ) {
   // Check for cache hit, eval if missing and return cached function
   if (functionCache[hash] == null) {
-    functionCache[hash] = new Function(functionString) as CodeFunction;
+    functionCache[hash] = new Function(functionString);
   }
 
   // Set the object
@@ -674,6 +674,6 @@ function isolateEvalWithHash(
  *
  * @internal
  */
-function isolateEval(functionString: string): CodeFunction {
-  return new Function(functionString) as CodeFunction;
+function isolateEval(functionString: string): Function {
+  return new Function(functionString);
 }

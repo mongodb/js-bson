@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer';
 import { Binary } from '../binary';
 import type { BSONSymbol, DBRef, Document, MaxKey } from '../bson';
-import type { Code, CodeFunction } from '../code';
+import type { Code } from '../code';
 import * as constants from '../constants';
 import type { DBRefLike } from '../db_ref';
 import type { Decimal128 } from '../decimal128';
@@ -527,7 +527,7 @@ function serializeDouble(
 function serializeFunction(
   buffer: Buffer,
   key: string,
-  value: CodeFunction,
+  value: Function,
   index: number,
   _checkKeys = false,
   _depth = 0,

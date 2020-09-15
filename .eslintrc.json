@@ -44,6 +44,14 @@
     "strict": [
       "error",
       "global"
+    ],
+    "@typescript-eslint/ban-types": [
+      "error",
+      {
+        "types": {
+          "Function": false
+        }
+      }
     ]
   }
 }

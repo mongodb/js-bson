@@ -1,10 +1,8 @@
-import type { CodeFunction } from '../code';
-
 /**
  * Normalizes our expected stringified form of a function across versions of node
  * @param fn - The function to stringify
  */
-export function normalizedFunctionString(fn: CodeFunction): string {
+export function normalizedFunctionString(fn: Function): string {
   return fn.toString().replace('function(', 'function (');
 }
 
