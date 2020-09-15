@@ -75,9 +75,7 @@ export function deserialize(
 
   if (size + index > buffer.length) {
     throw new Error(
-      `(bson size ${size} + options.index ${index} must be <= buffer length ${Buffer.byteLength(
-        buffer
-      )})`
+      `(bson size ${size} + options.index ${index} must be <= buffer length ${buffer.byteLength})`
     );
   }
 
@@ -156,7 +154,7 @@ function deserializeObject(
     }
 
     // If are at the end of the buffer there is a problem with the document
-    if (i >= Buffer.byteLength(buffer)) throw new Error('Bad BSON Document: illegal CString');
+    if (i >= buffer.byteLength) throw new Error('Bad BSON Document: illegal CString');
     const name = isArray ? arrayIndex++ : buffer.toString('utf8', index, i);
 
     index = i + 1;
@@ -318,7 +316,7 @@ function deserializeObject(
       if (binarySize < 0) throw new Error('Negative binary type element size found');
 
       // Is the length longer than the document
-      if (binarySize > Buffer.byteLength(buffer))
+      if (binarySize > buffer.byteLength)
         throw new Error('Binary type size larger than document size');
 
       // Decode as raw Buffer object if options specifies it
@@ -344,10 +342,7 @@ function deserializeObject(
           object[name] = new Binary(buffer.slice(index, index + binarySize), subType);
         }
       } else {
-        const _buffer =
-          typeof Uint8Array !== 'undefined'
-            ? new Uint8Array(new ArrayBuffer(binarySize))
-            : new Array(binarySize);
+        const _buffer = Buffer.alloc(binarySize);
         // If we have subtype 2 skip the 4 bytes for the size
         if (subType === Binary.SUBTYPE_BYTE_ARRAY) {
           binarySize =
@@ -613,11 +608,7 @@ function deserializeObject(
       object[name] = new DBRef(namespace, oid);
     } else {
       throw new Error(
-        'Detected unknown BSON type ' +
-          elementType.toString(16) +
-          ' for fieldname "' +
-          name +
-          '", are you using the latest BSON parser?'
+        'Detected unknown BSON type ' + elementType.toString(16) + ' for fieldname "' + name + '"'
       );
     }
   }

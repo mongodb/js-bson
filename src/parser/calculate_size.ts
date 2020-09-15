@@ -83,9 +83,9 @@ function calculateElement(
         return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (12 + 1);
       } else if (value instanceof Date || isDate(value)) {
         return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (8 + 1);
-      } else if (typeof Buffer !== 'undefined' && Buffer.isBuffer(value)) {
+      } else if (ArrayBuffer.isView(value) || value instanceof ArrayBuffer) {
         return (
-          (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (1 + 4 + 1) + value.length
+          (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (1 + 4 + 1) + value.byteLength
         );
       } else if (
         value['_bsontype'] === 'Long' ||

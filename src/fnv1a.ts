@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
 import { Long } from './long';
+import type { BufferEncoding } from './parser/utils';
 
 const MASK_8 = 0xff;
 const MASK_24 = 0xffffff;
