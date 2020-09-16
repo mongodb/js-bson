@@ -188,6 +188,16 @@ export class Long {
   }
 
   /**
+   * Returns a Long representing the given value, provided that it is a finite number. Otherwise, zero is returned.
+   * @param value - The number in question
+   * @param unsigned - Whether unsigned or not, defaults to signed
+   * @returns The corresponding Long value
+   */
+  static fromBigInt(value: bigint, unsigned?: boolean): Long {
+    return Long.fromString(value.toString(10), unsigned);
+  }
+
+  /**
    * Returns a Long representation of the given string, written using the specified radix.
    * @param str - The textual representation of the Long
    * @param unsigned - Whether unsigned or not, defaults to signed
@@ -791,6 +801,11 @@ export class Long {
   toNumber(): number {
     if (this.unsigned) return (this.high >>> 0) * TWO_PWR_32_DBL + (this.low >>> 0);
     return this.high * TWO_PWR_32_DBL + (this.low >>> 0);
+  }
+
+  /** Converts the Long to a BigInt (arbitrary precision). */
+  toBigInt(): bigint {
+    return BigInt(this.toString());
   }
 
   /**

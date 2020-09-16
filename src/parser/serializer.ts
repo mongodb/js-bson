@@ -4,7 +4,7 @@ import type { BSONSymbol, DBRef, Document, MaxKey } from '../bson';
 import type { Code } from '../code';
 import * as constants from '../constants';
 import type { DBRefLike } from '../db_ref';
-import type { Decimal128 } from '../decimal128';
+import { Decimal128 } from '../decimal128';
 import type { Double } from '../double';
 import { ensureBuffer } from '../ensure_buffer';
 import { isBSONType } from '../extended_json';
@@ -159,6 +159,55 @@ function serializeNumber(
     index = index + 8;
   }
 
+  return index;
+}
+
+function serializeBigInt(
+  buffer: Buffer,
+  key: string,
+  value: bigint,
+  index: number,
+  isArray?: boolean
+) {
+  const typeIndicatorIndex = index;
+  index += 1;
+  const keyByteLength = !isArray
+    ? buffer.write(key, index, undefined, 'utf8')
+    : buffer.write(key, index, undefined, 'ascii');
+
+  index += keyByteLength + 1;
+  buffer[index - 1] = 0;
+
+  if (BigInt(constants.BSON_INT32_MIN) <= value && BigInt(constants.BSON_INT32_MAX) >= value) {
+    // value fits in int 32
+    buffer[typeIndicatorIndex] = constants.BSON_DATA_INT;
+    index = buffer.writeInt32LE(Number(value), index, false);
+  } else if (
+    BigInt(constants.BSON_INT64_MIN) <= value &&
+    value <= BigInt(constants.BSON_INT64_MAX)
+  ) {
+    // value fits in int 64
+    buffer[typeIndicatorIndex] = constants.BSON_DATA_LONG;
+    const longVal = Long.fromBigInt(value);
+    buffer.set(longVal.toBytesLE(), index);
+    index += 8;
+  } else {
+    // value is very large, try decimal128
+    try {
+      const dec128Value = Decimal128.fromString(value.toString(10));
+      if (dec128Value.toString() !== value.toString(10)) {
+        // precision was lost!
+        throw new Error();
+      }
+      buffer[typeIndicatorIndex] = constants.BSON_DATA_DECIMAL128;
+      buffer.set(dec128Value.bytes, index);
+      index += 16;
+    } catch (e) {
+      // We could stringify the number? some metadata has to be tracked to do that correctly,
+      // cross driver support even
+      throw new TypeError(`BigInt ${value} is outside of BSON number format ranges`);
+    }
+  }
   return index;
 }
 
@@ -807,6 +856,8 @@ export function serializeInto(
         index = serializeString(buffer, key, value, index, true);
       } else if (typeof value === 'number') {
         index = serializeNumber(buffer, key, value, index, true);
+      } else if (typeof value === 'bigint') {
+        index = serializeBigInt(buffer, key, value, index, true);
       } else if (typeof value === 'boolean') {
         index = serializeBoolean(buffer, key, value, index, true);
       } else if (value instanceof Date || isDate(value)) {
@@ -913,6 +964,8 @@ export function serializeInto(
         index = serializeString(buffer, key, value, index);
       } else if (type === 'number') {
         index = serializeNumber(buffer, key, value, index);
+      } else if (type === 'bigint') {
+        index = serializeBigInt(buffer, key, value, index);
       } else if (type === 'boolean') {
         index = serializeBoolean(buffer, key, value, index);
       } else if (value instanceof Date || isDate(value)) {
@@ -1015,6 +1068,8 @@ export function serializeInto(
         index = serializeString(buffer, key, value, index);
       } else if (type === 'number') {
         index = serializeNumber(buffer, key, value, index);
+      } else if (type === 'bigint') {
+        index = serializeBigInt(buffer, key, value, index);
       } else if (type === 'boolean') {
         index = serializeBoolean(buffer, key, value, index);
       } else if (value instanceof Date || isDate(value)) {
