@@ -19,11 +19,14 @@ import { MinKey } from './min_key';
 import { ObjectId } from './objectid';
 import { calculateObjectSize as internalCalculateObjectSize } from './parser/calculate_size';
 // Parts of the parser
-import { DeserializationOptions, deserialize as internalDeserialize } from './parser/deserializer';
-import { SerializationOptions, serializeInto as internalSerialize } from './parser/serializer';
+import { DeserializeOptions, deserialize as internalDeserialize } from './parser/deserializer';
+import { SerializeOptions, serializeInto as internalSerialize } from './parser/serializer';
 import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
+
+export { SerializeOptions, DeserializeOptions };
+
 export {
   BSON_BINARY_SUBTYPE_BYTE_ARRAY,
   BSON_BINARY_SUBTYPE_DEFAULT,
@@ -118,7 +121,7 @@ export function setInternalBufferSize(size: number): void {
  * @param object - the Javascript object to serialize.
  * @returns Buffer object containing the serialized object.
  */
-export function serialize(object: Document, options: SerializationOptions = {}): Buffer {
+export function serialize(object: Document, options: SerializeOptions = {}): Buffer {
   // Unpack the options
   const checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : false;
   const serializeFunctions =
@@ -166,7 +169,7 @@ export function serialize(object: Document, options: SerializationOptions = {}):
 export function serializeWithBufferAndIndex(
   object: Document,
   finalBuffer: Buffer,
-  options: SerializationOptions = {}
+  options: SerializeOptions = {}
 ): number {
   // Unpack the options
   const checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : false;
@@ -198,13 +201,13 @@ export function serializeWithBufferAndIndex(
  * @param buffer - the buffer containing the serialized set of BSON documents.
  * @returns returns the deserialized Javascript Object.
  */
-export function deserialize(buffer: Buffer, options: DeserializationOptions = {}): Document {
+export function deserialize(buffer: Buffer, options: DeserializeOptions = {}): Document {
   buffer = ensureBuffer(buffer);
   return internalDeserialize(buffer, options);
 }
 
 export type CalculateObjectSizeOptions = Pick<
-  SerializationOptions,
+  SerializeOptions,
   'serializeFunctions' | 'ignoreUndefined'
 >;
 
@@ -245,7 +248,7 @@ export function deserializeStream(
   numberOfDocuments: number,
   documents: Document[],
   docStartIndex: number,
-  options: DeserializationOptions
+  options: DeserializeOptions
 ): number {
   const internalOptions = Object.assign(
     { allowObjectSmallerThanBufferSize: true, index: 0 },

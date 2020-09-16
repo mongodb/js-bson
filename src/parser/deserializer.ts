@@ -16,7 +16,7 @@ import { BSONSymbol } from '../symbol';
 import { Timestamp } from '../timestamp';
 import { validateUtf8 } from '../validate_utf8';
 
-export interface DeserializationOptions {
+export interface DeserializeOptions {
   /** evaluate functions in the BSON document scoped to the object deserialized. */
   evalFunctions?: boolean;
   /** cache evaluated functions for reuse. */
@@ -49,7 +49,7 @@ const functionCache: { [hash: string]: Function } = {};
 
 export function deserialize(
   buffer: Buffer,
-  options: DeserializationOptions,
+  options: DeserializeOptions,
   isArray?: boolean
 ): Document {
   options = options == null ? {} : options;
@@ -93,7 +93,7 @@ export function deserialize(
 function deserializeObject(
   buffer: Buffer,
   index: number,
-  options: DeserializationOptions,
+  options: DeserializeOptions,
   isArray = false
 ) {
   const evalFunctions = options['evalFunctions'] == null ? false : options['evalFunctions'];
@@ -253,8 +253,8 @@ function deserializeObject(
         arrayOptions = {};
         for (const n in options) {
           (arrayOptions as {
-            [key: string]: DeserializationOptions[keyof DeserializationOptions];
-          })[n] = options[n as keyof DeserializationOptions];
+            [key: string]: DeserializeOptions[keyof DeserializeOptions];
+          })[n] = options[n as keyof DeserializeOptions];
         }
         arrayOptions['raw'] = true;
       }
