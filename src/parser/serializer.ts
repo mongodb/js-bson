@@ -15,7 +15,7 @@ import { Map } from '../map';
 import type { MinKey } from '../min_key';
 import type { ObjectId } from '../objectid';
 import type { BSONRegExp } from '../regexp';
-import { isDate, isUint8Array, normalizedFunctionString } from './utils';
+import { isBigInt64Array, isBigUInt64Array, isDate, normalizedFunctionString } from './utils';
 
 export interface SerializeOptions {
   /** the serializer will check if keys are valid. */
@@ -966,7 +966,7 @@ export function serializeInto(
         index = serializeString(buffer, key, value, index);
       } else if (type === 'number') {
         index = serializeNumber(buffer, key, value, index);
-      } else if (type === 'bigint') {
+      } else if (type === 'bigint' || isBigInt64Array(value) || isBigUInt64Array(value)) {
         index = serializeBigInt(buffer, key, value, index);
       } else if (type === 'boolean') {
         index = serializeBoolean(buffer, key, value, index);

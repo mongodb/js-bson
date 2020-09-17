@@ -40,6 +40,24 @@ export function isUint8Array(value: unknown): value is Uint8Array {
   return Object.prototype.toString.call(value) === '[object Uint8Array]';
 }
 
+export function isBigInt64Array(value: unknown): value is BigInt64Array {
+  return Object.prototype.toString.call(value) === '[object BigInt64Array]';
+}
+
+export function isBigUInt64Array(value: unknown): value is BigUint64Array {
+  return Object.prototype.toString.call(value) === '[object BigUint64Array]';
+}
+
+/** Call to check if your environment has `Buffer` */
+export function haveBuffer(): boolean {
+  return typeof global !== 'undefined' && typeof global.Buffer !== 'undefined';
+}
+
+/** Callable in any environment to check if value is a Buffer */
+export function isBuffer(value: unknown): value is Buffer {
+  return haveBuffer() && Buffer.isBuffer(value);
+}
+
 // To ensure that 0.4 of node works correctly
 export function isDate(d: unknown): d is Date {
   return isObjectLike(d) && Object.prototype.toString.call(d) === '[object Date]';
