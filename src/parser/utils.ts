@@ -40,9 +40,6 @@ export function isUint8Array(value: unknown): value is Uint8Array {
   return Object.prototype.toString.call(value) === '[object Uint8Array]';
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const global: any;
-
 // To ensure that 0.4 of node works correctly
 export function isDate(d: unknown): d is Date {
   return isObjectLike(d) && Object.prototype.toString.call(d) === '[object Date]';
