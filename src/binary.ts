@@ -4,17 +4,15 @@ import type { EJSONOptions } from './extended_json';
 
 type BinarySequence = Uint8Array | Buffer | number[];
 
-export type BinaryEJSON =
-  | {
-      $type: string;
-      $binary: string;
-    }
-  | {
-      $binary: {
+export type BinaryEJSON = {
+  $type?: string;
+  $binary:
+    | string
+    | {
         subType: string;
         base64: string;
       };
-    };
+};
 
 /** A class representation of the BSON Binary type. */
 export class Binary {
@@ -226,7 +224,7 @@ export class Binary {
     options = options || {};
     let data: Buffer | undefined;
     let type;
-    if (options.legacy && '$type' in doc && typeof doc.$binary === 'string') {
+    if (options.legacy && typeof doc.$binary === 'string') {
       type = doc.$type ? parseInt(doc.$type, 16) : 0;
       data = Buffer.from(doc.$binary, 'base64');
     } else {
