@@ -5,6 +5,13 @@ const { Buffer } = require('buffer');
 const BSON = require('../register-bson');
 
 describe('BSON BigInt Support', function () {
+  before(function () {
+    try {
+      BigInt(0);
+    } catch (_) {
+      this.skip('JS VM does not support BigInt');
+    }
+  });
   it('Should serialize an int that fits in int32', function () {
     const testDoc = { b: BigInt(32) };
     const serializedDoc = BSON.serialize(testDoc);
