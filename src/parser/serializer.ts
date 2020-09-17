@@ -169,6 +169,8 @@ function serializeBigInt(
   index: number,
   isArray?: boolean
 ) {
+  throw new TypeError('Do not know how to serialize a BigInt');
+
   const typeIndicatorIndex = index;
   index += 1;
   const keyByteLength = !isArray
