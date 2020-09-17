@@ -49,6 +49,10 @@ const INT_CACHE: { [key: number]: Long } = {};
 /** A cache of the Long representations of small unsigned integer values. */
 const UINT_CACHE: { [key: number]: Long } = {};
 
+export interface LongExtended {
+  $numberLong: string;
+}
+
 /**
  * A class representing a 64-bit integer
  * @remarks
@@ -912,7 +916,7 @@ export class Long {
    *                  BSON SPECIFIC ADDITIONS                     *
    ****************************************************************
    */
-  toExtendedJSON(options?: EJSONOptions): number | { $numberLong: string } {
+  toExtendedJSON(options?: EJSONOptions): number | LongExtended {
     if (options && options.relaxed) return this.toNumber();
     return { $numberLong: this.toString() };
   }

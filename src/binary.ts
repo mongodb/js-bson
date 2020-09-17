@@ -4,17 +4,17 @@ import { haveBuffer, isBuffer, isUint8Array } from './parser/utils';
 
 type BinarySequence = Uint8Array | Buffer | number[];
 
-export type BinaryEJSON =
-  | {
-      $type: string;
-      $binary: string;
-    }
-  | {
-      $binary: {
-        subType: string;
-        base64: string;
-      };
-    };
+export interface BinaryExtendedLegacy {
+  $type: string;
+  $binary: string;
+}
+
+export interface BinaryExtended {
+  $binary: {
+    subType: string;
+    base64: string;
+  };
+}
 
 /** A class representation of the BSON Binary type. */
 export class Binary {
@@ -290,7 +290,7 @@ export class Binary {
   }
 
   /** @internal */
-  toExtendedJSON(options?: EJSONOptions): BinaryEJSON {
+  toExtendedJSON(options?: EJSONOptions): BinaryExtendedLegacy | BinaryExtended {
     options = options || {};
     const base64String = Buffer.isBuffer(this.buffer)
       ? this.buffer.toString('base64')
@@ -313,13 +313,13 @@ export class Binary {
 
   /** @internal */
   static fromExtendedJSON(
-    doc: { $type: string; $binary: string | { subType: string; base64: string } },
+    doc: BinaryExtendedLegacy | BinaryExtended,
     options?: EJSONOptions
   ): Binary {
     options = options || {};
     let data: Buffer | undefined;
     let type;
-    if (options.legacy && typeof doc.$binary === 'string') {
+    if (options.legacy && typeof doc.$binary === 'string' && '$type' in doc) {
       type = doc.$type ? parseInt(doc.$type, 16) : 0;
       data = Buffer.from(doc.$binary, 'base64');
     } else {

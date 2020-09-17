@@ -1,3 +1,7 @@
+interface MinKeyExtended {
+  $minKey: 1;
+}
+
 /**
  * A class representation of the BSON MinKey type.
  */
@@ -5,7 +9,7 @@ export class MinKey {
   _bsontype!: 'MinKey';
 
   /** @internal */
-  toExtendedJSON(): { $minKey: 1 } {
+  toExtendedJSON(): MinKeyExtended {
     return { $minKey: 1 };
   }
 

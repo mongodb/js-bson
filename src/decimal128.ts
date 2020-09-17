@@ -153,6 +153,10 @@ function invalidErr(string: string, message: string) {
   throw new TypeError(`"${string}" is not a valid Decimal128 string - ${message}`);
 }
 
+export interface Decimal128Extended {
+  $numberDecimal: string;
+}
+
 /** A class representation of the BSON Decimal128 type. */
 export class Decimal128 {
   _bsontype!: 'Decimal128';
@@ -766,17 +770,17 @@ export class Decimal128 {
     return string.join('');
   }
 
-  toJSON(): { $numberDecimal: string } {
+  toJSON(): Decimal128Extended {
     return { $numberDecimal: this.toString() };
   }
 
   /** @internal */
-  toExtendedJSON(): { $numberDecimal: string } {
+  toExtendedJSON(): Decimal128Extended {
     return { $numberDecimal: this.toString() };
   }
 
   /** @internal */
-  static fromExtendedJSON(doc: { $numberDecimal: string }): Decimal128 {
+  static fromExtendedJSON(doc: Decimal128Extended): Decimal128 {
     return Decimal128.fromString(doc.$numberDecimal);
   }
 }

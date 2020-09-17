@@ -1,5 +1,9 @@
 import type { EJSONOptions } from './extended_json';
 
+export interface Int32Extended {
+  $numberInt: string;
+}
+
 /** A class representation of a BSON Int32 type. */
 export class Int32 {
   _bsontype!: 'Int32';
@@ -33,13 +37,13 @@ export class Int32 {
   }
 
   /** @internal */
-  toExtendedJSON(options?: EJSONOptions): number | { $numberInt: string } {
+  toExtendedJSON(options?: EJSONOptions): number | Int32Extended {
     if (options && (options.relaxed || options.legacy)) return this.value;
     return { $numberInt: this.value.toString() };
   }
 
   /** @internal */
-  static fromExtendedJSON(doc: { $numberInt: string }, options?: EJSONOptions): number | Int32 {
+  static fromExtendedJSON(doc: Int32Extended, options?: EJSONOptions): number | Int32 {
     return options && options.relaxed ? parseInt(doc.$numberInt, 10) : new Int32(doc.$numberInt);
   }
 }

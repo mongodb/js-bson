@@ -4,9 +4,17 @@ function alphabetize(str: string): string {
   return str.split('').sort().join('');
 }
 
-export type BSONRegExpEJSON =
-  | { $regex: string | BSONRegExp; $options: string }
-  | { $regularExpression: { pattern: string; options: string } };
+export interface BSONRegExpExtendedLegacy {
+  $regex: string | BSONRegExp;
+  $options: string;
+}
+
+export interface BSONRegExpExtended {
+  $regularExpression: {
+    pattern: string;
+    options: string;
+  };
+}
 
 /** A class representation of the BSON RegExp type. */
 export class BSONRegExp {
@@ -46,7 +54,7 @@ export class BSONRegExp {
   }
 
   /** @internal */
-  toExtendedJSON(options?: EJSONOptions): BSONRegExpEJSON {
+  toExtendedJSON(options?: EJSONOptions): BSONRegExpExtendedLegacy | BSONRegExpExtended {
     options = options || {};
     if (options.legacy) {
       return { $regex: this.pattern, $options: this.options };
@@ -55,7 +63,7 @@ export class BSONRegExp {
   }
 
   /** @internal */
-  static fromExtendedJSON(doc: BSONRegExpEJSON): BSONRegExp {
+  static fromExtendedJSON(doc: BSONRegExpExtendedLegacy | BSONRegExpExtended): BSONRegExp {
     if ('$regex' in doc) {
       if (typeof doc.$regex !== 'string') {
         // This is for $regex query operators that have extended json values.

@@ -1,3 +1,7 @@
+interface MaxKeyExtended {
+  $maxKey: 1;
+}
+
 /**
  * A class representation of the BSON MaxKey type.
  */
@@ -5,7 +9,7 @@ export class MaxKey {
   _bsontype!: 'MaxKey';
 
   /** @internal */
-  toExtendedJSON(): { $maxKey: 1 } {
+  toExtendedJSON(): MaxKeyExtended {
     return { $maxKey: 1 };
   }
 
