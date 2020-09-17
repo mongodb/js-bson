@@ -297,10 +297,8 @@ describe('Full BSON', function () {
     const serialized_data = BSON.serialize(doc);
     const deserialized_data = BSON.deserialize(serialized_data);
 
-    const bytesFromBSON = Array.from(deserialized_data.floats.value(true));
-    const bytesFromJS = Array.from(new Uint8Array(floats.buffer));
-    expect(bytesFromJS).to.have.ordered.members(bytesFromBSON);
-    expect(12.34).to.equal(deserialized_data.floats.value(true).readDoubleLE(0));
+    expect(deserialized_data).to.have.property('floats');
+    expect(deserialized_data.floats).to.have.property('0', 12.34);
   });
 
   it('Should Correctly fail due to attempting serialization of illegal key values', function (done) {
