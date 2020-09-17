@@ -1,4 +1,4 @@
-import type { Buffer } from 'buffer';
+import { Buffer } from 'buffer';
 import { Binary } from '../binary';
 import type { BSONSymbol, DBRef, Document, MaxKey } from '../bson';
 import type { Code } from '../code';
@@ -15,7 +15,7 @@ import { Map } from '../map';
 import type { MinKey } from '../min_key';
 import type { ObjectId } from '../objectid';
 import type { BSONRegExp } from '../regexp';
-import { isDate, normalizedFunctionString } from './utils';
+import { isDate, isUint8Array, normalizedFunctionString } from './utils';
 
 export interface SerializeOptions {
   /** the serializer will check if keys are valid. */
@@ -817,7 +817,7 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index, true);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index, true);
-      } else if (ArrayBuffer.isView(value) || value instanceof ArrayBuffer) {
+      } else if (Buffer.isBuffer(value) || isUint8Array(value) || value instanceof ArrayBuffer) {
         index = serializeBuffer(buffer, key, value, index, true);
       } else if (value instanceof RegExp || isRegExp(value)) {
         index = serializeRegExp(buffer, key, value, index, true);
@@ -921,7 +921,7 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index);
-      } else if (ArrayBuffer.isView(value) || value instanceof ArrayBuffer) {
+      } else if (Buffer.isBuffer(value) || isUint8Array(value) || value instanceof ArrayBuffer) {
         index = serializeBuffer(buffer, key, value, index);
       } else if (value instanceof RegExp || isRegExp(value)) {
         index = serializeRegExp(buffer, key, value, index);
@@ -1025,7 +1025,7 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index);
-      } else if (ArrayBuffer.isView(value) || value instanceof ArrayBuffer) {
+      } else if (Buffer.isBuffer(value) || isUint8Array(value) || value instanceof ArrayBuffer) {
         index = serializeBuffer(buffer, key, value, index);
       } else if (value instanceof RegExp || isRegExp(value)) {
         index = serializeRegExp(buffer, key, value, index);
