@@ -73,7 +73,7 @@ export function deserialize(
     throw new Error(`buffer length ${buffer.length} must === bson size ${size}`);
   }
 
-  if (size + index > buffer.length) {
+  if (size + index > buffer.byteLength) {
     throw new Error(
       `(bson size ${size} + options.index ${index} must be <= buffer length ${buffer.byteLength})`
     );

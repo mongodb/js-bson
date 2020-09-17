@@ -1,6 +1,5 @@
 import { Buffer } from 'buffer';
 import { Long } from './long';
-import type { BufferEncoding } from './parser/utils';
 
 const MASK_8 = 0xff;
 const MASK_24 = 0xffffff;
@@ -16,7 +15,7 @@ const FNV_MASK = new Long(MASK_32, 0);
  * Algorithm can be found here: http://www.isthe.com/chongo/tech/comp/fnv/#FNV-1a
  * @internal
  */
-export function fnv1a32(input: string, encoding?: BufferEncoding): number {
+export function fnv1a32(input: string, encoding?: string): number {
   encoding ??= 'utf8';
   const octets = Buffer.from(input, encoding);
 
@@ -35,7 +34,7 @@ export function fnv1a32(input: string, encoding?: BufferEncoding): number {
  * http://www.isthe.com/chongo/tech/comp/fnv/#xor-fold
  * @internal
  */
-export function fnv1a24(input: string, encoding?: BufferEncoding): number {
+export function fnv1a24(input: string, encoding?: string): number {
   const _32bit = fnv1a32(input, encoding);
   const base = _32bit & MASK_24;
   const top = (_32bit >>> 24) & MASK_8;

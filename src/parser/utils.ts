@@ -1,13 +1,4 @@
 import { Buffer } from 'buffer';
-export type BufferEncoding =
-  | 'ascii'
-  | 'utf8'
-  | 'utf16le'
-  | 'ucs2'
-  | 'base64'
-  | 'latin1'
-  | 'binary'
-  | 'hex';
 
 /**
  * Normalizes our expected stringified form of a function across versions of node
@@ -51,11 +42,6 @@ export function isUint8Array(value: unknown): value is Uint8Array {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const global: any;
-
-/** Call to check if your environment has `Buffer` */
-export function haveBuffer(): boolean {
-  return typeof global !== 'undefined' && typeof global.Buffer !== 'undefined';
-}
 
 // To ensure that 0.4 of node works correctly
 export function isDate(d: unknown): d is Date {
