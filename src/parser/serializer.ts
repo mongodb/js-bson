@@ -80,68 +80,27 @@ function serializeNumber(
   isArray?: boolean
 ) {
   // We have an integer value
-  // TODO(NODE-2769): Issue serializing large integers as doubles
   // TODO(NODE-2529): Add support for big int
   if (
-    Math.floor(value) === value &&
-    value >= constants.JS_INT_MIN &&
-    value <= constants.JS_INT_MAX
+    Number.isInteger(value) &&
+    value >= constants.BSON_INT32_MIN &&
+    value <= constants.BSON_INT32_MAX
   ) {
-    // If the value fits in 32 bits encode as int, if it fits in a double
-    // encode it as a double, otherwise long
-    if (value >= constants.BSON_INT32_MIN && value <= constants.BSON_INT32_MAX) {
-      // Set int type 32 bits or less
-      buffer[index++] = constants.BSON_DATA_INT;
-      // Number of written bytes
-      const numberOfWrittenBytes = !isArray
-        ? buffer.write(key, index, undefined, 'utf8')
-        : buffer.write(key, index, undefined, 'ascii');
-      // Encode the name
-      index = index + numberOfWrittenBytes;
-      buffer[index++] = 0;
-      // Write the int value
-      buffer[index++] = value & 0xff;
-      buffer[index++] = (value >> 8) & 0xff;
-      buffer[index++] = (value >> 16) & 0xff;
-      buffer[index++] = (value >> 24) & 0xff;
-    } else if (value >= constants.JS_INT_MIN && value <= constants.JS_INT_MAX) {
-      // Encode as double
-      buffer[index++] = constants.BSON_DATA_NUMBER;
-      // Number of written bytes
-      const numberOfWrittenBytes = !isArray
-        ? buffer.write(key, index, undefined, 'utf8')
-        : buffer.write(key, index, undefined, 'ascii');
-      // Encode the name
-      index = index + numberOfWrittenBytes;
-      buffer[index++] = 0;
-      // Write float
-      writeIEEE754(buffer, value, index, 'little', 52, 8);
-      // Adjust index
-      index = index + 8;
-    } else {
-      // Set long type
-      buffer[index++] = constants.BSON_DATA_LONG;
-      // Number of written bytes
-      const numberOfWrittenBytes = !isArray
-        ? buffer.write(key, index, undefined, 'utf8')
-        : buffer.write(key, index, undefined, 'ascii');
-      // Encode the name
-      index = index + numberOfWrittenBytes;
-      buffer[index++] = 0;
-      const longVal = Long.fromNumber(value);
-      const lowBits = longVal.getLowBits();
-      const highBits = longVal.getHighBits();
-      // Encode low bits
-      buffer[index++] = lowBits & 0xff;
-      buffer[index++] = (lowBits >> 8) & 0xff;
-      buffer[index++] = (lowBits >> 16) & 0xff;
-      buffer[index++] = (lowBits >> 24) & 0xff;
-      // Encode high bits
-      buffer[index++] = highBits & 0xff;
-      buffer[index++] = (highBits >> 8) & 0xff;
-      buffer[index++] = (highBits >> 16) & 0xff;
-      buffer[index++] = (highBits >> 24) & 0xff;
-    }
+    // If the value fits in 32 bits encode as int32
+    // Set int type 32 bits or less
+    buffer[index++] = constants.BSON_DATA_INT;
+    // Number of written bytes
+    const numberOfWrittenBytes = !isArray
+      ? buffer.write(key, index, undefined, 'utf8')
+      : buffer.write(key, index, undefined, 'ascii');
+    // Encode the name
+    index = index + numberOfWrittenBytes;
+    buffer[index++] = 0;
+    // Write the int value
+    buffer[index++] = value & 0xff;
+    buffer[index++] = (value >> 8) & 0xff;
+    buffer[index++] = (value >> 16) & 0xff;
+    buffer[index++] = (value >> 24) & 0xff;
   } else {
     // Encode as double
     buffer[index++] = constants.BSON_DATA_NUMBER;

@@ -7,9 +7,9 @@ export const BSON_INT64_MIN = -Math.pow(2, 63);
 
 // JS MAX PRECISE VALUES
 // Any integer up to 2^53 can be precisely represented by a double.
-export const JS_INT_MAX = Number.MAX_SAFE_INTEGER + 1;
+export const JS_INT_MAX = Math.pow(2, 53);
 // Any integer down to -2^53 can be precisely represented by a double.
-export const JS_INT_MIN = Number.MIN_SAFE_INTEGER - 1;
+export const JS_INT_MIN = -Math.pow(2, 53);
 
 /** Number BSON Type */
 export const BSON_DATA_NUMBER = 1;
