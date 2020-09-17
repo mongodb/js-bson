@@ -489,7 +489,7 @@ function deserializeObject(
         // If we have cache enabled let's look for the md5 of the function in the cache
         if (cacheFunctions) {
           // Got to do this to avoid V8 deoptimizing the call due to finding eval
-          object[name] = isolateEvalWithHash(functionCache, functionString, object);
+          object[name] = isolateEval(functionString, functionCache, object);
         } else {
           object[name] = isolateEval(functionString);
         }
@@ -557,7 +557,7 @@ function deserializeObject(
         // If we have cache enabled let's look for the md5 of the function in the cache
         if (cacheFunctions) {
           // Got to do this to avoid V8 deoptimizing the call due to finding eval
-          object[name] = isolateEvalWithHash(functionCache, functionString, object);
+          object[name] = isolateEval(functionString, functionCache, object);
         } else {
           object[name] = isolateEval(functionString);
         }
@@ -641,11 +641,12 @@ function deserializeObject(
  *
  * @internal
  */
-function isolateEvalWithHash(
-  functionCache: { [hash: string]: Function },
+function isolateEval(
   functionString: string,
-  object: Document
+  functionCache?: { [hash: string]: Function },
+  object?: Document
 ) {
+  if (!functionCache) return new Function(functionString);
   // Check for cache hit, eval if missing and return cached function
   if (functionCache[functionString] == null) {
     functionCache[functionString] = new Function(functionString);
@@ -653,13 +654,4 @@ function isolateEvalWithHash(
 
   // Set the object
   return functionCache[functionString].bind(object);
-}
-
-/**
- * Ensure eval is isolated.
- *
- * @internal
- */
-function isolateEval(functionString: string): Function {
-  return new Function(functionString);
 }
