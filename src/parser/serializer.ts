@@ -4,7 +4,7 @@ import type { BSONSymbol, DBRef, Document, MaxKey } from '../bson';
 import type { Code } from '../code';
 import * as constants from '../constants';
 import type { DBRefLike } from '../db_ref';
-import { Decimal128 } from '../decimal128';
+import type { Decimal128 } from '../decimal128';
 import type { Double } from '../double';
 import { ensureBuffer } from '../ensure_buffer';
 import { isBSONType } from '../extended_json';
