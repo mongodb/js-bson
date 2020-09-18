@@ -21,6 +21,12 @@ export interface DeserializationOptions {
   evalFunctions?: boolean;
   /** cache evaluated functions for reuse. */
   cacheFunctions?: boolean;
+  /**
+   * use a crc32 code for caching, otherwise use the string of the function.
+   * @deprecated this option to use the crc32 function never worked as intended
+   * due to the fact that the crc32 function itself was never implemented.
+   * */
+  cacheFunctionsCrc32?: boolean;
   /** when deserializing a Long will fit it into a Number if it's smaller than 53 bits */
   promoteLongs?: boolean;
   /** when deserializing a Binary will return it as a node.js Buffer instance. */
