@@ -16,7 +16,7 @@ import type { ObjectId } from '../objectid';
 import type { BSONRegExp } from '../regexp';
 import { isDate, normalizedFunctionString } from './utils';
 
-export interface SerializationOptions {
+export interface SerializeOptions {
   /** the serializer will check if keys are valid. */
   checkKeys?: boolean;
   /** serialize the javascript functions **(default:false)**. */

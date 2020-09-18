@@ -1,3 +1,4 @@
+import type { Timestamp } from './timestamp';
 import type { EJSONOptions } from './extended_json';
 import { isObjectLike } from './parser/utils';
 
@@ -297,7 +298,7 @@ export class Long {
   }
 
   /** Returns the sum of this and the specified Long. */
-  add(addend: string | number | Long): Long {
+  add(addend: string | number | Long | Timestamp): Long {
     if (!Long.isLong(addend)) addend = Long.fromValue(addend);
 
     // Divide each number into 4 chunks of 16 bits, and then sum the chunks.
@@ -334,7 +335,7 @@ export class Long {
    * Returns the sum of this and the specified Long.
    * @returns Sum
    */
-  and(other: string | number | Long): Long {
+  and(other: string | number | Long | Timestamp): Long {
     if (!Long.isLong(other)) other = Long.fromValue(other);
     return Long.fromBits(this.low & other.low, this.high & other.high, this.unsigned);
   }
@@ -343,7 +344,7 @@ export class Long {
    * Compares this Long's value with the specified's.
    * @returns 0 if they are the same, 1 if the this is greater and -1 if the given one is greater
    */
-  compare(other: string | number | Long): 0 | 1 | -1 {
+  compare(other: string | number | Long | Timestamp): 0 | 1 | -1 {
     if (!Long.isLong(other)) other = Long.fromValue(other);
     if (this.eq(other)) return 0;
     const thisNeg = this.isNegative(),
@@ -366,7 +367,7 @@ export class Long {
    * Returns this Long divided by the specified. The result is signed if this Long is signed or unsigned if this Long is unsigned.
    * @returns Quotient
    */
-  divide(divisor: string | number | Long): Long {
+  divide(divisor: string | number | Long | Timestamp): Long {
     if (!Long.isLong(divisor)) divisor = Long.fromValue(divisor);
     if (divisor.isZero()) throw Error('division by zero');
 
@@ -473,7 +474,7 @@ export class Long {
    * Tests if this Long's value equals the specified's.
    * @param other - Other value
    */
-  equals(other: string | number | Long): boolean {
+  equals(other: string | number | Long | Timestamp): boolean {
     if (!Long.isLong(other)) other = Long.fromValue(other);
     if (this.unsigned !== other.unsigned && this.high >>> 31 === 1 && other.high >>> 31 === 1)
       return false;
@@ -516,7 +517,7 @@ export class Long {
   }
 
   /** Tests if this Long's value is greater than the specified's. */
-  greaterThan(other: string | number | Long): boolean {
+  greaterThan(other: string | number | Long | Timestamp): boolean {
     return this.comp(other) > 0;
   }
 
@@ -524,7 +525,7 @@ export class Long {
   gt = Long.prototype.greaterThan;
 
   /** Tests if this Long's value is greater than or equal the specified's. */
-  greaterThanOrEqual(other: string | number | Long): boolean {
+  greaterThanOrEqual(other: string | number | Long | Timestamp): boolean {
     return this.comp(other) >= 0;
   }
 
@@ -559,7 +560,7 @@ export class Long {
   }
 
   /** Tests if this Long's value is less than the specified's. */
-  lessThan(other: string | number | Long): boolean {
+  lessThan(other: string | number | Long | Timestamp): boolean {
     return this.comp(other) < 0;
   }
 
@@ -567,7 +568,7 @@ export class Long {
   lt = Long.prototype.lessThan;
 
   /** Tests if this Long's value is less than or equal the specified's. */
-  lessThanOrEqual(other: string | number | Long): boolean {
+  lessThanOrEqual(other: string | number | Long | Timestamp): boolean {
     return this.comp(other) <= 0;
   }
 
@@ -575,7 +576,7 @@ export class Long {
   lte = Long.prototype.lessThanOrEqual;
 
   /** Returns this Long modulo the specified. */
-  modulo(divisor: string | number | Long): Long {
+  modulo(divisor: string | number | Long | Timestamp): Long {
     if (!Long.isLong(divisor)) divisor = Long.fromValue(divisor);
 
     // use wasm support if present
@@ -602,7 +603,7 @@ export class Long {
    * @param multiplier - Multiplier
    * @returns Product
    */
-  multiply(multiplier: string | number | Long): Long {
+  multiply(multiplier: string | number | Long | Timestamp): Long {
     if (this.isZero()) return Long.ZERO;
     if (!Long.isLong(multiplier)) multiplier = Long.fromValue(multiplier);
 
@@ -683,7 +684,7 @@ export class Long {
   }
 
   /** Tests if this Long's value differs from the specified's. */
-  notEquals(other: string | number | Long): boolean {
+  notEquals(other: string | number | Long | Timestamp): boolean {
     return !this.equals(other);
   }
 
@@ -773,7 +774,7 @@ export class Long {
    * @param subtrahend - Subtrahend
    * @returns Difference
    */
-  subtract(subtrahend: string | number | Long): Long {
+  subtract(subtrahend: string | number | Long | Timestamp): Long {
     if (!Long.isLong(subtrahend)) subtrahend = Long.fromValue(subtrahend);
     return this.add(subtrahend.neg());
   }
