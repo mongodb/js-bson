@@ -808,7 +808,7 @@ export function serializeInto(
       } else if (typeof value === 'number') {
         index = serializeNumber(buffer, key, value, index, true);
       } else if (typeof value === 'bigint') {
-        throw new TypeError('Do not know how to serialize a BigInt, please use Decimal128');
+        throw new TypeError('Unsupported type BigInt, please use Decimal128');
       } else if (typeof value === 'boolean') {
         index = serializeBoolean(buffer, key, value, index, true);
       } else if (value instanceof Date || isDate(value)) {
@@ -916,7 +916,7 @@ export function serializeInto(
       } else if (type === 'number') {
         index = serializeNumber(buffer, key, value, index);
       } else if (type === 'bigint' || isBigInt64Array(value) || isBigUInt64Array(value)) {
-        throw new TypeError('Do not know how to serialize a BigInt, please use Decimal128');
+        throw new TypeError('Unsupported type BigInt, please use Decimal128');
       } else if (type === 'boolean') {
         index = serializeBoolean(buffer, key, value, index);
       } else if (value instanceof Date || isDate(value)) {
@@ -1020,7 +1020,7 @@ export function serializeInto(
       } else if (type === 'number') {
         index = serializeNumber(buffer, key, value, index);
       } else if (type === 'bigint') {
-        throw new TypeError('Do not know how to serialize a BigInt, please use Decimal128');
+        throw new TypeError('Unsupported type BigInt, please use Decimal128');
       } else if (type === 'boolean') {
         index = serializeBoolean(buffer, key, value, index);
       } else if (value instanceof Date || isDate(value)) {
