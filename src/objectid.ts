@@ -1,10 +1,6 @@
 import { Buffer } from 'buffer';
 import { ensureBuffer } from './ensure_buffer';
-import { randomBytes } from './parser/utils';
-
-declare const require: Function;
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { deprecate, inspect } = require('util');
+import { deprecate, randomBytes } from './parser/utils';
 
 // constants
 const PROCESS_UNIQUE = randomBytes(5);
@@ -372,6 +368,6 @@ Object.defineProperty(ObjectId, 'get_inc', {
  * @returns return the 24 character hex string representation.
  * @internal
  */
-Object.defineProperty(ObjectId.prototype, inspect.custom || 'inspect', ObjectId.prototype.toString);
+Object.defineProperty(ObjectId.prototype, 'inspect', ObjectId.prototype.toString);
 
 Object.defineProperty(ObjectId.prototype, '_bsontype', { value: 'ObjectID' });

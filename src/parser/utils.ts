@@ -20,6 +20,7 @@ declare let window: any;
 declare let require: Function;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare let global: any;
+declare const self: unknown;
 
 export let randomBytes = insecureRandomBytes;
 if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
@@ -72,4 +73,20 @@ export function isDate(d: unknown): d is Date {
  */
 export function isObjectLike(candidate: unknown): candidate is Record<string, unknown> {
   return typeof candidate === 'object' && candidate !== null;
+}
+
+export function deprecate<T extends Function>(fn: T, message: string): T {
+  if (typeof window === 'undefined' || typeof self === 'undefined') {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    return require('util').deprecate(fn, message);
+  }
+  let warned = false;
+  function deprecated(this: unknown, ...args: unknown[]) {
+    if (!warned) {
+      console.warn(message);
+      warned = true;
+    }
+    return fn.apply(this, ...args);
+  }
+  return (deprecated as unknown) as T;
 }
