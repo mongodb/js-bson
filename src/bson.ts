@@ -19,13 +19,11 @@ import { MinKey } from './min_key';
 import { ObjectId } from './objectid';
 import { calculateObjectSize as internalCalculateObjectSize } from './parser/calculate_size';
 // Parts of the parser
-import { DeserializeOptions, deserialize as internalDeserialize } from './parser/deserializer';
-import { SerializeOptions, serializeInto as internalSerialize } from './parser/serializer';
+import { deserialize as internalDeserialize, DeserializeOptions } from './parser/deserializer';
+import { serializeInto as internalSerialize, SerializeOptions } from './parser/serializer';
 import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
-
-export { SerializeOptions, DeserializeOptions };
 
 export {
   BSON_BINARY_SUBTYPE_BYTE_ARRAY,
@@ -63,6 +61,7 @@ export {
   JS_INT_MAX,
   JS_INT_MIN
 } from './constants';
+export { SerializeOptions, DeserializeOptions };
 export {
   Code,
   Map,
@@ -201,9 +200,11 @@ export function serializeWithBufferAndIndex(
  * @param buffer - the buffer containing the serialized set of BSON documents.
  * @returns returns the deserialized Javascript Object.
  */
-export function deserialize(buffer: Buffer, options: DeserializeOptions = {}): Document {
-  buffer = ensureBuffer(buffer);
-  return internalDeserialize(buffer, options);
+export function deserialize(
+  buffer: Buffer | ArrayBufferView | ArrayBuffer,
+  options: DeserializeOptions = {}
+): Document {
+  return internalDeserialize(ensureBuffer(buffer), options);
 }
 
 export type CalculateObjectSizeOptions = Pick<
@@ -243,7 +244,7 @@ export function calculateObjectSize(
  * @returns next index in the buffer after deserialization **x** numbers of documents.
  */
 export function deserializeStream(
-  data: Buffer,
+  data: Buffer | ArrayBufferView | ArrayBuffer,
   startIndex: number,
   numberOfDocuments: number,
   documents: Document[],
@@ -254,18 +255,21 @@ export function deserializeStream(
     { allowObjectSmallerThanBufferSize: true, index: 0 },
     options
   );
-  data = ensureBuffer(data);
+  const bufferData = ensureBuffer(data);
 
   let index = startIndex;
   // Loop over all documents
   for (let i = 0; i < numberOfDocuments; i++) {
     // Find size of the document
     const size =
-      data[index] | (data[index + 1] << 8) | (data[index + 2] << 16) | (data[index + 3] << 24);
+      bufferData[index] |
+      (bufferData[index + 1] << 8) |
+      (bufferData[index + 2] << 16) |
+      (bufferData[index + 3] << 24);
     // Update options with index
     internalOptions.index = index;
     // Parse the document at this point
-    documents[docStartIndex + i] = internalDeserialize(data, internalOptions);
+    documents[docStartIndex + i] = internalDeserialize(bufferData, internalOptions);
     // Adjust index by the document size
     index = index + size;
   }

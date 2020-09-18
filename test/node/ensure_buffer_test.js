@@ -40,7 +40,6 @@ describe('ensureBuffer tests', function () {
   });
 
   [
-    /* eslint-disable */
     Int8Array,
     Uint8ClampedArray,
     Int16Array,
@@ -49,13 +48,10 @@ describe('ensureBuffer tests', function () {
     Uint32Array,
     Float32Array,
     Float64Array
-    /* eslint-enable */
   ].forEach(function (TypedArray) {
     it(`should throw if input is typed array ${TypedArray.name}`, function () {
       const typedArray = new TypedArray();
-      expect(function () {
-        ensureBuffer(typedArray);
-      }).to.throw(TypeError);
+      expect(ensureBuffer(typedArray)).to.be.instanceOf(Buffer);
     });
   });
 });

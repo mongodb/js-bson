@@ -8,14 +8,18 @@ import { Buffer } from 'buffer';
  * wraps a passed in Uint8Array
  * @throws TypeError If anything other than a Buffer or Uint8Array is passed in
  */
-export function ensureBuffer(potentialBuffer: Buffer | Uint8Array): Buffer {
-  if (potentialBuffer instanceof Buffer) {
+export function ensureBuffer(potentialBuffer: Buffer | ArrayBufferView | ArrayBuffer): Buffer {
+  if (Buffer.isBuffer(potentialBuffer)) {
     return potentialBuffer;
   }
 
-  if (potentialBuffer instanceof Uint8Array) {
+  if (ArrayBuffer.isView(potentialBuffer)) {
     return Buffer.from(potentialBuffer.buffer);
   }
 
-  throw new TypeError('Must use either Buffer or Uint8Array');
+  if (potentialBuffer instanceof ArrayBuffer) {
+    return Buffer.from(potentialBuffer);
+  }
+
+  throw new TypeError('Must use either Buffer or TypedArray');
 }

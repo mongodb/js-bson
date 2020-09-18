@@ -1,6 +1,10 @@
 import { Buffer } from 'buffer';
-import { deprecate, inspect } from 'util';
-import { haveBuffer, randomBytes } from './parser/utils';
+import { ensureBuffer } from './ensure_buffer';
+import { randomBytes } from './parser/utils';
+
+declare const require: Function;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { deprecate, inspect } = require('util');
 
 // constants
 const PROCESS_UNIQUE = randomBytes(5);
@@ -20,23 +24,13 @@ let i = 0;
 while (i < 10) decodeLookup[0x30 + i] = i++;
 while (i < 16) decodeLookup[0x41 - 10 + i] = decodeLookup[0x61 - 10 + i] = i++;
 
-function convertToHex(bytes: Buffer): string {
-  return bytes.toString('hex');
-}
-
-function makeObjectIdError(invalidString: string, index: number) {
-  const invalidCharacter = invalidString[index];
-  return new TypeError(
-    `ObjectId string "${invalidString}" contains invalid character "${invalidCharacter}" with character code (${invalidString.charCodeAt(
-      index
-    )}). All character codes for a non-hex string must be less than 256.`
-  );
-}
-
 export interface ObjectIdLike {
   id: string | Buffer;
+  __id?: string;
   toHexString(): string;
 }
+
+const kId = Symbol('id');
 
 /**
  * A class representation of the BSON ObjectId type.
@@ -47,9 +41,12 @@ export class ObjectId {
   /** @internal */
   static index = ~~(Math.random() * 0xffffff);
 
-  static cacheHexString?: boolean;
-  id: string | Buffer;
-  __id?: string;
+  static cacheHexString: boolean;
+
+  /** ObjectId Bytes @internal */
+  private [kId]: Buffer;
+  /** ObjectId hexString cache @internal */
+  private __id?: string;
 
   /**
    * Create an ObjectId type
@@ -59,67 +56,74 @@ export class ObjectId {
   constructor(id?: string | Buffer | number | ObjectIdLike | ObjectId) {
     // Duck-typing to support ObjectId from different npm packages
     if (id instanceof ObjectId) {
-      this.id = id.id;
+      this[kId] = id.id;
       this.__id = id.__id;
-      return;
+    }
+
+    if (typeof id === 'object' && 'id' in id) {
+      if ('toHexString' in id && typeof id.toHexString === 'function') {
+        this[kId] = Buffer.from(id.toHexString(), 'hex');
+      } else {
+        this[kId] = typeof id.id === 'string' ? Buffer.from(id.id) : id.id;
+      }
     }
 
     // The most common use case (blank id, new objectId instance)
     if (id == null || typeof id === 'number') {
       // Generate a new id
-      this.id = ObjectId.generate(typeof id === 'number' ? id : undefined);
+      this[kId] = ObjectId.generate(typeof id === 'number' ? id : undefined);
       // If we are caching the hex string
-      if (ObjectId.cacheHexString) this.__id = this.toString('hex');
-      // Return the object
-      return;
+      if (ObjectId.cacheHexString) {
+        this.__id = this.id.toString('hex');
+      }
     }
 
-    // Check if the passed in id is valid
-    const valid = ObjectId.isValid(id);
-
-    // Throw an error if it's not a valid setup
-    if (!valid) {
-      throw new TypeError(
-        'Argument passed in must be a single String of 12 bytes or a string of 24 hex characters'
-      );
-    } else if (valid && typeof id === 'string' && id.length === 24 && haveBuffer()) {
-      this.id = Buffer.from(id, 'hex');
-    } else if (valid && typeof id === 'string' && id.length === 24) {
-      this.id = ObjectId.createFromHexString(id).id;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } else if ((id as any)['length'] === 12) {
-      // assume 12 byte string
-      this.id = id as string | Buffer;
-    } else if (
-      typeof id !== 'string' &&
-      'toHexString' in id &&
-      typeof id.toHexString === 'function'
-    ) {
-      // Duck-typing to support ObjectId from different npm packages
-      this.id = ObjectId.createFromHexString(id.toHexString()).id;
-    } else {
-      throw new TypeError(
-        'Argument passed in must be a single String of 12 bytes or a string of 24 hex characters'
-      );
+    if (ArrayBuffer.isView(id) && id.byteLength === 12) {
+      this[kId] = ensureBuffer(id);
     }
 
-    if (ObjectId.cacheHexString) this.__id = this.toString('hex');
+    if (typeof id === 'string') {
+      if (id.length === 12) {
+        const bytes = Buffer.from(id);
+        if (bytes.byteLength === 12) {
+          this[kId] = bytes;
+        }
+      } else if (id.length === 24 && checkForHexRegExp.test(id)) {
+        this[kId] = Buffer.from(id, 'hex');
+      } else {
+        throw new TypeError(
+          'Argument passed in must be a Buffer or string of 12 bytes or a string of 24 hex characters'
+        );
+      }
+    }
+
+    if (ObjectId.cacheHexString) {
+      this.__id = this.id.toString('hex');
+    }
+  }
+
+  /**
+   * The ObjectId bytes
+   * @readonly
+   */
+  get id(): Buffer {
+    return this[kId];
+  }
+
+  /** @internal */
+  set id(value: Buffer) {
+    this[kId] = value;
+    if (ObjectId.cacheHexString) {
+      this.__id = value.toString('hex');
+    }
   }
 
   /**
    * The generation time of this ObjectId instance
-   * @deprecated Please use getTimestamp / createFromTime which returns a Date
+   * @deprecated Please use getTimestamp / createFromTime which returns an int32 epoch
    */
   get generationTime(): number {
-    if (typeof this.id === 'string') {
-      return (
-        this.id.charCodeAt(3) |
-        (this.id.charCodeAt(2) << 8) |
-        (this.id.charCodeAt(1) << 16) |
-        (this.id.charCodeAt(0) << 24)
-      );
-    }
-    return this.id[3] | (this.id[2] << 8) | (this.id[1] << 16) | (this.id[0] << 24);
+    return this.id.readInt32BE(0);
   }
 
   /**
@@ -128,50 +132,21 @@ export class ObjectId {
    */
   set generationTime(value: number) {
     // Encode time into first 4 bytes
-    const bytes = [value & 0xff, (value >> 8) & 0xff, (value >> 16) & 0xff, (value >> 24) & 0xff];
-    if (typeof this.id === 'string') {
-      let result = '';
-      for (const byte of bytes) {
-        result += String.fromCharCode(byte);
-      }
-      result += this.id.slice(4);
-      this.id = result;
-      return;
-    }
-    this.id[3] = value & 0xff;
-    this.id[2] = (value >> 8) & 0xff;
-    this.id[1] = (value >> 16) & 0xff;
-    this.id[0] = (value >> 24) & 0xff;
+    this.id.writeUInt32BE(value, 0);
   }
 
   /** Returns the ObjectId id as a 24 character hex string representation */
   toHexString(): string {
-    if (ObjectId.cacheHexString && this.__id) return this.__id;
-
-    let hexString = '';
-    if (!this.id || !this.id.length) {
-      throw new TypeError(
-        'invalid ObjectId, ObjectId.id must be either a string or a Buffer, but is [' +
-          JSON.stringify(this.id) +
-          ']'
-      );
+    if (ObjectId.cacheHexString && this.__id) {
+      return this.__id;
     }
 
-    if (this.id instanceof Buffer) {
-      hexString = convertToHex(this.id);
-      if (ObjectId.cacheHexString) this.__id = hexString;
-      return hexString;
+    const hexString = this.id.toString('hex');
+
+    if (ObjectId.cacheHexString && !this.__id) {
+      this.__id = hexString;
     }
 
-    for (let i = 0; i < this.id.length; i++) {
-      const hexChar = hexTable[this.id.charCodeAt(i)];
-      if (typeof hexChar !== 'string') {
-        throw makeObjectIdError(this.id, i);
-      }
-      hexString += hexChar;
-    }
-
-    if (ObjectId.cacheHexString) this.__id = hexString;
     return hexString;
   }
 
@@ -199,10 +174,7 @@ export class ObjectId {
     const buffer = Buffer.alloc(12);
 
     // 4-byte timestamp
-    buffer[3] = time & 0xff;
-    buffer[2] = (time >> 8) & 0xff;
-    buffer[1] = (time >> 16) & 0xff;
-    buffer[0] = (time >> 24) & 0xff;
+    buffer.writeUInt32BE(time, 0);
 
     // 5-byte process unique
     buffer[4] = PROCESS_UNIQUE[0];
@@ -225,12 +197,9 @@ export class ObjectId {
    * @param format - The Buffer toString format parameter.
    * @internal
    */
-  toString(format?: BufferEncoding): string {
+  toString(format?: string): string {
     // Is the id a buffer then use the buffer toString method to return the format
-    if (this.id && typeof this.id !== 'string' && 'copy' in (this.id as Buffer)) {
-      return this.id.toString(typeof format === 'string' ? format : 'hex');
-    }
-
+    if (format) return this.id.toString(format);
     return this.toHexString();
   }
 
@@ -270,7 +239,7 @@ export class ObjectId {
     }
 
     if (typeof otherId === 'string' && ObjectId.isValid(otherId) && otherId.length === 12) {
-      return otherId === this.id;
+      return Buffer.from(otherId).equals(this.id);
     }
 
     if (
@@ -287,12 +256,7 @@ export class ObjectId {
   /** Returns the generation date (accurate up to the second) that this ID was generated. */
   getTimestamp(): Date {
     const timestamp = new Date();
-    let time: number;
-    if (typeof this.id !== 'string') {
-      time = this.id.readUInt32BE(0);
-    } else {
-      time = this.generationTime;
-    }
+    const time = this.id.readUInt32BE(0);
     timestamp.setTime(Math.floor(time) * 1000);
     return timestamp;
   }
@@ -310,10 +274,7 @@ export class ObjectId {
   static createFromTime(time: number): ObjectId {
     const buffer = Buffer.from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
     // Encode time into first 4 bytes
-    buffer[3] = time & 0xff;
-    buffer[2] = (time >> 8) & 0xff;
-    buffer[1] = (time >> 16) & 0xff;
-    buffer[0] = (time >> 24) & 0xff;
+    buffer.writeUInt32BE(time, 0);
     // Return the new objectId
     return new ObjectId(buffer);
   }
@@ -331,22 +292,7 @@ export class ObjectId {
       );
     }
 
-    // Use Buffer.from method if available
-    if (haveBuffer()) {
-      return new ObjectId(Buffer.from(hexString, 'hex'));
-    }
-
-    // Calculate lengths
-    const array = Buffer.alloc(12);
-
-    let n = 0;
-    let i = 0;
-    while (i < 24) {
-      array[n++] =
-        (decodeLookup[hexString.charCodeAt(i++)] << 4) | decodeLookup[hexString.charCodeAt(i++)];
-    }
-
-    return new ObjectId(array);
+    return new ObjectId(Buffer.from(hexString, 'hex'));
   }
 
   /**
