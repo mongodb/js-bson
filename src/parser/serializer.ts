@@ -355,7 +355,7 @@ function serializeObjectId(
 function serializeBuffer(
   buffer: Buffer,
   key: string,
-  value: Buffer | Uint8Array | ArrayBuffer,
+  value: Buffer | Uint8Array,
   index: number,
   isArray?: boolean
 ) {
@@ -369,7 +369,7 @@ function serializeBuffer(
   index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   // Get size of the buffer (current write point)
-  const size = value.byteLength;
+  const size = value.length;
   // Write the size of the string to buffer
   buffer[index++] = size & 0xff;
   buffer[index++] = (size >> 8) & 0xff;
@@ -817,7 +817,7 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index, true);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index, true);
-      } else if (Buffer.isBuffer(value) || isUint8Array(value) || value instanceof ArrayBuffer) {
+      } else if (Buffer.isBuffer(value) || isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index, true);
       } else if (value instanceof RegExp || isRegExp(value)) {
         index = serializeRegExp(buffer, key, value, index, true);
@@ -921,7 +921,7 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index);
-      } else if (Buffer.isBuffer(value) || isUint8Array(value) || value instanceof ArrayBuffer) {
+      } else if (Buffer.isBuffer(value) || isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index);
       } else if (value instanceof RegExp || isRegExp(value)) {
         index = serializeRegExp(buffer, key, value, index);
@@ -1025,7 +1025,7 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index);
-      } else if (Buffer.isBuffer(value) || isUint8Array(value) || value instanceof ArrayBuffer) {
+      } else if (Buffer.isBuffer(value) || isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index);
       } else if (value instanceof RegExp || isRegExp(value)) {
         index = serializeRegExp(buffer, key, value, index);
