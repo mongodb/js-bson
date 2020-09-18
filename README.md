@@ -193,7 +193,7 @@ Starting with Angular 6, Angular CLI removed the shim for `global` and other nod
 Parse an Extended JSON string, constructing the JavaScript value or object described by that
 string.
 
-**Example**  
+**Example**
 ```js
 const { EJSON } = require('bson');
 const text = '{ "int32": { "$numberInt": "10" } }';
@@ -221,7 +221,7 @@ Converts a BSON document to an Extended JSON string, optionally replacing values
 function is specified or optionally including only the specified properties if a replacer array
 is specified.
 
-**Example**  
+**Example**
 ```js
 const { EJSON } = require('bson');
 const Int32 = require('mongodb').Int32;
@@ -278,7 +278,7 @@ Sets the size of the internal serialization buffer.
 
 Serialize a Javascript object.
 
-**Returns**: <code>Buffer</code> - returns the Buffer object containing the serialized object.  
+**Returns**: <code>Buffer</code> - returns the Buffer object containing the serialized object.
 <a name="serializeWithBufferAndIndex"></a>
 
 ### serializeWithBufferAndIndex(object, buffer)
@@ -294,7 +294,7 @@ Serialize a Javascript object.
 
 Serialize a Javascript object using a predefined Buffer and index into the buffer, useful when pre-allocating the space for serialization.
 
-**Returns**: <code>Number</code> - returns the index pointing to the last written byte in the buffer.  
+**Returns**: <code>Number</code> - returns the index pointing to the last written byte in the buffer.
 <a name="deserialize"></a>
 
 ### deserialize(buffer)
@@ -304,7 +304,6 @@ Serialize a Javascript object using a predefined Buffer and index into the buffe
 | buffer | <code>Buffer</code> |  | the buffer containing the serialized set of BSON documents. |
 | [options.evalFunctions] | <code>Object</code> | <code>false</code> | evaluate functions in the BSON document scoped to the object deserialized. |
 | [options.cacheFunctions] | <code>Object</code> | <code>false</code> | cache evaluated functions for reuse. |
-| [options.cacheFunctionsCrc32] | <code>Object</code> | <code>false</code> | use a crc32 code for caching, otherwise use the string of the function. |
 | [options.promoteLongs] | <code>Object</code> | <code>true</code> | when deserializing a Long will fit it into a Number if it's smaller than 53 bits |
 | [options.promoteBuffers] | <code>Object</code> | <code>false</code> | when deserializing a Binary will return it as a node.js Buffer instance. |
 | [options.promoteValues] | <code>Object</code> | <code>false</code> | when deserializing will promote BSON values to their Node.js closest equivalent types. |
@@ -314,7 +313,7 @@ Serialize a Javascript object using a predefined Buffer and index into the buffe
 
 Deserialize data as BSON.
 
-**Returns**: <code>Object</code> - returns the deserialized Javascript Object.  
+**Returns**: <code>Object</code> - returns the deserialized Javascript Object.
 <a name="calculateObjectSize"></a>
 
 ### calculateObjectSize(object)
@@ -327,7 +326,7 @@ Deserialize data as BSON.
 
 Calculate the bson size for a passed in Javascript object.
 
-**Returns**: <code>Number</code> - returns the number of bytes the BSON object will take up.  
+**Returns**: <code>Number</code> - returns the number of bytes the BSON object will take up.
 <a name="deserializeStream"></a>
 
 ### deserializeStream(data, startIndex, numberOfDocuments, documents, docStartIndex, [options])
@@ -342,7 +341,6 @@ Calculate the bson size for a passed in Javascript object.
 | [options] | <code>Object</code> |  | additional options used for the deserialization. |
 | [options.evalFunctions] | <code>Object</code> | <code>false</code> | evaluate functions in the BSON document scoped to the object deserialized. |
 | [options.cacheFunctions] | <code>Object</code> | <code>false</code> | cache evaluated functions for reuse. |
-| [options.cacheFunctionsCrc32] | <code>Object</code> | <code>false</code> | use a crc32 code for caching, otherwise use the string of the function. |
 | [options.promoteLongs] | <code>Object</code> | <code>true</code> | when deserializing a Long will fit it into a Number if it's smaller than 53 bits |
 | [options.promoteBuffers] | <code>Object</code> | <code>false</code> | when deserializing a Binary will return it as a node.js Buffer instance. |
 | [options.promoteValues] | <code>Object</code> | <code>false</code> | when deserializing will promote BSON values to their Node.js closest equivalent types. |
@@ -351,7 +349,7 @@ Calculate the bson size for a passed in Javascript object.
 
 Deserialize stream data as BSON documents.
 
-**Returns**: <code>Number</code> - returns the next index in the buffer after deserialization **x** numbers of documents.  
+**Returns**: <code>Number</code> - returns the next index in the buffer after deserialization **x** numbers of documents.
 
 ## FAQ
 
