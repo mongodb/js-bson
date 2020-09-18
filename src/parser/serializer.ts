@@ -355,7 +355,7 @@ function serializeObjectId(
 function serializeBuffer(
   buffer: Buffer,
   key: string,
-  value: Buffer | ArrayBuffer | ArrayBufferView,
+  value: Buffer | Uint8Array | ArrayBuffer,
   index: number,
   isArray?: boolean
 ) {

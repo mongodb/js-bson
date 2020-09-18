@@ -123,7 +123,7 @@ export class ObjectId {
    * @deprecated Please use getTimestamp / createFromTime which returns an int32 epoch
    */
   get generationTime(): number {
-    return this.id.readInt32BE(0, false);
+    return this.id.readInt32BE(0);
   }
 
   /**
@@ -256,7 +256,7 @@ export class ObjectId {
   /** Returns the generation date (accurate up to the second) that this ID was generated. */
   getTimestamp(): Date {
     const timestamp = new Date();
-    const time = this.id.readUInt32BE(0, false);
+    const time = this.id.readUInt32BE(0);
     timestamp.setTime(Math.floor(time) * 1000);
     return timestamp;
   }
