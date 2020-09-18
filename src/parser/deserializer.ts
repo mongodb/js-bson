@@ -21,7 +21,11 @@ export interface DeserializeOptions {
   evalFunctions?: boolean;
   /** cache evaluated functions for reuse. */
   cacheFunctions?: boolean;
-  /** use a crc32 code for caching, otherwise use the string of the function. */
+  /**
+   * use a crc32 code for caching, otherwise use the string of the function.
+   * @deprecated this option to use the crc32 function never worked as intended
+   * due to the fact that the crc32 function itself was never implemented.
+   * */
   cacheFunctionsCrc32?: boolean;
   /** when deserializing a Long will fit it into a Number if it's smaller than 53 bits */
   promoteLongs?: boolean;
@@ -98,15 +102,6 @@ function deserializeObject(
 ) {
   const evalFunctions = options['evalFunctions'] == null ? false : options['evalFunctions'];
   const cacheFunctions = options['cacheFunctions'] == null ? false : options['cacheFunctions'];
-  const cacheFunctionsCrc32 =
-    options['cacheFunctionsCrc32'] == null ? false : options['cacheFunctionsCrc32'];
-
-  let crc32;
-  if (!cacheFunctionsCrc32) {
-    crc32 = null;
-  } else {
-    crc32 = (v: string) => v; // FIXME(NODE-2770): This is a bug, hashing function is missing.
-  }
 
   const fieldsAsRaw = options['fieldsAsRaw'] == null ? null : options['fieldsAsRaw'];
 
@@ -499,9 +494,8 @@ function deserializeObject(
       if (evalFunctions) {
         // If we have cache enabled let's look for the md5 of the function in the cache
         if (cacheFunctions) {
-          const hash = cacheFunctionsCrc32 && crc32 ? crc32(functionString) : functionString;
           // Got to do this to avoid V8 deoptimizing the call due to finding eval
-          object[name] = isolateEvalWithHash(functionCache, hash, functionString, object);
+          object[name] = isolateEval(functionString, functionCache, object);
         } else {
           object[name] = isolateEval(functionString);
         }
@@ -568,9 +562,8 @@ function deserializeObject(
       if (evalFunctions) {
         // If we have cache enabled let's look for the md5 of the function in the cache
         if (cacheFunctions) {
-          const hash = cacheFunctionsCrc32 && crc32 ? crc32(functionString) : functionString;
           // Got to do this to avoid V8 deoptimizing the call due to finding eval
-          object[name] = isolateEvalWithHash(functionCache, hash, functionString, object);
+          object[name] = isolateEval(functionString, functionCache, object);
         } else {
           object[name] = isolateEval(functionString);
         }
@@ -654,26 +647,17 @@ function deserializeObject(
  *
  * @internal
  */
-function isolateEvalWithHash(
-  functionCache: { [hash: string]: Function },
-  hash: string,
+function isolateEval(
   functionString: string,
-  object: Document
+  functionCache?: { [hash: string]: Function },
+  object?: Document
 ) {
+  if (!functionCache) return new Function(functionString);
   // Check for cache hit, eval if missing and return cached function
-  if (functionCache[hash] == null) {
-    functionCache[hash] = new Function(functionString);
+  if (functionCache[functionString] == null) {
+    functionCache[functionString] = new Function(functionString);
   }
 
   // Set the object
-  return functionCache[hash].bind(object);
-}
-
-/**
- * Ensure eval is isolated.
- *
- * @internal
- */
-function isolateEval(functionString: string): Function {
-  return new Function(functionString);
+  return functionCache[functionString].bind(object);
 }
