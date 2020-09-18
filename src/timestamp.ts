@@ -41,7 +41,7 @@ export class Timestamp extends LongWithoutOverridesClass {
     });
   }
 
-  toJSON(): TimestampExtended {
+  toJSON(): { $timestamp: string } {
     return {
       $timestamp: this.toString()
     };
