@@ -287,8 +287,7 @@ describe('Full BSON', function () {
     const serialized_data = BSON.serialize(doc);
     const deserialized_data = BSON.deserialize(serialized_data);
 
-    var v = deserialized_data.arrayBuffer.value(true);
-    expect(Array.from(new Uint8Array(doc.arrayBuffer))).to.have.ordered.members(Array.from(v));
+    expect(deserialized_data.arrayBuffer).to.be.empty;
   });
 
   it('Should Correctly Serialize and Deserialize a Float64Array object', function () {
