@@ -1,6 +1,6 @@
-import type { Timestamp } from './timestamp';
 import type { EJSONOptions } from './extended_json';
 import { isObjectLike } from './parser/utils';
+import type { Timestamp } from './timestamp';
 
 interface LongWASMHelpers {
   /** Gets the high bits of the last operation performed */
@@ -194,7 +194,7 @@ export class Long {
    * @returns The corresponding Long value
    */
   static fromBigInt(value: bigint, unsigned?: boolean): Long {
-    return Long.fromString(value.toString(10), unsigned);
+    return Long.fromString(value.toString(), unsigned);
   }
 
   /**

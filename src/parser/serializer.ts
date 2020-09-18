@@ -15,7 +15,13 @@ import { Map } from '../map';
 import type { MinKey } from '../min_key';
 import type { ObjectId } from '../objectid';
 import type { BSONRegExp } from '../regexp';
-import { isBigInt64Array, isBigUInt64Array, isDate, normalizedFunctionString } from './utils';
+import {
+  isBigInt64Array,
+  isBigUInt64Array,
+  isDate,
+  isUint8Array,
+  normalizedFunctionString
+} from './utils';
 
 export interface SerializeOptions {
   /** the serializer will check if keys are valid. */

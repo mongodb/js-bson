@@ -18,6 +18,8 @@ function insecureRandomBytes(size: number): Uint8Array {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare let window: any;
 declare let require: Function;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare let global: any;
 
 export let randomBytes = insecureRandomBytes;
 if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {

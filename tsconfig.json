@@ -8,7 +8,9 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "lib": [
-      "ES2017"
+      "ES2017",
+      "ES2020.BigInt",
+      "ES2017.TypedArrays"
     ],
     "outDir": "lib",
     // We don't make use of tslib helpers
