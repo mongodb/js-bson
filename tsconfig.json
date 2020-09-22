@@ -20,10 +20,11 @@
     // Generate separate source maps files with sourceContent included
     "sourceMap": true,
     "inlineSourceMap": false,
-    "inlineSources": true,
+    "inlineSources": false,
     // API-extractor makes use of the declarations, npm script should be cleaning these up
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "types": []
   },
   "ts-node": {
     "transpileOnly": true,

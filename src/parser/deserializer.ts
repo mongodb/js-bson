@@ -16,12 +16,16 @@ import { BSONSymbol } from '../symbol';
 import { Timestamp } from '../timestamp';
 import { validateUtf8 } from '../validate_utf8';
 
-export interface DeserializationOptions {
+export interface DeserializeOptions {
   /** evaluate functions in the BSON document scoped to the object deserialized. */
   evalFunctions?: boolean;
   /** cache evaluated functions for reuse. */
   cacheFunctions?: boolean;
-  /** use a crc32 code for caching, otherwise use the string of the function. */
+  /**
+   * use a crc32 code for caching, otherwise use the string of the function.
+   * @deprecated this option to use the crc32 function never worked as intended
+   * due to the fact that the crc32 function itself was never implemented.
+   * */
   cacheFunctionsCrc32?: boolean;
   /** when deserializing a Long will fit it into a Number if it's smaller than 53 bits */
   promoteLongs?: boolean;
@@ -49,7 +53,7 @@ const functionCache: { [hash: string]: Function } = {};
 
 export function deserialize(
   buffer: Buffer,
-  options: DeserializationOptions,
+  options: DeserializeOptions,
   isArray?: boolean
 ): Document {
   options = options == null ? {} : options;
@@ -73,11 +77,9 @@ export function deserialize(
     throw new Error(`buffer length ${buffer.length} must === bson size ${size}`);
   }
 
-  if (size + index > buffer.length) {
+  if (size + index > buffer.byteLength) {
     throw new Error(
-      `(bson size ${size} + options.index ${index} must be <= buffer length ${Buffer.byteLength(
-        buffer
-      )})`
+      `(bson size ${size} + options.index ${index} must be <= buffer length ${buffer.byteLength})`
     );
   }
 
@@ -93,20 +95,11 @@ export function deserialize(
 function deserializeObject(
   buffer: Buffer,
   index: number,
-  options: DeserializationOptions,
+  options: DeserializeOptions,
   isArray = false
 ) {
   const evalFunctions = options['evalFunctions'] == null ? false : options['evalFunctions'];
   const cacheFunctions = options['cacheFunctions'] == null ? false : options['cacheFunctions'];
-  const cacheFunctionsCrc32 =
-    options['cacheFunctionsCrc32'] == null ? false : options['cacheFunctionsCrc32'];
-
-  let crc32;
-  if (!cacheFunctionsCrc32) {
-    crc32 = null;
-  } else {
-    crc32 = (v: string) => v; // FIXME(NODE-2770): This is a bug, hashing function is missing.
-  }
 
   const fieldsAsRaw = options['fieldsAsRaw'] == null ? null : options['fieldsAsRaw'];
 
@@ -156,7 +149,7 @@ function deserializeObject(
     }
 
     // If are at the end of the buffer there is a problem with the document
-    if (i >= Buffer.byteLength(buffer)) throw new Error('Bad BSON Document: illegal CString');
+    if (i >= buffer.byteLength) throw new Error('Bad BSON Document: illegal CString');
     const name = isArray ? arrayIndex++ : buffer.toString('utf8', index, i);
 
     index = i + 1;
@@ -253,8 +246,8 @@ function deserializeObject(
         arrayOptions = {};
         for (const n in options) {
           (arrayOptions as {
-            [key: string]: DeserializationOptions[keyof DeserializationOptions];
-          })[n] = options[n as keyof DeserializationOptions];
+            [key: string]: DeserializeOptions[keyof DeserializeOptions];
+          })[n] = options[n as keyof DeserializeOptions];
         }
         arrayOptions['raw'] = true;
       }
@@ -318,7 +311,7 @@ function deserializeObject(
       if (binarySize < 0) throw new Error('Negative binary type element size found');
 
       // Is the length longer than the document
-      if (binarySize > Buffer.byteLength(buffer))
+      if (binarySize > buffer.byteLength)
         throw new Error('Binary type size larger than document size');
 
       // Decode as raw Buffer object if options specifies it
@@ -344,10 +337,7 @@ function deserializeObject(
           object[name] = new Binary(buffer.slice(index, index + binarySize), subType);
         }
       } else {
-        const _buffer =
-          typeof Uint8Array !== 'undefined'
-            ? new Uint8Array(new ArrayBuffer(binarySize))
-            : new Array(binarySize);
+        const _buffer = Buffer.alloc(binarySize);
         // If we have subtype 2 skip the 4 bytes for the size
         if (subType === Binary.SUBTYPE_BYTE_ARRAY) {
           binarySize =
@@ -499,9 +489,8 @@ function deserializeObject(
       if (evalFunctions) {
         // If we have cache enabled let's look for the md5 of the function in the cache
         if (cacheFunctions) {
-          const hash = cacheFunctionsCrc32 && crc32 ? crc32(functionString) : functionString;
           // Got to do this to avoid V8 deoptimizing the call due to finding eval
-          object[name] = isolateEvalWithHash(functionCache, hash, functionString, object);
+          object[name] = isolateEval(functionString, functionCache, object);
         } else {
           object[name] = isolateEval(functionString);
         }
@@ -568,9 +557,8 @@ function deserializeObject(
       if (evalFunctions) {
         // If we have cache enabled let's look for the md5 of the function in the cache
         if (cacheFunctions) {
-          const hash = cacheFunctionsCrc32 && crc32 ? crc32(functionString) : functionString;
           // Got to do this to avoid V8 deoptimizing the call due to finding eval
-          object[name] = isolateEvalWithHash(functionCache, hash, functionString, object);
+          object[name] = isolateEval(functionString, functionCache, object);
         } else {
           object[name] = isolateEval(functionString);
         }
@@ -613,11 +601,7 @@ function deserializeObject(
       object[name] = new DBRef(namespace, oid);
     } else {
       throw new Error(
-        'Detected unknown BSON type ' +
-          elementType.toString(16) +
-          ' for fieldname "' +
-          name +
-          '", are you using the latest BSON parser?'
+        'Detected unknown BSON type ' + elementType.toString(16) + ' for fieldname "' + name + '"'
       );
     }
   }
@@ -654,26 +638,17 @@ function deserializeObject(
  *
  * @internal
  */
-function isolateEvalWithHash(
-  functionCache: { [hash: string]: Function },
-  hash: string,
+function isolateEval(
   functionString: string,
-  object: Document
+  functionCache?: { [hash: string]: Function },
+  object?: Document
 ) {
+  if (!functionCache) return new Function(functionString);
   // Check for cache hit, eval if missing and return cached function
-  if (functionCache[hash] == null) {
-    functionCache[hash] = new Function(functionString);
+  if (functionCache[functionString] == null) {
+    functionCache[functionString] = new Function(functionString);
   }
 
   // Set the object
-  return functionCache[hash].bind(object);
-}
-
-/**
- * Ensure eval is isolated.
- *
- * @internal
- */
-function isolateEval(functionString: string): Function {
-  return new Function(functionString);
+  return functionCache[functionString].bind(object);
 }

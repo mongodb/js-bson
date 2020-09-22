@@ -8,6 +8,7 @@
   ],
   "files": [
     "lib",
+    "src",
     "dist",
     "bson.d.ts",
     "etc/prepare.js",
@@ -81,7 +82,8 @@
     "build": "npm run build:dts && npm run build:bundle",
     "lint": "eslint -v && eslint --ext '.js,.ts' --max-warnings=0 src test && tsc -v && tsc --noEmit",
     "format": "eslint --ext '.js,.ts' src test --fix",
-    "coverage": "nyc mocha test/node",
+    "coverage": "nyc npm run test-node",
+    "coverage:html": "npm run coverage && open ./coverage/index.html",
     "prepare": "node etc/prepare.js",
     "release": "standard-version -i HISTORY.md"
   },

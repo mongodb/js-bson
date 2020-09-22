@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
+import { ensureBuffer } from './ensure_buffer';
 import type { EJSONOptions } from './extended_json';
-import { haveBuffer, isBuffer, isUint8Array } from './parser/utils';
 
 type BinarySequence = Uint8Array | Buffer | number[];
 
@@ -20,6 +20,12 @@ export interface BinaryExtended {
 export class Binary {
   _bsontype!: 'Binary';
 
+  /**
+   * Binary default subtype
+   * @internal
+   */
+  private static readonly BSON_BINARY_SUBTYPE_DEFAULT = 0;
+
   /** Initial buffer default size */
   static readonly BUFFER_SIZE = 256;
   /** Default BSON type */
@@ -37,7 +43,7 @@ export class Binary {
   /** User BSON type */
   static readonly SUBTYPE_USER_DEFINED = 128;
 
-  buffer: BinarySequence;
+  buffer: Buffer;
   sub_type: number;
   position: number;
 
@@ -45,43 +51,38 @@ export class Binary {
    * @param buffer - a buffer object containing the binary data.
    * @param subType - the option binary type.
    */
-  constructor(buffer: string | BinarySequence, subType?: number) {
+  constructor(buffer?: string | BinarySequence, subType?: number) {
     if (
-      buffer != null &&
+      !(buffer == null) &&
       !(typeof buffer === 'string') &&
-      !Buffer.isBuffer(buffer) &&
-      !(buffer instanceof Uint8Array) &&
+      !ArrayBuffer.isView(buffer) &&
+      !(buffer instanceof ArrayBuffer) &&
       !Array.isArray(buffer)
     ) {
-      throw new TypeError('only String, Buffer, Uint8Array or Array accepted');
+      throw new TypeError(
+        'Binary can only be constructed from string, Buffer, TypedArray, or Array<number>'
+      );
     }
 
-    this.sub_type = subType == null ? BSON_BINARY_SUBTYPE_DEFAULT : subType;
-    this.position = 0;
+    this.sub_type = subType ?? Binary.BSON_BINARY_SUBTYPE_DEFAULT;
 
-    if (buffer != null && !(buffer instanceof Number)) {
-      // Only accept Buffer, Uint8Array or Arrays
-      if (typeof buffer === 'string') {
-        // Different ways of writing the length of the string for the different types
-        if (haveBuffer()) {
-          this.buffer = Buffer.from(buffer);
-        } else if (typeof Uint8Array !== 'undefined' || Array.isArray(buffer)) {
-          this.buffer = writeStringToArray(buffer);
-        } else {
-          throw new TypeError('only String, Buffer, Uint8Array or Array accepted');
-        }
-      } else {
-        this.buffer = buffer;
-      }
-      this.position = buffer.length;
+    if (buffer == null) {
+      // create an empty binary buffer
+      this.buffer = Buffer.alloc(Binary.BUFFER_SIZE);
+      this.position = 0;
     } else {
-      if (haveBuffer()) {
-        this.buffer = Buffer.alloc(Binary.BUFFER_SIZE);
-      } else if (typeof Uint8Array !== 'undefined') {
-        this.buffer = new Uint8Array(new ArrayBuffer(Binary.BUFFER_SIZE));
+      if (typeof buffer === 'string') {
+        // string
+        this.buffer = Buffer.from(buffer, 'binary');
+      } else if (Array.isArray(buffer)) {
+        // number[]
+        this.buffer = Buffer.from(buffer);
       } else {
-        this.buffer = new Array(Binary.BUFFER_SIZE);
+        // Buffer | TypedArray | ArrayBuffer
+        this.buffer = ensureBuffer(buffer);
       }
+
+      this.position = this.buffer.byteLength;
     }
   }
 
@@ -114,32 +115,11 @@ export class Binary {
     if (this.buffer.length > this.position) {
       this.buffer[this.position++] = decodedByte;
     } else {
-      if (isBuffer(this.buffer)) {
-        // Create additional overflow buffer
-        const buffer = Buffer.alloc(Binary.BUFFER_SIZE + this.buffer.length);
-        // Combine the two buffers together
-        this.buffer.copy(buffer, 0, 0, this.buffer.length);
-        this.buffer = buffer;
-        this.buffer[this.position++] = decodedByte;
-      } else {
-        let buffer: Uint8Array | number[];
-        // Create a new buffer (typed or normal array)
-        if (isUint8Array(this.buffer)) {
-          buffer = new Uint8Array(new ArrayBuffer(Binary.BUFFER_SIZE + this.buffer.length));
-        } else {
-          buffer = new Array(Binary.BUFFER_SIZE + this.buffer.length);
-        }
-
-        // We need to copy all the content to the new array
-        for (let i = 0; i < this.buffer.length; i++) {
-          buffer[i] = this.buffer[i];
-        }
-
-        // Reassign the buffer
-        this.buffer = buffer;
-        // Write the byte
-        this.buffer[this.position++] = decodedByte;
-      }
+      const buffer = Buffer.alloc(Binary.BUFFER_SIZE + this.buffer.length);
+      // Combine the two buffers together
+      this.buffer.copy(buffer, 0, 0, this.buffer.length);
+      this.buffer = buffer;
+      this.buffer[this.position++] = decodedByte;
     }
   }
 
@@ -154,50 +134,21 @@ export class Binary {
 
     // If the buffer is to small let's extend the buffer
     if (this.buffer.length < offset + sequence.length) {
-      let buffer: Buffer | Uint8Array | null = null;
-      // If we are in node.js
-      if (isBuffer(this.buffer)) {
-        buffer = Buffer.alloc(this.buffer.length + sequence.length);
-        this.buffer.copy(buffer, 0, 0, this.buffer.length);
-      } else if (isUint8Array(this.buffer)) {
-        // Create a new buffer
-        buffer = new Uint8Array(new ArrayBuffer(this.buffer.length + sequence.length));
-        // Copy the content
-        for (let i = 0; i < this.position; i++) {
-          buffer[i] = this.buffer[i];
-        }
-      }
+      const buffer = Buffer.alloc(this.buffer.length + sequence.length);
+      this.buffer.copy(buffer, 0, 0, this.buffer.length);
 
       // Assign the new buffer
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.buffer = buffer!;
+      this.buffer = buffer;
     }
 
-    if (isBuffer(sequence) && isBuffer(this.buffer)) {
-      sequence.copy(this.buffer, offset, 0, sequence.length);
+    if (ArrayBuffer.isView(sequence)) {
+      this.buffer.set(ensureBuffer(sequence), offset);
       this.position =
-        offset + sequence.length > this.position ? offset + sequence.length : this.position;
-      // offset = string.length
-    } else if (typeof sequence === 'string' && isBuffer(this.buffer)) {
+        offset + sequence.byteLength > this.position ? offset + sequence.length : this.position;
+    } else if (typeof sequence === 'string') {
       this.buffer.write(sequence, offset, sequence.length, 'binary');
       this.position =
         offset + sequence.length > this.position ? offset + sequence.length : this.position;
-      // offset = string.length;
-    } else if (
-      isUint8Array(sequence) ||
-      (Array.isArray(sequence) && typeof sequence !== 'string')
-    ) {
-      for (let i = 0; i < sequence.length; i++) {
-        this.buffer[offset++] = sequence[i];
-      }
-
-      this.position = offset > this.position ? offset : this.position;
-    } else if (typeof sequence === 'string') {
-      for (let i = 0; i < sequence.length; i++) {
-        this.buffer[offset++] = sequence.charCodeAt(i);
-      }
-
-      this.position = offset > this.position ? offset : this.position;
     }
   }
 
@@ -211,21 +162,7 @@ export class Binary {
     length = length && length > 0 ? length : this.position;
 
     // Let's return the data based on the type we have
-    if (this.buffer['slice']) {
-      return this.buffer.slice(position, position + length);
-    }
-
-    // Create a buffer to keep the result
-    const buffer =
-      typeof Uint8Array !== 'undefined'
-        ? new Uint8Array(new ArrayBuffer(length))
-        : new Array(length);
-    for (let i = 0; i < length; i++) {
-      buffer[i] = this.buffer[position++];
-    }
-
-    // Return the buffer
-    return buffer;
+    return this.buffer.slice(position, position + length);
   }
 
   /**
@@ -238,36 +175,15 @@ export class Binary {
     asRaw = !!asRaw;
 
     // Optimize to serialize for the situation where the data == size of buffer
-    if (asRaw && isBuffer(this.buffer) && this.buffer.length === this.position) return this.buffer;
+    if (asRaw && this.buffer.length === this.position) {
+      return this.buffer;
+    }
 
     // If it's a node.js buffer object
-    if (isBuffer(this.buffer)) {
-      return asRaw
-        ? this.buffer.slice(0, this.position)
-        : this.buffer.toString('binary', 0, this.position);
-    } else {
-      if (asRaw) {
-        // we support the slice command use it
-        if (this.buffer['slice'] != null) {
-          return this.buffer.slice(0, this.position);
-        } else {
-          // Create a new buffer to copy content to
-          const newBuffer = isUint8Array(this.buffer)
-            ? new Uint8Array(new ArrayBuffer(this.position))
-            : new Array(this.position);
-
-          // Copy content
-          for (let i = 0; i < this.position; i++) {
-            newBuffer[i] = this.buffer[i];
-          }
-
-          // Return the buffer
-          return newBuffer;
-        }
-      } else {
-        return convertArraytoUtf8BinaryString(this.buffer, 0, this.position);
-      }
+    if (asRaw) {
+      return this.buffer.slice(0, this.position);
     }
+    return this.buffer.toString('binary', 0, this.position);
   }
 
   /** the length of the binary sequence */
@@ -277,24 +193,18 @@ export class Binary {
 
   /** @internal */
   toJSON(): string {
-    if (!this.buffer) return '';
-    const buffer = Buffer.from(this.buffer as Uint8Array);
-    return buffer.toString('base64');
+    return this.buffer.toString('base64');
   }
 
   /** @internal */
-  toString(format: BufferEncoding): string {
-    if (!this.buffer) return '';
-    const buffer = Buffer.from(this.buffer.slice(0, this.position) as Uint8Array);
-    return buffer.toString(format);
+  toString(format: string): string {
+    return this.buffer.toString(format);
   }
 
   /** @internal */
   toExtendedJSON(options?: EJSONOptions): BinaryExtendedLegacy | BinaryExtended {
     options = options || {};
-    const base64String = Buffer.isBuffer(this.buffer)
-      ? this.buffer.toString('base64')
-      : Buffer.from(this.buffer as Uint8Array).toString('base64');
+    const base64String = this.buffer.toString('base64');
 
     const subType = Number(this.sub_type).toString(16);
     if (options.legacy) {
@@ -333,46 +243,6 @@ export class Binary {
     }
     return new Binary(data, type);
   }
-}
-
-/**
- * Binary default subtype
- * @internal
- */
-const BSON_BINARY_SUBTYPE_DEFAULT = 0;
-
-/** @internal */
-function writeStringToArray(data: string) {
-  // Create a buffer
-  const buffer =
-    typeof Uint8Array !== 'undefined'
-      ? new Uint8Array(new ArrayBuffer(data.length))
-      : new Array(data.length);
-
-  // Write the content to the buffer
-  for (let i = 0; i < data.length; i++) {
-    buffer[i] = data.charCodeAt(i);
-  }
-  // Write the string to the buffer
-  return buffer;
-}
-
-/**
- * Convert Array ot Uint8Array to Binary String
- *
- * @internal
- */
-function convertArraytoUtf8BinaryString(
-  byteArray: number[] | Uint8Array,
-  startIndex: number,
-  endIndex: number
-) {
-  let result = '';
-  for (let i = startIndex; i < endIndex; i++) {
-    result = result + String.fromCharCode(byteArray[i]);
-  }
-
-  return result;
 }
 
 Object.defineProperty(Binary.prototype, '_bsontype', { value: 'Binary' });

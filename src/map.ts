@@ -4,6 +4,7 @@
 /* We do not want to have to include DOM types just for this check */
 declare const window: unknown;
 declare const self: unknown;
+declare const global: unknown;
 
 let bsonMap: MapConstructor;
 

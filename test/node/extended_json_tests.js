@@ -427,16 +427,10 @@ describe('Extended JSON', function () {
         // symbol: { $symbol: 'symbol' },  // removed because this type is deprecated. See comment above.
         timestamp: { $timestamp: { t: 0, i: 0 } }
       };
-      const ejsonSerializationOptions = { relaxed: false };
-      const resultOld = EJSON.serialize(
-        deserialized.usingOldDeserializer,
-        ejsonSerializationOptions
-      );
+      const ejsonSerializeOptions = { relaxed: false };
+      const resultOld = EJSON.serialize(deserialized.usingOldDeserializer, ejsonSerializeOptions);
       expect(resultOld).to.deep.equal(ejsonExpected);
-      const resultNew = EJSON.serialize(
-        deserialized.usingNewDeserializer,
-        ejsonSerializationOptions
-      );
+      const resultNew = EJSON.serialize(deserialized.usingNewDeserializer, ejsonSerializeOptions);
       expect(resultNew).to.deep.equal(ejsonExpected);
     });
 
@@ -482,16 +476,10 @@ describe('Extended JSON', function () {
         usingOldDeserializer: OldBSON.deserialize(expectedBufferMinKey, deserializationOptions),
         usingNewDeserializer: BSON.deserialize(expectedBufferMinKey, deserializationOptions)
       };
-      const ejsonSerializationOptions = { relaxed: false };
-      const resultOld = EJSON.serialize(
-        deserialized.usingOldDeserializer,
-        ejsonSerializationOptions
-      );
+      const ejsonSerializeOptions = { relaxed: false };
+      const resultOld = EJSON.serialize(deserialized.usingOldDeserializer, ejsonSerializeOptions);
       expect(resultOld).to.deep.equal(ejsonExpected);
-      const resultNew = EJSON.serialize(
-        deserialized.usingNewDeserializer,
-        ejsonSerializationOptions
-      );
+      const resultNew = EJSON.serialize(deserialized.usingNewDeserializer, ejsonSerializeOptions);
       expect(resultNew).to.deep.equal(ejsonExpected);
     });
   }
