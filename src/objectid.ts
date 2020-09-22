@@ -30,6 +30,10 @@ export interface ObjectIdLike {
   toHexString(): string;
 }
 
+export interface ObjectIdExtended {
+  $oid: string;
+}
+
 const kId = Symbol('id');
 
 /**
@@ -331,13 +335,13 @@ export class ObjectId {
   }
 
   /** @internal */
-  toExtendedJSON(): { $oid: string } {
+  toExtendedJSON(): ObjectIdExtended {
     if (this.toHexString) return { $oid: this.toHexString() };
     return { $oid: this.toString('hex') };
   }
 
   /** @internal */
-  static fromExtendedJSON(doc: { $oid: string }): ObjectId {
+  static fromExtendedJSON(doc: ObjectIdExtended): ObjectId {
     return new ObjectId(doc.$oid);
   }
 }

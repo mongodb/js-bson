@@ -1,5 +1,10 @@
 import type { Document } from './bson';
 
+export interface CodeExtended {
+  $code: string | Function;
+  $scope?: Document;
+}
+
 /** A class representation of the BSON Code type. */
 export class Code {
   _bsontype!: 'Code';
@@ -21,7 +26,7 @@ export class Code {
   }
 
   /** @internal */
-  toExtendedJSON(): { $code: string | Function; $scope?: Document } {
+  toExtendedJSON(): CodeExtended {
     if (this.scope) {
       return { $code: this.code, $scope: this.scope };
     }
@@ -30,7 +35,7 @@ export class Code {
   }
 
   /** @internal */
-  static fromExtendedJSON(doc: { $code: string | Function; $scope?: Document }): Code {
+  static fromExtendedJSON(doc: CodeExtended): Code {
     return new Code(doc.$code, doc.$scope);
   }
 }

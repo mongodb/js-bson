@@ -1,5 +1,9 @@
 import type { EJSONOptions } from './extended_json';
 
+export interface DoubleExtended {
+  $numberDouble: string;
+}
+
 /**
  * A class representation of the BSON Double type.
  */
@@ -35,7 +39,7 @@ export class Double {
   }
 
   /** @internal */
-  toExtendedJSON(options?: EJSONOptions): number | { $numberDouble: string } {
+  toExtendedJSON(options?: EJSONOptions): number | DoubleExtended {
     if (options && (options.legacy || (options.relaxed && isFinite(this.value)))) {
       return this.value;
     }
@@ -60,7 +64,7 @@ export class Double {
   }
 
   /** @internal */
-  static fromExtendedJSON(doc: { $numberDouble: string }, options?: EJSONOptions): number | Double {
+  static fromExtendedJSON(doc: DoubleExtended, options?: EJSONOptions): number | Double {
     const doubleValue = parseFloat(doc.$numberDouble);
     return options && options.relaxed ? doubleValue : new Double(doubleValue);
   }

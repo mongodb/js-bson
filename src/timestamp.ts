@@ -6,6 +6,13 @@ type LongWithoutOverrides = new (low: number | Long, high?: number, unsigned?: b
 };
 const LongWithoutOverridesClass: LongWithoutOverrides = (Long as unknown) as LongWithoutOverrides;
 
+export interface TimestampExtended {
+  $timestamp: {
+    t: number;
+    i: number;
+  };
+}
+
 export class Timestamp extends LongWithoutOverridesClass {
   _bsontype!: 'Timestamp';
 
@@ -71,12 +78,12 @@ export class Timestamp extends LongWithoutOverridesClass {
   }
 
   /** @internal */
-  toExtendedJSON(): { $timestamp: { t: number; i: number } } {
+  toExtendedJSON(): TimestampExtended {
     return { $timestamp: { t: this.high >>> 0, i: this.low >>> 0 } };
   }
 
   /** @internal */
-  static fromExtendedJSON(doc: { $timestamp: { t: number; i: number } }): Timestamp {
+  static fromExtendedJSON(doc: TimestampExtended): Timestamp {
     return new Timestamp(doc.$timestamp.i, doc.$timestamp.t);
   }
 }
