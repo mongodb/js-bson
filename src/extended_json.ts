@@ -52,6 +52,7 @@ export interface EJSONOptions {
 const keysToCodecs = {
   $oid: ObjectId,
   $binary: Binary,
+  $uuid: Binary,
   $symbol: BSONSymbol,
   $numberInt: Int32,
   $numberDecimal: Decimal128,

@@ -1,6 +1,7 @@
 import { Buffer } from 'buffer';
 import { ensureBuffer } from './ensure_buffer';
 import type { EJSONOptions } from './extended_json';
+import { parseUUID } from './uuid';
 
 type BinarySequence = Uint8Array | Buffer | number[];
 
@@ -14,6 +15,10 @@ export interface BinaryExtended {
     subType: string;
     base64: string;
   };
+}
+
+export interface UUIDExtended {
+  $uuid: string;
 }
 
 /** A class representation of the BSON Binary type. */
@@ -202,7 +207,7 @@ export class Binary {
   }
 
   /** @internal */
-  toExtendedJSON(options?: EJSONOptions): BinaryExtendedLegacy | BinaryExtended {
+  toExtendedJSON(options?: EJSONOptions): BinaryExtendedLegacy | BinaryExtended | UUIDExtended {
     options = options || {};
     const base64String = this.buffer.toString('base64');
 
@@ -223,20 +228,25 @@ export class Binary {
 
   /** @internal */
   static fromExtendedJSON(
-    doc: BinaryExtendedLegacy | BinaryExtended,
+    doc: BinaryExtendedLegacy | BinaryExtended | UUIDExtended,
     options?: EJSONOptions
   ): Binary {
     options = options || {};
     let data: Buffer | undefined;
     let type;
-    if (options.legacy && typeof doc.$binary === 'string' && '$type' in doc) {
-      type = doc.$type ? parseInt(doc.$type, 16) : 0;
-      data = Buffer.from(doc.$binary, 'base64');
-    } else {
-      if (typeof doc.$binary !== 'string') {
-        type = doc.$binary.subType ? parseInt(doc.$binary.subType, 16) : 0;
-        data = Buffer.from(doc.$binary.base64, 'base64');
+    if ('$binary' in doc) {
+      if (options.legacy && typeof doc.$binary === 'string' && '$type' in doc) {
+        type = doc.$type ? parseInt(doc.$type, 16) : 0;
+        data = Buffer.from(doc.$binary, 'base64');
+      } else {
+        if (typeof doc.$binary !== 'string') {
+          type = doc.$binary.subType ? parseInt(doc.$binary.subType, 16) : 0;
+          data = Buffer.from(doc.$binary.base64, 'base64');
+        }
       }
+    } else if ('$uuid' in doc) {
+      type = 4;
+      data = Buffer.from(parseUUID(doc.$uuid));
     }
     if (!data) {
       throw new TypeError(`Unexpected Binary Extended JSON format ${JSON.stringify(doc)}`);
