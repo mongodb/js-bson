@@ -207,7 +207,7 @@ export class Binary {
   }
 
   /** @internal */
-  toExtendedJSON(options?: EJSONOptions): BinaryExtendedLegacy | BinaryExtended | UUIDExtended {
+  toExtendedJSON(options?: EJSONOptions): BinaryExtendedLegacy | BinaryExtended {
     options = options || {};
     const base64String = this.buffer.toString('base64');
 
