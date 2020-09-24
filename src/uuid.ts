@@ -2,16 +2,8 @@ const UUIDPattern = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]
 
 export function formatUUID(uuid: string): string {
   uuid = uuid.replace(/^.+:/, '');
-  if (!uuid.match('-')) {
-    const pieces = [
-      uuid.substr(0, 8),
-      uuid.substr(8, 4),
-      uuid.substr(8 + 4, 4),
-      uuid.substr(8 + 4 + 4, 4),
-      uuid.substr(8 + 4 + 4 + 4, 12)
-    ];
-    uuid = pieces.join('-');
-  }
+  const result = uuid.match(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/);
+  if (result) uuid = result.slice(1, 6).join('-');
   return uuid;
 }
 
