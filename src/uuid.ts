@@ -1,7 +1,7 @@
 const UUID_RX = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
 
 /** @internal */
-export function formatUUID(uuid: string): string {
+function formatUUID(uuid: string): string {
   uuid = uuid.replace(/^.+:/, '');
   const result = uuid.match(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/);
   if (result) uuid = result.slice(1, 6).join('-');
