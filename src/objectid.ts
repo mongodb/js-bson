@@ -60,7 +60,7 @@ export class ObjectId {
       this.__id = id.__id;
     }
 
-    if (typeof id === 'object' && 'id' in id) {
+    if (typeof id === 'object' && id && 'id' in id) {
       if ('toHexString' in id && typeof id.toHexString === 'function') {
         this[kId] = Buffer.from(id.toHexString(), 'hex');
       } else {
