@@ -32,7 +32,7 @@ export default [
     plugins: [
       nodeResolve({ preferBuiltins: false }),
       commonjs(),
-      nodePolyfills(),
+      nodePolyfills({ include: ['buffer'] }),
       babel({
         babelHelpers: 'bundled',
         presets: [
