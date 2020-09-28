@@ -362,12 +362,14 @@ Object.defineProperty(ObjectId, 'get_inc', {
   value: deprecate(() => ObjectId.getInc(), 'Please use the static `ObjectId.getInc()` instead')
 });
 
+const inspect = Symbol.for('nodejs.util.inspect.custom');
 /**
  * Converts to a string representation of this Id.
  *
  * @returns return the 24 character hex string representation.
  * @internal
  */
+Object.defineProperty(ObjectId.prototype, inspect, ObjectId.prototype.toString);
 Object.defineProperty(ObjectId.prototype, 'inspect', ObjectId.prototype.toString);
 
 Object.defineProperty(ObjectId.prototype, '_bsontype', { value: 'ObjectID' });
