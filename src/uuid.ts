@@ -1,5 +1,6 @@
-const UUIDPattern = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
+const UUID_RX = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
 
+/** @internal */
 export function formatUUID(uuid: string): string {
   uuid = uuid.replace(/^.+:/, '');
   const result = uuid.match(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/);
@@ -7,13 +8,18 @@ export function formatUUID(uuid: string): string {
   return uuid;
 }
 
+/**
+ * Parser function copied from `uuid` npm module.
+ * @see https://github.com/uuidjs/uuid/blob/master/src/parse.js
+ * @internal
+ */
 export function parseUUID(uuid: string): Uint8Array {
   uuid = formatUUID(uuid);
 
   if (typeof uuid !== 'string') {
     throw new Error('$uuid wrong type');
   }
-  if (!UUIDPattern.test(uuid)) {
+  if (!UUID_RX.test(uuid)) {
     throw new Error('$uuid invalid value');
   }
 
