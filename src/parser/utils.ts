@@ -75,6 +75,7 @@ export function isObjectLike(candidate: unknown): candidate is Record<string, un
   return typeof candidate === 'object' && candidate !== null;
 }
 
+declare let console: { warn(...message: unknown[]): void };
 export function deprecate<T extends Function>(fn: T, message: string): T {
   if (typeof window === 'undefined' || typeof self === 'undefined') {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
