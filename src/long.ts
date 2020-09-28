@@ -1,6 +1,6 @@
-import type { Timestamp } from './timestamp';
 import type { EJSONOptions } from './extended_json';
 import { isObjectLike } from './parser/utils';
+import type { Timestamp } from './timestamp';
 
 interface LongWASMHelpers {
   /** Gets the high bits of the last operation performed */
@@ -189,6 +189,16 @@ export class Long {
     }
     if (value < 0) return Long.fromNumber(-value, unsigned).neg();
     return Long.fromBits(value % TWO_PWR_32_DBL | 0, (value / TWO_PWR_32_DBL) | 0, unsigned);
+  }
+
+  /**
+   * Returns a Long representing the given value, provided that it is a finite number. Otherwise, zero is returned.
+   * @param value - The number in question
+   * @param unsigned - Whether unsigned or not, defaults to signed
+   * @returns The corresponding Long value
+   */
+  static fromBigInt(value: bigint, unsigned?: boolean): Long {
+    return Long.fromString(value.toString(), unsigned);
   }
 
   /**
@@ -795,6 +805,11 @@ export class Long {
   toNumber(): number {
     if (this.unsigned) return (this.high >>> 0) * TWO_PWR_32_DBL + (this.low >>> 0);
     return this.high * TWO_PWR_32_DBL + (this.low >>> 0);
+  }
+
+  /** Converts the Long to a BigInt (arbitrary precision). */
+  toBigInt(): bigint {
+    return BigInt(this.toString());
   }
 
   /**

@@ -18,6 +18,8 @@ function insecureRandomBytes(size: number): Uint8Array {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare let window: any;
 declare let require: Function;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare let global: any;
 
 export let randomBytes = insecureRandomBytes;
 if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
@@ -38,6 +40,24 @@ if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomVal
 
 export function isUint8Array(value: unknown): value is Uint8Array {
   return Object.prototype.toString.call(value) === '[object Uint8Array]';
+}
+
+export function isBigInt64Array(value: unknown): value is BigInt64Array {
+  return Object.prototype.toString.call(value) === '[object BigInt64Array]';
+}
+
+export function isBigUInt64Array(value: unknown): value is BigUint64Array {
+  return Object.prototype.toString.call(value) === '[object BigUint64Array]';
+}
+
+/** Call to check if your environment has `Buffer` */
+export function haveBuffer(): boolean {
+  return typeof global !== 'undefined' && typeof global.Buffer !== 'undefined';
+}
+
+/** Callable in any environment to check if value is a Buffer */
+export function isBuffer(value: unknown): value is Buffer {
+  return haveBuffer() && Buffer.isBuffer(value);
 }
 
 // To ensure that 0.4 of node works correctly
