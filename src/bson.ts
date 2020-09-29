@@ -1,7 +1,6 @@
 import { Buffer } from 'buffer';
 import { Binary } from './binary';
 import { Code } from './code';
-import * as constants from './constants';
 import { DBRef } from './db_ref';
 import { Decimal128 } from './decimal128';
 import { Double } from './double';
@@ -278,68 +277,3 @@ export function deserializeStream(
   // Return object containing end index of parsing and list of documents
   return index;
 }
-
-const bsonDefaultModuleExport = {
-  // constants
-  // NOTE: this is done this way because rollup can't resolve an `Object.assign`ed export
-  BSON_INT32_MAX: constants.BSON_INT32_MAX,
-  BSON_INT32_MIN: constants.BSON_INT32_MIN,
-  BSON_INT64_MAX: constants.BSON_INT64_MAX,
-  BSON_INT64_MIN: constants.BSON_INT64_MIN,
-  JS_INT_MAX: constants.JS_INT_MAX,
-  JS_INT_MIN: constants.JS_INT_MIN,
-  BSON_DATA_NUMBER: constants.BSON_DATA_NUMBER,
-  BSON_DATA_STRING: constants.BSON_DATA_STRING,
-  BSON_DATA_OBJECT: constants.BSON_DATA_OBJECT,
-  BSON_DATA_ARRAY: constants.BSON_DATA_ARRAY,
-  BSON_DATA_BINARY: constants.BSON_DATA_BINARY,
-  BSON_DATA_UNDEFINED: constants.BSON_DATA_UNDEFINED,
-  BSON_DATA_OID: constants.BSON_DATA_OID,
-  BSON_DATA_BOOLEAN: constants.BSON_DATA_BOOLEAN,
-  BSON_DATA_DATE: constants.BSON_DATA_DATE,
-  BSON_DATA_NULL: constants.BSON_DATA_NULL,
-  BSON_DATA_REGEXP: constants.BSON_DATA_REGEXP,
-  BSON_DATA_DBPOINTER: constants.BSON_DATA_DBPOINTER,
-  BSON_DATA_CODE: constants.BSON_DATA_CODE,
-  BSON_DATA_SYMBOL: constants.BSON_DATA_SYMBOL,
-  BSON_DATA_CODE_W_SCOPE: constants.BSON_DATA_CODE_W_SCOPE,
-  BSON_DATA_INT: constants.BSON_DATA_INT,
-  BSON_DATA_TIMESTAMP: constants.BSON_DATA_TIMESTAMP,
-  BSON_DATA_LONG: constants.BSON_DATA_LONG,
-  BSON_DATA_DECIMAL128: constants.BSON_DATA_DECIMAL128,
-  BSON_DATA_MIN_KEY: constants.BSON_DATA_MIN_KEY,
-  BSON_DATA_MAX_KEY: constants.BSON_DATA_MAX_KEY,
-  BSON_BINARY_SUBTYPE_DEFAULT: constants.BSON_BINARY_SUBTYPE_DEFAULT,
-  BSON_BINARY_SUBTYPE_FUNCTION: constants.BSON_BINARY_SUBTYPE_FUNCTION,
-  BSON_BINARY_SUBTYPE_BYTE_ARRAY: constants.BSON_BINARY_SUBTYPE_BYTE_ARRAY,
-  BSON_BINARY_SUBTYPE_UUID: constants.BSON_BINARY_SUBTYPE_UUID,
-  BSON_BINARY_SUBTYPE_MD5: constants.BSON_BINARY_SUBTYPE_MD5,
-  BSON_BINARY_SUBTYPE_USER_DEFINED: constants.BSON_BINARY_SUBTYPE_USER_DEFINED,
-  // wrapped types
-  Code,
-  Map,
-  BSONSymbol,
-  DBRef,
-  Binary,
-  ObjectId,
-  ObjectID: ObjectId,
-  Long,
-  Timestamp,
-  Double,
-  Int32,
-  MinKey,
-  MaxKey,
-  BSONRegExp,
-  Decimal128,
-  // methods
-  serialize,
-  serializeWithBufferAndIndex,
-  deserialize,
-  calculateObjectSize,
-  deserializeStream,
-  setInternalBufferSize,
-  // EJSON namespace
-  EJSON
-};
-
-export default bsonDefaultModuleExport;

@@ -1,11 +1,9 @@
-import { getBabelOutputPlugin } from '@rollup/plugin-babel';
-const commonjs = require('@rollup/plugin-commonjs');
+const pkg = require('./package.json');
+const commonjs = require('rollup-plugin-commonjs');
+const nodeBuiltins = require('rollup-plugin-node-builtins');
 const { nodeResolve } = require('@rollup/plugin-node-resolve');
-const nodePolyfills = require('rollup-plugin-node-polyfills');
-import typescript from '@rollup/plugin-typescript';
-
-// Entry point of the library
-const input = './src/bson.ts';
+const { babel } = require('@rollup/plugin-babel');
+const typescript = require('@rollup/plugin-typescript');
 
 const tsConfig = {
   allowJs: false,
@@ -13,7 +11,7 @@ const tsConfig = {
   strict: true,
   alwaysStrict: true,
   target: 'ES2017',
-  module: 'esnext',
+  module: 'commonjs',
   moduleResolution: 'node',
   lib: ['ES2017', 'ES2020.BigInt', 'ES2017.TypedArrays'],
   // We don't make use of tslib helpers
@@ -32,85 +30,62 @@ const tsConfig = {
   tsconfig: false,
   include: ['src/**/*']
 };
+const input = 'src/bson.ts';
 
-export default [
+const plugins = [
+  typescript(tsConfig),
+  nodeResolve({ preferBuiltins: false }),
+  commonjs({ extensions: ['.js', '.ts'] }),
+  nodeBuiltins(),
+  babel({
+    babelHelpers: 'external',
+    plugins: ['@babel/plugin-external-helpers'],
+    presets: [['@babel/env', { modules: false }]]
+  })
+];
+
+const external = Object.keys(pkg.dependencies || {});
+
+const defaultName = 'BSON';
+
+module.exports = [
   {
     input,
-    /* Browser ESM bundle */
     output: {
-      file: 'dist/bson.browser.esm.js',
-      format: 'esm',
+      file: 'dist/bson.esm.js',
+      format: 'es',
+      name: defaultName,
       exports: 'named',
       sourcemap: true
     },
-    plugins: [
-      typescript(tsConfig),
-      nodeResolve({ preferBuiltins: false }),
-      commonjs(),
-      nodePolyfills(),
-      getBabelOutputPlugin({
-        presets: [
-          [
-            '@babel/preset-env',
-            {
-              modules: false,
-              targets: { ie: 8, node: 6 }
-            }
-          ]
-        ]
-      })
-    ]
+    plugins,
+    external
   },
   {
     input,
     output: [
-      /* Browser UMD bundle */
       {
         file: 'dist/bson.browser.umd.js',
-        format: 'esm',
-        name: 'BSON',
+        format: 'umd',
+        name: defaultName,
+        exports: 'named',
         sourcemap: true
       },
-      /* Browser IIFE bundle */ {
-        file: 'dist/bson.bundle.js',
-        format: 'esm',
-        name: 'BSON',
-        sourcemap: true
-      }
-    ],
-    plugins: [
-      typescript(tsConfig),
-      nodeResolve({ preferBuiltins: false }),
-      commonjs(),
-      nodePolyfills(),
-      getBabelOutputPlugin({
-        allowAllFormats: true,
-        moduleId: 'BSON', // names the IIFE/UMD module
-        // babelHelpers: 'bundled',
-        presets: [
-          [
-            '@babel/preset-env',
-            {
-              modules: 'umd',
-              targets: { ie: 8, node: 6 }
-            }
-          ]
-        ]
-      })
-    ]
-  },
-  /* ESM bundle with externals */
-  {
-    input,
-    output: [
       {
-        file: 'dist/bson.esm.js',
-        format: 'esm',
+        file: 'dist/bson.browser.esm.js',
+        format: 'es',
+        name: defaultName,
+        exports: 'named',
+        sourcemap: true
+      },
+      {
+        file: 'dist/bson.bundle.js',
+        format: 'iife',
+        name: defaultName,
         exports: 'named',
         sourcemap: true
       }
     ],
-    external: ['buffer'], // don't bundle 'buffer'
-    plugins: [typescript(tsConfig), nodeResolve({ preferBuiltins: true }), commonjs()]
+    plugins
   }
 ];
