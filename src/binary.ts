@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer';
 import { ensureBuffer } from './ensure_buffer';
 import type { EJSONOptions } from './extended_json';
-import { parseUUID } from './uuid';
+import { parseUUID, UUIDExtended } from './uuid';
 
 type BinarySequence = Uint8Array | Buffer | number[];
 
@@ -15,10 +15,6 @@ export interface BinaryExtended {
     subType: string;
     base64: string;
   };
-}
-
-export interface UUIDExtended {
-  $uuid: string;
 }
 
 /** A class representation of the BSON Binary type. */
