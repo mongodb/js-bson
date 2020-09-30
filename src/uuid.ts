@@ -1,3 +1,5 @@
+const UUID_RX = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
+
 export interface UUIDExtended {
   $uuid: string;
 }
@@ -9,13 +11,11 @@ export interface UUIDExtended {
  */
 export function parseUUID(uuid: string): Uint8Array {
   if (typeof uuid !== 'string') {
-    throw new Error('$uuid wrong type');
+    throw new TypeError('Invalid type for UUID, expected string but got ' + typeof uuid);
   }
 
-  const UUID_RX = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
-
   if (!UUID_RX.test(uuid)) {
-    throw new Error('$uuid invalid value');
+    throw new TypeError('Invalid format for UUID: ' + uuid);
   }
 
   let v;
