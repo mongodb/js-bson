@@ -25,6 +25,7 @@
     "url": "https://github.com/mongodb/js-bson/issues"
   },
   "devDependencies": {
+    "@babel/plugin-external-helpers": "^7.10.4",
     "@babel/preset-env": "^7.11.0",
     "@istanbuljs/nyc-config-typescript": "^1.0.1",
     "@microsoft/api-extractor": "^7.9.10",
@@ -32,6 +33,7 @@
     "@rollup/plugin-commonjs": "^15.0.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^9.0.0",
+    "@rollup/plugin-typescript": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^3.10.1",
     "@typescript-eslint/parser": "^3.10.1",
     "benchmark": "^2.1.4",
@@ -51,6 +53,8 @@
     "prettier": "^2.1.1",
     "rimraf": "^3.0.2",
     "rollup": "^2.26.5",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-polyfills": "^0.2.1",
     "standard-version": "^8.0.1",
