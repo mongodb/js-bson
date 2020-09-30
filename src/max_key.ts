@@ -1,9 +1,11 @@
-interface MaxKeyExtended {
+/** @public */
+export interface MaxKeyExtended {
   $maxKey: 1;
 }
 
 /**
  * A class representation of the BSON MaxKey type.
+ * @public
  */
 export class MaxKey {
   _bsontype!: 'MaxKey';

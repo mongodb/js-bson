@@ -6,6 +6,7 @@ declare const window: unknown;
 declare const self: unknown;
 declare const global: unknown;
 
+/** @public */
 let bsonMap: MapConstructor;
 
 const check = function (potentialGlobal: any) {

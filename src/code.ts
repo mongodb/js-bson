@@ -1,11 +1,15 @@
 import type { Document } from './bson';
 
+/** @public */
 export interface CodeExtended {
   $code: string | Function;
   $scope?: Document;
 }
 
-/** A class representation of the BSON Code type. */
+/**
+ * A class representation of the BSON Code type.
+ * @public
+ */
 export class Code {
   _bsontype!: 'Code';
 

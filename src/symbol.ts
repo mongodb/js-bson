@@ -1,8 +1,12 @@
+/** @public */
 export interface BSONSymbolExtended {
   $symbol: string;
 }
 
-/** A class representation of the BSON Symbol type. */
+/**
+ * A class representation of the BSON Symbol type.
+ * @public
+ */
 export class BSONSymbol {
   _bsontype!: 'Symbol';
 

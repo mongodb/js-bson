@@ -153,11 +153,15 @@ function invalidErr(string: string, message: string) {
   throw new TypeError(`"${string}" is not a valid Decimal128 string - ${message}`);
 }
 
+/** @public */
 export interface Decimal128Extended {
   $numberDecimal: string;
 }
 
-/** A class representation of the BSON Decimal128 type. */
+/**
+ * A class representation of the BSON Decimal128 type.
+ * @public
+ */
 export class Decimal128 {
   _bsontype!: 'Decimal128';
 

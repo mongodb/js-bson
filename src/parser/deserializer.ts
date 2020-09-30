@@ -16,6 +16,7 @@ import { BSONSymbol } from '../symbol';
 import { Timestamp } from '../timestamp';
 import { validateUtf8 } from '../validate_utf8';
 
+/** @public */
 export interface DeserializeOptions {
   /** evaluate functions in the BSON document scoped to the object deserialized. */
   evalFunctions?: boolean;

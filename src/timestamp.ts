@@ -1,11 +1,15 @@
 import { Long } from './long';
 
-type TimestampOverrides = '_bsontype' | 'toExtendedJSON' | 'fromExtendedJSON';
-type LongWithoutOverrides = new (low: number | Long, high?: number, unsigned?: boolean) => {
+/** @public */
+export type TimestampOverrides = '_bsontype' | 'toExtendedJSON' | 'fromExtendedJSON';
+/** @public */
+export type LongWithoutOverrides = new (low: number | Long, high?: number, unsigned?: boolean) => {
   [P in Exclude<keyof Long, TimestampOverrides>]: Long[P];
 };
-const LongWithoutOverridesClass: LongWithoutOverrides = (Long as unknown) as LongWithoutOverrides;
+/** @public */
+export const LongWithoutOverridesClass: LongWithoutOverrides = (Long as unknown) as LongWithoutOverrides;
 
+/** @public */
 export interface TimestampExtended {
   $timestamp: {
     t: number;
@@ -13,6 +17,7 @@ export interface TimestampExtended {
   };
 }
 
+/** @public */
 export class Timestamp extends LongWithoutOverridesClass {
   _bsontype!: 'Timestamp';
 

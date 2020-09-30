@@ -1,11 +1,13 @@
 import type { EJSONOptions } from './extended_json';
 
+/** @public */
 export interface DoubleExtended {
   $numberDouble: string;
 }
 
 /**
  * A class representation of the BSON Double type.
+ * @public
  */
 export class Double {
   _bsontype!: 'Double';
