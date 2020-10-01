@@ -39,7 +39,7 @@ export class ObjectId {
   _bsontype!: 'ObjectId';
 
   /** @internal */
-  static index = ~~(Math.random() * 0xffffff);
+  static index = Math.floor(Math.random() * 0xffffff);
 
   static cacheHexString: boolean;
 
@@ -167,7 +167,7 @@ export class ObjectId {
    */
   static generate(time?: number): Buffer {
     if ('number' !== typeof time) {
-      time = ~~(Date.now() / 1000);
+      time = Math.floor(Date.now() / 1000);
     }
 
     const inc = ObjectId.getInc();
