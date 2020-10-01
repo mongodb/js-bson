@@ -73,6 +73,7 @@ export {
   TimestampExtended,
   TimestampOverrides
 } from './timestamp';
+export { UUIDExtended } from './uuid';
 export { SerializeOptions, DeserializeOptions };
 export {
   Code,
