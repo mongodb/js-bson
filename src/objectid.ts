@@ -20,12 +20,14 @@ let i = 0;
 while (i < 10) decodeLookup[0x30 + i] = i++;
 while (i < 16) decodeLookup[0x41 - 10 + i] = decodeLookup[0x61 - 10 + i] = i++;
 
+/** @public */
 export interface ObjectIdLike {
   id: string | Buffer;
   __id?: string;
   toHexString(): string;
 }
 
+/** @public */
 export interface ObjectIdExtended {
   $oid: string;
 }
@@ -34,6 +36,7 @@ const kId = Symbol('id');
 
 /**
  * A class representation of the BSON ObjectId type.
+ * @public
  */
 export class ObjectId {
   _bsontype!: 'ObjectId';
@@ -110,7 +113,6 @@ export class ObjectId {
     return this[kId];
   }
 
-  /** @internal */
   set id(value: Buffer) {
     this[kId] = value;
     if (ObjectId.cacheHexString) {
@@ -126,10 +128,6 @@ export class ObjectId {
     return this.id.readInt32BE(0);
   }
 
-  /**
-   * Sets the generation time of this ObjectId instance
-   * @deprecated Please use createFromTime
-   */
   set generationTime(value: number) {
     // Encode time into first 4 bytes
     this.id.writeUInt32BE(value, 0);

@@ -1,10 +1,14 @@
 import type { EJSONOptions } from './extended_json';
 
+/** @public */
 export interface Int32Extended {
   $numberInt: string;
 }
 
-/** A class representation of a BSON Int32 type. */
+/**
+ * A class representation of a BSON Int32 type.
+ * @public
+ */
 export class Int32 {
   _bsontype!: 'Int32';
 

@@ -5,12 +5,6 @@ import { DBRef } from './db_ref';
 import { Decimal128 } from './decimal128';
 import { Double } from './double';
 import { ensureBuffer } from './ensure_buffer';
-import {
-  deserialize as EJSON_deserialize,
-  parse as EJSON_parse,
-  serialize as EJSON_serialize,
-  stringify as EJSON_stringify
-} from './extended_json';
 import { Int32 } from './int_32';
 import { Long } from './long';
 import { Map } from './map';
@@ -24,7 +18,8 @@ import { serializeInto as internalSerialize, SerializeOptions } from './parser/s
 import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
-
+export { BinaryExtended, BinaryExtendedLegacy, BinarySequence } from './binary';
+export { CodeExtended } from './code';
 export {
   BSON_BINARY_SUBTYPE_BYTE_ARRAY,
   BSON_BINARY_SUBTYPE_DEFAULT,
@@ -61,6 +56,24 @@ export {
   JS_INT_MAX,
   JS_INT_MIN
 } from './constants';
+export { DBRefLike } from './db_ref';
+export { Decimal128Extended } from './decimal128';
+export { DoubleExtended } from './double';
+export { EJSON, EJSONOptions } from './extended_json';
+export { Int32Extended } from './int_32';
+export { LongExtended } from './long';
+export { MaxKeyExtended } from './max_key';
+export { MinKeyExtended } from './min_key';
+export { ObjectIdExtended, ObjectIdLike } from './objectid';
+export { BSONRegExpExtended, BSONRegExpExtendedLegacy } from './regexp';
+export { BSONSymbolExtended } from './symbol';
+export {
+  LongWithoutOverrides,
+  LongWithoutOverridesClass,
+  TimestampExtended,
+  TimestampOverrides
+} from './timestamp';
+export { UUIDExtended } from './uuid';
 export { SerializeOptions, DeserializeOptions };
 export {
   Code,
@@ -83,13 +96,7 @@ export {
   ObjectId as ObjectID
 };
 
-export const EJSON = {
-  parse: EJSON_parse,
-  stringify: EJSON_stringify,
-  serialize: EJSON_serialize,
-  deserialize: EJSON_deserialize
-};
-
+/** @public */
 export interface Document {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
@@ -106,6 +113,7 @@ let buffer = Buffer.alloc(MAXSIZE);
  * Sets the size of the internal serialization buffer.
  *
  * @param size - The desired size for the internal serialization buffer
+ * @public
  */
 export function setInternalBufferSize(size: number): void {
   // Resize the internal serialization buffer if needed
@@ -119,6 +127,7 @@ export function setInternalBufferSize(size: number): void {
  *
  * @param object - the Javascript object to serialize.
  * @returns Buffer object containing the serialized object.
+ * @public
  */
 export function serialize(object: Document, options: SerializeOptions = {}): Buffer {
   // Unpack the options
@@ -164,6 +173,7 @@ export function serialize(object: Document, options: SerializeOptions = {}): Buf
  * @param object - the Javascript object to serialize.
  * @param finalBuffer - the Buffer you pre-allocated to store the serialized BSON object.
  * @returns the index pointing to the last written byte in the buffer.
+ * @public
  */
 export function serializeWithBufferAndIndex(
   object: Document,
@@ -199,6 +209,7 @@ export function serializeWithBufferAndIndex(
  *
  * @param buffer - the buffer containing the serialized set of BSON documents.
  * @returns returns the deserialized Javascript Object.
+ * @public
  */
 export function deserialize(
   buffer: Buffer | ArrayBufferView | ArrayBuffer,
@@ -207,6 +218,7 @@ export function deserialize(
   return internalDeserialize(ensureBuffer(buffer), options);
 }
 
+/** @public */
 export type CalculateObjectSizeOptions = Pick<
   SerializeOptions,
   'serializeFunctions' | 'ignoreUndefined'
@@ -217,6 +229,7 @@ export type CalculateObjectSizeOptions = Pick<
  *
  * @param object - the Javascript object to calculate the BSON byte size for
  * @returns size of BSON object in bytes
+ * @public
  */
 export function calculateObjectSize(
   object: Document,
@@ -242,6 +255,7 @@ export function calculateObjectSize(
  * @param docStartIndex - the index in the documents array from where to start inserting documents.
  * @param options - additional options used for the deserialization.
  * @returns next index in the buffer after deserialization **x** numbers of documents.
+ * @public
  */
 export function deserializeStream(
   data: Buffer | ArrayBufferView | ArrayBuffer,

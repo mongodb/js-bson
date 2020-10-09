@@ -9,7 +9,7 @@
   },
   "dtsRollup": {
     "enabled": true,
-    "untrimmedFilePath": "<projectFolder>/<unscopedPackageName>.d.ts"
+    "publicTrimmedFilePath": "<projectFolder>/<unscopedPackageName>.d.ts"
   },
   "tsdocMetadata": {
     "enabled": false
@@ -23,28 +23,16 @@
     },
     "extractorMessageReporting": {
       "default": {
-        "logLevel": "warning"
+        "logLevel": "error"
       },
       "ae-internal-missing-underscore": {
-        "logLevel": "error",
-        "addToApiReportFile": false
-      },
-      "ae-missing-release-tag": {
         "logLevel": "none",
         "addToApiReportFile": false
-      },
-      "ae-incompatible-release-tags": {
-        "logLevel": "none",
-        "addToApiReportFile": false
-      },
-      "ae-unresolved-link": {
-        "addToApiReportFile": false,
-        "logLevel": "error"
       }
     },
     "tsdocMessageReporting": {
       "default": {
-        "logLevel": "none"
+        "logLevel": "error"
       }
     }
   }

@@ -23,6 +23,7 @@ import {
   normalizedFunctionString
 } from './utils';
 
+/** @public */
 export interface SerializeOptions {
   /** the serializer will check if keys are valid. */
   checkKeys?: boolean;

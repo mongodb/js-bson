@@ -50,12 +50,14 @@ const INT_CACHE: { [key: number]: Long } = {};
 /** A cache of the Long representations of small unsigned integer values. */
 const UINT_CACHE: { [key: number]: Long } = {};
 
+/** @public */
 export interface LongExtended {
   $numberLong: string;
 }
 
 /**
  * A class representing a 64-bit integer
+ * @public
  * @remarks
  * The internal representation of a long is the two given signed, 32-bit values.
  * We use 32-bit pieces because these are the size of integers on which

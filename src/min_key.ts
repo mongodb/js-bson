@@ -1,9 +1,11 @@
-interface MinKeyExtended {
+/** @public */
+export interface MinKeyExtended {
   $minKey: 1;
 }
 
 /**
  * A class representation of the BSON MinKey type.
+ * @public
  */
 export class MinKey {
   _bsontype!: 'MinKey';

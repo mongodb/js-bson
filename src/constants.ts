@@ -1,96 +1,104 @@
-// BSON MAX VALUES
+/** @internal */
 export const BSON_INT32_MAX = 0x7fffffff;
+/** @internal */
 export const BSON_INT32_MIN = -0x80000000;
-
+/** @internal */
 export const BSON_INT64_MAX = Math.pow(2, 63) - 1;
+/** @internal */
 export const BSON_INT64_MIN = -Math.pow(2, 63);
 
-// JS MAX PRECISE VALUES
-// Any integer up to 2^53 can be precisely represented by a double.
+/**
+ * Any integer up to 2^53 can be precisely represented by a double.
+ * @internal
+ */
 export const JS_INT_MAX = Math.pow(2, 53);
-// Any integer down to -2^53 can be precisely represented by a double.
+
+/**
+ * Any integer down to -2^53 can be precisely represented by a double.
+ * @internal
+ */
 export const JS_INT_MIN = -Math.pow(2, 53);
 
-/** Number BSON Type */
+/** Number BSON Type @internal */
 export const BSON_DATA_NUMBER = 1;
 
-/** String BSON Type */
+/** String BSON Type @internal */
 export const BSON_DATA_STRING = 2;
 
-/** Object BSON Type */
+/** Object BSON Type @internal */
 export const BSON_DATA_OBJECT = 3;
 
-/** Array BSON Type */
+/** Array BSON Type @internal */
 export const BSON_DATA_ARRAY = 4;
 
-/** Binary BSON Type */
+/** Binary BSON Type @internal */
 export const BSON_DATA_BINARY = 5;
 
-/** Binary BSON Type */
+/** Binary BSON Type @internal */
 export const BSON_DATA_UNDEFINED = 6;
 
-/** ObjectId BSON Type */
+/** ObjectId BSON Type @internal */
 export const BSON_DATA_OID = 7;
 
-/** Boolean BSON Type */
+/** Boolean BSON Type @internal */
 export const BSON_DATA_BOOLEAN = 8;
 
-/** Date BSON Type */
+/** Date BSON Type @internal */
 export const BSON_DATA_DATE = 9;
 
-/** null BSON Type */
+/** null BSON Type @internal */
 export const BSON_DATA_NULL = 10;
 
-/** RegExp BSON Type */
+/** RegExp BSON Type @internal */
 export const BSON_DATA_REGEXP = 11;
 
-/** Code BSON Type */
+/** Code BSON Type @internal */
 export const BSON_DATA_DBPOINTER = 12;
 
-/** Code BSON Type */
+/** Code BSON Type @internal */
 export const BSON_DATA_CODE = 13;
 
-/** Symbol BSON Type */
+/** Symbol BSON Type @internal */
 export const BSON_DATA_SYMBOL = 14;
 
-/** Code with Scope BSON Type */
+/** Code with Scope BSON Type @internal */
 export const BSON_DATA_CODE_W_SCOPE = 15;
 
-/** 32 bit Integer BSON Type */
+/** 32 bit Integer BSON Type @internal */
 export const BSON_DATA_INT = 16;
 
-/** Timestamp BSON Type */
+/** Timestamp BSON Type @internal */
 export const BSON_DATA_TIMESTAMP = 17;
 
-/** Long BSON Type */
+/** Long BSON Type @internal */
 export const BSON_DATA_LONG = 18;
 
-/** Decimal128 BSON Type */
+/** Decimal128 BSON Type @internal */
 export const BSON_DATA_DECIMAL128 = 19;
 
-/** MinKey BSON Type */
+/** MinKey BSON Type @internal */
 export const BSON_DATA_MIN_KEY = 0xff;
 
-/** MaxKey BSON Type */
+/** MaxKey BSON Type @internal */
 export const BSON_DATA_MAX_KEY = 0x7f;
 
-/** Binary Default Type */
+/** Binary Default Type @internal */
 export const BSON_BINARY_SUBTYPE_DEFAULT = 0;
 
-/** Binary Function Type */
+/** Binary Function Type @internal */
 export const BSON_BINARY_SUBTYPE_FUNCTION = 1;
 
-/** Binary Byte Array Type */
+/** Binary Byte Array Type @internal */
 export const BSON_BINARY_SUBTYPE_BYTE_ARRAY = 2;
 
-/** Binary Deprecated UUID Type @deprecated Please use BSON_BINARY_SUBTYPE_UUID_NEW */
+/** Binary Deprecated UUID Type @deprecated Please use BSON_BINARY_SUBTYPE_UUID_NEW @internal */
 export const BSON_BINARY_SUBTYPE_UUID = 3;
 
-/** Binary UUID Type */
+/** Binary UUID Type @internal */
 export const BSON_BINARY_SUBTYPE_UUID_NEW = 4;
 
-/** Binary MD5 Type */
+/** Binary MD5 Type @internal */
 export const BSON_BINARY_SUBTYPE_MD5 = 5;
 
-/** Binary User Defined Type */
+/** Binary User Defined Type @internal */
 export const BSON_BINARY_SUBTYPE_USER_DEFINED = 128;

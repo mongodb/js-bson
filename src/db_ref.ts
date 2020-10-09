@@ -3,17 +3,22 @@ import type { EJSONOptions } from './extended_json';
 import type { ObjectId } from './objectid';
 import { isObjectLike } from './parser/utils';
 
+/** @public */
 export interface DBRefLike {
   $ref: string;
   $id: ObjectId;
   $db?: string;
 }
 
+/** @internal */
 export function isDBRefLike(value: unknown): value is DBRefLike {
   return isObjectLike(value) && value['$id'] != null && value['$ref'] != null;
 }
 
-/** A class representation of the BSON DBRef type. */
+/**
+ * A class representation of the BSON DBRef type.
+ * @public
+ */
 export class DBRef {
   _bsontype!: 'DBRef';
 
@@ -49,7 +54,7 @@ export class DBRef {
   get namespace(): string {
     return this.collection;
   }
-  /** @internal */
+
   set namespace(value: string) {
     this.collection = value;
   }

@@ -4,11 +4,13 @@ function alphabetize(str: string): string {
   return str.split('').sort().join('');
 }
 
+/** @public */
 export interface BSONRegExpExtendedLegacy {
   $regex: string | BSONRegExp;
   $options: string;
 }
 
+/** @public */
 export interface BSONRegExpExtended {
   $regularExpression: {
     pattern: string;
@@ -16,7 +18,10 @@ export interface BSONRegExpExtended {
   };
 }
 
-/** A class representation of the BSON RegExp type. */
+/**
+ * A class representation of the BSON RegExp type.
+ * @public
+ */
 export class BSONRegExp {
   _bsontype!: 'BSONRegExp';
 
