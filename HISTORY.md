@@ -1,6 +1,26 @@
-# Change Log
+# Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [4.2.0](https://github.com/mongodb/js-bson/compare/v4.1.0...v4.2.0) (2020-10-13)
+
+
+### Features
+
+* add extended json parsing for $uuid ([b1b2a0e](https://github.com/mongodb/js-bson/commit/b1b2a0ee5f497c971aa28961cf80bde522fc1779))
+* convert to TypeScript ([#393](https://github.com/mongodb/js-bson/issues/393)) ([9aad874](https://github.com/mongodb/js-bson/commit/9aad8746bbb2159012193a53a206509130a95fb0))
+* Improve TS Typings ([#389](https://github.com/mongodb/js-bson/issues/389)) ([ae9ae2d](https://github.com/mongodb/js-bson/commit/ae9ae2df0d5d0a88adf27523d7fca7f3ad59a57a))
+
+
+### Bug Fixes
+
+* adds interfaces for EJSON objects ([7f5f1a3](https://github.com/mongodb/js-bson/commit/7f5f1a38d99d1d50b8bf261cc72916f5bce506ae))
+* Correct API Extractor config to omit definition file from dist ([#407](https://github.com/mongodb/js-bson/issues/407)) ([ace8647](https://github.com/mongodb/js-bson/commit/ace8647646e20df61e77d0ce8ed7ea84a3ff7738))
+* coverage ([992e2e0](https://github.com/mongodb/js-bson/commit/992e2e040806701d1c69e09d07186a6e1deacc0e))
+* deprecate cacheFunctionsCrc32 ([ea83bf5](https://github.com/mongodb/js-bson/commit/ea83bf5200f4a936692f710063941ba802386da4))
+* Rework rollup config to output named and default exports ([#404](https://github.com/mongodb/js-bson/issues/404)) ([a48676b](https://github.com/mongodb/js-bson/commit/a48676b0d442e06a71a413500194d35a7bea7587))
+* Throw on BigInt type values ([#397](https://github.com/mongodb/js-bson/issues/397)) ([2dd54e5](https://github.com/mongodb/js-bson/commit/2dd54e5275fc72dd8cd579a1636d2a73b7b0e790))
+* type issues with SerializeOptions and Long methods accepting Timestamp ([c18ba71](https://github.com/mongodb/js-bson/commit/c18ba71229129c8ea34e40265a9503c10e29a9e0))
 
 <a name="4.1.0"></a>
 # [4.1.0](https://github.com/mongodb/js-bson/compare/v4.0.4...v4.1.0) (2020-08-10)

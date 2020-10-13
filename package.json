@@ -15,7 +15,7 @@
     "bower.json"
   ],
   "types": "bson.d.ts",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "author": "Christian Amor Kvalheim <christkv@gmail.com>",
   "license": "Apache-2.0",
   "contributors": [],
