@@ -9,6 +9,7 @@
   },
   "dtsRollup": {
     "enabled": true,
+    "untrimmedFilePath": "", // Force API extractor to not create d.ts in dist folder
     "publicTrimmedFilePath": "<projectFolder>/<unscopedPackageName>.d.ts"
   },
   "tsdocMetadata": {
