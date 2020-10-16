@@ -349,8 +349,6 @@ export namespace EJSON {
    * console.log(EJSON.stringify(doc));
    * ```
    */
-  export function stringify(value: SerializableTypes): string;
-  export function stringify(value: SerializableTypes, options?: EJSON.Options): string;
   export function stringify(
     value: SerializableTypes,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
