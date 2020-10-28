@@ -214,41 +214,12 @@ export class ObjectId {
    *
    * @param otherId - ObjectId instance to compare against.
    */
-  equals(otherId: string | ObjectId | ObjectIdLike): boolean {
-    if (otherId === undefined || otherId === null) {
+  equals(otherId: string | Buffer | number | ObjectIdLike | ObjectId): boolean {
+    try {
+      return this.id.equals(new ObjectId(otherId).id);
+    } catch (e) {
       return false;
     }
-
-    if (otherId instanceof ObjectId) {
-      return this.toString() === otherId.toString();
-    }
-
-    if (
-      typeof otherId === 'string' &&
-      ObjectId.isValid(otherId) &&
-      otherId.length === 12 &&
-      this.id instanceof Buffer
-    ) {
-      return otherId === this.id.toString('binary');
-    }
-
-    if (typeof otherId === 'string' && ObjectId.isValid(otherId) && otherId.length === 24) {
-      return otherId.toLowerCase() === this.toHexString();
-    }
-
-    if (typeof otherId === 'string' && ObjectId.isValid(otherId) && otherId.length === 12) {
-      return Buffer.from(otherId).equals(this.id);
-    }
-
-    if (
-      typeof otherId === 'object' &&
-      'toHexString' in otherId &&
-      typeof otherId.toHexString === 'function'
-    ) {
-      return otherId.toHexString() === this.toHexString();
-    }
-
-    return false;
   }
 
   /** Returns the generation date (accurate up to the second) that this ID was generated. */
