@@ -58,7 +58,7 @@ export function haveBuffer(): boolean {
 
 /** Callable in any environment to check if value is a Buffer */
 export function isBuffer(value: unknown): value is Buffer {
-  return haveBuffer() && Buffer.isBuffer(value);
+  return typeof value === 'object' && value?.constructor?.name === 'Buffer';
 }
 
 // To ensure that 0.4 of node works correctly
