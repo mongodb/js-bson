@@ -66,16 +66,7 @@ describe('ObjectId', function () {
   it('should correctly allow for node.js inspect to work with ObjectId', function (done) {
     var a = 'AAAAAAAAAAAAAAAAAAAAAAAA';
     var b = new ObjectId(a);
-    util.inspect(b);
-
-    // var c = b.equals(a); // => false
-    // expect(true).to.equal(c);
-    //
-    // var a = 'aaaaaaaaaaaaaaaaaaaaaaaa';
-    // var b = new ObjectId(a);
-    // var c = b.equals(a); // => true
-    // expect(true).to.equal(c);
-    // expect(a).to.equal(b.toString());
+    expect(util.inspect(b)).to.equal('ObjectId("aaaaaaaaaaaaaaaaaaaaaaaa")');
 
     done();
   });
