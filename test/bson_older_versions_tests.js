@@ -17,7 +17,11 @@ function downloadZip(version, done) {
     })
     .then(r => {
       fs.writeFileSync(`bson-${version}.zip`, new Uint8Array(r));
-      cp.execSync(`unzip bson-${version}.zip -d bson-${version}`);
+      try {
+        cp.execSync(`unzip bson-${version}.zip -d bson-${version}`);
+      } catch (err) {
+        return done(err);
+      }
       done();
     });
 }
@@ -25,6 +29,9 @@ function downloadZip(version, done) {
 describe('Current version', function () {
   OLD_VERSIONS.forEach(version => {
     before(function (done) {
+      if (Number(process.version.split('.')[0].substring(1)) < 8) {
+        this.skip();
+      }
       if (fs.existsSync(`bson-${version}.zip`)) {
         fs.unlinkSync(`bson-${version}.zip`);
         rimraf(`./bson-${version}`, err => {
@@ -40,7 +47,11 @@ describe('Current version', function () {
     });
 
     after(function (done) {
-      fs.unlinkSync(`bson-${version}.zip`);
+      try {
+        fs.unlinkSync(`bson-${version}.zip`);
+      } catch (e) {
+        // ignore
+      }
       rimraf(`./bson-${version}`, err => {
         if (err) done(err);
         done();
