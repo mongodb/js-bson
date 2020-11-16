@@ -255,6 +255,16 @@ export class Binary {
     }
     return new Binary(data, type);
   }
+
+  /** @internal */
+  [Symbol.for('nodejs.util.inspect.custom')](): string {
+    return this.inspect();
+  }
+
+  inspect(): string {
+    const asBuffer = this.value(true);
+    return `Binary("${asBuffer.toString('hex')}", ${this.sub_type})`;
+  }
 }
 
 Object.defineProperty(Binary.prototype, '_bsontype', { value: 'Binary' });

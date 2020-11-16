@@ -787,6 +787,15 @@ export class Decimal128 {
   static fromExtendedJSON(doc: Decimal128Extended): Decimal128 {
     return Decimal128.fromString(doc.$numberDecimal);
   }
+
+  /** @internal */
+  [Symbol.for('nodejs.util.inspect.custom')](): string {
+    return this.inspect();
+  }
+
+  inspect(): string {
+    return `Decimal128("${this.toString()}")`;
+  }
 }
 
 Object.defineProperty(Decimal128.prototype, '_bsontype', { value: 'Decimal128' });
