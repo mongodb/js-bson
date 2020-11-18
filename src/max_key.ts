@@ -19,6 +19,15 @@ export class MaxKey {
   static fromExtendedJSON(): MaxKey {
     return new MaxKey();
   }
+
+  /** @internal */
+  [Symbol.for('nodejs.util.inspect.custom')](): string {
+    return this.inspect();
+  }
+
+  inspect(): string {
+    return 'MaxKey()';
+  }
 }
 
 Object.defineProperty(MaxKey.prototype, '_bsontype', { value: 'MaxKey' });

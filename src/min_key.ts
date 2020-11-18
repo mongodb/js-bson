@@ -19,6 +19,15 @@ export class MinKey {
   static fromExtendedJSON(): MinKey {
     return new MinKey();
   }
+
+  /** @internal */
+  [Symbol.for('nodejs.util.inspect.custom')](): string {
+    return this.inspect();
+  }
+
+  inspect(): string {
+    return 'MinKey()';
+  }
 }
 
 Object.defineProperty(MinKey.prototype, '_bsontype', { value: 'MinKey' });

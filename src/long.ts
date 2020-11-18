@@ -943,6 +943,15 @@ export class Long {
     const result = Long.fromString(doc.$numberLong);
     return options && options.relaxed ? result.toNumber() : result;
   }
+
+  /** @internal */
+  [Symbol.for('nodejs.util.inspect.custom')](): string {
+    return this.inspect();
+  }
+
+  inspect(): string {
+    return `Long("${this.toString()}")`;
+  }
 }
 
 Object.defineProperty(Long.prototype, '__isLong__', { value: true });

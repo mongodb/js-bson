@@ -18,6 +18,7 @@ const MaxKey = BSON.MaxKey;
 const { BinaryParser } = require('../binary_parser');
 const vm = require('vm');
 const { assertBuffersEqual } = require('./tools/utils');
+const { inspect } = require('util');
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
@@ -2267,5 +2268,98 @@ describe('BSON', function () {
     expect(() => BSON.serialize(badDoc)).to.throw();
     expect(() => BSON.serialize(badArray)).to.throw();
     expect(() => BSON.serialize(badMap)).to.throw();
+  });
+
+  describe('Should support util.inspect for', function () {
+    /**
+     * @ignore
+     */
+    it('Binary', function () {
+      const binary = new Binary(Buffer.from('0123456789abcdef0123456789abcdef', 'hex'), 4);
+      expect(inspect(binary)).to.equal('Binary("0123456789abcdef0123456789abcdef", 4)');
+    });
+
+    /**
+     * @ignore
+     */
+    it('BSONSymbol', function () {
+      const symbol = new BSONSymbol('sym');
+      expect(inspect(symbol)).to.equal('BSONSymbol("sym")');
+    });
+
+    /**
+     * @ignore
+     */
+    it('Code', function () {
+      const code = new Code('this.a > i', { i: 1 });
+      expect(inspect(code)).to.equal('Code("this.a > i", {"i":1})');
+    });
+
+    /**
+     * @ignore
+     */
+    it('DBRef', function () {
+      const oid = new ObjectId('deadbeefdeadbeefdeadbeef');
+      const dbref = new DBRef('namespace', oid, 'integration_tests_');
+      expect(inspect(dbref)).to.equal(
+        'DBRef("namespace", "deadbeefdeadbeefdeadbeef", "integration_tests_")'
+      );
+    });
+
+    /**
+     * @ignore
+     */
+    it('Decimal128', function () {
+      const dec = Decimal128.fromString('1.42');
+      expect(inspect(dec)).to.equal('Decimal128("1.42")');
+    });
+
+    /**
+     * @ignore
+     */
+    it('Double', function () {
+      const double = new Double(-42.42);
+      expect(inspect(double)).to.equal('Double(-42.42)');
+    });
+
+    /**
+     * @ignore
+     */
+    it('Int32', function () {
+      const int = new Int32(42);
+      expect(inspect(int)).to.equal('Int32(42)');
+    });
+
+    /**
+     * @ignore
+     */
+    it('Long', function () {
+      const long = Long.fromString('42');
+      expect(inspect(long)).to.equal('Long("42")');
+    });
+
+    /**
+     * @ignore
+     */
+    it('MaxKey', function () {
+      const maxKey = new MaxKey();
+      expect(inspect(maxKey)).to.equal('MaxKey()');
+    });
+
+    /**
+     * @ignore
+     */
+    it('MinKey', function () {
+      const minKey = new MinKey();
+      expect(inspect(minKey)).to.equal('MinKey()');
+    });
+
+    /**
+     * @ignore
+     */
+    it('Timestamp', function () {
+      const timestamp = new Timestamp(1, 100);
+      expect(inspect(timestamp)).to.equal('Timestamp(1, 100)');
+    });
   });
 });

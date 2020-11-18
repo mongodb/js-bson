@@ -1,7 +1,7 @@
 import { Long } from './long';
 
 /** @public */
-export type TimestampOverrides = '_bsontype' | 'toExtendedJSON' | 'fromExtendedJSON';
+export type TimestampOverrides = '_bsontype' | 'toExtendedJSON' | 'fromExtendedJSON' | 'inspect';
 /** @public */
 export type LongWithoutOverrides = new (low: number | Long, high?: number, unsigned?: boolean) => {
   [P in Exclude<keyof Long, TimestampOverrides>]: Long[P];
@@ -90,5 +90,14 @@ export class Timestamp extends LongWithoutOverridesClass {
   /** @internal */
   static fromExtendedJSON(doc: TimestampExtended): Timestamp {
     return new Timestamp(doc.$timestamp.i, doc.$timestamp.t);
+  }
+
+  /** @internal */
+  [Symbol.for('nodejs.util.inspect.custom')](): string {
+    return this.inspect();
+  }
+
+  inspect(): string {
+    return `Timestamp(${this.getLowBits().toString()}, ${this.getHighBits().toString()})`;
   }
 }

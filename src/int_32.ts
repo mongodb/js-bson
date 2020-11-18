@@ -50,6 +50,15 @@ export class Int32 {
   static fromExtendedJSON(doc: Int32Extended, options?: EJSONOptions): number | Int32 {
     return options && options.relaxed ? parseInt(doc.$numberInt, 10) : new Int32(doc.$numberInt);
   }
+
+  /** @internal */
+  [Symbol.for('nodejs.util.inspect.custom')](): string {
+    return this.inspect();
+  }
+
+  inspect(): string {
+    return `Int32(${this.valueOf()})`;
+  }
 }
 
 Object.defineProperty(Int32.prototype, '_bsontype', { value: 'Int32' });

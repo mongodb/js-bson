@@ -42,6 +42,16 @@ export class Code {
   static fromExtendedJSON(doc: CodeExtended): Code {
     return new Code(doc.$code, doc.$scope);
   }
+
+  /** @internal */
+  [Symbol.for('nodejs.util.inspect.custom')](): string {
+    return this.inspect();
+  }
+
+  inspect(): string {
+    const codeJson = this.toJSON();
+    return `Code("${codeJson.code}"${codeJson.scope ? `, ${JSON.stringify(codeJson.scope)}` : ''})`;
+  }
 }
 
 Object.defineProperty(Code.prototype, '_bsontype', { value: 'Code' });

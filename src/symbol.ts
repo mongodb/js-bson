@@ -30,7 +30,7 @@ export class BSONSymbol {
 
   /** @internal */
   inspect(): string {
-    return this.value;
+    return `BSONSymbol("${this.value}")`;
   }
 
   /** @internal */
@@ -46,6 +46,11 @@ export class BSONSymbol {
   /** @internal */
   static fromExtendedJSON(doc: BSONSymbolExtended): BSONSymbol {
     return new BSONSymbol(doc.$symbol);
+  }
+
+  /** @internal */
+  [Symbol.for('nodejs.util.inspect.custom')](): string {
+    return this.inspect();
   }
 }
 

@@ -98,6 +98,18 @@ export class DBRef {
     delete copy.$db;
     return new DBRef(doc.$ref, doc.$id, doc.$db, copy);
   }
+
+  /** @internal */
+  [Symbol.for('nodejs.util.inspect.custom')](): string {
+    return this.inspect();
+  }
+
+  inspect(): string {
+    // NOTE: if OID is an ObjectId class it will just print the oid string.
+    const oid =
+      this.oid === undefined || this.oid.toString === undefined ? this.oid : this.oid.toString();
+    return `DBRef("${this.namespace}", "${oid}"${this.db ? `, "${this.db}"` : ''})`;
+  }
 }
 
 Object.defineProperty(DBRef.prototype, '_bsontype', { value: 'DBRef' });
