@@ -2274,112 +2274,92 @@ describe('BSON', function () {
     /**
      * @ignore
      */
-    it('Binary', function (done) {
+    it('Binary', function () {
       const binary = new Binary(Buffer.from('0123456789abcdef0123456789abcdef', 'hex'), 4);
       expect(inspect(binary)).to.equal('Binary("0123456789abcdef0123456789abcdef", 4)');
-      done();
     });
 
     /**
      * @ignore
      */
-    it('Code', function (done) {
+    it('BSONSymbol', function () {
+      const symbol = new BSONSymbol('sym');
+      expect(inspect(symbol)).to.equal('BSONSymbol("sym")');
+    });
+
+    /**
+     * @ignore
+     */
+    it('Code', function () {
       const code = new Code('this.a > i', { i: 1 });
       expect(inspect(code)).to.equal('Code("this.a > i", {"i":1})');
-      done();
     });
 
     /**
      * @ignore
      */
-    it('DBRef', function (done) {
+    it('DBRef', function () {
       const oid = new ObjectId('deadbeefdeadbeefdeadbeef');
       const dbref = new DBRef('namespace', oid, 'integration_tests_');
       expect(inspect(dbref)).to.equal(
         'DBRef("namespace", "deadbeefdeadbeefdeadbeef", "integration_tests_")'
       );
-      done();
     });
 
     /**
      * @ignore
      */
-    it('Decimal128', function (done) {
+    it('Decimal128', function () {
       const dec = Decimal128.fromString('1.42');
       expect(inspect(dec)).to.equal('Decimal128("1.42")');
-      done();
     });
 
     /**
      * @ignore
      */
-    it('Int32', function (done) {
+    it('Double', function () {
+      const double = new Double(-42.42);
+      expect(inspect(double)).to.equal('Double(-42.42)');
+    });
+
+    /**
+     * @ignore
+     */
+    it('Int32', function () {
       const int = new Int32(42);
       expect(inspect(int)).to.equal('Int32(42)');
-      done();
     });
 
     /**
      * @ignore
      */
-    it('Int32', function (done) {
-      const int = new Int32(42);
-      expect(inspect(int)).to.equal('Int32(42)');
-      done();
-    });
-
-    /**
-     * @ignore
-     */
-    it('Int32', function (done) {
-      const int = new Int32(42);
-      expect(inspect(int)).to.equal('Int32(42)');
-      done();
-    });
-
-    /**
-     * @ignore
-     */
-    it('Int32', function (done) {
+    it('Long', function () {
       const long = Long.fromString('42');
       expect(inspect(long)).to.equal('Long("42")');
-      done();
     });
 
     /**
      * @ignore
      */
-    it('MaxKey', function (done) {
+    it('MaxKey', function () {
       const maxKey = new MaxKey();
       expect(inspect(maxKey)).to.equal('MaxKey()');
-      done();
     });
 
     /**
      * @ignore
      */
-    it('MinKey', function (done) {
+    it('MinKey', function () {
       const minKey = new MinKey();
       expect(inspect(minKey)).to.equal('MinKey()');
-      done();
     });
 
     /**
      * @ignore
      */
-    it('Symbol', function (done) {
-      const symbol = new BSONSymbol('sym');
-      expect(inspect(symbol)).to.equal('BSONSymbol("sym")');
-      done();
-    });
-
-    /**
-     * @ignore
-     */
-    it('Timestamp', function (done) {
+    it('Timestamp', function () {
       const timestamp = new Timestamp(1, 100);
       expect(inspect(timestamp)).to.equal('Timestamp(1, 100)');
-      done();
     });
   });
 });

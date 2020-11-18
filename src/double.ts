@@ -70,6 +70,16 @@ export class Double {
     const doubleValue = parseFloat(doc.$numberDouble);
     return options && options.relaxed ? doubleValue : new Double(doubleValue);
   }
+
+  /** @internal */
+  [Symbol.for('nodejs.util.inspect.custom')](): string {
+    return this.inspect();
+  }
+
+  inspect(): string {
+    const eJSON = this.toExtendedJSON() as DoubleExtended;
+    return `Double(${eJSON.$numberDouble})`;
+  }
 }
 
 Object.defineProperty(Double.prototype, '_bsontype', { value: 'Double' });
