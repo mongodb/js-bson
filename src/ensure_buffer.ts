@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer';
+import { isBuffer } from './parser/utils';
 
 /**
  * Makes sure that, if a Uint8Array is passed in, it is wrapped in a Buffer.
@@ -9,7 +10,7 @@ import { Buffer } from 'buffer';
  * @throws TypeError If anything other than a Buffer or Uint8Array is passed in
  */
 export function ensureBuffer(potentialBuffer: Buffer | ArrayBufferView | ArrayBuffer): Buffer {
-  if (Buffer.isBuffer(potentialBuffer)) {
+  if (isBuffer(potentialBuffer)) {
     return potentialBuffer;
   }
 

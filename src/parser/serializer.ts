@@ -1,4 +1,4 @@
-import { Buffer } from 'buffer';
+import type { Buffer } from 'buffer';
 import { Binary } from '../binary';
 import type { BSONSymbol, DBRef, Document, MaxKey } from '../bson';
 import type { Code } from '../code';
@@ -18,6 +18,7 @@ import type { BSONRegExp } from '../regexp';
 import {
   isBigInt64Array,
   isBigUInt64Array,
+  isBuffer,
   isDate,
   isUint8Array,
   normalizedFunctionString
@@ -785,7 +786,7 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index, true);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index, true);
-      } else if (Buffer.isBuffer(value) || isUint8Array(value)) {
+      } else if (isBuffer(value) || isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index, true);
       } else if (value instanceof RegExp || isRegExp(value)) {
         index = serializeRegExp(buffer, key, value, index, true);
@@ -891,7 +892,7 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index);
-      } else if (Buffer.isBuffer(value) || isUint8Array(value)) {
+      } else if (isBuffer(value) || isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index);
       } else if (value instanceof RegExp || isRegExp(value)) {
         index = serializeRegExp(buffer, key, value, index);
@@ -997,7 +998,7 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index);
-      } else if (Buffer.isBuffer(value) || isUint8Array(value)) {
+      } else if (isBuffer(value) || isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index);
       } else if (value instanceof RegExp || isRegExp(value)) {
         index = serializeRegExp(buffer, key, value, index);

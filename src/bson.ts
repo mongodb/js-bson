@@ -5,6 +5,7 @@ import { DBRef } from './db_ref';
 import { Decimal128 } from './decimal128';
 import { Double } from './double';
 import { ensureBuffer } from './ensure_buffer';
+import { EJSON } from './extended_json';
 import { Int32 } from './int_32';
 import { Long } from './long';
 import { Map } from './map';
@@ -20,42 +21,7 @@ import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
 export { BinaryExtended, BinaryExtendedLegacy, BinarySequence } from './binary';
 export { CodeExtended } from './code';
-export {
-  BSON_BINARY_SUBTYPE_BYTE_ARRAY,
-  BSON_BINARY_SUBTYPE_DEFAULT,
-  BSON_BINARY_SUBTYPE_FUNCTION,
-  BSON_BINARY_SUBTYPE_MD5,
-  BSON_BINARY_SUBTYPE_USER_DEFINED,
-  BSON_BINARY_SUBTYPE_UUID,
-  BSON_BINARY_SUBTYPE_UUID_NEW,
-  BSON_DATA_ARRAY,
-  BSON_DATA_BINARY,
-  BSON_DATA_BOOLEAN,
-  BSON_DATA_CODE,
-  BSON_DATA_CODE_W_SCOPE,
-  BSON_DATA_DATE,
-  BSON_DATA_DBPOINTER,
-  BSON_DATA_DECIMAL128,
-  BSON_DATA_INT,
-  BSON_DATA_LONG,
-  BSON_DATA_MAX_KEY,
-  BSON_DATA_MIN_KEY,
-  BSON_DATA_NULL,
-  BSON_DATA_NUMBER,
-  BSON_DATA_OBJECT,
-  BSON_DATA_OID,
-  BSON_DATA_REGEXP,
-  BSON_DATA_STRING,
-  BSON_DATA_SYMBOL,
-  BSON_DATA_TIMESTAMP,
-  BSON_DATA_UNDEFINED,
-  BSON_INT32_MAX,
-  BSON_INT32_MIN,
-  BSON_INT64_MAX,
-  BSON_INT64_MIN,
-  JS_INT_MAX,
-  JS_INT_MIN
-} from './constants';
+export * from './constants';
 export { DBRefLike } from './db_ref';
 export { Decimal128Extended } from './decimal128';
 export { DoubleExtended } from './double';
@@ -291,3 +257,37 @@ export function deserializeStream(
   // Return object containing end index of parsing and list of documents
   return index;
 }
+
+/**
+ * BSON default export
+ * @deprecated Please use named exports
+ * @privateRemarks
+ * We want to someday deprecate the default export,
+ * so none of the new TS types are being exported on the default
+ * @public
+ */
+const BSON = {
+  Binary,
+  Code,
+  DBRef,
+  Decimal128,
+  Double,
+  Int32,
+  Long,
+  Map,
+  MaxKey,
+  MinKey,
+  ObjectId,
+  ObjectID: ObjectId,
+  BSONRegExp,
+  BSONSymbol,
+  Timestamp,
+  EJSON,
+  setInternalBufferSize,
+  serialize,
+  serializeWithBufferAndIndex,
+  deserialize,
+  calculateObjectSize,
+  deserializeStream
+};
+export default BSON;
