@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.2.2](https://github.com/mongodb/js-bson/compare/v4.2.1...v4.2.2) (2020-12-01)
+
+
+### Bug Fixes
+
+* remove tslib usage and fix Long method alias ([#415](https://github.com/mongodb/js-bson/issues/415)) ([2d9a8e6](https://github.com/mongodb/js-bson/commit/2d9a8e678417ec43a0b82377743ab9c30a3c3b6b))
+
 ### [4.2.1](https://github.com/mongodb/js-bson/compare/v4.2.0...v4.2.1) (2020-12-01)
 
 
