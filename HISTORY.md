@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.2.1](https://github.com/mongodb/js-bson/compare/v4.2.0...v4.2.1) (2020-12-01)
+
+
+### Bug Fixes
+
+* backwards compatibility with older BSON package versions ([#411](https://github.com/mongodb/js-bson/issues/411)) ([5167be2](https://github.com/mongodb/js-bson/commit/5167be2752369d5832057f7b69da0e240ed4c204))
+* Downlevel type definitions ([#410](https://github.com/mongodb/js-bson/issues/410)) ([203402f](https://github.com/mongodb/js-bson/commit/203402f5cd9dd496a4103dc1008bad382d3c69c4))
+* make inspect method for ObjectId work ([#412](https://github.com/mongodb/js-bson/issues/412)) ([a585a0c](https://github.com/mongodb/js-bson/commit/a585a0cf8cd1212617fb8f37581194e6c31e33fa))
+* remove stringify overloads ([2df6b42](https://github.com/mongodb/js-bson/commit/2df6b42de4cbf81a307d2db144d15470d543976e))
+
 ## [4.2.0](https://github.com/mongodb/js-bson/compare/v4.1.0...v4.2.0) (2020-10-13)
 
 
