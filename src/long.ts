@@ -560,7 +560,7 @@ export class Long {
   }
   /** This is an alias of {@link Long.greaterThanOrEqual} */
   ge(other: string | number | Long | Timestamp): boolean {
-    return this.greaterThan(other);
+    return this.greaterThanOrEqual(other);
   }
 
   /** Tests if this Long's value is even. */
