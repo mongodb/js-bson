@@ -378,7 +378,9 @@ export class Long {
   }
 
   /** This is an alias of {@link Long.compare} */
-  comp = Long.prototype.compare;
+  comp(other: string | number | Long | Timestamp): 0 | 1 | -1 {
+    return this.compare(other);
+  }
 
   /**
    * Returns this Long divided by the specified. The result is signed if this Long is signed or unsigned if this Long is unsigned.
@@ -485,7 +487,9 @@ export class Long {
   }
 
   /**This is an alias of {@link Long.divide} */
-  div = Long.prototype.divide;
+  div(divisor: string | number | Long | Timestamp): Long {
+    return this.divide(divisor);
+  }
 
   /**
    * Tests if this Long's value equals the specified's.
@@ -499,7 +503,9 @@ export class Long {
   }
 
   /** This is an alias of {@link Long.equals} */
-  eq = Long.prototype.equals;
+  eq(other: string | number | Long | Timestamp): boolean {
+    return this.equals(other);
+  }
 
   /** Gets the high 32 bits as a signed integer. */
   getHighBits(): number {
@@ -539,7 +545,9 @@ export class Long {
   }
 
   /** This is an alias of {@link Long.greaterThan} */
-  gt = Long.prototype.greaterThan;
+  gt(other: string | number | Long | Timestamp): boolean {
+    return this.greaterThan(other);
+  }
 
   /** Tests if this Long's value is greater than or equal the specified's. */
   greaterThanOrEqual(other: string | number | Long | Timestamp): boolean {
@@ -547,9 +555,13 @@ export class Long {
   }
 
   /** This is an alias of {@link Long.greaterThanOrEqual} */
-  gte = Long.prototype.greaterThanOrEqual;
+  gte(other: string | number | Long | Timestamp): boolean {
+    return this.greaterThanOrEqual(other);
+  }
   /** This is an alias of {@link Long.greaterThanOrEqual} */
-  ge = Long.prototype.greaterThanOrEqual;
+  ge(other: string | number | Long | Timestamp): boolean {
+    return this.greaterThan(other);
+  }
 
   /** Tests if this Long's value is even. */
   isEven(): boolean {
@@ -582,7 +594,9 @@ export class Long {
   }
 
   /** This is an alias of {@link Long#lessThan}. */
-  lt = Long.prototype.lessThan;
+  lt(other: string | number | Long | Timestamp): boolean {
+    return this.lessThan(other);
+  }
 
   /** Tests if this Long's value is less than or equal the specified's. */
   lessThanOrEqual(other: string | number | Long | Timestamp): boolean {
@@ -590,7 +604,9 @@ export class Long {
   }
 
   /** This is an alias of {@link Long.lessThanOrEqual} */
-  lte = Long.prototype.lessThanOrEqual;
+  lte(other: string | number | Long | Timestamp): boolean {
+    return this.lessThanOrEqual(other);
+  }
 
   /** Returns this Long modulo the specified. */
   modulo(divisor: string | number | Long | Timestamp): Long {
@@ -611,9 +627,13 @@ export class Long {
   }
 
   /** This is an alias of {@link Long.modulo} */
-  mod = Long.prototype.modulo;
+  mod(divisor: string | number | Long | Timestamp): Long {
+    return this.modulo(divisor);
+  }
   /** This is an alias of {@link Long.modulo} */
-  rem = Long.prototype.modulo;
+  rem(divisor: string | number | Long | Timestamp): Long {
+    return this.modulo(divisor);
+  }
 
   /**
    * Returns the product of this and the specified Long.
@@ -684,7 +704,9 @@ export class Long {
   }
 
   /** This is an alias of {@link Long.multiply} */
-  mul = Long.prototype.multiply;
+  mul(multiplier: string | number | Long | Timestamp): Long {
+    return this.multiply(multiplier);
+  }
 
   /** Returns the Negation of this Long's value. */
   negate(): Long {
@@ -693,7 +715,9 @@ export class Long {
   }
 
   /** This is an alias of {@link Long.negate} */
-  neg = Long.prototype.negate;
+  neg(): Long {
+    return this.negate();
+  }
 
   /** Returns the bitwise NOT of this Long. */
   not(): Long {
@@ -706,9 +730,13 @@ export class Long {
   }
 
   /** This is an alias of {@link Long.notEquals} */
-  neq = Long.prototype.notEquals;
+  neq(other: string | number | Long | Timestamp): boolean {
+    return this.notEquals(other);
+  }
   /** This is an alias of {@link Long.notEquals} */
-  ne = Long.prototype.notEquals;
+  ne(other: string | number | Long | Timestamp): boolean {
+    return this.notEquals(other);
+  }
 
   /**
    * Returns the bitwise OR of this Long and the specified.
@@ -736,7 +764,9 @@ export class Long {
   }
 
   /** This is an alias of {@link Long.shiftLeft} */
-  shl = Long.prototype.shiftLeft;
+  shl(numBits: number | Long): Long {
+    return this.shiftLeft(numBits);
+  }
 
   /**
    * Returns this Long with bits arithmetically shifted to the right by the given amount.
@@ -756,7 +786,9 @@ export class Long {
   }
 
   /** This is an alias of {@link Long.shiftRight} */
-  shr = Long.prototype.shiftRight;
+  shr(numBits: number | Long): Long {
+    return this.shiftRight(numBits);
+  }
 
   /**
    * Returns this Long with bits logically shifted to the right by the given amount.
@@ -782,9 +814,13 @@ export class Long {
   }
 
   /** This is an alias of {@link Long.shiftRightUnsigned} */
-  shr_u = Long.prototype.shiftRightUnsigned;
+  shr_u(numBits: number | Long): Long {
+    return this.shiftRightUnsigned(numBits);
+  }
   /** This is an alias of {@link Long.shiftRightUnsigned} */
-  shru = Long.prototype.shiftRightUnsigned;
+  shru(numBits: number | Long): Long {
+    return this.shiftRightUnsigned(numBits);
+  }
 
   /**
    * Returns the difference of this and the specified Long.
@@ -797,7 +833,9 @@ export class Long {
   }
 
   /** This is an alias of {@link Long.subtract} */
-  sub = Long.prototype.subtract;
+  sub(subtrahend: string | number | Long | Timestamp): Long {
+    return this.subtract(subtrahend);
+  }
 
   /** Converts the Long to a 32 bit integer, assuming it is a 32 bit integer. */
   toInt(): number {
@@ -925,10 +963,14 @@ export class Long {
   }
 
   /** This is an alias of {@link Long.isZero} */
-  eqz = Long.prototype.isZero;
+  eqz(): boolean {
+    return this.isZero();
+  }
 
   /** This is an alias of {@link Long.lessThanOrEqual} */
-  le = Long.prototype.lessThanOrEqual;
+  le(other: string | number | Long | Timestamp): boolean {
+    return this.lessThanOrEqual(other);
+  }
 
   /*
    ****************************************************************
