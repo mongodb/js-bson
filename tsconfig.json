@@ -14,7 +14,7 @@
     ],
     "outDir": "lib",
     // We don't make use of tslib helpers
-    "importHelpers": true,
+    "importHelpers": false,
     "noEmitHelpers": false,
     "noEmitOnError": true,
     // make use of import type where applicable
