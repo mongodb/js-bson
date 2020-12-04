@@ -78,7 +78,7 @@ export class Double {
 
   inspect(): string {
     const eJSON = this.toExtendedJSON() as DoubleExtended;
-    return `Double(${eJSON.$numberDouble})`;
+    return `new Double(${eJSON.$numberDouble})`;
   }
 }
 

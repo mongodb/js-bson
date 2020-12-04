@@ -50,7 +50,9 @@ export class Code {
 
   inspect(): string {
     const codeJson = this.toJSON();
-    return `Code("${codeJson.code}"${codeJson.scope ? `, ${JSON.stringify(codeJson.scope)}` : ''})`;
+    return `new Code("${codeJson.code}"${
+      codeJson.scope ? `, ${JSON.stringify(codeJson.scope)}` : ''
+    })`;
   }
 }
 

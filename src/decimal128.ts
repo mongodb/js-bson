@@ -794,7 +794,7 @@ export class Decimal128 {
   }
 
   inspect(): string {
-    return `Decimal128("${this.toString()}")`;
+    return `Decimal128.fromString("${this.toString()}")`;
   }
 }
 

@@ -263,7 +263,7 @@ export class Binary {
 
   inspect(): string {
     const asBuffer = this.value(true);
-    return `Binary("${asBuffer.toString('hex')}", ${this.sub_type})`;
+    return `new Binary(Buffer.from("${asBuffer.toString('hex')}", "hex"), ${this.sub_type})`;
   }
 }
 

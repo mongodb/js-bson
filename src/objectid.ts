@@ -350,7 +350,7 @@ export class ObjectId {
   }
 
   inspect(): string {
-    return `ObjectId("${this.toHexString()}")`;
+    return `new ObjectId("${this.toHexString()}")`;
   }
 }
 
