@@ -30,7 +30,7 @@ export class BSONSymbol {
 
   /** @internal */
   inspect(): string {
-    return `BSONSymbol("${this.value}")`;
+    return `new BSONSymbol("${this.value}")`;
   }
 
   /** @internal */

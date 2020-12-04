@@ -98,6 +98,6 @@ export class Timestamp extends LongWithoutOverridesClass {
   }
 
   inspect(): string {
-    return `Timestamp(${this.getLowBits().toString()}, ${this.getHighBits().toString()})`;
+    return `new Timestamp(${this.getLowBits().toString()}, ${this.getHighBits().toString()})`;
   }
 }

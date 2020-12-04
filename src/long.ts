@@ -992,7 +992,7 @@ export class Long {
   }
 
   inspect(): string {
-    return `Long("${this.toString()}")`;
+    return `new Long("${this.toString()}")`;
   }
 }
 

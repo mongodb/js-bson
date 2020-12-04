@@ -26,7 +26,7 @@ export class MaxKey {
   }
 
   inspect(): string {
-    return 'MaxKey()';
+    return 'new MaxKey()';
   }
 }
 

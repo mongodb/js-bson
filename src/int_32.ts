@@ -57,7 +57,7 @@ export class Int32 {
   }
 
   inspect(): string {
-    return `Int32(${this.valueOf()})`;
+    return `new Int32(${this.valueOf()})`;
   }
 }
 

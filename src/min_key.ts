@@ -26,7 +26,7 @@ export class MinKey {
   }
 
   inspect(): string {
-    return 'MinKey()';
+    return 'new MinKey()';
   }
 }
 
