@@ -143,7 +143,7 @@ export class UUID {
 
     try {
       return new UUID(otherId).id.equals(this.id);
-    } catch (_) {
+    } catch {
       return false;
     }
   }
