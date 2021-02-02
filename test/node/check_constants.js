@@ -86,6 +86,9 @@ describe('BSON Constants', () => {
     it('ObjectId should be 0x07', () => {
       expect(BSON.BSON_DATA_OID).to.equal(0x07);
     });
+    it('UUID should be 0x14', () => {
+      expect(BSON.BSON_DATA_UUID).to.equal(0x14);
+    });
     it('Boolean should be 0x08', () => {
       expect(BSON.BSON_DATA_BOOLEAN).to.equal(0x08);
     });

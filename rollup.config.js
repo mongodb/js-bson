@@ -34,7 +34,7 @@ const input = 'src/bson.ts';
 
 const plugins = [
   typescript(tsConfig),
-  nodeResolve({ preferBuiltins: false }),
+  nodeResolve({ preferBuiltins: false, browser: true }),
   commonjs({ extensions: ['.js', '.ts'] }),
   nodeBuiltins(),
   babel({

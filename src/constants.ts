@@ -76,6 +76,9 @@ export const BSON_DATA_LONG = 18;
 /** Decimal128 BSON Type @internal */
 export const BSON_DATA_DECIMAL128 = 19;
 
+/** UUID BSON Type @internal */
+export const BSON_DATA_UUID = 20;
+
 /** MinKey BSON Type @internal */
 export const BSON_DATA_MIN_KEY = 0xff;
 

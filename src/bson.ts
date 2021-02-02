@@ -12,6 +12,7 @@ import { Map } from './map';
 import { MaxKey } from './max_key';
 import { MinKey } from './min_key';
 import { ObjectId } from './objectid';
+import { UUID } from './uuid';
 import { calculateObjectSize as internalCalculateObjectSize } from './parser/calculate_size';
 // Parts of the parser
 import { deserialize as internalDeserialize, DeserializeOptions } from './parser/deserializer';
@@ -45,6 +46,7 @@ export {
   BSON_DATA_NUMBER,
   BSON_DATA_OBJECT,
   BSON_DATA_OID,
+  BSON_DATA_UUID,
   BSON_DATA_REGEXP,
   BSON_DATA_STRING,
   BSON_DATA_SYMBOL,
@@ -81,6 +83,7 @@ export {
   DBRef,
   Binary,
   ObjectId,
+  UUID,
   Long,
   Timestamp,
   Double,

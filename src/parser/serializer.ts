@@ -1,4 +1,4 @@
-import type { Buffer } from 'buffer';
+import { Buffer } from 'buffer';
 import { Binary } from '../binary';
 import type { BSONSymbol, DBRef, Document, MaxKey } from '../bson';
 import type { Code } from '../code';
@@ -14,6 +14,7 @@ import { Long } from '../long';
 import { Map } from '../map';
 import type { MinKey } from '../min_key';
 import type { ObjectId } from '../objectid';
+import type { UUID } from '../uuid';
 import type { BSONRegExp } from '../regexp';
 import {
   isBigInt64Array,
@@ -317,6 +318,29 @@ function serializeObjectId(
 
   // Adjust index
   return index + 12;
+}
+
+function serializeUUID(buffer: Buffer, key: string, value: UUID, index: number, isArray?: boolean) {
+  // Write the type
+  buffer[index++] = constants.BSON_DATA_UUID;
+  // Number of written bytes
+  const numberOfWrittenBytes = !isArray
+    ? buffer.write(key, index, undefined, 'utf8')
+    : buffer.write(key, index, undefined, 'ascii');
+
+  // Encode the name
+  index = index + numberOfWrittenBytes;
+  buffer[index++] = 0;
+
+  // Write the UUID into the shared buffer
+  if (Buffer.isBuffer(value.id)) {
+    value.id.copy(buffer, index, 0, 16);
+  } else {
+    throw new TypeError('object [' + JSON.stringify(value) + '] is not a valid UUID');
+  }
+
+  // Adjust index
+  return index + 16;
 }
 
 function serializeBuffer(
@@ -786,6 +810,8 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index, true);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index, true);
+      } else if (value['_bsontype'] === 'UUID') {
+        index = serializeUUID(buffer, key, value, index, true);
       } else if (isBuffer(value) || isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index, true);
       } else if (value instanceof RegExp || isRegExp(value)) {
@@ -892,6 +918,8 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index);
+      } else if (value['_bsontype'] === 'UUID') {
+        index = serializeUUID(buffer, key, value, index);
       } else if (isBuffer(value) || isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index);
       } else if (value instanceof RegExp || isRegExp(value)) {
@@ -998,6 +1026,8 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index);
+      } else if (value['_bsontype'] === 'UUID') {
+        index = serializeUUID(buffer, key, value, index);
       } else if (isBuffer(value) || isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index);
       } else if (value instanceof RegExp || isRegExp(value)) {

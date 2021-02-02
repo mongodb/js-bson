@@ -8,6 +8,7 @@ const Binary = BSON.Binary;
 const Timestamp = BSON.Timestamp;
 const Long = BSON.Long;
 const ObjectId = BSON.ObjectId;
+const UUID = BSON.UUID;
 const BSONSymbol = BSON.BSONSymbol;
 const DBRef = BSON.DBRef;
 const Decimal128 = BSON.Decimal128;
@@ -78,9 +79,25 @@ describe('BSON', function () {
   /**
    * @ignore
    */
+  it('Should Correctly convert UUID to itself', function (done) {
+    var myObject, newObject;
+    var selfConversion = function () {
+      myObject = new UUID();
+      newObject = UUID(myObject);
+    };
+
+    expect(selfConversion).to.not.throw;
+    expect(myObject).to.equal(newObject);
+    done();
+  });
+
+  /**
+   * @ignore
+   */
   it('Should Correctly get BSON types from require', function (done) {
     var _mongodb = require('../register-bson');
     expect(_mongodb.ObjectId === ObjectId).to.be.ok;
+    expect(_mongodb.UUID === UUID).to.be.ok;
     expect(_mongodb.Binary === Binary).to.be.ok;
     expect(_mongodb.Long === Long).to.be.ok;
     expect(_mongodb.Timestamp === Timestamp).to.be.ok;
@@ -687,7 +704,7 @@ describe('BSON', function () {
     var deserialized = BSON.deserialize(serialized_data, {
       promoteBuffers: true
     });
-    expect(deserialized.doc instanceof Buffer).to.be.ok;
+    expect(Buffer.isBuffer(deserialized.doc)).to.be.ok;
     expect('hello world').to.equal(deserialized.doc.toString());
     done();
   });
@@ -853,6 +870,23 @@ describe('BSON', function () {
     const deserializedDoc = BSON.deserialize(serialized_data);
     expect(deserializedDoc.doc).instanceof(ObjectId);
     expect(doc.doc.toString('hex')).to.equal(deserializedDoc.doc.toString('hex'));
+    done();
+  });
+
+  /**
+   * @ignore
+   */
+  it('Should Correctly Serialize and Deserialize UUID', function (done) {
+    var doc = { id: new UUID() };
+    var serialized_data = BSON.serialize(doc);
+
+    var serialized_data2 = Buffer.alloc(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
+    assertBuffersEqual(done, serialized_data, serialized_data2, 0);
+
+    const deserializedDoc = BSON.deserialize(serialized_data);
+    expect(deserializedDoc.id).instanceof(UUID);
+    expect(doc.id.toString('hex')).to.equal(deserializedDoc.id.toString('hex'));
     done();
   });
 

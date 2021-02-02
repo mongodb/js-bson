@@ -1,7 +1,8 @@
 import { Buffer } from 'buffer';
 import { ensureBuffer } from './ensure_buffer';
+import { uuidHexStringToBuffer } from './uuid_utils';
 import type { EJSONOptions } from './extended_json';
-import { parseUUID, UUIDExtended } from './uuid';
+import type { UUIDExtended } from './uuid';
 
 /** @public */
 export type BinarySequence = Uint8Array | Buffer | number[];
@@ -248,7 +249,7 @@ export class Binary {
       }
     } else if ('$uuid' in doc) {
       type = 4;
-      data = Buffer.from(parseUUID(doc.$uuid));
+      data = uuidHexStringToBuffer(doc.$uuid);
     }
     if (!data) {
       throw new TypeError(`Unexpected Binary Extended JSON format ${JSON.stringify(doc)}`);
