@@ -71,7 +71,12 @@ describe('BSON Compliance', function () {
         } else if (doc[name]['$uuid']) {
           object[name] = new UUID(doc[name]['$uuid']);
         } else if (doc[name]['$binary']) {
-          object[name] = new Binary(doc[name]['$binary'], doc[name]['$type'] || 1);
+          const subType = doc[name]['$type'] || 1;
+          const base64Str = doc[name]['$binary'];
+          object[name] =
+            subType === Binary.SUBTYPE_UUID
+              ? new UUID(Buffer.from(base64Str, 'base64'))
+              : new Binary(base64Str, subType);
         } else if (doc[name]['$timestamp']) {
           object[name] = Timestamp.fromBits(
             parseInt(doc[name]['$timestamp']['t'], 10),

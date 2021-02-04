@@ -165,18 +165,18 @@ export class UUID {
       return uuidHexStringValidateV4(input);
     }
 
-    if (Buffer.isBuffer(input) && input.length === BYTE_LENGTH) {
-      // TODO: Investigate a faster check, than converting to a string and letting uuid handle the rest?
-      return uuidHexStringValidateV4(bufferToUuidHexString(input));
+    if (Buffer.isBuffer(input)) {
+      // check for length & uuid version (https://tools.ietf.org/html/rfc4122#section-4.1.3)
+      return input.length === BYTE_LENGTH && (input[6] & 0x40) === 0x40;
     }
 
     return false;
   }
 
   /** @internal */
-  toExtendedJSON(): UUIDExtended {
-    // TODO: Should this be able to return UUIDExtendedBinary?
-    return { $uuid: this.toHexString() };
+  toExtendedJSON(options: EJSONOptions = {}): BinaryExtendedLegacy | BinaryExtended {
+    const binary = new Binary(this.id, Binary.SUBTYPE_UUID);
+    return binary.toExtendedJSON(options);
   }
 
   /** @internal */
@@ -184,18 +184,13 @@ export class UUID {
     doc: UUIDExtended | BinaryExtended | BinaryExtendedLegacy,
     options: EJSONOptions = {}
   ): UUID {
-    if ('$binary' in doc) {
-      const binary = Binary.fromExtendedJSON(doc, options);
-      // TODO: Should sub_type = 3 still be parsable?
-      if (binary.sub_type !== Binary.SUBTYPE_UUID) {
-        throw new TypeError(
-          `Binary EJSON passed to UUID containing unsupported sub_type: "${binary.sub_type}".`
-        );
-      }
-      return new UUID(binary.buffer);
+    const binary = Binary.fromExtendedJSON(doc, options);
+    if (binary.sub_type !== Binary.SUBTYPE_UUID) {
+      throw new TypeError(
+        `Binary EJSON passed to UUID containing with unsupported sub_type: "${binary.sub_type}".`
+      );
     }
-
-    return UUID.createFromHexString(doc.$uuid);
+    return new UUID(binary.buffer);
   }
 
   /** @internal */

@@ -182,11 +182,6 @@ function deserializeObject(
       buffer.copy(oid, 0, index, index + 12);
       object[name] = new ObjectId(oid);
       index = index + 12;
-    } else if (elementType === constants.BSON_DATA_UUID) {
-      const uuid = Buffer.alloc(16);
-      buffer.copy(uuid, 0, index, index + 16);
-      object[name] = new UUID(uuid);
-      index = index + 16;
     } else if (elementType === constants.BSON_DATA_INT && promoteValues === false) {
       object[name] = new Int32(
         buffer[index++] | (buffer[index++] << 8) | (buffer[index++] << 16) | (buffer[index++] << 24)
@@ -340,6 +335,9 @@ function deserializeObject(
 
         if (promoteBuffers && promoteValues) {
           object[name] = buffer.slice(index, index + binarySize);
+        } else if (subType === Binary.SUBTYPE_UUID) {
+          // NOTE: Is this approach too breaking?
+          object[name] = new UUID(buffer.slice(index, index + binarySize));
         } else {
           object[name] = new Binary(buffer.slice(index, index + binarySize), subType);
         }
@@ -367,6 +365,9 @@ function deserializeObject(
 
         if (promoteBuffers && promoteValues) {
           object[name] = _buffer;
+        } else if (subType === Binary.SUBTYPE_UUID) {
+          // NOTE: Is this approach too breaking?
+          object[name] = new UUID(_buffer);
         } else {
           object[name] = new Binary(_buffer, subType);
         }

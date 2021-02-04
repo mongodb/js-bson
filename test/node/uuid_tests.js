@@ -3,7 +3,7 @@
 const { Buffer } = require('buffer');
 const BSON = require('../register-bson');
 const util = require('util');
-const { validate, version } = require('uuid');
+const { validate: uuidStringValidate, version: uuidStringVersion } = require('uuid');
 const UUID = BSON.UUID;
 
 // Test values
@@ -11,7 +11,6 @@ const UPPERCASE_UUID_STRING = 'AAAAAAAA-AAAA-4AAA-AAAA-AAAAAAAAAAAA';
 const UPPERCASE_HEX_STRING = UPPERCASE_UUID_STRING.replace(/-/g, '');
 const LOWERCASE_UUID_STRING = UPPERCASE_UUID_STRING.toLowerCase();
 const LOWERCASE_HEX_STRING = LOWERCASE_UUID_STRING.replace(/-/g, '');
-const BASE64_STRING = Buffer.from(LOWERCASE_HEX_STRING, 'hex').toString('base64');
 
 describe('UUID', function () {
   /**
@@ -20,8 +19,8 @@ describe('UUID', function () {
   it('should correctly generate a valid UUID v4 from empty constructor', function (done) {
     const uuid = new UUID();
     const uuidHexStr = uuid.toHexString();
-    expect(validate(uuidHexStr)).to.be.true;
-    expect(version(uuidHexStr)).to.equal(BSON.Binary.SUBTYPE_UUID);
+    expect(uuidStringValidate(uuidHexStr)).to.be.true;
+    expect(uuidStringVersion(uuidHexStr)).to.equal(BSON.Binary.SUBTYPE_UUID);
 
     done();
   });
@@ -52,8 +51,6 @@ describe('UUID', function () {
    * @ignore
    */
   it('should correctly create UUID from Buffer', function (done) {
-    if (!Buffer.from) return done();
-
     const uuid1 = new UUID(Buffer.from(UPPERCASE_HEX_STRING, 'hex'));
     expect(uuid1.equals(UPPERCASE_UUID_STRING)).to.be.true;
     expect(uuid1.toString()).to.equal(LOWERCASE_UUID_STRING);
@@ -103,84 +100,15 @@ describe('UUID', function () {
    */
   it('should correctly check if a buffer isValid', function (done) {
     const validBuffer = Buffer.from(UPPERCASE_HEX_STRING, 'hex');
-    const invalidBuffer = Buffer.alloc(16);
+    const invalidBuffer1 = Buffer.from('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'hex');
+    const invalidBuffer2 = Buffer.alloc(16);
 
-    expect(validBuffer.length).to.equal(invalidBuffer.length);
-    expect(UUID.isValid(invalidBuffer)).to.be.false;
+    expect(validBuffer.length).to.equal(invalidBuffer1.length);
+    expect(validBuffer.length).to.equal(invalidBuffer2.length);
+    expect(UUID.isValid(invalidBuffer1)).to.be.false;
+    expect(UUID.isValid(invalidBuffer2)).to.be.false;
     expect(UUID.isValid(validBuffer)).to.be.true;
 
-    done();
-  });
-
-  /**
-   * @ignore
-   */
-  it('should parse UUIDExtended via fromExtendedJSON', function (done) {
-    const ejson = { $uuid: LOWERCASE_UUID_STRING };
-
-    const parseEjson = () => UUID.fromExtendedJSON(ejson);
-    expect(parseEjson).to.not.throw;
-
-    const uuid = parseEjson();
-    expect(uuid.equals(LOWERCASE_UUID_STRING)).to.be.true;
-
-    done();
-  });
-
-  /**
-   * @ignore
-   */
-  it('should parse BinaryExtended via fromExtendedJSON', function (done) {
-    const ejson = { $binary: { base64: BASE64_STRING, subType: '04' } };
-
-    const parseEjson = () => UUID.fromExtendedJSON(ejson);
-    expect(parseEjson).to.not.throw;
-
-    const uuid = parseEjson();
-    expect(uuid.equals(LOWERCASE_UUID_STRING)).to.be.true;
-
-    done();
-  });
-
-  /**
-   * @ignore
-   */
-  it('should parse BinaryExtendedLegacy via fromExtendedJSON', function (done) {
-    const ejson = { $binary: BASE64_STRING, $type: '04' };
-
-    const parseEjson = () => UUID.fromExtendedJSON(ejson, { legacy: true });
-    expect(parseEjson).to.not.throw;
-
-    const uuid = parseEjson();
-    expect(uuid.equals(LOWERCASE_UUID_STRING)).to.be.true;
-
-    done();
-  });
-
-  /**
-   * @ignore
-   */
-  it('should generate valid UUIDExtended via toExtendedJSON', function (done) {
-    const uuid = new UUID(UPPERCASE_UUID_STRING);
-    const ejson = uuid.toExtendedJSON();
-    expect(ejson.$uuid).to.equal(LOWERCASE_UUID_STRING);
-
-    done();
-  });
-
-  /**
-   * @ignore
-   */
-  xit('should generate valid BinaryExtended via toExtendedJSON', function (done) {
-    // TODO: Unsure how this will work, EJSONOptions does not seem to contain an option for this case?
-    done();
-  });
-
-  /**
-   * @ignore
-   */
-  xit('should generate valid BinaryExtendedLegacy via toExtendedJSON', function (done) {
-    // TODO: Unsure how this will work, EJSONOptions does not seem to contain an option for this case?
     done();
   });
 
