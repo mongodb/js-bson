@@ -16,7 +16,6 @@ describe('UUID', () => {
    * @ignore
    */
   it('should correctly generate a valid UUID v4 from empty constructor', () => {
-    // NOTE: non-deterministic test
     const uuid = new UUID();
     const uuidHexStr = uuid.toHexString();
     expect(uuidStringValidate(uuidHexStr)).to.be.true;
