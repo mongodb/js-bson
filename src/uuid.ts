@@ -1,13 +1,9 @@
 import { Buffer } from 'buffer';
-import { v4 as uuidV4Generate } from 'uuid';
 import { ensureBuffer } from './ensure_buffer';
 import { Binary, BinaryExtended, BinaryExtendedLegacy } from './binary';
-import {
-  bufferToUuidHexString,
-  uuidHexStringToBuffer,
-  uuidHexStringValidateV4
-} from './uuid_utils';
+import { bufferToUuidHexString, uuidHexStringToBuffer, uuidValidateString } from './uuid_utils';
 import type { EJSONOptions } from './extended_json';
+import { randomBytes } from './parser/utils';
 
 /** @public */
 export type UUIDExtended = {
@@ -75,10 +71,14 @@ export class UUID {
    * Generate a 16 byte uuid v4 buffer used in UUIDs
    */
   static generate(): Buffer {
-    const buffer = Buffer.alloc(BYTE_LENGTH);
-    uuidV4Generate(null, buffer, 0);
+    const bytes = randomBytes(BYTE_LENGTH);
 
-    return buffer;
+    // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+    // Kindly borrowed from https://github.com/uuidjs/uuid/blob/master/src/v4.js
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+    return Buffer.from(bytes);
   }
 
   /**
@@ -162,7 +162,7 @@ export class UUID {
     }
 
     if (typeof input === 'string') {
-      return uuidHexStringValidateV4(input);
+      return uuidValidateString(input);
     }
 
     if (Buffer.isBuffer(input)) {

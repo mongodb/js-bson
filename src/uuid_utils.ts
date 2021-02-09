@@ -1,15 +1,14 @@
 import { Buffer } from 'buffer';
-import { validate as uuidValidate, version as uuidVersion } from 'uuid';
 
-// Internally the version-check executes validate as well, but docs describes this way:
-// https://www.npmjs.com/package/uuid#uuidvalidatestr
-export const uuidHexStringValidateV4 = (hexString: string): boolean =>
-  uuidValidate(hexString) && uuidVersion(hexString) === 4;
+const VALIDATION_REGEX = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|[0-9a-f]{32})$/i;
+
+export const uuidValidateString = (str: string): boolean =>
+  typeof str === 'string' && VALIDATION_REGEX.test(str);
 
 export const uuidHexStringToBuffer = (hexString: string): Buffer => {
-  if (!uuidHexStringValidateV4(hexString)) {
+  if (!uuidValidateString(hexString)) {
     throw new TypeError(
-      'UUID string representations must be a 36 character hex string (dashes included). Format: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx".'
+      'UUID string representations must be a 32 or 36 character hex string (dashes excluded/included). Format: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" or "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx".'
     );
   }
 
