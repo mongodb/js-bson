@@ -23,8 +23,15 @@ declare let global: any;
 declare const self: unknown;
 
 export let randomBytes = insecureRandomBytes;
-if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
-  randomBytes = size => window.crypto.getRandomValues(Buffer.alloc(size));
+if (typeof window !== 'undefined') {
+  // browser crypto implementation(s)
+  const target = window.crypto || window.msCrypto; // allow for IE11
+  if (target.getRandomValues) {
+    randomBytes = size => target.getRandomValues(Buffer.alloc(size));
+  }
+} else if (typeof global !== 'undefined' && global.crypto && global.crypto.getRandomValues) {
+  // allow for RN packages such as https://www.npmjs.com/package/react-native-get-random-values to populate global
+  randomBytes = size => global.crypto.getRandomValues(Buffer.alloc(size));
 } else {
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
