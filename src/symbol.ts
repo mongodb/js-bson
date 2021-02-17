@@ -10,11 +10,13 @@ export interface BSONSymbolExtended {
 export class BSONSymbol {
   _bsontype!: 'Symbol';
 
-  value: string;
+  value!: string;
   /**
    * @param value - the string representing the symbol.
    */
   constructor(value: string) {
+    if (!(this instanceof BSONSymbol)) return new BSONSymbol(value);
+
     this.value = value;
   }
 

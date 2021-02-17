@@ -12,13 +12,15 @@ export interface Int32Extended {
 export class Int32 {
   _bsontype!: 'Int32';
 
-  value: number;
+  value!: number;
   /**
    * Create an Int32 type
    *
    * @param value - the number we want to represent as an int32.
    */
   constructor(value: number | string) {
+    if (!(this instanceof Int32)) return new Int32(value);
+
     if ((value as unknown) instanceof Number) {
       value = value.valueOf();
     }

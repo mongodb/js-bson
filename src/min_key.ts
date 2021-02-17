@@ -10,6 +10,10 @@ export interface MinKeyExtended {
 export class MinKey {
   _bsontype!: 'MinKey';
 
+  constructor() {
+    if (!(this instanceof MinKey)) return new MinKey();
+  }
+
   /** @internal */
   toExtendedJSON(): MinKeyExtended {
     return { $minKey: 1 };

@@ -2,3 +2,5 @@ dist/
 node_modules/
 docs/
 types/
+lib/
+*.d.ts

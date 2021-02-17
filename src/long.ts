@@ -82,17 +82,17 @@ export class Long {
   /**
    * The high 32 bits as a signed value.
    */
-  high: number;
+  high!: number;
 
   /**
    * The low 32 bits as a signed value.
    */
-  low: number;
+  low!: number;
 
   /**
    * Whether unsigned or not.
    */
-  unsigned: boolean;
+  unsigned!: boolean;
 
   /**
    * Constructs a 64 bit two's-complement integer, given its low and high 32 bit values as *signed* integers.
@@ -102,6 +102,8 @@ export class Long {
    * @param unsigned - Whether unsigned or not, defaults to signed
    */
   constructor(low = 0, high = 0, unsigned?: boolean) {
+    if (!(this instanceof Long)) return new Long(low, high, unsigned);
+
     this.low = low | 0;
     this.high = high | 0;
     this.unsigned = !!unsigned;

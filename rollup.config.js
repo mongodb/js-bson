@@ -10,7 +10,7 @@ const tsConfig = {
   checkJs: false,
   strict: true,
   alwaysStrict: true,
-  target: 'ES2017',
+  target: 'es5',
   module: 'commonjs',
   moduleResolution: 'node',
   lib: ['ES2017', 'ES2020.BigInt', 'ES2017.TypedArrays'],
