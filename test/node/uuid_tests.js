@@ -7,9 +7,9 @@ const { validate: uuidStringValidate, version: uuidStringVersion } = require('uu
 
 // Test values
 const UPPERCASE_DASH_SEPARATED_UUID_STRING = 'AAAAAAAA-AAAA-4AAA-AAAA-AAAAAAAAAAAA';
-const UPPERCASE_UUID_STRING = 'AAAAAAAAAAAA4AAAAAAAAAAAAAAAAAAA';
+const UPPERCASE_VALUES_ONLY_UUID_STRING = 'AAAAAAAAAAAA4AAAAAAAAAAAAAAAAAAA';
 const LOWERCASE_DASH_SEPARATED_UUID_STRING = 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa';
-const LOWERCASE_UUID_STRING = 'aaaaaaaaaaaa4aaaaaaaaaaaaaaaaaaa';
+const LOWERCASE_VALUES_ONLY_UUID_STRING = 'aaaaaaaaaaaa4aaaaaaaaaaaaaaaaaaa';
 
 describe('UUID', () => {
   /**
@@ -39,12 +39,12 @@ describe('UUID', () => {
    * @ignore
    */
   it('should correctly create UUIDs from UPPERCASE & lowercase 32 char hex string (no dash separators)', () => {
-    const uuid1 = new UUID(UPPERCASE_UUID_STRING);
-    expect(uuid1.equals(UPPERCASE_UUID_STRING)).to.be.true;
+    const uuid1 = new UUID(UPPERCASE_VALUES_ONLY_UUID_STRING);
+    expect(uuid1.equals(UPPERCASE_VALUES_ONLY_UUID_STRING)).to.be.true;
     expect(uuid1.toString()).to.equal(LOWERCASE_DASH_SEPARATED_UUID_STRING);
 
-    const uuid2 = new UUID(LOWERCASE_UUID_STRING);
-    expect(uuid2.equals(LOWERCASE_UUID_STRING)).to.be.true;
+    const uuid2 = new UUID(LOWERCASE_VALUES_ONLY_UUID_STRING);
+    expect(uuid2.equals(LOWERCASE_VALUES_ONLY_UUID_STRING)).to.be.true;
     expect(uuid2.toString()).to.equal(LOWERCASE_DASH_SEPARATED_UUID_STRING);
   });
 
@@ -52,11 +52,11 @@ describe('UUID', () => {
    * @ignore
    */
   it('should correctly create UUID from Buffer', () => {
-    const uuid1 = new UUID(Buffer.from(UPPERCASE_UUID_STRING, 'hex'));
+    const uuid1 = new UUID(Buffer.from(UPPERCASE_VALUES_ONLY_UUID_STRING, 'hex'));
     expect(uuid1.equals(UPPERCASE_DASH_SEPARATED_UUID_STRING)).to.be.true;
     expect(uuid1.toString()).to.equal(LOWERCASE_DASH_SEPARATED_UUID_STRING);
 
-    const uuid2 = new UUID(Buffer.from(LOWERCASE_UUID_STRING, 'hex'));
+    const uuid2 = new UUID(Buffer.from(LOWERCASE_VALUES_ONLY_UUID_STRING, 'hex'));
     expect(uuid2.equals(LOWERCASE_DASH_SEPARATED_UUID_STRING)).to.be.true;
     expect(uuid2.toString()).to.equal(LOWERCASE_DASH_SEPARATED_UUID_STRING);
   });
@@ -92,7 +92,7 @@ describe('UUID', () => {
    * @ignore
    */
   it('should correctly check if a buffer isValid', () => {
-    const validBuffer = Buffer.from(UPPERCASE_UUID_STRING, 'hex');
+    const validBuffer = Buffer.from(UPPERCASE_VALUES_ONLY_UUID_STRING, 'hex');
     const invalidBuffer1 = Buffer.from('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'hex');
     const invalidBuffer2 = Buffer.alloc(16);
 
