@@ -30,8 +30,7 @@ module.exports = function (config) {
       plugins: [
         scenariosPlugin(),
         nodeResolve({
-          preferBuiltins: false,
-          browser: true
+          preferBuiltins: false
         }),
         commonjs(),
         nodePolyfills(),
