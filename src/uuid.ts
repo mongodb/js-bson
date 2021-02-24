@@ -31,7 +31,7 @@ export class UUID {
   /**
    * Create an UUID type
    *
-   * @param input - Can be a 36 character hex string (dashes included) or a 16 byte binary Buffer.
+   * @param input - Can be a 32 or 36 character hex string (dashes excluded/included) or a 16 byte binary Buffer.
    */
   constructor(input?: string | Buffer | UUID) {
     if (typeof input === 'undefined') {
@@ -46,7 +46,7 @@ export class UUID {
       this.id = uuidHexStringToBuffer(input);
     } else {
       throw new TypeError(
-        'Argument passed in UUID constructor must be 16 byte Buffer or a 36 character hex string (dashes included, format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).'
+        'Argument passed in UUID constructor must be 16 byte Buffer or a 32/36 character hex string (dashes excluded/included, format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).'
       );
     }
   }
@@ -83,7 +83,7 @@ export class UUID {
 
   /**
    * Creates an UUID from a hex string representation of an UUID.
-   * @param hexString - 36 character hex string (dashes included, format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).
+   * @param hexString - 32 or 36 character hex string (dashes excluded/included).
    */
   static createFromHexString(hexString: string): UUID {
     const buffer = uuidHexStringToBuffer(hexString);
@@ -201,7 +201,7 @@ export class UUID {
   /**
    * Converts to a string representation of this Id.
    *
-   * @returns return the 32(36) character hex string representation.
+   * @returns return the 36 character hex string representation.
    * @internal
    */
   [Symbol.for('nodejs.util.inspect.custom')](): string {

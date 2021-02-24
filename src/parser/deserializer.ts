@@ -336,7 +336,7 @@ function deserializeObject(
         if (promoteBuffers && promoteValues) {
           object[name] = buffer.slice(index, index + binarySize);
         } else if (subType === Binary.SUBTYPE_UUID) {
-          // NOTE: Is this approach too breaking?
+          // NOTE: This is breaking. What previously would return an instance of Binary, now returns a UUID instance.
           object[name] = new UUID(buffer.slice(index, index + binarySize));
         } else {
           object[name] = new Binary(buffer.slice(index, index + binarySize), subType);
@@ -366,7 +366,7 @@ function deserializeObject(
         if (promoteBuffers && promoteValues) {
           object[name] = _buffer;
         } else if (subType === Binary.SUBTYPE_UUID) {
-          // NOTE: Is this approach too breaking?
+          // NOTE: This is breaking. What previously would return an instance of Binary, now returns a UUID instance.
           object[name] = new UUID(_buffer);
         } else {
           object[name] = new Binary(_buffer, subType);
