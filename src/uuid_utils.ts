@@ -16,10 +16,9 @@ export const uuidHexStringToBuffer = (hexString: string): Buffer => {
   return Buffer.from(sanitizedHexString, 'hex');
 };
 
-export const bufferToUuidHexString = (buffer: Buffer, excludeDashes = false): string =>
-  excludeDashes
-    ? buffer.toString('hex')
-    : buffer.toString('hex', 0, 4) +
+export const bufferToUuidHexString = (buffer: Buffer, includeDashes = true): string =>
+  includeDashes
+    ? buffer.toString('hex', 0, 4) +
       '-' +
       buffer.toString('hex', 4, 6) +
       '-' +
@@ -27,4 +26,5 @@ export const bufferToUuidHexString = (buffer: Buffer, excludeDashes = false): st
       '-' +
       buffer.toString('hex', 8, 10) +
       '-' +
-      buffer.toString('hex', 10, 16);
+      buffer.toString('hex', 10, 16)
+    : buffer.toString('hex');

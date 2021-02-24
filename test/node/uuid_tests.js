@@ -42,11 +42,11 @@ describe('UUID', () => {
   it('should correctly create UUIDs from UPPERCASE & lowercase 32 char hex string (no dash separators)', () => {
     const uuid1 = new UUID(UPPERCASE_VALUES_ONLY_UUID_STRING);
     expect(uuid1.equals(UPPERCASE_VALUES_ONLY_UUID_STRING)).to.be.true;
-    expect(uuid1.toHexString(true)).to.equal(LOWERCASE_VALUES_ONLY_UUID_STRING);
+    expect(uuid1.toHexString(false)).to.equal(LOWERCASE_VALUES_ONLY_UUID_STRING);
 
     const uuid2 = new UUID(LOWERCASE_VALUES_ONLY_UUID_STRING);
     expect(uuid2.equals(LOWERCASE_VALUES_ONLY_UUID_STRING)).to.be.true;
-    expect(uuid2.toHexString(true)).to.equal(LOWERCASE_VALUES_ONLY_UUID_STRING);
+    expect(uuid2.toHexString(false)).to.equal(LOWERCASE_VALUES_ONLY_UUID_STRING);
   });
 
   /**

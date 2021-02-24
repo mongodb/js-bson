@@ -92,14 +92,14 @@ export class UUID {
 
   /**
    * Returns the UUID id as a 32 or 36 character hex string representation, excluding/including dashes (defaults to 36 character dash separated)
-   * @param excludeDashes - should the string exclude dash-separators.
+   * @param includeDashes - should the string exclude dash-separators.
    * */
-  toHexString(excludeDashes = false): string {
+  toHexString(includeDashes = true): string {
     if (UUID.cacheHexString && this.__id) {
       return this.__id;
     }
 
-    const uuidHexString = bufferToUuidHexString(this.id, excludeDashes);
+    const uuidHexString = bufferToUuidHexString(this.id, includeDashes);
 
     if (UUID.cacheHexString) {
       this.__id = uuidHexString;
