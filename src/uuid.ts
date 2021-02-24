@@ -90,19 +90,16 @@ export class UUID {
     return new UUID(buffer);
   }
 
-  /** Returns the UUID id as a 36 character hex string representation, including dashes */
-  toHexString(): string {
+  /**
+   * Returns the UUID id as a 32 or 36 character hex string representation, excluding/including dashes (defaults to 36 character dash separated)
+   * @param excludeDashes - should the string exclude dash-separators.
+   * */
+  toHexString(excludeDashes = false): string {
     if (UUID.cacheHexString && this.__id) {
       return this.__id;
     }
 
-    const uuidHexString = [
-      this.id.toString('hex', 0, 4),
-      this.id.toString('hex', 4, 6),
-      this.id.toString('hex', 6, 8),
-      this.id.toString('hex', 8, 10),
-      this.id.toString('hex', 10, 16)
-    ].join('-');
+    const uuidHexString = bufferToUuidHexString(this.id, excludeDashes);
 
     if (UUID.cacheHexString) {
       this.__id = uuidHexString;

@@ -16,13 +16,15 @@ export const uuidHexStringToBuffer = (hexString: string): Buffer => {
   return Buffer.from(sanitizedHexString, 'hex');
 };
 
-export const bufferToUuidHexString = (buffer: Buffer): string =>
-  buffer.toString('hex', 0, 4) +
-  '-' +
-  buffer.toString('hex', 4, 6) +
-  '-' +
-  buffer.toString('hex', 6, 8) +
-  '-' +
-  buffer.toString('hex', 8, 10) +
-  '-' +
-  buffer.toString('hex', 10, 16);
+export const bufferToUuidHexString = (buffer: Buffer, excludeDashes = false): string =>
+  excludeDashes
+    ? buffer.toString('hex')
+    : buffer.toString('hex', 0, 4) +
+      '-' +
+      buffer.toString('hex', 4, 6) +
+      '-' +
+      buffer.toString('hex', 6, 8) +
+      '-' +
+      buffer.toString('hex', 8, 10) +
+      '-' +
+      buffer.toString('hex', 10, 16);

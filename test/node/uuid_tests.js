@@ -16,6 +16,7 @@ describe('UUID', () => {
    * @ignore
    */
   it('should correctly generate a valid UUID v4 from empty constructor', () => {
+    // NOTE: Nondeterministic test. Is this welcome?
     const uuid = new UUID();
     const uuidHexStr = uuid.toHexString();
     expect(uuidStringValidate(uuidHexStr)).to.be.true;
@@ -41,11 +42,11 @@ describe('UUID', () => {
   it('should correctly create UUIDs from UPPERCASE & lowercase 32 char hex string (no dash separators)', () => {
     const uuid1 = new UUID(UPPERCASE_VALUES_ONLY_UUID_STRING);
     expect(uuid1.equals(UPPERCASE_VALUES_ONLY_UUID_STRING)).to.be.true;
-    expect(uuid1.toString()).to.equal(LOWERCASE_DASH_SEPARATED_UUID_STRING);
+    expect(uuid1.toHexString(true)).to.equal(LOWERCASE_VALUES_ONLY_UUID_STRING);
 
     const uuid2 = new UUID(LOWERCASE_VALUES_ONLY_UUID_STRING);
     expect(uuid2.equals(LOWERCASE_VALUES_ONLY_UUID_STRING)).to.be.true;
-    expect(uuid2.toString()).to.equal(LOWERCASE_DASH_SEPARATED_UUID_STRING);
+    expect(uuid2.toHexString(true)).to.equal(LOWERCASE_VALUES_ONLY_UUID_STRING);
   });
 
   /**
