@@ -26,7 +26,7 @@ export let randomBytes = insecureRandomBytes;
 if (typeof window !== 'undefined') {
   // browser crypto implementation(s)
   const target = window.crypto || window.msCrypto; // allow for IE11
-  if (target.getRandomValues) {
+  if (target && target.getRandomValues) {
     randomBytes = size => target.getRandomValues(Buffer.alloc(size));
   }
 } else if (typeof global !== 'undefined' && global.crypto && global.crypto.getRandomValues) {
