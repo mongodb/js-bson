@@ -12,13 +12,15 @@ export interface DoubleExtended {
 export class Double {
   _bsontype!: 'Double';
 
-  value: number;
+  value!: number;
   /**
    * Create a Double type
    *
    * @param value - the number we want to represent as a double.
    */
   constructor(value: number) {
+    if (!(this instanceof Double)) return new Double(value);
+
     if ((value as unknown) instanceof Number) {
       value = value.valueOf();
     }

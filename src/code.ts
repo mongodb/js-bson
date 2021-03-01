@@ -13,13 +13,15 @@ export interface CodeExtended {
 export class Code {
   _bsontype!: 'Code';
 
-  code: string | Function;
+  code!: string | Function;
   scope?: Document;
   /**
    * @param code - a string or function.
    * @param scope - an optional scope for the function.
    */
   constructor(code: string | Function, scope?: Document) {
+    if (!(this instanceof Code)) return new Code(code, scope);
+
     this.code = code;
     this.scope = scope;
   }

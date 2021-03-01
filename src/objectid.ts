@@ -57,6 +57,8 @@ export class ObjectId {
    * @param id - Can be a 24 character hex string, 12 byte binary Buffer, or a number.
    */
   constructor(id?: string | Buffer | number | ObjectIdLike | ObjectId) {
+    if (!(this instanceof ObjectId)) return new ObjectId(id);
+
     // Duck-typing to support ObjectId from different npm packages
     if (id instanceof ObjectId) {
       this[kId] = id.id;

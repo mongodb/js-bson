@@ -165,10 +165,12 @@ export interface Decimal128Extended {
 export class Decimal128 {
   _bsontype!: 'Decimal128';
 
-  readonly bytes: Buffer;
+  readonly bytes!: Buffer;
 
   /** @param bytes - a buffer containing the raw Decimal128 bytes in little endian order */
   constructor(bytes: Buffer) {
+    if (!(this instanceof Decimal128)) return new Decimal128(bytes);
+
     this.bytes = bytes;
   }
 

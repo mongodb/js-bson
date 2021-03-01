@@ -50,15 +50,17 @@ export class Binary {
   /** User BSON type */
   static readonly SUBTYPE_USER_DEFINED = 128;
 
-  buffer: Buffer;
-  sub_type: number;
-  position: number;
+  buffer!: Buffer;
+  sub_type!: number;
+  position!: number;
 
   /**
    * @param buffer - a buffer object containing the binary data.
    * @param subType - the option binary type.
    */
   constructor(buffer?: string | BinarySequence, subType?: number) {
+    if (!(this instanceof Binary)) return new Binary(buffer, subType);
+
     if (
       !(buffer == null) &&
       !(typeof buffer === 'string') &&

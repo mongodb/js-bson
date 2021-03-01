@@ -31,8 +31,13 @@ export class Timestamp extends LongWithoutOverridesClass {
    * @param low - the low (signed) 32 bits of the Timestamp.
    * @param high - the high (signed) 32 bits of the Timestamp.
    */
+  constructor(low: Long);
   constructor(low: number, high: number);
   constructor(low: number | Long, high?: number) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    ///@ts-expect-error
+    if (!(this instanceof Timestamp)) return new Timestamp(low, high);
+
     if (Long.isLong(low)) {
       super(low.low, low.high, true);
     } else {
