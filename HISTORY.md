@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.2.3](https://github.com/mongodb/js-bson/compare/v4.2.2...v4.2.3) (2021-03-02)
+
+
+### Bug Fixes
+
+* allow library to be loaded in web workeds ([#423](https://github.com/mongodb/js-bson/issues/423)) ([023f57e](https://github.com/mongodb/js-bson/commit/5ae057d3c6dd87e1407dcdc7b8d9da668023f57e))
+
+* make inspection result of BSON types evaluable ([#416](https://github.com/mongodb/js-bson/issues/416)) ([616665f](https://github.com/mongodb/js-bson/commit/616665f5e6f7dd06a88de450aaccaa203fa6c652))
+* permit BSON types to be created without new ([#424](https://github.com/mongodb/js-bson/issues/424)) ([d2bc284](https://github.com/mongodb/js-bson/commit/d2bc284943649ac27116701a4ed91ff731a4bdf7))
+
 ### [4.2.2](https://github.com/mongodb/js-bson/compare/v4.2.1...v4.2.2) (2020-12-01)
 
 
