@@ -1,5 +1,7 @@
 import { Buffer } from 'buffer';
 
+type RandomBytesFunction = (size: number) => Uint8Array;
+
 /**
  * Normalizes our expected stringified form of a function across versions of node
  * @param fn - The function to stringify
@@ -8,11 +10,11 @@ export function normalizedFunctionString(fn: Function): string {
   return fn.toString().replace('function(', 'function (');
 }
 
-function insecureRandomBytes(size: number): Uint8Array {
+const insecureRandomBytes: RandomBytesFunction = function insecureRandomBytes(size: number) {
   const result = Buffer.alloc(size);
   for (let i = 0; i < size; ++i) result[i] = Math.floor(Math.random() * 256);
   return result;
-}
+};
 
 /* We do not want to have to include DOM types just for this check */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,29 +24,47 @@ declare let require: Function;
 declare let global: any;
 declare const self: unknown;
 
-export let randomBytes = insecureRandomBytes;
-if (typeof window !== 'undefined') {
-  // browser crypto implementation(s)
-  const target = window.crypto || window.msCrypto; // allow for IE11
-  if (target && target.getRandomValues) {
-    randomBytes = size => target.getRandomValues(Buffer.alloc(size));
+const detectRandomBytes = (): RandomBytesFunction => {
+  if (typeof window !== 'undefined') {
+    // browser crypto implementation(s)
+    const target = window.crypto || window.msCrypto; // allow for IE11
+    if (target && target.getRandomValues) {
+      return size => target.getRandomValues(Buffer.alloc(size));
+    }
   }
-} else if (typeof global !== 'undefined' && global.crypto && global.crypto.getRandomValues) {
-  // allow for RN packages such as https://www.npmjs.com/package/react-native-get-random-values to populate global
-  randomBytes = size => global.crypto.getRandomValues(Buffer.alloc(size));
-} else {
+
+  if (typeof global !== 'undefined' && global.crypto && global.crypto.getRandomValues) {
+    // allow for RN packages such as https://www.npmjs.com/package/react-native-get-random-values to populate global
+    return size => global.crypto.getRandomValues(Buffer.alloc(size));
+  }
+
+  let requiredRandomBytes: RandomBytesFunction | null | undefined;
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    randomBytes = require('crypto').randomBytes;
+    requiredRandomBytes = require('crypto').randomBytes;
   } catch (e) {
     // keep the fallback
   }
 
   // NOTE: in transpiled cases the above require might return null/undefined
-  if (randomBytes == null) {
-    randomBytes = insecureRandomBytes;
+  if (requiredRandomBytes) {
+    return requiredRandomBytes;
+  } else {
+    let warning =
+      'BSON: No cryptographic implementation for random bytes present, falling back to a less secure implementation.';
+
+    if (typeof global.navigator === 'object' && global.navigator.product === 'ReactNative') {
+      warning =
+        'BSON: For React Native please polyfill crypto.getRandomValues, e.g. using: https://www.npmjs.com/package/react-native-get-random-values.';
+    }
+
+    console.warn(warning);
+
+    return insecureRandomBytes;
   }
-}
+};
+
+export const randomBytes = detectRandomBytes();
 
 export function isUint8Array(value: unknown): value is Uint8Array {
   return Object.prototype.toString.call(value) === '[object Uint8Array]';
