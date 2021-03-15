@@ -18,7 +18,7 @@ const kId = Symbol('id');
  * @public
  */
 export class UUID {
-  _bsontype = 'UUID' as const;
+  _bsontype!: 'UUID';
 
   static cacheHexString: boolean;
 
