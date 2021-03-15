@@ -168,9 +168,17 @@ export class UUID {
 
     if (Buffer.isBuffer(input)) {
       // check for length & uuid version (https://tools.ietf.org/html/rfc4122#section-4.1.3)
-      return (
-        input.length === BYTE_LENGTH && (input[6] & 0x40) === 0x40 && (input[8] & 0x80) === 0x80
-      );
+      if (input.length !== BYTE_LENGTH) {
+        return false;
+      }
+
+      try {
+        // get this byte as hex:             xxxxxxxx-xxxx-XXxx-xxxx-xxxxxxxxxxxx
+        // check first part as uuid version: xxxxxxxx-xxxx-Xxxx-xxxx-xxxxxxxxxxxx
+        return parseInt(input[6].toString(16)[0], 10) === Binary.SUBTYPE_UUID;
+      } catch {
+        return false;
+      }
     }
 
     return false;
