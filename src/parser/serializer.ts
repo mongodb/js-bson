@@ -786,14 +786,6 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index, true);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index, true);
-      } else if (value['_bsontype'] === 'UUID') {
-        index = serializeBinary(
-          buffer,
-          key,
-          new Binary(value.id, Binary.SUBTYPE_UUID),
-          index,
-          true
-        );
       } else if (isBuffer(value) || isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index, true);
       } else if (value instanceof RegExp || isRegExp(value)) {
@@ -900,14 +892,6 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index);
-      } else if (value['_bsontype'] === 'UUID') {
-        index = serializeBinary(
-          buffer,
-          key,
-          new Binary(value.id, Binary.SUBTYPE_UUID),
-          index,
-          true
-        );
       } else if (isBuffer(value) || isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index);
       } else if (value instanceof RegExp || isRegExp(value)) {
@@ -1014,14 +998,6 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index);
-      } else if (value['_bsontype'] === 'UUID') {
-        index = serializeBinary(
-          buffer,
-          key,
-          new Binary(value.id, Binary.SUBTYPE_UUID),
-          index,
-          true
-        );
       } else if (isBuffer(value) || isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index);
       } else if (value instanceof RegExp || isRegExp(value)) {

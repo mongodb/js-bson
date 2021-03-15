@@ -1,8 +1,8 @@
 import { Buffer } from 'buffer';
 import { ensureBuffer } from './ensure_buffer';
 import { uuidHexStringToBuffer } from './uuid_utils';
+import { UUID, UUIDExtended } from './uuid';
 import type { EJSONOptions } from './extended_json';
-import type { UUIDExtended } from './uuid';
 
 /** @public */
 export type BinarySequence = Uint8Array | Buffer | number[];
@@ -227,6 +227,17 @@ export class Binary {
         subType: subType.length === 1 ? '0' + subType : subType
       }
     };
+  }
+
+  /** @internal */
+  toUUID(): UUID {
+    if (this.sub_type === Binary.SUBTYPE_UUID) {
+      return new UUID(this.buffer.slice(0, this.position));
+    }
+
+    throw new Error(
+      `Binary sub_type "${this.sub_type}" is not supported for converting to UUID. Only "${Binary.SUBTYPE_UUID}" is currently supported.`
+    );
   }
 
   /** @internal */

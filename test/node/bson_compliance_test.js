@@ -7,7 +7,6 @@ const Binary = BSON.Binary;
 const Timestamp = BSON.Timestamp;
 const Long = BSON.Long;
 const ObjectId = BSON.ObjectId;
-const UUID = BSON.UUID;
 const DBRef = BSON.DBRef;
 const MinKey = BSON.MinKey;
 const MaxKey = BSON.MaxKey;
@@ -68,15 +67,8 @@ describe('BSON Compliance', function () {
           object[name] = new RegExp(doc[name]['$regexp'], doc[name]['$options'] || '');
         } else if (doc[name]['$oid']) {
           object[name] = new ObjectId(doc[name]['$oid']);
-        } else if (doc[name]['$uuid']) {
-          object[name] = new UUID(doc[name]['$uuid']);
         } else if (doc[name]['$binary']) {
-          const subType = doc[name]['$type'] || 1;
-          const base64Str = doc[name]['$binary'];
-          object[name] =
-            subType === Binary.SUBTYPE_UUID
-              ? new UUID(Buffer.from(base64Str, 'base64'))
-              : new Binary(base64Str, subType);
+          object[name] = new Binary(doc[name]['$binary'], doc[name]['$type'] || 1);
         } else if (doc[name]['$timestamp']) {
           object[name] = Timestamp.fromBits(
             parseInt(doc[name]['$timestamp']['t'], 10),

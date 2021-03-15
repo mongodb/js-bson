@@ -107,6 +107,56 @@ describe('UUID', () => {
   /**
    * @ignore
    */
+  it('should correctly convert to and from a Binary instance', () => {
+    const uuid = new UUID(LOWERCASE_DASH_SEPARATED_UUID_STRING);
+    expect(UUID.isValid(uuid)).to.be.true;
+
+    const bin = uuid.toBinary();
+    expect(bin).to.be.instanceOf(Binary);
+
+    const uuid2 = bin.toUUID();
+    expect(uuid2.toHexString()).to.equal(LOWERCASE_DASH_SEPARATED_UUID_STRING);
+  });
+
+  /**
+   * @ignore
+   */
+  it('should correctly convert to and from a Binary instance', () => {
+    const uuid = new UUID(LOWERCASE_DASH_SEPARATED_UUID_STRING);
+    expect(UUID.isValid(uuid)).to.be.true;
+
+    const bin = uuid.toBinary();
+    expect(bin).to.be.instanceOf(Binary);
+
+    const uuid2 = bin.toUUID();
+    expect(uuid.equals(uuid2)).to.be.true;
+  });
+
+  /**
+   * @ignore
+   */
+  it('should throw when converted from an incompatible Binary instance', () => {
+    const validRandomBuffer = Buffer.from('Hello World!');
+    const binRand = new Binary(validRandomBuffer);
+
+    expect(() => binRand.toUUID()).to.throw();
+
+    const validUuidV3String = '25f0d698-15b9-3a7a-96b1-a573061e29c9';
+    const validUuidV3Buffer = Buffer.from(validUuidV3String.replace(/-/g, ''), 'hex');
+    const binV3 = new Binary(validUuidV3Buffer, Binary.SUBTYPE_UUID_OLD);
+
+    expect(() => binV3.toUUID()).to.throw();
+
+    const validUuidV4String = 'bd2d74fe-bad8-430c-aeac-b01d073a1eb6';
+    const validUuidV4Buffer = Buffer.from(validUuidV4String.replace(/-/g, ''), 'hex');
+    const binV4 = new Binary(validUuidV4Buffer, Binary.SUBTYPE_UUID);
+
+    expect(() => binV4.toUUID()).to.not.throw();
+  });
+
+  /**
+   * @ignore
+   */
   it('should correctly allow for node.js inspect to work with UUID', () => {
     const uuid = new UUID(UPPERCASE_DASH_SEPARATED_UUID_STRING);
     expect(inspect(uuid)).to.equal(`new UUID("${LOWERCASE_DASH_SEPARATED_UUID_STRING}")`);

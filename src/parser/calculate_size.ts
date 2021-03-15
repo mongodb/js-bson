@@ -81,8 +81,6 @@ function calculateElement(
         return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + 1;
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (12 + 1);
-      } else if (value['_bsontype'] === 'UUID') {
-        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (1 + 4 + 1) + 16;
       } else if (value instanceof Date || isDate(value)) {
         return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (8 + 1);
       } else if (ArrayBuffer.isView(value) || value instanceof ArrayBuffer) {
