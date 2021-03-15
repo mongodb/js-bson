@@ -207,3 +207,5 @@ export class UUID {
     return `new UUID("${this.toHexString()}")`;
   }
 }
+
+Object.defineProperty(UUID.prototype, '_bsontype', { value: 'UUID' });
