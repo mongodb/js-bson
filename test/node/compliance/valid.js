@@ -21,7 +21,7 @@ var data = {
         },
         double: 3.14,
         binary: {
-          $binary: 'FgAAAAJoZWxsbwAGAAAAd29ybGQAAA==', // Warning: this binary contains a "hello world" string.
+          $binary: 'FgAAAAJoZWxsbwAGAAAAd29ybGQAAA==',
           $type: 4
         },
         date: {
