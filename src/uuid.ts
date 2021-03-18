@@ -18,6 +18,7 @@ const kId = Symbol('id');
  * @public
  */
 export class UUID {
+  // This property is not meant for direct serialization, but simply an indication that this type originates from this package.
   _bsontype!: 'UUID';
 
   static cacheHexString: boolean;
