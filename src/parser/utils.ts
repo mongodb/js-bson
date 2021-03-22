@@ -10,7 +10,16 @@ export function normalizedFunctionString(fn: Function): string {
   return fn.toString().replace('function(', 'function (');
 }
 
+const isReactNative =
+  typeof global.navigator === 'object' && global.navigator.product === 'ReactNative';
+
+const insecureWarning = isReactNative
+  ? 'BSON: For React Native please polyfill crypto.getRandomValues, e.g. using: https://www.npmjs.com/package/react-native-get-random-values.'
+  : 'BSON: No cryptographic implementation for random bytes present, falling back to a less secure implementation.';
+
 const insecureRandomBytes: RandomBytesFunction = function insecureRandomBytes(size: number) {
+  console.warn(insecureWarning);
+
   const result = Buffer.alloc(size);
   for (let i = 0; i < size; ++i) result[i] = Math.floor(Math.random() * 256);
   return result;
@@ -47,21 +56,8 @@ const detectRandomBytes = (): RandomBytesFunction => {
   }
 
   // NOTE: in transpiled cases the above require might return null/undefined
-  if (requiredRandomBytes) {
-    return requiredRandomBytes;
-  } else {
-    let warning =
-      'BSON: No cryptographic implementation for random bytes present, falling back to a less secure implementation.';
 
-    if (typeof global.navigator === 'object' && global.navigator.product === 'ReactNative') {
-      warning =
-        'BSON: For React Native please polyfill crypto.getRandomValues, e.g. using: https://www.npmjs.com/package/react-native-get-random-values.';
-    }
-
-    console.warn(warning);
-
-    return insecureRandomBytes;
-  }
+  return requiredRandomBytes || insecureRandomBytes;
 };
 
 export const randomBytes = detectRandomBytes();
