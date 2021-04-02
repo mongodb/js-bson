@@ -8,6 +8,7 @@ const Binary = BSON.Binary;
 const Timestamp = BSON.Timestamp;
 const Long = BSON.Long;
 const ObjectId = BSON.ObjectId;
+const UUID = BSON.UUID;
 const BSONSymbol = BSON.BSONSymbol;
 const DBRef = BSON.DBRef;
 const Decimal128 = BSON.Decimal128;
@@ -81,6 +82,7 @@ describe('BSON', function () {
   it('Should Correctly get BSON types from require', function (done) {
     var _mongodb = require('../register-bson');
     expect(_mongodb.ObjectId === ObjectId).to.be.ok;
+    expect(_mongodb.UUID === UUID).to.be.ok;
     expect(_mongodb.Binary === Binary).to.be.ok;
     expect(_mongodb.Long === Long).to.be.ok;
     expect(_mongodb.Timestamp === Timestamp).to.be.ok;
@@ -687,7 +689,7 @@ describe('BSON', function () {
     var deserialized = BSON.deserialize(serialized_data, {
       promoteBuffers: true
     });
-    expect(deserialized.doc instanceof Buffer).to.be.ok;
+    expect(Buffer.isBuffer(deserialized.doc)).to.be.ok;
     expect('hello world').to.equal(deserialized.doc.toString());
     done();
   });

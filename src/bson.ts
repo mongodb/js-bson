@@ -12,6 +12,7 @@ import { Map } from './map';
 import { MaxKey } from './max_key';
 import { MinKey } from './min_key';
 import { ObjectId } from './objectid';
+import { UUID } from './uuid';
 import { calculateObjectSize as internalCalculateObjectSize } from './parser/calculate_size';
 // Parts of the parser
 import { deserialize as internalDeserialize, DeserializeOptions } from './parser/deserializer';
@@ -81,6 +82,7 @@ export {
   DBRef,
   Binary,
   ObjectId,
+  UUID,
   Long,
   Timestamp,
   Double,

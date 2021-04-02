@@ -1,57 +1,212 @@
-/**
- * UUID regular expression pattern copied from `uuid` npm module.
- * @see https://github.com/uuidjs/uuid/blob/master/src/regex.js
- */
-const UUID_RX = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
+import { Buffer } from 'buffer';
+import { ensureBuffer } from './ensure_buffer';
+import { Binary } from './binary';
+import { bufferToUuidHexString, uuidHexStringToBuffer, uuidValidateString } from './uuid_utils';
+import { randomBytes } from './parser/utils';
 
 /** @public */
-export interface UUIDExtended {
+export type UUIDExtended = {
   $uuid: string;
-}
+};
+
+const BYTE_LENGTH = 16;
+
+const kId = Symbol('id');
 
 /**
- * Parser function copied from `uuid` npm module.
- * @see https://github.com/uuidjs/uuid/blob/master/src/parse.js
- * @internal
+ * A class representation of the BSON UUID type.
+ * @public
  */
-export function parseUUID(uuid: string): Uint8Array {
-  if (typeof uuid !== 'string') {
-    throw new TypeError('Invalid type for UUID, expected string but got ' + typeof uuid);
+export class UUID {
+  // This property is not meant for direct serialization, but simply an indication that this type originates from this package.
+  _bsontype!: 'UUID';
+
+  static cacheHexString: boolean;
+
+  /** UUID Bytes @internal */
+  private [kId]: Buffer;
+  /** UUID hexString cache @internal */
+  private __id?: string;
+
+  /**
+   * Create an UUID type
+   *
+   * @param input - Can be a 32 or 36 character hex string (dashes excluded/included) or a 16 byte binary Buffer.
+   */
+  constructor(input?: string | Buffer | UUID) {
+    if (typeof input === 'undefined') {
+      // The most common use case (blank id, new UUID() instance)
+      this.id = UUID.generate();
+    } else if (input instanceof UUID) {
+      this[kId] = Buffer.from(input.id);
+      this.__id = input.__id;
+    } else if (
+      (Buffer.isBuffer(input) || ArrayBuffer.isView(input)) &&
+      input.byteLength === BYTE_LENGTH
+    ) {
+      this.id = ensureBuffer(input);
+    } else if (typeof input === 'string') {
+      this.id = uuidHexStringToBuffer(input);
+    } else {
+      throw new TypeError(
+        'Argument passed in UUID constructor must be a UUID, a 16 byte Buffer or a 32/36 character hex string (dashes excluded/included, format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).'
+      );
+    }
   }
 
-  if (!UUID_RX.test(uuid)) {
-    throw new TypeError('Invalid format for UUID: ' + uuid);
+  /**
+   * The UUID bytes
+   * @readonly
+   */
+  get id(): Buffer {
+    return this[kId];
   }
 
-  let v;
-  const arr = new Uint8Array(16);
+  set id(value: Buffer) {
+    this[kId] = value;
 
-  // Parse ########-....-....-....-............
-  arr[0] = (v = parseInt(uuid.slice(0, 8), 16)) >>> 24;
-  arr[1] = (v >>> 16) & 0xff;
-  arr[2] = (v >>> 8) & 0xff;
-  arr[3] = v & 0xff;
+    if (UUID.cacheHexString) {
+      this.__id = bufferToUuidHexString(value);
+    }
+  }
 
-  // Parse ........-####-....-....-............
-  arr[4] = (v = parseInt(uuid.slice(9, 13), 16)) >>> 8;
-  arr[5] = v & 0xff;
+  /**
+   * Generate a 16 byte uuid v4 buffer used in UUIDs
+   */
 
-  // Parse ........-....-####-....-............
-  arr[6] = (v = parseInt(uuid.slice(14, 18), 16)) >>> 8;
-  arr[7] = v & 0xff;
+  /**
+   * Returns the UUID id as a 32 or 36 character hex string representation, excluding/including dashes (defaults to 36 character dash separated)
+   * @param includeDashes - should the string exclude dash-separators.
+   * */
+  toHexString(includeDashes = true): string {
+    if (UUID.cacheHexString && this.__id) {
+      return this.__id;
+    }
 
-  // Parse ........-....-....-####-............
-  arr[8] = (v = parseInt(uuid.slice(19, 23), 16)) >>> 8;
-  arr[9] = v & 0xff;
+    const uuidHexString = bufferToUuidHexString(this.id, includeDashes);
 
-  // Parse ........-....-....-....-############
-  // (Use "/" to avoid 32-bit truncation when bit-shifting high-order bytes)
-  arr[10] = ((v = parseInt(uuid.slice(24, 36), 16)) / 0x10000000000) & 0xff;
-  arr[11] = (v / 0x100000000) & 0xff;
-  arr[12] = (v >>> 24) & 0xff;
-  arr[13] = (v >>> 16) & 0xff;
-  arr[14] = (v >>> 8) & 0xff;
-  arr[15] = v & 0xff;
+    if (UUID.cacheHexString) {
+      this.__id = uuidHexString;
+    }
 
-  return arr;
+    return uuidHexString;
+  }
+
+  /**
+   * Converts the id into a 36 character (dashes included) hex string, unless a encoding is specified.
+   * @internal
+   */
+  toString(encoding?: string): string {
+    return encoding ? this.id.toString(encoding) : this.toHexString();
+  }
+
+  /**
+   * Converts the id into its JSON string representation. A 36 character (dashes included) hex string in the format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+   * @internal
+   */
+  toJSON(): string {
+    return this.toHexString();
+  }
+
+  /**
+   * Compares the equality of this UUID with `otherID`.
+   *
+   * @param otherId - UUID instance to compare against.
+   */
+  equals(otherId: string | Buffer | UUID): boolean {
+    if (!otherId) {
+      return false;
+    }
+
+    if (otherId instanceof UUID) {
+      return otherId.id.equals(this.id);
+    }
+
+    try {
+      return new UUID(otherId).id.equals(this.id);
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Creates a Binary instance from the current UUID.
+   */
+  toBinary(): Binary {
+    return new Binary(this.id, Binary.SUBTYPE_UUID);
+  }
+
+  /**
+   * Generates a populated buffer containing a v4 uuid
+   */
+  static generate(): Buffer {
+    const bytes = randomBytes(BYTE_LENGTH);
+
+    // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+    // Kindly borrowed from https://github.com/uuidjs/uuid/blob/master/src/v4.js
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+    return Buffer.from(bytes);
+  }
+
+  /**
+   * Checks if a value is a valid bson UUID
+   * @param input - UUID, string or Buffer to validate.
+   */
+  static isValid(input: string | Buffer | UUID): boolean {
+    if (!input) {
+      return false;
+    }
+
+    if (input instanceof UUID) {
+      return true;
+    }
+
+    if (typeof input === 'string') {
+      return uuidValidateString(input);
+    }
+
+    if (Buffer.isBuffer(input)) {
+      // check for length & uuid version (https://tools.ietf.org/html/rfc4122#section-4.1.3)
+      if (input.length !== BYTE_LENGTH) {
+        return false;
+      }
+
+      try {
+        // get this byte as hex:             xxxxxxxx-xxxx-XXxx-xxxx-xxxxxxxxxxxx
+        // check first part as uuid version: xxxxxxxx-xxxx-Xxxx-xxxx-xxxxxxxxxxxx
+        return parseInt(input[6].toString(16)[0], 10) === Binary.SUBTYPE_UUID;
+      } catch {
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Creates an UUID from a hex string representation of an UUID.
+   * @param hexString - 32 or 36 character hex string (dashes excluded/included).
+   */
+  static createFromHexString(hexString: string): UUID {
+    const buffer = uuidHexStringToBuffer(hexString);
+    return new UUID(buffer);
+  }
+
+  /**
+   * Converts to a string representation of this Id.
+   *
+   * @returns return the 36 character hex string representation.
+   * @internal
+   */
+  [Symbol.for('nodejs.util.inspect.custom')](): string {
+    return this.inspect();
+  }
+
+  inspect(): string {
+    return `new UUID("${this.toHexString()}")`;
+  }
 }
+
+Object.defineProperty(UUID.prototype, '_bsontype', { value: 'UUID' });

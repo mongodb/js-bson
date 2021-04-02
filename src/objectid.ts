@@ -229,7 +229,7 @@ export class ObjectId {
       typeof otherId === 'string' &&
       ObjectId.isValid(otherId) &&
       otherId.length === 12 &&
-      this.id instanceof Buffer
+      Buffer.isBuffer(this.id)
     ) {
       return otherId === this.id.toString('binary');
     }
@@ -315,7 +315,7 @@ export class ObjectId {
       return true;
     }
 
-    if (id instanceof Buffer && id.length === 12) {
+    if (Buffer.isBuffer(id) && id.length === 12) {
       return true;
     }
 
