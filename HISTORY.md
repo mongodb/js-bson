@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.3.0](https://github.com/mongodb/js-bson/compare/v4.2.3...v4.3.0) (2021-04-06)
+
+
+### Features
+
+* UUID convenience class ([#425](https://github.com/mongodb/js-bson/issues/425)) ([76e1826](https://github.com/mongodb/js-bson/commit/76e1826eed852d4cca9fafabbcf826af1367c9af))
+
 ### [4.2.3](https://github.com/mongodb/js-bson/compare/v4.2.2...v4.2.3) (2021-03-02)
 
 

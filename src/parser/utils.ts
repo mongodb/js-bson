@@ -110,7 +110,7 @@ export function deprecate<T extends Function>(fn: T, message: string): T {
       console.warn(message);
       warned = true;
     }
-    return fn.apply(this, ...args);
+    return fn.apply(this, args);
   }
   return (deprecated as unknown) as T;
 }

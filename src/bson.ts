@@ -12,7 +12,6 @@ import { Map } from './map';
 import { MaxKey } from './max_key';
 import { MinKey } from './min_key';
 import { ObjectId } from './objectid';
-import { UUID } from './uuid';
 import { calculateObjectSize as internalCalculateObjectSize } from './parser/calculate_size';
 // Parts of the parser
 import { deserialize as internalDeserialize, DeserializeOptions } from './parser/deserializer';
@@ -20,6 +19,7 @@ import { serializeInto as internalSerialize, SerializeOptions } from './parser/s
 import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
+import { UUID } from './uuid';
 export { BinaryExtended, BinaryExtendedLegacy, BinarySequence } from './binary';
 export { CodeExtended } from './code';
 export {
@@ -309,6 +309,7 @@ const BSON = {
   Double,
   Int32,
   Long,
+  UUID,
   Map,
   MaxKey,
   MinKey,
