@@ -1,3 +1,4 @@
+/* global SharedArrayBuffer */
 'use strict';
 
 const { Buffer } = require('buffer');
@@ -19,7 +20,7 @@ describe('ensureBuffer tests', function () {
     expect(bufferOut).to.equal(bufferIn);
   });
 
-  it('should wrap a UInt8Array with a buffer', function () {
+  it('should wrap a Uint8Array with a buffer', function () {
     const arrayIn = Uint8Array.from([1, 2, 3]);
     let bufferOut;
 
@@ -29,6 +30,34 @@ describe('ensureBuffer tests', function () {
 
     expect(bufferOut).to.be.an.instanceOf(Buffer);
     expect(bufferOut.buffer).to.equal(arrayIn.buffer);
+  });
+
+  it('should wrap a ArrayBuffer with a buffer', function () {
+    const arrayBufferIn = Uint8Array.from([1, 2, 3]).buffer;
+    let bufferOut;
+
+    expect(function () {
+      bufferOut = ensureBuffer(arrayBufferIn);
+    }).to.not.throw(Error);
+
+    expect(bufferOut).to.be.an.instanceOf(Buffer);
+    expect(bufferOut.buffer).to.equal(arrayBufferIn);
+  });
+
+  it('should wrap a SharedArrayBuffer with a buffer', function () {
+    if (typeof SharedArrayBuffer === 'undefined') {
+      this.skip();
+      return;
+    }
+    const arrayBufferIn = new SharedArrayBuffer(3);
+    let bufferOut;
+
+    expect(function () {
+      bufferOut = ensureBuffer(arrayBufferIn);
+    }).to.not.throw(Error);
+
+    expect(bufferOut).to.be.an.instanceOf(Buffer);
+    expect(bufferOut.buffer).to.equal(arrayBufferIn);
   });
 
   [0, 12, -1, '', 'foo', null, undefined, ['list'], {}, /x/].forEach(function (item) {

@@ -18,7 +18,11 @@ export function ensureBuffer(potentialBuffer: Buffer | ArrayBufferView | ArrayBu
     return Buffer.from(potentialBuffer.buffer);
   }
 
-  if (potentialBuffer instanceof ArrayBuffer) {
+  if (
+    ['[object ArrayBuffer]', '[object SharedArrayBuffer]'].includes(
+      Object.prototype.toString.call(potentialBuffer)
+    )
+  ) {
     return Buffer.from(potentialBuffer);
   }
 
