@@ -2,7 +2,7 @@ import { Buffer } from 'buffer';
 import { Binary } from '../binary';
 import type { Document } from '../bson';
 import * as constants from '../constants';
-import { isDate, normalizedFunctionString } from './utils';
+import { isAnyArrayBuffer, isDate, isRegExp, normalizedFunctionString } from './utils';
 
 export function calculateObjectSize(
   object: Document,
@@ -83,7 +83,7 @@ function calculateElement(
         return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (12 + 1);
       } else if (value instanceof Date || isDate(value)) {
         return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (8 + 1);
-      } else if (ArrayBuffer.isView(value) || value instanceof ArrayBuffer) {
+      } else if (ArrayBuffer.isView(value) || value instanceof ArrayBuffer || isAnyArrayBuffer(value)) {
         return (
           (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (1 + 4 + 1) + value.byteLength
         );
@@ -156,10 +156,7 @@ function calculateElement(
           1 +
           calculateObjectSize(ordered_values, serializeFunctions, ignoreUndefined)
         );
-      } else if (
-        value instanceof RegExp ||
-        Object.prototype.toString.call(value) === '[object RegExp]'
-      ) {
+      } else if (value instanceof RegExp || isRegExp(value)) {
         return (
           (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) +
           1 +
@@ -189,8 +186,7 @@ function calculateElement(
     case 'function':
       // WTF for 0.4.X where typeof /someregexp/ === 'function'
       if (
-        value instanceof RegExp ||
-        Object.prototype.toString.call(value) === '[object RegExp]' ||
+        value instanceof RegExp || isRegExp(value) ||
         String.call(value) === '[object RegExp]'
       ) {
         return (

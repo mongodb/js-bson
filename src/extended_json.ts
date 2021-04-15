@@ -9,7 +9,7 @@ import { Long } from './long';
 import { MaxKey } from './max_key';
 import { MinKey } from './min_key';
 import { ObjectId } from './objectid';
-import { isObjectLike } from './parser/utils';
+import { isDate, isObjectLike, isRegExp } from './parser/utils';
 import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
@@ -157,7 +157,7 @@ function serializeValue(value: any, options: EJSON.Options): any {
 
   if (value === undefined) return null;
 
-  if (value instanceof Date) {
+  if (value instanceof Date || isDate(value)) {
     const dateNum = value.getTime(),
       // is it in year range 1970-9999?
       inRange = dateNum > -1 && dateNum < 253402318800000;
@@ -185,7 +185,7 @@ function serializeValue(value: any, options: EJSON.Options): any {
     return { $numberDouble: value.toString() };
   }
 
-  if (value instanceof RegExp) {
+  if (value instanceof RegExp || isRegExp(value)) {
     let flags = value.flags;
     if (flags === undefined) {
       const match = value.toString().match(/[gimuy]*$/);
