@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import { isBuffer } from './parser/utils';
+import { isBuffer, isAnyArrayBuffer } from './parser/utils';
 
 /**
  * Makes sure that, if a Uint8Array is passed in, it is wrapped in a Buffer.
@@ -18,11 +18,7 @@ export function ensureBuffer(potentialBuffer: Buffer | ArrayBufferView | ArrayBu
     return Buffer.from(potentialBuffer.buffer);
   }
 
-  if (
-    ['[object ArrayBuffer]', '[object SharedArrayBuffer]'].includes(
-      Object.prototype.toString.call(potentialBuffer)
-    )
-  ) {
+  if (isAnyArrayBuffer(potentialBuffer)) {
     return Buffer.from(potentialBuffer);
   }
 

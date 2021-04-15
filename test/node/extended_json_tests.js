@@ -2,6 +2,7 @@
 
 const BSON = require('../register-bson');
 const EJSON = BSON.EJSON;
+const vm = require('vm');
 
 // BSON types
 const Binary = BSON.Binary;
@@ -228,7 +229,9 @@ describe('Extended JSON', function () {
       oldObjectID: OldObjectID.createFromHexString('111111111111111111111111'),
       bsonRegExp: new BSONRegExp('hello world', 'i'),
       symbol: new BSONSymbol('symbol'),
-      timestamp: new Timestamp()
+      timestamp: new Timestamp(),
+      foreignRegExp: vm.runInNewContext('/abc/'),
+      foreignDate: vm.runInNewContext('new Date(0)')
     };
 
     const result = EJSON.serialize(doc, { relaxed: false });
@@ -247,7 +250,9 @@ describe('Extended JSON', function () {
       oldObjectID: { $oid: '111111111111111111111111' },
       bsonRegExp: { $regularExpression: { pattern: 'hello world', options: 'i' } },
       symbol: { $symbol: 'symbol' },
-      timestamp: { $timestamp: { t: 0, i: 0 } }
+      timestamp: { $timestamp: { t: 0, i: 0 } },
+      foreignDate: { $date: { $numberLong: '0' } },
+      foreignRegExp: { $regularExpression: { pattern: 'abc', options: '' } }
     });
   });
 

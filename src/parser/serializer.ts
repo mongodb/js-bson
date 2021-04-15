@@ -20,6 +20,8 @@ import {
   isBigUInt64Array,
   isBuffer,
   isDate,
+  isMap,
+  isRegExp,
   isUint8Array,
   normalizedFunctionString
 } from './utils';
@@ -40,10 +42,6 @@ export interface SerializeOptions {
 
 const regexp = /\x00/; // eslint-disable-line no-control-regex
 const ignoreKeys = new Set(['$db', '$ref', '$id', '$clusterTime']);
-
-function isRegExp(d: unknown): d is RegExp {
-  return Object.prototype.toString.call(d) === '[object RegExp]';
-}
 
 /*
  * isArray indicates if we are writing to a BSON array (type 0x04)
@@ -843,7 +841,7 @@ export function serializeInto(
         throw new TypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
       }
     }
-  } else if (object instanceof Map) {
+  } else if (object instanceof Map || isMap(object)) {
     const iterator = object.entries();
     let done = false;
 
