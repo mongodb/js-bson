@@ -83,7 +83,11 @@ function calculateElement(
         return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (12 + 1);
       } else if (value instanceof Date || isDate(value)) {
         return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (8 + 1);
-      } else if (ArrayBuffer.isView(value) || value instanceof ArrayBuffer || isAnyArrayBuffer(value)) {
+      } else if (
+        ArrayBuffer.isView(value) ||
+        value instanceof ArrayBuffer ||
+        isAnyArrayBuffer(value)
+      ) {
         return (
           (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (1 + 4 + 1) + value.byteLength
         );
@@ -185,10 +189,7 @@ function calculateElement(
       }
     case 'function':
       // WTF for 0.4.X where typeof /someregexp/ === 'function'
-      if (
-        value instanceof RegExp || isRegExp(value) ||
-        String.call(value) === '[object RegExp]'
-      ) {
+      if (value instanceof RegExp || isRegExp(value) || String.call(value) === '[object RegExp]') {
         return (
           (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) +
           1 +

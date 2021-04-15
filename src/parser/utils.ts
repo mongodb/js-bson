@@ -64,7 +64,8 @@ export const randomBytes = detectRandomBytes();
 
 export function isAnyArrayBuffer(value: unknown): value is ArrayBuffer {
   return ['[object ArrayBuffer]', '[object SharedArrayBuffer]'].includes(
-    Object.prototype.toString.call(value));
+    Object.prototype.toString.call(value)
+  );
 }
 
 export function isUint8Array(value: unknown): value is Uint8Array {
