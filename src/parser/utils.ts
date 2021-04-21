@@ -58,6 +58,7 @@ export function haveBuffer(): boolean {
 
 /** Callable in any environment to check if value is a Buffer */
 export function isBuffer(value: unknown): value is Buffer {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return isUint8Array(value) && typeof (value as any)?.toJSON === 'function';
 }
 
