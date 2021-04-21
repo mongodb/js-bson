@@ -58,7 +58,7 @@ export function haveBuffer(): boolean {
 
 /** Callable in any environment to check if value is a Buffer */
 export function isBuffer(value: unknown): value is Buffer {
-  return isUint8Array(value) && typeof value?.toJSON === 'function';
+  return isUint8Array(value) && typeof (value as any)?.toJSON === 'function';
 }
 
 // To ensure that 0.4 of node works correctly
