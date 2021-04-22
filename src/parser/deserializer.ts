@@ -606,7 +606,7 @@ function deserializeObject(
       );
     }
     if (name === '__proto__') {
-      Object.defineProperty(object, name, { 
+      Object.defineProperty(object, name, {
         value,
         writable: true,
         enumerable: true,
