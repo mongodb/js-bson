@@ -2,7 +2,7 @@ import { Buffer } from 'buffer';
 import { ensureBuffer } from './ensure_buffer';
 import { Binary } from './binary';
 import { bufferToUuidHexString, uuidHexStringToBuffer, uuidValidateString } from './uuid_utils';
-import { randomBytes } from './parser/utils';
+import { isUint8Array, randomBytes } from './parser/utils';
 
 /** @public */
 export type UUIDExtended = {
@@ -40,10 +40,7 @@ export class UUID {
     } else if (input instanceof UUID) {
       this[kId] = Buffer.from(input.id);
       this.__id = input.__id;
-    } else if (
-      (Buffer.isBuffer(input) || ArrayBuffer.isView(input)) &&
-      input.byteLength === BYTE_LENGTH
-    ) {
+    } else if (ArrayBuffer.isView(input) && input.byteLength === BYTE_LENGTH) {
       this.id = ensureBuffer(input);
     } else if (typeof input === 'string') {
       this.id = uuidHexStringToBuffer(input);
@@ -167,7 +164,7 @@ export class UUID {
       return uuidValidateString(input);
     }
 
-    if (Buffer.isBuffer(input)) {
+    if (isUint8Array(input)) {
       // check for length & uuid version (https://tools.ietf.org/html/rfc4122#section-4.1.3)
       if (input.length !== BYTE_LENGTH) {
         return false;

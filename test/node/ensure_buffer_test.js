@@ -9,7 +9,7 @@ describe('ensureBuffer tests', function () {
     expect(ensureBuffer).to.be.a('function');
   });
 
-  it('should return the exact same buffer if a buffer is passed in', function () {
+  it('should return a view over the exact same memory when a Buffer is passed in', function () {
     const bufferIn = Buffer.alloc(10);
     let bufferOut;
 
@@ -17,7 +17,10 @@ describe('ensureBuffer tests', function () {
       bufferOut = ensureBuffer(bufferIn);
     }).to.not.throw(Error);
 
-    expect(bufferOut).to.equal(bufferIn);
+    expect(bufferOut).to.be.an.instanceOf(Buffer);
+    expect(bufferOut.buffer).to.equal(bufferIn.buffer);
+    expect(bufferOut.byteLength).to.equal(bufferIn.byteLength);
+    expect(bufferOut.byteOffset).to.equal(bufferIn.byteOffset);
   });
 
   it('should wrap a Uint8Array with a buffer', function () {
@@ -58,6 +61,19 @@ describe('ensureBuffer tests', function () {
 
     expect(bufferOut).to.be.an.instanceOf(Buffer);
     expect(bufferOut.buffer).to.equal(arrayBufferIn);
+  });
+
+  it('should account for the input view byteLength and byteOffset', function () {
+    const input = new Uint8Array(new Uint8Array([1, 2, 3, 4, 5]).buffer, 1, 3);
+    let bufferOut;
+
+    expect(function () {
+      bufferOut = ensureBuffer(input);
+    }).to.not.throw(Error);
+
+    expect(bufferOut).to.be.an.instanceOf(Buffer);
+    expect(bufferOut.byteLength).to.equal(3);
+    expect(bufferOut.byteOffset).to.equal(1);
   });
 
   [0, 12, -1, '', 'foo', null, undefined, ['list'], {}, /x/].forEach(function (item) {

@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 import { ensureBuffer } from './ensure_buffer';
-import { deprecate, randomBytes } from './parser/utils';
+import { deprecate, isUint8Array, randomBytes } from './parser/utils';
 
 // constants
 const PROCESS_UNIQUE = randomBytes(5);
@@ -229,9 +229,9 @@ export class ObjectId {
       typeof otherId === 'string' &&
       ObjectId.isValid(otherId) &&
       otherId.length === 12 &&
-      Buffer.isBuffer(this.id)
+      isUint8Array(this.id)
     ) {
-      return otherId === this.id.toString('binary');
+      return otherId === Buffer.prototype.toString.call(this.id, 'latin1');
     }
 
     if (typeof otherId === 'string' && ObjectId.isValid(otherId) && otherId.length === 24) {
@@ -300,7 +300,7 @@ export class ObjectId {
    *
    * @param id - ObjectId instance to validate.
    */
-  static isValid(id: number | string | ObjectId | Buffer | ObjectIdLike): boolean {
+  static isValid(id: number | string | ObjectId | Uint8Array | ObjectIdLike): boolean {
     if (id == null) return false;
 
     if (typeof id === 'number') {
@@ -315,7 +315,7 @@ export class ObjectId {
       return true;
     }
 
-    if (Buffer.isBuffer(id) && id.length === 12) {
+    if (isUint8Array(id) && id.length === 12) {
       return true;
     }
 

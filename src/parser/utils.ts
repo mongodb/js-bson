@@ -93,11 +93,6 @@ export function haveBuffer(): boolean {
   return typeof global !== 'undefined' && typeof global.Buffer !== 'undefined';
 }
 
-/** Callable in any environment to check if value is a Buffer */
-export function isBuffer(value: unknown): value is Buffer {
-  return typeof value === 'object' && value?.constructor?.name === 'Buffer';
-}
-
 // To ensure that 0.4 of node works correctly
 export function isDate(d: unknown): d is Date {
   return isObjectLike(d) && Object.prototype.toString.call(d) === '[object Date]';
