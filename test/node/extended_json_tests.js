@@ -495,6 +495,21 @@ describe('Extended JSON', function () {
     // expect(() => EJSON.serialize(badMap)).to.throw(); // uncomment when EJSON supports ES6 Map
   });
 
+  it('should throw a helpful error message for input with circular references', function () {
+    const obj = {
+      some: {
+        property: {
+          array: []
+        }
+      }
+    };
+    obj.some.property.array.push(obj.some);
+    expect(() => EJSON.serialize(obj)).to.throw(`\
+Converting circular structure to EJSON:
+    (input) -> some -> property -> array -> index 0
+                 \\-----------------------------/`);
+  });
+
   context('when dealing with legacy extended json', function () {
     describe('.stringify', function () {
       context('when serializing binary', function () {

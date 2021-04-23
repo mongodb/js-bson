@@ -140,9 +140,20 @@ function deserializeValue(value: any, options: EJSON.Options = {}) {
   return value;
 }
 
+type EJSONSerializeOptions = EJSON.Options & {
+  seenObjects: { obj: unknown; propertyName: string }[];
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function serializeArray(array: any[], options: EJSON.Options): any[] {
-  return array.map((v: unknown) => serializeValue(v, options));
+function serializeArray(array: any[], options: EJSONSerializeOptions): any[] {
+  return array.map((v: unknown, index: number) => {
+    options.seenObjects.push({ propertyName: `index ${index}`, obj: null });
+    try {
+      return serializeValue(v, options);
+    } finally {
+      options.seenObjects.pop();
+    }
+  });
 }
 
 function getISOString(date: Date) {
@@ -152,7 +163,29 @@ function getISOString(date: Date) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function serializeValue(value: any, options: EJSON.Options): any {
+function serializeValue(value: any, options: EJSONSerializeOptions): any {
+  if ((typeof value === 'object' || typeof value === 'function') && value !== null) {
+    const index = options.seenObjects.findIndex(entry => entry.obj === value);
+    if (index !== -1) {
+      const props = options.seenObjects.map(entry => entry.propertyName);
+      const leadingPart = `${props.slice(0, index).join(' -> ')} -> `;
+      const alreadySeen = props[index];
+      const circularPart = ` -> ${props.slice(index + 1, props.length - 1).join(' -> ')} -> `;
+      const current = props[props.length - 1];
+      const leadingSpace = ' '.repeat(leadingPart.length + alreadySeen.length / 2);
+      const dashes = '-'.repeat(
+        circularPart.length + (alreadySeen.length + current.length) / 2 - 1
+      );
+
+      throw new TypeError(
+        'Converting circular structure to EJSON:\n' +
+          `    ${leadingPart}${alreadySeen}${circularPart}${current}\n` +
+          `    ${leadingSpace}\\${dashes}/`
+      );
+    }
+    options.seenObjects[options.seenObjects.length - 1].obj = value;
+  }
+
   if (Array.isArray(value)) return serializeArray(value, options);
 
   if (value === undefined) return null;
@@ -232,7 +265,7 @@ const BSON_TYPE_MAPPINGS = {
 } as const;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function serializeDocument(doc: any, options: EJSON.Options) {
+function serializeDocument(doc: any, options: EJSONSerializeOptions) {
   if (doc == null || typeof doc !== 'object') throw new Error('not an object instance');
 
   const bsontype: BSONType['_bsontype'] = doc._bsontype;
@@ -240,7 +273,12 @@ function serializeDocument(doc: any, options: EJSON.Options) {
     // It's a regular object. Recursively serialize its property values.
     const _doc: Document = {};
     for (const name in doc) {
-      _doc[name] = serializeValue(doc[name], options);
+      options.seenObjects.push({ propertyName: name, obj: null });
+      try {
+        _doc[name] = serializeValue(doc[name], options);
+      } finally {
+        options.seenObjects.pop();
+      }
     }
     return _doc;
   } else if (isBSONType(doc)) {
@@ -365,9 +403,11 @@ export namespace EJSON {
       replacer = undefined;
       space = 0;
     }
-    options = Object.assign({}, { relaxed: true, legacy: false }, options);
+    const serializeOptions = Object.assign({ relaxed: true, legacy: false }, options, {
+      seenObjects: [{ propertyName: '(input)', obj: null }]
+    });
 
-    const doc = serializeValue(value, options);
+    const doc = serializeValue(value, serializeOptions);
     return JSON.stringify(doc, replacer as Parameters<JSON['stringify']>[1], space);
   }
 
