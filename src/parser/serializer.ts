@@ -18,7 +18,6 @@ import type { BSONRegExp } from '../regexp';
 import {
   isBigInt64Array,
   isBigUInt64Array,
-  isBuffer,
   isDate,
   isMap,
   isRegExp,
@@ -784,7 +783,7 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index, true);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index, true);
-      } else if (isBuffer(value) || isUint8Array(value)) {
+      } else if (isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index, true);
       } else if (value instanceof RegExp || isRegExp(value)) {
         index = serializeRegExp(buffer, key, value, index, true);
@@ -890,7 +889,7 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index);
-      } else if (isBuffer(value) || isUint8Array(value)) {
+      } else if (isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index);
       } else if (value instanceof RegExp || isRegExp(value)) {
         index = serializeRegExp(buffer, key, value, index);
@@ -996,7 +995,7 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index);
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
         index = serializeObjectId(buffer, key, value, index);
-      } else if (isBuffer(value) || isUint8Array(value)) {
+      } else if (isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index);
       } else if (value instanceof RegExp || isRegExp(value)) {
         index = serializeRegExp(buffer, key, value, index);
