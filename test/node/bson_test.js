@@ -2167,6 +2167,23 @@ describe('BSON', function () {
   /**
    * @ignore
    */
+  it('Should correctly deserialize objects containing __proto__ keys', function (done) {
+    var doc = { ['__proto__']: { a: 42 } };
+    var serialized_data = BSON.serialize(doc);
+
+    var serialized_data2 = Buffer.alloc(BSON.calculateObjectSize(doc));
+    BSON.serializeWithBufferAndIndex(doc, serialized_data2);
+    assertBuffersEqual(done, serialized_data, serialized_data2, 0);
+
+    var doc1 = BSON.deserialize(serialized_data);
+    expect(Object.getOwnPropertyDescriptor(doc1, '__proto__').enumerable).to.equal(true);
+    expect(doc1.__proto__.a).to.equal(42);
+    done();
+  });
+
+  /**
+   * @ignore
+   */
   it('Should return boolean for ObjectId equality check', function (done) {
     var id = new ObjectId();
     expect(true).to.equal(id.equals(new ObjectId(id.toString())));
