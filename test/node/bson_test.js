@@ -2356,7 +2356,10 @@ describe('BSON', function () {
      */
     it('Long', function () {
       const long = Long.fromString('42');
-      expect(inspect(long)).to.equal('new Long("42")');
+      expect(inspect(long)).to.equal('Long.fromString("42")');
+
+      const unsignedLong = Long.fromString('42', true);
+      expect(inspect(unsignedLong)).to.equal('Long.fromString("42", true)');
     });
 
     /**
