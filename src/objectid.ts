@@ -2,9 +2,6 @@ import { Buffer } from 'buffer';
 import { ensureBuffer } from './ensure_buffer';
 import { deprecate, isUint8Array, randomBytes } from './parser/utils';
 
-// constants
-const PROCESS_UNIQUE = randomBytes(5);
-
 // Regular expression that checks for hex value
 const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
 
@@ -19,6 +16,9 @@ const decodeLookup: number[] = [];
 let i = 0;
 while (i < 10) decodeLookup[0x30 + i] = i++;
 while (i < 16) decodeLookup[0x41 - 10 + i] = decodeLookup[0x61 - 10 + i] = i++;
+
+// Unique sequence for the current process (initialized on first use)
+let PROCESS_UNIQUE: Uint8Array | null = null;
 
 /** @public */
 export interface ObjectIdLike {
@@ -175,6 +175,11 @@ export class ObjectId {
 
     // 4-byte timestamp
     buffer.writeUInt32BE(time, 0);
+
+    // set PROCESS_UNIQUE if yet not initialized
+    if (PROCESS_UNIQUE === null) {
+      PROCESS_UNIQUE = randomBytes(5);
+    }
 
     // 5-byte process unique
     buffer[4] = PROCESS_UNIQUE[0];
