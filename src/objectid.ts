@@ -5,18 +5,6 @@ import { deprecate, isUint8Array, randomBytes } from './parser/utils';
 // Regular expression that checks for hex value
 const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
 
-// Precomputed hex table enables speedy hex string conversion
-const hexTable: string[] = [];
-for (let i = 0; i < 256; i++) {
-  hexTable[i] = (i <= 15 ? '0' : '') + i.toString(16);
-}
-
-// Lookup tables
-const decodeLookup: number[] = [];
-let i = 0;
-while (i < 10) decodeLookup[0x30 + i] = i++;
-while (i < 16) decodeLookup[0x41 - 10 + i] = decodeLookup[0x61 - 10 + i] = i++;
-
 // Unique sequence for the current process (initialized on first use)
 let PROCESS_UNIQUE: Uint8Array | null = null;
 
