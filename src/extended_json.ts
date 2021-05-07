@@ -404,7 +404,7 @@ export namespace EJSON {
       space = 0;
     }
     const serializeOptions = Object.assign({ relaxed: true, legacy: false }, options, {
-      seenObjects: [{ propertyName: '(input)', obj: null }]
+      seenObjects: [{ propertyName: '(root)', obj: null }]
     });
 
     const doc = serializeValue(value, serializeOptions);
