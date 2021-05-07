@@ -168,9 +168,17 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
     const index = options.seenObjects.findIndex(entry => entry.obj === value);
     if (index !== -1) {
       const props = options.seenObjects.map(entry => entry.propertyName);
-      const leadingPart = props.slice(0, index).map(prop => `${prop} -> `).join('');
+      const leadingPart = props
+        .slice(0, index)
+        .map(prop => `${prop} -> `)
+        .join('');
       const alreadySeen = props[index];
-      const circularPart = ' -> ' + props.slice(index + 1, props.length - 1).map(prop => `${prop} -> `).join('');
+      const circularPart =
+        ' -> ' +
+        props
+          .slice(index + 1, props.length - 1)
+          .map(prop => `${prop} -> `)
+          .join('');
       const current = props[props.length - 1];
       const leadingSpace = ' '.repeat(leadingPart.length + alreadySeen.length / 2);
       const dashes = '-'.repeat(
