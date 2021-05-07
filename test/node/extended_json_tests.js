@@ -507,8 +507,8 @@ describe('Extended JSON', function () {
       obj.some.property.array.push(obj.some);
       expect(() => EJSON.serialize(obj)).to.throw(`\
 Converting circular structure to EJSON:
-    (input) -> some -> property -> array -> index 0
-                 \\-----------------------------/`);
+    (root) -> some -> property -> array -> index 0
+                \\-----------------------------/`);
     });
 
     it('should throw a helpful error message for input with circular references, one-level nested', function () {
@@ -516,8 +516,8 @@ Converting circular structure to EJSON:
       obj.obj = obj;
       expect(() => EJSON.serialize(obj)).to.throw(`\
 Converting circular structure to EJSON:
-    (input) -> obj
-       \\--------/`);
+    (root) -> obj
+       \\-------/`);
     });
 
     it('should throw a helpful error message for input with circular references, one-level nested inside base object', function () {
@@ -525,8 +525,8 @@ Converting circular structure to EJSON:
       obj.obj = obj;
       expect(() => EJSON.serialize({ foo: obj })).to.throw(`\
 Converting circular structure to EJSON:
-    (input) -> foo -> obj
-                \\------/`);
+    (root) -> foo -> obj
+               \\------/`);
     });
 
     it('should throw a helpful error message for input with circular references, pointing back to base object', function () {
@@ -534,8 +534,8 @@ Converting circular structure to EJSON:
       obj.foo.obj = obj;
       expect(() => EJSON.serialize(obj)).to.throw(`\
 Converting circular structure to EJSON:
-    (input) -> foo -> obj
-       \\---------------/`);
+    (root) -> foo -> obj
+       \\--------------/`);
     });
   });
 
