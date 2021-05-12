@@ -192,7 +192,7 @@ describe('BSON Corpus', function () {
         describe('parseErrors', function () {
           scenario.parseErrors.forEach(p => {
             it(p.description, function () {
-              expect(() => Decimal128.fromString(scenario.string)).to.throw();
+              expect(() => jsonToNative(scenario.string)).to.throw();
             });
           });
         });
