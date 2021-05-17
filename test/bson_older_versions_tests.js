@@ -42,6 +42,7 @@ function downloadZip(version, done) {
 describe('Current version', function () {
   OLD_VERSIONS.forEach(version => {
     before(function (done) {
+      this.timeout(30000); // Downloading may take a few seconds.
       if (Number(process.version.split('.')[0].substring(1)) < 8) {
         // WHATWG fetch doesn't download correctly prior to node 8
         // but we should be safe by testing on node 8 +
