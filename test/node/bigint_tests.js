@@ -64,7 +64,9 @@ describe('BSON BigInt Support', function () {
     expect(new Long(BigInt('123456789123456789')).toString()).to.equal('123456789123456789');
     expect(new Long(BigInt('123456789123456789'), true).toString()).to.equal('123456789123456789');
     expect(new Long(BigInt('13835058055282163712')).toString()).to.equal('-4611686018427387904');
-    expect(new Long(BigInt('13835058055282163712'), true).toString()).to.equal('13835058055282163712');
+    expect(new Long(BigInt('13835058055282163712'), true).toString()).to.equal(
+      '13835058055282163712'
+    );
     done();
   });
 });
