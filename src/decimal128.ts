@@ -167,11 +167,18 @@ export class Decimal128 {
 
   readonly bytes!: Buffer;
 
-  /** @param bytes - a buffer containing the raw Decimal128 bytes in little endian order */
-  constructor(bytes: Buffer) {
+  /**
+   * @param bytes - a buffer containing the raw Decimal128 bytes in little endian order,
+   *                or a string representation as returned by .toString()
+   */
+  constructor(bytes: Buffer | string) {
     if (!(this instanceof Decimal128)) return new Decimal128(bytes);
 
-    this.bytes = bytes;
+    if (typeof bytes === 'string') {
+      this.bytes = Decimal128.fromString(bytes).bytes;
+    } else {
+      this.bytes = bytes;
+    }
   }
 
   /**
@@ -796,7 +803,7 @@ export class Decimal128 {
   }
 
   inspect(): string {
-    return `Decimal128.fromString("${this.toString()}")`;
+    return `Decimal128("${this.toString()}")`;
   }
 }
 

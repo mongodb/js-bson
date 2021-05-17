@@ -97,16 +97,28 @@ export class Long {
   /**
    * Constructs a 64 bit two's-complement integer, given its low and high 32 bit values as *signed* integers.
    *  See the from* functions below for more convenient ways of constructing Longs.
+   *
+   * Acceptable signatures are:
+   * - Long(low, high, unsigned?)
+   * - Long(bigint, unsigned?)
+   * - Long(string, unsigned?)
+   *
    * @param low - The low (signed) 32 bits of the long
    * @param high - The high (signed) 32 bits of the long
    * @param unsigned - Whether unsigned or not, defaults to signed
    */
-  constructor(low = 0, high = 0, unsigned?: boolean) {
+  constructor(low: number | bigint | string = 0, high?: number | boolean, unsigned?: boolean) {
     if (!(this instanceof Long)) return new Long(low, high, unsigned);
 
-    this.low = low | 0;
-    this.high = high | 0;
-    this.unsigned = !!unsigned;
+    if (typeof low === 'bigint') {
+      Object.assign(this, Long.fromBigInt(low, !!high));
+    } else if (typeof low === 'string') {
+      Object.assign(this, Long.fromString(low, !!high));
+    } else {
+      this.low = low | 0;
+      this.high = (high as number) | 0;
+      this.unsigned = !!unsigned;
+    }
 
     Object.defineProperty(this, '__isLong__', {
       value: true,
@@ -994,7 +1006,7 @@ export class Long {
   }
 
   inspect(): string {
-    return `Long.fromString("${this.toString()}"${this.unsigned ? ', true' : ''})`;
+    return `Long("${this.toString()}"${this.unsigned ? ', true' : ''})`;
   }
 }
 
