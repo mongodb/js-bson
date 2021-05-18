@@ -55,4 +55,18 @@ describe('BSON BigInt Support', function () {
     expect(() => BSON.serialize(testDoc)).to.throw(TypeError);
     // expect(() => BSON.serialize(testDoc)).to.throw();
   });
+
+  it('Should accept BigInts in Long constructor', function (done) {
+    const Long = BSON.Long;
+    expect(new Long(BigInt('0')).toString()).to.equal('0');
+    expect(new Long(BigInt('-1')).toString()).to.equal('-1');
+    expect(new Long(BigInt('-1'), true).toString()).to.equal('18446744073709551615');
+    expect(new Long(BigInt('123456789123456789')).toString()).to.equal('123456789123456789');
+    expect(new Long(BigInt('123456789123456789'), true).toString()).to.equal('123456789123456789');
+    expect(new Long(BigInt('13835058055282163712')).toString()).to.equal('-4611686018427387904');
+    expect(new Long(BigInt('13835058055282163712'), true).toString()).to.equal(
+      '13835058055282163712'
+    );
+    done();
+  });
 });

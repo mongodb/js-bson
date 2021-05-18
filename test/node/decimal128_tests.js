@@ -2131,4 +2131,13 @@ describe('Decimal128', function () {
 
     done();
   });
+
+  it('accepts strings in the constructor', function (done) {
+    expect(new Decimal128('0').toString()).to.equal('0');
+    expect(new Decimal128('00').toString()).to.equal('0');
+    expect(new Decimal128('0.5').toString()).to.equal('0.5');
+    expect(new Decimal128('-0.5').toString()).to.equal('-0.5');
+    expect(new Decimal128('-1e400').toString()).to.equal('-1E+400');
+    done();
+  });
 });

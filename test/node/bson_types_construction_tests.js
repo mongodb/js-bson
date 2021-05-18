@@ -9,7 +9,7 @@ describe('Constructing BSON types', function () {
     new BSON.BSONSymbol('aaa');
     new BSON.Binary('aaa');
     new BSON.Code(function () {});
-    new BSON.Decimal128('aaa');
+    new BSON.Decimal128('123');
     new BSON.Double(2.3);
     new BSON.Int32(1);
     new BSON.Long(0, 0);
@@ -24,7 +24,7 @@ describe('Constructing BSON types', function () {
     BSON.BSONSymbol('aaa');
     BSON.Binary('aaa');
     BSON.Code(function () {});
-    BSON.Decimal128('aaa');
+    BSON.Decimal128('123');
     BSON.Double(2.3);
     BSON.Int32(1);
     BSON.Long(0, 0);
