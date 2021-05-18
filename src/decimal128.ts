@@ -803,7 +803,7 @@ export class Decimal128 {
   }
 
   inspect(): string {
-    return `Decimal128("${this.toString()}")`;
+    return `new Decimal128("${this.toString()}")`;
   }
 }
 

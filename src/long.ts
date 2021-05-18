@@ -1006,7 +1006,7 @@ export class Long {
   }
 
   inspect(): string {
-    return `Long("${this.toString()}"${this.unsigned ? ', true' : ''})`;
+    return `new Long("${this.toString()}"${this.unsigned ? ', true' : ''})`;
   }
 }
 
