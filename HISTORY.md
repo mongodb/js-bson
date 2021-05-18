@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.4.0](https://github.com/mongodb/js-bson/compare/v4.3.0...v4.4.0) (2021-05-18)
+
+
+### Features
+
+* **NODE-3264:** allow Decimal128(string), Long(string), Long(bigint) ([#437](https://github.com/mongodb/js-bson/issues/437)) ([392c1bc](https://github.com/mongodb/js-bson/commit/392c1bcbe003b185f38d64a8a24bc21a6661cb26))
+* make circular input errors for EJSON expressive ([#433](https://github.com/mongodb/js-bson/issues/433)) ([7b351cc](https://github.com/mongodb/js-bson/commit/7b351cc217786e5ee992f0fb64588f9c3fddd828))
+
+
+### Bug Fixes
+
+* make Long inspect result evaluable ([3a2eff1](https://github.com/mongodb/js-bson/commit/3a2eff127175c7f94c9ccc940074537b7ad972f1))
+* **NODE-3153:** correctly deserialize `__proto__` properties ([#431](https://github.com/mongodb/js-bson/issues/431)) ([f34cabc](https://github.com/mongodb/js-bson/commit/f34cabc31e66bc809d8e3cc6b0d203739f40aa41))
+* accept Uint8Array where Buffer is accepted ([#432](https://github.com/mongodb/js-bson/issues/432)) ([4613763](https://github.com/mongodb/js-bson/commit/46137636ac8e59010ba3bfdd317d5d13d9d3066d))
+* clean up instanceof usage ([9b6d52a](https://github.com/mongodb/js-bson/commit/9b6d52a84a20641b22732355e56c3bae3fe857f1))
+* improve ArrayBuffer brand check in ensureBuffer ([#429](https://github.com/mongodb/js-bson/issues/429)) ([99722f6](https://github.com/mongodb/js-bson/commit/99722f66d9f5eeb0ab57e74bab26049a425fa3e8))
+
 ## [4.3.0](https://github.com/mongodb/js-bson/compare/v4.2.3...v4.3.0) (2021-04-06)
 
 
