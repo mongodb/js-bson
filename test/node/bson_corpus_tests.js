@@ -2,7 +2,6 @@
 
 const Buffer = require('buffer').Buffer;
 const BSON = require('../register-bson');
-const Decimal128 = BSON.Decimal128;
 const EJSON = BSON.EJSON;
 
 const deserializeOptions = {
