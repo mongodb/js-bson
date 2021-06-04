@@ -35,9 +35,7 @@ export class BSONRegExp {
     if (!(this instanceof BSONRegExp)) return new BSONRegExp(pattern, options);
 
     this.pattern = pattern;
-    this.options = options ?? '';
-    // Execute
-    alphabetize(this.options);
+    this.options = alphabetize(options ?? '');
 
     // Validate options
     for (let i = 0; i < this.options.length; i++) {

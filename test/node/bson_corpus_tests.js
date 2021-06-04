@@ -107,6 +107,11 @@ describe('BSON Corpus', function () {
 
               if (v.degenerate_bson) {
                 const dB = Buffer.from(v.degenerate_bson, 'hex');
+                // Degenerate BSON to JS equals canonical BSON in JS
+                expect(BSON.deserialize(cB, deserializeOptions)).to.deep.equal(
+                  BSON.deserialize(dB, deserializeOptions)
+                );
+                // Dengenerate BSON roundtripped is transformed to canonical BSON
                 expect(cB).to.deep.equal(
                   BSON.serialize(BSON.deserialize(dB, deserializeOptions), serializeOptions)
                 );
