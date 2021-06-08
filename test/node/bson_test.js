@@ -2164,6 +2164,13 @@ describe('BSON', function () {
     done();
   });
 
+  describe('BSONRegExp', () => {
+    it('Should alphabetize options', () => {
+      const b = new BSONRegExp('cba', 'mix');
+      expect(b.options).to.equal('imx');
+    });
+  });
+
   /**
    * @ignore
    */
