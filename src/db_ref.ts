@@ -12,7 +12,12 @@ export interface DBRefLike {
 
 /** @internal */
 export function isDBRefLike(value: unknown): value is DBRefLike {
-  return isObjectLike(value) && value['$id'] != null && value['$ref'] != null;
+  return (
+    isObjectLike(value) &&
+    value.$id != null &&
+    typeof value.$ref === 'string' &&
+    (value.$db == null || typeof value.$db === 'string')
+  );
 }
 
 /**
