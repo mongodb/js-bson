@@ -1,7 +1,7 @@
 import { Binary } from './binary';
 import type { Document } from './bson';
 import { Code } from './code';
-import { DBRef } from './db_ref';
+import { DBRef, isDBRefLike } from './db_ref';
 import { Decimal128 } from './decimal128';
 import { Double } from './double';
 import { Int32 } from './int_32';
@@ -120,7 +120,7 @@ function deserializeValue(value: any, options: EJSON.Options = {}) {
     return Code.fromExtendedJSON(value);
   }
 
-  if (value.$ref != null || value.$dbPointer != null) {
+  if (isDBRefLike(value) || value.$dbPointer) {
     const v = value.$ref ? value : value.$dbPointer;
 
     // we run into this in a "degenerate EJSON" case (with $id and $ref order flipped)
@@ -310,10 +310,10 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
       outDoc = new Code(outDoc.code, serializeValue(outDoc.scope, options));
     } else if (bsontype === 'DBRef' && outDoc.oid) {
       outDoc = new DBRef(
-        outDoc.collection,
+        serializeValue(outDoc.collection, options),
         serializeValue(outDoc.oid, options),
-        outDoc.db,
-        outDoc.fields
+        serializeValue(outDoc.db, options),
+        serializeValue(outDoc.fields, options)
       );
     }
 
