@@ -306,8 +306,10 @@ function serializeObjectId(
   // Write the objectId into the shared buffer
   if (typeof value.id === 'string') {
     buffer.write(value.id, index, undefined, 'binary');
-  } else if (value.id && value.id.copy) {
-    value.id.copy(buffer, index, 0, 12);
+  } else if (isUint8Array(value.id)) {
+    // Use the standard JS methods here because buffer.copy() is buggy with the
+    // browser polyfill
+    buffer.set(value.id.subarray(0, 12), index);
   } else {
     throw new TypeError('object [' + JSON.stringify(value) + '] is not a valid ObjectId');
   }
@@ -406,7 +408,9 @@ function serializeDecimal128(
   index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   // Write the data from the value
-  value.bytes.copy(buffer, index, 0, 16);
+  // Prefer the standard JS methods because their typechecking is not buggy,
+  // unlike the `buffer` polyfill's.
+  buffer.set(value.bytes.subarray(0, 16), index);
   return index + 16;
 }
 
