@@ -168,6 +168,15 @@ describe('Extended JSON', function () {
     expect(serialized).to.equal('42');
   });
 
+  it('should correctly serialize non-finite numbers', function () {
+    const numbers = { neginf: -Infinity, posinf: Infinity, nan: NaN };
+    const serialized = EJSON.stringify(numbers);
+    expect(serialized).to.equal(
+      '{"neginf":{"$numberDouble":"-Infinity"},"posinf":{"$numberDouble":"Infinity"},"nan":{"$numberDouble":"NaN"}}'
+    );
+    expect(EJSON.parse(serialized)).to.deep.equal(numbers);
+  });
+
   it('should correctly parse null values', function () {
     expect(EJSON.parse('null')).to.be.null;
     expect(EJSON.parse('[null]')[0]).to.be.null;

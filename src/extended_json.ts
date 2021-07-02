@@ -213,7 +213,7 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
       : { $date: { $numberLong: value.getTime().toString() } };
   }
 
-  if (typeof value === 'number' && !options.relaxed) {
+  if (typeof value === 'number' && (!options.relaxed || !isFinite(value))) {
     // it's an integer
     if (Math.floor(value) === value) {
       const int32Range = value >= BSON_INT32_MIN && value <= BSON_INT32_MAX,
