@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.4.1](https://github.com/mongodb/js-bson/compare/v4.4.0...v4.4.1) (2021-07-06)
+
+
+### Bug Fixes
+
+* **NODE-3247:** DBRef special handling ([#443](https://github.com/mongodb/js-bson/issues/443)) ([f5d984d](https://github.com/mongodb/js-bson/commit/f5d984d88b2e20310ec5cc3a39b91b0fd1e0b3c9))
+* **NODE-3282:** BSONRegExp options not alphabetized ([#441](https://github.com/mongodb/js-bson/issues/441)) ([18c3512](https://github.com/mongodb/js-bson/commit/18c3512befe54908e4b816056dbde0d1b998d81b))
+* **NODE-3376:** use standard JS methods for copying Buffers ([#444](https://github.com/mongodb/js-bson/issues/444)) ([804050d](https://github.com/mongodb/js-bson/commit/804050d40b03a02116995e63671e05ffa033dc45))
+* **NODE-3390:** serialize non-finite doubles correctly in EJSON ([#445](https://github.com/mongodb/js-bson/issues/445)) ([7eb7998](https://github.com/mongodb/js-bson/commit/7eb79981e16d73a391c567b7f9748943997a424d))
+
 ## [4.4.0](https://github.com/mongodb/js-bson/compare/v4.3.0...v4.4.0) (2021-05-18)
 
 
