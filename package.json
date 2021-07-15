@@ -17,8 +17,8 @@
   "types": "bson.d.ts",
   "version": "4.4.1",
   "author": { 
-    "name" : "The MongoDB NodeJS Team", 
-    "email" : "dbx-node@mongodb.com"
+    "name": "The MongoDB NodeJS Team", 
+    "email": "dbx-node@mongodb.com"
   },
   "license": "Apache-2.0",
   "contributors": [],
