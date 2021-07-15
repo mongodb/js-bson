@@ -16,13 +16,15 @@
   ],
   "types": "bson.d.ts",
   "version": "4.4.1",
-  "author": "Christian Amor Kvalheim <christkv@gmail.com>",
+  "author": { 
+    "name": "The MongoDB NodeJS Team", 
+    "email": "dbx-node@mongodb.com"
+  },
   "license": "Apache-2.0",
   "contributors": [],
   "repository": "mongodb/js-bson",
   "bugs": {
-    "mail": "node-mongodb-native@googlegroups.com",
-    "url": "https://github.com/mongodb/js-bson/issues"
+    "url": "https://jira.mongodb.org/projects/NODE/issues/"
   },
   "devDependencies": {
     "@babel/plugin-external-helpers": "^7.10.4",
