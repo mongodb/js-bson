@@ -2120,8 +2120,8 @@ describe('BSON', function () {
      * @ignore
      */
     it('Timestamp', function () {
-      const timestamp = new Timestamp(1, 100);
-      expect(inspect(timestamp)).to.equal('new Timestamp(1, 100)');
+      const timestamp = new Timestamp({ t: 100, i: 1 });
+      expect(inspect(timestamp)).to.equal('new Timestamp({ t: 100, i: 1 })');
     });
   });
 });
