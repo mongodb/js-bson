@@ -73,7 +73,7 @@ export class BSONRegExp {
       if (typeof doc.$regex !== 'string') {
         // This is for $regex query operators that have extended json values.
         if (doc.$regex._bsontype === 'BSONRegExp') {
-          return (doc as unknown) as BSONRegExp;
+          return doc as unknown as BSONRegExp;
         }
       } else {
         return new BSONRegExp(doc.$regex, BSONRegExp.parseOptions(doc.$options));

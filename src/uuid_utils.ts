@@ -1,7 +1,8 @@
 import { Buffer } from 'buffer';
 
 // Validation regex for v4 uuid (validates with or without dashes)
-const VALIDATION_REGEX = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15})$/i;
+const VALIDATION_REGEX =
+  /^(?:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15})$/i;
 
 export const uuidValidateString = (str: string): boolean =>
   typeof str === 'string' && VALIDATION_REGEX.test(str);
