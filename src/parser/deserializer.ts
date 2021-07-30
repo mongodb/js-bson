@@ -246,9 +246,11 @@ function deserializeObject(
       if (fieldsAsRaw && fieldsAsRaw[name]) {
         arrayOptions = {};
         for (const n in options) {
-          (arrayOptions as {
-            [key: string]: DeserializeOptions[keyof DeserializeOptions];
-          })[n] = options[n as keyof DeserializeOptions];
+          (
+            arrayOptions as {
+              [key: string]: DeserializeOptions[keyof DeserializeOptions];
+            }
+          )[n] = options[n as keyof DeserializeOptions];
         }
         arrayOptions['raw'] = true;
       }

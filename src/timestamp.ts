@@ -7,7 +7,8 @@ export type LongWithoutOverrides = new (low: number | Long, high?: number, unsig
   [P in Exclude<keyof Long, TimestampOverrides>]: Long[P];
 };
 /** @public */
-export const LongWithoutOverridesClass: LongWithoutOverrides = (Long as unknown) as LongWithoutOverrides;
+export const LongWithoutOverridesClass: LongWithoutOverrides =
+  Long as unknown as LongWithoutOverrides;
 
 /** @public */
 export interface TimestampExtended {

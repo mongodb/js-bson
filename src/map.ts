@@ -31,7 +31,7 @@ if (Object.prototype.hasOwnProperty.call(bsonGlobal, 'Map')) {
   bsonMap = bsonGlobal.Map;
 } else {
   // We will return a polyfill
-  bsonMap = (class Map {
+  bsonMap = class Map {
     private _keys: string[];
     private _values: Record<string, any>;
     constructor(array: [string, any][] = []) {
@@ -133,7 +133,7 @@ if (Object.prototype.hasOwnProperty.call(bsonGlobal, 'Map')) {
     get size() {
       return this._keys.length;
     }
-  } as unknown) as MapConstructor;
+  } as unknown as MapConstructor;
 }
 
 export { bsonMap as Map };

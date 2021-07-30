@@ -121,5 +121,5 @@ export function deprecate<T extends Function>(fn: T, message: string): T {
     }
     return fn.apply(this, args);
   }
-  return (deprecated as unknown) as T;
+  return deprecated as unknown as T;
 }
