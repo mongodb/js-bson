@@ -17,7 +17,8 @@ describe('Timestamp', function () {
       new BSON.Timestamp(new BSON.Long(0xffffffff, 0xfffffffff, false)),
       new BSON.Timestamp(new BSON.Long(0xffffffff, 0xfffffffff, true)),
       new BSON.Timestamp({ t: 0xffffffff, i: 0xfffffffff }),
-      new BSON.Timestamp({ t: -1, i: -1 })
+      new BSON.Timestamp({ t: -1, i: -1 }),
+      new BSON.Timestamp({ t: new BSON.Int32(0xffffffff), i: new BSON.Int32(0xffffffff) })
     ].forEach(timestamp => {
       expect(timestamp).to.have.property('unsigned', true);
     });
@@ -36,5 +37,11 @@ describe('Timestamp', function () {
     const input = { t: 89, i: 144 };
     const timestamp = new BSON.Timestamp(input);
     expect(timestamp.toExtendedJSON()).to.deep.equal({ $timestamp: input });
+  });
+
+  it('should accept a { t, i } object as constructor input and coerce to integer', function () {
+    const input = { t: new BSON.Int32(89), i: new BSON.Int32(144) };
+    const timestamp = new BSON.Timestamp(input);
+    expect(timestamp.toExtendedJSON()).to.deep.equal({ $timestamp: { t: 89, i: 144 } });
   });
 });
