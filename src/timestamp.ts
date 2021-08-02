@@ -1,9 +1,10 @@
 import { Long } from './long';
+import { isObjectLike } from './parser/utils';
 
 /** @public */
 export type TimestampOverrides = '_bsontype' | 'toExtendedJSON' | 'fromExtendedJSON' | 'inspect';
 /** @public */
-export type LongWithoutOverrides = new (low: number | Long, high?: number, unsigned?: boolean) => {
+export type LongWithoutOverrides = new (low: unknown, high?: number, unsigned?: boolean) => {
   [P in Exclude<keyof Long, TimestampOverrides>]: Long[P];
 };
 /** @public */
@@ -27,20 +28,26 @@ export class Timestamp extends LongWithoutOverridesClass {
   /**
    * @param low - A 64-bit Long representing the Timestamp.
    */
-  constructor(low: Long);
+  constructor(long: Long);
+  /**
+   * @param value - A pair of two values indicating timestamp and increment.
+   */
+  constructor(value: { t: number; i: number });
   /**
    * @param low - the low (signed) 32 bits of the Timestamp.
    * @param high - the high (signed) 32 bits of the Timestamp.
+   * @deprecated Please use `Timestamp({ t: high, i: low })` or `Timestamp(Long(low, high))` instead.
    */
-  constructor(low: Long);
   constructor(low: number, high: number);
-  constructor(low: number | Long, high?: number) {
+  constructor(low: number | Long | { t: number; i: number }, high?: number) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     ///@ts-expect-error
     if (!(this instanceof Timestamp)) return new Timestamp(low, high);
 
     if (Long.isLong(low)) {
       super(low.low, low.high, true);
+    } else if (isObjectLike(low) && typeof low.t !== 'undefined' && typeof low.i !== 'undefined') {
+      super(low.i, low.t, true);
     } else {
       super(low, high, true);
     }
@@ -95,7 +102,7 @@ export class Timestamp extends LongWithoutOverridesClass {
 
   /** @internal */
   static fromExtendedJSON(doc: TimestampExtended): Timestamp {
-    return new Timestamp(doc.$timestamp.i, doc.$timestamp.t);
+    return new Timestamp(doc.$timestamp);
   }
 
   /** @internal */
@@ -104,6 +111,6 @@ export class Timestamp extends LongWithoutOverridesClass {
   }
 
   inspect(): string {
-    return `new Timestamp(${this.getLowBits().toString()}, ${this.getHighBits().toString()})`;
+    return `new Timestamp({ t: ${this.getHighBits()}, i: ${this.getLowBits()} })`;
   }
 }
