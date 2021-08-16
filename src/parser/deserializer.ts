@@ -176,11 +176,16 @@ function deserializeObject(
       )
         throw new Error('bad string length in bson');
 
-      if (!validateUtf8(buffer, index, index + stringSize - 1)) {
-        throw new Error('Invalid UTF-8 string in BSON document');
-      }
-
       value = buffer.toString('utf8', index, index + stringSize - 1);
+
+      for (let i = 0; i < value.length; i++) {
+        if (value.charCodeAt(i) === 0xfffd) {
+          if (!validateUtf8(buffer, index, index + stringSize - 1)) {
+            throw new Error('Invalid UTF-8 string in BSON document');
+          }
+          break;
+        }
+      }
 
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_OID) {
