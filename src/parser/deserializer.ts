@@ -156,7 +156,7 @@ function deserializeObject(
     // If are at the end of the buffer there is a problem with the document
     if (i >= buffer.byteLength) throw new Error('Bad BSON Document: illegal CString');
     const name = isArray ? arrayIndex++ : buffer.toString('utf8', index, i);
-    if (isPossibleDBRef !== false && (name as string).startsWith('$')) {
+    if (isPossibleDBRef !== false && (name as string)[0] === '$') {
       isPossibleDBRef = allowedDBRefKeys.test(name as string);
     }
     let value;
