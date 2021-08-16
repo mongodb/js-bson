@@ -216,7 +216,7 @@ export function deserialize(
   buffer: Buffer | ArrayBufferView | ArrayBuffer,
   options: DeserializeOptions = {}
 ): Document {
-  return internalDeserialize(ensureBuffer(buffer), options);
+  return internalDeserialize(buffer instanceof Buffer ? buffer : ensureBuffer(buffer), options);
 }
 
 /** @public */
