@@ -1,9 +1,10 @@
-const pkg = require('./package.json');
-const commonjs = require('rollup-plugin-commonjs');
-const nodeBuiltins = require('rollup-plugin-node-builtins');
-const { nodeResolve } = require('@rollup/plugin-node-resolve');
-const { babel } = require('@rollup/plugin-babel');
-const typescript = require('@rollup/plugin-typescript');
+import pkg from './package.json';
+import commonjs from 'rollup-plugin-commonjs';
+import nodeBuiltins from 'rollup-plugin-node-builtins';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import { babel } from '@rollup/plugin-babel';
+import typescript from '@rollup/plugin-typescript';
+import nodeGlobals from 'rollup-plugin-node-globals';
 
 const tsConfig = {
   allowJs: false,
@@ -11,7 +12,7 @@ const tsConfig = {
   strict: true,
   alwaysStrict: true,
   target: 'es5',
-  module: 'commonjs',
+  module: 'esnext',
   moduleResolution: 'node',
   lib: ['ES2017', 'ES2020.BigInt', 'ES2017.TypedArrays'],
   // We don't make use of tslib helpers
@@ -35,8 +36,9 @@ const input = 'src/bson.ts';
 const plugins = [
   typescript(tsConfig),
   nodeResolve({ preferBuiltins: false }),
-  commonjs({ extensions: ['.js', '.ts'] }),
   nodeBuiltins(),
+  nodeGlobals(),
+  commonjs({ extensions: ['.js', '.ts'] }),
   babel({
     babelHelpers: 'external',
     plugins: ['@babel/plugin-external-helpers'],

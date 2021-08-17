@@ -1,33 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // We have an ES6 Map available, return the native instance
 
-/* We do not want to have to include DOM types just for this check */
-declare const window: unknown;
-declare const self: unknown;
-declare const global: unknown;
+import { getGlobal } from './utils/global';
 
 /** @public */
 let bsonMap: MapConstructor;
 
-const check = function (potentialGlobal: any) {
-  // eslint-disable-next-line eqeqeq
-  return potentialGlobal && potentialGlobal.Math == Math && potentialGlobal;
-};
-
-// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
-function getGlobal() {
-  // eslint-disable-next-line no-undef
-  return (
-    check(typeof globalThis === 'object' && globalThis) ||
-    check(typeof window === 'object' && window) ||
-    check(typeof self === 'object' && self) ||
-    check(typeof global === 'object' && global) ||
-    Function('return this')()
-  );
-}
-
-const bsonGlobal = getGlobal();
-if (Object.prototype.hasOwnProperty.call(bsonGlobal, 'Map')) {
+const bsonGlobal = getGlobal<{ Map?: MapConstructor }>();
+if (bsonGlobal.Map) {
   bsonMap = bsonGlobal.Map;
 } else {
   // We will return a polyfill
