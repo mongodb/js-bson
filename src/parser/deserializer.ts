@@ -93,6 +93,8 @@ export function deserialize(
   return deserializeObject(buffer, index, options, isArray);
 }
 
+const allowedDBRefKeys = /^\$ref$|^\$id$|^\$db$/;
+
 function deserializeObject(
   buffer: Buffer,
   index: number,
@@ -134,6 +136,8 @@ function deserializeObject(
   let arrayIndex = 0;
   const done = false;
 
+  let isPossibleDBRef = isArray ? false : null;
+
   // While we have more left data left keep parsing
   while (!done) {
     // Read the type
@@ -152,6 +156,9 @@ function deserializeObject(
     // If are at the end of the buffer there is a problem with the document
     if (i >= buffer.byteLength) throw new Error('Bad BSON Document: illegal CString');
     const name = isArray ? arrayIndex++ : buffer.toString('utf8', index, i);
+    if (isPossibleDBRef !== false && (name as string)[0] === '$') {
+      isPossibleDBRef = allowedDBRefKeys.test(name as string);
+    }
     let value;
 
     index = i + 1;
@@ -169,11 +176,16 @@ function deserializeObject(
       )
         throw new Error('bad string length in bson');
 
-      if (!validateUtf8(buffer, index, index + stringSize - 1)) {
-        throw new Error('Invalid UTF-8 string in BSON document');
-      }
-
       value = buffer.toString('utf8', index, index + stringSize - 1);
+
+      for (let i = 0; i < value.length; i++) {
+        if (value.charCodeAt(i) === 0xfffd) {
+          if (!validateUtf8(buffer, index, index + stringSize - 1)) {
+            throw new Error('Invalid UTF-8 string in BSON document');
+          }
+          break;
+        }
+      }
 
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_OID) {
@@ -625,15 +637,8 @@ function deserializeObject(
     throw new Error('corrupt object bson');
   }
 
-  // check if object's $ keys are those of a DBRef
-  const dollarKeys = Object.keys(object).filter(k => k.startsWith('$'));
-  let valid = true;
-  dollarKeys.forEach(k => {
-    if (['$ref', '$id', '$db'].indexOf(k) === -1) valid = false;
-  });
-
-  // if a $key not in "$ref", "$id", "$db", don't make a DBRef
-  if (!valid) return object;
+  // if we did not find "$ref", "$id", "$db", or found an extraneous $key, don't make a DBRef
+  if (!isPossibleDBRef) return object;
 
   if (isDBRefLike(object)) {
     const copy = Object.assign({}, object) as Partial<DBRefLike>;
