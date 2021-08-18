@@ -16,8 +16,8 @@
   ],
   "types": "bson.d.ts",
   "version": "4.4.1",
-  "author": { 
-    "name": "The MongoDB NodeJS Team", 
+  "author": {
+    "name": "The MongoDB NodeJS Team",
     "email": "dbx-node@mongodb.com"
   },
   "license": "Apache-2.0",
@@ -45,7 +45,7 @@
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-tsdoc": "^0.2.6",
-    "karma": "^5.1.1",
+    "karma": "^6.3.4",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^3.1.0",
     "karma-mocha": "^2.0.1",
@@ -58,9 +58,9 @@
     "rimraf": "^3.0.2",
     "rollup": "^2.26.5",
     "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-polyfills": "^0.2.1",
+    "rollup-plugin-polyfill-node": "^0.7.0",
     "standard-version": "^9.3.0",
     "ts-node": "^9.0.0",
     "typedoc": "^0.21.2",

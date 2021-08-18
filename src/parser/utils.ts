@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer';
+import { getGlobal } from '../utils/global';
 
 type RandomBytesFunction = (size: number) => Uint8Array;
 
@@ -10,14 +11,15 @@ export function normalizedFunctionString(fn: Function): string {
   return fn.toString().replace('function(', 'function (');
 }
 
-const isReactNative =
-  typeof global.navigator === 'object' && global.navigator.product === 'ReactNative';
-
-const insecureWarning = isReactNative
-  ? 'BSON: For React Native please polyfill crypto.getRandomValues, e.g. using: https://www.npmjs.com/package/react-native-get-random-values.'
-  : 'BSON: No cryptographic implementation for random bytes present, falling back to a less secure implementation.';
+function isReactNative() {
+  const g = getGlobal<{ navigator?: { product?: string } }>();
+  return typeof g.navigator === 'object' && g.navigator.product === 'ReactNative';
+}
 
 const insecureRandomBytes: RandomBytesFunction = function insecureRandomBytes(size: number) {
+  const insecureWarning = isReactNative()
+    ? 'BSON: For React Native please polyfill crypto.getRandomValues, e.g. using: https://www.npmjs.com/package/react-native-get-random-values.'
+    : 'BSON: No cryptographic implementation for random bytes present, falling back to a less secure implementation.';
   console.warn(insecureWarning);
 
   const result = Buffer.alloc(size);
@@ -109,7 +111,11 @@ export function isObjectLike(candidate: unknown): candidate is Record<string, un
 
 declare let console: { warn(...message: unknown[]): void };
 export function deprecate<T extends Function>(fn: T, message: string): T {
-  if (typeof window === 'undefined' && typeof self === 'undefined') {
+  if (
+    typeof require === 'function' &&
+    typeof window === 'undefined' &&
+    typeof self === 'undefined'
+  ) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     return require('util').deprecate(fn, message);
   }
