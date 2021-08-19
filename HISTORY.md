@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.5.0](https://github.com/mongodb/js-bson/compare/v4.4.1...v4.5.0) (2021-08-19)
+
+
+### Features
+
+* **NODE-3504:** add unambiguous `Timestamp()` constructor overload ([#449](https://github.com/mongodb/js-bson/issues/449)) ([0298dd8](https://github.com/mongodb/js-bson/commit/0298dd8293523869433beccb8c17671b7f9b6fbd))
+
+
+### Bug Fixes
+
+* **NODE-3451:** fix performance regression from v1 ([#451](https://github.com/mongodb/js-bson/issues/451)) ([2330ab1](https://github.com/mongodb/js-bson/commit/2330ab1274166c285cbd8a0c3eff5a52573cf34d))
+* **NODE-3520:** global not defined in esm bundles ([#452](https://github.com/mongodb/js-bson/issues/452)) ([cb82a80](https://github.com/mongodb/js-bson/commit/cb82a802aff4039bc397bea2402c5f76450bb0f0))
+
 ### [4.4.1](https://github.com/mongodb/js-bson/compare/v4.4.0...v4.4.1) (2021-07-06)
 
 
