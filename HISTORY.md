@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.5.1](https://github.com/mongodb/js-bson/compare/v4.5.0...v4.5.1) (2021-08-24)
+
+
+### Bug Fixes
+
+* **NODE-3561:** umd bundle fails to require util ([#455](https://github.com/mongodb/js-bson/issues/455)) ([1c15155](https://github.com/mongodb/js-bson/commit/1c151555c76f2b80e699ae9090a256f7dbdfb8ca))
+
 ## [4.5.0](https://github.com/mongodb/js-bson/compare/v4.4.1...v4.5.0) (2021-08-19)
 
 
