@@ -63,10 +63,20 @@
     "rollup-plugin-polyfill-node": "^0.7.0",
     "standard-version": "^9.3.0",
     "ts-node": "^9.0.0",
+    "tsd": "^0.17.0",
     "typedoc": "^0.21.2",
     "typescript": "^4.0.2",
     "typescript-cached-transpile": "0.0.6",
     "uuid": "^8.3.2"
+  },
+  "tsd": {
+    "directory": "test/types",
+    "compilerOptions": {
+      "strict": true,
+      "target": "esnext",
+      "module": "commonjs",
+      "moduleResolution": "node"
+    }
   },
   "config": {
     "native": false
@@ -84,6 +94,7 @@
     "docs": "typedoc",
     "test": "npm run build && npm run test-node && npm run test-browser",
     "test-node": "mocha test/node test/*_tests.js",
+    "test-tsd": "npm run build:dts && tsd",
     "test-browser": "karma start karma.conf.js",
     "build:ts": "tsc",
     "build:dts": "npm run build:ts && api-extractor run --typescript-compiler-folder node_modules/typescript --local && rimraf 'lib/**/*.d.ts*' && downlevel-dts bson.d.ts bson.d.ts",

@@ -188,7 +188,6 @@ export class ObjectId {
    * Converts the id into a 24 character hex string for printing
    *
    * @param format - The Buffer toString format parameter.
-   * @internal
    */
   toString(format?: string): string {
     // Is the id a buffer then use the buffer toString method to return the format
@@ -196,10 +195,7 @@ export class ObjectId {
     return this.toHexString();
   }
 
-  /**
-   * Converts to its JSON the 24 character hex string representation.
-   * @internal
-   */
+  /** Converts to its JSON the 24 character hex string representation. */
   toJSON(): string {
     return this.toHexString();
   }

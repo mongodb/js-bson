@@ -17,4 +17,21 @@ describe('Double', function () {
       done();
     });
   });
+
+  describe('toString', () => {
+    it('should serialize to a string', () => {
+      const testNumber = Math.random() * Number.MAX_VALUE;
+      const double = new Double(testNumber);
+      expect(double.toString()).to.equal(testNumber.toString());
+    });
+    const testRadii = Array.from(new Array(35).keys()).map((_, i) => i + 2);
+
+    for (const radix of testRadii) {
+      it(`should support radix argument: ${radix}`, () => {
+        const testNumber = Math.random() * Number.MAX_VALUE;
+        const double = new Double(testNumber);
+        expect(double.toString(radix)).to.equal(testNumber.toString(radix));
+      });
+    }
+  });
 });

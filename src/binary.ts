@@ -201,13 +201,11 @@ export class Binary {
     return this.position;
   }
 
-  /** @internal */
   toJSON(): string {
     return this.buffer.toString('base64');
   }
 
-  /** @internal */
-  toString(format: string): string {
+  toString(format?: string): string {
     return this.buffer.toString(format);
   }
 
@@ -231,7 +229,6 @@ export class Binary {
     };
   }
 
-  /** @internal */
   toUUID(): UUID {
     if (this.sub_type === Binary.SUBTYPE_UUID) {
       return new UUID(this.buffer.slice(0, this.position));

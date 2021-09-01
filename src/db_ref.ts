@@ -66,7 +66,6 @@ export class DBRef {
     this.collection = value;
   }
 
-  /** @internal */
   toJSON(): DBRefLike & Document {
     const o = Object.assign(
       {
