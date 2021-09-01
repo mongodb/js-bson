@@ -100,7 +100,7 @@
     "build:dts": "npm run build:ts && api-extractor run --typescript-compiler-folder node_modules/typescript --local && rimraf 'lib/**/*.d.ts*' && downlevel-dts bson.d.ts bson.d.ts",
     "build:bundle": "rollup -c rollup.config.js",
     "build": "npm run build:dts && npm run build:bundle",
-    "lint": "eslint -v && eslint --ext '.js,.ts' --max-warnings=0 src test && tsc -v && tsc --noEmit",
+    "lint": "eslint -v && eslint --ext '.js,.ts' --max-warnings=0 src test && tsc -v && tsc --noEmit && npm run test-tsd",
     "format": "eslint --ext '.js,.ts' src test --fix",
     "coverage": "nyc npm run test-node",
     "coverage:html": "npm run coverage && open ./coverage/index.html",
