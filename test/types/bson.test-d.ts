@@ -1,20 +1,23 @@
-import { expectAssignable, expectError, expectType } from 'tsd';
+import { expectType, expectError } from 'tsd';
 import {
-    Binary,
-    Code,
-    DBRef,
-    Decimal128,
-    Double,
-    Int32,
-    Long,
-    MaxKey,
-    MinKey,
-    ObjectId,
-    BSONRegExp,
-    BSONSymbol,
-    Timestamp,
-    UUID
-} from '../../bson' // import from generated bson.d.ts
+  Binary,
+  Code,
+  DBRef,
+  Decimal128,
+  Double,
+  Int32,
+  Long,
+  MaxKey,
+  MinKey,
+  ObjectId,
+  BSONRegExp,
+  BSONSymbol,
+  Timestamp,
+  UUID,
+  DBRefLike,
+  Document,
+  Decimal128Extended
+} from '../../bson'; // import from generated bson.d.ts
 
 expectType<() => UUID>(Binary.prototype.toUUID);
 expectType<() => Binary>(UUID.prototype.toBinary);
@@ -24,15 +27,24 @@ expectType<(radix?: number) => string>(Double.prototype.toString);
 expectType<(radix?: number) => string>(Long.prototype.toString);
 expectType<(radix?: number) => string>(Int32.prototype.toString);
 
-expectAssignable<() => any>(Decimal128.prototype.toJSON);
-expectAssignable<() => any>(Code.prototype.toJSON);
-expectAssignable<() => any>(DBRef.prototype.toJSON);
-expectAssignable<() => any>(ObjectId.prototype.toJSON);
-expectAssignable<() => any>(BSONSymbol.prototype.toJSON);
-expectAssignable<() => any>(Timestamp.prototype.toJSON);
-expectAssignable<() => any>(Binary.prototype.toJSON);
-expectAssignable<() => any>(Double.prototype.toJSON);
-expectAssignable<() => any>(Int32.prototype.toJSON);
+expectType<() => Decimal128Extended>(Decimal128.prototype.toJSON);
+expectType<
+  () => {
+    code: string | Function;
+    scope?: Document;
+  }
+>(Code.prototype.toJSON);
+expectType<() => DBRefLike & Document>(DBRef.prototype.toJSON);
+expectType<() => string>(ObjectId.prototype.toJSON);
+expectType<() => string>(BSONSymbol.prototype.toJSON);
+expectType<
+  () => {
+    $timestamp: string;
+  }
+>(Timestamp.prototype.toJSON);
+expectType<() => string>(Binary.prototype.toJSON);
+expectType<() => number>(Double.prototype.toJSON);
+expectType<() => number>(Int32.prototype.toJSON);
 
 expectError(MaxKey.prototype.toJSON);
 expectError(MinKey.prototype.toJSON);
