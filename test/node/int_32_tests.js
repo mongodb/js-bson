@@ -62,9 +62,10 @@ describe('Int32', function () {
       const int32 = new Int32(testNumber);
       expect(int32.toString()).to.equal(testNumber.toString());
     });
-    const testRadii = Array.from(new Array(35).keys()).map((_, i) => i + 2);
 
-    for (const radix of testRadii) {
+    const testRadices = [2, 8, 10, 16, 22];
+
+    for (const radix of testRadices) {
       it(`should support radix argument: ${radix}`, () => {
         const testNumber = Math.floor(Math.random() * 0xffffffff);
         const int32 = new Int32(testNumber);

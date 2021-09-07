@@ -14,7 +14,7 @@ import {
     BSONSymbol,
     Timestamp,
     UUID
-} from '../../bson'
+} from '../../bson' // import from generated bson.d.ts
 
 expectType<() => UUID>(Binary.prototype.toUUID);
 expectType<() => Binary>(UUID.prototype.toBinary);
