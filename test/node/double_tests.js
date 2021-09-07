@@ -17,4 +17,22 @@ describe('Double', function () {
       done();
     });
   });
+
+  describe('toString', () => {
+    it('should serialize to a string', () => {
+      const testNumber = Math.random() * Number.MAX_VALUE;
+      const double = new Double(testNumber);
+      expect(double.toString()).to.equal(testNumber.toString());
+    });
+
+    const testRadices = [2, 8, 10, 16, 22];
+
+    for (const radix of testRadices) {
+      it(`should support radix argument: ${radix}`, () => {
+        const testNumber = Math.random() * Number.MAX_VALUE;
+        const double = new Double(testNumber);
+        expect(double.toString(radix)).to.equal(testNumber.toString(radix));
+      });
+    }
+  });
 });

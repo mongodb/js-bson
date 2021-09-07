@@ -37,7 +37,10 @@ export class Int32 {
     return this.value;
   }
 
-  /** @internal */
+  toString(radix?: number): string {
+    return this.value.toString(radix);
+  }
+
   toJSON(): number {
     return this.value;
   }

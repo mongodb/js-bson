@@ -91,15 +91,14 @@ export class UUID {
 
   /**
    * Converts the id into a 36 character (dashes included) hex string, unless a encoding is specified.
-   * @internal
    */
   toString(encoding?: string): string {
     return encoding ? this.id.toString(encoding) : this.toHexString();
   }
 
   /**
-   * Converts the id into its JSON string representation. A 36 character (dashes included) hex string in the format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-   * @internal
+   * Converts the id into its JSON string representation.
+   * A 36 character (dashes included) hex string in the format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
    */
   toJSON(): string {
     return this.toHexString();

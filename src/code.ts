@@ -26,7 +26,6 @@ export class Code {
     this.scope = scope;
   }
 
-  /** @internal */
   toJSON(): { code: string | Function; scope?: Document } {
     return { code: this.code, scope: this.scope };
   }

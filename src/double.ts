@@ -37,9 +37,12 @@ export class Double {
     return this.value;
   }
 
-  /** @internal */
   toJSON(): number {
     return this.value;
+  }
+
+  toString(radix?: number): string {
+    return this.value.toString(radix);
   }
 
   /** @internal */

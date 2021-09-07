@@ -25,7 +25,6 @@ export class BSONSymbol {
     return this.value;
   }
 
-  /** @internal */
   toString(): string {
     return this.value;
   }
@@ -35,7 +34,6 @@ export class BSONSymbol {
     return `new BSONSymbol("${this.value}")`;
   }
 
-  /** @internal */
   toJSON(): string {
     return this.value;
   }
