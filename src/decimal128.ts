@@ -304,7 +304,7 @@ export class Decimal128 {
       lastDigit = nDigitsStored - 1;
       significantDigits = nDigits;
       if (significantDigits !== 1) {
-        while (representation[firstNonZero + significantDigits - 1] === '0') {
+        while (digits[firstNonZero + significantDigits - 1] === 0) {
           significantDigits = significantDigits - 1;
         }
       }
