@@ -1212,6 +1212,9 @@ describe('Decimal128', function () {
     expect(new Decimal128('-0.5').toString()).to.equal('-0.5');
     expect(new Decimal128('-0.0097').toString()).to.equal('-0.0097');
     expect(new Decimal128('-0.0011').toString()).to.equal('-0.0011');
+    expect(new Decimal128('-0.00110').toString()).to.equal('-0.00110');
+    expect(new Decimal128('0.0011').toString()).to.equal('0.0011');
+    expect(new Decimal128('0.00110').toString()).to.equal('0.00110');
     expect(new Decimal128('-1e400').toString()).to.equal('-1E+400');
     done();
   });
