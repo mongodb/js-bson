@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.5.2](https://github.com/mongodb/js-bson/compare/v4.5.1...v4.5.2) (2021-09-14)
+
+
+### Bug Fixes
+
+* **NODE-3021:** fix a long standing bug in Decimal128.fromString() ([#458](https://github.com/mongodb/js-bson/issues/458)) ([824939a](https://github.com/mongodb/js-bson/commit/824939a4a47759b0c422010129480eb121620c83))
+* **NODE-3582:** fix internal marked APIs, add toString methods to Int32 and Double ([#457](https://github.com/mongodb/js-bson/issues/457)) ([b46ab5f](https://github.com/mongodb/js-bson/commit/b46ab5feff2090351be464ab5b180b4aeb675f69))
+
 ### [4.5.1](https://github.com/mongodb/js-bson/compare/v4.5.0...v4.5.1) (2021-08-24)
 
 
