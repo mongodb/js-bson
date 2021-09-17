@@ -100,5 +100,11 @@ export const BSON_BINARY_SUBTYPE_UUID_NEW = 4;
 /** Binary MD5 Type @internal */
 export const BSON_BINARY_SUBTYPE_MD5 = 5;
 
+/** Encrypted BSON type @internal */
+export const BSON_BINARY_SUBTYPE_ENCRYPTED = 6;
+
+/** Column BSON type @internal */
+export const BSON_BINARY_SUBTYPE_COLUMN = 7;
+
 /** Binary User Defined Type @internal */
 export const BSON_BINARY_SUBTYPE_USER_DEFINED = 128;
