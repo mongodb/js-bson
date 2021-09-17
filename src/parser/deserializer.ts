@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 import { Binary } from '../binary';
-import type { Document } from '../bson';
+import type { BinarySequence, Document } from '../bson';
 import { Code } from '../code';
 import * as constants from '../constants';
 import { DBRef, DBRefLike, isDBRefLike } from '../db_ref';
@@ -173,19 +173,11 @@ function deserializeObject(
         stringSize <= 0 ||
         stringSize > buffer.length - index ||
         buffer[index + stringSize - 1] !== 0
-      )
+      ) {
         throw new Error('bad string length in bson');
-
-      value = buffer.toString('utf8', index, index + stringSize - 1);
-
-      for (let i = 0; i < value.length; i++) {
-        if (value.charCodeAt(i) === 0xfffd) {
-          if (!validateUtf8(buffer, index, index + stringSize - 1)) {
-            throw new Error('Invalid UTF-8 string in BSON document');
-          }
-          break;
-        }
       }
+
+      value = getValidatedString(buffer, index, index + stringSize - 1); // buffer.toString('utf8', index, index + stringSize - 1);
 
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_OID) {
@@ -464,9 +456,10 @@ function deserializeObject(
         stringSize <= 0 ||
         stringSize > buffer.length - index ||
         buffer[index + stringSize - 1] !== 0
-      )
+      ) {
         throw new Error('bad string length in bson');
-      const symbol = buffer.toString('utf8', index, index + stringSize - 1);
+      }
+      const symbol = getValidatedString(buffer, index, index + stringSize - 1); // buffer.toString('utf8', index, index + stringSize - 1);
       value = promoteValues ? symbol : new BSONSymbol(symbol);
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_TIMESTAMP) {
@@ -496,9 +489,10 @@ function deserializeObject(
         stringSize <= 0 ||
         stringSize > buffer.length - index ||
         buffer[index + stringSize - 1] !== 0
-      )
+      ) {
         throw new Error('bad string length in bson');
-      const functionString = buffer.toString('utf8', index, index + stringSize - 1);
+      }
+      const functionString = getValidatedString(buffer, index, index + stringSize - 1); // buffer.toString('utf8', index, index + stringSize - 1);
 
       // If we are evaluating the functions
       if (evalFunctions) {
@@ -538,11 +532,12 @@ function deserializeObject(
         stringSize <= 0 ||
         stringSize > buffer.length - index ||
         buffer[index + stringSize - 1] !== 0
-      )
+      ) {
         throw new Error('bad string length in bson');
+      }
 
       // Javascript function
-      const functionString = buffer.toString('utf8', index, index + stringSize - 1);
+      const functionString = getValidatedString(buffer, index, index + stringSize - 1); // buffer.toString('utf8', index, index + stringSize - 1);
       // Update parse index position
       index = index + stringSize;
       // Parse the element
@@ -669,4 +664,17 @@ function isolateEval(
 
   // Set the object
   return functionCache[functionString].bind(object);
+}
+
+function getValidatedString(buffer: BinarySequence, start: number, end: number) {
+  const value = buffer.toString('utf8', start, end);
+  for (let i = 0; i < value.length; i++) {
+    if (value.charCodeAt(i) === 0xfffd) {
+      if (!validateUtf8(buffer, start, end)) {
+        throw new Error('Invalid UTF-8 string in BSON document');
+      }
+      break;
+    }
+  }
+  return value;
 }
