@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 import { Binary } from '../binary';
-import type { BinarySequence, Document } from '../bson';
+import type { Document } from '../bson';
 import { Code } from '../code';
 import * as constants from '../constants';
 import { DBRef, DBRefLike, isDBRefLike } from '../db_ref';
@@ -177,7 +177,7 @@ function deserializeObject(
         throw new Error('bad string length in bson');
       }
 
-      value = getValidatedString(buffer, index, index + stringSize - 1); // buffer.toString('utf8', index, index + stringSize - 1);
+      value = getValidatedString(buffer, index, index + stringSize - 1);
 
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_OID) {
@@ -459,7 +459,7 @@ function deserializeObject(
       ) {
         throw new Error('bad string length in bson');
       }
-      const symbol = getValidatedString(buffer, index, index + stringSize - 1); // buffer.toString('utf8', index, index + stringSize - 1);
+      const symbol = getValidatedString(buffer, index, index + stringSize - 1);
       value = promoteValues ? symbol : new BSONSymbol(symbol);
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_TIMESTAMP) {
@@ -492,7 +492,7 @@ function deserializeObject(
       ) {
         throw new Error('bad string length in bson');
       }
-      const functionString = getValidatedString(buffer, index, index + stringSize - 1); // buffer.toString('utf8', index, index + stringSize - 1);
+      const functionString = getValidatedString(buffer, index, index + stringSize - 1);
 
       // If we are evaluating the functions
       if (evalFunctions) {
@@ -537,7 +537,7 @@ function deserializeObject(
       }
 
       // Javascript function
-      const functionString = getValidatedString(buffer, index, index + stringSize - 1); // buffer.toString('utf8', index, index + stringSize - 1);
+      const functionString = getValidatedString(buffer, index, index + stringSize - 1);
       // Update parse index position
       index = index + stringSize;
       // Parse the element
@@ -666,7 +666,7 @@ function isolateEval(
   return functionCache[functionString].bind(object);
 }
 
-function getValidatedString(buffer: BinarySequence, start: number, end: number) {
+function getValidatedString(buffer: Buffer, start: number, end: number) {
   const value = buffer.toString('utf8', start, end);
   for (let i = 0; i < value.length; i++) {
     if (value.charCodeAt(i) === 0xfffd) {
