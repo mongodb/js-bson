@@ -1619,153 +1619,6 @@ describe('BSON', function () {
     done();
   });
 
-  // /**
-  //  * A simple example showing the usage of BSON.deserialize function returning a deserialized Javascript function.
-  //  *
-  //  * @_class bson
-  //  * @_function BSON.deserialize
-  //  * @ignore
-  //  */
-  //  it('Should correctly deserialize a buffer using the BSON class level parser', function(done) {
-  //   // Create a simple object
-  //   var doc = {a: 1, func:function(){ console.log('hello world'); }}
-  //   // Create a BSON parser instance
-  //   var bson = BSON;
-  //   // Serialize the object to a buffer, checking keys and serializing functions
-  //   var buffer = bson.serialize(doc, {
-  //     checkKeys: true,
-  //     serializeFunctions: true
-  //   });
-  //   // Validate the correctness
-  //   expect(65).to.equal(buffer.length);
-  //
-  //   // Deserialize the object with no eval for the functions
-  //   var deserializedDoc = bson.deserialize(buffer);
-  //   // Validate the correctness
-  //   expect('object').to.equal(typeof deserializedDoc.func);
-  //   expect(1).to.equal(deserializedDoc.a);
-  //
-  //   // Deserialize the object with eval for the functions caching the functions
-  //   deserializedDoc = bson.deserialize(buffer, {evalFunctions:true, cacheFunctions:true});
-  //   // Validate the correctness
-  //   expect('function').to.equal(typeof deserializedDoc.func);
-  //   expect(1).to.equal(deserializedDoc.a);
-  //   done();
-  // }
-
-  // /**
-  //  * A simple example showing the usage of BSON instance deserialize function returning a deserialized Javascript function.
-  //  *
-  //  * @_class bson
-  //  * @_function deserialize
-  //  * @ignore
-  //  */
-  // it('Should correctly deserialize a buffer using the BSON instance parser', function(done) {
-  //   // Create a simple object
-  //   var doc = {a: 1, func:function(){ console.log('hello world'); }}
-  //   // Create a BSON parser instance
-  //   var bson = BSON;
-  //   // Serialize the object to a buffer, checking keys and serializing functions
-  //   var buffer = bson.serialize(doc, true, true, true);
-  //   // Validate the correctness
-  //   expect(65).to.equal(buffer.length);
-  //
-  //   // Deserialize the object with no eval for the functions
-  //   var deserializedDoc = bson.deserialize(buffer);
-  //   // Validate the correctness
-  //   expect('object').to.equal(typeof deserializedDoc.func);
-  //   expect(1).to.equal(deserializedDoc.a);
-  //
-  //   // Deserialize the object with eval for the functions caching the functions
-  //   deserializedDoc = bson.deserialize(buffer, {evalFunctions:true, cacheFunctions:true});
-  //   // Validate the correctness
-  //   expect('function').to.equal(typeof deserializedDoc.func);
-  //   expect(1).to.equal(deserializedDoc.a);
-  //   done();
-  // }
-
-  // /**
-  //  * A simple example showing the usage of BSON.deserializeStream function returning deserialized Javascript objects.
-  //  *
-  //  * @_class bson
-  //  * @_function BSON.deserializeStream
-  //  * @ignore
-  //  */
-  // it('Should correctly deserializeStream a buffer object', function(done) {
-  //   // Create a simple object
-  //   var doc = {a: 1, func:function(){ console.log('hello world'); }}
-  //   var bson = BSON;
-  //   // Serialize the object to a buffer, checking keys and serializing functions
-  //   var buffer = bson.serialize(doc, {
-  //     checkKeys: true,
-  //     serializeFunctions: true
-  //   });
-  //   // Validate the correctness
-  //   expect(65).to.equal(buffer.length);
-  //
-  //   // The array holding the number of retuned documents
-  //   var documents = new Array(1);
-  //   // Deserialize the object with no eval for the functions
-  //   var index = bson.deserializeStream(buffer, 0, 1, documents, 0);
-  //   // Validate the correctness
-  //   expect(65).to.equal(index);
-  //   expect(1).to.equal(documents.length);
-  //   expect(1).to.equal(documents[0].a);
-  //   expect('object').to.equal(typeof documents[0].func);
-  //
-  //   // Deserialize the object with eval for the functions caching the functions
-  //   // The array holding the number of retuned documents
-  //   var documents = new Array(1);
-  //   // Deserialize the object with no eval for the functions
-  //   var index = bson.deserializeStream(buffer, 0, 1, documents, 0, {evalFunctions:true, cacheFunctions:true});
-  //   // Validate the correctness
-  //   expect(65).to.equal(index);
-  //   expect(1).to.equal(documents.length);
-  //   expect(1).to.equal(documents[0].a);
-  //   expect('function').to.equal(typeof documents[0].func);
-  //   done();
-  // }
-
-  // /**
-  //  * A simple example showing the usage of BSON instance deserializeStream function returning deserialized Javascript objects.
-  //  *
-  //  * @_class bson
-  //  * @_function deserializeStream
-  //  * @ignore
-  //  */
-  // it('Should correctly deserializeStream a buffer object', function(done) {
-  //   // Create a simple object
-  //   var doc = {a: 1, func:function(){ console.log('hello world'); }}
-  //   // Create a BSON parser instance
-  //   var bson = BSON;
-  //   // Serialize the object to a buffer, checking keys and serializing functions
-  //   var buffer = bson.serialize(doc, true, true, true);
-  //   // Validate the correctness
-  //   expect(65).to.equal(buffer.length);
-  //
-  //   // The array holding the number of retuned documents
-  //   var documents = new Array(1);
-  //   // Deserialize the object with no eval for the functions
-  //   var index = bson.deserializeStream(buffer, 0, 1, documents, 0);
-  //   // Validate the correctness
-  //   expect(65).to.equal(index);
-  //   expect(1).to.equal(documents.length);
-  //   expect(1).to.equal(documents[0].a);
-  //   expect('object').to.equal(typeof documents[0].func);
-  //
-  //   // Deserialize the object with eval for the functions caching the functions
-  //   // The array holding the number of retuned documents
-  //   var documents = new Array(1);
-  //   // Deserialize the object with no eval for the functions
-  //   var index = bson.deserializeStream(buffer, 0, 1, documents, 0, {evalFunctions:true, cacheFunctions:true});
-  //   // Validate the correctness
-  //   expect(65).to.equal(index);
-  //   expect(1).to.equal(documents.length);
-  //   expect(1).to.equal(documents[0].a);
-  //   expect('function').to.equal(typeof documents[0].func);
-  //   done();
-  // }
-
   it('should properly deserialize multiple documents using deserializeStream', function () {
     const bson = BSON;
     const docs = [{ foo: 'bar' }, { foo: 'baz' }, { foo: 'quux' }];
@@ -1899,6 +1752,14 @@ describe('BSON', function () {
     it('Should alphabetize options', () => {
       const b = new BSONRegExp('cba', 'mix');
       expect(b.options).to.equal('imx');
+    });
+
+    it('should correctly serialize JavaScript Regex with control character', () => {
+      const regex = /a\x34b/m;
+      const aNewLineB = BSON.serialize({ regex });
+      const { regex: roundTripRegex } = BSON.deserialize(aNewLineB);
+      expect(regex.source).to.equal(roundTripRegex.source);
+      expect(regex.flags).to.equal(roundTripRegex.flags);
     });
   });
 
@@ -2122,6 +1983,103 @@ describe('BSON', function () {
     it('Timestamp', function () {
       const timestamp = new Timestamp({ t: 100, i: 1 });
       expect(inspect(timestamp)).to.equal('new Timestamp({ t: 100, i: 1 })');
+    });
+  });
+
+  /**
+   * The BSON spec uses null-terminated strings to represent document field names and
+   * regex components (i.e. pattern and flags/options). Drivers MUST assert that null
+   * bytes are prohibited in the following contexts when encoding BSON (i.e. creating
+   * raw BSON bytes or constructing BSON-specific type classes):
+   * - Field name within a root document
+   * - Field name within a sub-document
+   * - Pattern for a regular expression
+   * - Flags/options for a regular expression
+   * Depending on how drivers implement BSON encoding, they MAY expect an error when
+   * constructing a type class (e.g. BSON Document or Regex class) or when encoding a
+   * language representation to BSON (e.g. converting a dictionary, which might allow
+   * null bytes in its keys, to raw BSON bytes).
+   */
+  describe('Prohibit null bytes in null-terminated strings when encoding BSON', () => {
+    const bufferFromHexArray = array => {
+      const string = array.join('');
+      const size = string.length / 2 + 4;
+
+      const byteLength = [size & 0xff, (size >> 8) & 0xff, (size >> 16) & 0xff, (size >> 24) & 0xff]
+        .map(n => n.toString(16).padStart(2, '0'))
+        .join('');
+
+      return Buffer.from(byteLength + string, 'hex');
+    };
+
+    describe('serialize', () => {
+      it('BSON Field name within a root document', () => {
+        expect(() => BSON.serialize({ 'a\x00b': 1 })).to.throw();
+      });
+
+      it('BSON Field name within a sub-document', () => {
+        expect(() => BSON.serialize({ a: { 'a\x00b': 1 } })).to.throw();
+      });
+
+      it('Pattern for a regular expression', () => {
+        // eslint-disable-next-line no-control-regex
+        expect(() => BSON.serialize({ a: new RegExp('a\x00b') })).to.throw(/null bytes/);
+        expect(() => BSON.serialize({ a: new BSONRegExp('a\x00b') })).to.throw(/null bytes/);
+      });
+
+      it('Flags/options for a regular expression', () => {
+        expect(() => BSON.serialize({ a: new BSONRegExp('a', 'i\x00m') })).to.throw();
+      });
+    });
+
+    describe('deserialize', () => {
+      it('BSON Field name within a root document', () => {
+        const doc = bufferFromHexArray([
+          '10', //int32 type
+          '650066', //
+          '00', //  key null
+          '01000000', // value = 1
+          '00' //  doc null
+        ]);
+        expect(() => BSON.deserialize(doc)).to.throw(/corrupt/);
+      });
+
+      it('BSON Field name within a sub-document', () => {
+        const doc = bufferFromHexArray([
+          '03', // sub doc type
+          '6100', // key a and its null
+          '0e000000', // sub doc size
+          '10', // int32
+          '61006200', // a\x00b key and its null
+          '01000000', // int32 of 1
+          '0000' // sub and root doc null
+        ]);
+        expect(() => BSON.deserialize(doc)).to.throw();
+      });
+
+      it('Pattern for a regular expression', () => {
+        const doc = bufferFromHexArray([
+          '10000000', // size
+          '0b', // regex type
+          '6100', // key
+          '61006200', // a\x00b
+          '00', // empty string of options
+          '00' //  doc null
+        ]);
+        expect(() => BSON.deserialize(doc)).to.throw(/corrupt/);
+      });
+
+      it('Flags/options for a regular expression', () => {
+        const doc = bufferFromHexArray([
+          '10000000', // size
+          '0b', // regex type
+          '6100', // key
+          '616200', // ab
+          '69006D00', // i\x00m null terminated
+          '00' //  doc null
+        ]);
+        expect(() => BSON.deserialize(doc)).to.throw(/corrupt/);
+      });
     });
   });
 });
