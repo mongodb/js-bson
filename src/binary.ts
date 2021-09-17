@@ -48,6 +48,10 @@ export class Binary {
   static readonly SUBTYPE_UUID = 4;
   /** MD5 BSON type */
   static readonly SUBTYPE_MD5 = 5;
+  /** Encrypted BSON type */
+  static readonly SUBTYPE_ENCRYPTED = 6;
+  /** Column BSON type */
+  static readonly SUBTYPE_COLUMN = 7;
   /** User BSON type */
   static readonly SUBTYPE_USER_DEFINED = 128;
 

@@ -39,6 +39,16 @@ describe('BSON Constants', () => {
       expect(BSON.BSON_BINARY_SUBTYPE_MD5).to.equal(5);
       expect(BSON.Binary.SUBTYPE_MD5).to.equal(5);
     });
+
+    it('Encrypted should be 6', () => {
+      expect(BSON.BSON_BINARY_SUBTYPE_ENCRYPTED).to.equal(6);
+      expect(BSON.Binary.SUBTYPE_ENCRYPTED).to.equal(6);
+    });
+
+    it('Column should be 7', () => {
+      expect(BSON.BSON_BINARY_SUBTYPE_COLUMN).to.equal(7);
+      expect(BSON.Binary.SUBTYPE_COLUMN).to.equal(7);
+    });
   });
   context('BSON Type indicators', () => {
     /*
