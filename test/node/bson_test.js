@@ -2000,7 +2000,7 @@ describe('BSON', function () {
    * language representation to BSON (e.g. converting a dictionary, which might allow
    * null bytes in its keys, to raw BSON bytes).
    */
-  describe('Prohibit null bytes in null-terminated strings when encoding BSON', () => {
+  describe('Prohibit null bytes in null-terminated strings when BSON', () => {
     const bufferFromHexArray = array => {
       const string = array.join('');
       const size = string.length / 2 + 4;
@@ -2015,7 +2015,7 @@ describe('BSON', function () {
       return Buffer.from(byteLength + string, 'hex');
     };
 
-    describe('serialize', () => {
+    describe('serializing should throw if null byte present in', () => {
       it('BSON Field name within a root document', () => {
         expect(() => BSON.serialize({ 'a\x00b': 1 })).to.throw();
       });
@@ -2035,12 +2035,12 @@ describe('BSON', function () {
       });
     });
 
-    describe('deserialize', () => {
+    describe('deserializing should throw if null byte present in', () => {
       it('BSON Field name within a root document', () => {
         const doc = bufferFromHexArray([
           '10', //int32 type
-          '650066', //
-          '00', //  key null
+          '650066', // a\x00b key
+          '00', //  key null terminator
           '01000000', // value = 1
           '00' //  doc null
         ]);
@@ -2050,10 +2050,10 @@ describe('BSON', function () {
       it('BSON Field name within a sub-document', () => {
         const doc = bufferFromHexArray([
           '03', // sub doc type
-          '6100', // key a and its null
+          '6100', // key a and its null terminator
           '0e000000', // sub doc size
           '10', // int32
-          '61006200', // a\x00b key and its null
+          '61006200', // a\x00b key and its null terminator
           '01000000', // int32 of 1
           '0000' // sub and root doc null
         ]);
