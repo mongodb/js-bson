@@ -2000,13 +2000,13 @@ describe('BSON', function () {
    * language representation to BSON (e.g. converting a dictionary, which might allow
    * null bytes in its keys, to raw BSON bytes).
    */
-  describe('null byte handling serializing', () => {
+  describe('null byte handling during serializing', () => {
     it('should throw when null byte in BSON Field name within a root document', () => {
-      expect(() => BSON.serialize({ 'a\x00b': 1 })).to.throw();
+      expect(() => BSON.serialize({ 'a\x00b': 1 })).to.throw(/null bytes/);
     });
 
     it('should throw when null byte in BSON Field name within a sub-document', () => {
-      expect(() => BSON.serialize({ a: { 'a\x00b': 1 } })).to.throw();
+      expect(() => BSON.serialize({ a: { 'a\x00b': 1 } })).to.throw(/null bytes/);
     });
 
     it('should throw when null byte in Pattern for a regular expression', () => {
@@ -2016,7 +2016,9 @@ describe('BSON', function () {
     });
 
     it('should throw when null byte in Flags/options for a regular expression', () => {
-      expect(() => BSON.serialize({ a: new BSONRegExp('a', 'i\x00m') })).to.throw();
+      expect(() => BSON.serialize({ a: new BSONRegExp('a', 'i\x00m') })).to.throw(
+        /regular expression option/
+      );
     });
   });
 });
