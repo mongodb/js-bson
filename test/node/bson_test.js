@@ -2007,7 +2007,7 @@ describe('BSON', function () {
 
       const byteLength = [size & 0xff, (size >> 8) & 0xff, (size >> 16) & 0xff, (size >> 24) & 0xff]
         .map(n => {
-          let hexCode = n.toString(16);
+          const hexCode = n.toString(16);
           return hexCode.length === 2 ? hexCode : '0' + hexCode;
         })
         .join('');
