@@ -2000,89 +2000,23 @@ describe('BSON', function () {
    * language representation to BSON (e.g. converting a dictionary, which might allow
    * null bytes in its keys, to raw BSON bytes).
    */
-  describe('Prohibit null bytes in null-terminated strings when BSON', () => {
-    const bufferFromHexArray = array => {
-      const string = array.join('');
-      const size = string.length / 2 + 4;
-
-      const byteLength = [size & 0xff, (size >> 8) & 0xff, (size >> 16) & 0xff, (size >> 24) & 0xff]
-        .map(n => {
-          const hexCode = n.toString(16);
-          return hexCode.length === 2 ? hexCode : '0' + hexCode;
-        })
-        .join('');
-
-      return Buffer.from(byteLength + string, 'hex');
-    };
-
-    describe('serializing should throw if null byte present in', () => {
-      it('BSON Field name within a root document', () => {
-        expect(() => BSON.serialize({ 'a\x00b': 1 })).to.throw();
-      });
-
-      it('BSON Field name within a sub-document', () => {
-        expect(() => BSON.serialize({ a: { 'a\x00b': 1 } })).to.throw();
-      });
-
-      it('Pattern for a regular expression', () => {
-        // eslint-disable-next-line no-control-regex
-        expect(() => BSON.serialize({ a: new RegExp('a\x00b') })).to.throw(/null bytes/);
-        expect(() => BSON.serialize({ a: new BSONRegExp('a\x00b') })).to.throw(/null bytes/);
-      });
-
-      it('Flags/options for a regular expression', () => {
-        expect(() => BSON.serialize({ a: new BSONRegExp('a', 'i\x00m') })).to.throw();
-      });
+  describe('null byte handling serializing', () => {
+    it('should throw when null byte in BSON Field name within a root document', () => {
+      expect(() => BSON.serialize({ 'a\x00b': 1 })).to.throw();
     });
 
-    describe('deserializing should throw if null byte present in', () => {
-      it('BSON Field name within a root document', () => {
-        const doc = bufferFromHexArray([
-          '10', //int32 type
-          '650066', // a\x00b key
-          '00', //  key null terminator
-          '01000000', // value = 1
-          '00' //  doc null
-        ]);
-        expect(() => BSON.deserialize(doc)).to.throw(/corrupt/);
-      });
+    it('should throw when null byte in BSON Field name within a sub-document', () => {
+      expect(() => BSON.serialize({ a: { 'a\x00b': 1 } })).to.throw();
+    });
 
-      it('BSON Field name within a sub-document', () => {
-        const doc = bufferFromHexArray([
-          '03', // sub doc type
-          '6100', // key a and its null terminator
-          '0e000000', // sub doc size
-          '10', // int32
-          '61006200', // a\x00b key and its null terminator
-          '01000000', // int32 of 1
-          '0000' // sub and root doc null
-        ]);
-        expect(() => BSON.deserialize(doc)).to.throw();
-      });
+    it('should throw when null byte in Pattern for a regular expression', () => {
+      // eslint-disable-next-line no-control-regex
+      expect(() => BSON.serialize({ a: new RegExp('a\x00b') })).to.throw(/null bytes/);
+      expect(() => BSON.serialize({ a: new BSONRegExp('a\x00b') })).to.throw(/null bytes/);
+    });
 
-      it('Pattern for a regular expression', () => {
-        const doc = bufferFromHexArray([
-          '10000000', // size
-          '0b', // regex type
-          '6100', // key
-          '61006200', // a\x00b
-          '00', // empty string of options
-          '00' //  doc null
-        ]);
-        expect(() => BSON.deserialize(doc)).to.throw(/corrupt/);
-      });
-
-      it('Flags/options for a regular expression', () => {
-        const doc = bufferFromHexArray([
-          '10000000', // size
-          '0b', // regex type
-          '6100', // key
-          '616200', // ab
-          '69006D00', // i\x00m null terminated
-          '00' //  doc null
-        ]);
-        expect(() => BSON.deserialize(doc)).to.throw(/corrupt/);
-      });
+    it('should throw when null byte in Flags/options for a regular expression', () => {
+      expect(() => BSON.serialize({ a: new BSONRegExp('a', 'i\x00m') })).to.throw();
     });
   });
 });

@@ -91,3 +91,37 @@ exports.assertBuffersEqual = function (done, buffer1, buffer2) {
     expect(buffer1[i]).to.equal(buffer2[i]);
   }
 };
+
+/**
+ * A helper to turn hex string sequences into BSON.
+ * Omit the first 8 hex digits for the document it will be calculated
+ * As well as the BSON document's null terminator '00'
+ *
+ * @example
+ * ```js
+ * const bytes = bufferFromHexArray([
+ *   '10', // int32 type
+ *   '6100', // 'a' key with key null terminator
+ *   '01000000' // little endian int32
+ * ])
+ * BSON.serialize(bytes) // { a: 1 }
+ * ```
+ *
+ * @param {string[]} array - sequences of hex digits broken up to be human readable
+ * @returns
+ */
+const bufferFromHexArray = array => {
+  const string = array.concat(['00']).join('');
+  const size = string.length / 2 + 4;
+
+  const byteLength = [size & 0xff, (size >> 8) & 0xff, (size >> 16) & 0xff, (size >> 24) & 0xff]
+    .map(n => {
+      const hexCode = n.toString(16);
+      return hexCode.length === 2 ? hexCode : '0' + hexCode;
+    })
+    .join('');
+
+  return Buffer.from(byteLength + string, 'hex');
+};
+
+exports.bufferFromHexArray = bufferFromHexArray;
