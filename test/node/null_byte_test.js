@@ -11,22 +11,22 @@ const it = (title, testFn) => tests.set(title, (test) => {
     test.done();
 });
 
-it('null byte handling serializing should throw when null byte in BSON Field name within a root document', () => {
-    expect(() => BSON.serialize({ 'a\x00b': 1 })).to.throw();
+it('null byte handling in serializing should throw when null byte in BSON Field name within a root document', () => {
+    expect(() => BSON.serialize({ 'a\x00b': 1 })).to.throw(/null bytes/);
 });
 
-it('null byte handling serializing should throw when null byte in BSON Field name within a sub-document', () => {
-    expect(() => BSON.serialize({ a: { 'a\x00b': 1 } })).to.throw();
+it('null byte handling in serializing should throw when null byte in BSON Field name within a sub-document', () => {
+    expect(() => BSON.serialize({ a: { 'a\x00b': 1 } })).to.throw(/null bytes/);
 });
 
-it('null byte handling serializing should throw when null byte in Pattern for a regular expression', () => {
+it('null byte handling in serializing should throw when null byte in Pattern for a regular expression', () => {
     // eslint-disable-next-line no-control-regex
     expect(() => BSON.serialize({ a: new RegExp('a\x00b') })).to.throw(/null bytes/);
     expect(() => BSON.serialize({ a: new BSON.BSONRegExp('a\x00b') })).to.throw(/null bytes/);
 });
 
-it('null byte handling serializing should throw when null byte in Flags/options for a regular expression', () => {
-    expect(() => BSON.serialize({ a: new BSON.BSONRegExp('a', 'i\x00m') })).to.throw();
+it('null byte handling in serializing should throw when null byte in Flags/options for a regular expression', () => {
+    expect(() => BSON.serialize({ a: new BSON.BSONRegExp('a', 'i\x00m') })).to.throw(/regular expression option/);
 });
 
 module.exports = {};
