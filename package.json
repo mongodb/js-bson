@@ -13,9 +13,9 @@
     "bower.json"
   ],
   "version": "1.1.6",
-  "author": { 
-    "name" : "The MongoDB NodeJS Team", 
-    "email" : "dbx-node@mongodb.com"
+  "author": {
+    "name": "The MongoDB NodeJS Team",
+    "email": "dbx-node@mongodb.com"
   },
   "contributors": [],
   "repository": "mongodb/js-bson",
@@ -23,16 +23,17 @@
     "url": "https://jira.mongodb.org/projects/NODE/issues/"
   },
   "devDependencies": {
-    "benchmark": "1.0.0",
-    "colors": "1.1.0",
-    "nodeunit": "0.9.0",
     "babel-core": "^6.14.0",
     "babel-loader": "^6.2.5",
     "babel-polyfill": "^6.13.0",
     "babel-preset-es2015": "^6.14.0",
     "babel-preset-stage-0": "^6.5.0",
     "babel-register": "^6.14.0",
+    "benchmark": "1.0.0",
+    "chai": "^4.3.4",
+    "colors": "1.1.0",
     "conventional-changelog-cli": "^1.3.5",
+    "nodeunit": "0.9.0",
     "standard-version": "^9.1.1",
     "webpack": "^1.13.2",
     "webpack-polyfills-plugin": "0.0.9"
