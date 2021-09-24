@@ -37,6 +37,17 @@ export class BSONRegExp {
     this.pattern = pattern;
     this.options = alphabetize(options ?? '');
 
+    if (this.pattern.indexOf('\x00') !== -1) {
+      throw new Error(
+        `BSON Regex patterns cannot contain a null byte, found: ${JSON.stringify(this.pattern)}`
+      );
+    }
+    if (this.options.indexOf('\x00') !== -1) {
+      throw new Error(
+        `BSON Regex options cannot contain a null byte, found: ${JSON.stringify(this.options)}`
+      );
+    }
+
     // Validate options
     for (let i = 0; i < this.options.length; i++) {
       if (

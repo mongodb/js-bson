@@ -366,7 +366,14 @@ export namespace EJSON {
     if (typeof finalOptions.relaxed === 'boolean') finalOptions.strict = !finalOptions.relaxed;
     if (typeof finalOptions.strict === 'boolean') finalOptions.relaxed = !finalOptions.strict;
 
-    return JSON.parse(text, (_key, value) => deserializeValue(value, finalOptions));
+    return JSON.parse(text, (key, value) => {
+      if (key.indexOf('\x00') !== -1) {
+        throw new Error(
+          `BSON Document field names cannot contain a null byte, found: ${JSON.stringify(key)}`
+        );
+      }
+      return deserializeValue(value, finalOptions);
+    });
   }
 
   export type JSONPrimitive = string | number | boolean | null;
