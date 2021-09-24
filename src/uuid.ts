@@ -3,6 +3,7 @@ import { ensureBuffer } from './ensure_buffer';
 import { Binary } from './binary';
 import { bufferToUuidHexString, uuidHexStringToBuffer, uuidValidateString } from './uuid_utils';
 import { isUint8Array, randomBytes } from './parser/utils';
+import { BSONTypeError } from './error';
 
 /** @public */
 export type UUIDExtended = {
@@ -45,7 +46,7 @@ export class UUID {
     } else if (typeof input === 'string') {
       this.id = uuidHexStringToBuffer(input);
     } else {
-      throw new TypeError(
+      throw new BSONTypeError(
         'Argument passed in UUID constructor must be a UUID, a 16 byte Buffer or a 32/36 character hex string (dashes excluded/included, format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).'
       );
     }

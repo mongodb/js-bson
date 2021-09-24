@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer';
+import { BSONTypeError } from './error';
 import { isAnyArrayBuffer } from './parser/utils';
 
 /**
@@ -22,5 +23,5 @@ export function ensureBuffer(potentialBuffer: Buffer | ArrayBufferView | ArrayBu
     return Buffer.from(potentialBuffer);
   }
 
-  throw new TypeError('Must use either Buffer or TypedArray');
+  throw new BSONTypeError('Must use either Buffer or TypedArray');
 }

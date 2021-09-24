@@ -4,6 +4,7 @@ import { Code } from './code';
 import { DBRef, isDBRefLike } from './db_ref';
 import { Decimal128 } from './decimal128';
 import { Double } from './double';
+import { BSONError, BSONTypeError } from './error';
 import { Int32 } from './int_32';
 import { Long } from './long';
 import { MaxKey } from './max_key';
@@ -185,7 +186,7 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
         circularPart.length + (alreadySeen.length + current.length) / 2 - 1
       );
 
-      throw new TypeError(
+      throw new BSONTypeError(
         'Converting circular structure to EJSON:\n' +
           `    ${leadingPart}${alreadySeen}${circularPart}${current}\n` +
           `    ${leadingSpace}\\${dashes}/`
@@ -274,7 +275,7 @@ const BSON_TYPE_MAPPINGS = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function serializeDocument(doc: any, options: EJSONSerializeOptions) {
-  if (doc == null || typeof doc !== 'object') throw new Error('not an object instance');
+  if (doc == null || typeof doc !== 'object') throw new BSONError('not an object instance');
 
   const bsontype: BSONType['_bsontype'] = doc._bsontype;
   if (typeof bsontype === 'undefined') {
@@ -300,7 +301,7 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
       // Copy the object into this library's version of that type.
       const mapper = BSON_TYPE_MAPPINGS[doc._bsontype];
       if (!mapper) {
-        throw new TypeError('Unrecognized or invalid _bsontype: ' + doc._bsontype);
+        throw new BSONTypeError('Unrecognized or invalid _bsontype: ' + doc._bsontype);
       }
       outDoc = mapper(outDoc);
     }
@@ -319,7 +320,7 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
 
     return outDoc.toExtendedJSON(options);
   } else {
-    throw new Error('_bsontype must be a string, but was: ' + typeof bsontype);
+    throw new BSONError('_bsontype must be a string, but was: ' + typeof bsontype);
   }
 }
 
@@ -368,8 +369,8 @@ export namespace EJSON {
 
     return JSON.parse(text, (key, value) => {
       if (key.indexOf('\x00') !== -1) {
-        throw new Error(
-          `BSON Document field names cannot contain a null byte, found: ${JSON.stringify(key)}`
+        throw new BSONError(
+          `BSON Document field names cannot contain null bytes, found: ${JSON.stringify(key)}`
         );
       }
       return deserializeValue(value, finalOptions);

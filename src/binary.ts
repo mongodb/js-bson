@@ -3,6 +3,7 @@ import { ensureBuffer } from './ensure_buffer';
 import { uuidHexStringToBuffer } from './uuid_utils';
 import { UUID, UUIDExtended } from './uuid';
 import type { EJSONOptions } from './extended_json';
+import { BSONError, BSONTypeError } from './error';
 
 /** @public */
 export type BinarySequence = Uint8Array | Buffer | number[];
@@ -73,7 +74,7 @@ export class Binary {
       !(buffer instanceof ArrayBuffer) &&
       !Array.isArray(buffer)
     ) {
-      throw new TypeError(
+      throw new BSONTypeError(
         'Binary can only be constructed from string, Buffer, TypedArray, or Array<number>'
       );
     }
@@ -108,9 +109,9 @@ export class Binary {
   put(byteValue: string | number | Uint8Array | Buffer | number[]): void {
     // If it's a string and a has more than one character throw an error
     if (typeof byteValue === 'string' && byteValue.length !== 1) {
-      throw new TypeError('only accepts single character String');
+      throw new BSONTypeError('only accepts single character String');
     } else if (typeof byteValue !== 'number' && byteValue.length !== 1)
-      throw new TypeError('only accepts single character Uint8Array or Array');
+      throw new BSONTypeError('only accepts single character Uint8Array or Array');
 
     // Decode the byte value once
     let decodedByte: number;
@@ -123,7 +124,7 @@ export class Binary {
     }
 
     if (decodedByte < 0 || decodedByte > 255) {
-      throw new TypeError('only accepts number in a valid unsigned byte range 0-255');
+      throw new BSONTypeError('only accepts number in a valid unsigned byte range 0-255');
     }
 
     if (this.buffer.length > this.position) {
@@ -238,7 +239,7 @@ export class Binary {
       return new UUID(this.buffer.slice(0, this.position));
     }
 
-    throw new Error(
+    throw new BSONError(
       `Binary sub_type "${this.sub_type}" is not supported for converting to UUID. Only "${Binary.SUBTYPE_UUID}" is currently supported.`
     );
   }
@@ -266,7 +267,7 @@ export class Binary {
       data = uuidHexStringToBuffer(doc.$uuid);
     }
     if (!data) {
-      throw new TypeError(`Unexpected Binary Extended JSON format ${JSON.stringify(doc)}`);
+      throw new BSONTypeError(`Unexpected Binary Extended JSON format ${JSON.stringify(doc)}`);
     }
     return new Binary(data, type);
   }

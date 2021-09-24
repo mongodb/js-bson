@@ -12,6 +12,7 @@ import { Map } from './map';
 import { MaxKey } from './max_key';
 import { MinKey } from './min_key';
 import { ObjectId } from './objectid';
+import { BSONError, BSONTypeError } from './error';
 import { calculateObjectSize as internalCalculateObjectSize } from './parser/calculate_size';
 // Parts of the parser
 import { deserialize as internalDeserialize, DeserializeOptions } from './parser/deserializer';
@@ -98,6 +99,7 @@ export {
   // later builds we changed it back to ObjectID (capital D) to match legacy implementations.
   ObjectId as ObjectID
 };
+export { BSONError, BSONTypeError } from './error';
 
 /** @public */
 export interface Document {
@@ -326,6 +328,8 @@ const BSON = {
   serializeWithBufferAndIndex,
   deserialize,
   calculateObjectSize,
-  deserializeStream
+  deserializeStream,
+  BSONError,
+  BSONTypeError
 };
 export default BSON;

@@ -7,6 +7,7 @@ import type { DBRefLike } from '../db_ref';
 import type { Decimal128 } from '../decimal128';
 import type { Double } from '../double';
 import { ensureBuffer } from '../ensure_buffer';
+import { BSONError, BSONTypeError } from '../error';
 import { isBSONType } from '../extended_json';
 import { writeIEEE754 } from '../float_parser';
 import type { Int32 } from '../int_32';
@@ -311,7 +312,7 @@ function serializeObjectId(
     // browser polyfill
     buffer.set(value.id.subarray(0, 12), index);
   } else {
-    throw new TypeError('object [' + JSON.stringify(value) + '] is not a valid ObjectId');
+    throw new BSONTypeError('object [' + JSON.stringify(value) + '] is not a valid ObjectId');
   }
 
   // Adjust index
@@ -363,7 +364,7 @@ function serializeObject(
   path: Document[] = []
 ) {
   for (let i = 0; i < path.length; i++) {
-    if (path[i] === value) throw new Error('cyclic dependency detected');
+    if (path[i] === value) throw new BSONError('cyclic dependency detected');
   }
 
   // Push value to stack
@@ -767,7 +768,7 @@ export function serializeInto(
 
       // Is there an override value
       if (value && value.toBSON) {
-        if (typeof value.toBSON !== 'function') throw new TypeError('toBSON is not a function');
+        if (typeof value.toBSON !== 'function') throw new BSONTypeError('toBSON is not a function');
         value = value.toBSON();
       }
 
@@ -776,7 +777,7 @@ export function serializeInto(
       } else if (typeof value === 'number') {
         index = serializeNumber(buffer, key, value, index, true);
       } else if (typeof value === 'bigint') {
-        throw new TypeError('Unsupported type BigInt, please use Decimal128');
+        throw new BSONTypeError('Unsupported type BigInt, please use Decimal128');
       } else if (typeof value === 'boolean') {
         index = serializeBoolean(buffer, key, value, index, true);
       } else if (value instanceof Date || isDate(value)) {
@@ -841,7 +842,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index, true);
       } else if (typeof value['_bsontype'] !== 'undefined') {
-        throw new TypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
+        throw new BSONTypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
       }
     }
   } else if (object instanceof Map || isMap(object)) {
@@ -884,7 +885,7 @@ export function serializeInto(
       } else if (type === 'number') {
         index = serializeNumber(buffer, key, value, index);
       } else if (type === 'bigint' || isBigInt64Array(value) || isBigUInt64Array(value)) {
-        throw new TypeError('Unsupported type BigInt, please use Decimal128');
+        throw new BSONTypeError('Unsupported type BigInt, please use Decimal128');
       } else if (type === 'boolean') {
         index = serializeBoolean(buffer, key, value, index);
       } else if (value instanceof Date || isDate(value)) {
@@ -942,16 +943,16 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index);
       } else if (typeof value['_bsontype'] !== 'undefined') {
-        throw new TypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
+        throw new BSONTypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
       }
     }
   } else {
     // Did we provide a custom serialization method
     if (object.toBSON) {
-      if (typeof object.toBSON !== 'function') throw new TypeError('toBSON is not a function');
+      if (typeof object.toBSON !== 'function') throw new BSONTypeError('toBSON is not a function');
       object = object.toBSON();
       if (object != null && typeof object !== 'object')
-        throw new TypeError('toBSON function did not return an object');
+        throw new BSONTypeError('toBSON function did not return an object');
     }
 
     // Iterate over all the keys
@@ -959,7 +960,7 @@ export function serializeInto(
       let value = object[key];
       // Is there an override value
       if (value && value.toBSON) {
-        if (typeof value.toBSON !== 'function') throw new TypeError('toBSON is not a function');
+        if (typeof value.toBSON !== 'function') throw new BSONTypeError('toBSON is not a function');
         value = value.toBSON();
       }
 
@@ -988,7 +989,7 @@ export function serializeInto(
       } else if (type === 'number') {
         index = serializeNumber(buffer, key, value, index);
       } else if (type === 'bigint') {
-        throw new TypeError('Unsupported type BigInt, please use Decimal128');
+        throw new BSONTypeError('Unsupported type BigInt, please use Decimal128');
       } else if (type === 'boolean') {
         index = serializeBoolean(buffer, key, value, index);
       } else if (value instanceof Date || isDate(value)) {
@@ -1048,7 +1049,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index);
       } else if (typeof value['_bsontype'] !== 'undefined') {
-        throw new TypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
+        throw new BSONTypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
       }
     }
   }
