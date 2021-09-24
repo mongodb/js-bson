@@ -12,6 +12,22 @@ require('chai/register-expect');
 const BSON = require('../lib/bson');
 const { ensureBuffer } = require('../lib/ensure_buffer');
 
+const Assertion = require('chai').Assertion;
+const util = require('chai').util;
+Assertion.overwriteMethod('throw', function (original) {
+  return function assertThrow(...args) {
+    if (args.length === 0 || args.includes(BSON.BSONError) || args.includes(BSON.BSONTypeError)) {
+      // By default, lets check for BSONError or BSONTypeError
+      // Since we compile to es5 instanceof is broken???
+      const assertion = original.apply(this, args);
+      const object = util.flag(assertion, 'object');
+      return this.assert(object && /BSONError|BSONTypeError/.test(object.stack));
+    } else {
+      return original.apply(this, args);
+    }
+  };
+});
+
 BSON.ensureBuffer = ensureBuffer;
 
 module.exports = BSON;

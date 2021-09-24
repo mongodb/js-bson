@@ -2016,9 +2016,7 @@ describe('BSON', function () {
     });
 
     it('should throw when null byte in Flags/options for a regular expression', () => {
-      expect(() => BSON.serialize({ a: new BSONRegExp('a', 'i\x00m') })).to.throw(
-        /regular expression option/
-      );
+      expect(() => BSON.serialize({ a: new BSONRegExp('a', 'i\x00m') })).to.throw(/null bytes/);
     });
   });
 });

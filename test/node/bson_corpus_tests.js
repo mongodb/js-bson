@@ -89,7 +89,7 @@ const parseErrorForRootDocument = scenario => {
 
       if (/Null/.test(parseError.description)) {
         expect(caughtError).to.be.instanceOf(Error);
-        expect(caughtError.message).to.match(/cannot contain a null/);
+        expect(caughtError.message).to.match(/null bytes/);
       } else if (/Bad/.test(parseError.description)) {
         // There is a number of failing tests that start with 'Bad'
         // so this check is essentially making the test optional for now
