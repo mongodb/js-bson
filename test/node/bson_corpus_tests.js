@@ -1,3 +1,4 @@
+//@ts-check
 'use strict';
 
 const Buffer = require('buffer').Buffer;
@@ -48,12 +49,69 @@ function normalize(cEJ) {
   return JSON.stringify(JSON.parse(cEJ));
 }
 
-// tests from the corpus that we need to skip, and explanations why
+const parseErrorForDecimal128 = scenario => {
+  // TODO(NODE-3637): remove regex of skipped tests and and add errors to d128 parsing
+  const skipRegex = /dqbsr|Inexact/;
+  for (const parseError of scenario.parseErrors) {
+    it(parseError.description, function () {
+      if (skipRegex.test(parseError.description)) {
+        this.skip();
+      }
+
+      expect(
+        () => BSON.Decimal128.fromString(parseError.string),
+        `Decimal.fromString('${parseError.string}') should throw`
+      ).to.throw(/not a valid Decimal128 string/);
+    });
+  }
+};
+
+const parseErrorForBinary = scenario => {
+  for (const parseError of scenario.parseErrors) {
+    it(parseError.description, () => {
+      // Currently the BSON Binary parseError tests only check parsing relating to UUID
+      // in the future this regex may need expansion
+      expect(() => EJSON.parse(parseError.string)).to.throw(/UUID/);
+    });
+  }
+};
+
+const parseErrorForRootDocument = scenario => {
+  for (const parseError of scenario.parseErrors) {
+    it(parseError.description, function () {
+      let caughtError;
+      try {
+        // Make sure not add anything more than this line to the try block
+        // Assertions, for example, throw and will mess up the checks below.
+        EJSON.parse(parseError.string);
+      } catch (error) {
+        caughtError = error;
+      }
+
+      if (/Null/.test(parseError.description)) {
+        expect(caughtError).to.be.instanceOf(Error);
+        expect(caughtError.message).to.match(/null bytes/);
+      } else if (/Bad/.test(parseError.description)) {
+        // There is a number of failing tests that start with 'Bad'
+        // so this check is essentially making the test optional for now
+        // This should assert that e is an Error and something about the message
+        // TODO(NODE-3637): remove special logic and use expect().to.throw() and add errors to lib
+        expect(caughtError).to.satisfy(e => {
+          if (e instanceof Error) return true;
+          else this.skip();
+        });
+      } else {
+        expect(caughtError).to.be.instanceOf(Error);
+      }
+    });
+  }
+};
+
 const skipBSON = {
   'NaN with payload':
     'passing this would require building a custom type to store the NaN payload data.'
 };
-
+// tests from the corpus that we need to skip, and explanations why
 const skipExtendedJSON = {
   'Timestamp with high-order bit set on both seconds and increment':
     'Current BSON implementation of timestamp/long cannot hold these values - 1 too large.',
@@ -61,9 +119,18 @@ const skipExtendedJSON = {
     'Current BSON implementation of timestamp/long cannot hold these values - 1 too large.'
 };
 
+const SKIP_TESTS = new Map([
+  ...Object.entries(skipBSON),
+  ...Object.entries(skipExtendedJSON),
+  [
+    'All BSON types',
+    'there is just too much variation in the specified expectation to make this work'
+  ]
+]);
+
 const corpus = require('./tools/bson_corpus_test_loader');
 describe('BSON Corpus', function () {
-  corpus.forEach(scenario => {
+  for (const scenario of corpus) {
     const deprecated = scenario.deprecated;
     const description = scenario.description;
     const valid = scenario.valid || [];
@@ -71,17 +138,10 @@ describe('BSON Corpus', function () {
     describe(description, function () {
       if (valid) {
         describe('valid-bson', function () {
-          valid.forEach(v => {
-            if (Reflect.has(skipBSON, v.description)) {
-              it.skip(v.description, () => {});
-              return;
-            }
-
+          for (const v of valid) {
             it(v.description, function () {
-              if (v.description === 'All BSON types' && deprecated) {
-                // there is just too much variation in the specified expectation to make this work
+              if (SKIP_TESTS.has(v.description)) {
                 this.skip();
-                return;
               }
 
               const cB = Buffer.from(v.canonical_bson, 'hex');
@@ -97,11 +157,8 @@ describe('BSON Corpus', function () {
                 const convB = Buffer.from(v.converted_bson, 'hex');
                 expect(convB).to.deep.equal(roundTripped);
               } else {
-                const roundTripped = BSON.serialize(
-                  BSON.deserialize(cB, deserializeOptions),
-                  serializeOptions
-                );
-
+                const jsObject = BSON.deserialize(cB, deserializeOptions);
+                const roundTripped = BSON.serialize(jsObject, serializeOptions);
                 expect(cB).to.deep.equal(roundTripped);
               }
 
@@ -117,17 +174,15 @@ describe('BSON Corpus', function () {
                 );
               }
             });
-          });
+          }
         });
 
         describe('valid-extjson', function () {
-          valid.forEach(v => {
-            if (Reflect.has(skipExtendedJSON, v.description)) {
-              it.skip(v.description, () => {});
-              return;
-            }
-
+          for (const v of valid) {
             it(v.description, function () {
+              if (SKIP_TESTS.has(v.description)) {
+                this.skip();
+              }
               // read in test case data. if this scenario is for a deprecated
               // type, we want to use the "converted" BSON and EJSON, which
               // use the upgraded version of the deprecated type. otherwise,
@@ -177,30 +232,34 @@ describe('BSON Corpus', function () {
                 expect(nativeToREJSON(jsonToNative(rEJ))).to.equal(rEJ);
               }
             });
-          });
+          }
         });
       }
 
       if (scenario.decodeErrors) {
         describe('decodeErrors', function () {
-          scenario.decodeErrors.forEach(d => {
+          for (const d of scenario.decodeErrors) {
             it(d.description, function () {
               const B = Buffer.from(d.bson, 'hex');
               expect(() => BSON.deserialize(B, deserializeOptions)).to.throw();
             });
-          });
+          }
         });
       }
 
       if (scenario.parseErrors) {
         describe('parseErrors', function () {
-          scenario.parseErrors.forEach(p => {
-            it(p.description, function () {
-              expect(() => jsonToNative(scenario.string)).to.throw();
-            });
-          });
+          if (description === 'Decimal128') {
+            parseErrorForDecimal128(scenario);
+          } else if (description === 'Binary type') {
+            parseErrorForBinary(scenario);
+          } else if (description === 'Top-level document validity') {
+            parseErrorForRootDocument(scenario);
+          } else {
+            expect.fail(`No parseError implementation for '${description}''`);
+          }
         });
       }
     });
-  });
+  }
 });

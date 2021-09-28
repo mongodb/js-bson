@@ -1,3 +1,4 @@
+import { BSONError, BSONTypeError } from './error';
 import type { EJSONOptions } from './extended_json';
 
 function alphabetize(str: string): string {
@@ -37,6 +38,17 @@ export class BSONRegExp {
     this.pattern = pattern;
     this.options = alphabetize(options ?? '');
 
+    if (this.pattern.indexOf('\x00') !== -1) {
+      throw new BSONError(
+        `BSON Regex patterns cannot contain null bytes, found: ${JSON.stringify(this.pattern)}`
+      );
+    }
+    if (this.options.indexOf('\x00') !== -1) {
+      throw new BSONError(
+        `BSON Regex options cannot contain null bytes, found: ${JSON.stringify(this.options)}`
+      );
+    }
+
     // Validate options
     for (let i = 0; i < this.options.length; i++) {
       if (
@@ -49,7 +61,7 @@ export class BSONRegExp {
           this.options[i] === 'u'
         )
       ) {
-        throw new Error(`The regular expression option [${this.options[i]}] is not supported`);
+        throw new BSONError(`The regular expression option [${this.options[i]}] is not supported`);
       }
     }
   }
@@ -85,7 +97,7 @@ export class BSONRegExp {
         BSONRegExp.parseOptions(doc.$regularExpression.options)
       );
     }
-    throw new TypeError(`Unexpected BSONRegExp EJSON object form: ${JSON.stringify(doc)}`);
+    throw new BSONTypeError(`Unexpected BSONRegExp EJSON object form: ${JSON.stringify(doc)}`);
   }
 }
 

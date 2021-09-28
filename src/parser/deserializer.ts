@@ -6,6 +6,7 @@ import * as constants from '../constants';
 import { DBRef, DBRefLike, isDBRefLike } from '../db_ref';
 import { Decimal128 } from '../decimal128';
 import { Double } from '../double';
+import { BSONError } from '../error';
 import { Int32 } from '../int_32';
 import { Long } from '../long';
 import { MaxKey } from '../max_key';
@@ -67,26 +68,28 @@ export function deserialize(
     (buffer[index + 3] << 24);
 
   if (size < 5) {
-    throw new Error(`bson size must be >= 5, is ${size}`);
+    throw new BSONError(`bson size must be >= 5, is ${size}`);
   }
 
   if (options.allowObjectSmallerThanBufferSize && buffer.length < size) {
-    throw new Error(`buffer length ${buffer.length} must be >= bson size ${size}`);
+    throw new BSONError(`buffer length ${buffer.length} must be >= bson size ${size}`);
   }
 
   if (!options.allowObjectSmallerThanBufferSize && buffer.length !== size) {
-    throw new Error(`buffer length ${buffer.length} must === bson size ${size}`);
+    throw new BSONError(`buffer length ${buffer.length} must === bson size ${size}`);
   }
 
   if (size + index > buffer.byteLength) {
-    throw new Error(
+    throw new BSONError(
       `(bson size ${size} + options.index ${index} must be <= buffer length ${buffer.byteLength})`
     );
   }
 
   // Illegal end value
   if (buffer[index + size - 1] !== 0) {
-    throw new Error("One object, sized correctly, with a spot for an EOO, but the EOO isn't 0x00");
+    throw new BSONError(
+      "One object, sized correctly, with a spot for an EOO, but the EOO isn't 0x00"
+    );
   }
 
   // Start deserializtion
@@ -121,14 +124,14 @@ function deserializeObject(
   const startIndex = index;
 
   // Validate that we have at least 4 bytes of buffer
-  if (buffer.length < 5) throw new Error('corrupt bson message < 5 bytes long');
+  if (buffer.length < 5) throw new BSONError('corrupt bson message < 5 bytes long');
 
   // Read the document size
   const size =
     buffer[index++] | (buffer[index++] << 8) | (buffer[index++] << 16) | (buffer[index++] << 24);
 
   // Ensure buffer is valid size
-  if (size < 5 || size > buffer.length) throw new Error('corrupt bson message');
+  if (size < 5 || size > buffer.length) throw new BSONError('corrupt bson message');
 
   // Create holding object
   const object: Document = isArray ? [] : {};
@@ -154,7 +157,7 @@ function deserializeObject(
     }
 
     // If are at the end of the buffer there is a problem with the document
-    if (i >= buffer.byteLength) throw new Error('Bad BSON Document: illegal CString');
+    if (i >= buffer.byteLength) throw new BSONError('Bad BSON Document: illegal CString');
     const name = isArray ? arrayIndex++ : buffer.toString('utf8', index, i);
     if (isPossibleDBRef !== false && (name as string)[0] === '$') {
       isPossibleDBRef = allowedDBRefKeys.test(name as string);
@@ -174,7 +177,7 @@ function deserializeObject(
         stringSize > buffer.length - index ||
         buffer[index + stringSize - 1] !== 0
       ) {
-        throw new Error('bad string length in bson');
+        throw new BSONError('bad string length in bson');
       }
 
       value = getValidatedString(buffer, index, index + stringSize - 1);
@@ -214,7 +217,8 @@ function deserializeObject(
         (buffer[index++] << 24);
       value = new Date(new Long(lowBits, highBits).toNumber());
     } else if (elementType === constants.BSON_DATA_BOOLEAN) {
-      if (buffer[index] !== 0 && buffer[index] !== 1) throw new Error('illegal boolean type value');
+      if (buffer[index] !== 0 && buffer[index] !== 1)
+        throw new BSONError('illegal boolean type value');
       value = buffer[index++] === 1;
     } else if (elementType === constants.BSON_DATA_OBJECT) {
       const _index = index;
@@ -224,7 +228,7 @@ function deserializeObject(
         (buffer[index + 2] << 16) |
         (buffer[index + 3] << 24);
       if (objectSize <= 0 || objectSize > buffer.length - index)
-        throw new Error('bad embedded document length in bson');
+        throw new BSONError('bad embedded document length in bson');
 
       // We have a raw value
       if (raw) {
@@ -262,8 +266,8 @@ function deserializeObject(
       value = deserializeObject(buffer, _index, arrayOptions, true);
       index = index + objectSize;
 
-      if (buffer[index - 1] !== 0) throw new Error('invalid array terminator byte');
-      if (index !== stopIndex) throw new Error('corrupted array bson');
+      if (buffer[index - 1] !== 0) throw new BSONError('invalid array terminator byte');
+      if (index !== stopIndex) throw new BSONError('corrupted array bson');
     } else if (elementType === constants.BSON_DATA_UNDEFINED) {
       value = undefined;
     } else if (elementType === constants.BSON_DATA_NULL) {
@@ -315,11 +319,11 @@ function deserializeObject(
       const subType = buffer[index++];
 
       // Did we have a negative binary size, throw
-      if (binarySize < 0) throw new Error('Negative binary type element size found');
+      if (binarySize < 0) throw new BSONError('Negative binary type element size found');
 
       // Is the length longer than the document
       if (binarySize > buffer.byteLength)
-        throw new Error('Binary type size larger than document size');
+        throw new BSONError('Binary type size larger than document size');
 
       // Decode as raw Buffer object if options specifies it
       if (buffer['slice'] != null) {
@@ -331,11 +335,11 @@ function deserializeObject(
             (buffer[index++] << 16) |
             (buffer[index++] << 24);
           if (binarySize < 0)
-            throw new Error('Negative binary type element size found for subtype 0x02');
+            throw new BSONError('Negative binary type element size found for subtype 0x02');
           if (binarySize > totalBinarySize - 4)
-            throw new Error('Binary type with subtype 0x02 contains too long binary size');
+            throw new BSONError('Binary type with subtype 0x02 contains too long binary size');
           if (binarySize < totalBinarySize - 4)
-            throw new Error('Binary type with subtype 0x02 contains too short binary size');
+            throw new BSONError('Binary type with subtype 0x02 contains too short binary size');
         }
 
         if (promoteBuffers && promoteValues) {
@@ -353,11 +357,11 @@ function deserializeObject(
             (buffer[index++] << 16) |
             (buffer[index++] << 24);
           if (binarySize < 0)
-            throw new Error('Negative binary type element size found for subtype 0x02');
+            throw new BSONError('Negative binary type element size found for subtype 0x02');
           if (binarySize > totalBinarySize - 4)
-            throw new Error('Binary type with subtype 0x02 contains too long binary size');
+            throw new BSONError('Binary type with subtype 0x02 contains too long binary size');
           if (binarySize < totalBinarySize - 4)
-            throw new Error('Binary type with subtype 0x02 contains too short binary size');
+            throw new BSONError('Binary type with subtype 0x02 contains too short binary size');
         }
 
         // Copy the data
@@ -382,7 +386,7 @@ function deserializeObject(
         i++;
       }
       // If are at the end of the buffer there is a problem with the document
-      if (i >= buffer.length) throw new Error('Bad BSON Document: illegal CString');
+      if (i >= buffer.length) throw new BSONError('Bad BSON Document: illegal CString');
       // Return the C string
       const source = buffer.toString('utf8', index, i);
       // Create the regexp
@@ -395,7 +399,7 @@ function deserializeObject(
         i++;
       }
       // If are at the end of the buffer there is a problem with the document
-      if (i >= buffer.length) throw new Error('Bad BSON Document: illegal CString');
+      if (i >= buffer.length) throw new BSONError('Bad BSON Document: illegal CString');
       // Return the C string
       const regExpOptions = buffer.toString('utf8', index, i);
       index = i + 1;
@@ -427,7 +431,7 @@ function deserializeObject(
         i++;
       }
       // If are at the end of the buffer there is a problem with the document
-      if (i >= buffer.length) throw new Error('Bad BSON Document: illegal CString');
+      if (i >= buffer.length) throw new BSONError('Bad BSON Document: illegal CString');
       // Return the C string
       const source = buffer.toString('utf8', index, i);
       index = i + 1;
@@ -439,7 +443,7 @@ function deserializeObject(
         i++;
       }
       // If are at the end of the buffer there is a problem with the document
-      if (i >= buffer.length) throw new Error('Bad BSON Document: illegal CString');
+      if (i >= buffer.length) throw new BSONError('Bad BSON Document: illegal CString');
       // Return the C string
       const regExpOptions = buffer.toString('utf8', index, i);
       index = i + 1;
@@ -457,7 +461,7 @@ function deserializeObject(
         stringSize > buffer.length - index ||
         buffer[index + stringSize - 1] !== 0
       ) {
-        throw new Error('bad string length in bson');
+        throw new BSONError('bad string length in bson');
       }
       const symbol = getValidatedString(buffer, index, index + stringSize - 1);
       value = promoteValues ? symbol : new BSONSymbol(symbol);
@@ -490,7 +494,7 @@ function deserializeObject(
         stringSize > buffer.length - index ||
         buffer[index + stringSize - 1] !== 0
       ) {
-        throw new Error('bad string length in bson');
+        throw new BSONError('bad string length in bson');
       }
       const functionString = getValidatedString(buffer, index, index + stringSize - 1);
 
@@ -518,7 +522,7 @@ function deserializeObject(
 
       // Element cannot be shorter than totalSize + stringSize + documentSize + terminator
       if (totalSize < 4 + 4 + 4 + 1) {
-        throw new Error('code_w_scope total size shorter minimum expected length');
+        throw new BSONError('code_w_scope total size shorter minimum expected length');
       }
 
       // Get the code string size
@@ -533,7 +537,7 @@ function deserializeObject(
         stringSize > buffer.length - index ||
         buffer[index + stringSize - 1] !== 0
       ) {
-        throw new Error('bad string length in bson');
+        throw new BSONError('bad string length in bson');
       }
 
       // Javascript function
@@ -555,12 +559,12 @@ function deserializeObject(
 
       // Check if field length is too short
       if (totalSize < 4 + 4 + objectSize + stringSize) {
-        throw new Error('code_w_scope total size is too short, truncating scope');
+        throw new BSONError('code_w_scope total size is too short, truncating scope');
       }
 
       // Check if totalSize field is too long
       if (totalSize > 4 + 4 + objectSize + stringSize) {
-        throw new Error('code_w_scope total size is too long, clips outer document');
+        throw new BSONError('code_w_scope total size is too long, clips outer document');
       }
 
       // If we are evaluating the functions
@@ -590,10 +594,10 @@ function deserializeObject(
         stringSize > buffer.length - index ||
         buffer[index + stringSize - 1] !== 0
       )
-        throw new Error('bad string length in bson');
+        throw new BSONError('bad string length in bson');
       // Namespace
       if (!validateUtf8(buffer, index, index + stringSize - 1)) {
-        throw new Error('Invalid UTF-8 string in BSON document');
+        throw new BSONError('Invalid UTF-8 string in BSON document');
       }
       const namespace = buffer.toString('utf8', index, index + stringSize - 1);
       // Update parse index position
@@ -610,7 +614,7 @@ function deserializeObject(
       // Upgrade to DBRef type
       value = new DBRef(namespace, oid);
     } else {
-      throw new Error(
+      throw new BSONError(
         'Detected unknown BSON type ' + elementType.toString(16) + ' for fieldname "' + name + '"'
       );
     }
@@ -628,8 +632,8 @@ function deserializeObject(
 
   // Check if the deserialization was against a valid array/object
   if (size !== index - startIndex) {
-    if (isArray) throw new Error('corrupt array bson');
-    throw new Error('corrupt object bson');
+    if (isArray) throw new BSONError('corrupt array bson');
+    throw new BSONError('corrupt object bson');
   }
 
   // if we did not find "$ref", "$id", "$db", or found an extraneous $key, don't make a DBRef
@@ -671,7 +675,7 @@ function getValidatedString(buffer: Buffer, start: number, end: number) {
   for (let i = 0; i < value.length; i++) {
     if (value.charCodeAt(i) === 0xfffd) {
       if (!validateUtf8(buffer, start, end)) {
-        throw new Error('Invalid UTF-8 string in BSON document');
+        throw new BSONError('Invalid UTF-8 string in BSON document');
       }
       break;
     }

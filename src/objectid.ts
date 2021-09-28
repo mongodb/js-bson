@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
 import { ensureBuffer } from './ensure_buffer';
+import { BSONTypeError } from './error';
 import { deprecate, isUint8Array, randomBytes } from './parser/utils';
 
 // Regular expression that checks for hex value
@@ -84,7 +85,7 @@ export class ObjectId {
       } else if (id.length === 24 && checkForHexRegExp.test(id)) {
         this[kId] = Buffer.from(id, 'hex');
       } else {
-        throw new TypeError(
+        throw new BSONTypeError(
           'Argument passed in must be a Buffer or string of 12 bytes or a string of 24 hex characters'
         );
       }
@@ -276,7 +277,7 @@ export class ObjectId {
   static createFromHexString(hexString: string): ObjectId {
     // Throw an error if it's not a valid setup
     if (typeof hexString === 'undefined' || (hexString != null && hexString.length !== 24)) {
-      throw new TypeError(
+      throw new BSONTypeError(
         'Argument passed in must be a single String of 12 bytes or a string of 24 hex characters'
       );
     }

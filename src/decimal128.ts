@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer';
+import { BSONTypeError } from './error';
 import { Long } from './long';
 
 const PARSE_STRING_REGEXP = /^(\+|-)?(\d+|(\d*\.\d*))?(E|e)?([-+])?(\d+)?$/;
@@ -105,7 +106,7 @@ function lessThan(left: Long, right: Long): boolean {
 }
 
 function invalidErr(string: string, message: string) {
-  throw new TypeError(`"${string}" is not a valid Decimal128 string - ${message}`);
+  throw new BSONTypeError(`"${string}" is not a valid Decimal128 string - ${message}`);
 }
 
 /** @public */
@@ -187,7 +188,7 @@ export class Decimal128 {
     // TODO: implementing a custom parsing for this, or refactoring the regex would yield
     //       further gains.
     if (representation.length >= 7000) {
-      throw new TypeError('' + representation + ' not a valid Decimal128 string');
+      throw new BSONTypeError('' + representation + ' not a valid Decimal128 string');
     }
 
     // Results
@@ -197,7 +198,7 @@ export class Decimal128 {
 
     // Validate the string
     if ((!stringMatch && !infMatch && !nanMatch) || representation.length === 0) {
-      throw new TypeError('' + representation + ' not a valid Decimal128 string');
+      throw new BSONTypeError('' + representation + ' not a valid Decimal128 string');
     }
 
     if (stringMatch) {
@@ -269,7 +270,7 @@ export class Decimal128 {
     }
 
     if (sawRadix && !nDigitsRead)
-      throw new TypeError('' + representation + ' not a valid Decimal128 string');
+      throw new BSONTypeError('' + representation + ' not a valid Decimal128 string');
 
     // Read exponent if exists
     if (representation[index] === 'e' || representation[index] === 'E') {
