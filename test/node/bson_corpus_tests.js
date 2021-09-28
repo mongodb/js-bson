@@ -50,6 +50,7 @@ function normalize(cEJ) {
 }
 
 const parseErrorForDecimal128 = scenario => {
+  // TODO(NODE-3637): remove regex of skipped tests and and add errors to d128 parsing
   const skipRegex = /dqbsr|Inexact/;
   for (const parseError of scenario.parseErrors) {
     it(parseError.description, function () {
@@ -94,6 +95,7 @@ const parseErrorForRootDocument = scenario => {
         // There is a number of failing tests that start with 'Bad'
         // so this check is essentially making the test optional for now
         // This should assert that e is an Error and something about the message
+        // TODO(NODE-3637): remove special logic and use expect().to.throw() and add errors to lib
         expect(caughtError).to.satisfy(e => {
           if (e instanceof Error) return true;
           else this.skip();
