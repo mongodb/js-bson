@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.5.3](https://github.com/mongodb/js-bson/compare/v4.5.2...v4.5.3) (2021-10-05)
+
+
+### Bug Fixes
+
+* **NODE-3493:** code and symbol tests are partially testing the wrong types ([#459](https://github.com/mongodb/js-bson/issues/459)) ([80d7f03](https://github.com/mongodb/js-bson/commit/80d7f039af5472fd51b8a1f7873f4340ed5f0d5e))
+* **NODE-3534:** add subtype 0x6 and 0x7 constants on Binary class ([#461](https://github.com/mongodb/js-bson/issues/461)) ([52cfe9c](https://github.com/mongodb/js-bson/commit/52cfe9c02a2483e197140e9838bf969c6f8e750e))
+* **NODE-3629:** correct corpus runner and add null checks ([#464](https://github.com/mongodb/js-bson/issues/464)) ([d75102d](https://github.com/mongodb/js-bson/commit/d75102d6bb995c5146d7bc1fb8606c1851c8bbc0))
+
 ### [4.5.2](https://github.com/mongodb/js-bson/compare/v4.5.1...v4.5.2) (2021-09-14)
 
 
