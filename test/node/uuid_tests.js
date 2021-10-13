@@ -1,9 +1,16 @@
 'use strict';
 
 const { Buffer } = require('buffer');
-const { Binary, UUID } = require('../register-bson');
+const {
+  Binary,
+  UUID,
+  serialize,
+  deserialize,
+  DefaultDeserializeOptions
+} = require('../register-bson');
 const { inspect } = require('util');
 const { validate: uuidStringValidate, version: uuidStringVersion } = require('uuid');
+const { afterEach } = require('mocha');
 
 // Test values
 const UPPERCASE_DASH_SEPARATED_UUID_STRING = 'AAAAAAAA-AAAA-4AAA-AAAA-AAAAAAAAAAAA';
@@ -159,5 +166,47 @@ describe('UUID', () => {
   it('should correctly allow for node.js inspect to work with UUID', () => {
     const uuid = new UUID(UPPERCASE_DASH_SEPARATED_UUID_STRING);
     expect(inspect(uuid)).to.equal(`new UUID("${LOWERCASE_DASH_SEPARATED_UUID_STRING}")`);
+  });
+
+  describe('when (de)serializing', () => {
+    describe('without specifying any `convertUUIDs` option', () => {
+      it('should (de)serialize as Binary/4', () => {
+        const uuidString = 'bd2d74fe-bad8-430c-aeac-b01d073a1eb6';
+
+        const { value } = deserialize(serialize({ value: new UUID(uuidString) }));
+        expect(value).to.be.instanceOf(Binary);
+        expect(value.toUUID().toHexString()).to.equal(uuidString);
+      });
+    });
+
+    describe('with DeserializationOptions.convertUUIDs set', () => {
+      it('should (de)serialize as actual UUID', () => {
+        const uuidString = 'bd2d74fe-bad8-430c-aeac-b01d073a1eb6';
+
+        const { value } = deserialize(serialize({ value: new UUID(uuidString) }), {
+          convertUUIDs: true
+        });
+        expect(value).to.be.instanceOf(UUID);
+        expect(value.toHexString()).to.equal(uuidString);
+      });
+    });
+
+    describe('with `DefaultDeserializationOption.convertUUIDs` set', () => {
+      beforeEach(() => {
+        DefaultDeserializeOptions.convertUUIDs = true;
+      });
+
+      afterEach(() => {
+        DefaultDeserializeOptions.convertUUIDs = false;
+      });
+
+      it('should (de)serialize as actual UUID', () => {
+        const uuidString = 'bd2d74fe-bad8-430c-aeac-b01d073a1eb6';
+
+        const { value } = deserialize(serialize({ value: new UUID(uuidString) }));
+        expect(value).to.be.instanceOf(UUID);
+        expect(value.toHexString()).to.equal(uuidString);
+      });
+    });
   });
 });

@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 import { Binary } from '../binary';
-import type { Document } from '../bson';
+import { Document, UUID } from '../bson';
 import { Code } from '../code';
 import * as constants from '../constants';
 import { DBRef, DBRefLike, isDBRefLike } from '../db_ref';
@@ -16,6 +16,11 @@ import { BSONRegExp } from '../regexp';
 import { BSONSymbol } from '../symbol';
 import { Timestamp } from '../timestamp';
 import { validateUtf8 } from '../validate_utf8';
+
+/** @public */
+export const DefaultDeserializeOptions = {
+  convertUUIDs: false
+};
 
 /** @public */
 export interface DeserializeOptions {
@@ -45,6 +50,8 @@ export interface DeserializeOptions {
   index?: number;
 
   raw?: boolean;
+  /** Convert Binary values of subtype 4 to UUID */
+  convertUUIDs?: boolean;
 }
 
 // Internal long versions
@@ -119,6 +126,8 @@ function deserializeObject(
   const promoteBuffers = options['promoteBuffers'] == null ? false : options['promoteBuffers'];
   const promoteLongs = options['promoteLongs'] == null ? true : options['promoteLongs'];
   const promoteValues = options['promoteValues'] == null ? true : options['promoteValues'];
+
+  const convertUUIDs = !!(DefaultDeserializeOptions.convertUUIDs || options.convertUUIDs);
 
   // Set the start index
   const startIndex = index;
@@ -342,10 +351,12 @@ function deserializeObject(
             throw new BSONError('Binary type with subtype 0x02 contains too short binary size');
         }
 
-        if (promoteBuffers && promoteValues) {
-          value = buffer.slice(index, index + binarySize);
-        } else {
-          value = new Binary(buffer.slice(index, index + binarySize), subType);
+        value = buffer.slice(index, index + binarySize);
+
+        if (convertUUIDs && subType === Binary.SUBTYPE_UUID) {
+          value = new UUID(value);
+        } else if (!(promoteBuffers && promoteValues)) {
+          value = new Binary(value, subType);
         }
       } else {
         const _buffer = Buffer.alloc(binarySize);

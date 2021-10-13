@@ -15,7 +15,11 @@ import { ObjectId } from './objectid';
 import { BSONError, BSONTypeError } from './error';
 import { calculateObjectSize as internalCalculateObjectSize } from './parser/calculate_size';
 // Parts of the parser
-import { deserialize as internalDeserialize, DeserializeOptions } from './parser/deserializer';
+import {
+  deserialize as internalDeserialize,
+  DeserializeOptions,
+  DefaultDeserializeOptions
+} from './parser/deserializer';
 import { serializeInto as internalSerialize, SerializeOptions } from './parser/serializer';
 import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
@@ -77,7 +81,7 @@ export {
   TimestampOverrides
 } from './timestamp';
 export { UUIDExtended } from './uuid';
-export { SerializeOptions, DeserializeOptions };
+export { SerializeOptions, DeserializeOptions, DefaultDeserializeOptions };
 export {
   Code,
   Map,
