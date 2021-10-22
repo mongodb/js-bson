@@ -9,10 +9,10 @@ describe('Int32', function () {
     const hexValue = 0x2a;
     const octalValue = 0o52;
     const value = 42;
-    const upperBoundValue = 2 ** 31 - 1;
-    const lowerBoundValue = -(2 ** 31);
-    const outOfUpperBoundValue = 2 ** 40;
-    const outOfLowerBoundValue = -(2 ** 40);
+    const upperBoundValue = 0x7fffffff;
+    const lowerBoundValue = -0x80000000;
+    const outOfUpperBoundValue = 0x10000000000;
+    const outOfLowerBoundValue = -0x10000000000;
 
     it('Primitive number', function (done) {
       expect(new Int32(value).valueOf()).to.equal(value);
