@@ -49,12 +49,12 @@ describe('Int32', function () {
       done();
     });
 
-    it('should equal zero', function (done) {
+    it('Outside lower bound', function (done) {
       expect(new Int32(outOfLowerBoundValue).valueOf()).to.equal(0);
       done();
     });
 
-    it('should equal zero', function (done) {
+    it('Outside upper bound', function (done) {
       expect(new Int32(outOfUpperBoundValue).valueOf()).to.equal(0);
       done();
     });
