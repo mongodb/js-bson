@@ -25,7 +25,7 @@ export class Int32 {
       value = value.valueOf();
     }
 
-    this.value = +value;
+    this.value = +value | 0;
   }
 
   /**

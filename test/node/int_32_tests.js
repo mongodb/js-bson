@@ -9,6 +9,10 @@ describe('Int32', function () {
     const hexValue = 0x2a;
     const octalValue = 0o52;
     const value = 42;
+    const upperBoundValue = 2 ** 31 - 1;
+    const lowerBoundValue = -(2 ** 31);
+    const outOfUpperBoundValue = 2 ** 40;
+    const outOfLowerBoundValue = -(2 ** 40);
 
     it('Primitive number', function (done) {
       expect(new Int32(value).valueOf()).to.equal(value);
@@ -35,6 +39,26 @@ describe('Int32', function () {
       done();
     });
 
+    it('Lower bound', function (done) {
+      expect(new Int32(lowerBoundValue).valueOf()).to.equal(lowerBoundValue);
+      done();
+    });
+
+    it('Upper bound', function (done) {
+      expect(new Int32(upperBoundValue).valueOf()).to.equal(upperBoundValue);
+      done();
+    });
+
+    it('should equal zero', function (done) {
+      expect(new Int32(outOfLowerBoundValue).valueOf()).to.equal(0);
+      done();
+    });
+
+    it('should equal zero', function (done) {
+      expect(new Int32(outOfUpperBoundValue).valueOf()).to.equal(0);
+      done();
+    });
+
     it('should equal zero', function () {
       const prop = 'key';
       const zero = BSON.serialize({ [prop]: new Int32(0) }).toString();
@@ -58,7 +82,7 @@ describe('Int32', function () {
 
   describe('toString', () => {
     it('should serialize to a string', () => {
-      const testNumber = Math.floor(Math.random() * 0xffffffff);
+      const testNumber = 0x7fffffff;
       const int32 = new Int32(testNumber);
       expect(int32.toString()).to.equal(testNumber.toString());
     });
@@ -67,7 +91,7 @@ describe('Int32', function () {
 
     for (const radix of testRadices) {
       it(`should support radix argument: ${radix}`, () => {
-        const testNumber = Math.floor(Math.random() * 0xffffffff);
+        const testNumber = 0x7fffffff;
         const int32 = new Int32(testNumber);
         expect(int32.toString(radix)).to.equal(testNumber.toString(radix));
       });
