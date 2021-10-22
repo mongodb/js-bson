@@ -3,7 +3,7 @@
 const BSON = require('../register-bson');
 const Int32 = BSON.Int32;
 
-describe('Int32', function () {
+describe.only('Int32', function () {
   context('Constructor', function () {
     const strHexValue = '0x2a';
     const hexValue = 0x2a;
@@ -11,51 +11,51 @@ describe('Int32', function () {
     const value = 42;
     const upperBoundValue = 0x7fffffff;
     const lowerBoundValue = -0x80000000;
-    const outOfUpperBoundValue = 0x10000000000;
-    const outOfLowerBoundValue = -0x10000000000;
+    const outOfUpperBoundValue = 0x80000000;
+    const outOfLowerBoundValue = -0x80000001;
 
-    it('Primitive number', function (done) {
+    it('should accept primitive numbers', function (done) {
       expect(new Int32(value).valueOf()).to.equal(value);
       done();
     });
 
-    it('Number object', function (done) {
+    it('should accept number objects', function (done) {
       expect(new Int32(new Number(value)).valueOf()).to.equal(value);
       done();
     });
 
-    it('String Hex', function (done) {
+    it('should accept string Hex', function (done) {
       expect(new Int32(strHexValue).valueOf()).to.equal(value);
       done();
     });
 
-    it('Hex', function (done) {
+    it('should accept hex', function (done) {
       expect(new Int32(hexValue).valueOf()).to.equal(value);
       done();
     });
 
-    it('Octal', function (done) {
+    it('should accept octal', function (done) {
       expect(new Int32(octalValue).valueOf()).to.equal(value);
       done();
     });
 
-    it('Lower bound', function (done) {
+    it('should accept int32 minimum input of -0x80000000', function (done) {
       expect(new Int32(lowerBoundValue).valueOf()).to.equal(lowerBoundValue);
       done();
     });
 
-    it('Upper bound', function (done) {
+    it('should accept int32 maximum input of 0x7fffffff', function (done) {
       expect(new Int32(upperBoundValue).valueOf()).to.equal(upperBoundValue);
       done();
     });
 
-    it('Outside lower bound', function (done) {
-      expect(new Int32(outOfLowerBoundValue).valueOf()).to.equal(0);
+    it('should truncate the input bits to int32 for too small inputs', function (done) {
+      expect(new Int32(outOfLowerBoundValue).valueOf()).to.equal(0x7fffffff);
       done();
     });
 
-    it('Outside upper bound', function (done) {
-      expect(new Int32(outOfUpperBoundValue).valueOf()).to.equal(0);
+    it('should truncate the input bits to int32 for too large inputs', function (done) {
+      expect(new Int32(outOfUpperBoundValue).valueOf()).to.equal(-0x80000000);
       done();
     });
 
@@ -69,7 +69,7 @@ describe('Int32', function () {
       });
     });
 
-    it('should equal fortyTwo', function () {
+    it('should have serialization consistency across different representations of 42', function () {
       const prop = 'key';
       const fortyTwo = BSON.serialize({ [prop]: new Int32(value) }).toString();
       // should equal fortyTwo
