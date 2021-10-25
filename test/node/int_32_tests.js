@@ -3,7 +3,7 @@
 const BSON = require('../register-bson');
 const Int32 = BSON.Int32;
 
-describe.only('Int32', function () {
+describe('Int32', function () {
   context('Constructor', function () {
     const strHexValue = '0x2a';
     const hexValue = 0x2a;
@@ -49,12 +49,12 @@ describe.only('Int32', function () {
       done();
     });
 
-    it('should truncate the input bits to int32 for too small inputs', function (done) {
+    it('should truncate the input bits to int32 for inputs smaller than -0x80000000', function (done) {
       expect(new Int32(outOfLowerBoundValue).valueOf()).to.equal(0x7fffffff);
       done();
     });
 
-    it('should truncate the input bits to int32 for too large inputs', function (done) {
+    it('should truncate the input bits to int32 for inputs larger than 0x7fffffff', function (done) {
       expect(new Int32(outOfUpperBoundValue).valueOf()).to.equal(-0x80000000);
       done();
     });
