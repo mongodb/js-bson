@@ -52,47 +52,43 @@ export class ObjectId {
     if (id instanceof ObjectId) {
       this[kId] = id.id;
       this.__id = id.__id;
-    }
-
-    if (typeof id === 'object' && id && 'id' in id) {
-      if ('toHexString' in id && typeof id.toHexString === 'function') {
-        this[kId] = Buffer.from(id.toHexString(), 'hex');
+    } else {
+      if (typeof id === 'object' && id && 'id' in id) {
+        if ('toHexString' in id && typeof id.toHexString === 'function') {
+          this[kId] = Buffer.from(id.toHexString(), 'hex');
+        } else {
+          throw new TypeError(
+            'Object passed in does not have toHexString() function'
+          );
+        }
+      } else if (id == null || typeof id === 'number') {
+        // The most common use case (blank id, new objectId instance)
+        // Generate a new id
+        this[kId] = ObjectId.generate(typeof id === 'number' ? id : undefined);
+      } else if (ArrayBuffer.isView(id) && id.byteLength === 12) {
+        this[kId] = ensureBuffer(id);
+      } else if (typeof id === 'string') {
+        if (id.length === 12) {
+          const bytes = Buffer.from(id);
+          if (bytes.byteLength === 12) {
+            this[kId] = bytes;
+          }
+        } else if (id.length === 24 && checkForHexRegExp.test(id)) {
+          this[kId] = Buffer.from(id, 'hex');
+        } else {
+          throw new BSONTypeError(
+            'Argument passed in must be a Buffer or string of 12 bytes or a string of 24 hex characters'
+          );
+        }
       } else {
-        this[kId] = typeof id.id === 'string' ? Buffer.from(id.id) : id.id;
+        throw new TypeError(
+          'Argument passed in does not match the accepted types'
+        );
       }
-    }
-
-    // The most common use case (blank id, new objectId instance)
-    if (id == null || typeof id === 'number') {
-      // Generate a new id
-      this[kId] = ObjectId.generate(typeof id === 'number' ? id : undefined);
       // If we are caching the hex string
       if (ObjectId.cacheHexString) {
         this.__id = this.id.toString('hex');
       }
-    }
-
-    if (ArrayBuffer.isView(id) && id.byteLength === 12) {
-      this[kId] = ensureBuffer(id);
-    }
-
-    if (typeof id === 'string') {
-      if (id.length === 12) {
-        const bytes = Buffer.from(id);
-        if (bytes.byteLength === 12) {
-          this[kId] = bytes;
-        }
-      } else if (id.length === 24 && checkForHexRegExp.test(id)) {
-        this[kId] = Buffer.from(id, 'hex');
-      } else {
-        throw new BSONTypeError(
-          'Argument passed in must be a Buffer or string of 12 bytes or a string of 24 hex characters'
-        );
-      }
-    }
-
-    if (ObjectId.cacheHexString) {
-      this.__id = this.id.toString('hex');
     }
   }
 

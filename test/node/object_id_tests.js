@@ -5,10 +5,11 @@ const BSON = require('../register-bson');
 const util = require('util');
 const ObjectId = BSON.ObjectId;
 
-describe('ObjectId', function () {
+describe.only('ObjectId', function () {
   /**
    * @ignore
    */
+ 
   it('should correctly handle objectId timestamps', function (done) {
     // var test_number = {id: ObjectI()};
     var a = ObjectId.createFromTime(1);
@@ -22,6 +23,45 @@ describe('ObjectId', function () {
     expect(1000).to.equal(b.getTimestamp().getTime());
 
     done();
+  });
+
+  it('should throw error if empty array is passed in', function () {
+    expect(() => new ObjectId([])).to.throw(TypeError);
+  });
+
+  it('should throw error if nonempty array is passed in', function () {
+    expect(() => new ObjectId(['abcdefŽhijkl'])).to.throw(TypeError);
+  });
+
+  it('should throw error if empty object is passed in', function () {
+    expect(() => new ObjectId({})).to.throw(TypeError);
+  });
+
+  it('should throw error if object without an id property is passed in', function () {
+    var tmp = new ObjectId();
+    var objectIdLike = {
+      toHexString: function () {
+        return tmp.toHexString();
+      }
+    };
+
+    expect(() => new ObjectId(objectIdLike)).to.throw(TypeError);
+  });
+
+  it('should throw error if object without toHexString function is passed in', function () {
+    var tmp = new ObjectId();
+    var objectIdLike = {
+      id: tmp.id
+    };
+    objectIdLike.id.toHexString = null;
+
+    expect(() => new ObjectId(objectIdLike).toHexString()).to.throw(TypeError);
+  });
+
+  it('should correctly create ObjectId from number', function () {
+    expect(() => new ObjectId(42)).to.not.throw();
+    expect(() => new ObjectId(0x2a)).to.not.throw();
+    expect(() => new ObjectId(NaN)).to.not.throw();
   });
 
   /**
