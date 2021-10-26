@@ -62,7 +62,7 @@ export class ObjectId {
           try {
             this[kId] = ensureBuffer(id.id);
           } catch {
-            throw new BSONTypeError('Argument passed in must be a Buffer or string of 12 bytes or a string of 24 hex characters');
+            throw new BSONTypeError('Argument passed in must have an id that is of type string or Buffer');
           }
         }
       } else if (id == null || typeof id === 'number') {
