@@ -48,6 +48,14 @@ describe('ObjectId', function () {
     expect(() => new ObjectId(objectIdLike)).to.throw(TypeError);
   });
 
+  it('should throw error if object without string or buffer id is passed in', function () {
+    var objectIdLike = {
+      id: 5
+    };
+
+    expect(() => new ObjectId(objectIdLike)).to.throw(TypeError);
+  });
+
   it('should correctly create ObjectId from number', function () {
     expect(() => new ObjectId(42)).to.not.throw();
     expect(() => new ObjectId(0x2a)).to.not.throw();

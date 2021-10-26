@@ -56,8 +56,14 @@ export class ObjectId {
       if (typeof id === 'object' && id && 'id' in id) {
         if ('toHexString' in id && typeof id.toHexString === 'function') {
           this[kId] = Buffer.from(id.toHexString(), 'hex');
+        } else if (typeof id.id === 'string') {
+          this[kId] = Buffer.from(id.id);
         } else {
-          this[kId] = typeof id.id === 'string' ? Buffer.from(id.id) : id.id;
+          try {
+            this[kId] = ensureBuffer(id.id);
+          } catch {
+            throw new BSONTypeError('Argument passed in must be a Buffer or string of 12 bytes or a string of 24 hex characters');
+          }
         }
       } else if (id == null || typeof id === 'number') {
         // The most common use case (blank id, new objectId instance)
