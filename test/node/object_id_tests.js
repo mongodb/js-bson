@@ -5,7 +5,7 @@ const BSON = require('../register-bson');
 const util = require('util');
 const ObjectId = BSON.ObjectId;
 
-describe.only('ObjectId', function () {
+describe('ObjectId', function () {
   /**
    * @ignore
    */
@@ -46,16 +46,6 @@ describe.only('ObjectId', function () {
     };
 
     expect(() => new ObjectId(objectIdLike)).to.throw(TypeError);
-  });
-
-  it('should throw error if object without toHexString function is passed in', function () {
-    var tmp = new ObjectId();
-    var objectIdLike = {
-      id: tmp.id
-    };
-    objectIdLike.id.toHexString = null;
-
-    expect(() => new ObjectId(objectIdLike).toHexString()).to.throw(TypeError);
   });
 
   it('should correctly create ObjectId from number', function () {

@@ -57,9 +57,7 @@ export class ObjectId {
         if ('toHexString' in id && typeof id.toHexString === 'function') {
           this[kId] = Buffer.from(id.toHexString(), 'hex');
         } else {
-          throw new TypeError(
-            'Object passed in does not have toHexString() function'
-          );
+          this[kId] = typeof id.id === 'string' ? Buffer.from(id.id) : id.id;
         }
       } else if (id == null || typeof id === 'number') {
         // The most common use case (blank id, new objectId instance)
