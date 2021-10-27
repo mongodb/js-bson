@@ -9,7 +9,7 @@ describe('ObjectId', function () {
   /**
    * @ignore
    */
- 
+
   it('should correctly handle objectId timestamps', function (done) {
     // var test_number = {id: ObjectI()};
     var a = ObjectId.createFromTime(1);
@@ -23,6 +23,11 @@ describe('ObjectId', function () {
     expect(1000).to.equal(b.getTimestamp().getTime());
 
     done();
+  });
+
+  it('should correctly create ObjectId from ObjectId', function () {
+    var tmp = new ObjectId();
+    expect(() => new ObjectId(tmp)).to.not.throw();
   });
 
   it('should throw error if empty array is passed in', function () {
@@ -48,18 +53,65 @@ describe('ObjectId', function () {
     expect(() => new ObjectId(objectIdLike)).to.throw(TypeError);
   });
 
-  it('should throw error if object without string or buffer id is passed in', function () {
-    var objectIdLike = {
+  it('should throw error if object with non-Buffer non-string id is passed in', function () {
+    var objectNumId = {
       id: 5
     };
+    var objectNullId = {
+      id: null
+    };
 
-    expect(() => new ObjectId(objectIdLike)).to.throw(TypeError);
+    expect(() => new ObjectId(objectNumId)).to.throw(TypeError);
+    expect(() => new ObjectId(objectNullId)).to.throw(TypeError);
   });
 
-  it('should correctly create ObjectId from number', function () {
+  it('should correctly create ObjectId with objectIdLike properties', function () {
+    var tmp = new ObjectId();
+    var objectIdLike = {
+      id: tmp.id,
+      toHexString: function () {
+        return tmp.toHexString();
+      }
+    };
+
+    expect(() => new ObjectId(objectIdLike)).to.not.throw(TypeError);
+  });
+
+  it('should correctly create ObjectId from number or null', function () {
     expect(() => new ObjectId(42)).to.not.throw();
     expect(() => new ObjectId(0x2a)).to.not.throw();
     expect(() => new ObjectId(NaN)).to.not.throw();
+    expect(() => new ObjectId(null)).to.not.throw();
+  });
+
+  it('should correctly create ObjectId with Buffer or string id', function () {
+    var objectStringId = {
+      id: 'thisisastringid'
+    };
+    var objectBufferId = {
+      id: Buffer.from('AAAAAAAAAAAAAAAAAAAAAAAA', 'hex')
+    };
+    var objectBufferFromArray = {
+      id: Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+    };
+
+    expect(() => new ObjectId(objectStringId)).to.not.throw(TypeError);
+    expect(() => new ObjectId(objectBufferId)).to.not.throw(TypeError);
+    expect(() => new ObjectId(objectBufferFromArray)).to.not.throw(TypeError);
+  });
+
+  it('should throw error if non-12 byte non-24 hex string passed in', function () {
+    expect(() => new ObjectId('FFFFFFFFFFFFFFFFFFFFFFFG')).to.throw();
+    expect(() => new ObjectId('thisismorethan12chars')).to.throw();
+    expect(() => new ObjectId('101010')).to.throw();
+    expect(() => new ObjectId('')).to.throw();
+  });
+
+  it('should correctly create ObjectId from 12 byte or 24 hex string', function () {
+    expect(() => new ObjectId('AAAAAAAAAAAAAAAAAAAAAAAA')).to.not.throw();
+    expect(() => new ObjectId('FFFFFFFFFFFFFFFFFFFFFFFF')).to.not.throw();
+    expect(() => new ObjectId('111111111111')).to.not.throw();
+    expect(() => new ObjectId('abcdefghijkl')).to.not.throw();
   });
 
   /**

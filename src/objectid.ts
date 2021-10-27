@@ -62,7 +62,9 @@ export class ObjectId {
           try {
             this[kId] = ensureBuffer(id.id);
           } catch {
-            throw new BSONTypeError('Argument passed in must have an id that is of type string or Buffer');
+            throw new BSONTypeError(
+              'Argument passed in must have an id that is of type string or Buffer'
+            );
           }
         }
       } else if (id == null || typeof id === 'number') {
@@ -85,9 +87,7 @@ export class ObjectId {
           );
         }
       } else {
-        throw new TypeError(
-          'Argument passed in does not match the accepted types'
-        );
+        throw new BSONTypeError('Argument passed in does not match the accepted types');
       }
       // If we are caching the hex string
       if (ObjectId.cacheHexString) {
