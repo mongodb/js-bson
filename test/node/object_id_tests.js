@@ -27,7 +27,7 @@ describe('ObjectId', function () {
 
   it('should correctly create ObjectId from ObjectId', function () {
     var tmp = new ObjectId();
-    expect(() => new ObjectId(tmp)).to.not.throw();
+    expect(() => new ObjectId(tmp).toHexString()).to.not.throw();
   });
 
   it('should throw error if empty array is passed in', function () {
@@ -74,14 +74,14 @@ describe('ObjectId', function () {
       }
     };
 
-    expect(() => new ObjectId(objectIdLike)).to.not.throw(TypeError);
+    expect(() => new ObjectId(objectIdLike).toHexString()).to.not.throw(TypeError);
   });
 
   it('should correctly create ObjectId from number or null', function () {
-    expect(() => new ObjectId(42)).to.not.throw();
-    expect(() => new ObjectId(0x2a)).to.not.throw();
-    expect(() => new ObjectId(NaN)).to.not.throw();
-    expect(() => new ObjectId(null)).to.not.throw();
+    expect(() => new ObjectId(42).toHexString()).to.not.throw();
+    expect(() => new ObjectId(0x2a).toHexString()).to.not.throw();
+    expect(() => new ObjectId(NaN).toHexString()).to.not.throw();
+    expect(() => new ObjectId(null).toHexString()).to.not.throw();
   });
 
   it('should correctly create ObjectId with Buffer or string id', function () {
@@ -95,9 +95,9 @@ describe('ObjectId', function () {
       id: Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
     };
 
-    expect(() => new ObjectId(objectStringId)).to.not.throw(TypeError);
-    expect(() => new ObjectId(objectBufferId)).to.not.throw(TypeError);
-    expect(() => new ObjectId(objectBufferFromArray)).to.not.throw(TypeError);
+    expect(() => new ObjectId(objectStringId).toHexString()).to.not.throw(TypeError);
+    expect(() => new ObjectId(objectBufferId).toHexString()).to.not.throw(TypeError);
+    expect(() => new ObjectId(objectBufferFromArray).toHexString()).to.not.throw(TypeError);
   });
 
   it('should throw error if non-12 byte non-24 hex string passed in', function () {
@@ -108,10 +108,10 @@ describe('ObjectId', function () {
   });
 
   it('should correctly create ObjectId from 12 byte or 24 hex string', function () {
-    expect(() => new ObjectId('AAAAAAAAAAAAAAAAAAAAAAAA')).to.not.throw();
-    expect(() => new ObjectId('FFFFFFFFFFFFFFFFFFFFFFFF')).to.not.throw();
-    expect(() => new ObjectId('111111111111')).to.not.throw();
-    expect(() => new ObjectId('abcdefghijkl')).to.not.throw();
+    expect(() => new ObjectId('AAAAAAAAAAAAAAAAAAAAAAAA').toHexString()).to.not.throw();
+    expect(() => new ObjectId('FFFFFFFFFFFFFFFFFFFFFFFF').toHexString()).to.not.throw();
+    expect(() => new ObjectId('111111111111').toHexString()).to.not.throw();
+    expect(() => new ObjectId('abcdefghijkl').toHexString()).to.not.throw();
   });
 
   /**
