@@ -110,8 +110,13 @@ describe('ObjectId', function () {
   it('should correctly create ObjectId from 12 byte or 24 hex string', function () {
     expect(() => new ObjectId('AAAAAAAAAAAAAAAAAAAAAAAA').toHexString()).to.not.throw();
     expect(() => new ObjectId('FFFFFFFFFFFFFFFFFFFFFFFF').toHexString()).to.not.throw();
-    expect(() => new ObjectId('111111111111').toHexString()).to.not.throw();
     expect(() => new ObjectId('abcdefghijkl').toHexString()).to.not.throw();
+  });
+
+  it('should correctly create ObjectId from 12 byte sequence', function () {
+    var a = '111111111111';
+    expect(() => new ObjectId(a).toHexString()).to.not.throw();
+    expect(Buffer.from(new ObjectId(a).id).equals(Buffer.from('111111111111', 'latin1')));
   });
 
   /**

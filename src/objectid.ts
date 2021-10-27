@@ -43,44 +43,44 @@ export class ObjectId {
   /**
    * Create an ObjectId type
    *
-   * @param id - Can be a 24 character hex string, 12 byte binary Buffer, or a number.
+   * @param inputId - Can be a 24 character hex string, 12 byte binary Buffer, or a number.
    */
-  constructor(id?: string | Buffer | number | ObjectIdLike | ObjectId) {
-    if (!(this instanceof ObjectId)) return new ObjectId(id);
+  constructor(inputId?: string | Buffer | number | ObjectIdLike | ObjectId) {
+    if (!(this instanceof ObjectId)) return new ObjectId(inputId);
 
     // Duck-typing to support ObjectId from different npm packages
-    if (id instanceof ObjectId) {
-      this[kId] = id.id;
-      this.__id = id.__id;
+    if (inputId instanceof ObjectId) {
+      this[kId] = inputId.id;
+      this.__id = inputId.__id;
     } else {
-      if (typeof id === 'object' && id && 'id' in id) {
-        if ('toHexString' in id && typeof id.toHexString === 'function') {
-          this[kId] = Buffer.from(id.toHexString(), 'hex');
-        } else if (typeof id.id === 'string') {
-          this[kId] = Buffer.from(id.id);
+      if (typeof inputId === 'object' && inputId && 'id' in inputId) {
+        if ('toHexString' in inputId && typeof inputId.toHexString === 'function') {
+          this[kId] = Buffer.from(inputId.toHexString(), 'hex');
+        } else if (typeof inputId.id === 'string') {
+          this[kId] = Buffer.from(inputId.id);
         } else {
           try {
-            this[kId] = ensureBuffer(id.id);
+            this[kId] = ensureBuffer(inputId.id);
           } catch {
             throw new BSONTypeError(
               'Argument passed in must have an id that is of type string or Buffer'
             );
           }
         }
-      } else if (id == null || typeof id === 'number') {
+      } else if (inputId == null || typeof inputId === 'number') {
         // The most common use case (blank id, new objectId instance)
         // Generate a new id
-        this[kId] = ObjectId.generate(typeof id === 'number' ? id : undefined);
-      } else if (ArrayBuffer.isView(id) && id.byteLength === 12) {
-        this[kId] = ensureBuffer(id);
-      } else if (typeof id === 'string') {
-        if (id.length === 12) {
-          const bytes = Buffer.from(id);
+        this[kId] = ObjectId.generate(typeof inputId === 'number' ? inputId : undefined);
+      } else if (ArrayBuffer.isView(inputId) && inputId.byteLength === 12) {
+        this[kId] = ensureBuffer(inputId);
+      } else if (typeof inputId === 'string') {
+        if (inputId.length === 12) {
+          const bytes = Buffer.from(inputId);
           if (bytes.byteLength === 12) {
             this[kId] = bytes;
           }
-        } else if (id.length === 24 && checkForHexRegExp.test(id)) {
-          this[kId] = Buffer.from(id, 'hex');
+        } else if (inputId.length === 24 && checkForHexRegExp.test(inputId)) {
+          this[kId] = Buffer.from(inputId, 'hex');
         } else {
           throw new BSONTypeError(
             'Argument passed in must be a Buffer or string of 12 bytes or a string of 24 hex characters'
