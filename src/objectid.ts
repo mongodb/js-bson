@@ -50,61 +50,45 @@ export class ObjectId {
 
     let workingId;
     if (typeof inputId === 'object' && inputId && 'id' in inputId) {
-      if (typeof inputId.id !== 'string') {
-        try {
-          workingId = ensureBuffer(inputId.id);
-        } catch {
-          throw new BSONTypeError(
-            'Argument passed in must have an id that is of type string or Buffer'
-          );
-        }
-      } else {
-        workingId = Buffer.from(inputId.id);
-        this.checkValidString(inputId.id);
+      if (typeof inputId.id !== 'string' && !ArrayBuffer.isView(inputId.id)) {
+        throw new BSONTypeError(
+          'Argument passed in must have an id that is of type string or Buffer'
+        );
       }
       if ('toHexString' in inputId && typeof inputId.toHexString === 'function') {
         workingId = Buffer.from(inputId.toHexString(), 'hex');
+      } else {
+        workingId = inputId.id;
       }
-      this[kId] = workingId;
     } else {
       workingId = inputId;
-      if (workingId == null || typeof workingId === 'number') {
-        // The most common use case (blank id, new objectId instance)
-        // Generate a new id
-        this[kId] = ObjectId.generate(typeof workingId === 'number' ? workingId : undefined);
-      } else if (ArrayBuffer.isView(workingId) && workingId.byteLength === 12) {
-        this[kId] = ensureBuffer(workingId);
-      } else if (typeof workingId === 'string') {
-        this.checkValidString(workingId);
+    }
+    if (workingId == null || typeof workingId === 'number') {
+      // The most common use case (blank id, new objectId instance)
+      // Generate a new id
+      this[kId] = ObjectId.generate(typeof workingId === 'number' ? workingId : undefined);
+    } else if (ArrayBuffer.isView(workingId) && workingId.byteLength === 12) {
+      this[kId] = ensureBuffer(workingId);
+    } else if (typeof workingId === 'string') {
+      if (workingId.length === 12) {
+        const bytes = Buffer.from(workingId);
+        if (bytes.byteLength === 12) {
+          this[kId] = bytes;
+        }
+      } else if (workingId.length === 24 && checkForHexRegExp.test(workingId)) {
+        this[kId] = Buffer.from(workingId, 'hex');
       } else {
-        throw new BSONTypeError('Argument passed in does not match the accepted types');
+        throw new BSONTypeError(
+          'Argument passed in must be a string of 12 bytes or a string of 24 hex characters'
+        );
       }
+    } else {
+      throw new BSONTypeError('Argument passed in does not match the accepted types');
     }
     // If we are caching the hex string
     if (ObjectId.cacheHexString) {
       this.__id = this.id.toString('hex');
     }
-  }
-
-  /**
-   * Returns Buffer for valid string of 12 bytes or string of 24 hex characters, otherwise throws BSONTypeError
-   *
-   * @param str - pass in a string to validate
-   */
-  checkValidString(str: string): Buffer {
-    if (str.length === 12) {
-      const bytes = Buffer.from(str);
-      if (bytes.byteLength === 12) {
-        this[kId] = bytes;
-      }
-    } else if (str.length === 24 && checkForHexRegExp.test(str)) {
-      this[kId] = Buffer.from(str, 'hex');
-    } else {
-      throw new BSONTypeError(
-        'Argument passed in must be a string of 12 bytes or a string of 24 hex characters'
-      );
-    }
-    return Buffer.from(str);
   }
 
   /**
