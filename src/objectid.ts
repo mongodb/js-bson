@@ -63,6 +63,7 @@ export class ObjectId {
     } else {
       workingId = inputId;
     }
+    // the following checks use workingId to construct an ObjectId
     if (workingId == null || typeof workingId === 'number') {
       // The most common use case (blank id, new objectId instance)
       // Generate a new id
