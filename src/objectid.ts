@@ -31,7 +31,7 @@ export class ObjectId {
   _bsontype!: 'ObjectId';
 
   /** @internal */
-  static index = ~~(Math.random() * 0xffffff);
+  static index = Math.floor(Math.random() * 0xffffff);
 
   static cacheHexString: boolean;
 
@@ -48,6 +48,7 @@ export class ObjectId {
   constructor(inputId?: string | Buffer | number | ObjectIdLike | ObjectId) {
     if (!(this instanceof ObjectId)) return new ObjectId(inputId);
 
+    // workingId is set based on type of input and whether valid id exists for the input
     let workingId;
     if (typeof inputId === 'object' && inputId && 'id' in inputId) {
       if (typeof inputId.id !== 'string' && !ArrayBuffer.isView(inputId.id)) {
@@ -63,7 +64,8 @@ export class ObjectId {
     } else {
       workingId = inputId;
     }
-    // the following checks use workingId to construct an ObjectId
+
+    // the following cases use workingId to construct an ObjectId
     if (workingId == null || typeof workingId === 'number') {
       // The most common use case (blank id, new objectId instance)
       // Generate a new id
@@ -152,7 +154,7 @@ export class ObjectId {
    */
   static generate(time?: number): Buffer {
     if ('number' !== typeof time) {
-      time = ~~(Date.now() / 1000);
+      time = Math.floor(Date.now() / 1000);
     }
 
     const inc = ObjectId.getInc();

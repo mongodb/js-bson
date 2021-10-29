@@ -27,7 +27,6 @@ describe('ObjectId', function () {
 
   it('should correctly create ObjectId from ObjectId', function () {
     var tmp = new ObjectId();
-    expect(() => new ObjectId(tmp)).to.not.throw();
     expect(() => new ObjectId(tmp).id.equals(Buffer.from(tmp, 'hex')));
   });
 
@@ -63,9 +62,7 @@ describe('ObjectId', function () {
     };
     var buf1 = Buffer.from('aaaaaaaaaaaaaaaaaaaaaaaa', 'hex');
     var buf2 = Buffer.from('abcdefghijkl', 'hex');
-    expect(() => new ObjectId(objectValidStringId1).toHexString()).to.not.throw(TypeError);
     expect(Buffer.from(new ObjectId(objectValidStringId1).id).equals(buf1));
-    expect(() => new ObjectId(objectValidStringId2).toHexString()).to.not.throw(TypeError);
     expect(Buffer.from(new ObjectId(objectValidStringId2).id).equals(buf2));
   });
 
@@ -82,9 +79,7 @@ describe('ObjectId', function () {
       id: 'abcdefghijkl',
       toHexString: newToHexString
     };
-    expect(() => new ObjectId(objectValidStringId1).toHexString()).to.not.throw(TypeError);
     expect(Buffer.from(new ObjectId(objectValidStringId1).id).equals(buf));
-    expect(() => new ObjectId(objectValidStringId2).toHexString()).to.not.throw(TypeError);
     expect(Buffer.from(new ObjectId(objectValidStringId2).id).equals(buf));
   });
 
@@ -97,10 +92,8 @@ describe('ObjectId', function () {
     var objectBufferFromArray = {
       id: validBuffer2
     };
-    expect(() => new ObjectId(objectBufferId).toHexString()).to.not.throw(TypeError);
     expect(Buffer.from(new ObjectId(objectBufferId).id).equals(validBuffer1));
-    expect(() => new ObjectId(objectBufferFromArray).toHexString()).to.not.throw(TypeError);
-    expect(Buffer.from(new ObjectId(objectBufferId).id).equals(validBuffer2));
+    expect(Buffer.from(new ObjectId(objectBufferFromArray).id).equals(validBuffer2));
   });
 
   it('should correctly create ObjectId from object with valid Buffer id and toHexString method', function () {
@@ -118,9 +111,7 @@ describe('ObjectId', function () {
       id: validBuffer2,
       toHexString: newToHexString
     };
-    expect(() => new ObjectId(objectBufferId).toHexString()).to.not.throw(TypeError);
     expect(Buffer.from(new ObjectId(objectBufferId).id).equals(bufferToHex));
-    expect(() => new ObjectId(objectBufferFromArray).toHexString()).to.not.throw(TypeError);
     expect(Buffer.from(new ObjectId(objectBufferFromArray).id).equals(bufferToHex));
   });
 
@@ -151,7 +142,6 @@ describe('ObjectId', function () {
       toHexString: newToHexString
     };
     var buf = Buffer.from('BBBBBBBBBBBBBBBBBBBBBBBB', 'hex');
-    expect(() => new ObjectId(objectInvalidString)).to.not.throw(TypeError);
     expect(Buffer.from(new ObjectId(objectInvalidString).id).equals(buf));
   });
 
@@ -171,7 +161,6 @@ describe('ObjectId', function () {
       toHexString: newToHexString
     };
     var buf = Buffer.from('BBBBBBBBBBBBBBBBBBBBBBBB', 'hex');
-    expect(() => new ObjectId(objectInvalidBuffer)).to.not.throw(TypeError);
     expect(Buffer.from(new ObjectId(objectInvalidBuffer).id).equals(buf));
   });
 
@@ -183,21 +172,16 @@ describe('ObjectId', function () {
         return tmp.toHexString();
       }
     };
-    expect(() => new ObjectId(objectIdLike).toHexString()).to.not.throw(TypeError);
     expect(() => new ObjectId(objectIdLike).id.equals(Buffer.from(tmp, 'hex')));
   });
 
   it('should correctly create ObjectId from number or null', function () {
-    expect(() => new ObjectId(42).toHexString()).to.not.throw();
-    expect(() => new ObjectId(42).id.equals(Buffer.from(42, 'hex')));
-    expect(() => new ObjectId(0x2a).toHexString()).to.not.throw();
-    expect(() => new ObjectId(0x2a).id.equals(Buffer.from(0x2a, 'hex')));
-    expect(() => new ObjectId(4.2).toHexString()).to.not.throw();
-    expect(() => new ObjectId(4.2).id.equals(Buffer.from(4, 'hex')));
-    expect(() => new ObjectId(NaN).toHexString()).to.not.throw();
-    expect(() => new ObjectId(NaN).id.equals(Buffer.from(NaN, 'hex')));
-    expect(() => new ObjectId(null).toHexString()).to.not.throw();
+    expect(new ObjectId(42).id.readUint32BE(0)).to.equal(42);
+    expect(new ObjectId(0x2a).id.readUint32BE(0)).to.equal(0x2a);
+    expect(new ObjectId(4.2).id.readUint32BE(0)).to.equal(4);
+    expect(new ObjectId(NaN).id.readUint32BE(0)).to.equal(0);
     expect(() => new ObjectId(null).id.equals(Buffer.from(null, 'hex')));
+    expect(() => new ObjectId(undefined).id.equals(Buffer.from(undefined, 'hex')));
   });
 
   it('should throw error if non-12 byte non-24 hex string passed in', function () {
@@ -212,17 +196,13 @@ describe('ObjectId', function () {
     var str1 = 'AAAAAAAAAAAAAAAAAAAAAAAA';
     var str2 = 'FFFFFFFFFFFFFFFFFFFFFFFF';
     var str3 = 'abcdefghijkl';
-    expect(() => new ObjectId(str1).toHexString()).to.not.throw();
     expect(() => new ObjectId(str1).id.equals(Buffer.from(str1, 'hex')));
-    expect(() => new ObjectId(str2).toHexString()).to.not.throw();
     expect(() => new ObjectId(str2).id.equals(Buffer.from(str2, 'hex')));
-    expect(() => new ObjectId(str3).toHexString()).to.not.throw();
     expect(() => new ObjectId(str3).id.equals(Buffer.from(str3, 'hex')));
   });
 
   it('should correctly create ObjectId from 12 byte sequence', function () {
     var a = '111111111111';
-    expect(() => new ObjectId(a).toHexString()).to.not.throw();
     expect(Buffer.from(new ObjectId(a).id).equals(Buffer.from(a, 'latin1')));
   });
 
