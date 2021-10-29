@@ -5,7 +5,7 @@ const BSON = require('../register-bson');
 const util = require('util');
 const ObjectId = BSON.ObjectId;
 
-describe('ObjectId', function () {
+describe.only('ObjectId', function () {
   /**
    * @ignore
    */
@@ -53,6 +53,49 @@ describe('ObjectId', function () {
     expect(() => new ObjectId(objectIdLike)).to.throw(TypeError);
   });
 
+  it('should correctly create ObjectId from object with Buffer or string id', function () {
+    var objectStringId = {
+      id: 'aaaaaaaaaaaaaaaaaaaaaaaa'
+    };
+    var objectBufferId = {
+      id: Buffer.from('AAAAAAAAAAAAAAAAAAAAAAAA', 'hex')
+    };
+    var objectBufferFromArray = {
+      id: Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+    };
+
+    expect(() => new ObjectId(objectStringId).toHexString()).to.not.throw(TypeError);
+    expect(() => new ObjectId(objectBufferId).toHexString()).to.not.throw(TypeError);
+    expect(() => new ObjectId(objectBufferFromArray).toHexString()).to.not.throw(TypeError);
+  });
+
+  it('should correctly create ObjectId from object with Buffer or string id and override toHexString', function () {
+    function newToHexString() {
+      return 'BBBBBBBBBBBBBBBBBBBBBBBB';
+    }
+    var buf = Buffer.from('BBBBBBBBBBBBBBBBBBBBBBBB', 'hex');
+    var objectStringId = {
+      id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
+      toHexString: newToHexString
+    };
+    var objectBufferId = {
+      id: Buffer.from('AAAAAAAAAAAAAAAAAAAAAAAA', 'hex'),
+      toHexString: newToHexString
+    };
+    var objectBufferFromArray = {
+      id: Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
+      toHexString: newToHexString
+    };
+    expect(() => new ObjectId(objectStringId).toHexString()).to.not.throw(TypeError);
+    expect(Buffer.from(new ObjectId(objectStringId).id).equals(buf));
+
+    expect(() => new ObjectId(objectBufferId).toHexString()).to.not.throw(TypeError);
+    expect(Buffer.from(new ObjectId(objectBufferId).id).equals(buf));
+
+    expect(() => new ObjectId(objectBufferFromArray).toHexString()).to.not.throw(TypeError);
+    expect(Buffer.from(new ObjectId(objectBufferFromArray).id).equals(buf));
+  });
+
   it('should throw error if object with non-Buffer non-string id is passed in', function () {
     var objectNumId = {
       id: 5
@@ -65,7 +108,21 @@ describe('ObjectId', function () {
     expect(() => new ObjectId(objectNullId)).to.throw(TypeError);
   });
 
-  it('should correctly create ObjectId with objectIdLike properties', function () {
+  it('should throw an error if object with invalid string id is passed in', function () {
+    var objectInvalidString = {
+      id: 'FFFFFFFFFFFFFFFFFFFFFFFG'
+    };
+    expect(() => new ObjectId(objectInvalidString)).to.throw(TypeError);
+  });
+
+  it('should throw an error if object with invalid Buffer id is passed in', function () {
+    var objectInvalidBuffer = {
+      id: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+    };
+    expect(() => new ObjectId(objectInvalidBuffer)).to.throw(TypeError);
+  });
+
+  it('should correctly create ObjectId from object with objectIdLike properties', function () {
     var tmp = new ObjectId();
     var objectIdLike = {
       id: tmp.id,
@@ -82,22 +139,6 @@ describe('ObjectId', function () {
     expect(() => new ObjectId(0x2a).toHexString()).to.not.throw();
     expect(() => new ObjectId(NaN).toHexString()).to.not.throw();
     expect(() => new ObjectId(null).toHexString()).to.not.throw();
-  });
-
-  it('should correctly create ObjectId with Buffer or string id', function () {
-    var objectStringId = {
-      id: 'thisisastringid'
-    };
-    var objectBufferId = {
-      id: Buffer.from('AAAAAAAAAAAAAAAAAAAAAAAA', 'hex')
-    };
-    var objectBufferFromArray = {
-      id: Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
-    };
-
-    expect(() => new ObjectId(objectStringId).toHexString()).to.not.throw(TypeError);
-    expect(() => new ObjectId(objectBufferId).toHexString()).to.not.throw(TypeError);
-    expect(() => new ObjectId(objectBufferFromArray).toHexString()).to.not.throw(TypeError);
   });
 
   it('should throw error if non-12 byte non-24 hex string passed in', function () {
@@ -152,6 +193,12 @@ describe('ObjectId', function () {
     c = b.equals(a); // => true
     expect(a).to.equal(b.toString());
     expect(true).to.equal(c);
+    done();
+  });
+
+  it('should throw an error if invalid Buffer passed in', function (done) {
+    var a = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
+    expect(() => new ObjectId(a)).to.throw(TypeError);
     done();
   });
 
