@@ -30,12 +30,12 @@ describe('ObjectId', function () {
   });
 
   const invalidInputs = [
-    {input: [], description: 'empty array'},
-    {input: ['abcdefŽhijkl'], description: 'nonempty array'},
-    {input: {}, description: 'empty object'}
-  ]
+    { input: [], description: 'empty array' },
+    { input: ['abcdefŽhijkl'], description: 'nonempty array' },
+    { input: {}, description: 'empty object' }
+  ];
 
-  for (const {input, description} of invalidInputs) {
+  for (const { input, description } of invalidInputs) {
     it(`should throw error if ${description} is passed in`, function () {
       expect(() => new ObjectId(input)).to.throw(TypeError);
     });
@@ -164,13 +164,13 @@ describe('ObjectId', function () {
   });
 
   const numericIO = [
-    {input: 42, output: 42},
-    {input: 0x2a, output: 0x2a},
-    {input: 4.2, output: 4},
-    {input: NaN, output: 0}
-  ]
+    { input: 42, output: 42 },
+    { input: 0x2a, output: 0x2a },
+    { input: 4.2, output: 4 },
+    { input: NaN, output: 0 }
+  ];
 
-  for (const {input, output} of numericIO) {
+  for (const { input, output } of numericIO) {
     it(`should correctly create ObjectId from ${input} and result in ${output}`, function () {
       const objId = new ObjectId(input);
       expect(objId).to.have.property('id');
