@@ -176,10 +176,10 @@ describe('ObjectId', function () {
   });
 
   it('should correctly create ObjectId from number or null', function () {
-    expect(new ObjectId(42).id.readUint32BE(0)).to.equal(42);
-    expect(new ObjectId(0x2a).id.readUint32BE(0)).to.equal(0x2a);
-    expect(new ObjectId(4.2).id.readUint32BE(0)).to.equal(4);
-    expect(new ObjectId(NaN).id.readUint32BE(0)).to.equal(0);
+    expect(() => new ObjectId(42).id.readUint32BE(0).equals(42));
+    expect(() => new ObjectId(0x2a).id.readUint32BE(0).equals(0x2a));
+    expect(() => new ObjectId(4.2).id.readUint32BE(0).equals(4));
+    expect(() => new ObjectId(NaN).id.readUint32BE(0).equals(0));
     expect(() => new ObjectId(null).id.equals(Buffer.from(null, 'hex')));
     expect(() => new ObjectId(undefined).id.equals(Buffer.from(undefined, 'hex')));
   });
