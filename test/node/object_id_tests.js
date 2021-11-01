@@ -26,7 +26,7 @@ describe('ObjectId', function () {
 
   it('should correctly create ObjectId from ObjectId', function () {
     var tmp = new ObjectId();
-    expect(new ObjectId(tmp).id.equals(Buffer.from(tmp.id, 'hex')));
+    expect(new ObjectId(tmp).id).to.deep.equal(Buffer.from(tmp.id, 'hex'));
   });
 
   const invalidInputs = [
@@ -78,8 +78,8 @@ describe('ObjectId', function () {
       id: 'abcdefghijkl',
       toHexString: newToHexString
     };
-    expect(Buffer.from(new ObjectId(objectValidStringId1).id).equals(buf));
-    expect(Buffer.from(new ObjectId(objectValidStringId2).id).equals(buf));
+    expect(Buffer.from(new ObjectId(objectValidStringId1).id)).to.deep.equal(buf);
+    expect(Buffer.from(new ObjectId(objectValidStringId2).id)).to.deep.equal(buf);
   });
 
   it('should correctly create ObjectId from object with valid Buffer id', function () {
@@ -91,8 +91,8 @@ describe('ObjectId', function () {
     var objectBufferFromArray = {
       id: validBuffer2
     };
-    expect(Buffer.from(new ObjectId(objectBufferId).id).equals(validBuffer1));
-    expect(Buffer.from(new ObjectId(objectBufferFromArray).id).equals(validBuffer2));
+    expect(Buffer.from(new ObjectId(objectBufferId).id)).to.deep.equals(validBuffer1);
+    expect(Buffer.from(new ObjectId(objectBufferFromArray).id)).to.deep.equals(validBuffer2);
   });
 
   it('should correctly create ObjectId from object with valid Buffer id and toHexString method', function () {
@@ -110,8 +110,8 @@ describe('ObjectId', function () {
       id: validBuffer2,
       toHexString: newToHexString
     };
-    expect(Buffer.from(new ObjectId(objectBufferId).id).equals(bufferToHex));
-    expect(Buffer.from(new ObjectId(objectBufferFromArray).id).equals(bufferToHex));
+    expect(Buffer.from(new ObjectId(objectBufferId).id)).to.deep.equal(bufferToHex);
+    expect(Buffer.from(new ObjectId(objectBufferFromArray).id)).to.deep.equal(bufferToHex);
   });
 
   it('should throw error if object with non-Buffer non-string id is passed in', function () {
@@ -141,7 +141,7 @@ describe('ObjectId', function () {
       toHexString: newToHexString
     };
     var buf = Buffer.from('BBBBBBBBBBBBBBBBBBBBBBBB', 'hex');
-    expect(Buffer.from(new ObjectId(objectInvalidString).id).equals(buf));
+    expect(Buffer.from(new ObjectId(objectInvalidString).id)).to.deep.equal(buf);
   });
 
   it('should throw an error if object with invalid Buffer id is passed in', function () {
@@ -160,7 +160,7 @@ describe('ObjectId', function () {
       toHexString: newToHexString
     };
     var buf = Buffer.from('BBBBBBBBBBBBBBBBBBBBBBBB', 'hex');
-    expect(Buffer.from(new ObjectId(objectInvalidBuffer).id).equals(buf));
+    expect(Buffer.from(new ObjectId(objectInvalidBuffer).id)).to.deep.equal(buf);
   });
 
   const numericIO = [
@@ -207,7 +207,7 @@ describe('ObjectId', function () {
 
   it('should correctly create ObjectId from 12 byte sequence', function () {
     var a = '111111111111';
-    expect(Buffer.from(new ObjectId(a).id).equals(Buffer.from(a, 'latin1')));
+    expect(Buffer.from(new ObjectId(a).id)).to.deep.equal(Buffer.from(a, 'latin1'));
   });
 
   /**
