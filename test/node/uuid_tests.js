@@ -4,6 +4,8 @@ const { Buffer } = require('buffer');
 const { Binary, UUID } = require('../register-bson');
 const { inspect } = require('util');
 const { validate: uuidStringValidate, version: uuidStringVersion } = require('uuid');
+const BSON = require('../register-bson');
+const BSONTypeError = BSON.BSONTypeError;
 
 // Test values
 const UPPERCASE_DASH_SEPARATED_UUID_STRING = 'AAAAAAAA-AAAA-4AAA-AAAA-AAAAAAAAAAAA';
@@ -76,7 +78,7 @@ describe('UUID', () => {
    */
   it('should throw if passed invalid 36-char uuid hex string', () => {
     expect(() => new UUID(LOWERCASE_DASH_SEPARATED_UUID_STRING)).to.not.throw();
-    expect(() => new UUID('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')).to.throw(TypeError);
+    expect(() => new UUID('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')).to.throw(BSONTypeError);
     // Note: The version is missing here ^
   });
 
@@ -85,7 +87,7 @@ describe('UUID', () => {
    */
   it('should throw if passed unsupported argument', () => {
     expect(() => new UUID(LOWERCASE_DASH_SEPARATED_UUID_STRING)).to.not.throw();
-    expect(() => new UUID({})).to.throw(TypeError);
+    expect(() => new UUID({})).to.throw(BSONTypeError);
   });
 
   /**
