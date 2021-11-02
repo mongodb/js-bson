@@ -77,6 +77,8 @@ export class ObjectId {
         const bytes = Buffer.from(workingId);
         if (bytes.byteLength === 12) {
           this[kId] = bytes;
+        } else {
+          throw new BSONTypeError('Argument passed in must be a string of 12 bytes');
         }
       } else if (workingId.length === 24 && checkForHexRegExp.test(workingId)) {
         this[kId] = Buffer.from(workingId, 'hex');
