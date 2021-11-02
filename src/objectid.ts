@@ -31,7 +31,7 @@ export class ObjectId {
   _bsontype!: 'ObjectId';
 
   /** @internal */
-  static index = ~~(Math.random() * 0xffffff);
+  static index = Math.floor(Math.random() * 0xffffff);
 
   static cacheHexString: boolean;
 
@@ -43,54 +43,54 @@ export class ObjectId {
   /**
    * Create an ObjectId type
    *
-   * @param id - Can be a 24 character hex string, 12 byte binary Buffer, or a number.
+   * @param inputId - Can be a 24 character hex string, 12 byte binary Buffer, or a number.
    */
-  constructor(id?: string | Buffer | number | ObjectIdLike | ObjectId) {
-    if (!(this instanceof ObjectId)) return new ObjectId(id);
+  constructor(inputId?: string | Buffer | number | ObjectIdLike | ObjectId) {
+    if (!(this instanceof ObjectId)) return new ObjectId(inputId);
 
-    // Duck-typing to support ObjectId from different npm packages
-    if (id instanceof ObjectId) {
-      this[kId] = id.id;
-      this.__id = id.__id;
-    }
-
-    if (typeof id === 'object' && id && 'id' in id) {
-      if ('toHexString' in id && typeof id.toHexString === 'function') {
-        this[kId] = Buffer.from(id.toHexString(), 'hex');
-      } else {
-        this[kId] = typeof id.id === 'string' ? Buffer.from(id.id) : id.id;
-      }
-    }
-
-    // The most common use case (blank id, new objectId instance)
-    if (id == null || typeof id === 'number') {
-      // Generate a new id
-      this[kId] = ObjectId.generate(typeof id === 'number' ? id : undefined);
-      // If we are caching the hex string
-      if (ObjectId.cacheHexString) {
-        this.__id = this.id.toString('hex');
-      }
-    }
-
-    if (ArrayBuffer.isView(id) && id.byteLength === 12) {
-      this[kId] = ensureBuffer(id);
-    }
-
-    if (typeof id === 'string') {
-      if (id.length === 12) {
-        const bytes = Buffer.from(id);
-        if (bytes.byteLength === 12) {
-          this[kId] = bytes;
-        }
-      } else if (id.length === 24 && checkForHexRegExp.test(id)) {
-        this[kId] = Buffer.from(id, 'hex');
-      } else {
+    // workingId is set based on type of input and whether valid id exists for the input
+    let workingId;
+    if (typeof inputId === 'object' && inputId && 'id' in inputId) {
+      if (typeof inputId.id !== 'string' && !ArrayBuffer.isView(inputId.id)) {
         throw new BSONTypeError(
-          'Argument passed in must be a Buffer or string of 12 bytes or a string of 24 hex characters'
+          'Argument passed in must have an id that is of type string or Buffer'
         );
       }
+      if ('toHexString' in inputId && typeof inputId.toHexString === 'function') {
+        workingId = Buffer.from(inputId.toHexString(), 'hex');
+      } else {
+        workingId = inputId.id;
+      }
+    } else {
+      workingId = inputId;
     }
 
+    // the following cases use workingId to construct an ObjectId
+    if (workingId == null || typeof workingId === 'number') {
+      // The most common use case (blank id, new objectId instance)
+      // Generate a new id
+      this[kId] = ObjectId.generate(typeof workingId === 'number' ? workingId : undefined);
+    } else if (ArrayBuffer.isView(workingId) && workingId.byteLength === 12) {
+      this[kId] = ensureBuffer(workingId);
+    } else if (typeof workingId === 'string') {
+      if (workingId.length === 12) {
+        const bytes = Buffer.from(workingId);
+        if (bytes.byteLength === 12) {
+          this[kId] = bytes;
+        } else {
+          throw new BSONTypeError('Argument passed in must be a string of 12 bytes');
+        }
+      } else if (workingId.length === 24 && checkForHexRegExp.test(workingId)) {
+        this[kId] = Buffer.from(workingId, 'hex');
+      } else {
+        throw new BSONTypeError(
+          'Argument passed in must be a string of 12 bytes or a string of 24 hex characters'
+        );
+      }
+    } else {
+      throw new BSONTypeError('Argument passed in does not match the accepted types');
+    }
+    // If we are caching the hex string
     if (ObjectId.cacheHexString) {
       this.__id = this.id.toString('hex');
     }
@@ -156,7 +156,7 @@ export class ObjectId {
    */
   static generate(time?: number): Buffer {
     if ('number' !== typeof time) {
-      time = ~~(Date.now() / 1000);
+      time = Math.floor(Date.now() / 1000);
     }
 
     const inc = ObjectId.getInc();
