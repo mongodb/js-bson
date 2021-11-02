@@ -1,7 +1,7 @@
 /** @public */
 export class BSONError extends Error {
-  constructor(m: string) {
-    super(m);
+  constructor(message: string) {
+    super(message);
     Object.setPrototypeOf(this, BSONError.prototype);
   }
 
@@ -12,8 +12,8 @@ export class BSONError extends Error {
 
 /** @public */
 export class BSONTypeError extends TypeError {
-  constructor(m: string) {
-    super(m);
+  constructor(message: string) {
+    super(message);
     Object.setPrototypeOf(this, BSONTypeError.prototype);
   }
 

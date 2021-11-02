@@ -9,8 +9,10 @@ describe('BSON error tests', function () {
     const bsonTypeErr = new BSONTypeError();
     const bsonErr = new BSONError();
 
-    expect(bsonTypeErr instanceof BSONTypeError).to.be.true;
-    expect(bsonErr instanceof BSONError).to.be.true;
+    expect(bsonTypeErr).to.be.instanceOf(BSONTypeError);
+    expect(bsonTypeErr).to.be.instanceOf(TypeError);
+    expect(bsonErr).to.be.instanceOf(BSONError);
+    expect(bsonErr).to.be.instanceOf(Error);
   });
 
   it('should correctly get correct names for BSONTypeError and BSONError', function () {
