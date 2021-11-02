@@ -16,6 +16,7 @@ const Int32 = BSON.Int32;
 const Double = BSON.Double;
 const MinKey = BSON.MinKey;
 const MaxKey = BSON.MaxKey;
+const BSONError = BSON.BSONError;
 const { BinaryParser } = require('../binary_parser');
 const vm = require('vm');
 const { assertBuffersEqual } = require('./tools/utils');
@@ -33,7 +34,7 @@ var ISODate = function (string) {
 
   const match = string.match(ISO_REGEX);
   if (!match) {
-    throw new Error(`Invalid ISO 8601 date given: ${string}`);
+    throw new BSONError(`Invalid ISO 8601 date given: ${string}`);
   }
 
   var date = new Date();

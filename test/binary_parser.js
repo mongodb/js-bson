@@ -1,4 +1,8 @@
 'use strict';
+
+const BSON = require('./register-bson');
+const BSONError = BSON.BSONError;
+
 /**
  * Binary Parser.
  * Jonas Raoni Soares Silva
@@ -20,7 +24,7 @@ function BinaryParser(bigEndian, allowExceptions) {
 
 BinaryParser.warn = function warn(msg) {
   if (this.allowExceptions) {
-    throw new Error(msg);
+    throw new BSONError(msg);
   }
 
   return 1;
@@ -419,7 +423,7 @@ BinaryParserBuffer.prototype.hasNeededBits = function hasNeededBits(neededBits) 
 
 BinaryParserBuffer.prototype.checkBuffer = function checkBuffer(neededBits) {
   if (!this.hasNeededBits(neededBits)) {
-    throw new Error('checkBuffer::missing bytes');
+    throw new BSONError('checkBuffer::missing bytes');
   }
 };
 

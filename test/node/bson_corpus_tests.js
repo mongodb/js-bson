@@ -3,6 +3,7 @@
 
 const Buffer = require('buffer').Buffer;
 const BSON = require('../register-bson');
+const BSONError = BSON.BSONError;
 const EJSON = BSON.EJSON;
 
 const deserializeOptions = {
@@ -89,19 +90,19 @@ const parseErrorForRootDocument = scenario => {
       }
 
       if (/Null/.test(parseError.description)) {
-        expect(caughtError).to.be.instanceOf(Error);
+        expect(caughtError).to.be.instanceOf(BSONError);
         expect(caughtError.message).to.match(/null bytes/);
       } else if (/Bad/.test(parseError.description)) {
         // There is a number of failing tests that start with 'Bad'
         // so this check is essentially making the test optional for now
-        // This should assert that e is an Error and something about the message
+        // This should assert that e is a BSONError and something about the message
         // TODO(NODE-3637): remove special logic and use expect().to.throw() and add errors to lib
         expect(caughtError).to.satisfy(e => {
-          if (e instanceof Error) return true;
+          if (e instanceof BSONError) return true;
           else this.skip();
         });
       } else {
-        expect(caughtError).to.be.instanceOf(Error);
+        expect(caughtError).to.be.instanceOf(BSONError);
       }
     });
   }
