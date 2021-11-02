@@ -45,7 +45,6 @@ describe('ObjectId', function () {
         return noArgObjID.toHexString();
       }
     };
-
     expect(() => new ObjectId(objectIdLike)).to.throw(BSONTypeError);
   });
 
