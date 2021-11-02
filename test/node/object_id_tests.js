@@ -7,11 +7,11 @@ const ObjectId = BSON.ObjectId;
 
 describe('ObjectId', function () {
   it('should correctly handle objectId timestamps', function (done) {
-    let a = ObjectId.createFromTime(1);
+    const a = ObjectId.createFromTime(1);
     expect(Buffer.from([0, 0, 0, 1])).to.deep.equal(a.id.slice(0, 4));
     expect(1000).to.equal(a.getTimestamp().getTime());
 
-    let b = new ObjectId();
+    const b = new ObjectId();
     b.generationTime = 1;
     expect(Buffer.from([0, 0, 0, 1])).to.deep.equal(b.id.slice(0, 4));
     expect(1).to.equal(b.generationTime);
