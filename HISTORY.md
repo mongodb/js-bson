@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.5.4](https://github.com/mongodb/js-bson/compare/v4.5.3...v4.5.4) (2021-11-03)
+
+
+### Bug Fixes
+
+* **NODE-3640:** Fix Int32 constructor to coerce its argument to int32 ([#466](https://github.com/mongodb/js-bson/issues/466)) ([d388f1e](https://github.com/mongodb/js-bson/commit/d388f1efc1831ceecec11b79dc564d3116a97779))
+* **NODE-3662:** error checking to make sure that ObjectId results in object with correct properties ([#467](https://github.com/mongodb/js-bson/issues/467)) ([5f99b1b](https://github.com/mongodb/js-bson/commit/5f99b1bfa74bcf75700174f8d4a8b974f9753e7f))
+
 ### [4.5.3](https://github.com/mongodb/js-bson/compare/v4.5.2...v4.5.3) (2021-10-05)
 
 
