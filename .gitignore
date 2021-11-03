@@ -16,6 +16,8 @@ builderror.log
 bson.sublime-project
 bson.sublime-workspace
 
+.vscode
+
 lib
 .nyc_output/
 coverage/
