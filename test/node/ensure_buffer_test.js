@@ -3,6 +3,8 @@
 
 const { Buffer } = require('buffer');
 const { ensureBuffer } = require('../register-bson');
+const BSON = require('../register-bson');
+const BSONTypeError = BSON.BSONTypeError;
 
 describe('ensureBuffer tests', function () {
   it('should be a function', function () {
@@ -15,7 +17,7 @@ describe('ensureBuffer tests', function () {
 
     expect(function () {
       bufferOut = ensureBuffer(bufferIn);
-    }).to.not.throw(Error);
+    }).to.not.throw(BSONTypeError);
 
     expect(bufferOut).to.be.an.instanceOf(Buffer);
     expect(bufferOut.buffer).to.equal(bufferIn.buffer);
@@ -29,7 +31,7 @@ describe('ensureBuffer tests', function () {
 
     expect(function () {
       bufferOut = ensureBuffer(arrayIn);
-    }).to.not.throw(Error);
+    }).to.not.throw(BSONTypeError);
 
     expect(bufferOut).to.be.an.instanceOf(Buffer);
     expect(bufferOut.buffer).to.equal(arrayIn.buffer);
@@ -41,7 +43,7 @@ describe('ensureBuffer tests', function () {
 
     expect(function () {
       bufferOut = ensureBuffer(arrayBufferIn);
-    }).to.not.throw(Error);
+    }).to.not.throw(BSONTypeError);
 
     expect(bufferOut).to.be.an.instanceOf(Buffer);
     expect(bufferOut.buffer).to.equal(arrayBufferIn);
@@ -57,7 +59,7 @@ describe('ensureBuffer tests', function () {
 
     expect(function () {
       bufferOut = ensureBuffer(arrayBufferIn);
-    }).to.not.throw(Error);
+    }).to.not.throw(BSONTypeError);
 
     expect(bufferOut).to.be.an.instanceOf(Buffer);
     expect(bufferOut.buffer).to.equal(arrayBufferIn);
@@ -69,7 +71,7 @@ describe('ensureBuffer tests', function () {
 
     expect(function () {
       bufferOut = ensureBuffer(input);
-    }).to.not.throw(Error);
+    }).to.not.throw(BSONTypeError);
 
     expect(bufferOut).to.be.an.instanceOf(Buffer);
     expect(bufferOut.byteLength).to.equal(3);
@@ -80,7 +82,7 @@ describe('ensureBuffer tests', function () {
     it(`should throw if input is ${typeof item}: ${item}`, function () {
       expect(function () {
         ensureBuffer(item);
-      }).to.throw(TypeError);
+      }).to.throw(BSONTypeError);
     });
   });
 

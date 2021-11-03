@@ -2,6 +2,7 @@
 
 const Buffer = require('buffer').Buffer;
 const BSON = require('../register-bson');
+const BSONTypeError = BSON.BSONTypeError;
 const util = require('util');
 const ObjectId = BSON.ObjectId;
 
@@ -33,7 +34,7 @@ describe('ObjectId', function () {
 
   for (const { input, description } of invalidInputs) {
     it(`should throw error if ${description} is passed in`, function () {
-      expect(() => new ObjectId(input)).to.throw(TypeError);
+      expect(() => new ObjectId(input)).to.throw(BSONTypeError);
     });
   }
 
@@ -44,8 +45,7 @@ describe('ObjectId', function () {
         return noArgObjID.toHexString();
       }
     };
-
-    expect(() => new ObjectId(objectIdLike)).to.throw(TypeError);
+    expect(() => new ObjectId(objectIdLike)).to.throw(BSONTypeError);
   });
 
   it('should correctly create ObjectId from object with valid string id', function () {
@@ -117,15 +117,15 @@ describe('ObjectId', function () {
     const objectNullId = {
       id: null
     };
-    expect(() => new ObjectId(objectNumId)).to.throw(TypeError);
-    expect(() => new ObjectId(objectNullId)).to.throw(TypeError);
+    expect(() => new ObjectId(objectNumId)).to.throw(BSONTypeError);
+    expect(() => new ObjectId(objectNullId)).to.throw(BSONTypeError);
   });
 
   it('should throw an error if object with invalid string id is passed in', function () {
     const objectInvalid24HexStr = {
       id: 'FFFFFFFFFFFFFFFFFFFFFFFG'
     };
-    expect(() => new ObjectId(objectInvalid24HexStr)).to.throw(TypeError);
+    expect(() => new ObjectId(objectInvalid24HexStr)).to.throw(BSONTypeError);
   });
 
   it('should correctly create ObjectId from object with invalid string id and toHexString method', function () {
@@ -144,7 +144,7 @@ describe('ObjectId', function () {
     const objectInvalidBuffer = {
       id: Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])
     };
-    expect(() => new ObjectId(objectInvalidBuffer)).to.throw(TypeError);
+    expect(() => new ObjectId(objectInvalidBuffer)).to.throw(BSONTypeError);
   });
 
   it('should correctly create ObjectId from object with invalid Buffer id and toHexString method', function () {
@@ -185,11 +185,11 @@ describe('ObjectId', function () {
   });
 
   it('should throw error if non-12 byte non-24 hex string passed in', function () {
-    expect(() => new ObjectId('FFFFFFFFFFFFFFFFFFFFFFFG')).to.throw(TypeError);
-    expect(() => new ObjectId('thisstringisdefinitelytoolong')).to.throw(TypeError);
-    expect(() => new ObjectId('tooshort')).to.throw(TypeError);
-    expect(() => new ObjectId('101010')).to.throw(TypeError);
-    expect(() => new ObjectId('')).to.throw(TypeError);
+    expect(() => new ObjectId('FFFFFFFFFFFFFFFFFFFFFFFG')).to.throw(BSONTypeError);
+    expect(() => new ObjectId('thisstringisdefinitelytoolong')).to.throw(BSONTypeError);
+    expect(() => new ObjectId('tooshort')).to.throw(BSONTypeError);
+    expect(() => new ObjectId('101010')).to.throw(BSONTypeError);
+    expect(() => new ObjectId('')).to.throw(BSONTypeError);
   });
 
   it('should correctly create ObjectId from 24 hex string', function () {
@@ -234,7 +234,7 @@ describe('ObjectId', function () {
 
   it('should throw an error if invalid Buffer passed in', function () {
     const a = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
-    expect(() => new ObjectId(a)).to.throw(TypeError);
+    expect(() => new ObjectId(a)).to.throw(BSONTypeError);
   });
 
   it('should correctly allow for node.js inspect to work with ObjectId', function (done) {
@@ -260,11 +260,11 @@ describe('ObjectId', function () {
     const characterCodesLargerThan256 = 'abcdefŽhijkl';
     const length12Not12Bytes = '🐶🐶🐶🐶🐶🐶';
     expect(() => new ObjectId(characterCodesLargerThan256).toHexString()).to.throw(
-      TypeError,
+      BSONTypeError,
       'Argument passed in must be a string of 12 bytes'
     );
     expect(() => new ObjectId(length12Not12Bytes).id).to.throw(
-      TypeError,
+      BSONTypeError,
       'Argument passed in must be a string of 12 bytes'
     );
   });

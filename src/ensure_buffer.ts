@@ -8,7 +8,7 @@ import { isAnyArrayBuffer } from './parser/utils';
  * @param potentialBuffer - The potential buffer
  * @returns Buffer the input if potentialBuffer is a buffer, or a buffer that
  * wraps a passed in Uint8Array
- * @throws TypeError If anything other than a Buffer or Uint8Array is passed in
+ * @throws BSONTypeError If anything other than a Buffer or Uint8Array is passed in
  */
 export function ensureBuffer(potentialBuffer: Buffer | ArrayBufferView | ArrayBuffer): Buffer {
   if (ArrayBuffer.isView(potentialBuffer)) {
