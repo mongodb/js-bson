@@ -8,6 +8,7 @@ describe('BSONTypeError', function () {
   it('should evaluate true on instanceof BSONTypeError and TypeError', function () {
     const bsonTypeErr = new BSONTypeError();
     expect(bsonTypeErr instanceof BSONTypeError).to.be.true;
+    expect(bsonTypeErr instanceof TypeError).to.be.true;
     expect(bsonTypeErr).to.be.instanceOf(BSONTypeError);
     expect(bsonTypeErr).to.be.instanceOf(TypeError);
   });
@@ -23,6 +24,7 @@ describe('BSONError', function () {
   it('should evaluate true on instanceof BSONError and Error', function () {
     const bsonErr = new BSONError();
     expect(bsonErr instanceof BSONError).to.be.true;
+    expect(bsonErr instanceof Error).to.be.true;
     expect(bsonErr).to.be.instanceOf(BSONError);
     expect(bsonErr).to.be.instanceOf(Error);
   });
