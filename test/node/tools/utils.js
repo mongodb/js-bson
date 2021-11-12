@@ -125,3 +125,28 @@ const bufferFromHexArray = array => {
 };
 
 exports.bufferFromHexArray = bufferFromHexArray;
+
+/**
+ * A helper to calculate the byte size of a string (including null)
+ *
+ * ```js
+ * const x = stringToUTF8HexBytes('ab') // { x: '03000000616200' }
+ *
+ * @param string - representing what you want to encode into BSON
+ * @returns BSON string with byte size encoded
+ */
+const stringToUTF8HexBytes = str => {
+  var b = Buffer.from(str, 'utf8');
+  var len = b.byteLength;
+  var out = Buffer.alloc(len + 4 + 1);
+  out.writeInt32LE(len + 1, 0);
+  out.set(b, 4);
+  return out.toString('hex');
+};
+
+exports.stringToUTF8HexBytes = stringToUTF8HexBytes;
+
+exports.isBrowser = function () {
+  // eslint-disable-next-line no-undef
+  return typeof window === 'object' && typeof window['navigator'] === 'object';
+};

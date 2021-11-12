@@ -45,6 +45,8 @@ export interface DeserializeOptions {
   index?: number;
 
   raw?: boolean;
+  /** allows for opt-in utf-8 validation */
+  validation?: Document;
 }
 
 // Internal long versions
@@ -102,7 +104,8 @@ function deserializeObject(
   buffer: Buffer,
   index: number,
   options: DeserializeOptions,
-  isArray = false
+  isArray = false,
+  nestedKey?: boolean
 ) {
   const evalFunctions = options['evalFunctions'] == null ? false : options['evalFunctions'];
   const cacheFunctions = options['cacheFunctions'] == null ? false : options['cacheFunctions'];
@@ -119,6 +122,45 @@ function deserializeObject(
   const promoteBuffers = options['promoteBuffers'] == null ? false : options['promoteBuffers'];
   const promoteLongs = options['promoteLongs'] == null ? true : options['promoteLongs'];
   const promoteValues = options['promoteValues'] == null ? true : options['promoteValues'];
+
+  // Ensures default validation option if none given
+  const validation = options['validation'] == null ? { utf8: true } : options['validation'];
+
+  // Shows if global utf8 validation is enabled or disabled
+  let globalUTFValidation = true;
+  // Reflects utf8 validation boolean regardless of global or specific key validation
+  let uniformBool: boolean;
+  // Set of keys either to enable or disable validation on
+  const utf8KeysSet = new Set();
+
+  // Check for boolean uniformity and empty validation option
+  const keys = validation.utf8;
+  if (typeof keys !== 'boolean') {
+    globalUTFValidation = false;
+    const vals = Object.values(keys);
+    if (vals.length !== 0) {
+      // Ensures boolean uniformity in utf-8 validation (all true or all false)
+      if (typeof vals[0] === 'boolean') {
+        uniformBool = vals[0];
+        if (!vals.every(item => item === uniformBool)) {
+          throw new BSONError(
+            'Invalid UTF-8 validation option - keys must be all true or all false'
+          );
+        }
+      } else {
+        throw new BSONError('Invalid UTF-8 validation option, must specify boolean values');
+      }
+    } else {
+      throw new BSONError('validation option is empty');
+    }
+  } else {
+    uniformBool = keys;
+  }
+
+  // Add keys to set that will either be validated or not based on uniformBool
+  if ((!uniformBool && !globalUTFValidation) || (uniformBool && !globalUTFValidation)) {
+    Object.keys(keys).forEach(key => utf8KeysSet.add(key));
+  }
 
   // Set the start index
   const startIndex = index;
@@ -158,7 +200,19 @@ function deserializeObject(
 
     // If are at the end of the buffer there is a problem with the document
     if (i >= buffer.byteLength) throw new BSONError('Bad BSON Document: illegal CString');
+
+    // Represents the key
     const name = isArray ? arrayIndex++ : buffer.toString('utf8', index, i);
+
+    // keyValidate is true if the key should be validated, false otherwise
+    let keyValidate = true;
+    if (utf8KeysSet.has(name) && !uniformBool) {
+      keyValidate = false;
+    }
+    if (nestedKey != null) {
+      keyValidate = nestedKey;
+    }
+
     if (isPossibleDBRef !== false && (name as string)[0] === '$') {
       isPossibleDBRef = allowedDBRefKeys.test(name as string);
     }
@@ -179,9 +233,7 @@ function deserializeObject(
       ) {
         throw new BSONError('bad string length in bson');
       }
-
-      value = getValidatedString(buffer, index, index + stringSize - 1);
-
+      value = getValidatedString(buffer, index, index + stringSize - 1, validation, keyValidate);
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_OID) {
       const oid = Buffer.alloc(12);
@@ -234,7 +286,7 @@ function deserializeObject(
       if (raw) {
         value = buffer.slice(index, index + objectSize);
       } else {
-        value = deserializeObject(buffer, _index, options, false);
+        value = deserializeObject(buffer, _index, options, false, keyValidate);
       }
 
       index = index + objectSize;
@@ -463,7 +515,13 @@ function deserializeObject(
       ) {
         throw new BSONError('bad string length in bson');
       }
-      const symbol = getValidatedString(buffer, index, index + stringSize - 1);
+      const symbol = getValidatedString(
+        buffer,
+        index,
+        index + stringSize - 1,
+        validation,
+        keyValidate
+      );
       value = promoteValues ? symbol : new BSONSymbol(symbol);
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_TIMESTAMP) {
@@ -496,7 +554,13 @@ function deserializeObject(
       ) {
         throw new BSONError('bad string length in bson');
       }
-      const functionString = getValidatedString(buffer, index, index + stringSize - 1);
+      const functionString = getValidatedString(
+        buffer,
+        index,
+        index + stringSize - 1,
+        validation,
+        keyValidate
+      );
 
       // If we are evaluating the functions
       if (evalFunctions) {
@@ -541,7 +605,13 @@ function deserializeObject(
       }
 
       // Javascript function
-      const functionString = getValidatedString(buffer, index, index + stringSize - 1);
+      const functionString = getValidatedString(
+        buffer,
+        index,
+        index + stringSize - 1,
+        validation,
+        keyValidate
+      );
       // Update parse index position
       index = index + stringSize;
       // Parse the element
@@ -596,8 +666,10 @@ function deserializeObject(
       )
         throw new BSONError('bad string length in bson');
       // Namespace
-      if (!validateUtf8(buffer, index, index + stringSize - 1)) {
-        throw new BSONError('Invalid UTF-8 string in BSON document');
+      if (validation != null && validation.utf8) {
+        if (!validateUtf8(buffer, index, index + stringSize - 1)) {
+          throw new BSONError('Invalid UTF-8 string in BSON document');
+        }
       }
       const namespace = buffer.toString('utf8', index, index + stringSize - 1);
       // Update parse index position
@@ -670,14 +742,25 @@ function isolateEval(
   return functionCache[functionString].bind(object);
 }
 
-function getValidatedString(buffer: Buffer, start: number, end: number) {
+function getValidatedString(
+  buffer: Buffer,
+  start: number,
+  end: number,
+  validation: Document,
+  check: boolean
+) {
   const value = buffer.toString('utf8', start, end);
-  for (let i = 0; i < value.length; i++) {
-    if (value.charCodeAt(i) === 0xfffd) {
-      if (!validateUtf8(buffer, start, end)) {
-        throw new BSONError('Invalid UTF-8 string in BSON document');
+  // if utf8 validation is on, do the check
+  if (check) {
+    if (validation.utf8 != null && validation.utf8) {
+      for (let i = 0; i < value.length; i++) {
+        if (value.charCodeAt(i) === 0xfffd) {
+          if (!validateUtf8(buffer, start, end)) {
+            throw new BSONError('Invalid UTF-8 string in BSON document');
+          }
+          break;
+        }
       }
-      break;
     }
   }
   return value;
