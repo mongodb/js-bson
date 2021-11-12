@@ -5,7 +5,7 @@ const BSON = require('../register-bson');
 const { isBrowser } = require('./tools/utils');
 const BSONError = BSON.BSONError;
 
-describe.only('UTF8 validation', function () {
+describe('UTF8 validation', function () {
   // Test both browser shims and node which have different replacement mechanisms
   const replacementChar = isBrowser() ? '���' : '�';
   const replacementString = `hi${replacementChar}bye`;
