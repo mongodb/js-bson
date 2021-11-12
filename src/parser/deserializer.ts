@@ -206,9 +206,16 @@ function deserializeObject(
 
     // keyValidate is true if the key should be validated, false otherwise
     let keyValidate = true;
-    if (utf8KeysSet.has(name) && !uniformBool) {
-      keyValidate = false;
+    if (globalUTFValidation) {
+      keyValidate = uniformBool;
+    } else {
+      if (utf8KeysSet.has(name)) {
+        keyValidate = uniformBool;
+      } else if (!utf8KeysSet.has(name)) {
+        keyValidate = !uniformBool;
+      }
     }
+    // if nested key, validate based on top level key
     if (nestedKey != null) {
       keyValidate = nestedKey;
     }
