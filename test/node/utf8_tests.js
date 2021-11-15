@@ -2,12 +2,12 @@
 
 const { Buffer } = require('buffer');
 const BSON = require('../register-bson');
-const { isBrowser } = require('./tools/utils');
+const { isNode6, isBrowser } = require('./tools/utils');
 const BSONError = BSON.BSONError;
 
 describe('UTF8 validation', function () {
   // Test both browser shims and node which have different replacement mechanisms
-  const replacementChar = isBrowser() ? '���' : '�';
+  const replacementChar = isNode6() || isBrowser() ? '���' : '�';
   const replacementString = `hi${replacementChar}bye`;
   const twoCharReplacementStr = `${replacementChar}${replacementChar}bye`;
   const sampleValidUTF8 = BSON.serialize({

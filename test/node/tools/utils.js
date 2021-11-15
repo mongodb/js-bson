@@ -150,3 +150,8 @@ exports.isBrowser = function () {
   // eslint-disable-next-line no-undef
   return typeof window === 'object' && typeof window['navigator'] === 'object';
 };
+
+exports.isNode6 = function () {
+  // eslint-disable-next-line no-undef
+  return process.version.split('.')[0] === 'v6';
+};
