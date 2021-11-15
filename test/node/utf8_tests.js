@@ -72,7 +72,7 @@ describe('UTF8 validation', function () {
       containsInvalid: true
     },
     {
-      description: 'object with invalid utf8 in nested key',
+      description: 'object with invalid utf8 in nested key object',
       buffer: Buffer.from(
         '460000000276616c69644b657943686172000600000061626364650003746f704c766c4b6579001e00000002696e76616c69644b657900090000006869f09f90627965000000',
         'hex'
@@ -86,7 +86,7 @@ describe('UTF8 validation', function () {
       containsInvalid: true
     },
     {
-      description: 'object with invalid utf8 in nested key',
+      description: 'object with invalid utf8 in two top level keys',
       buffer: Buffer.from(
         '5e0000000276616c69644b65794368617200040000006162630002696e76616c696455746638546f704c766c3100090000006869f09f906279650002696e76616c696455746638546f704c766c32000a000000f09f90f09f906279650000',
         'hex'
@@ -95,6 +95,44 @@ describe('UTF8 validation', function () {
         validKeyChar: 'abc',
         invalidUtf8TopLvl1: replacementString,
         invalidUtf8TopLvl2: twoCharReplacementStr
+      },
+      containsInvalid: true
+    },
+    {
+      description: 'object with vakud utf8 in top level key array',
+      buffer: Buffer.from(
+        '4a0000000276616c69644b657943686172000600000061626364650004746f704c766c41727200220000000230000300000068690002310005000000f09f988e00103200393000000000',
+        'hex'
+      ),
+      expectedObjectWithReplacementChars: {
+        validKeyChar: 'abcde',
+        topLvlArr: ['hi', '😎', 12345]
+      },
+      containsInvalid: false
+    },
+    {
+      description: 'object with invalid utf8 in top level key array',
+      buffer: Buffer.from(
+        '4e0000000276616c69644b657943686172000600000061626364650004746f704c766c417272002600000002300003000000686900023100090000006869f09f9062796500103200393000000000',
+        'hex'
+      ),
+      expectedObjectWithReplacementChars: {
+        validKeyChar: 'abcde',
+        topLvlArr: ['hi', replacementString, 12345]
+      },
+      containsInvalid: true
+    },
+    {
+      description: 'object with invalid utf8 in nested key array',
+      buffer: Buffer.from(
+        '5a0000000276616c69644b657943686172000600000061626364650003746f704c766c4b65790032000000046e65737465644b6579417272001f00000002300003000000686900023100090000006869f09f9062796500000000',
+        'hex'
+      ),
+      expectedObjectWithReplacementChars: {
+        validKeyChar: 'abcde',
+        topLvlKey: {
+          nestedKeyArr: ['hi', replacementString]
+        }
       },
       containsInvalid: true
     }
