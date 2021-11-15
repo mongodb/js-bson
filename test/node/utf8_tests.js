@@ -57,7 +57,8 @@ describe('UTF8 validation', function () {
         validKeyChar: 'abcde',
         validKeyNum: 12345
       },
-      containsInvalid: false
+      containsInvalid: false,
+      testCases: []
     },
     {
       description: 'object with invalid utf8 top level key',
@@ -69,7 +70,38 @@ describe('UTF8 validation', function () {
         validKeyChar: 'abcde',
         invalidUtf8TopLevelKey: replacementString
       },
-      containsInvalid: true
+      containsInvalid: true,
+      testCases: [
+        {
+          validation: { validation: { utf8: { validKeyChar: false } } },
+          behavior: 'throw error when only valid toplevel key has validation disabled'
+        },
+        {
+          validation: { validation: { utf8: { invalidUtf8TopLevelKey: false } } },
+          behavior: 'not throw error when only invalid toplevel key has validation disabled'
+        },
+        {
+          validation: {
+            validation: { utf8: { validKeyChar: false, invalidUtf8TopLevelKey: false } }
+          },
+          behavior:
+            'not throw error when both valid and invalid toplevel keys have validation disabled'
+        },
+        {
+          validation: { validation: { utf8: { validKeyChar: true } } },
+          behavior: 'not throw error when only valid toplevel key has validation enabled'
+        },
+        {
+          validation: { validation: { utf8: { invalidUtf8TopLevelKey: true } } },
+          behavior: 'throw error when only invalid toplevel key has validation enabled'
+        },
+        {
+          validation: {
+            validation: { utf8: { validKeyChar: true, invalidUtf8TopLevelKey: true } }
+          },
+          behavior: 'throw error when both valid and invalid toplevel keys have validation enabled'
+        }
+      ]
     },
     {
       description: 'object with invalid utf8 in nested key object',
@@ -83,7 +115,42 @@ describe('UTF8 validation', function () {
           invalidKey: replacementString
         }
       },
-      containsInvalid: true
+      containsInvalid: true,
+      testCases: [
+        {
+          validation: { validation: { utf8: { validKeyChar: false } } },
+          behavior: 'throw error when only valid toplevel key has validation disabled'
+        },
+        {
+          validation: { validation: { utf8: { topLvlKey: false } } },
+          behavior:
+            'not throw error when only toplevel key with invalid subkey has validation disabled'
+        },
+        {
+          validation: { validation: { utf8: { invalidKey: false } } },
+          behavior:
+            'throw error when specified invalid key for disabling validation is not a toplevel key'
+        },
+        {
+          validation: { validation: { utf8: { validKeyChar: false, topLvlKey: false } } },
+          behavior:
+            'not throw error when both valid toplevel key and toplevel key with invalid subkey have validation disabled'
+        },
+        {
+          validation: { validation: { utf8: { validKeyChar: true } } },
+          behavior: 'not throw error when only valid toplevel key has validation enabled'
+        },
+        {
+          validation: { validation: { utf8: { topLvlKey: true } } },
+          behavior:
+            'throw error when only toplevel key containing nested invalid key has validation enabled'
+        },
+        {
+          validation: { validation: { utf8: { validKeyChar: true, topLvlKey: true } } },
+          behavior:
+            'throw error when both valid key and nested invalid toplevel keys have validation enabled'
+        }
+      ]
     },
     {
       description: 'object with invalid utf8 in two top level keys',
@@ -96,10 +163,32 @@ describe('UTF8 validation', function () {
         invalidUtf8TopLvl1: replacementString,
         invalidUtf8TopLvl2: twoCharReplacementStr
       },
-      containsInvalid: true
+      containsInvalid: true,
+      testCases: [
+        {
+          validation: { validation: { utf8: { invalidUtf8TopLvl1: false } } },
+          behavior:
+            'throw error when only one of two invalid top level keys has validation disabled'
+        },
+        {
+          validation: {
+            validation: { utf8: { invalidUtf8TopLvl1: false, invalidUtf8TopLvl2: false } }
+          },
+          behavior: 'not throw error when all invalid top level keys have validation disabled'
+        },
+        {
+          validation: { validation: { utf8: { validKeyChar: true } } },
+          behavior: 'not throw error when only the valid top level key has enabled validation'
+        },
+        {
+          validation: { validation: { utf8: { validKeyChar: true, invalidUtf8TopLvl1: true } } },
+          behavior:
+            'throw error when only the valid toplevel key and one of the invalid keys has enabled validation'
+        }
+      ]
     },
     {
-      description: 'object with vakud utf8 in top level key array',
+      description: 'object with valid utf8 in top level key array',
       buffer: Buffer.from(
         '4a0000000276616c69644b657943686172000600000061626364650004746f704c766c41727200220000000230000300000068690002310005000000f09f988e00103200393000000000',
         'hex'
@@ -108,7 +197,17 @@ describe('UTF8 validation', function () {
         validKeyChar: 'abcde',
         topLvlArr: ['hi', '😎', 12345]
       },
-      containsInvalid: false
+      containsInvalid: false,
+      testCases: [
+        {
+          validation: { validation: { utf8: { validKeyChar: false, topLvlArr: false } } },
+          behavior: 'not throw error when both valid top level keys have validation disabled'
+        },
+        {
+          validation: { validation: { utf8: { validKeyChar: true, topLvlArr: true } } },
+          behavior: 'not throw error when both valid top level keys have validation enabled'
+        }
+      ]
     },
     {
       description: 'object with invalid utf8 in top level key array',
@@ -120,7 +219,21 @@ describe('UTF8 validation', function () {
         validKeyChar: 'abcde',
         topLvlArr: ['hi', replacementString, 12345]
       },
-      containsInvalid: true
+      containsInvalid: true,
+      testCases: [
+        {
+          validation: { validation: { utf8: { topLvlArr: false } } },
+          behavior: 'not throw error when invalid toplevel key array has validation disabled'
+        },
+        {
+          validation: { validation: { utf8: { topLvlArr: true } } },
+          behavior: 'throw error when invalid toplevel key array has validation enabled'
+        },
+        {
+          validation: { validation: { utf8: { validKeyChar: true, topLvlArr: true } } },
+          behavior: 'throw error when both valid and invalid toplevel keys have validation enabled'
+        }
+      ]
     },
     {
       description: 'object with invalid utf8 in nested key array',
@@ -134,7 +247,29 @@ describe('UTF8 validation', function () {
           nestedKeyArr: ['hi', replacementString]
         }
       },
-      containsInvalid: true
+      containsInvalid: true,
+      testCases: [
+        {
+          validation: { validation: { utf8: { topLvlKey: false } } },
+          behavior:
+            'not throw error when toplevel key for array with invalid key has validation disabled'
+        },
+        {
+          validation: { validation: { utf8: { topLvlKey: true } } },
+          behavior:
+            'throw error when toplevel key for array with invalid key has validation enabled'
+        },
+        {
+          validation: { validation: { utf8: { nestedKeyArr: false } } },
+          behavior:
+            'throw error when specified invalid key for disabling validation is not a toplevel key'
+        },
+        {
+          validation: { validation: { utf8: { validKeyChar: true, topLvlKey: true } } },
+          behavior:
+            'throw error when both toplevel key and key with nested key with invalid array have validation enabled'
+        }
+      ]
     }
   ];
 
@@ -189,142 +324,20 @@ describe('UTF8 validation', function () {
     });
   }
 
-  const utf8ValidationSpecifiedKeys = [
-    {
-      validation: { validation: { utf8: { validKeyChar: false } } },
-      behavior:
-        'throw error when valid toplevel key has validation disabled but invalid toplevel key has validation enabled'
-    },
-    {
-      validation: { validation: { utf8: { invalidUtf8TopLevelKey: false } } },
-      behavior:
-        'not throw when invalid toplevel key has validation disabled but valid toplevel key has validation enabled'
-    },
-    {
-      validation: { validation: { utf8: { validKeyChar: false, invalidUtf8TopLevelKey: false } } },
-      behavior: 'not throw when both valid and invalid toplevel keys have validation disabled'
-    },
-    {
-      validation: { validation: { utf8: { validKeyChar: true } } },
-      behavior:
-        'not throw when valid toplevel key has validation enabled and invalid toplevel key has validation disabled'
-    },
-    {
-      validation: { validation: { utf8: { invalidUtf8TopLevelKey: true } } },
-      behavior:
-        'throw error when invalid toplevel key has validation enabled but valid toplevel key has validation disabled'
-    },
-    {
-      validation: { validation: { utf8: { validKeyChar: true, invalidUtf8TopLevelKey: true } } },
-      behavior: 'throw error when both valid and invalid toplevel keys have validation enabled'
+  for (const { description, buffer, expectedObjectWithReplacementChars, testCases } of testInputs) {
+    for (const { behavior, validation } of testCases) {
+      it(`should ${behavior} for ${description}`, function () {
+        if (behavior.substring(0, 3) === 'not') {
+          expect(BSON.deserialize(buffer, validation)).to.deep.equals(
+            expectedObjectWithReplacementChars
+          );
+        } else {
+          expect(() => BSON.deserialize(buffer, validation)).to.throw(
+            BSONError,
+            'Invalid UTF-8 string in BSON document'
+          );
+        }
+      });
     }
-  ];
-
-  for (const { behavior, validation } of utf8ValidationSpecifiedKeys) {
-    const topLvlKeysEx = testInputs[1];
-    it(`should ${behavior}`, function () {
-      if (behavior.substring(0, 3) === 'not') {
-        expect(BSON.deserialize(topLvlKeysEx.buffer, validation)).to.deep.equals(
-          topLvlKeysEx.expectedObjectWithReplacementChars
-        );
-      } else {
-        expect(() => BSON.deserialize(topLvlKeysEx.buffer, validation)).to.throw(
-          BSONError,
-          'Invalid UTF-8 string in BSON document'
-        );
-      }
-    });
-  }
-
-  const utf8ValidationNestedInvalidKey = [
-    {
-      validation: { validation: { utf8: { validKeyChar: false } } },
-      behavior:
-        'throw error when valid toplevel key has validation disabled but invalid nested key is validated'
-    },
-    {
-      validation: { validation: { utf8: { topLvlKey: false } } },
-      behavior:
-        'not throw when toplevel key with invalid subkey has validation disabled but valid toplevel key is validated'
-    },
-    {
-      validation: { validation: { utf8: { invalidKey: false } } },
-      behavior:
-        'throw error when specified invalid key for disabling validation is not a top level key'
-    },
-    {
-      validation: { validation: { utf8: { validKeyChar: false, topLvlKey: false } } },
-      behavior:
-        'not throw when both valid top level key and toplevel key with invalid subkey have validation disabled'
-    },
-    {
-      validation: { validation: { utf8: { validKeyChar: true } } },
-      behavior:
-        'not throw when valid toplevel key has validation enabled and invalid nested key is not validated'
-    },
-    {
-      validation: { validation: { utf8: { topLvlKey: true } } },
-      behavior:
-        'throw error when toplevel key containing nested invalid key has validation enabled but valid key is not validated'
-    },
-    {
-      validation: { validation: { utf8: { validKeyChar: true, topLvlKey: true } } },
-      behavior:
-        'throw error when both valid key and nested invalid toplevel keys have validation enabled'
-    }
-  ];
-
-  for (const { behavior, validation } of utf8ValidationNestedInvalidKey) {
-    const nestedKeysEx = testInputs[2];
-    it(`should ${behavior}`, function () {
-      if (behavior.substring(0, 3) === 'not') {
-        expect(BSON.deserialize(nestedKeysEx.buffer, validation)).to.deep.equals(
-          nestedKeysEx.expectedObjectWithReplacementChars
-        );
-      } else {
-        expect(() => BSON.deserialize(nestedKeysEx.buffer, validation)).to.throw(
-          BSONError,
-          'Invalid UTF-8 string in BSON document'
-        );
-      }
-    });
-  }
-
-  const utf8ValidationMultipleInvalidKeys = [
-    {
-      validation: { validation: { utf8: { invalidUtf8TopLvl1: false } } },
-      behavior: 'throw error when only one of two invalid top level keys has validation disabled'
-    },
-    {
-      validation: {
-        validation: { utf8: { invalidUtf8TopLvl1: false, invalidUtf8TopLvl2: false } }
-      },
-      behavior: 'not throw when all invalid top level keys have validation disabled'
-    },
-    {
-      validation: { validation: { utf8: { validKeyChar: true } } },
-      behavior: 'not throw when only the valid top level key has enabled validation'
-    },
-    {
-      validation: { validation: { utf8: { validKeyChar: true, invalidUtf8TopLvl1: true } } },
-      behavior:
-        'throw error when only the valid toplevel key and one of the invalid keys has enabled validation'
-    }
-  ];
-
-  for (const { behavior, validation } of utf8ValidationMultipleInvalidKeys) {
-    const nestedKeysEx = testInputs[3];
-    it(`should ${behavior}`, function () {
-      if (behavior.substring(0, 3) === 'not') {
-        expect(BSON.deserialize(nestedKeysEx.buffer, validation)).to.deep.equals(
-          nestedKeysEx.expectedObjectWithReplacementChars
-        );
-      } else {
-        expect(() => BSON.deserialize(nestedKeysEx.buffer, validation)).to.throw(
-          BSONError,
-          'Invalid UTF-8 string in BSON document'
-        );
-      }
-    });
   }
 });

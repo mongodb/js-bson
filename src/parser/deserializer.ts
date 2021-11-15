@@ -324,7 +324,7 @@ function deserializeObject(
         arrayOptions['raw'] = true;
       }
 
-      value = deserializeObject(buffer, _index, arrayOptions, true);
+      value = deserializeObject(buffer, _index, arrayOptions, true, keyValidate);
       index = index + objectSize;
 
       if (buffer[index - 1] !== 0) throw new BSONError('invalid array terminator byte');
