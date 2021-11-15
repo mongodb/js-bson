@@ -137,7 +137,9 @@ function deserializeObject(
   const keys = validation.utf8;
   if (typeof keys !== 'boolean') {
     globalUTFValidation = false;
-    const vals = Object.values(keys);
+    const vals = Object.keys(keys).map(function (key) {
+      return keys[key];
+    });
     if (vals.length !== 0) {
       // Ensures boolean uniformity in utf-8 validation (all true or all false)
       if (typeof vals[0] === 'boolean') {
