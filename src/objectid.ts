@@ -298,7 +298,7 @@ export class ObjectId {
     }
 
     if (typeof id === 'string') {
-      return id.length === 12 || (id.length === 24 && checkForHexRegExp.test(id));
+      return (id.length === 12 || id.length === 24) && checkForHexRegExp.test(id));
     }
 
     if (id instanceof ObjectId) {
