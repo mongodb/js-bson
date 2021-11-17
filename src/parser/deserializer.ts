@@ -46,7 +46,7 @@ export interface DeserializeOptions {
 
   raw?: boolean;
   /** allows for opt-in utf-8 validation */
-  validation?: Document;
+  validation?: { utf8: Record<string, boolean> };
 }
 
 // Internal long versions
@@ -124,7 +124,7 @@ function deserializeObject(
   const promoteValues = options['promoteValues'] == null ? true : options['promoteValues'];
 
   // Ensures default validation option if none given
-  const validation = options['validation'] == null ? { utf8: true } : options['validation'];
+  const validation = options.validation == null ? { utf8: true } : options.validation;
 
   // Shows if global utf8 validation is enabled or disabled
   let globalUTFValidation = true;
@@ -134,17 +134,17 @@ function deserializeObject(
   const utf8KeysSet = new Set();
 
   // Check for boolean uniformity and empty validation option
-  const keys = validation.utf8;
-  if (typeof keys !== 'boolean') {
+  const utf8ValidatedKeys = validation.utf8;
+  if (typeof utf8ValidatedKeys !== 'boolean') {
     globalUTFValidation = false;
-    const vals = Object.keys(keys).map(function (key) {
-      return keys[key];
+    const utf8ValidationValues = Object.keys(utf8ValidatedKeys).map(function (key) {
+      return utf8ValidatedKeys[key];
     });
-    if (vals.length !== 0) {
+    if (utf8ValidationValues.length !== 0) {
       // Ensures boolean uniformity in utf-8 validation (all true or all false)
-      if (typeof vals[0] === 'boolean') {
-        uniformBool = vals[0];
-        if (!vals.every(item => item === uniformBool)) {
+      if (typeof utf8ValidationValues[0] === 'boolean') {
+        uniformBool = utf8ValidationValues[0];
+        if (!utf8ValidationValues.every(item => item === uniformBool)) {
           throw new BSONError(
             'Invalid UTF-8 validation option - keys must be all true or all false'
           );
@@ -156,12 +156,14 @@ function deserializeObject(
       throw new BSONError('validation option is empty');
     }
   } else {
-    uniformBool = keys;
+    uniformBool = utf8ValidatedKeys;
   }
 
   // Add keys to set that will either be validated or not based on uniformBool
   if ((!uniformBool && !globalUTFValidation) || (uniformBool && !globalUTFValidation)) {
-    Object.keys(keys).forEach(key => utf8KeysSet.add(key));
+    for (const key of Object.keys(utf8ValidatedKeys)) {
+      utf8KeysSet.add(key);
+    }
   }
 
   // Set the start index

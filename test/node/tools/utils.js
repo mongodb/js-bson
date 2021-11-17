@@ -141,6 +141,7 @@ const stringToUTF8HexBytes = str => {
   var out = Buffer.alloc(len + 4 + 1);
   out.writeInt32LE(len + 1, 0);
   out.set(b, 4);
+  out[len + 1] = 0x00;
   return out.toString('hex');
 };
 
