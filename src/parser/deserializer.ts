@@ -45,8 +45,19 @@ export interface DeserializeOptions {
   index?: number;
 
   raw?: boolean;
-  /** allows for opt-in utf-8 validation */
-  validation?: { utf8: Record<string, boolean> };
+  /** allows for opt-out utf-8 validation for all keys or
+   * specified keys. Must be all true or all false.
+   *
+   * @example
+   * ```js
+   * // disables validation on all keys
+   *  validation: { utf8: false }
+   *
+   * // enables validation on specified keys a, b, and c
+   *  validation: { utf8: { a: true, b: true, c: true } }
+   * ```
+   */
+  validation?: { utf8: boolean | Record<string, boolean> };
 }
 
 // Internal long versions
@@ -126,10 +137,10 @@ function deserializeObject(
   // Ensures default validation option if none given
   const validation = options.validation == null ? { utf8: true } : options.validation;
 
-  // Shows if global utf8 validation is enabled or disabled
+  // Shows if global utf-8 validation is enabled or disabled
   let globalUTFValidation = true;
-  // Reflects utf8 validation boolean regardless of global or specific key validation
-  let uniformBool: boolean;
+  // Reflects utf-8 validation setting regardless of global or specific key validation
+  let validationSetting: boolean;
   // Set of keys either to enable or disable validation on
   const utf8KeysSet = new Set();
 
@@ -143,8 +154,8 @@ function deserializeObject(
     if (utf8ValidationValues.length !== 0) {
       // Ensures boolean uniformity in utf-8 validation (all true or all false)
       if (typeof utf8ValidationValues[0] === 'boolean') {
-        uniformBool = utf8ValidationValues[0];
-        if (!utf8ValidationValues.every(item => item === uniformBool)) {
+        validationSetting = utf8ValidationValues[0];
+        if (!utf8ValidationValues.every(item => item === validationSetting)) {
           throw new BSONError(
             'Invalid UTF-8 validation option - keys must be all true or all false'
           );
@@ -156,11 +167,11 @@ function deserializeObject(
       throw new BSONError('validation option is empty');
     }
   } else {
-    uniformBool = utf8ValidatedKeys;
+    validationSetting = utf8ValidatedKeys;
   }
 
-  // Add keys to set that will either be validated or not based on uniformBool
-  if ((!uniformBool && !globalUTFValidation) || (uniformBool && !globalUTFValidation)) {
+  // Add keys to set that will either be validated or not based on validationSetting
+  if ((!validationSetting && !globalUTFValidation) || (validationSetting && !globalUTFValidation)) {
     for (const key of Object.keys(utf8ValidatedKeys)) {
       utf8KeysSet.add(key);
     }
@@ -211,12 +222,12 @@ function deserializeObject(
     // keyValidate is true if the key should be validated, false otherwise
     let keyValidate = true;
     if (globalUTFValidation) {
-      keyValidate = uniformBool;
+      keyValidate = validationSetting;
     } else {
       if (utf8KeysSet.has(name)) {
-        keyValidate = uniformBool;
-      } else if (!utf8KeysSet.has(name)) {
-        keyValidate = !uniformBool;
+        keyValidate = validationSetting;
+      } else {
+        keyValidate = !validationSetting;
       }
     }
     // if nested key, validate based on top level key
