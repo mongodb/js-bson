@@ -30,19 +30,40 @@ describe('UTF8 validation', function () {
   });
 
   it('should correctly handle validation if validation option contains all T or all F with valid utf8 example', function () {
-    let allTrue = { validation: { utf8: { a: true, b: true, c: true } } };
-    let allFalse = { validation: { utf8: { a: false, b: false, c: false, d: false } } };
+    const allTrue = { validation: { utf8: { a: true, b: true, c: true } } };
+    const allFalse = { validation: { utf8: { a: false, b: false, c: false, d: false } } };
     expect(() => BSON.deserialize(sampleValidUTF8, allTrue)).to.not.throw();
     expect(() => BSON.deserialize(sampleValidUTF8, allFalse)).to.not.throw();
   });
 
   it('should throw error if empty utf8 validation option passed in', function () {
-    var doc = { a: 'validation utf8 option cant be empty' };
+    const doc = { a: 'validation utf8 option cant be empty' };
     const serialized = BSON.serialize(doc);
-    let emptyUTF8validation = { validation: { utf8: {} } };
+    const emptyUTF8validation = { validation: { utf8: {} } };
     expect(() => BSON.deserialize(serialized, emptyUTF8validation)).to.throw(
       BSONError,
-      'validation option is empty'
+      'UTF-8 validation setting cannot be empty'
+    );
+  });
+
+  it('should throw error if non-boolean utf8 field for validation option is specified for a key', function () {
+    const utf8InvalidOptionObj = { validation: { utf8: { a: { a: true } } } };
+    const utf8InvalidOptionArr = {
+      validation: { utf8: { a: ['should', 'be', 'boolean'], b: true } }
+    };
+    const utf8InvalidOptionStr = { validation: { utf8: { a: 'bad value', b: true } } };
+
+    expect(() => BSON.deserialize(sampleValidUTF8, utf8InvalidOptionObj)).to.throw(
+      BSONError,
+      'Invalid UTF-8 validation option, must specify boolean values'
+    );
+    expect(() => BSON.deserialize(sampleValidUTF8, utf8InvalidOptionArr)).to.throw(
+      BSONError,
+      'Invalid UTF-8 validation option, must specify boolean values'
+    );
+    expect(() => BSON.deserialize(sampleValidUTF8, utf8InvalidOptionStr)).to.throw(
+      BSONError,
+      'Invalid UTF-8 validation option, must specify boolean values'
     );
   });
 
