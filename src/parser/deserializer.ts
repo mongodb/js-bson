@@ -158,10 +158,7 @@ function deserializeObject(
     if (utf8ValidationValues.length === 0) {
       throw new BSONError('UTF-8 validation setting cannot be empty');
     }
-    // if (typeof utf8ValidationValues[0] !== 'boolean') {
-    //   throw new BSONError('Invalid UTF-8 validation option, must specify boolean values');
-    // }
-    if (!utf8ValidationValues.every(item => typeof item === 'boolean')) {
+    if (typeof utf8ValidationValues[0] !== 'boolean') {
       throw new BSONError('Invalid UTF-8 validation option, must specify boolean values');
     }
     validationSetting = utf8ValidationValues[0];
@@ -222,14 +219,10 @@ function deserializeObject(
 
     // shouldValidateKey is true if the key should be validated, false otherwise
     let shouldValidateKey = true;
-    if (globalUTFValidation) {
+    if (globalUTFValidation || utf8KeysSet.has(name)) {
       shouldValidateKey = validationSetting;
     } else {
-      if (utf8KeysSet.has(name)) {
-        shouldValidateKey = validationSetting;
-      } else {
-        shouldValidateKey = !validationSetting;
-      }
+      shouldValidateKey = !validationSetting;
     }
 
     if (isPossibleDBRef !== false && (name as string)[0] === '$') {
@@ -305,8 +298,11 @@ function deserializeObject(
       if (raw) {
         value = buffer.slice(index, index + objectSize);
       } else {
-        options.validation = { utf8: shouldValidateKey };
-        value = deserializeObject(buffer, _index, options, false);
+        let objectOptions = options;
+        if (!globalUTFValidation) {
+          objectOptions = { ...options, validation: { utf8: shouldValidateKey } };
+        }
+        value = deserializeObject(buffer, _index, objectOptions, false);
       }
 
       index = index + objectSize;
@@ -334,7 +330,9 @@ function deserializeObject(
         }
         arrayOptions['raw'] = true;
       }
-      arrayOptions.validation = { utf8: shouldValidateKey };
+      if (!globalUTFValidation) {
+        arrayOptions = { ...options, validation: { utf8: shouldValidateKey } };
+      }
       value = deserializeObject(buffer, _index, arrayOptions, true);
       index = index + objectSize;
 

@@ -316,7 +316,7 @@ describe('UTF8 validation', function () {
   for (const { description, buffer, expectedObjectWithReplacementChars } of testInputs) {
     const behavior = 'not validate utf8 and not throw an error';
     it(`should ${behavior} for ${description} with global utf8 validation disabled`, function () {
-      const validation = { validation: { utf8: false } };
+      const validation = Object.freeze({ validation: Object.freeze({ utf8: false }) });
       expect(BSON.deserialize(buffer, validation)).to.deep.equals(
         expectedObjectWithReplacementChars
       );
@@ -331,7 +331,7 @@ describe('UTF8 validation', function () {
   } of testInputs) {
     const behavior = containsInvalid ? 'throw error' : 'validate utf8 with no errors';
     it(`should ${behavior} for ${description} with global utf8 validation enabled`, function () {
-      const validation = { validation: { utf8: true } };
+      const validation = Object.freeze({ validation: Object.freeze({ utf8: true }) });
       if (containsInvalid) {
         expect(() => BSON.deserialize(buffer, validation)).to.throw(
           BSONError,
@@ -348,6 +348,8 @@ describe('UTF8 validation', function () {
   for (const { description, buffer, expectedObjectWithReplacementChars, testCases } of testInputs) {
     for (const { behavior, validation } of testCases) {
       it(`should ${behavior} for ${description}`, function () {
+        Object.freeze(validation);
+        Object.freeze(validation.utf8);
         if (behavior.substring(0, 3) === 'not') {
           expect(BSON.deserialize(buffer, validation)).to.deep.equals(
             expectedObjectWithReplacementChars

@@ -14,4 +14,4 @@ expectError(deserialize(sampleValidUTF8, { validation: { utf8: { a: true, b: tru
 deserialize(sampleValidUTF8, { validation: { utf8: { a: true, b: true, c: true } } });
 deserialize(sampleValidUTF8, { validation: { utf8: { a: false, b: false, c: false} } });
 deserialize(sampleValidUTF8, { validation: { utf8: true } });
-deserialize(sampleValidUTF8, { validation: { utf8: true } });
+deserialize(sampleValidUTF8, { validation: { utf8: false } });
