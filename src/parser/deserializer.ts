@@ -331,7 +331,7 @@ function deserializeObject(
         arrayOptions['raw'] = true;
       }
       if (!globalUTFValidation) {
-        arrayOptions = { ...options, validation: { utf8: shouldValidateKey } };
+        arrayOptions = { ...arrayOptions, validation: { utf8: shouldValidateKey } };
       }
       value = deserializeObject(buffer, _index, arrayOptions, true);
       index = index + objectSize;
