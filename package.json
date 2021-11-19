@@ -97,7 +97,7 @@
     "test": "npm run build && npm run test-node && npm run test-browser",
     "test-node": "mocha test/node test/*_tests.js",
     "test-tsd": "npm run build:dts && tsd",
-    "test-browser": "karma start karma.conf.js",
+    "test-browser": "node --max-old-space-size=4096 ./node_modules/.bin/karma start karma.conf.js",
     "build:ts": "tsc",
     "build:dts": "npm run build:ts && api-extractor run --typescript-compiler-folder node_modules/typescript --local && rimraf 'lib/**/*.d.ts*' && downlevel-dts bson.d.ts bson.d.ts",
     "build:bundle": "rollup -c rollup.config.js",
