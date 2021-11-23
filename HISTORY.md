@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.6.0](https://github.com/mongodb/js-bson/compare/v4.5.4...v4.6.0) (2021-11-23)
+
+
+### Features
+
+* **NODE-3740:** Implement root and top level key utf-8 validation settings for BSON ([#472](https://github.com/mongodb/js-bson/issues/472)) ([07019a0](https://github.com/mongodb/js-bson/commit/07019a036ca4a4a15976707099bd949d2c042699))
+
+
+### Bug Fixes
+
+* **NODE-3724:** Fix BSONTypeError and BSONError to correctly handle instanceof checks ([#471](https://github.com/mongodb/js-bson/issues/471)) ([d8f334b](https://github.com/mongodb/js-bson/commit/d8f334bd3086ee7764849dd145ad513dd1067eaf))
+
 ### [4.5.4](https://github.com/mongodb/js-bson/compare/v4.5.3...v4.5.4) (2021-11-03)
 
 
