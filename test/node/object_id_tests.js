@@ -269,6 +269,20 @@ describe('ObjectId', function () {
     );
   });
 
+  it('should have isValid be true for 12-char length and 12-byte length string', function () {
+    const plainASCIIstr = 'aaaaaaaaaaaa';
+    expect(ObjectId.isValid(plainASCIIstr)).to.be.true;
+  });
+
+  it('should have isValid be false for 12-char length but non-12-byte length string', function () {
+    const characterCodesLargerThan256 = 'abcdefŽhijkl';
+    const length12Not12Bytest1 = '🐶🐶🐶🐶🐶🐶';
+    const length12Not12Bytest2 = 'value with é';
+    expect(ObjectId.isValid(characterCodesLargerThan256)).to.be.false;
+    expect(ObjectId.isValid(length12Not12Bytest1)).to.be.false;
+    expect(ObjectId.isValid(length12Not12Bytest2)).to.be.false;
+  });
+
   it('should correctly interpret timestamps beyond 2038', function () {
     const farFuture = new Date('2040-01-01T00:00:00.000Z').getTime();
     expect(
