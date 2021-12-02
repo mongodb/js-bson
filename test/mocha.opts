@@ -2,4 +2,3 @@
 --require chai/register-expect
 --require source-map-support/register
 --timeout 10000
---throw-deprecation

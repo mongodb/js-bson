@@ -45,7 +45,7 @@ export class ObjectId {
    *
    * @param inputId - Can be a 24 character hex string, 12 byte binary Buffer, or a number.
    */
-  constructor(inputId?: string | Buffer | number | ObjectIdLike | ObjectId) {
+  constructor(inputId?: string | number | ObjectId | ObjectIdLike | Buffer | Uint8Array) {
     if (!(this instanceof ObjectId)) return new ObjectId(inputId);
 
     // workingId is set based on type of input and whether valid id exists for the input
@@ -290,34 +290,15 @@ export class ObjectId {
    *
    * @param id - ObjectId instance to validate.
    */
-  static isValid(id: number | string | ObjectId | Uint8Array | ObjectIdLike): boolean {
+  static isValid(id: string | number | ObjectId | ObjectIdLike | Buffer | Uint8Array): boolean {
     if (id == null) return false;
 
-    if (typeof id === 'number') {
+    try {
+      new ObjectId(id);
       return true;
+    } catch {
+      return false;
     }
-
-    if (typeof id === 'string') {
-      return id.length === 12 || (id.length === 24 && checkForHexRegExp.test(id));
-    }
-
-    if (id instanceof ObjectId) {
-      return true;
-    }
-
-    if (isUint8Array(id) && id.length === 12) {
-      return true;
-    }
-
-    // Duck-Typing detection of ObjectId like objects
-    if (typeof id === 'object' && 'toHexString' in id && typeof id.toHexString === 'function') {
-      if (typeof id.id === 'string') {
-        return id.id.length === 12;
-      }
-      return id.toHexString().length === 24 && checkForHexRegExp.test(id.id.toString('hex'));
-    }
-
-    return false;
   }
 
   /** @internal */
