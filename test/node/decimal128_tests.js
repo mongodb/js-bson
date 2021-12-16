@@ -1219,7 +1219,7 @@ describe('Decimal128', function () {
     expect(new Decimal128('-1e400').toString()).to.equal('-1E+400');
   });
 
-  it.only('throws appropriate error for invalid constructor arguments', () => {
+  it('throws appropriate error for invalid constructor arguments', () => {
     const byteLengthErrMsg = 'Decimal128 must take a Buffer of 16 bytes';
     const constructorArgErrMsg = 'Decimal128 must take a Buffer or string';
 
