@@ -112,7 +112,7 @@ export interface Document {
 const MAXSIZE = 1024 * 1024 * 17;
 
 // Current Internal Temporary Serialization Buffer
-let buffer = Buffer.alloc(MAXSIZE);
+let buffer = Buffer.allocUnsafe(MAXSIZE);
 
 /**
  * Sets the size of the internal serialization buffer.

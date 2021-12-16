@@ -1,6 +1,7 @@
 import { Buffer } from 'buffer';
 import { BSONTypeError } from './error';
 import { Long } from './long';
+import { isUint8Array } from './parser/utils';
 
 const PARSE_STRING_REGEXP = /^(\+|-)?(\d+|(\d*\.\d*))?(E|e)?([-+])?(\d+)?$/;
 const PARSE_INF_REGEXP = /^(\+|-)?(Infinity|inf)$/i;
@@ -132,8 +133,14 @@ export class Decimal128 {
 
     if (typeof bytes === 'string') {
       this.bytes = Decimal128.fromString(bytes).bytes;
+    } else if (isUint8Array(bytes)) {
+      if (bytes.byteLength === 16) {
+        this.bytes = bytes;
+      } else {
+        throw new BSONTypeError('Decimal128 must take a Buffer of 16 bytes');
+      }
     } else {
-      this.bytes = bytes;
+      throw new BSONTypeError('Decimal128 must take a Buffer or string');
     }
   }
 
