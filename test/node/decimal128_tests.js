@@ -1,6 +1,5 @@
 'use strict';
 
-// const { BSONTypeError } = require('../register-bson');
 const BSON = require('../register-bson');
 const Decimal128 = BSON.Decimal128;
 
@@ -1219,14 +1218,17 @@ describe('Decimal128', function () {
     expect(new Decimal128('-1e400').toString()).to.equal('-1E+400');
   });
 
-  it('throws appropriate error for invalid constructor arguments', () => {
-    const byteLengthErrMsg = 'Decimal128 must take a Buffer of 16 bytes';
+  it('throws correct error for invalid constructor argument type', () => {
     const constructorArgErrMsg = 'Decimal128 must take a Buffer or string';
 
     expect(() => new Decimal128(-0)).to.throw(constructorArgErrMsg);
     expect(() => new Decimal128(-1)).to.throw(constructorArgErrMsg);
     expect(() => new Decimal128(10)).to.throw(constructorArgErrMsg);
     expect(() => new Decimal128(1111111111111111)).to.throw(constructorArgErrMsg);
+  });
+
+  it('throws correct error for an invalid Buffer constructor argument', () => {
+    const byteLengthErrMsg = 'Decimal128 must take a Buffer of 16 bytes';
 
     expect(() => new Decimal128(new Uint8Array(0))).to.throw(byteLengthErrMsg);
     expect(() => new Decimal128(Buffer.alloc(0))).to.throw(byteLengthErrMsg);
