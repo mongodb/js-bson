@@ -946,12 +946,12 @@ export function serializeInto(
       }
     }
   } else {
-    // Did we provide a custom serialization method
-    if (object.toBSON) {
-      if (typeof object.toBSON !== 'function') throw new BSONTypeError('toBSON is not a function');
+    if (typeof object?.toBSON === 'function') {
+      // Provided a custom serialization method
       object = object.toBSON();
-      if (object != null && typeof object !== 'object')
+      if (object != null && typeof object !== 'object') {
         throw new BSONTypeError('toBSON function did not return an object');
+      }
     }
 
     // Iterate over all the keys
