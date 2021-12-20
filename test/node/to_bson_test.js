@@ -129,4 +129,44 @@ describe('toBSON', function () {
     expect(true).to.equal(test2);
     done();
   });
+
+  it('Should not fail with properly extended BigInt prototype', function (done) {
+    // extend BigInt prototype
+    BigInt.prototype.toBSON = function(){
+      return 'hello';
+    }
+
+    // test with 0n
+    var doc = {
+      a: BigInt(0)
+    }
+
+    // serialize / deserialize
+    var serialized_data = BSON.serialize(doc, false, true);
+    var deserialized_doc = BSON.deserialize(serialized_data);
+    expect('hello').to.deep.equal(deserialized_doc.a);
+
+    // remove prototype extension intended for test
+    delete BigInt.prototype.toBSON;
+
+    done();
+  });
+
+  // by default, bigint is not supported
+  it('Should fail with unsupported primitive bigint', function (done) {
+    var doc = {
+      a: BigInt(0)
+    };
+
+    var test = false;
+
+    try{
+      BSON.serialize(doc, false, true);
+    } catch (err) {
+      test = true;
+    }
+
+    expect(true).to.equal(test);
+    done();
+  });
 });
