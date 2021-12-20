@@ -1,3 +1,4 @@
+/* globals BigInt */
 'use strict';
 
 const BSON = require('../register-bson');
@@ -132,14 +133,14 @@ describe('toBSON', function () {
 
   it('Should not fail with properly extended BigInt prototype', function (done) {
     // extend BigInt prototype
-    BigInt.prototype.toBSON = function(){
+    BigInt.prototype.toBSON = function () {
       return 'hello';
-    }
+    };
 
     // test with 0n
     var doc = {
       a: BigInt(0)
-    }
+    };
 
     // serialize / deserialize
     var serialized_data = BSON.serialize(doc, false, true);
@@ -160,7 +161,7 @@ describe('toBSON', function () {
 
     var test = false;
 
-    try{
+    try {
       BSON.serialize(doc, false, true);
     } catch (err) {
       test = true;
