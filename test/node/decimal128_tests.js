@@ -1236,7 +1236,10 @@ describe('Decimal128', function () {
     expect(() => new Decimal128(Buffer.alloc(3))).to.throw(byteLengthErrMsg);
     expect(() => new Decimal128(new Uint8Array(17))).to.throw(byteLengthErrMsg);
     expect(() => new Decimal128(Buffer.alloc(17))).to.throw(byteLengthErrMsg);
-    new Decimal128(Buffer.alloc(16));
-    new Decimal128(new Uint8Array(16));
+  });
+
+  it('does not throw error for an empty Buffer of correct length constructor argument', () => {
+    expect(() => new Decimal128(Buffer.alloc(16))).to.not.throw();
+    expect(() => new Decimal128(new Uint8Array(16))).to.not.throw();
   });
 });
