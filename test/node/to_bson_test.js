@@ -131,7 +131,7 @@ describe('toBSON', function () {
   });
 
   it('Should not fail with properly extended primitive wrapper object', function (done) {
-    // extend BigInt prototype
+    // extend Number prototype
     Number.prototype.toBSON = function () {
       return 'hello';
     };
