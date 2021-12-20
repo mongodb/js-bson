@@ -767,8 +767,7 @@ export function serializeInto(
       let value = object[i];
 
       // Is there an override value
-      if (value !== null && value !== undefined && value.toBSON) {
-        if (typeof value.toBSON !== 'function') throw new BSONTypeError('toBSON is not a function');
+      if (typeof value?.toBSON === 'function') {
         value = value.toBSON();
       }
 
