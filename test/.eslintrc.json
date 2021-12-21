@@ -31,6 +31,21 @@
       "error",
       "global"
     ],
-    "promise/no-native": "off"
+    "promise/no-native": "off",
+    "no-restricted-properties": [
+      "error",
+      {
+        "object": "describe",
+        "property": "only"
+      },
+      {
+        "object": "it",
+        "property": "only"
+      },
+      {
+        "object": "context",
+        "property": "only"
+      }
+    ]
   }
 }

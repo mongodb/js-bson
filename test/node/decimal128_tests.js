@@ -1205,7 +1205,7 @@ describe('Decimal128', function () {
     done();
   });
 
-  it('accepts strings in the constructor', function (done) {
+  it('accepts strings in the constructor', () => {
     expect(new Decimal128('0').toString()).to.equal('0');
     expect(new Decimal128('00').toString()).to.equal('0');
     expect(new Decimal128('0.5').toString()).to.equal('0.5');
@@ -1216,6 +1216,30 @@ describe('Decimal128', function () {
     expect(new Decimal128('0.0011').toString()).to.equal('0.0011');
     expect(new Decimal128('0.00110').toString()).to.equal('0.00110');
     expect(new Decimal128('-1e400').toString()).to.equal('-1E+400');
-    done();
+  });
+
+  it('throws correct error for invalid constructor argument type', () => {
+    const constructorArgErrMsg = 'Decimal128 must take a Buffer or string';
+
+    expect(() => new Decimal128(-0)).to.throw(constructorArgErrMsg);
+    expect(() => new Decimal128(-1)).to.throw(constructorArgErrMsg);
+    expect(() => new Decimal128(10)).to.throw(constructorArgErrMsg);
+    expect(() => new Decimal128(1111111111111111)).to.throw(constructorArgErrMsg);
+  });
+
+  it('throws correct error for an invalid Buffer constructor argument', () => {
+    const byteLengthErrMsg = 'Decimal128 must take a Buffer of 16 bytes';
+
+    expect(() => new Decimal128(new Uint8Array(0))).to.throw(byteLengthErrMsg);
+    expect(() => new Decimal128(Buffer.alloc(0))).to.throw(byteLengthErrMsg);
+    expect(() => new Decimal128(new Uint8Array(3))).to.throw(byteLengthErrMsg);
+    expect(() => new Decimal128(Buffer.alloc(3))).to.throw(byteLengthErrMsg);
+    expect(() => new Decimal128(new Uint8Array(17))).to.throw(byteLengthErrMsg);
+    expect(() => new Decimal128(Buffer.alloc(17))).to.throw(byteLengthErrMsg);
+  });
+
+  it('does not throw error for an empty Buffer of correct length constructor argument', () => {
+    expect(() => new Decimal128(Buffer.alloc(16))).to.not.throw();
+    expect(() => new Decimal128(new Uint8Array(16))).to.not.throw();
   });
 });
