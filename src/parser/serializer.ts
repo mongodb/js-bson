@@ -767,8 +767,7 @@ export function serializeInto(
       let value = object[i];
 
       // Is there an override value
-      if (value && value.toBSON) {
-        if (typeof value.toBSON !== 'function') throw new BSONTypeError('toBSON is not a function');
+      if (typeof value?.toBSON === 'function') {
         value = value.toBSON();
       }
 
@@ -947,20 +946,19 @@ export function serializeInto(
       }
     }
   } else {
-    // Did we provide a custom serialization method
-    if (object.toBSON) {
-      if (typeof object.toBSON !== 'function') throw new BSONTypeError('toBSON is not a function');
+    if (typeof object?.toBSON === 'function') {
+      // Provided a custom serialization method
       object = object.toBSON();
-      if (object != null && typeof object !== 'object')
+      if (object != null && typeof object !== 'object') {
         throw new BSONTypeError('toBSON function did not return an object');
+      }
     }
 
     // Iterate over all the keys
     for (const key in object) {
       let value = object[key];
       // Is there an override value
-      if (value && value.toBSON) {
-        if (typeof value.toBSON !== 'function') throw new BSONTypeError('toBSON is not a function');
+      if (typeof value?.toBSON === 'function') {
         value = value.toBSON();
       }
 

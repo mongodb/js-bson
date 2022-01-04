@@ -24,7 +24,7 @@ export function calculateObjectSize(
   } else {
     // If we have toBSON defined, override the current object
 
-    if (object.toBSON) {
+    if (typeof object?.toBSON === 'function') {
       object = object.toBSON();
     }
 
@@ -47,7 +47,7 @@ function calculateElement(
   ignoreUndefined = false
 ) {
   // If we have toBSON defined, override the current object
-  if (value && value.toBSON) {
+  if (typeof value?.toBSON === 'function') {
     value = value.toBSON();
   }
 
