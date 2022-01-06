@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.6.1](https://github.com/mongodb/js-bson/compare/v4.6.0...v4.6.1) (2022-01-06)
+
+
+### Bug Fixes
+
+* **NODE-3760:** ObjectId.isValid string and byte length match ([#475](https://github.com/mongodb/js-bson/issues/475)) ([187d1c4](https://github.com/mongodb/js-bson/commit/187d1c40f7222fd63dbc55d1535669ff0bfcbce2))
+* **NODE-3815:** update Decimal128 constructor validation ([#476](https://github.com/mongodb/js-bson/issues/476)) ([95e8293](https://github.com/mongodb/js-bson/commit/95e8293f95b6fff65a37962b05cebf40f0cb6a41))
+* **NODE-3821:** nullish check before using toBSON override function ([#477](https://github.com/mongodb/js-bson/issues/477)) ([1d898b6](https://github.com/mongodb/js-bson/commit/1d898b6cb412138fad5ba1abbde02aa7a462d77d))
+
 ## [4.6.0](https://github.com/mongodb/js-bson/compare/v4.5.4...v4.6.0) (2021-11-23)
 
 
