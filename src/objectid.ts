@@ -212,7 +212,7 @@ export class ObjectId {
     }
 
     if (otherId instanceof ObjectId) {
-      return this.toString() === otherId.toString();
+      return this.id[11] === otherId.id[11] && this.id.equals(otherId.id);
     }
 
     if (
