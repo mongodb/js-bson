@@ -212,7 +212,7 @@ export class ObjectId {
     }
 
     if (otherId instanceof ObjectId) {
-      return this.id[11] === otherId.id[11] && this.id.equals(otherId.id);
+      return this.id[11] === otherId.id[11] && this[kId].equals(otherId[kId]);
     }
 
     if (
