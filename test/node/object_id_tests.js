@@ -289,4 +289,95 @@ describe('ObjectId', function () {
       new BSON.ObjectId(BSON.ObjectId.generate(farFuture / 1000)).getTimestamp().getTime()
     ).to.equal(farFuture);
   });
+
+  describe('.equals(otherId)', () => {
+    /*
+     * ObjectId.equals() covers many varieties of cases passed into it In an attempt to handle ObjectId-like objects
+     * Each test covers a corresponding if stmt in the equals method.
+     */
+    const oidBytesInAString = 'kaffeeklatch';
+    const oidString = '6b61666665656b6c61746368';
+    const oid = new ObjectId(oidString);
+    it('should return false for an undefined otherId', () => {
+      // otherId === undefined || otherId === null
+      expect(oid.equals(null)).to.be.false;
+      expect(oid.equals(undefined)).to.be.false;
+      expect(oid.equals()).to.be.false;
+    });
+
+    it('should return true for another ObjectId with the same bytes', () => {
+      // otherId instanceof ObjectId
+      const equalOid = new ObjectId(oid.id);
+      expect(oid.equals(equalOid)).to.be.true;
+    });
+
+    it('should return true if otherId is a valid 24 char hex string', () => {
+      // typeof otherId === 'string' && ObjectId.isValid(otherId) && otherId.length === 24
+      const equalOid = oidString;
+      expect(oid.equals(equalOid)).to.be.true;
+    });
+
+    it('should return true if otherId is a valid 12 byte string', () => {
+      /*
+      typeof otherId === 'string' &&
+      ObjectId.isValid(otherId) &&
+      otherId.length === 12 &&
+      isUint8Array(this.id)
+      */
+      const equalOid = oidBytesInAString;
+      expect(oid.equals(equalOid)).to.be.true;
+    });
+
+    it.skip('should return true if otherId is a valid 12 byte string and oid.id is not Uint8Array', () => {
+      // typeof otherId === 'string' && ObjectId.isValid(otherId) && otherId.length === 12
+      // Skipped because the check inside of this if statement is incorrect, it will never return true
+      // But it is also unreachable because of the other 12 len case checked before it
+      const equalOid = oidBytesInAString;
+      Object.defineProperty(oid, 'id', { value: oid.toHexString() });
+      expect(oid.equals(equalOid)).to.be.true;
+    });
+
+    it('should return true if otherId is an object with a toHexString function, regardless of casing', () => {
+      /*
+      typeof otherId === 'object' &&
+      'toHexString' in otherId &&
+      typeof otherId.toHexString === 'function'
+      */
+      expect(oid.equals({ toHexString: () => oidString.toLowerCase() })).to.be.true;
+      expect(oid.equals({ toHexString: () => oidString.toUpperCase() })).to.be.true;
+    });
+
+    it('should return false if toHexString does not return a string', () => {
+      // typeof otherIdString === 'string'
+
+      // Now that we call toLowerCase() make sure we guard the call with a type check
+      expect(() => oid.equals({ toHexString: () => 100 })).to.not.throw(TypeError);
+      expect(oid.equals({ toHexString: () => 100 })).to.be.false;
+    });
+
+    it('should not rely on toString for otherIds that are instanceof ObjectId', () => {
+      const equalId = { toString: () => oidString + 'wrong', id: oid.id };
+      Object.setPrototypeOf(equalId, ObjectId.prototype);
+      expect(oid.toString()).to.not.equal(equalId.toString());
+      expect(oid.equals(equalId)).to.be.true;
+    });
+
+    it('should use otherId.id Buffer for equality when otherId is instanceof ObjectId', () => {
+      let equalId = { id: oid.id };
+      Object.setPrototypeOf(equalId, ObjectId.prototype);
+
+      const propAccessRecord = [];
+      equalId = new Proxy(equalId, {
+        get(target, prop, recv) {
+          propAccessRecord.push(prop);
+          return Reflect.get(target, prop, recv);
+        }
+      });
+
+      expect(oid.equals(equalId)).to.be.true;
+      // once for the 11th byte shortcut
+      // once for the total equality
+      expect(propAccessRecord).to.deep.equal(['id', 'id']);
+    });
+  });
 });

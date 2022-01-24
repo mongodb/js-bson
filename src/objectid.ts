@@ -237,7 +237,9 @@ export class ObjectId {
       'toHexString' in otherId &&
       typeof otherId.toHexString === 'function'
     ) {
-      return otherId.toHexString() === this.toHexString();
+      const otherIdString = otherId.toHexString();
+      const thisIdString = this.toHexString().toLowerCase();
+      return typeof otherIdString === 'string' && otherIdString.toLowerCase() === thisIdString;
     }
 
     return false;
