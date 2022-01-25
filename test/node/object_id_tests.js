@@ -3,8 +3,9 @@
 const Buffer = require('buffer').Buffer;
 const BSON = require('../register-bson');
 const BSONTypeError = BSON.BSONTypeError;
-const util = require('util');
 const ObjectId = BSON.ObjectId;
+const util = require('util');
+const getSymbolFrom = require('./tools/utils').getSymbolFrom;
 
 describe('ObjectId', function () {
   it('should correctly handle objectId timestamps', function (done) {
@@ -298,6 +299,7 @@ describe('ObjectId', function () {
     const oidBytesInAString = 'kaffeeklatch';
     const oidString = '6b61666665656b6c61746368';
     const oid = new ObjectId(oidString);
+    const oidKId = getSymbolFrom(oid, 'id');
     it('should return false for an undefined otherId', () => {
       // otherId === undefined || otherId === null
       expect(oid.equals(null)).to.be.false;
@@ -356,14 +358,15 @@ describe('ObjectId', function () {
     });
 
     it('should not rely on toString for otherIds that are instanceof ObjectId', () => {
-      const equalId = { toString: () => oidString + 'wrong', id: oid.id };
+      // Note: the method access the symbol prop directly instead of the getter
+      const equalId = { toString: () => oidString + 'wrong', [oidKId]: oid.id };
       Object.setPrototypeOf(equalId, ObjectId.prototype);
       expect(oid.toString()).to.not.equal(equalId.toString());
       expect(oid.equals(equalId)).to.be.true;
     });
 
-    it('should use otherId.id Buffer for equality when otherId is instanceof ObjectId', () => {
-      let equalId = { id: oid.id };
+    it('should use otherId[kId] Buffer for equality when otherId is instanceof ObjectId', () => {
+      let equalId = { [oidKId]: oid.id };
       Object.setPrototypeOf(equalId, ObjectId.prototype);
 
       const propAccessRecord = [];
@@ -377,7 +380,7 @@ describe('ObjectId', function () {
       expect(oid.equals(equalId)).to.be.true;
       // once for the 11th byte shortcut
       // once for the total equality
-      expect(propAccessRecord).to.deep.equal(['id', 'id']);
+      expect(propAccessRecord).to.deep.equal([oidKId, oidKId]);
     });
   });
 });
