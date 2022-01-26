@@ -156,3 +156,19 @@ exports.isNode6 = function () {
   // eslint-disable-next-line no-undef
   return process.version.split('.')[0] === 'v6';
 };
+
+const getSymbolFrom = function (target, symbolName, assertExists) {
+  if (assertExists == null) assertExists = true;
+
+  const symbol = Object.getOwnPropertySymbols(target).filter(
+    s => s.toString() === `Symbol(${symbolName})`
+  )[0];
+
+  if (assertExists && !symbol) {
+    throw new Error(`Did not find Symbol(${symbolName}) on ${target}`);
+  }
+
+  return symbol;
+};
+
+exports.getSymbolFrom = getSymbolFrom;
