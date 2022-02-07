@@ -50,3 +50,27 @@ expectError(MaxKey.prototype.toJSON);
 expectError(MinKey.prototype.toJSON);
 expectError(Long.prototype.toJSON);
 expectError(BSONRegExp.prototype.toJSON);
+
+// ObjectID uses a capital for backwards compatibility
+expectType<'ObjectID'>(ObjectId.prototype._bsontype)
+// BSONSymbol was renamed to not conflict with the global JS Symbol
+// but its _bsontype is still 'Symbol'
+expectType<'Symbol'>(BSONSymbol.prototype._bsontype)
+
+// We hack TS to say that the prototype has _bsontype='Timestamp'
+// but it actually is _bsontype='Long', inside the Timestamp constructor
+// we override the property on the instance
+// TODO(NODE-2624): Make Timestamp hold its long value on a property rather than be a subclass
+expectType<'Timestamp'>(Timestamp.prototype._bsontype)
+
+expectType<'Binary'>(Binary.prototype._bsontype)
+expectType<'Code'>(Code.prototype._bsontype)
+expectType<'DBRef'>(DBRef.prototype._bsontype)
+expectType<'Decimal128'>(Decimal128.prototype._bsontype)
+expectType<'Double'>(Double.prototype._bsontype)
+expectType<'Int32'>(Int32.prototype._bsontype)
+expectType<'Long'>(Long.prototype._bsontype)
+expectType<'MaxKey'>(MaxKey.prototype._bsontype)
+expectType<'MinKey'>(MinKey.prototype._bsontype)
+expectType<'BSONRegExp'>(BSONRegExp.prototype._bsontype)
+expectType<'UUID'>(UUID.prototype._bsontype)
