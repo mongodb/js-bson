@@ -229,7 +229,7 @@ describe('BSON Corpus', function () {
           for (const d of scenario.decodeErrors) {
             it(d.description, function () {
               const B = Buffer.from(d.bson, 'hex');
-              expect(() => BSON.deserialize(B, deserializeOptions)).to.throw();
+              expect(() => BSON.deserialize(B, deserializeOptions)).to.throw(BSONError);
             });
           }
         });
