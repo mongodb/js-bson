@@ -30,6 +30,7 @@ const fs = require('fs');
 
 /**
  * @typedef {object} BSONCorpus
+ * @property {string} _filename
  * @property {string} description
  * @property {string} bson_type
  * @property {string} test_key
@@ -46,7 +47,12 @@ function findScenarios() {
   return fs
     .readdirSync(path.join(__dirname, '../specs/bson-corpus'))
     .filter(x => x.indexOf('json') !== -1)
-    .map(x => JSON.parse(fs.readFileSync(path.join(__dirname, '../specs/bson-corpus', x), 'utf8')));
+    .map(x =>
+      Object.assign(
+        JSON.parse(fs.readFileSync(path.join(__dirname, '../specs/bson-corpus', x), 'utf8')),
+        { _filename: x.replace('.json', '') }
+      )
+    );
 }
 
 module.exports = findScenarios();

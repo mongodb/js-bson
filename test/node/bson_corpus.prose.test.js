@@ -35,7 +35,9 @@ describe('BSON Corpus Prose Tests', function () {
 
     it('Flags/options for a regular expression', () => {
       expect(() => BSON.serialize({ a: new BSONRegExp('a', 'i\x00m') })).to.throw(/null bytes/);
-      // TODO: should we test RegExp, too?
+
+      // eslint-disable-next-line no-invalid-regexp
+      expect(() => new RegExp('a', 'i\x00m')).to.throw(SyntaxError);
     });
   });
 });
