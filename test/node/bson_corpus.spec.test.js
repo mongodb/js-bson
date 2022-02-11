@@ -108,40 +108,29 @@ const parseErrorForRootDocument = scenario => {
   }
 };
 
-const skipBSON = {
-  'NaN with payload':
-    'passing this would require building a custom type to store the NaN payload data.'
-};
-// tests from the corpus that we need to skip, and explanations why
-const skipExtendedJSON = {
-  'Timestamp with high-order bit set on both seconds and increment':
-    'Current BSON implementation of timestamp/long cannot hold these values - 1 too large.',
-  'Timestamp with high-order bit set on both seconds and increment (not UINT32_MAX)':
-    'Current BSON implementation of timestamp/long cannot hold these values - 1 too large.'
-};
-
-const SKIP_TESTS = new Map([
-  ...Object.entries(skipBSON),
-  ...Object.entries(skipExtendedJSON),
-  [
-    'All BSON types',
-    'there is just too much variation in the specified expectation to make this work'
-  ]
-]);
-
 const corpus = require('./tools/bson_corpus_test_loader');
 describe('BSON Corpus', function () {
   for (const scenario of corpus) {
     const deprecated = scenario.deprecated;
     const description = scenario.description;
-    const valid = scenario.valid || [];
+    const scenarioName = `${description} (${scenario._filename})`;
+    const valid = scenario.valid;
 
-    describe(description, function () {
+    describe(scenarioName, function () {
       if (valid) {
         describe('valid-bson', function () {
           for (const v of valid) {
             it(v.description, function () {
-              if (SKIP_TESTS.has(v.description)) {
+              if (v.description === 'NaN with payload') {
+                // TODO(NODE-3630): remove custom float parser so we can handle the NaN payload data
+                this.skip();
+              }
+
+              if (
+                v.description === 'All BSON types' &&
+                scenario._filename === 'multi-type-deprecated'
+              ) {
+                // TODO(NODE-3987): fix multi-type-deprecated test
                 this.skip();
               }
 
@@ -181,9 +170,6 @@ describe('BSON Corpus', function () {
         describe('valid-extjson', function () {
           for (const v of valid) {
             it(v.description, function () {
-              if (SKIP_TESTS.has(v.description)) {
-                this.skip();
-              }
               // read in test case data. if this scenario is for a deprecated
               // type, we want to use the "converted" BSON and EJSON, which
               // use the upgraded version of the deprecated type. otherwise,
@@ -230,6 +216,7 @@ describe('BSON Corpus', function () {
                 expect(nativeToREJSON(nativeFromCB)).to.equal(rEJ);
 
                 // relaxed EJSON -> native -> relaxed EJSON unchanged
+                // TODO(NODE-3396): jsonToNative doesn't correctly parse the relaxed form
                 expect(nativeToREJSON(jsonToNative(rEJ))).to.equal(rEJ);
               }
             });
@@ -242,7 +229,7 @@ describe('BSON Corpus', function () {
           for (const d of scenario.decodeErrors) {
             it(d.description, function () {
               const B = Buffer.from(d.bson, 'hex');
-              expect(() => BSON.deserialize(B, deserializeOptions)).to.throw();
+              expect(() => BSON.deserialize(B, deserializeOptions)).to.throw(BSONError);
             });
           }
         });
