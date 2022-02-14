@@ -4,6 +4,7 @@ import { uuidHexStringToBuffer } from './uuid_utils';
 import { UUID, UUIDExtended } from './uuid';
 import type { EJSONOptions } from './extended_json';
 import { BSONError, BSONTypeError } from './error';
+import { writeBinaryToBuffer } from './parser/utils';
 
 /** @public */
 export type BinarySequence = Uint8Array | Buffer | number[];
@@ -161,7 +162,7 @@ export class Binary {
       this.position =
         offset + sequence.byteLength > this.position ? offset + sequence.length : this.position;
     } else if (typeof sequence === 'string') {
-      this.buffer.write(sequence, offset, sequence.length, 'binary');
+      writeBinaryToBuffer(sequence, this.buffer, offset);
       this.position =
         offset + sequence.length > this.position ? offset + sequence.length : this.position;
     }

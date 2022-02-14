@@ -121,3 +121,49 @@ export function deprecate<T extends Function>(fn: T, message: string): T {
   }
   return deprecated as unknown as T;
 }
+
+export function writeUTF8ToBuffer(str: string, buf: Buffer, offset: number): number {
+  let charCode = 0;
+  let bytes = 0;
+  let i = 0;
+  const il = str.length;
+
+  for (; i < il; ++i) {
+    charCode = str.charCodeAt(i);
+    if (charCode < 0x80) {
+      buf[offset + bytes++] = charCode;
+    } else if (charCode < 0x800) {
+      buf[offset + bytes++] = 0xc0 | (charCode >> 6);
+      buf[offset + bytes++] = 0x80 | (charCode & 0x3f);
+    } else if (charCode < 0xd800 || charCode >= 0xe000) {
+      buf[offset + bytes++] = 0xe0 | (charCode >> 12);
+      buf[offset + bytes++] = 0x80 | ((charCode >> 6) & 0x3f);
+      buf[offset + bytes++] = 0x80 | (charCode & 0x3f);
+    }
+    // surrogate pair
+    else {
+      // UTF-16 encodes 0x10000-0x10FFFF by
+      // subtracting 0x10000 and splitting the
+      // 20 bits of 0x0-0xFFFFF into two halves
+      charCode = 0x10000 + (((charCode & 0x3ff) << 10) | (str.charCodeAt(++i) & 0x3ff));
+      buf[offset++] = 0xf0 | (charCode >> 18);
+      buf[offset++] = 0x80 | ((charCode >> 12) & 0x3f);
+      buf[offset++] = 0x80 | ((charCode >> 6) & 0x3f);
+      buf[offset++] = 0x80 | (charCode & 0x3f);
+    }
+  }
+  return bytes;
+}
+
+export function writeASCIIToBuffer(str: string, buf: Buffer, offset: number): number {
+  let bytes = 0;
+  let i = 0;
+  const il = str.length;
+
+  for (; i < il; ++i) {
+    buf[offset + bytes++] = str.charCodeAt(i);
+  }
+  return bytes;
+}
+
+export const writeBinaryToBuffer = writeASCIIToBuffer;
