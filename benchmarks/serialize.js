@@ -1,12 +1,8 @@
 const Benchmark = require('benchmark');
 
-const bigboard = require('./bigboard.json');
-const checkitem = require('./checkitem.json');
+const bigboard = require('./data/bigboard.json');
+const checkitem = require('./data/checkitem.json');
 const serialize = require('../lib/bson').serialize;
-
-// while(true) {
-//   serialize(checkitem)
-// }
 
 new Benchmark.Suite()
   .add('serialize bigboard', function () {
