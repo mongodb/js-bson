@@ -24,9 +24,9 @@ import {
   isRegExp,
   isUint8Array,
   normalizedFunctionString,
+  writeBinaryToBuffer,
   writeUTF8ToBuffer,
-  writeASCIIToBuffer,
-  writeBinaryToBuffer
+  writeASCIIToBuffer
 } from './utils';
 
 /** @public */
@@ -62,23 +62,20 @@ function serializeString(
   // Encode String type
   buffer[index++] = constants.BSON_DATA_STRING;
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
-  // Encode the name
-  index = index + numberOfWrittenBytes + 1;
-  buffer[index - 1] = 0;
-  // Write the string
-  const size = writeUTF8ToBuffer(value, buffer, index + 4);
-  // Write the size of the string to buffer
-  buffer[index + 3] = ((size + 1) >> 24) & 0xff;
-  buffer[index + 2] = ((size + 1) >> 16) & 0xff;
-  buffer[index + 1] = ((size + 1) >> 8) & 0xff;
-  buffer[index] = (size + 1) & 0xff;
-  // Update index
-  index = index + 4 + size;
-  // Write zero
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
   buffer[index++] = 0;
+  // Write the string
+  const size = writeUTF8ToBuffer(value, buffer, index + 4) - index - 3;
+  // Write the size of the string to buffer
+  buffer[index++] = size & 0xff;
+  buffer[index++] = (size >> 8) & 0xff;
+  buffer[index++] = (size >> 16) & 0xff;
+  buffer[index++] = (size >> 24) & 0xff;
+
+  // Update index
+  index += size;
+  // Write zero
+  buffer[index - 1] = 0;
   return index;
 }
 
@@ -100,11 +97,10 @@ function serializeNumber(
     // Set int type 32 bits or less
     buffer[index++] = constants.BSON_DATA_INT;
     // Number of written bytes
-    const numberOfWrittenBytes = !isArray
+    index = !isArray
       ? writeUTF8ToBuffer(key, buffer, index)
       : writeASCIIToBuffer(key, buffer, index);
     // Encode the name
-    index = index + numberOfWrittenBytes;
     buffer[index++] = 0;
     // Write the int value
     buffer[index++] = value & 0xff;
@@ -115,11 +111,10 @@ function serializeNumber(
     // Encode as double
     buffer[index++] = constants.BSON_DATA_NUMBER;
     // Number of written bytes
-    const numberOfWrittenBytes = !isArray
+    index = !isArray
       ? writeUTF8ToBuffer(key, buffer, index)
       : writeASCIIToBuffer(key, buffer, index);
     // Encode the name
-    index = index + numberOfWrittenBytes;
     buffer[index++] = 0;
     // Write float
     writeIEEE754(buffer, value, index, 'little', 52, 8);
@@ -135,12 +130,9 @@ function serializeNull(buffer: Buffer, key: string, _: unknown, index: number, i
   buffer[index++] = constants.BSON_DATA_NULL;
 
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
 
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   return index;
 }
@@ -155,11 +147,8 @@ function serializeBoolean(
   // Write the type
   buffer[index++] = constants.BSON_DATA_BOOLEAN;
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   // Encode the boolean value
   buffer[index++] = value ? 1 : 0;
@@ -170,11 +159,8 @@ function serializeDate(buffer: Buffer, key: string, value: Date, index: number, 
   // Write the type
   buffer[index++] = constants.BSON_DATA_DATE;
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
 
   // Write the date
@@ -204,18 +190,15 @@ function serializeRegExp(
   // Write the type
   buffer[index++] = constants.BSON_DATA_REGEXP;
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
 
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   if (value.source && regexp.test(value.source)) {
     throw Error('value ' + value.source + ' must not contain null bytes');
   }
   // Adjust the index
-  index = index + writeUTF8ToBuffer(value.source, buffer, index);
+  index = writeUTF8ToBuffer(value.source, buffer, index);
   // Write zero
   buffer[index++] = 0x00;
   // Write the parameters
@@ -238,11 +221,8 @@ function serializeBSONRegExp(
   // Write the type
   buffer[index++] = constants.BSON_DATA_REGEXP;
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
 
   // Check the pattern for 0 bytes
@@ -253,11 +233,11 @@ function serializeBSONRegExp(
   }
 
   // Adjust the index
-  index = index + writeUTF8ToBuffer(value.pattern, buffer, index);
+  index = writeUTF8ToBuffer(value.pattern, buffer, index);
   // Write zero
   buffer[index++] = 0x00;
   // Write the options
-  index = index + writeUTF8ToBuffer(value.options.split('').sort().join(''), buffer, index);
+  index = writeUTF8ToBuffer(value.options.split('').sort().join(''), buffer, index);
   // Add ending zero
   buffer[index++] = 0x00;
   return index;
@@ -280,11 +260,8 @@ function serializeMinMax(
   }
 
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   return index;
 }
@@ -299,12 +276,9 @@ function serializeObjectId(
   // Write the type
   buffer[index++] = constants.BSON_DATA_OID;
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
 
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
 
   // Write the objectId into the shared buffer
@@ -332,11 +306,8 @@ function serializeBuffer(
   // Write the type
   buffer[index++] = constants.BSON_DATA_BINARY;
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   // Get size of the buffer (current write point)
   const size = value.length;
@@ -375,11 +346,8 @@ function serializeObject(
   // Write the type
   buffer[index++] = Array.isArray(value) ? constants.BSON_DATA_ARRAY : constants.BSON_DATA_OBJECT;
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   const endIndex = serializeInto(
     buffer,
@@ -405,11 +373,8 @@ function serializeDecimal128(
 ) {
   buffer[index++] = constants.BSON_DATA_DECIMAL128;
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   // Write the data from the value
   // Prefer the standard JS methods because their typechecking is not buggy,
@@ -423,11 +388,8 @@ function serializeLong(buffer: Buffer, key: string, value: Long, index: number, 
   buffer[index++] =
     value._bsontype === 'Long' ? constants.BSON_DATA_LONG : constants.BSON_DATA_TIMESTAMP;
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   // Write the date
   const lowBits = value.getLowBits();
@@ -456,11 +418,8 @@ function serializeInt32(
   // Set int type 32 bits or less
   buffer[index++] = constants.BSON_DATA_INT;
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   // Write the int value
   buffer[index++] = value & 0xff;
@@ -481,12 +440,9 @@ function serializeDouble(
   buffer[index++] = constants.BSON_DATA_NUMBER;
 
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
 
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
 
   // Write float
@@ -508,26 +464,23 @@ function serializeFunction(
 ) {
   buffer[index++] = constants.BSON_DATA_CODE;
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   // Function string
   const functionString = normalizedFunctionString(value);
 
   // Write the string
-  const size = writeUTF8ToBuffer(functionString, buffer, index + 4) + 1;
+  const size = writeUTF8ToBuffer(functionString, buffer, index + 4) - index - 3;
   // Write the size of the string to buffer
-  buffer[index] = size & 0xff;
-  buffer[index + 1] = (size >> 8) & 0xff;
-  buffer[index + 2] = (size >> 16) & 0xff;
-  buffer[index + 3] = (size >> 24) & 0xff;
+  buffer[index++] = size & 0xff;
+  buffer[index++] = (size >> 8) & 0xff;
+  buffer[index++] = (size >> 16) & 0xff;
+  buffer[index++] = (size >> 24) & 0xff;
   // Update index
-  index = index + 4 + size - 1;
+  index += size;
   // Write zero
-  buffer[index++] = 0;
+  buffer[index - 1] = 0;
   return index;
 }
 
@@ -546,11 +499,10 @@ function serializeCode(
     // Write the type
     buffer[index++] = constants.BSON_DATA_CODE_W_SCOPE;
     // Number of written bytes
-    const numberOfWrittenBytes = !isArray
+    index = !isArray
       ? writeUTF8ToBuffer(key, buffer, index)
       : writeASCIIToBuffer(key, buffer, index);
     // Encode the name
-    index = index + numberOfWrittenBytes;
     buffer[index++] = 0;
 
     // Starting index
@@ -562,16 +514,17 @@ function serializeCode(
     // Index adjustment
     index = index + 4;
     // Write string into buffer
-    const codeSize = writeUTF8ToBuffer(functionString, buffer, index + 4) + 1;
+    const codeSize = writeUTF8ToBuffer(functionString, buffer, index + 4) - index - 3;
     // Write the size of the string to buffer
-    buffer[index] = codeSize & 0xff;
-    buffer[index + 1] = (codeSize >> 8) & 0xff;
-    buffer[index + 2] = (codeSize >> 16) & 0xff;
-    buffer[index + 3] = (codeSize >> 24) & 0xff;
+    buffer[index++] = codeSize & 0xff;
+    buffer[index++] = (codeSize >> 8) & 0xff;
+    buffer[index++] = (codeSize >> 16) & 0xff;
+    buffer[index++] = (codeSize >> 24) & 0xff;
+
+    // Update index
+    index += codeSize;
     // Write end 0
-    buffer[index + 4 + codeSize - 1] = 0;
-    // Write the
-    index = index + codeSize + 4;
+    buffer[index - 1] = 0;
 
     //
     // Serialize the scope value
@@ -599,25 +552,24 @@ function serializeCode(
   } else {
     buffer[index++] = constants.BSON_DATA_CODE;
     // Number of written bytes
-    const numberOfWrittenBytes = !isArray
+    index = !isArray
       ? writeUTF8ToBuffer(key, buffer, index)
       : writeASCIIToBuffer(key, buffer, index);
     // Encode the name
-    index = index + numberOfWrittenBytes;
     buffer[index++] = 0;
     // Function string
     const functionString = value.code.toString();
     // Write the string
-    const size = writeUTF8ToBuffer(functionString, buffer, index + 4) + 1;
+    const size = writeUTF8ToBuffer(functionString, buffer, index + 4) - index - 3;
     // Write the size of the string to buffer
-    buffer[index] = size & 0xff;
-    buffer[index + 1] = (size >> 8) & 0xff;
-    buffer[index + 2] = (size >> 16) & 0xff;
-    buffer[index + 3] = (size >> 24) & 0xff;
+    buffer[index++] = size & 0xff;
+    buffer[index++] = (size >> 8) & 0xff;
+    buffer[index++] = (size >> 16) & 0xff;
+    buffer[index++] = (size >> 24) & 0xff;
     // Update index
-    index = index + 4 + size - 1;
+    index += size;
     // Write zero
-    buffer[index++] = 0;
+    buffer[index - 1] = 0;
   }
 
   return index;
@@ -633,11 +585,8 @@ function serializeBinary(
   // Write the type
   buffer[index++] = constants.BSON_DATA_BINARY;
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   // Extract the buffer
   const data = value.value(true) as Buffer | Uint8Array;
@@ -679,23 +628,20 @@ function serializeSymbol(
   // Write the type
   buffer[index++] = constants.BSON_DATA_SYMBOL;
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   // Write the string
-  const size = writeUTF8ToBuffer(value.value, buffer, index + 4) + 1;
+  const size = writeUTF8ToBuffer(value.value, buffer, index + 4) - index - 3;
   // Write the size of the string to buffer
-  buffer[index] = size & 0xff;
-  buffer[index + 1] = (size >> 8) & 0xff;
-  buffer[index + 2] = (size >> 16) & 0xff;
-  buffer[index + 3] = (size >> 24) & 0xff;
+  buffer[index++] = size & 0xff;
+  buffer[index++] = (size >> 8) & 0xff;
+  buffer[index++] = (size >> 16) & 0xff;
+  buffer[index++] = (size >> 24) & 0xff;
   // Update index
-  index = index + 4 + size - 1;
+  index += size;
   // Write zero
-  buffer[index++] = 0x00;
+  buffer[index - 1] = 0x00;
   return index;
 }
 
@@ -711,12 +657,9 @@ function serializeDBRef(
   // Write the type
   buffer[index++] = constants.BSON_DATA_OBJECT;
   // Number of written bytes
-  const numberOfWrittenBytes = !isArray
-    ? writeUTF8ToBuffer(key, buffer, index)
-    : writeASCIIToBuffer(key, buffer, index);
+  index = !isArray ? writeUTF8ToBuffer(key, buffer, index) : writeASCIIToBuffer(key, buffer, index);
 
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
 
   let startIndex = index;

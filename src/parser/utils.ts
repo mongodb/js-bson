@@ -124,21 +124,20 @@ export function deprecate<T extends Function>(fn: T, message: string): T {
 
 export function writeUTF8ToBuffer(str: string, buf: Buffer, offset: number): number {
   let charCode = 0;
-  let bytes = 0;
   let i = 0;
   const il = str.length;
 
   for (; i < il; ++i) {
     charCode = str.charCodeAt(i);
     if (charCode < 0x80) {
-      buf[offset + bytes++] = charCode;
+      buf[offset++] = charCode;
     } else if (charCode < 0x800) {
-      buf[offset + bytes++] = 0xc0 | (charCode >> 6);
-      buf[offset + bytes++] = 0x80 | (charCode & 0x3f);
+      buf[offset++] = 0xc0 | (charCode >> 6);
+      buf[offset++] = 0x80 | (charCode & 0x3f);
     } else if (charCode < 0xd800 || charCode >= 0xe000) {
-      buf[offset + bytes++] = 0xe0 | (charCode >> 12);
-      buf[offset + bytes++] = 0x80 | ((charCode >> 6) & 0x3f);
-      buf[offset + bytes++] = 0x80 | (charCode & 0x3f);
+      buf[offset++] = 0xe0 | (charCode >> 12);
+      buf[offset++] = 0x80 | ((charCode >> 6) & 0x3f);
+      buf[offset++] = 0x80 | (charCode & 0x3f);
     }
     // surrogate pair
     else {
@@ -152,18 +151,17 @@ export function writeUTF8ToBuffer(str: string, buf: Buffer, offset: number): num
       buf[offset++] = 0x80 | (charCode & 0x3f);
     }
   }
-  return bytes;
+  return offset;
 }
 
 export function writeASCIIToBuffer(str: string, buf: Buffer, offset: number): number {
-  let bytes = 0;
   let i = 0;
   const il = str.length;
 
   for (; i < il; ++i) {
-    buf[offset + bytes++] = str.charCodeAt(i);
+    buf[offset++] = str.charCodeAt(i);
   }
-  return bytes;
+  return offset;
 }
 
 export const writeBinaryToBuffer = writeASCIIToBuffer;
