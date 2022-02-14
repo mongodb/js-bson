@@ -123,24 +123,78 @@ export function deprecate<T extends Function>(fn: T, message: string): T {
 }
 
 export function writeUTF8ToBuffer(str: string, buf: Buffer, offset: number): number {
+  let units = Infinity;
   let charCode = 0;
   let i = 0;
   const il = str.length;
+  let leadSurrogate;
 
   for (; i < il; ++i) {
     charCode = str.charCodeAt(i);
+    // is surrogate component
+    if (charCode > 0xd7ff && charCode < 0xe000) {
+      // last char was a lead
+      if (!leadSurrogate) {
+        // no lead yet
+        if (charCode > 0xdbff) {
+          // unexpected trail
+          if ((units -= 3) > -1) {
+            buf[offset++] = 0xef;
+            buf[offset++] = 0xbf;
+            buf[offset++] = 0xbd;
+          }
+          continue;
+        } else if (i + 1 === il) {
+          // unpaired lead
+          if ((units -= 3) > -1) {
+            buf[offset++] = 0xef;
+            buf[offset++] = 0xbf;
+            buf[offset++] = 0xbd;
+          }
+          continue;
+        }
+
+        // valid lead
+        leadSurrogate = charCode;
+
+        continue;
+      }
+
+      // 2 leads in a row
+      if (charCode < 0xdc00) {
+        if ((units -= 3) > -1) {
+          buf[offset++] = 0xef;
+          buf[offset++] = 0xbf;
+          buf[offset++] = 0xbd;
+        }
+        leadSurrogate = charCode;
+        continue;
+      }
+
+      // valid surrogate pair
+      charCode = ((leadSurrogate - 0xd800) << 10) | (charCode - 0xdc00);
+    } else if (leadSurrogate) {
+      // valid bmp char, but last char was a lead
+      if ((units -= 3) > -1) {
+        buf[offset++] = 0xef;
+        buf[offset++] = 0xbf;
+        buf[offset++] = 0xbd;
+      }
+    }
+
+    leadSurrogate = null;
     if (charCode < 0x80) {
       buf[offset++] = charCode;
     } else if (charCode < 0x800) {
       buf[offset++] = 0xc0 | (charCode >> 6);
       buf[offset++] = 0x80 | (charCode & 0x3f);
-    } else if (charCode < 0xd800 || charCode >= 0xe000) {
-      buf[offset++] = 0xe0 | (charCode >> 12);
+    } else if (charCode < 0x10000) {
+      buf[offset++] = 0xe0 | (charCode >> 0xc);
       buf[offset++] = 0x80 | ((charCode >> 6) & 0x3f);
       buf[offset++] = 0x80 | (charCode & 0x3f);
     }
     // surrogate pair
-    else {
+    else if (charCode < 0x110000) {
       // UTF-16 encodes 0x10000-0x10FFFF by
       // subtracting 0x10000 and splitting the
       // 20 bits of 0x0-0xFFFFF into two halves
