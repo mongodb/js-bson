@@ -13,6 +13,7 @@ We use JIRA to track issues and feature requests: https://jira.mongodb.org/brows
 
 Our GitHub Issues are left open for now as we work to deprecate this method of issue reporting.
 Thank you for understanding.
+
 -->
 
 **BSON Version:** 4.0.x
