@@ -84,7 +84,7 @@ export class ObjectId {
         this[kId] = Buffer.from(workingId, 'hex');
       } else {
         throw new BSONTypeError(
-          'Argument passed in must be a string of 12 bytes or a string of 24 hex characters'
+          'Argument passed in must be a string of 12 bytes or a string of 24 hex characters or an integer'
         );
       }
     } else {
