@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.6.2](https://github.com/mongodb/js-bson/compare/v4.6.1...v4.6.2) (2022-03-22)
+
+
+### Bug Fixes
+
+* **MONGOSH-1155:** update error message in ObjectId class ([#493](https://github.com/mongodb/js-bson/issues/493)) ([67fbc7c](https://github.com/mongodb/js-bson/commit/67fbc7cc8fc20d9c39720ba3f5e872c4f27eb8c6))
+* **NODE-3015:** ObjectId.equals should use Buffer.equals for better performance ([#478](https://github.com/mongodb/js-bson/issues/478)) ([8305bdf](https://github.com/mongodb/js-bson/commit/8305bdf333a4ddec99121b42d9477958342b0fda))
+* **NODE-3962:** correct type for ObjectiId._bsontype ([#480](https://github.com/mongodb/js-bson/issues/480)) ([9671773](https://github.com/mongodb/js-bson/commit/9671773880b0e01d84259f1eb5d49e32070a9e8a))
+
 ### [4.6.1](https://github.com/mongodb/js-bson/compare/v4.6.0...v4.6.1) (2022-01-06)
 
 

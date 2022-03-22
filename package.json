@@ -15,7 +15,7 @@
     "bower.json"
   ],
   "types": "bson.d.ts",
-  "version": "4.6.1",
+  "version": "4.6.2",
   "author": {
     "name": "The MongoDB NodeJS Team",
     "email": "dbx-node@mongodb.com"
