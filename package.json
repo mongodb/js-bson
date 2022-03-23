@@ -12,7 +12,8 @@
     "dist",
     "bson.d.ts",
     "etc/prepare.js",
-    "bower.json"
+    "bower.json",
+    "bson.ts34.d.ts"
   ],
   "types": "bson.d.ts",
   "typesVersions": {
