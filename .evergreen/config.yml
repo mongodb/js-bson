@@ -143,6 +143,16 @@ tasks:
       - func: run tests
         vars:
           TEST_TARGET: node
+  - name: node-tests-v17
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 17
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: node
   - name: browser-tests
     tags: ["browser"]
     commands:
