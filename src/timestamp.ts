@@ -19,7 +19,10 @@ export interface TimestampExtended {
   };
 }
 
-/** @public */
+/**
+ * @public
+ * @category BSON
+ * */
 export class Timestamp extends LongWithoutOverridesClass {
   _bsontype!: 'Timestamp';
 

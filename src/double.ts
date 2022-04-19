@@ -8,6 +8,7 @@ export interface DoubleExtended {
 /**
  * A class representation of the BSON Double type.
  * @public
+ * @category BSON
  */
 export class Double {
   _bsontype!: 'Double';

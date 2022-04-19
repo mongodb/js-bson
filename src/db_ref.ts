@@ -23,6 +23,7 @@ export function isDBRefLike(value: unknown): value is DBRefLike {
 /**
  * A class representation of the BSON DBRef type.
  * @public
+ * @category BSON
  */
 export class DBRef {
   _bsontype!: 'DBRef';

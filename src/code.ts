@@ -9,6 +9,7 @@ export interface CodeExtended {
 /**
  * A class representation of the BSON Code type.
  * @public
+ * @category BSON
  */
 export class Code {
   _bsontype!: 'Code';
