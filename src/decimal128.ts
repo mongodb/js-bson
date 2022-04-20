@@ -118,7 +118,7 @@ export interface Decimal128Extended {
 /**
  * A class representation of the BSON Decimal128 type.
  * @public
- * @category BSON
+ * @category BSONType
  */
 export class Decimal128 {
   _bsontype!: 'Decimal128';

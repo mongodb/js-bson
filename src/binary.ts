@@ -25,7 +25,7 @@ export interface BinaryExtended {
 /**
  * A class representation of the BSON Binary type.
  * @public
- * @category BSON
+ * @category BSONType
  */
 export class Binary {
   _bsontype!: 'Binary';
