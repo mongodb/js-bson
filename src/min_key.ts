@@ -6,6 +6,7 @@ export interface MinKeyExtended {
 /**
  * A class representation of the BSON MinKey type.
  * @public
+ * @category BSONType
  */
 export class MinKey {
   _bsontype!: 'MinKey';

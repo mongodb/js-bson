@@ -8,6 +8,7 @@ export interface Int32Extended {
 /**
  * A class representation of a BSON Int32 type.
  * @public
+ * @category BSONType
  */
 export class Int32 {
   _bsontype!: 'Int32';

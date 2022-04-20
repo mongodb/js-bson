@@ -6,6 +6,7 @@ export interface MaxKeyExtended {
 /**
  * A class representation of the BSON MaxKey type.
  * @public
+ * @category BSONType
  */
 export class MaxKey {
   _bsontype!: 'MaxKey';

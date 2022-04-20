@@ -22,6 +22,7 @@ export interface BSONRegExpExtended {
 /**
  * A class representation of the BSON RegExp type.
  * @public
+ * @category BSONType
  */
 export class BSONRegExp {
   _bsontype!: 'BSONRegExp';

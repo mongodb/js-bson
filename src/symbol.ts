@@ -6,6 +6,7 @@ export interface BSONSymbolExtended {
 /**
  * A class representation of the BSON Symbol type.
  * @public
+ * @category BSONType
  */
 export class BSONSymbol {
   _bsontype!: 'Symbol';

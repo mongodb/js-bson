@@ -26,6 +26,7 @@ const kId = Symbol('id');
 /**
  * A class representation of the BSON ObjectId type.
  * @public
+ * @category BSONType
  */
 export class ObjectId {
   _bsontype!: 'ObjectID';
