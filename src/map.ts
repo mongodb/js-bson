@@ -5,7 +5,6 @@ import { getGlobal } from './utils/global';
 
 /**
  * @public
- * @category BSONType
  */
 let bsonMap: MapConstructor;
 
