@@ -3,9 +3,7 @@
 
 import { getGlobal } from './utils/global';
 
-/**
- * @public
- */
+/** @public */
 let bsonMap: MapConstructor;
 
 const bsonGlobal = getGlobal<{ Map?: MapConstructor }>();
