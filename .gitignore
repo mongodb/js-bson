@@ -24,3 +24,5 @@ coverage/
 *.d.ts
 *.tgz
 docs/public
+
+*.0x
