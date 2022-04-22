@@ -5,7 +5,7 @@ stepback: true
 command_type: system
 
 # Limit maximum test running time.
-exec_timeout_secs: 900   # 15 minutes
+exec_timeout_secs: 900 # 15 minutes
 
 # What to do when evergreen hits the timeout
 timeout:
@@ -81,7 +81,6 @@ functions:
           echo "NODE_VERSION=${NODE_VERSION} TEST_TARGET=${TEST_TARGET}"
           bash ${PROJECT_DIRECTORY}/.evergreen/run-checks.sh
 
-
 tasks:
   - name: node-tests-v6
     tags: ["node"]
@@ -133,12 +132,22 @@ tasks:
       - func: run tests
         vars:
           TEST_TARGET: node
+  - name: node-tests-v16
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 16
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: node
   - name: browser-tests
     tags: ["browser"]
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 10
+          NODE_MAJOR_VERSION: 16
       - func: install dependencies
       - func: run tests
         vars:
@@ -149,7 +158,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 12
+          NODE_MAJOR_VERSION: 16
       - func: install dependencies
       - func: run checks
 
