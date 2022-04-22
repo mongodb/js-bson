@@ -7,8 +7,7 @@
 // and make sure you run mocha using our .mocharc.json or with --require ts-node/register
 
 // This should be done by mocha --require, but that isn't supported until mocha version 7+
-// Fix chai import on node 17
-global.expect = require('../node_modules/chai/index.js').expect;
+require('chai/register-expect');
 require('array-includes/auto');
 require('object.entries/auto');
 
