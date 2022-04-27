@@ -1,3 +1,4 @@
+/* globals performance */
 'use strict';
 
 const Buffer = require('buffer').Buffer;
@@ -6,6 +7,7 @@ const BSONTypeError = BSON.BSONTypeError;
 const ObjectId = BSON.ObjectId;
 const util = require('util');
 const getSymbolFrom = require('./tools/utils').getSymbolFrom;
+const getGlobal = require('./tools/utils').getGlobal;
 
 describe('ObjectId', function () {
   it('should correctly handle objectId timestamps', function (done) {
@@ -381,6 +383,17 @@ describe('ObjectId', function () {
       // once for the 11th byte shortcut
       // once for the total equality
       expect(propAccessRecord).to.deep.equal([oidKId, oidKId]);
+    });
+  });
+
+  describe('constructor performance', () => {
+    const perf = getGlobal().performance != null ? performance : require('perf_hooks').performance;
+    it('should construct an ObjectId from a Buffer in less than 12000 ns', () => {
+      const buffer = Buffer.from('00'.repeat(12), 'hex');
+      const start = perf.now();
+      new ObjectId(buffer);
+      const end = perf.now();
+      expect(Math.floor((end - start) * 1000000)).to.be.lessThan(12000);
     });
   });
 });

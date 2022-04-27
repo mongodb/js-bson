@@ -11,6 +11,10 @@ import { isAnyArrayBuffer } from './parser/utils';
  * @throws BSONTypeError If anything other than a Buffer or Uint8Array is passed in
  */
 export function ensureBuffer(potentialBuffer: Buffer | ArrayBufferView | ArrayBuffer): Buffer {
+  if (potentialBuffer instanceof Buffer) {
+    return potentialBuffer;
+  }
+
   if (ArrayBuffer.isView(potentialBuffer)) {
     return Buffer.from(
       potentialBuffer.buffer,

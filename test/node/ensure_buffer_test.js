@@ -11,6 +11,19 @@ describe('ensureBuffer tests', function () {
     expect(ensureBuffer).to.be.a('function');
   });
 
+  it('should return the same instance if a buffer is passed in', function () {
+    const inBuffer = Buffer.from('00'.repeat(12), 'hex');
+
+    const outBuffer = ensureBuffer(inBuffer);
+
+    // instance equality
+    expect(inBuffer).to.equal(outBuffer);
+    // deep equality
+    expect(inBuffer).to.deep.equal(outBuffer);
+    // class method equality
+    expect(Buffer.prototype.equals.call(inBuffer, outBuffer)).to.be.true;
+  });
+
   it('should return a view over the exact same memory when a Buffer is passed in', function () {
     const bufferIn = Buffer.alloc(10);
     let bufferOut;
