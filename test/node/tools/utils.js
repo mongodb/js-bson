@@ -1,3 +1,4 @@
+/* globals globalThis window self */
 'use strict';
 
 exports.assertArrayEqual = function (array1, array2) {
@@ -172,7 +173,6 @@ const getSymbolFrom = function (target, symbolName, assertExists) {
 };
 
 exports.getSymbolFrom = getSymbolFrom;
-
 
 function checkForMath(potentialGlobal) {
   // eslint-disable-next-line eqeqeq
