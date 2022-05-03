@@ -12,6 +12,7 @@ import { isAnyArrayBuffer } from './parser/utils';
  */
 export function ensureBuffer(potentialBuffer: Buffer | ArrayBufferView | ArrayBuffer): Buffer {
   if (potentialBuffer instanceof Buffer) {
+    // If in a typical nodejs environment we can early return with the passed in buffer
     return potentialBuffer;
   }
 
