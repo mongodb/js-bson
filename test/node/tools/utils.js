@@ -1,4 +1,4 @@
-/* globals globalThis window self */
+/* globals window */
 'use strict';
 
 exports.assertArrayEqual = function (array1, array2) {
