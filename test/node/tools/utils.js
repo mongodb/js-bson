@@ -173,21 +173,3 @@ const getSymbolFrom = function (target, symbolName, assertExists) {
 };
 
 exports.getSymbolFrom = getSymbolFrom;
-
-function checkForMath(potentialGlobal) {
-  // eslint-disable-next-line eqeqeq
-  return potentialGlobal && potentialGlobal.Math == Math && potentialGlobal;
-}
-
-// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
-function getGlobal() {
-  // eslint-disable-next-line no-undef
-  return (
-    checkForMath(typeof globalThis === 'object' && globalThis) ||
-    checkForMath(typeof window === 'object' && window) ||
-    checkForMath(typeof self === 'object' && self) ||
-    checkForMath(typeof global === 'object' && global) ||
-    Function('return this')()
-  );
-}
-exports.getGlobal = getGlobal;

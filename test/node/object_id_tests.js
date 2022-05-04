@@ -1,4 +1,3 @@
-/* globals performance */
 'use strict';
 
 const Buffer = require('buffer').Buffer;
@@ -7,7 +6,6 @@ const BSONTypeError = BSON.BSONTypeError;
 const ObjectId = BSON.ObjectId;
 const util = require('util');
 const getSymbolFrom = require('./tools/utils').getSymbolFrom;
-const getGlobal = require('./tools/utils').getGlobal;
 
 describe('ObjectId', function () {
   it('should correctly handle objectId timestamps', function (done) {
@@ -384,5 +382,18 @@ describe('ObjectId', function () {
       // once for the total equality
       expect(propAccessRecord).to.deep.equal([oidKId, oidKId]);
     });
+  });
+
+  it('should return the same instance if a buffer is passed in', function () {
+    const inBuffer = Buffer.from('00'.repeat(12), 'hex');
+
+    const outBuffer = new ObjectId(inBuffer);
+
+    // instance equality
+    expect(inBuffer).to.equal(outBuffer.id);
+    // deep equality
+    expect(inBuffer).to.deep.equal(outBuffer.id);
+    // class method equality
+    expect(Buffer.prototype.equals.call(inBuffer, outBuffer.id)).to.be.true;
   });
 });
