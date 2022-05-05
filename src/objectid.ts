@@ -72,7 +72,8 @@ export class ObjectId {
       // Generate a new id
       this[kId] = ObjectId.generate(typeof workingId === 'number' ? workingId : undefined);
     } else if (ArrayBuffer.isView(workingId) && workingId.byteLength === 12) {
-      this[kId] = ensureBuffer(workingId);
+      // If intstanceof matches we can escape calling ensure buffer in Node.js environments
+      this[kId] = workingId instanceof Buffer ? workingId : ensureBuffer(workingId);
     } else if (typeof workingId === 'string') {
       if (workingId.length === 12) {
         const bytes = Buffer.from(workingId);

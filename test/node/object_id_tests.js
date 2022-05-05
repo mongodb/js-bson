@@ -383,4 +383,17 @@ describe('ObjectId', function () {
       expect(propAccessRecord).to.deep.equal([oidKId, oidKId]);
     });
   });
+
+  it('should return the same instance if a buffer is passed in', function () {
+    const inBuffer = Buffer.from('00'.repeat(12), 'hex');
+
+    const outBuffer = new ObjectId(inBuffer);
+
+    // instance equality
+    expect(inBuffer).to.equal(outBuffer.id);
+    // deep equality
+    expect(inBuffer).to.deep.equal(outBuffer.id);
+    // class method equality
+    expect(Buffer.prototype.equals.call(inBuffer, outBuffer.id)).to.be.true;
+  });
 });
