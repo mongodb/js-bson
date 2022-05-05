@@ -1,11 +1,23 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { performance } from 'perf_hooks';
 import { readFile } from 'fs/promises';
+import { cpus, totalmem } from 'os';
+
+const hw = cpus();
+const ram = totalmem() / 1024 ** 3;
+const platform = { name: hw[0].model, cores: hw.length, ram: `${ram}GB` };
+const ITERATIONS = 1_000_000;
+
+const systemInfo = [
+  `\n- cpu: ${platform.name}`,
+  `- cores: ${platform.cores}`,
+  `- os: ${process.platform}`,
+  `- ram: ${platform.ram}`,
+  `- iterations: ${ITERATIONS.toLocaleString()}`
+].join('\n');
 
 const readJSONFile = async path =>
   JSON.parse(await readFile(new URL(path, import.meta.url), { encoding: 'utf8' }));
-
-const ITERATIONS = 10_000;
 
 function average(array) {
   let sum = 0;
@@ -59,7 +71,7 @@ async function main() {
     })
   );
 
-  console.log(`\nIterations: ${ITERATIONS}`);
+  console.log(systemInfo);
 
   for (const bson of [currentBSON, currentReleaseBSON, legacyBSONLib]) {
     console.log(`\nBSON@${bson.version}`);
