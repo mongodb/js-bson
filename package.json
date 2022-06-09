@@ -19,7 +19,7 @@
   "typesVersions": {
     "<=4.0.2": {
       "bson.d.ts": [
-        "bson.ts34.d.ts"
+        "bson-ts34.d.ts"
       ]
     }
   },
