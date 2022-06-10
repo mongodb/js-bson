@@ -5,6 +5,7 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { babel } from '@rollup/plugin-babel';
 import typescript from '@rollup/plugin-typescript';
 import nodeGlobals from 'rollup-plugin-node-globals';
+import replace from '@rollup/plugin-replace';
 
 const tsConfig = {
   allowJs: false,
@@ -33,18 +34,26 @@ const tsConfig = {
 };
 const input = 'src/bson.ts';
 
-const plugins = [
-  typescript(tsConfig),
-  nodeResolve({ preferBuiltins: false }),
-  nodeBuiltins(),
-  nodeGlobals(),
-  commonjs({ extensions: ['.js', '.ts'] }),
-  babel({
-    babelHelpers: 'external',
-    plugins: ['@babel/plugin-external-helpers'],
-    presets: [['@babel/env', { modules: false }]]
-  })
-];
+const plugins = ({ browser = false }) => {
+  return [
+    typescript(tsConfig),
+    nodeResolve({ preferBuiltins: false }),
+    nodeBuiltins(),
+    nodeGlobals(),
+    replace({
+      preventAssignment: true,
+      values: {
+        'process.browser': browser
+      }
+    }),
+    commonjs({ extensions: ['.js', '.ts'] }),
+    babel({
+      babelHelpers: 'external',
+      plugins: ['@babel/plugin-external-helpers'],
+      presets: [['@babel/env', { modules: false }]]
+    })
+  ];
+};
 
 const external = Object.keys(pkg.dependencies || {});
 
@@ -60,7 +69,7 @@ module.exports = [
       exports: 'named',
       sourcemap: true
     },
-    plugins,
+    plugins: plugins({ browser: false }),
     external
   },
   {
@@ -88,6 +97,6 @@ module.exports = [
         sourcemap: true
       }
     ],
-    plugins
+    plugins: plugins({ browser: true })
   }
 ];
