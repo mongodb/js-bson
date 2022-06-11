@@ -34,7 +34,7 @@ const tsConfig = {
 };
 const input = 'src/bson.ts';
 
-const plugins = ({ browser = false }) => {
+const plugins = (options = { browser: false }) => {
   return [
     typescript(tsConfig),
     nodeResolve({ preferBuiltins: false }),
@@ -43,7 +43,7 @@ const plugins = ({ browser = false }) => {
     replace({
       preventAssignment: true,
       values: {
-        'rollupProcess.browser': browser
+        'rollupProcess.browser': options.browser
       }
     }),
     commonjs({ extensions: ['.js', '.ts'] }),
@@ -69,7 +69,7 @@ module.exports = [
       exports: 'named',
       sourcemap: true
     },
-    plugins: plugins({ browser: false }),
+    plugins: plugins(),
     external
   },
   {
