@@ -34,32 +34,38 @@ declare let require: Function;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare let global: any;
 declare const self: unknown;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare let process: any; // Used by @rollup/plugin-replace
 
 const detectRandomBytes = (): RandomBytesFunction => {
-  if (typeof window !== 'undefined') {
-    // browser crypto implementation(s)
-    const target = window.crypto || window.msCrypto; // allow for IE11
-    if (target && target.getRandomValues) {
-      return size => target.getRandomValues(Buffer.alloc(size));
+  if (process.browser) {
+    if (typeof window !== 'undefined') {
+      // browser crypto implementation(s)
+      const target = window.crypto || window.msCrypto; // allow for IE11
+      if (target && target.getRandomValues) {
+        return size => target.getRandomValues(Buffer.alloc(size));
+      }
     }
+
+    if (typeof global !== 'undefined' && global.crypto && global.crypto.getRandomValues) {
+      // allow for RN packages such as https://www.npmjs.com/package/react-native-get-random-values to populate global
+      return size => global.crypto.getRandomValues(Buffer.alloc(size));
+    }
+
+    return insecureRandomBytes;
+  } else {
+    let requiredRandomBytes: RandomBytesFunction | null | undefined;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      requiredRandomBytes = require('crypto').randomBytes;
+    } catch (e) {
+      // keep the fallback
+    }
+
+    // NOTE: in transpiled cases the above require might return null/undefined
+
+    return requiredRandomBytes || insecureRandomBytes;
   }
-
-  if (typeof global !== 'undefined' && global.crypto && global.crypto.getRandomValues) {
-    // allow for RN packages such as https://www.npmjs.com/package/react-native-get-random-values to populate global
-    return size => global.crypto.getRandomValues(Buffer.alloc(size));
-  }
-
-  let requiredRandomBytes: RandomBytesFunction | null | undefined;
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    requiredRandomBytes = require('crypto').randomBytes;
-  } catch (e) {
-    // keep the fallback
-  }
-
-  // NOTE: in transpiled cases the above require might return null/undefined
-
-  return requiredRandomBytes || insecureRandomBytes;
 };
 
 export const randomBytes = detectRandomBytes();
