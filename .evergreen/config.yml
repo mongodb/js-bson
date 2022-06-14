@@ -89,7 +89,7 @@ functions:
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           TS_VERSION: "${TS_VERSION}"
-          TRY_COMPILING_LIBRARY: "${TRY_COMPILING_DRIVER}"
+          TRY_COMPILING_LIBRARY: "${TRY_COMPILING_LIBRARY}"
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
