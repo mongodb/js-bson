@@ -80,6 +80,19 @@ functions:
           ${PREPARE_SHELL}
           echo "NODE_VERSION=${NODE_VERSION} TEST_TARGET=${TEST_TARGET}"
           bash ${PROJECT_DIRECTORY}/.evergreen/run-checks.sh
+  run typescript:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 60
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          TS_VERSION: "${TS_VERSION}"
+          TRY_COMPILING_LIBRARY: "${TRY_COMPILING_LIBRARY}"
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
 
 tasks:
   - name: node-tests-v6
@@ -161,6 +174,36 @@ tasks:
           NODE_MAJOR_VERSION: 16
       - func: install dependencies
       - func: run checks
+  - name: check-typescript-oldest
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 16
+      - func: install dependencies
+      - func: "run typescript"
+        vars:
+          TS_VERSION: "4.0.2"
+          TRY_COMPILING_LIBRARY: "true"
+  - name: check-typescript-current
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 16
+      - func: install dependencies
+      - func: "run typescript"
+        vars:
+          TS_VERSION: ""
+          TRY_COMPILING_LIBRARY: "true"
+  - name: check-typescript-next
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 16
+      - func: install dependencies
+      - func: "run typescript"
+        vars:
+          TS_VERSION: "next"
+          TRY_COMPILING_LIBRARY: "false"
 
 buildvariants:
   - name: linux
@@ -180,3 +223,6 @@ buildvariants:
     run_on: rhel70
     tasks:
       - run-checks
+      - check-typescript-oldest
+      - check-typescript-current
+      - check-typescript-next
