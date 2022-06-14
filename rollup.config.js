@@ -43,7 +43,7 @@ const plugins = (options = { browser: false }) => {
     replace({
       preventAssignment: true,
       values: {
-        'rollupProcess.browser': options.browser
+        'process.browser': options.browser
       }
     }),
     commonjs({ extensions: ['.js', '.ts'] }),

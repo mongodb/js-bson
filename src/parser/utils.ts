@@ -35,10 +35,10 @@ declare let require: Function;
 declare let global: any;
 declare const self: unknown;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare let rollupProcess: any; // Used by @rollup/plugin-replace
+declare let process: any; // Used by @rollup/plugin-replace
 
 const detectRandomBytes = (): RandomBytesFunction => {
-  if (rollupProcess.browser) {
+  if (process.browser) {
     if (typeof window !== 'undefined') {
       // browser crypto implementation(s)
       const target = window.crypto || window.msCrypto; // allow for IE11
