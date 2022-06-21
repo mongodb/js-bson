@@ -9,7 +9,6 @@ import type { Double } from '../double';
 import { ensureBuffer } from '../ensure_buffer';
 import { BSONError, BSONTypeError } from '../error';
 import { isBSONType } from '../extended_json';
-import { writeIEEE754 } from '../float_parser';
 import type { Int32 } from '../int_32';
 import { Long } from '../long';
 import { Map } from '../map';
@@ -119,7 +118,7 @@ function serializeNumber(
     index = index + numberOfWrittenBytes;
     buffer[index++] = 0;
     // Write float
-    writeIEEE754(buffer, value, index, 'little', 52, 8);
+    buffer.writeDoubleLE(value, index);
     // Adjust index
     index = index + 8;
   }
@@ -487,7 +486,7 @@ function serializeDouble(
   buffer[index++] = 0;
 
   // Write float
-  writeIEEE754(buffer, value.value, index, 'little', 52, 8);
+  buffer.writeDoubleLE(value.value, index); // little endian by default
 
   // Adjust index
   index = index + 8;
