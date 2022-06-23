@@ -77,16 +77,24 @@ describe('Double', function () {
 
     it('0', () => {
       let value = 0;
-      let orig = new Double(value).valueOf();
+      let orig = new Double(value);
       let newVal = twiceSerialized(orig);
-      expect(orig).to.equal(newVal);
+      expect(value).to.equal(newVal);
     });
 
     it('-0', () => {
       let value = -0;
-      let orig = new Double(value).valueOf();
+      let orig = new Double(value);
       let newVal = twiceSerialized(orig);
-      expect(orig).to.equal(newVal);
+      expect(Object.is(newVal, -0)).to.be.true;
+    });
+
+    // TODO (NODE-4335): -0 should be serialized as double
+    it.skip('-0 serializes as Double', () => {
+      let value = -0;
+      let serializedDouble = BSON.serialize({ d: value });
+      let type = serializedDouble[5];
+      expect(type).to.not.equal(BSON.BSON_DATA_NUMBER);
     });
 
     it('Number.EPSILON', () => {
