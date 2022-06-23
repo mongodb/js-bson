@@ -1,95 +1,57 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { performance } from 'perf_hooks';
-import { readFile } from 'fs/promises';
-import { cpus, totalmem } from 'os';
+import { runner, systemInfo, getCurrentLocalBSON } from './lib_runner.mjs';
 
-const hw = cpus();
-const ram = totalmem() / 1024 ** 3;
-const platform = { name: hw[0].model, cores: hw.length, ram: `${ram}GB` };
-const ITERATIONS = 1_000_000;
+const iterations = 100_000;
+console.log(systemInfo(iterations));
+console.log();
 
-const systemInfo = [
-  `\n- cpu: ${platform.name}`,
-  `- cores: ${platform.cores}`,
-  `- os: ${process.platform}`,
-  `- ram: ${platform.ram}`,
-  `- iterations: ${ITERATIONS.toLocaleString()}`
-].join('\n');
-
-const readJSONFile = async path =>
-  JSON.parse(await readFile(new URL(path, import.meta.url), { encoding: 'utf8' }));
-
-function average(array) {
-  let sum = 0;
-  for (const value of array) sum += value;
-  return sum / array.length;
-}
-
-function testPerformance(fn, iterations = ITERATIONS) {
-  let measurements = [];
-  for (let i = 0; i < iterations; i++) {
-    const start = performance.now();
-    fn(i);
-    const end = performance.now();
-    measurements.push(end - start);
+////////////////////////////////////////////////////////////////////////////////////////////////////
+await runner({
+  skip: true,
+  name: 'deserialize({ oid, string }, { validation: { utf8: false } })',
+  iterations,
+  setup(libs) {
+    const bson = getCurrentLocalBSON(libs);
+    return Array.from({ length: iterations }, () =>
+      bson.lib.serialize({
+        _id: new bson.lib.ObjectId(),
+        field1: 'value1'
+      })
+    );
+  },
+  run(i, bson, documents) {
+    bson.lib.deserialize(documents[i], { validation: { utf8: false } });
   }
-  return average(measurements).toFixed(8);
-}
-
-async function main() {
-  const [currentBSON, currentReleaseBSON, legacyBSONLib] = await Promise.all([
-    (async () => ({
-      lib: await import('../../lib/bson.js'),
-      version: 'current local'
-    }))(),
-    (async () => ({
-      lib: await import('../../node_modules/bson_latest/lib/bson.js'),
-      version: (await readJSONFile('../../node_modules/bson_latest/package.json')).version
-    }))(),
-    (async () => {
-      const legacyBSON = (await import('../../node_modules/bson_legacy/index.js')).default;
-      return {
-        lib: { ...legacyBSON, ...legacyBSON.prototype },
-        version: (await readJSONFile('../../node_modules/bson_legacy/package.json')).version
-      };
-    })()
-  ]).catch(error => {
-    console.error(error);
-    console.error(
-      `Please run:\n${[
-        'npm run build',
-        'npm install --no-save bson_legacy@npm:bson@1 bson_latest@npm:bson@latest'
-      ].join('\n')}`
-    );
-    process.exit(1);
-  });
-
-  const documents = Array.from({ length: ITERATIONS }, () =>
-    currentReleaseBSON.lib.serialize({
-      _id: new currentReleaseBSON.lib.ObjectId(),
-      field1: 'value1'
-    })
-  );
-
-  console.log(systemInfo);
-
-  for (const bson of [currentBSON, currentReleaseBSON, legacyBSONLib]) {
-    console.log(`\nBSON@${bson.version}`);
-    console.log(
-      `deserialize({ oid, string }, { validation: { utf8: false } }) takes ${testPerformance(i =>
-        bson.lib.deserialize(documents[i], { validation: { utf8: false } })
-      )}ms on average`
-    );
-
-    const oidBuffer = Buffer.from('00'.repeat(12), 'hex');
-    console.log(
-      `new Oid(buf) take ${testPerformance(() => new bson.lib.ObjectId(oidBuffer))}ms on average`
-    );
+});
+////////////////////////////////////////////////////////////////////////////////////////////////////
+await runner({
+  skip: false,
+  name: 'new Oid(buf)',
+  iterations,
+  setup() {
+    return Buffer.from('00'.repeat(12), 'hex');
+  },
+  run(i, bson, oidBuffer) {
+    new bson.lib.ObjectId(oidBuffer);
   }
-
-  console.log();
-}
-
-main()
-  .then(() => null)
-  .catch(error => console.error(error));
+});
+////////////////////////////////////////////////////////////////////////////////////////////////////
+await runner({
+  skip: true,
+  name: 'BSON.deserialize(largeDocument)',
+  iterations,
+  setup(libs) {
+    const bson = getCurrentLocalBSON(libs);
+    const entries = Array.from({ length: 10 }, (_, i) => [
+      `${i}_${'a'.repeat(10)}`,
+      'b'.repeat(10)
+    ]);
+    const document = Object.fromEntries(entries);
+    const bytes = bson.lib.serialize(document);
+    console.log(`largeDocument { byteLength: ${bytes.byteLength} }`);
+    return bytes;
+  },
+  run(i, bson, largeDocument) {
+    new bson.lib.deserialize(largeDocument);
+  }
+});
