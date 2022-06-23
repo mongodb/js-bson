@@ -1,6 +1,7 @@
 'use strict';
 
 const BSON = require('../register-bson');
+const { getNodeMajor } = require('./tools/utils');
 const Double = BSON.Double;
 
 describe('Double', function () {
@@ -64,7 +65,10 @@ describe('Double', function () {
       expect(Number.isNaN(newVal)).to.equal(true);
     });
 
-    it('NaN with payload', () => {
+    it('NaN with payload', function () {
+      if (getNodeMajor() < 10) {
+        this.skip();
+      }
       let buffer = Buffer.from('120000000000F87F', 'hex');
       let value = buffer.readDoubleLE(0);
       let serializedDouble = BSON.serialize({ d: new Double(value) });

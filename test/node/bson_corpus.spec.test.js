@@ -3,6 +3,7 @@
 
 const Buffer = require('buffer').Buffer;
 const BSON = require('../register-bson');
+const { getNodeMajor } = require('./tools/utils');
 const BSONError = BSON.BSONError;
 const EJSON = BSON.EJSON;
 
@@ -121,6 +122,10 @@ describe('BSON Corpus', function () {
         describe('valid-bson', function () {
           for (const v of valid) {
             it(v.description, function () {
+              if (v.description === 'NaN with payload' && getNodeMajor() < 10) {
+                this.skip();
+              }
+
               if (
                 v.description === 'All BSON types' &&
                 scenario._filename === 'multi-type-deprecated'
