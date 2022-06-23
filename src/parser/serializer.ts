@@ -486,7 +486,7 @@ function serializeDouble(
   buffer[index++] = 0;
 
   // Write float
-  buffer.writeDoubleLE(value.value, index); // little endian by default
+  buffer.writeDoubleLE(value.value, index);
 
   // Adjust index
   index = index + 8;

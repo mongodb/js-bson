@@ -39,7 +39,7 @@ describe('Double', function () {
 
   describe('specialValues', () => {
     function twiceSerialized(value) {
-      let serializedDouble = BSON.serialize({ d: new Double(value) });
+      let serializedDouble = BSON.serialize({ d: value });
       let deserializedDouble = BSON.deserialize(serializedDouble, { promoteValues: true });
       let newVal = deserializedDouble.d;
       return newVal;
@@ -47,16 +47,14 @@ describe('Double', function () {
 
     it('inf', () => {
       let value = Infinity;
-      let orig = new Double(value).valueOf();
       let newVal = twiceSerialized(value);
-      expect(orig).to.equal(newVal);
+      expect(value).to.equal(newVal);
     });
 
     it('-inf', () => {
       let value = -Infinity;
-      let orig = new Double(value).valueOf();
       let newVal = twiceSerialized(value);
-      expect(orig).to.equal(newVal);
+      expect(value).to.equal(newVal);
     });
 
     it('NaN', () => {
@@ -71,7 +69,7 @@ describe('Double', function () {
       }
       let buffer = Buffer.from('120000000000F87F', 'hex');
       let value = buffer.readDoubleLE(0);
-      let serializedDouble = BSON.serialize({ d: new Double(value) });
+      let serializedDouble = BSON.serialize({ d: value });
       expect(serializedDouble.subarray(7, 15)).to.deep.equal(buffer);
       let { d: newVal } = BSON.deserialize(serializedDouble, { promoteValues: true });
       expect(Number.isNaN(newVal)).to.equal(true);
@@ -80,22 +78,21 @@ describe('Double', function () {
     it('0', () => {
       let value = 0;
       let orig = new Double(value).valueOf();
-      let newVal = twiceSerialized(value);
+      let newVal = twiceSerialized(orig);
       expect(orig).to.equal(newVal);
     });
 
     it('-0', () => {
       let value = -0;
       let orig = new Double(value).valueOf();
-      let newVal = twiceSerialized(value);
+      let newVal = twiceSerialized(orig);
       expect(orig).to.equal(newVal);
     });
 
     it('Number.EPSILON', () => {
       let value = Number.EPSILON;
-      let orig = new Double(value).valueOf();
       let newVal = twiceSerialized(value);
-      expect(orig).to.equal(newVal);
+      expect(value).to.equal(newVal);
     });
   });
 });
