@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import { performance } from 'perf_hooks';
 import { runner, systemInfo, getCurrentLocalBSON } from './lib_runner.mjs';
 
-const iterations = 100_000;
+const iterations = 1_000_000;
+const startedEntireRun = performance.now();
 console.log(systemInfo(iterations));
 console.log();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 await runner({
-  skip: true,
+  skip: false,
   name: 'deserialize({ oid, string }, { validation: { utf8: false } })',
   iterations,
   setup(libs) {
@@ -25,7 +27,7 @@ await runner({
 });
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 await runner({
-  skip: false,
+  skip: true,
   name: 'new Oid(buf)',
   iterations,
   setup() {
@@ -55,3 +57,10 @@ await runner({
     new bson.lib.deserialize(largeDocument);
   }
 });
+
+// End
+console.log(
+  'Total time taken to benchmark:',
+  (performance.now() - startedEntireRun).toLocaleString(),
+  'ms'
+);
