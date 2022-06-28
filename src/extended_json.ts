@@ -44,6 +44,7 @@ export function isBSONType(value: unknown): value is BSONType {
 const BSON_INT32_MAX = 0x7fffffff;
 const BSON_INT32_MIN = -0x80000000;
 // INT64 boundaries
+// eslint-disable-next-line @typescript-eslint/no-loss-of-precision
 const BSON_INT64_MAX = 0x7fffffffffffffff;
 const BSON_INT64_MIN = -0x8000000000000000;
 

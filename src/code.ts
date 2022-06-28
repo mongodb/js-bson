@@ -52,7 +52,7 @@ export class Code {
 
   inspect(): string {
     const codeJson = this.toJSON();
-    return `new Code("${codeJson.code}"${
+    return `new Code("${codeJson.code.toString()}"${
       codeJson.scope ? `, ${JSON.stringify(codeJson.scope)}` : ''
     })`;
   }

@@ -115,6 +115,7 @@ export class DBRef {
     // NOTE: if OID is an ObjectId class it will just print the oid string.
     const oid =
       this.oid === undefined || this.oid.toString === undefined ? this.oid : this.oid.toString();
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     return `new DBRef("${this.namespace}", new ObjectId("${oid}")${
       this.db ? `, "${this.db}"` : ''
     })`;

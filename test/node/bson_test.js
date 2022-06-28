@@ -1,3 +1,4 @@
+/* eslint-disable no-loss-of-precision */
 'use strict';
 
 const { Buffer } = require('buffer');

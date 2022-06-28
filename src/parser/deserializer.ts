@@ -697,7 +697,7 @@ function deserializeObject(
       value = new DBRef(namespace, oid);
     } else {
       throw new BSONError(
-        'Detected unknown BSON type ' + elementType.toString(16) + ' for fieldname "' + name + '"'
+        `Detected unknown BSON type ${elementType.toString(16)} for fieldname "${name}"`
       );
     }
     if (name === '__proto__') {
@@ -742,9 +742,11 @@ function isolateEval(
   functionCache?: { [hash: string]: Function },
   object?: Document
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-implied-eval
   if (!functionCache) return new Function(functionString);
   // Check for cache hit, eval if missing and return cached function
   if (functionCache[functionString] == null) {
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
     functionCache[functionString] = new Function(functionString);
   }
 

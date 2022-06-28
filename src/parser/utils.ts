@@ -33,7 +33,6 @@ declare let window: any;
 declare let require: Function;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare let global: any;
-declare const self: unknown;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare let process: any; // Used by @rollup/plugin-replace
 

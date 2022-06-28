@@ -763,7 +763,7 @@ export function serializeInto(
   if (Array.isArray(object)) {
     // Get object keys
     for (let i = 0; i < object.length; i++) {
-      const key = '' + i;
+      const key = String(i);
       let value = object[i];
 
       // Is there an override value
@@ -841,6 +841,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index, true);
       } else if (typeof value['_bsontype'] !== 'undefined') {
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
         throw new BSONTypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
       }
     }
@@ -942,6 +943,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index);
       } else if (typeof value['_bsontype'] !== 'undefined') {
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
         throw new BSONTypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
       }
     }
@@ -1047,6 +1049,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index);
       } else if (typeof value['_bsontype'] !== 'undefined') {
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
         throw new BSONTypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
       }
     }

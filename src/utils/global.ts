@@ -17,6 +17,7 @@ export function getGlobal<T = Record<string, unknown>>(): T {
     checkForMath(typeof window === 'object' && window) ||
     checkForMath(typeof self === 'object' && self) ||
     checkForMath(typeof global === 'object' && global) ||
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
     Function('return this')()
   );
 }

@@ -264,27 +264,6 @@ BinaryParser.encode_int32 = function encode_int32(number, asArray) {
   return asArray ? [chr(a), chr(b), chr(c), chr(d)] : chr(a) + chr(b) + chr(c) + chr(d);
 };
 
-BinaryParser.encode_int64 = function encode_int64(number) {
-  var a, b, c, d, e, f, g, h, unsigned;
-  unsigned = number < 0 ? number + 0x10000000000000000 : number;
-  a = Math.floor(unsigned / 0xffffffffffffff);
-  unsigned &= 0xffffffffffffff;
-  b = Math.floor(unsigned / 0xffffffffffff);
-  unsigned &= 0xffffffffffff;
-  c = Math.floor(unsigned / 0xffffffffff);
-  unsigned &= 0xffffffffff;
-  d = Math.floor(unsigned / 0xffffffff);
-  unsigned &= 0xffffffff;
-  e = Math.floor(unsigned / 0xffffff);
-  unsigned &= 0xffffff;
-  f = Math.floor(unsigned / 0xffff);
-  unsigned &= 0xffff;
-  g = Math.floor(unsigned / 0xff);
-  unsigned &= 0xff;
-  h = Math.floor(unsigned);
-  return chr(a) + chr(b) + chr(c) + chr(d) + chr(e) + chr(f) + chr(g) + chr(h);
-};
-
 /**
  * UTF8 methods
  */

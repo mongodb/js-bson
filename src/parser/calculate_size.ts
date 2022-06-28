@@ -121,15 +121,16 @@ function calculateElement(
           );
         }
       } else if (value['_bsontype'] === 'Binary') {
+        const binary: Binary = value;
         // Check what kind of subtype we have
-        if (value.sub_type === Binary.SUBTYPE_BYTE_ARRAY) {
+        if (binary.sub_type === Binary.SUBTYPE_BYTE_ARRAY) {
           return (
             (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) +
-            (value.position + 1 + 4 + 1 + 4)
+            (binary.position + 1 + 4 + 1 + 4)
           );
         } else {
           return (
-            (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (value.position + 1 + 4 + 1)
+            (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (binary.position + 1 + 4 + 1)
           );
         }
       } else if (value['_bsontype'] === 'Symbol') {

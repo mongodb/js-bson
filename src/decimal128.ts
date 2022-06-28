@@ -690,8 +690,8 @@ export class Decimal128 {
       // representation should be treated as 0/-0" spec cases in decimal128-1.json)
       if (significand_digits > 34) {
         string.push(`${0}`);
-        if (exponent > 0) string.push('E+' + exponent);
-        else if (exponent < 0) string.push('E' + exponent);
+        if (exponent > 0) string.push(`E+${exponent}`);
+        else if (exponent < 0) string.push(`E${exponent}`);
         return string.join('');
       }
 
@@ -709,7 +709,7 @@ export class Decimal128 {
       // Exponent
       string.push('E');
       if (scientific_exponent > 0) {
-        string.push('+' + scientific_exponent);
+        string.push(`+${scientific_exponent}`);
       } else {
         string.push(`${scientific_exponent}`);
       }
