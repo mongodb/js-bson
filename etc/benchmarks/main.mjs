@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { performance } from 'perf_hooks';
+import bson from '../../lib/bson.js';
 import { runner, systemInfo, getCurrentLocalBSON } from './lib_runner.mjs';
 
 const iterations = 1_000_000;
@@ -59,11 +60,42 @@ await runner({
 });
 
 await runner({
-  skip: false,
+  skip: true,
   name: 'Double Serialization',
   iterations,
   run(i, bson) {
     bson.lib.serialize({ d: 2.3 });
+  }
+});
+
+await runner({
+  skip: false,
+  name: 'Double Deserialization',
+  iterations,
+  setup(libs) {
+    const bson = getCurrentLocalBSON(libs);
+    return bson.lib.serialize({ d: 2.3 });
+  },
+  run(i, bson, serialized_double) {
+    bson.lib.deserialize(serialized_double);
+  }
+});
+
+await runner({
+  skip: false,
+  name: 'Many Doubles Deserialization',
+  iterations,
+  setup(libs) {
+    const bson = getCurrentLocalBSON(libs);
+    let doubles = Object.fromEntries(
+      Array.from({ length: 1000 }, i => {
+        return [`a_${i}`, 2.3];
+      })
+    );
+    return bson.lib.serialize(doubles);
+  },
+  run(i, bson, serialized_doubles) {
+    bson.lib.deserialize(serialized_doubles);
   }
 });
 
