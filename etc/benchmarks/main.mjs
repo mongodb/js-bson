@@ -9,7 +9,7 @@ console.log();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 await runner({
-  skip: false,
+  skip: true,
   name: 'deserialize({ oid, string }, { validation: { utf8: false } })',
   iterations,
   setup(libs) {
@@ -55,6 +55,15 @@ await runner({
   },
   run(i, bson, largeDocument) {
     new bson.lib.deserialize(largeDocument);
+  }
+});
+
+await runner({
+  skip: false,
+  name: 'Double Serialization',
+  iterations,
+  run(i, bson) {
+    bson.lib.serialize({ d: 2.3 });
   }
 });
 

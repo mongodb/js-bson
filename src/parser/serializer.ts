@@ -78,6 +78,12 @@ function serializeString(
   return index;
 }
 
+const SPACE_FOR_FLOAT64 = new Uint8Array(8);
+const DV_FOR_FLOAT64 = new DataView(
+  SPACE_FOR_FLOAT64.buffer,
+  SPACE_FOR_FLOAT64.byteOffset,
+  SPACE_FOR_FLOAT64.byteLength
+);
 function serializeNumber(
   buffer: Buffer,
   key: string,
@@ -118,7 +124,8 @@ function serializeNumber(
     index = index + numberOfWrittenBytes;
     buffer[index++] = 0;
     // Write float
-    buffer.writeDoubleLE(value, index);
+    DV_FOR_FLOAT64.setFloat64(0, value, true);
+    buffer.set(SPACE_FOR_FLOAT64, index);
     // Adjust index
     index = index + 8;
   }
@@ -486,7 +493,8 @@ function serializeDouble(
   buffer[index++] = 0;
 
   // Write float
-  buffer.writeDoubleLE(value.value, index);
+  DV_FOR_FLOAT64.setFloat64(0, value.value, true);
+  buffer.set(SPACE_FOR_FLOAT64, index);
 
   // Adjust index
   index = index + 8;

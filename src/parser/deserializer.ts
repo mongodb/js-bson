@@ -263,10 +263,12 @@ function deserializeObject(
         (buffer[index++] << 16) |
         (buffer[index++] << 24);
     } else if (elementType === constants.BSON_DATA_NUMBER && promoteValues === false) {
-      value = new Double(buffer.readDoubleLE(index));
+      const dv = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+      value = new Double(dv.getFloat64(index, true));
       index = index + 8;
     } else if (elementType === constants.BSON_DATA_NUMBER) {
-      value = buffer.readDoubleLE(index);
+      const dv = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+      value = dv.getFloat64(index, true);
       index = index + 8;
     } else if (elementType === constants.BSON_DATA_DATE) {
       const lowBits =

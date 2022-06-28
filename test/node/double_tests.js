@@ -1,7 +1,7 @@
 'use strict';
 
 const BSON = require('../register-bson');
-const { getNodeMajor } = require('./tools/utils');
+const { getNodeMajor, isBrowser } = require('./tools/utils');
 const Double = BSON.Double;
 
 describe('Double', function () {
@@ -64,11 +64,14 @@ describe('Double', function () {
     });
 
     it('NaN with payload', function () {
-      if (getNodeMajor() < 10) {
+      if (!isBrowser() && getNodeMajor() < 10) {
         this.skip();
       }
       let buffer = Buffer.from('120000000000F87F', 'hex');
-      let value = buffer.readDoubleLE(0);
+
+      const dv = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+      let value = dv.getFloat64(0, true);
+
       let serializedDouble = BSON.serialize({ d: value });
       expect(serializedDouble.subarray(7, 15)).to.deep.equal(buffer);
       let { d: newVal } = BSON.deserialize(serializedDouble, { promoteValues: true });
