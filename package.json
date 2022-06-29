@@ -11,7 +11,6 @@
     "src",
     "dist",
     "bson.d.ts",
-    "bson-ts34.d.ts",
     "etc/prepare.js",
     "bower.json"
   ],
