@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { performance } from 'perf_hooks';
-import bson from '../../lib/bson.js';
 import { runner, systemInfo, getCurrentLocalBSON } from './lib_runner.mjs';
 
 const iterations = 1_000_000;
