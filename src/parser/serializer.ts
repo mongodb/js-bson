@@ -763,7 +763,7 @@ export function serializeInto(
   if (Array.isArray(object)) {
     // Get object keys
     for (let i = 0; i < object.length; i++) {
-      const key = String(i);
+      const key = i.toString(10);
       let value = object[i];
 
       // Is there an override value
