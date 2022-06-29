@@ -62,6 +62,13 @@ export class Binary {
   position!: number;
 
   /**
+   * Create a new Binary instance.
+   *
+   * This constructor can accept a string as its first argument. In this case,
+   * this string will be encoded using ISO-8859-1, **not** using UTF-8.
+   * This is almost certainly not what you want. Use `new Binary(Buffer.from(string))`
+   * instead to convert the string to a Buffer using UTF-8 first.
+   *
    * @param buffer - a buffer object containing the binary data.
    * @param subType - the option binary type.
    */
