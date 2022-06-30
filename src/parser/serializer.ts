@@ -841,8 +841,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index, true);
       } else if (typeof value['_bsontype'] !== 'undefined') {
-        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-        throw new BSONTypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
+        throw new BSONTypeError(`Unrecognized or invalid _bsontype: ${String(value['_bsontype'])}`);
       }
     }
   } else if (object instanceof Map || isMap(object)) {
@@ -943,8 +942,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index);
       } else if (typeof value['_bsontype'] !== 'undefined') {
-        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-        throw new BSONTypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
+        throw new BSONTypeError(`Unrecognized or invalid _bsontype: ${String(value['_bsontype'])}`);
       }
     }
   } else {
@@ -1049,8 +1047,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index);
       } else if (typeof value['_bsontype'] !== 'undefined') {
-        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-        throw new BSONTypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
+        throw new BSONTypeError(`Unrecognized or invalid _bsontype: ${String(value['_bsontype'])}`);
       }
     }
   }
