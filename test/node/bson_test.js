@@ -1,4 +1,3 @@
-/* eslint-disable no-loss-of-precision */
 'use strict';
 
 const { Buffer } = require('buffer');
@@ -748,7 +747,7 @@ describe('BSON', function () {
    * @ignore
    */
   it('Should Correctly Serialize and Deserialize Long Integer', function (done) {
-    var doc = { doc: Long.fromNumber(9223372036854775807) };
+    var doc = { doc: Long.fromNumber(9223372036854776000) };
     var serialized_data = BSON.serialize(doc);
 
     var serialized_data2 = Buffer.alloc(BSON.calculateObjectSize(doc));
@@ -758,12 +757,12 @@ describe('BSON', function () {
     var deserialized_data = BSON.deserialize(serialized_data);
     expect(doc.doc.equals(deserialized_data.doc)).to.be.true;
 
-    doc = { doc: Long.fromNumber(-9223372036854775) };
+    doc = { doc: Long.fromNumber(-9223372036854776) };
     serialized_data = BSON.serialize(doc);
     deserialized_data = BSON.deserialize(serialized_data);
     expect(doc.doc.equals(deserialized_data.doc)).to.be.true;
 
-    doc = { doc: Long.fromNumber(-9223372036854775809) };
+    doc = { doc: Long.fromNumber(-9223372036854776000) };
     serialized_data = BSON.serialize(doc);
     deserialized_data = BSON.deserialize(serialized_data);
     expect(doc.doc.equals(deserialized_data.doc)).to.be.true;
@@ -794,7 +793,7 @@ describe('BSON', function () {
     roundTrip(-Math.pow(2, 53));
     roundTrip(Math.pow(2, 65)); // Too big for Long.
     roundTrip(-Math.pow(2, 65));
-    roundTrip(9223372036854775807);
+    roundTrip(9223372036854776000);
     roundTrip(1234567890123456800); // Bigger than 2^53, stays a double.
     roundTrip(-1234567890123456800);
     done();
@@ -804,8 +803,8 @@ describe('BSON', function () {
    * @ignore
    */
   it('Should Correctly Serialize and Deserialize Timestamp as subclass of Long', function (done) {
-    var long = Long.fromNumber(9223372036854775807);
-    var timestamp = Timestamp.fromNumber(9223372036854775807);
+    var long = Long.fromNumber(9223372036854776000);
+    var timestamp = Timestamp.fromNumber(9223372036854776000);
     expect(long instanceof Long).to.be.ok;
     expect(!(long instanceof Timestamp)).to.be.ok;
     expect(timestamp instanceof Timestamp).to.be.ok;

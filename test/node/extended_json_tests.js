@@ -73,8 +73,7 @@ describe('Extended JSON', function () {
       int32Number: 300,
       doubleNumber: 200.2,
       longNumberIntFit: 0x19000000000000,
-      // eslint-disable-next-line no-loss-of-precision
-      doubleNumberIntFit: 19007199250000000.12
+      doubleNumberIntFit: 19007199250000000
     };
   });
 
@@ -94,8 +93,7 @@ describe('Extended JSON', function () {
     expect(300).to.equal(doc1.int32Number);
     expect(200.2).to.equal(doc1.doubleNumber);
     expect(0x19000000000000).to.equal(doc1.longNumberIntFit);
-    // eslint-disable-next-line no-loss-of-precision
-    expect(19007199250000000.12).to.equal(doc1.doubleNumberIntFit);
+    expect(19007199250000000).to.equal(doc1.doubleNumberIntFit);
 
     // Deserialize the document using strict mode
     doc1 = EJSON.parse(EJSON.stringify(doc, null, 0), { relaxed: false });
