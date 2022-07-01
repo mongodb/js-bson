@@ -11,7 +11,6 @@ function checkForMath(potentialGlobal: any) {
 
 // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
 export function getGlobal<T = Record<string, unknown>>(): T {
-  // eslint-disable-next-line no-undef
   return (
     checkForMath(typeof globalThis === 'object' && globalThis) ||
     checkForMath(typeof window === 'object' && window) ||

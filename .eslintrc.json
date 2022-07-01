@@ -28,6 +28,7 @@
     "prettier",
     "eslint-plugin-tsdoc"
   ],
+  "reportUnusedDisableDirectives": true,
   "rules": {
     "prettier/prettier": "error",
     "tsdoc/syntax": "warn",

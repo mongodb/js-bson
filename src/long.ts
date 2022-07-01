@@ -331,8 +331,7 @@ export class Long {
   /**
    * Tests if the specified object is a Long.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-  static isLong(value: any): value is Long {
+  static isLong(value: unknown): value is Long {
     return isObjectLike(value) && value['__isLong__'] === true;
   }
 

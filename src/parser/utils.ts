@@ -55,7 +55,6 @@ const detectRandomBytes = (): RandomBytesFunction => {
   } else {
     let requiredRandomBytes: RandomBytesFunction | null | undefined;
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       requiredRandomBytes = require('crypto').randomBytes;
     } catch (e) {
       // keep the fallback
