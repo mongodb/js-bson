@@ -37,7 +37,7 @@ export class ObjectId {
   static cacheHexString: boolean;
 
   /** ObjectId Bytes @internal */
-  private [kId]: Buffer;
+  private [kId]!: Buffer;
   /** ObjectId hexString cache @internal */
   private __id?: string;
 

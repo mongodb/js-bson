@@ -4,12 +4,37 @@ import type { Timestamp } from './timestamp';
 
 interface LongWASMHelpers {
   /** Gets the high bits of the last operation performed */
-  get_high(): number;
-  div_u(lowBits: number, highBits: number, lowBitsDivisor: number, highBitsDivisor: number): number;
-  div_s(lowBits: number, highBits: number, lowBitsDivisor: number, highBitsDivisor: number): number;
-  rem_u(lowBits: number, highBits: number, lowBitsDivisor: number, highBitsDivisor: number): number;
-  rem_s(lowBits: number, highBits: number, lowBitsDivisor: number, highBitsDivisor: number): number;
+  get_high(this: void): number;
+  div_u(
+    this: void,
+    lowBits: number,
+    highBits: number,
+    lowBitsDivisor: number,
+    highBitsDivisor: number
+  ): number;
+  div_s(
+    this: void,
+    lowBits: number,
+    highBits: number,
+    lowBitsDivisor: number,
+    highBitsDivisor: number
+  ): number;
+  rem_u(
+    this: void,
+    lowBits: number,
+    highBits: number,
+    lowBitsDivisor: number,
+    highBitsDivisor: number
+  ): number;
+  rem_s(
+    this: void,
+    lowBits: number,
+    highBits: number,
+    lowBitsDivisor: number,
+    highBitsDivisor: number
+  ): number;
   mul(
+    this: void,
     lowBits: number,
     highBits: number,
     lowBitsMultiplier: number,
@@ -306,8 +331,7 @@ export class Long {
   /**
    * Tests if the specified object is a Long.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-  static isLong(value: any): value is Long {
+  static isLong(value: unknown): value is Long {
     return isObjectLike(value) && value['__isLong__'] === true;
   }
 
@@ -471,6 +495,7 @@ export class Long {
     // into the result, and subtract it from the remainder.  It is critical that
     // the approximate value is less than or equal to the real value so that the
     // remainder never becomes negative.
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     rem = this;
     while (rem.gte(divisor)) {
       // Approximate the result of division. This may be a little greater or

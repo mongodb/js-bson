@@ -25,7 +25,7 @@ export class UUID {
   static cacheHexString: boolean;
 
   /** UUID Bytes @internal */
-  private [kId]: Buffer;
+  private [kId]!: Buffer;
   /** UUID hexString cache @internal */
   private __id?: string;
 

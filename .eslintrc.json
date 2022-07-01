@@ -5,7 +5,7 @@
     "plugin:prettier/recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
-    "prettier/@typescript-eslint"
+    "plugin:@typescript-eslint/recommended-requiring-type-checking"
   ],
   "env": {
     "node": true
@@ -17,13 +17,18 @@
     "Set": true,
     "Map": false
   },
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": 2017
+    "ecmaVersion": 2017,
+    "project": [
+      "./tsconfig.json"
+    ]
   },
   "plugins": [
     "prettier",
     "eslint-plugin-tsdoc"
   ],
+  "reportUnusedDisableDirectives": true,
   "rules": {
     "prettier/prettier": "error",
     "tsdoc/syntax": "warn",
@@ -52,6 +57,11 @@
           "Function": false
         }
       }
-    ]
+    ],
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-return": "off",
+    "@typescript-eslint/no-unsafe-argument": "off",
+    "@typescript-eslint/no-unsafe-call": "off"
   }
 }

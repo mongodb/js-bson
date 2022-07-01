@@ -763,7 +763,7 @@ export function serializeInto(
   if (Array.isArray(object)) {
     // Get object keys
     for (let i = 0; i < object.length; i++) {
-      const key = '' + i;
+      const key = `${i}`;
       let value = object[i];
 
       // Is there an override value
@@ -841,7 +841,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index, true);
       } else if (typeof value['_bsontype'] !== 'undefined') {
-        throw new BSONTypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
+        throw new BSONTypeError(`Unrecognized or invalid _bsontype: ${String(value['_bsontype'])}`);
       }
     }
   } else if (object instanceof Map || isMap(object)) {
@@ -942,7 +942,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index);
       } else if (typeof value['_bsontype'] !== 'undefined') {
-        throw new BSONTypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
+        throw new BSONTypeError(`Unrecognized or invalid _bsontype: ${String(value['_bsontype'])}`);
       }
     }
   } else {
@@ -1047,7 +1047,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index);
       } else if (typeof value['_bsontype'] !== 'undefined') {
-        throw new BSONTypeError('Unrecognized or invalid _bsontype: ' + value['_bsontype']);
+        throw new BSONTypeError(`Unrecognized or invalid _bsontype: ${String(value['_bsontype'])}`);
       }
     }
   }

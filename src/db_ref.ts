@@ -115,7 +115,7 @@ export class DBRef {
     // NOTE: if OID is an ObjectId class it will just print the oid string.
     const oid =
       this.oid === undefined || this.oid.toString === undefined ? this.oid : this.oid.toString();
-    return `new DBRef("${this.namespace}", new ObjectId("${oid}")${
+    return `new DBRef("${this.namespace}", new ObjectId("${String(oid)}")${
       this.db ? `, "${this.db}"` : ''
     })`;
   }
