@@ -85,12 +85,14 @@ describe('BSON Double Precision', function () {
       expect(Number.isNaN(newVal)).to.equal(true);
     });
   });
-  it('NODE-4335: does not preserve -0 in serialize-deserialize roundtrip if JS number is used', () => {
+
+  it('NODE-4335: does not preserve -0 in serialize-deserialize roundtrip if JS number is used', function () {
     // TODO (NODE-4335): -0 should be serialized as double
+    this.skip();
     const value = -0;
     const serializedDouble = BSON.serialize({ d: value });
     const type = serializedDouble[4];
-    expect(type).to.not.equal(BSON.BSON_DATA_NUMBER);
-    expect(type).to.equal(BSON.BSON_DATA_INT);
+    expect(type).to.equal(BSON.BSON_DATA_NUMBER);
+    expect(type).to.not.equal(BSON.BSON_DATA_INT);
   });
 });

@@ -158,11 +158,6 @@ exports.isNode6 = function () {
   return process.version.split('.')[0] === 'v6';
 };
 
-exports.getNodeMajor = function () {
-  // eslint-disable-next-line no-undef
-  return Number(process.versions.node.split('.')[0]);
-};
-
 const getSymbolFrom = function (target, symbolName, assertExists) {
   if (assertExists == null) assertExists = true;
 
