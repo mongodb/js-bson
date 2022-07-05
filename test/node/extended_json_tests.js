@@ -514,7 +514,12 @@ describe('Extended JSON', function () {
     const serialized = EJSON.stringify(original);
     expect(serialized).to.equal('{"__proto__":{"a":42}}');
     const deserialized = EJSON.parse(serialized);
-    expect(Object.getOwnPropertyDescriptor(deserialized, '__proto__').enumerable).to.equal(true);
+    expect(deserialized).to.have.deep.ownPropertyDescriptor('__proto__', {
+      configurable: true,
+      enumerable: true,
+      writable: true,
+      value: { a: 42 }
+    });
     expect(deserialized.__proto__.a).to.equal(42);
     done();
   });
