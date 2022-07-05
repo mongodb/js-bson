@@ -45,26 +45,21 @@ describe('BSON Double Precision', function () {
   }
 
   const testCases = [
-    { name: 'Infinity', input: new Double(Infinity) },
-    { name: '-Infinity', input: new Double(-Infinity) },
-    { name: 'Number.EPSILON', input: new Double(Number.EPSILON) },
-    { name: 'Zero', input: new Double(0) },
-    { name: 'Double (Negative Zero)', input: new Double(-0) }
+    { name: 'Infinity', doubleVal: new Double(Infinity), testVal: Infinity },
+    { name: '-Infinity', doubleVal: new Double(-Infinity), testVal: -Infinity },
+    { name: 'Number.EPSILON', doubleVal: new Double(Number.EPSILON), testVal: Number.EPSILON },
+    { name: 'Zero', doubleVal: new Double(0), testVal: 0 },
+    { name: 'Negative Zero', doubleVal: new Double(-0), testVal: -0 },
+    { name: 'NaN', doubleVal: new Double(NaN), testVal: NaN }
   ];
 
-  for (const { name, input } of testCases) {
-    it(`should return Double from serialize-deserialize roundtrip when value is: ${name}`, () => {
-      const outcome = serializeThenDeserialize(input);
-      expect(outcome.value).to.equal(input.value);
-      expect(Object.is(outcome.value, input.value)).to.be.true;
+  for (const { name, doubleVal, testVal } of testCases) {
+    it(`should preserve the input value ${name} in Double serialize-deserialize roundtrip`, () => {
+      const roundTrippedVal = serializeThenDeserialize(doubleVal);
+      expect(Object.is(doubleVal.value, testVal)).to.be.true;
+      expect(Object.is(roundTrippedVal.value, doubleVal.value)).to.be.true;
     });
   }
-
-  it('should preserve NaN value in serialize-deserialize roundtrip', () => {
-    const value = NaN;
-    const newVal = serializeThenDeserialize(value);
-    expect(Number.isNaN(newVal.value)).to.equal(true);
-  });
 
   context('NaN with Payload', function () {
     const NanPayloadBuffer = Buffer.from('120000000000F87F', 'hex');
@@ -82,7 +77,7 @@ describe('BSON Double Precision', function () {
 
     it('should preserve NaN value in serialize-deserialize roundtrip', function () {
       const { d: newVal } = BSON.deserialize(serializedNanPayloadDouble, { promoteValues: true });
-      expect(Number.isNaN(newVal)).to.equal(true);
+      expect(newVal).to.be.NaN;
     });
   });
 
