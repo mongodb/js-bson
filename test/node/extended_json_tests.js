@@ -509,7 +509,7 @@ describe('Extended JSON', function () {
     // expect(() => EJSON.serialize(badMap)).to.throw(); // uncomment when EJSON supports ES6 Map
   });
 
-  it('should correctly deserialize objects containing __proto__ keys', function (done) {
+  it('should correctly deserialize objects containing __proto__ keys', function () {
     const original = { ['__proto__']: { a: 42 } };
     const serialized = EJSON.stringify(original);
     expect(serialized).to.equal('{"__proto__":{"a":42}}');
@@ -521,7 +521,6 @@ describe('Extended JSON', function () {
       value: { a: 42 }
     });
     expect(deserialized.__proto__.a).to.equal(42);
-    done();
   });
 
   context('circular references', () => {
