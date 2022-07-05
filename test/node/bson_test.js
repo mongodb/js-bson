@@ -1776,7 +1776,12 @@ describe('BSON', function () {
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
 
     var doc1 = BSON.deserialize(serialized_data);
-    expect(Object.getOwnPropertyDescriptor(doc1, '__proto__').enumerable).to.equal(true);
+    expect(doc1).to.have.deep.ownPropertyDescriptor('__proto__', {
+      configurable: true,
+      enumerable: true,
+      writable: true,
+      value: { a: 42 }
+    });
     expect(doc1.__proto__.a).to.equal(42);
     done();
   });
