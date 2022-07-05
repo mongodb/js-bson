@@ -285,7 +285,17 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
     for (const name in doc) {
       options.seenObjects.push({ propertyName: name, obj: null });
       try {
-        _doc[name] = serializeValue(doc[name], options);
+        const value = serializeValue(doc[name], options);
+        if (name === '__proto__') {
+          Object.defineProperty(_doc, name, {
+            value,
+            writable: true,
+            enumerable: true,
+            configurable: true
+          });
+        } else {
+          _doc[name] = value;
+        }
       } finally {
         options.seenObjects.pop();
       }
