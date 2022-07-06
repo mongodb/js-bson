@@ -8,14 +8,12 @@ describe('BSON Double Precision', function () {
     describe('constructor()', function () {
       const value = 42.3456;
 
-      it('Primitive number', function (done) {
+      it('Primitive number', function () {
         expect(new Double(value).valueOf()).to.equal(value);
-        done();
       });
 
-      it('Number object', function (done) {
+      it('Number object', function () {
         expect(new Double(new Number(value)).valueOf()).to.equal(value);
-        done();
       });
     });
 
@@ -69,6 +67,7 @@ describe('BSON Double Precision', function () {
       NanPayloadBuffer.byteLength
     );
     const NanPayloadDouble = NanPayloadDV.getFloat64(0, true);
+    // Using promoteValues: false (returning raw BSON) in order to be able to check that payload remains intact
     const serializedNanPayloadDouble = BSON.serialize({ d: NanPayloadDouble });
 
     it('should keep payload in serialize-deserialize roundtrip', function () {
