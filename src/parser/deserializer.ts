@@ -197,6 +197,7 @@ function deserializeObject(
   let isPossibleDBRef = isArray ? false : null;
 
   // While we have more left data left keep parsing
+  const dataview = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
   while (!done) {
     // Read the type
     const elementType = buffer[index++];
@@ -263,10 +264,10 @@ function deserializeObject(
         (buffer[index++] << 16) |
         (buffer[index++] << 24);
     } else if (elementType === constants.BSON_DATA_NUMBER && promoteValues === false) {
-      value = new Double(buffer.readDoubleLE(index));
+      value = new Double(dataview.getFloat64(index, true));
       index = index + 8;
     } else if (elementType === constants.BSON_DATA_NUMBER) {
-      value = buffer.readDoubleLE(index);
+      value = dataview.getFloat64(index, true);
       index = index + 8;
     } else if (elementType === constants.BSON_DATA_DATE) {
       const lowBits =

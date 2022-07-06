@@ -9,7 +9,6 @@ import type { Double } from '../double';
 import { ensureBuffer } from '../ensure_buffer';
 import { BSONError, BSONTypeError } from '../error';
 import { isBSONType } from '../extended_json';
-import { writeIEEE754 } from '../float_parser';
 import type { Int32 } from '../int_32';
 import { Long } from '../long';
 import { Map } from '../map';
@@ -79,6 +78,12 @@ function serializeString(
   return index;
 }
 
+const SPACE_FOR_FLOAT64 = new Uint8Array(8);
+const DV_FOR_FLOAT64 = new DataView(
+  SPACE_FOR_FLOAT64.buffer,
+  SPACE_FOR_FLOAT64.byteOffset,
+  SPACE_FOR_FLOAT64.byteLength
+);
 function serializeNumber(
   buffer: Buffer,
   key: string,
@@ -119,7 +124,8 @@ function serializeNumber(
     index = index + numberOfWrittenBytes;
     buffer[index++] = 0;
     // Write float
-    writeIEEE754(buffer, value, index, 'little', 52, 8);
+    DV_FOR_FLOAT64.setFloat64(0, value, true);
+    buffer.set(SPACE_FOR_FLOAT64, index);
     // Adjust index
     index = index + 8;
   }
@@ -487,7 +493,8 @@ function serializeDouble(
   buffer[index++] = 0;
 
   // Write float
-  writeIEEE754(buffer, value.value, index, 'little', 52, 8);
+  DV_FOR_FLOAT64.setFloat64(0, value.value, true);
+  buffer.set(SPACE_FOR_FLOAT64, index);
 
   // Adjust index
   index = index + 8;

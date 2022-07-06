@@ -121,11 +121,6 @@ describe('BSON Corpus', function () {
         describe('valid-bson', function () {
           for (const v of valid) {
             it(v.description, function () {
-              if (v.description === 'NaN with payload') {
-                // TODO(NODE-3630): remove custom float parser so we can handle the NaN payload data
-                this.skip();
-              }
-
               if (
                 v.description === 'All BSON types' &&
                 scenario._filename === 'multi-type-deprecated'
