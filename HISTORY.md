@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.6.5](https://github.com/mongodb/js-bson/compare/v4.6.4...v4.6.5) (2022-07-07)
+
+
+### Bug Fixes
+
+* **NODE-3630:** remove float parser and test edge cases for Double ([#502](https://github.com/mongodb/js-bson/issues/502)) ([54ca603](https://github.com/mongodb/js-bson/commit/54ca603e8cc3b038517556acb378f3e345f3fce2))
+* **NODE-4211:** Do not require crypto in browser builds ([#500](https://github.com/mongodb/js-bson/issues/500)) ([b32ab40](https://github.com/mongodb/js-bson/commit/b32ab40a48d044be15d935c805753525ec06e855))
+* **NODE-4302:** remove downlevel ts and typesVersions ([#501](https://github.com/mongodb/js-bson/issues/501)) ([651b60e](https://github.com/mongodb/js-bson/commit/651b60edb2d4cdd7933e99d5bc5f7fc3a925eb7a))
+* **NODE-4381:** handle `__proto__` well in EJSON ([#506](https://github.com/mongodb/js-bson/issues/506)) ([4bda57d](https://github.com/mongodb/js-bson/commit/4bda57d9593e5e357979a3c60d132fbd07491f75))
+
 ### [4.6.4](https://github.com/mongodb/js-bson/compare/v4.6.3...v4.6.4) (2022-05-19)
 
 ### [4.6.3](https://github.com/mongodb/js-bson/compare/v4.6.2...v4.6.3) (2022-04-20)
