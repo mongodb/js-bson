@@ -62,7 +62,8 @@ export {
 export type { DBRefLike } from './db_ref';
 export type { Decimal128Extended } from './decimal128';
 export type { DoubleExtended } from './double';
-export type { EJSON, EJSONOptions } from './extended_json';
+export type { EJSONOptions } from './extended_json';
+export { EJSON } from './extended_json';
 export type { Int32Extended } from './int_32';
 export type { LongExtended } from './long';
 export type { MaxKeyExtended } from './max_key';
