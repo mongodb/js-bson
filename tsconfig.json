@@ -26,7 +26,8 @@
     // API-extractor makes use of the declarations, npm script should be cleaning these up
     "declaration": true,
     "declarationMap": true,
-    "types": []
+    "types": [],
+    "isolatedModules": true
   },
   "ts-node": {
     "transpileOnly": true,
