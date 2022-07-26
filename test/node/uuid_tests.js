@@ -185,9 +185,10 @@ describe('UUID', () => {
     });
 
     it('should serialize BSON.UUID() input the same as BSON.UUID().toBinary()', () => {
-      const toBinarySerialization = BSON.serialize({ uuid: new BSON.UUID().toBinary() });
-      const plainUUIDSerialization = BSON.serialize({ uuid: new BSON.UUID() });
+      const exampleUUID = new BSON.UUID();
+      const toBinarySerialization = BSON.serialize({ uuid: exampleUUID.toBinary() });
+      const plainUUIDSerialization = BSON.serialize({ uuid: exampleUUID });
       expect(plainUUIDSerialization).to.deep.equal(toBinarySerialization);
-    }); 
+    });
   });
 });
