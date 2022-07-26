@@ -198,6 +198,7 @@ describe('UUID', () => {
       const testCases = promoteUUIDValues.flatMap(promoteUUIDs =>
         promoteBufferValues.flatMap(promoteBuffers => ({
           options: { promoteUUIDs, promoteBuffers },
+          // promoteBuffers: true returns a Buffer so _bsontype does not exist
           outcome: promoteUUIDs ? 'UUID' : promoteBuffers ? undefined : 'Binary'
         }))
       );
