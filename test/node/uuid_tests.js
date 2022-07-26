@@ -190,5 +190,24 @@ describe('UUID', () => {
       const plainUUIDSerialization = BSON.serialize({ uuid: exampleUUID });
       expect(plainUUIDSerialization).to.deep.equal(toBinarySerialization);
     });
+
+    describe('promoteBuffers', () => {
+      const promoteUUIDValues = [true, false, undefined];
+      const promoteBufferValues = [true, false, undefined];
+
+      const testCases = promoteUUIDValues.flatMap(promoteUUIDs =>
+        promoteBufferValues.flatMap(promoteBuffers => ({
+          options: { promoteUUIDs, promoteBuffers },
+          outcome: promoteUUIDs ? 'UUID' : promoteBuffers ? undefined : 'Binary'
+        }))
+      );
+
+      for (const { options, outcome } of testCases) {
+        it(`should deserialize to ${outcome} type when promoteUUIDs is ${options.promoteUUIDs} and promoteBuffers is ${options.promoteBuffers}`, () => {
+          const { uuid } = BSON.deserialize(serializedUUID, options);
+          expect(uuid._bsontype).to.equal(outcome);
+        });
+      }
+    });
   });
 });

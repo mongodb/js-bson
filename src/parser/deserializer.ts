@@ -35,7 +35,7 @@ export interface DeserializeOptions {
   promoteBuffers?: boolean;
   /** when deserializing will promote BSON values to their Node.js closest equivalent types. */
   promoteValues?: boolean;
-  /** when deserializing will return UUID type */
+  /** when deserializing will return UUID type, if promoteBuffers is also true then promoteUUIDs will take precedence and a buffer will not be returned  */
   promoteUUIDs?: boolean;
   /** allow to specify if there what fields we wish to return as unserialized raw buffer. */
   fieldsAsRaw?: Document;
@@ -137,7 +137,7 @@ function deserializeObject(
   const promoteBuffers = options['promoteBuffers'] == null ? false : options['promoteBuffers'];
   const promoteLongs = options['promoteLongs'] == null ? true : options['promoteLongs'];
   const promoteValues = options['promoteValues'] == null ? true : options['promoteValues'];
-  const promoteUUIDs = options['promoteUUIDs'] == null ? false : options['promoteUUIDs'];
+  const promoteUUIDs = options.promoteUUIDs == null ? false : options.promoteUUIDs;
 
   // Ensures default validation option if none given
   const validation = options.validation == null ? { utf8: true } : options.validation;
