@@ -30,9 +30,6 @@ functions:
              CURRENT_VERSION=latest
           fi
           export PROJECT_DIRECTORY="$(pwd)"
-          if [ "Windows_NT" = "$OS" ]; then
-             export PROJECT_DIRECTORY=$(cygpath -m $PROJECT_DIRECTORY)
-          fi
 
           # get the latest version of node for given major version
           NODE_VERSION=$(curl -sL nodejs.org/download/release/latest-v${NODE_MAJOR_VERSION}.x/SHASUMS256.txt -o - | head -n 1 | tr -s ' ' | cut -d' ' -f2 | cut -d- -f2 | cut -dv -f2)
@@ -213,10 +210,6 @@ buildvariants:
   - name: mac
     display_name: MacOS 10.14
     run_on: macos-1014
-    tasks: [".node"]
-  - name: windows
-    display_name: Windows 64
-    run_on: windows-64-vsMulti-small
     tasks: [".node"]
   - name: lint
     display_name: lint
