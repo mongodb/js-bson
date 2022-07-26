@@ -10,7 +10,6 @@ NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY}/node-artifacts"
 NPM_CACHE_DIR="${NODE_ARTIFACTS_PATH}/npm"
 NPM_TMP_DIR="${NODE_ARTIFACTS_PATH}/tmp"
 BIN_DIR="$(pwd)/bin"
-NVM_WINDOWS_URL="https://github.com/coreybutler/nvm-windows/releases/download/1.1.9/nvm-noinstall.zip"
 NVM_URL="https://raw.githubusercontent.com/creationix/nvm/v0.38.0/install.sh"
 
 # this needs to be explicitly exported for the nvm install below
@@ -28,51 +27,21 @@ export PATH="${BIN_DIR}:${PATH}"
 
 # install Node.js
 echo "Installing Node ${NODE_LTS_NAME}"
-if [ "$OS" == "Windows_NT" ]; then
-  set +o xtrace
 
-  export NVM_HOME=`cygpath -w "$NVM_DIR"`
-  export NVM_SYMLINK=`cygpath -w "$NODE_ARTIFACTS_PATH/bin"`
-  export PATH=`cygpath $NVM_SYMLINK`:`cygpath $NVM_HOME`:$PATH
+set +o xtrace
 
-  # download and install nvm
-  curl -L $NVM_WINDOWS_URL -o nvm.zip
-  unzip -d $NVM_DIR nvm.zip
-  rm nvm.zip
+echo "  Downloading nvm"
+curl -o- $NVM_URL | bash
+[ -s "${NVM_DIR}/nvm.sh" ] && \. "${NVM_DIR}/nvm.sh"
 
-  chmod 777 $NVM_DIR
-  chmod -R a+rx $NVM_DIR
+echo "Running: nvm install --lts --latest-npm"
+nvm install --lts --latest-npm
+echo "Running: nvm install ${NODE_VERSION}"
+nvm install "${NODE_VERSION}"
+echo "Running: nvm use --lts"
+nvm use --lts
 
-  cat <<EOT > $NVM_DIR/settings.txt
-root: $NVM_HOME
-path: $NVM_SYMLINK
-EOT
-
-  echo "Running: nvm install lts"
-  nvm install lts
-  echo "Running: nvm install ${NODE_VERSION}"
-  nvm install "${NODE_VERSION}"
-  echo "Running: nvm use lts"
-  nvm use lts
-  echo "Running: npm install -g npm@8.3.1"
-  npm install -g npm@8.3.1 # https://github.com/npm/cli/issues/4341
-  set -o xtrace
-else
-  set +o xtrace
-
-  echo "  Downloading nvm"
-  curl -o- $NVM_URL | bash
-  [ -s "${NVM_DIR}/nvm.sh" ] && \. "${NVM_DIR}/nvm.sh"
-
-  echo "Running: nvm install --lts --latest-npm"
-  nvm install --lts --latest-npm
-  echo "Running: nvm install ${NODE_VERSION}"
-  nvm install "${NODE_VERSION}"
-  echo "Running: nvm use --lts"
-  nvm use --lts
-
-  set -o xtrace
-fi
+set -o xtrace
 
 
 

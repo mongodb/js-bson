@@ -181,7 +181,7 @@ describe('Mutual version and distribution compatibility', function () {
                 fromObjects = makeObjects(fromBSON);
               },
               err => {
-                if (+process.version.slice(1).split('.')[0] >= 12 && process.platform !== 'win32') {
+                if (+process.version.slice(1).split('.')[0] >= 12) {
                   throw err; // On Node.js 12+, all loading is expected to work.
                 } else {
                   this.skip(); // Otherwise, e.g. ESM can't be loaded, so just skip.
