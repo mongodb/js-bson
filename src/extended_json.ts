@@ -1,5 +1,6 @@
 import { Binary } from './binary';
 import type { Document } from './bson';
+import { UUID } from './uuid';
 import { Code } from './code';
 import { DBRef, isDBRefLike } from './db_ref';
 import { Decimal128 } from './decimal128';
@@ -32,7 +33,8 @@ type BSONType =
   | ObjectId
   | BSONRegExp
   | BSONSymbol
-  | Timestamp;
+  | Timestamp
+  | UUID;
 
 export function isBSONType(value: unknown): value is BSONType {
   return (
@@ -53,7 +55,7 @@ const BSON_INT64_MIN = -0x8000000000000000;
 const keysToCodecs = {
   $oid: ObjectId,
   $binary: Binary,
-  $uuid: Binary,
+  $uuid: Binary, 
   $symbol: BSONSymbol,
   $numberInt: Int32,
   $numberDecimal: Decimal128,
@@ -247,6 +249,7 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
 
 const BSON_TYPE_MAPPINGS = {
   Binary: (o: Binary) => new Binary(o.value(), o.sub_type),
+  UUID: (o: UUID) => new UUID(o.id),
   Code: (o: Code) => new Code(o.code, o.scope),
   DBRef: (o: DBRef) => new DBRef(o.collection || o.namespace, o.oid, o.db, o.fields), // "namespace" for 1.x library backwards compat
   Decimal128: (o: Decimal128) => new Decimal128(o.bytes),
@@ -301,7 +304,7 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
       }
     }
     return _doc;
-  } else if (isBSONType(doc)) {
+  } else if (isBSONType(doc)) { //TODO: define toExtendedJSOn
     // the "document" is really just a BSON type object
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let outDoc: any = doc;

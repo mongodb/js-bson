@@ -4,6 +4,7 @@ import { Binary } from './binary';
 import { bufferToUuidHexString, uuidHexStringToBuffer, uuidValidateString } from './uuid_utils';
 import { isUint8Array, randomBytes } from './parser/utils';
 import { BSONTypeError } from './error';
+import type { EJSONOptions } from './extended_json';
 
 /** @public */
 export type UUIDExtended = {
@@ -203,6 +204,10 @@ export class UUID {
 
   inspect(): string {
     return `new UUID("${this.toHexString()}")`;
+  }
+
+  toExtendedJSON(options: EJSONOptions) {
+    return this.toBinary().toExtendedJSON(options);
   }
 }
 

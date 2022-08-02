@@ -19,6 +19,7 @@ const ObjectId = BSON.ObjectId;
 const BSONRegExp = BSON.BSONRegExp;
 const BSONSymbol = BSON.BSONSymbol;
 const Timestamp = BSON.Timestamp;
+const UUID = BSON.UUID;
 
 // Several tests in this file can test interop between current library versions and library version 1.1.0, because
 // between 1.1.0 and 4.0.0 there was a significant rewrite. To minimize maintenance issues of a hard dependency on
@@ -737,6 +738,16 @@ Converting circular structure to EJSON:
           expect(bson).to.deep.equal(doc);
         });
       });
+    });
+  });
+
+  describe('UUID stringify', () => {
+    const uuid = new UUID();
+    it('should return same values for UUID.toBinary() and UUID', () => {
+      // {"u":{"$binary":{"base64":"vDzrMPEAQOGkA8wGUNSOxw==","subType":"04"}}}
+      const stringifiedToBinary = EJSON.stringify({ u: uuid.toBinary() });
+      const stringifiedPlainUUID = EJSON.stringify({ u: uuid });
+      expect(stringifiedToBinary).to.deep.equal(stringifiedPlainUUID);
     });
   });
 });
