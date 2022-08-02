@@ -55,7 +55,7 @@ const BSON_INT64_MIN = -0x8000000000000000;
 const keysToCodecs = {
   $oid: ObjectId,
   $binary: Binary,
-  $uuid: Binary, 
+  $uuid: Binary,
   $symbol: BSONSymbol,
   $numberInt: Int32,
   $numberDecimal: Decimal128,
@@ -304,7 +304,7 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
       }
     }
     return _doc;
-  } else if (isBSONType(doc)) { //TODO: define toExtendedJSOn
+  } else if (isBSONType(doc)) {
     // the "document" is really just a BSON type object
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let outDoc: any = doc;

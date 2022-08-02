@@ -743,11 +743,15 @@ Converting circular structure to EJSON:
 
   describe('UUID stringify', () => {
     const uuid = new UUID();
+    const stringifiedPlainUUID = EJSON.stringify({ u: uuid });
     it('should return same values for UUID.toBinary() and UUID', () => {
-      // {"u":{"$binary":{"base64":"vDzrMPEAQOGkA8wGUNSOxw==","subType":"04"}}}
       const stringifiedToBinary = EJSON.stringify({ u: uuid.toBinary() });
-      const stringifiedPlainUUID = EJSON.stringify({ u: uuid });
       expect(stringifiedToBinary).to.deep.equal(stringifiedPlainUUID);
+    });
+    it('should serialize to correct subType', () => {
+      const stringifiedUUIDtoObject = JSON.parse(stringifiedPlainUUID);
+      const stringifiedBinaryNewUUIDSubType = '04';
+      expect(stringifiedUUIDtoObject.u.$binary.subType).to.equal(stringifiedBinaryNewUUIDSubType);
     });
   });
 });
