@@ -193,4 +193,65 @@ describe('UUID', () => {
       expect(plainUUIDSerialization).to.deep.equal(toBinarySerialization);
     });
   });
+
+  describe('deserialize', () => {
+    const originalUUID = new BSON.UUID();
+    const binaryUUID = originalUUID.toBinary();
+    const serializedUUID = BSON.serialize({ uuid: originalUUID.toBinary() });
+
+    it('should promoteUUIDs when flag is true', () => {
+      const { uuid: promotedUUID } = BSON.deserialize(serializedUUID, { promoteUUIDs: true });
+      expect(promotedUUID._bsontype).to.equal('UUID');
+      expect(promotedUUID).to.deep.equal(originalUUID);
+    });
+
+    it('should not promoteUUIDs when flag is false', () => {
+      const { uuid: unpromotedUUID } = BSON.deserialize(serializedUUID, { promoteUUIDs: false });
+      expect(unpromotedUUID._bsontype).to.equal('Binary');
+      expect(unpromotedUUID).to.deep.equal(binaryUUID);
+    });
+
+    it('should not promoteUUIDs when flag is omitted', () => {
+      const { uuid: omittedFlagUUID } = BSON.deserialize(serializedUUID);
+      expect(omittedFlagUUID._bsontype).to.equal('Binary');
+      expect(omittedFlagUUID).to.deep.equal(binaryUUID);
+    });
+
+    it('should throw BSONTypeError if _bsontype is not UUID and promoteUUIDs is true', () => {
+      const binaryVar = new Binary(Buffer.from('abc'));
+      const serializedBinary = BSON.serialize(binaryVar);
+      expect(() => {
+        BSON.deserialize(serializedBinary, { promoteUUIDs: true });
+      }).to.throw(BSONTypeError);
+    });
+
+    describe('promoteBuffers', () => {
+      const promoteUUIDValues = [true, false, undefined];
+      const promoteBufferValues = [true, false, undefined];
+
+      const testCases = promoteUUIDValues.flatMap(promoteUUIDs =>
+        promoteBufferValues.flatMap(promoteBuffers => ({
+          options: { promoteUUIDs, promoteBuffers },
+          // promoteBuffers: true returns a Buffer so _bsontype does not exist
+          outcome: promoteUUIDs ? 'UUID' : promoteBuffers ? undefined : 'Binary'
+        }))
+      );
+
+      for (const { options, outcome } of testCases) {
+        it(`should deserialize to ${outcome} type when promoteUUIDs is ${options.promoteUUIDs} and promoteBuffers is ${options.promoteBuffers}`, () => {
+          const { uuid } = BSON.deserialize(serializedUUID, options);
+          expect(uuid._bsontype).to.equal(outcome);
+          if (uuid._bsontype === 'UUID') {
+            expect(uuid.id).to.deep.equal(originalUUID.id);
+          } else if (uuid._bsontype === 'Binary') {
+            expect(uuid.buffer).to.deep.equal(originalUUID.id);
+          } else if (uuid._bsontype === undefined) {
+            expect(uuid).to.deep.equal(originalUUID.id);
+          } else {
+            expect.fail('Unexpected _bsontype');
+          }
+        });
+      }
+    });
+  });
 });
