@@ -216,8 +216,8 @@ describe('UUID', () => {
     });
 
     it('should throw BSONTypeError if _bsontype is not UUID and promoteUUIDs is true', () => {
-      const binaryVar = new Binary(Buffer.from('abc'));
-      const serializedBinary = BSON.serialize(binaryVar);
+      const binaryVar = new Binary(Buffer.from('abc'), BSON_BINARY_SUBTYPE_UUID_NEW);
+      const serializedBinary = BSON.serialize({ d: binaryVar });
       expect(() => {
         BSON.deserialize(serializedBinary, { promoteUUIDs: true });
       }).to.throw(BSONTypeError);
