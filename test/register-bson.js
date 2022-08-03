@@ -10,6 +10,7 @@
 require('chai/register-expect');
 require('array-includes/auto');
 require('object.entries/auto');
+require('array.prototype.flatmap/auto');
 
 const BSON = require('../lib/bson');
 const { ensureBuffer } = require('../lib/ensure_buffer');
