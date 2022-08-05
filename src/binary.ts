@@ -73,7 +73,7 @@ export class Binary {
    * @param buffer - a buffer object containing the binary data.
    * @param subType - the option binary type.
    */
-  constructor(buffer?: string | BinarySequence | Binary, subType?: number) {
+  constructor(buffer?: string | BinarySequence, subType?: number) {
     if (!(this instanceof Binary)) return new Binary(buffer, subType);
 
     if (
@@ -88,32 +88,26 @@ export class Binary {
       );
     }
 
-    if (buffer != null && (buffer as Binary)._bsontype === 'Binary') {
-      this.sub_type = (buffer as Binary).sub_type;
-      this.buffer = (buffer as Binary).buffer;
-      this.position = (buffer as Binary).position;
+    this.sub_type = subType ?? Binary.BSON_BINARY_SUBTYPE_DEFAULT;
+
+    if (buffer == null) {
+      // create an empty binary buffer
+      this.buffer = Buffer.alloc(Binary.BUFFER_SIZE);
+      this.position = 0;
     } else {
-      this.sub_type = subType ?? Binary.BSON_BINARY_SUBTYPE_DEFAULT;
-
-      if (buffer == null) {
-        // create an empty binary buffer
-        this.buffer = Buffer.alloc(Binary.BUFFER_SIZE);
-        this.position = 0;
+      if (typeof buffer === 'string') {
+        // string
+        this.buffer = Buffer.from(buffer, 'binary');
+      } else if (Array.isArray(buffer)) {
+        // number[]
+        this.buffer = Buffer.from(buffer);
       } else {
-        if (typeof buffer === 'string') {
-          // string
-          this.buffer = Buffer.from(buffer, 'binary');
-        } else if (Array.isArray(buffer)) {
-          // number[]
-          this.buffer = Buffer.from(buffer);
-        } else {
-          // Buffer | TypedArray | ArrayBuffer
-          this.buffer = ensureBuffer(buffer);
-        }
-
-        this.position = this.buffer.byteLength;
+        // Buffer | TypedArray | ArrayBuffer
+        this.buffer = ensureBuffer(buffer);
       }
-    }
+
+      this.position = this.buffer.byteLength;
+    
   }
 
   /**
