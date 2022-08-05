@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import { Binary, UUID, UUID } from './binary';
+import { Binary, UUID } from './binary';
 import { Code } from './code';
 import { DBRef } from './db_ref';
 import { Decimal128 } from './decimal128';
