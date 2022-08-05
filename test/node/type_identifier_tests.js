@@ -64,7 +64,7 @@ describe('_bsontype identifier', () => {
   it('should be equal to BSONRegExp for BSONRegExp', () => {
     expect(BSONRegExp.prototype._bsontype).to.equal('BSONRegExp');
   });
-  it('should be equal to UUID for UUID', () => {
-    expect(UUID.prototype._bsontype).to.equal('UUID');
+  it('should be equal to Binary for UUID', () => {
+    expect(UUID.prototype._bsontype).to.equal('Binary');
   });
 });

@@ -4,6 +4,7 @@ import { Binary } from './binary';
 import { bufferToUuidHexString, uuidHexStringToBuffer, uuidValidateString } from './uuid_utils';
 import { isUint8Array, randomBytes } from './parser/utils';
 import { BSONTypeError } from './error';
+import { BSON_BINARY_SUBTYPE_UUID_NEW } from './constants';
 
 /** @public */
 export type UUIDExtended = {
@@ -18,10 +19,7 @@ const kId = Symbol('id');
  * A class representation of the BSON UUID type.
  * @public
  */
-export class UUID {
-  // This property is not meant for direct serialization, but simply an indication that this type originates from this package.
-  _bsontype!: 'UUID';
-
+export class UUID extends Binary {
   static cacheHexString: boolean;
 
   /** UUID Bytes @internal */
@@ -35,21 +33,25 @@ export class UUID {
    * @param input - Can be a 32 or 36 character hex string (dashes excluded/included) or a 16 byte binary Buffer.
    */
   constructor(input?: string | Buffer | UUID) {
-    if (typeof input === 'undefined') {
-      // The most common use case (blank id, new UUID() instance)
-      this.id = UUID.generate();
+    let bytes;
+    let hexStr;
+    if (input == null) {
+      bytes = UUID.generate();
     } else if (input instanceof UUID) {
-      this[kId] = Buffer.from(input.id);
-      this.__id = input.__id;
+      bytes = Buffer.from(input[kId]);
+      hexStr = input.__id;
     } else if (ArrayBuffer.isView(input) && input.byteLength === BYTE_LENGTH) {
-      this.id = ensureBuffer(input);
+      bytes = ensureBuffer(input);
     } else if (typeof input === 'string') {
-      this.id = uuidHexStringToBuffer(input);
+      bytes = uuidHexStringToBuffer(input);
     } else {
       throw new BSONTypeError(
         'Argument passed in UUID constructor must be a UUID, a 16 byte Buffer or a 32/36 character hex string (dashes excluded/included, format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).'
       );
     }
+    super(bytes, BSON_BINARY_SUBTYPE_UUID_NEW);
+    this[kId] = bytes;
+    this.__id = hexStr;
   }
 
   /**
@@ -205,5 +207,3 @@ export class UUID {
     return `new UUID("${this.toHexString()}")`;
   }
 }
-
-Object.defineProperty(UUID.prototype, '_bsontype', { value: 'UUID' });
