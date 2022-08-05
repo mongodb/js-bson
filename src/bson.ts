@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import { Binary } from './binary';
+import { Binary, UUID, UUID } from './binary';
 import { Code } from './code';
 import { DBRef } from './db_ref';
 import { Decimal128 } from './decimal128';
@@ -20,8 +20,7 @@ import { serializeInto as internalSerialize, SerializeOptions } from './parser/s
 import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
-import { UUID } from './uuid';
-export type { BinaryExtended, BinaryExtendedLegacy, BinarySequence } from './binary';
+export type { UUIDExtended, BinaryExtended, BinaryExtendedLegacy, BinarySequence } from './binary';
 export type { CodeExtended } from './code';
 export {
   BSON_BINARY_SUBTYPE_BYTE_ARRAY,
@@ -73,7 +72,6 @@ export type { BSONRegExpExtended, BSONRegExpExtendedLegacy } from './regexp';
 export type { BSONSymbolExtended } from './symbol';
 export type { LongWithoutOverrides, TimestampExtended, TimestampOverrides } from './timestamp';
 export { LongWithoutOverridesClass } from './timestamp';
-export type { UUIDExtended } from './uuid';
 export type { SerializeOptions, DeserializeOptions };
 export {
   Code,
