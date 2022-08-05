@@ -107,7 +107,7 @@ export class Binary {
       }
 
       this.position = this.buffer.byteLength;
-    
+    }
   }
 
   /**
