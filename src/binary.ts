@@ -250,7 +250,6 @@ export class Binary {
   }
 
   toUUID(): UUID {
-    const { UUID } = require('./uuid');
     if (this.sub_type === Binary.SUBTYPE_UUID) {
       return new UUID(this.buffer.slice(0, this.position));
     }
