@@ -6,6 +6,8 @@ const { inspect } = require('util');
 const { validate: uuidStringValidate, version: uuidStringVersion } = require('uuid');
 const BSON = require('../register-bson');
 const BSONTypeError = BSON.BSONTypeError;
+const BSON_DATA_BINARY = BSON.BSON_DATA_BINARY;
+const BSON_BINARY_SUBTYPE_UUID_NEW = BSON.BSON_BINARY_SUBTYPE_UUID_NEW;
 
 // Test values
 const UPPERCASE_DASH_SEPARATED_UUID_STRING = 'AAAAAAAA-AAAA-4AAA-AAAA-AAAAAAAAAAAA';
