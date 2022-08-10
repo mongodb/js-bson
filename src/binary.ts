@@ -298,9 +298,7 @@ Object.defineProperty(Binary.prototype, '_bsontype', { value: 'Binary' });
 export type UUIDExtended = {
   $uuid: string;
 };
-const BYTE_LENGTH = 16;
-
-const kId = Symbol('id');
+const UUID_BYTE_LENGTH = 16;
 
 /**
  * A class representation of the BSON UUID type.
@@ -309,8 +307,6 @@ const kId = Symbol('id');
 export class UUID extends Binary {
   static cacheHexString: boolean;
 
-  /** UUID Bytes @internal */
-  private [kId]!: Buffer;
   /** UUID hexString cache @internal */
   private __id?: string;
 
@@ -325,9 +321,9 @@ export class UUID extends Binary {
     if (input == null) {
       bytes = UUID.generate();
     } else if (input instanceof UUID) {
-      bytes = Buffer.from(input[kId]);
+      bytes = Buffer.from(input.buffer);
       hexStr = input.__id;
-    } else if (ArrayBuffer.isView(input) && input.byteLength === BYTE_LENGTH) {
+    } else if (ArrayBuffer.isView(input) && input.byteLength === UUID_BYTE_LENGTH) {
       bytes = ensureBuffer(input);
     } else if (typeof input === 'string') {
       bytes = uuidHexStringToBuffer(input);
@@ -337,7 +333,7 @@ export class UUID extends Binary {
       );
     }
     super(bytes, BSON_BINARY_SUBTYPE_UUID_NEW);
-    this[kId] = bytes;
+    this.buffer = bytes;
     this.__id = hexStr;
   }
 
@@ -346,11 +342,11 @@ export class UUID extends Binary {
    * @readonly
    */
   get id(): Buffer {
-    return this[kId];
+    return this.buffer;
   }
 
   set id(value: Buffer) {
-    this[kId] = value;
+    this.buffer = value;
 
     if (UUID.cacheHexString) {
       this.__id = bufferToUuidHexString(value);
@@ -426,7 +422,7 @@ export class UUID extends Binary {
    * Generates a populated buffer containing a v4 uuid
    */
   static generate(): Buffer {
-    const bytes = randomBytes(BYTE_LENGTH);
+    const bytes = randomBytes(UUID_BYTE_LENGTH);
 
     // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
     // Kindly borrowed from https://github.com/uuidjs/uuid/blob/master/src/v4.js
@@ -455,7 +451,7 @@ export class UUID extends Binary {
 
     if (isUint8Array(input)) {
       // check for length & uuid version (https://tools.ietf.org/html/rfc4122#section-4.1.3)
-      if (input.length !== BYTE_LENGTH) {
+      if (input.length !== UUID_BYTE_LENGTH) {
         return false;
       }
 
