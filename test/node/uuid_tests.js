@@ -166,6 +166,13 @@ describe('UUID', () => {
   });
 
   describe('serialize', () => {
+    it('should serialize BSON.UUID() input the same as BSON.UUID().toBinary()', () => {
+      const exampleUUID = new BSON.UUID();
+      const toBinarySerialization = BSON.serialize({ uuid: exampleUUID.toBinary() });
+      const plainUUIDSerialization = BSON.serialize({ uuid: exampleUUID });
+      expect(plainUUIDSerialization).to.deep.equal(toBinarySerialization);
+    });
+
     it('should have a valid UUID _bsontype with Object input without error', () => {
       const output = BSON.serialize({ uuid: new BSON.UUID() });
       expect(output[4]).to.equal(BSON_DATA_BINARY);
@@ -182,13 +189,6 @@ describe('UUID', () => {
       const output = BSON.serialize({ a: [new BSON.UUID()] });
       expect(output[11]).to.equal(BSON_DATA_BINARY);
       expect(output[18]).to.equal(BSON_BINARY_SUBTYPE_UUID_NEW);
-    });
-
-    it('should serialize BSON.UUID() input the same as BSON.UUID().toBinary()', () => {
-      const exampleUUID = new BSON.UUID();
-      const toBinarySerialization = BSON.serialize({ uuid: exampleUUID.toBinary() });
-      const plainUUIDSerialization = BSON.serialize({ uuid: exampleUUID });
-      expect(plainUUIDSerialization).to.deep.equal(toBinarySerialization);
     });
   });
 

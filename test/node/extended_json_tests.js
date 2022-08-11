@@ -6,6 +6,7 @@ const vm = require('vm');
 
 // BSON types
 const Binary = BSON.Binary;
+const UUID = BSON.UUID;
 const Code = BSON.Code;
 const DBRef = BSON.DBRef;
 const Decimal128 = BSON.Decimal128;
@@ -737,6 +738,40 @@ Converting circular structure to EJSON:
           expect(bson).to.deep.equal(doc);
         });
       });
+    });
+  });
+
+  describe('UUID stringify', () => {
+    const uuid = new UUID();
+    const stringifiedPlainUUID = EJSON.stringify({ u: uuid });
+    it('should return same values for UUID.toBinary() and UUID', () => {
+      const stringifiedToBinary = EJSON.stringify({ u: uuid.toBinary() });
+      expect(stringifiedToBinary).to.deep.equal(stringifiedPlainUUID);
+    });
+    it('should serialize to correct subType', () => {
+      const stringifiedUUIDtoObject = JSON.parse(stringifiedPlainUUID);
+      const stringifiedBinaryNewUUIDSubType = '04';
+      expect(stringifiedUUIDtoObject.u.$binary.subType).to.equal(stringifiedBinaryNewUUIDSubType);
+    });
+  });
+
+  describe('UUID parse', () => {
+    const uuid = new UUID();
+    const stringifiedPlainUUID = EJSON.stringify({ u: uuid });
+    it('should return same values for UUID.toBinary() and UUID', () => {
+      const stringifiedToBinary = EJSON.stringify({ u: uuid.toBinary() });
+      const parsedToBinary = EJSON.parse(stringifiedToBinary);
+      const parsedPlainUUID = EJSON.parse(stringifiedPlainUUID);
+      expect(parsedToBinary).to.deep.equal(parsedPlainUUID);
+    });
+    it('should parse both input formats the same way', () => {
+      const parsedUndashedInput = EJSON.parse(
+        `{"u":{"$binary":{"base64":"vDzrMPEAQOGkA8wGUNSOxw==","subType":"04"}}}`
+      );
+      const parsedDashedInput = EJSON.parse(
+        `{"u":{"$uuid":"bc3ceb30-f100-40e1-a403-cc0650d48ec7"}}`
+      );
+      expect(parsedUndashedInput).to.deep.equal(parsedDashedInput);
     });
   });
 });

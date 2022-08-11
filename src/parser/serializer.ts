@@ -837,8 +837,6 @@ export function serializeInto(
         );
       } else if (value['_bsontype'] === 'Binary') {
         index = serializeBinary(buffer, key, value, index, true);
-      } else if (value['_bsontype'] === 'UUID') {
-        index = serializeBinary(buffer, key, value.toBinary(), index);
       } else if (value['_bsontype'] === 'Symbol') {
         index = serializeSymbol(buffer, key, value, index, true);
       } else if (value['_bsontype'] === 'DBRef') {
@@ -940,8 +938,6 @@ export function serializeInto(
         index = serializeFunction(buffer, key, value, index, checkKeys, depth, serializeFunctions);
       } else if (value['_bsontype'] === 'Binary') {
         index = serializeBinary(buffer, key, value, index);
-      } else if (value['_bsontype'] === 'UUID') {
-        index = serializeBinary(buffer, key, value.toBinary(), index);
       } else if (value['_bsontype'] === 'Symbol') {
         index = serializeSymbol(buffer, key, value, index);
       } else if (value['_bsontype'] === 'DBRef') {
@@ -1047,8 +1043,6 @@ export function serializeInto(
         index = serializeFunction(buffer, key, value, index, checkKeys, depth, serializeFunctions);
       } else if (value['_bsontype'] === 'Binary') {
         index = serializeBinary(buffer, key, value, index);
-      } else if (value['_bsontype'] === 'UUID') {
-        index = serializeBinary(buffer, key, value.toBinary(), index);
       } else if (value['_bsontype'] === 'Symbol') {
         index = serializeSymbol(buffer, key, value, index);
       } else if (value['_bsontype'] === 'DBRef') {
