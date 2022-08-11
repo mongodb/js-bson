@@ -333,7 +333,6 @@ export class UUID extends Binary {
       );
     }
     super(bytes, BSON_BINARY_SUBTYPE_UUID_NEW);
-    this.buffer = bytes;
     this.__id = hexStr;
   }
 
