@@ -422,6 +422,9 @@ function deserializeObject(
           value = buffer.slice(index, index + binarySize);
         } else {
           value = new Binary(buffer.slice(index, index + binarySize), subType);
+          if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW) {
+            value = value.toUUID();
+          }
         }
       } else {
         const _buffer = Buffer.alloc(binarySize);

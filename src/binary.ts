@@ -278,7 +278,7 @@ export class Binary {
     if (!data) {
       throw new BSONTypeError(`Unexpected Binary Extended JSON format ${JSON.stringify(doc)}`);
     }
-    return new Binary(data, type);
+    return type === 4 ? new UUID(data) : new Binary(data, type);
   }
 
   /** @internal */
