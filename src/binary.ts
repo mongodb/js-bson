@@ -354,10 +354,6 @@ export class UUID extends Binary {
   }
 
   /**
-   * Generate a 16 byte uuid v4 buffer used in UUIDs
-   */
-
-  /**
    * Returns the UUID id as a 32 or 36 character hex string representation, excluding/including dashes (defaults to 36 character dash separated)
    * @param includeDashes - should the string exclude dash-separators.
    * */
@@ -455,13 +451,7 @@ export class UUID extends Binary {
         return false;
       }
 
-      try {
-        // get this byte as hex:             xxxxxxxx-xxxx-XXxx-xxxx-xxxxxxxxxxxx
-        // check first part as uuid version: xxxxxxxx-xxxx-Xxxx-xxxx-xxxxxxxxxxxx
-        return parseInt(input[6].toString(16)[0], 10) === Binary.SUBTYPE_UUID;
-      } catch {
-        return false;
-      }
+      return (input[6] & 0xf0) === 0x40;
     }
 
     return false;
