@@ -773,5 +773,15 @@ Converting circular structure to EJSON:
       );
       expect(parsedUndashedInput).to.deep.equal(parsedDashedInput);
     });
+
+    it('should return UUID object when deserializing UUID subtype', () => {
+      const exampleUUID = new BSON.UUID('878dac12-01cc-4830-b271-cbc8518e63ad');
+      const stringifiedUUID = EJSON.stringify({ uuid: exampleUUID });
+      const parsedUUID = EJSON.parse(stringifiedUUID);
+      const expectedResult = {
+        uuid: new UUID('878dac12-01cc-4830-b271-cbc8518e63ad')
+      };
+      expect(parsedUUID).to.deep.equal(expectedResult);
+    });
   });
 });
