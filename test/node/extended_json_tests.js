@@ -779,7 +779,7 @@ Converting circular structure to EJSON:
       const stringifiedUUID = EJSON.stringify({ uuid: exampleUUID });
       const parsedUUID = EJSON.parse(stringifiedUUID);
       const expectedResult = {
-        uuid: new UUID('878dac1201cc4830b271cbc8518e63ad')
+        uuid: new UUID('878dac12-01cc-4830-b271-cbc8518e63ad')
       };
       expect(parsedUUID).to.deep.equal(expectedResult);
     });

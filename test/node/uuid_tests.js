@@ -198,7 +198,7 @@ describe('UUID', () => {
       const serializedUUID = BSON.serialize({ uuid: exampleUUID });
       const deserializedUUID = BSON.deserialize(serializedUUID);
       const expectedResult = {
-        uuid: new UUID('878dac1201cc4830b271cbc8518e63ad')
+        uuid: new UUID('878dac12-01cc-4830-b271-cbc8518e63ad')
       };
       expect(deserializedUUID).to.deep.equal(expectedResult);
     });
