@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.7.0](https://github.com/mongodb/js-bson/compare/v4.6.5...v4.7.0) (2022-08-18)
+
+
+### Features
+
+* **NODE-4405:** support serializing UUID class ([#508](https://github.com/mongodb/js-bson/issues/508)) ([f5dc9ed](https://github.com/mongodb/js-bson/commit/f5dc9edf915cc119f02f53ec84d1c640695dced7))
+* **NODE-4419:** UUID class deserialization ([#509](https://github.com/mongodb/js-bson/issues/509)) ([ff2b975](https://github.com/mongodb/js-bson/commit/ff2b97585848730fcf90cd21c14ba2a18a0ed016))
+* **NODE-4506:** Make UUID a subclass of binary ([#512](https://github.com/mongodb/js-bson/issues/512)) ([e9afa9d](https://github.com/mongodb/js-bson/commit/e9afa9dcfc295da8ff53b28658835fc76cde557c))
+* **NODE-4535:** automatically promote UUIDs when deserializing and parsing UUIDs ([#513](https://github.com/mongodb/js-bson/issues/513)) ([1dc7eae](https://github.com/mongodb/js-bson/commit/1dc7eaea6a61924be66ae5b8a05b74d5dd9c7b1e))
+
 ### [4.6.5](https://github.com/mongodb/js-bson/compare/v4.6.4...v4.6.5) (2022-07-07)
 
 
