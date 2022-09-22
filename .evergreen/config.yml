@@ -152,6 +152,16 @@ tasks:
       - func: run tests
         vars:
           TEST_TARGET: node
+  - name: node-tests-v18
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 18
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: node
   - name: browser-tests
     tags: ["browser"]
     commands:
@@ -168,14 +178,14 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 16
+          NODE_MAJOR_VERSION: 18
       - func: install dependencies
       - func: run checks
   - name: check-typescript-oldest
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 16
+          NODE_MAJOR_VERSION: 18
       - func: install dependencies
       - func: "run typescript"
         vars:
@@ -185,7 +195,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 16
+          NODE_MAJOR_VERSION: 18
       - func: install dependencies
       - func: "run typescript"
         vars:
@@ -195,7 +205,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 16
+          NODE_MAJOR_VERSION: 18
       - func: install dependencies
       - func: "run typescript"
         vars:
@@ -204,8 +214,8 @@ tasks:
 
 buildvariants:
   - name: linux
-    display_name: Ubuntu 18.04
-    run_on: ubuntu1804-test
+    display_name: Ubuntu 22.04
+    run_on: ubuntu2004-small
     tasks: [".node", ".browser"]
   - name: mac
     display_name: MacOS 10.14
@@ -213,7 +223,7 @@ buildvariants:
     tasks: [".node"]
   - name: lint
     display_name: lint
-    run_on: rhel70
+    run_on: ubuntu2004-small
     tasks:
       - run-checks
       - check-typescript-oldest
