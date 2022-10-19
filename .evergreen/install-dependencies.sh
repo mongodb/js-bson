@@ -55,5 +55,7 @@ registry=https://registry.npmjs.org
 EOT
 
 # install node dependencies
-npm install # npm prepare runs after install and will compile the library
+# npm prepare runs after install and will compile the library
+# TODO(NODE-3555): rollup dependencies for node polyfills have broken peerDeps. We can remove this flag once we've removed them.
+npm install --legacy-peer-deps
 nvm use "${NODE_VERSION}" # Switch to the node version we want to test against

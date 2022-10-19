@@ -23,8 +23,8 @@ const Timestamp = BSON.Timestamp;
 
 // Several tests in this file can test interop between current library versions and library version 1.1.0, because
 // between 1.1.0 and 4.0.0 there was a significant rewrite. To minimize maintenance issues of a hard dependency on
-// the old version, these interop tests are inactive by default. To activate, edit the test-node script in package.json:
-//   "test-node": "npm i --no-save --force bson@1.1.0 && mocha ./test/node && npm uninstall --no-save --force bson@1.1.0"
+// the old version, these interop tests are inactive by default. To activate, edit the check:test script in package.json:
+//   "check:test": "npm i --no-save --force bson@1.1.0 && mocha ./test/node && npm uninstall --no-save --force bson@1.1.0"
 //
 function getOldBSON() {
   try {

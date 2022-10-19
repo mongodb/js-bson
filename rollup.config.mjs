@@ -1,4 +1,4 @@
-import pkg from './package.json';
+import pkg from './package.json' assert { type: 'json' };
 import commonjs from 'rollup-plugin-commonjs';
 import nodeBuiltins from 'rollup-plugin-polyfill-node';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
@@ -59,7 +59,7 @@ const external = Object.keys(pkg.dependencies || {});
 
 const defaultName = 'BSON';
 
-module.exports = [
+export default [
   {
     input,
     output: {
