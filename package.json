@@ -91,7 +91,7 @@
     "./dist/bson.esm.js": "./dist/bson.browser.esm.js"
   },
   "engines": {
-    "node": ">=6.9.0"
+    "node": ">=14.20.1"
   },
   "scripts": {
     "docs": "typedoc",

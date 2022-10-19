@@ -92,46 +92,6 @@ functions:
           - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
 
 tasks:
-  - name: node-tests-v6
-    tags: ["node"]
-    commands:
-      - func: fetch source
-        vars:
-          NODE_MAJOR_VERSION: 6
-      - func: install dependencies
-      - func: run tests
-        vars:
-          TEST_TARGET: node
-  - name: node-tests-v8
-    tags: ["node"]
-    commands:
-      - func: fetch source
-        vars:
-          NODE_MAJOR_VERSION: 8
-      - func: install dependencies
-      - func: run tests
-        vars:
-          TEST_TARGET: node
-  - name: node-tests-v10
-    tags: ["node"]
-    commands:
-      - func: fetch source
-        vars:
-          NODE_MAJOR_VERSION: 10
-      - func: install dependencies
-      - func: run tests
-        vars:
-          TEST_TARGET: node
-  - name: node-tests-v12
-    tags: ["node"]
-    commands:
-      - func: fetch source
-        vars:
-          NODE_MAJOR_VERSION: 12
-      - func: install dependencies
-      - func: run tests
-        vars:
-          TEST_TARGET: node
   - name: node-tests-v14
     tags: ["node"]
     commands:
