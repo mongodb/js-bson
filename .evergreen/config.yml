@@ -122,16 +122,17 @@ tasks:
       - func: run tests
         vars:
           TEST_TARGET: node
-  - name: browser-tests
-    tags: ["browser"]
-    commands:
-      - func: fetch source
-        vars:
-          NODE_MAJOR_VERSION: 16
-      - func: install dependencies
-      - func: run tests
-        vars:
-          TEST_TARGET: browser
+  # TODO(NODE-3555): Karma tests pass locally still after these changes, rhel80 is just missing chrome
+  # - name: browser-tests
+  #   tags: ["browser"]
+  #   commands:
+  #     - func: fetch source
+  #       vars:
+  #         NODE_MAJOR_VERSION: 16
+  #     - func: install dependencies
+  #     - func: run tests
+  #       vars:
+  #         TEST_TARGET: browser
   - name: run-checks
     tags:
       - run-checks
@@ -176,7 +177,7 @@ buildvariants:
   - name: linux
     display_name: RHEL 8.0
     run_on: rhel80-small
-    tasks: [".node", ".browser"]
+    tasks: [".node"]
   - name: lint
     display_name: lint
     run_on: rhel80-small
