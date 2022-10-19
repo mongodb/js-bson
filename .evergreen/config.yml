@@ -174,16 +174,12 @@ tasks:
 
 buildvariants:
   - name: linux
-    display_name: Ubuntu 22.04
-    run_on: ubuntu2004-small
+    display_name: RHEL 8.0
+    run_on: rhel80-small
     tasks: [".node", ".browser"]
-  - name: mac
-    display_name: MacOS 10.14
-    run_on: macos-1014
-    tasks: [".node"]
   - name: lint
     display_name: lint
-    run_on: ubuntu2004-small
+    run_on: rhel80-small
     tasks:
       - run-checks
       - check-typescript-oldest

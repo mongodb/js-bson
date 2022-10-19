@@ -13,7 +13,7 @@ export NVM_DIR="${NODE_ARTIFACTS_PATH}/nvm"
 
 case $1 in
   "node")
-    npm run check:test
+    npm run check:coverage
     ;;
   "browser")
     # TODO(NODE-3555): remove explicit browser tests

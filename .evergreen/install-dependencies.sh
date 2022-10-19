@@ -58,4 +58,9 @@ EOT
 # npm prepare runs after install and will compile the library
 # TODO(NODE-3555): rollup dependencies for node polyfills have broken peerDeps. We can remove this flag once we've removed them.
 npm install --legacy-peer-deps
+
+set +o xtrace
+echo "Running: nvm use ${NODE_VERSION}"
 nvm use "${NODE_VERSION}" # Switch to the node version we want to test against
+echo "Success: switched to node $(node -v)"
+set -o xtrace
