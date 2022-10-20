@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/mocharc.json",
+  "require": [
+    "source-map-support/register",
+    "ts-node/register",
+    "./node_modules/chai/register-expect"
+  ],
+  "extension": [
+    "js",
+    "ts"
+  ],
+  "recursive": true,
+  "timeout": 10000,
+  "failZero": true,
+  "sort": true,
+  "color": true
+}

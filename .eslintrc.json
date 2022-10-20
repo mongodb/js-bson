@@ -63,5 +63,17 @@
     "@typescript-eslint/no-unsafe-return": "off",
     "@typescript-eslint/no-unsafe-argument": "off",
     "@typescript-eslint/no-unsafe-call": "off"
-  }
+  },
+  "overrides": [
+    {
+      "parser": "espree",
+      "files": [
+        "*.mjs"
+      ],
+      "parserOptions": {
+        "sourceType": "module",
+        "ecmaVersion": "latest"
+      }
+    }
+  ]
 }

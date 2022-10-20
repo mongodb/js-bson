@@ -92,46 +92,6 @@ functions:
           - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
 
 tasks:
-  - name: node-tests-v6
-    tags: ["node"]
-    commands:
-      - func: fetch source
-        vars:
-          NODE_MAJOR_VERSION: 6
-      - func: install dependencies
-      - func: run tests
-        vars:
-          TEST_TARGET: node
-  - name: node-tests-v8
-    tags: ["node"]
-    commands:
-      - func: fetch source
-        vars:
-          NODE_MAJOR_VERSION: 8
-      - func: install dependencies
-      - func: run tests
-        vars:
-          TEST_TARGET: node
-  - name: node-tests-v10
-    tags: ["node"]
-    commands:
-      - func: fetch source
-        vars:
-          NODE_MAJOR_VERSION: 10
-      - func: install dependencies
-      - func: run tests
-        vars:
-          TEST_TARGET: node
-  - name: node-tests-v12
-    tags: ["node"]
-    commands:
-      - func: fetch source
-        vars:
-          NODE_MAJOR_VERSION: 12
-      - func: install dependencies
-      - func: run tests
-        vars:
-          TEST_TARGET: node
   - name: node-tests-v14
     tags: ["node"]
     commands:
@@ -162,16 +122,17 @@ tasks:
       - func: run tests
         vars:
           TEST_TARGET: node
-  - name: browser-tests
-    tags: ["browser"]
-    commands:
-      - func: fetch source
-        vars:
-          NODE_MAJOR_VERSION: 16
-      - func: install dependencies
-      - func: run tests
-        vars:
-          TEST_TARGET: browser
+  # TODO(NODE-3555): Karma tests pass locally still after these changes, rhel80 is just missing chrome
+  # - name: browser-tests
+  #   tags: ["browser"]
+  #   commands:
+  #     - func: fetch source
+  #       vars:
+  #         NODE_MAJOR_VERSION: 16
+  #     - func: install dependencies
+  #     - func: run tests
+  #       vars:
+  #         TEST_TARGET: browser
   - name: run-checks
     tags:
       - run-checks
@@ -214,16 +175,12 @@ tasks:
 
 buildvariants:
   - name: linux
-    display_name: Ubuntu 22.04
-    run_on: ubuntu2004-small
-    tasks: [".node", ".browser"]
-  - name: mac
-    display_name: MacOS 10.14
-    run_on: macos-1014
+    display_name: RHEL 8.0
+    run_on: rhel80-small
     tasks: [".node"]
   - name: lint
     display_name: lint
-    run_on: ubuntu2004-small
+    run_on: rhel80-small
     tasks:
       - run-checks
       - check-typescript-oldest
