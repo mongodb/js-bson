@@ -1,5 +1,6 @@
 {
   "root": true,
+  "parser": "@typescript-eslint/parser",
   "env": {
     "node": true,
     "mocha": true,
@@ -8,7 +9,9 @@
   "globals": {
     "expect": true,
     "BSON": false,
-    "Buffer": false
+    "Buffer": false,
+    "BigInt": true,
+    "globalThis": true
   },
   "parserOptions": {
     "ecmaVersion": 2020
@@ -47,5 +50,14 @@
         "property": "only"
       }
     ]
-  }
+  },
+  "overrides": [
+    {
+      "files": "./**/*.ts",
+      "extends": [
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
+      ]
+    }
+  ]
 }

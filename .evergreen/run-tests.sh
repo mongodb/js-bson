@@ -15,9 +15,9 @@ case $1 in
   "node")
     npm run check:coverage
     ;;
-  "browser")
-    # TODO(NODE-3555): remove explicit browser tests
-    npm run test-browser
+  "web")
+    export WEB="true"
+    npm run check:web
     ;;
   *)
     npm test

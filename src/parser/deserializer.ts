@@ -1,4 +1,3 @@
-import { Buffer } from 'buffer';
 import { Binary } from '../binary';
 import type { Document } from '../bson';
 import { Code } from '../code';
@@ -15,6 +14,7 @@ import { ObjectId } from '../objectid';
 import { BSONRegExp } from '../regexp';
 import { BSONSymbol } from '../symbol';
 import { Timestamp } from '../timestamp';
+import { ByteUtils } from '../utils/byte_utils';
 import { validateUtf8 } from '../validate_utf8';
 
 /** @public */
@@ -70,7 +70,7 @@ const JS_INT_MIN_LONG = Long.fromNumber(constants.JS_INT_MIN);
 const functionCache: { [hash: string]: Function } = {};
 
 export function deserialize(
-  buffer: Buffer,
+  buffer: Uint8Array,
   options: DeserializeOptions,
   isArray?: boolean
 ): Document {
@@ -115,7 +115,7 @@ export function deserialize(
 const allowedDBRefKeys = /^\$ref$|^\$id$|^\$db$/;
 
 function deserializeObject(
-  buffer: Buffer,
+  buffer: Uint8Array,
   index: number,
   options: DeserializeOptions,
   isArray = false
@@ -216,7 +216,7 @@ function deserializeObject(
     if (i >= buffer.byteLength) throw new BSONError('Bad BSON Document: illegal CString');
 
     // Represents the key
-    const name = isArray ? arrayIndex++ : buffer.toString('utf8', index, i);
+    const name = isArray ? arrayIndex++ : ByteUtils.toText(buffer.subarray(index, i));
 
     // shouldValidateKey is true if the key should be validated, false otherwise
     let shouldValidateKey = true;
@@ -249,8 +249,8 @@ function deserializeObject(
       value = getValidatedString(buffer, index, index + stringSize - 1, shouldValidateKey);
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_OID) {
-      const oid = Buffer.alloc(12);
-      buffer.copy(oid, 0, index, index + 12);
+      const oid = ByteUtils.allocate(12);
+      oid.set(buffer.subarray(index, index + 12), 0);
       value = new ObjectId(oid);
       index = index + 12;
     } else if (elementType === constants.BSON_DATA_INT && promoteValues === false) {
@@ -367,9 +367,9 @@ function deserializeObject(
       }
     } else if (elementType === constants.BSON_DATA_DECIMAL128) {
       // Buffer to contain the decimal bytes
-      const bytes = Buffer.alloc(16);
+      const bytes = ByteUtils.allocate(16);
       // Copy the next 16 bytes into the bytes buffer
-      buffer.copy(bytes, 0, index, index + 16);
+      bytes.set(buffer.subarray(index, index + 16), 0);
       // Update index
       index = index + 16;
       // Assign the new Decimal128 value
@@ -414,7 +414,7 @@ function deserializeObject(
         }
 
         if (promoteBuffers && promoteValues) {
-          value = buffer.slice(index, index + binarySize);
+          value = ByteUtils.toLocalBufferType(buffer.slice(index, index + binarySize));
         } else {
           value = new Binary(buffer.slice(index, index + binarySize), subType);
           if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW) {
@@ -422,7 +422,7 @@ function deserializeObject(
           }
         }
       } else {
-        const _buffer = Buffer.alloc(binarySize);
+        const _buffer = ByteUtils.allocate(binarySize);
         // If we have subtype 2 skip the 4 bytes for the size
         if (subType === Binary.SUBTYPE_BYTE_ARRAY) {
           binarySize =
@@ -464,7 +464,7 @@ function deserializeObject(
       // If are at the end of the buffer there is a problem with the document
       if (i >= buffer.length) throw new BSONError('Bad BSON Document: illegal CString');
       // Return the C string
-      const source = buffer.toString('utf8', index, i);
+      const source = ByteUtils.toText(buffer.subarray(index, i));
       // Create the regexp
       index = i + 1;
 
@@ -477,7 +477,7 @@ function deserializeObject(
       // If are at the end of the buffer there is a problem with the document
       if (i >= buffer.length) throw new BSONError('Bad BSON Document: illegal CString');
       // Return the C string
-      const regExpOptions = buffer.toString('utf8', index, i);
+      const regExpOptions = ByteUtils.toText(buffer.subarray(index, i));
       index = i + 1;
 
       // For each option add the corresponding one for javascript
@@ -509,7 +509,7 @@ function deserializeObject(
       // If are at the end of the buffer there is a problem with the document
       if (i >= buffer.length) throw new BSONError('Bad BSON Document: illegal CString');
       // Return the C string
-      const source = buffer.toString('utf8', index, i);
+      const source = ByteUtils.toText(buffer.subarray(index, i));
       index = i + 1;
 
       // Get the start search index
@@ -521,7 +521,7 @@ function deserializeObject(
       // If are at the end of the buffer there is a problem with the document
       if (i >= buffer.length) throw new BSONError('Bad BSON Document: illegal CString');
       // Return the C string
-      const regExpOptions = buffer.toString('utf8', index, i);
+      const regExpOptions = ByteUtils.toText(buffer.subarray(index, i));
       index = i + 1;
 
       // Set the object
@@ -687,13 +687,13 @@ function deserializeObject(
           throw new BSONError('Invalid UTF-8 string in BSON document');
         }
       }
-      const namespace = buffer.toString('utf8', index, index + stringSize - 1);
+      const namespace = ByteUtils.toText(buffer.subarray(index, index + stringSize - 1));
       // Update parse index position
       index = index + stringSize;
 
       // Read the oid
-      const oidBuffer = Buffer.alloc(12);
-      buffer.copy(oidBuffer, 0, index, index + 12);
+      const oidBuffer = ByteUtils.allocate(12);
+      oidBuffer.set(buffer.subarray(index, index + 12), 0);
       const oid = new ObjectId(oidBuffer);
 
       // Update the index
@@ -761,12 +761,12 @@ function isolateEval(
 }
 
 function getValidatedString(
-  buffer: Buffer,
+  buffer: Uint8Array,
   start: number,
   end: number,
   shouldValidateUtf8: boolean
 ) {
-  const value = buffer.toString('utf8', start, end);
+  const value = ByteUtils.toText(buffer.subarray(start, end));
   // if utf8 validation is on, do the check
   if (shouldValidateUtf8) {
     for (let i = 0; i < value.length; i++) {

@@ -1,5 +1,6 @@
 /* globals window */
 'use strict';
+const { types } = require('node:util');
 
 exports.assertArrayEqual = function (array1, array2) {
   if (array1.length !== array2.length) return false;
@@ -157,6 +158,8 @@ exports.isNode6 = function () {
   // eslint-disable-next-line no-undef
   return process.version.split('.')[0] === 'v6';
 };
+
+exports.isBufferOrUint8Array = b => Buffer.isBuffer(b) || types.isUint8Array(b);
 
 const getSymbolFrom = function (target, symbolName, assertExists) {
   if (assertExists == null) assertExists = true;

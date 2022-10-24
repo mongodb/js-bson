@@ -1,6 +1,6 @@
 'use strict';
 
-const BSON = require('./register-bson');
+const BSON = require('../../register-bson');
 const BSONError = BSON.BSONError;
 
 /**

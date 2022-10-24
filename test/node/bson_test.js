@@ -17,9 +17,9 @@ const Double = BSON.Double;
 const MinKey = BSON.MinKey;
 const MaxKey = BSON.MaxKey;
 const BSONError = BSON.BSONError;
-const { BinaryParser } = require('../binary_parser');
+const { BinaryParser } = require('./tools/binary_parser');
 const vm = require('vm');
-const { assertBuffersEqual } = require('./tools/utils');
+const { assertBuffersEqual, isBufferOrUint8Array } = require('./tools/utils');
 const { inspect } = require('util');
 
 /**
@@ -403,7 +403,7 @@ describe('BSON', function () {
 
     var deserialized = BSON.deserialize(serialized_data);
     expect(deserialized.doc instanceof Binary).to.be.ok;
-    expect('hello world').to.equal(deserialized.doc.toString());
+    expect(deserialized.doc.toString()).to.equal('hello world');
     done();
   });
 
@@ -421,8 +421,9 @@ describe('BSON', function () {
     var deserialized = BSON.deserialize(serialized_data, {
       promoteBuffers: true
     });
-    expect(Buffer.isBuffer(deserialized.doc)).to.be.ok;
-    expect('hello world').to.equal(deserialized.doc.toString());
+    expect(isBufferOrUint8Array(deserialized.doc)).to.be.true;
+    expect(deserialized.doc).to.not.be.instanceOf(Binary);
+    expect(doc.doc).to.deep.equal(deserialized.doc);
     done();
   });
 
@@ -1693,10 +1694,10 @@ describe('BSON', function () {
     expect(false).to.equal(ObjectId.isValid(true));
     expect(true).to.equal(ObjectId.isValid(0));
     expect(false).to.equal(ObjectId.isValid('invalid'));
-    expect(true).to.equal(ObjectId.isValid('zzzzzzzzzzzz'));
+    // TODO Oid removed binary string: expect(true).to.equal(ObjectId.isValid('zzzzzzzzzzzz'));
     expect(false).to.equal(ObjectId.isValid('zzzzzzzzzzzzzzzzzzzzzzzz'));
     expect(true).to.equal(ObjectId.isValid('000000000000000000000000'));
-    expect(true).to.equal(ObjectId.isValid(new ObjectId('thisis12char')));
+    // TODO Oid removed binary string: expect(true).to.equal(ObjectId.isValid(new ObjectId('thisis12char')));
 
     var tmp = new ObjectId();
     // Cloning tmp so that instanceof fails to fake import from different version/instance of the same npm package

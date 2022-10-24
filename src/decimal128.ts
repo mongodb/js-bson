@@ -1,7 +1,7 @@
-import { Buffer } from 'buffer';
 import { BSONTypeError } from './error';
 import { Long } from './long';
 import { isUint8Array } from './parser/utils';
+import { ByteUtils } from './utils/byte_utils';
 
 const PARSE_STRING_REGEXP = /^(\+|-)?(\d+|(\d*\.\d*))?(E|e)?([-+])?(\d+)?$/;
 const PARSE_INF_REGEXP = /^(\+|-)?(Infinity|inf)$/i;
@@ -13,16 +13,22 @@ const EXPONENT_BIAS = 6176;
 const MAX_DIGITS = 34;
 
 // Nan value bits as 32 bit values (due to lack of longs)
-const NAN_BUFFER = [
-  0x7c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-].reverse();
+const NAN_BUFFER = ByteUtils.fromNumberArray(
+  [
+    0x7c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+  ].reverse()
+);
 // Infinity value bits 32 bit values (due to lack of longs)
-const INF_NEGATIVE_BUFFER = [
-  0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-].reverse();
-const INF_POSITIVE_BUFFER = [
-  0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-].reverse();
+const INF_NEGATIVE_BUFFER = ByteUtils.fromNumberArray(
+  [
+    0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+  ].reverse()
+);
+const INF_POSITIVE_BUFFER = ByteUtils.fromNumberArray(
+  [
+    0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+  ].reverse()
+);
 
 const EXPONENT_REGEX = /^([-+])?(\d+)?$/;
 
@@ -123,13 +129,13 @@ export interface Decimal128Extended {
 export class Decimal128 {
   _bsontype!: 'Decimal128';
 
-  readonly bytes!: Buffer;
+  readonly bytes!: Uint8Array;
 
   /**
    * @param bytes - a buffer containing the raw Decimal128 bytes in little endian order,
    *                or a string representation as returned by .toString()
    */
-  constructor(bytes: Buffer | string) {
+  constructor(bytes: Uint8Array | string) {
     if (!(this instanceof Decimal128)) return new Decimal128(bytes);
 
     if (typeof bytes === 'string') {
@@ -239,9 +245,9 @@ export class Decimal128 {
     // Check if user passed Infinity or NaN
     if (!isDigit(representation[index]) && representation[index] !== '.') {
       if (representation[index] === 'i' || representation[index] === 'I') {
-        return new Decimal128(Buffer.from(isNegative ? INF_NEGATIVE_BUFFER : INF_POSITIVE_BUFFER));
+        return new Decimal128(isNegative ? INF_NEGATIVE_BUFFER : INF_POSITIVE_BUFFER);
       } else if (representation[index] === 'N') {
-        return new Decimal128(Buffer.from(NAN_BUFFER));
+        return new Decimal128(NAN_BUFFER);
       }
     }
 
@@ -285,7 +291,7 @@ export class Decimal128 {
       const match = representation.substr(++index).match(EXPONENT_REGEX);
 
       // No digits read
-      if (!match || !match[2]) return new Decimal128(Buffer.from(NAN_BUFFER));
+      if (!match || !match[2]) return new Decimal128(NAN_BUFFER);
 
       // Get exponent
       exponent = parseInt(match[0], 10);
@@ -295,7 +301,7 @@ export class Decimal128 {
     }
 
     // Return not a number
-    if (representation[index]) return new Decimal128(Buffer.from(NAN_BUFFER));
+    if (representation[index]) return new Decimal128(NAN_BUFFER);
 
     // Done reading input
     // Find first non-zero digit in digits
@@ -423,9 +429,7 @@ export class Decimal128 {
                 exponent = exponent + 1;
                 digits[dIdx] = 1;
               } else {
-                return new Decimal128(
-                  Buffer.from(isNegative ? INF_NEGATIVE_BUFFER : INF_POSITIVE_BUFFER)
-                );
+                return new Decimal128(isNegative ? INF_NEGATIVE_BUFFER : INF_POSITIVE_BUFFER);
               }
             }
           }
@@ -503,7 +507,7 @@ export class Decimal128 {
     }
 
     // Encode into a buffer
-    const buffer = Buffer.alloc(16);
+    const buffer = ByteUtils.allocate(16);
     index = 0;
 
     // Encode the low 64 bits of the decimal

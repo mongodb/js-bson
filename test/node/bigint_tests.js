@@ -1,4 +1,3 @@
-/* globals BigInt */
 'use strict';
 
 const BSON = require('../register-bson');

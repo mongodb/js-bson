@@ -1,13 +1,12 @@
-import { Buffer } from 'buffer';
-import { ensureBuffer } from './ensure_buffer';
 import { bufferToUuidHexString, uuidHexStringToBuffer, uuidValidateString } from './uuid_utils';
 import { isUint8Array, randomBytes } from './parser/utils';
 import type { EJSONOptions } from './extended_json';
 import { BSONError, BSONTypeError } from './error';
 import { BSON_BINARY_SUBTYPE_UUID_NEW } from './constants';
+import { ByteUtils } from './utils/byte_utils';
 
 /** @public */
-export type BinarySequence = Uint8Array | Buffer | number[];
+export type BinarySequence = Uint8Array | number[];
 
 /** @public */
 export interface BinaryExtendedLegacy {
@@ -58,7 +57,7 @@ export class Binary {
   /** User BSON type */
   static readonly SUBTYPE_USER_DEFINED = 128;
 
-  buffer!: Buffer;
+  buffer!: Uint8Array;
   sub_type!: number;
   position!: number;
 
@@ -92,18 +91,18 @@ export class Binary {
 
     if (buffer == null) {
       // create an empty binary buffer
-      this.buffer = Buffer.alloc(Binary.BUFFER_SIZE);
+      this.buffer = ByteUtils.allocate(Binary.BUFFER_SIZE);
       this.position = 0;
     } else {
       if (typeof buffer === 'string') {
         // string
-        this.buffer = Buffer.from(buffer, 'binary');
+        this.buffer = ByteUtils.fromISO88591(buffer);
       } else if (Array.isArray(buffer)) {
         // number[]
-        this.buffer = Buffer.from(buffer);
+        this.buffer = ByteUtils.fromNumberArray(buffer);
       } else {
         // Buffer | TypedArray | ArrayBuffer
-        this.buffer = ensureBuffer(buffer);
+        this.buffer = ByteUtils.toLocalBufferType(buffer);
       }
 
       this.position = this.buffer.byteLength;
@@ -115,7 +114,7 @@ export class Binary {
    *
    * @param byteValue - a single byte we wish to write.
    */
-  put(byteValue: string | number | Uint8Array | Buffer | number[]): void {
+  put(byteValue: string | number | Uint8Array | number[]): void {
     // If it's a string and a has more than one character throw an error
     if (typeof byteValue === 'string' && byteValue.length !== 1) {
       throw new BSONTypeError('only accepts single character String');
@@ -139,9 +138,9 @@ export class Binary {
     if (this.buffer.length > this.position) {
       this.buffer[this.position++] = decodedByte;
     } else {
-      const buffer = Buffer.alloc(Binary.BUFFER_SIZE + this.buffer.length);
+      const buffer = ByteUtils.allocate(Binary.BUFFER_SIZE + this.buffer.length);
       // Combine the two buffers together
-      this.buffer.copy(buffer, 0, 0, this.buffer.length);
+      buffer.set(this.buffer.subarray(0, this.position));
       this.buffer = buffer;
       this.buffer[this.position++] = decodedByte;
     }
@@ -158,19 +157,20 @@ export class Binary {
 
     // If the buffer is to small let's extend the buffer
     if (this.buffer.length < offset + sequence.length) {
-      const buffer = Buffer.alloc(this.buffer.length + sequence.length);
-      this.buffer.copy(buffer, 0, 0, this.buffer.length);
+      const buffer = ByteUtils.allocate(this.buffer.length + sequence.length);
+      buffer.set(this.buffer.subarray(0, this.buffer.length), 0);
 
       // Assign the new buffer
       this.buffer = buffer;
     }
 
     if (ArrayBuffer.isView(sequence)) {
-      this.buffer.set(ensureBuffer(sequence), offset);
+      this.buffer.set(new Uint8Array(sequence), offset);
       this.position =
         offset + sequence.byteLength > this.position ? offset + sequence.length : this.position;
     } else if (typeof sequence === 'string') {
-      this.buffer.write(sequence, offset, sequence.length, 'binary');
+      const bytes = ByteUtils.fromISO88591(sequence);
+      this.buffer.set(bytes, offset);
       this.position =
         offset + sequence.length > this.position ? offset + sequence.length : this.position;
     }
@@ -207,7 +207,7 @@ export class Binary {
     if (asRaw) {
       return this.buffer.slice(0, this.position);
     }
-    return this.buffer.toString('binary', 0, this.position);
+    return ByteUtils.toISO88591(this.buffer.subarray(0, this.position));
   }
 
   /** the length of the binary sequence */
@@ -216,17 +216,18 @@ export class Binary {
   }
 
   toJSON(): string {
-    return this.buffer.toString('base64');
+    return ByteUtils.toBase64(this.buffer);
   }
 
-  toString(format?: string): string {
-    return this.buffer.toString(format);
+  // TODO: BREAKING
+  toString(): string {
+    return ByteUtils.toText(this.buffer);
   }
 
   /** @internal */
   toExtendedJSON(options?: EJSONOptions): BinaryExtendedLegacy | BinaryExtended {
     options = options || {};
-    const base64String = this.buffer.toString('base64');
+    const base64String = ByteUtils.toBase64(this.buffer);
 
     const subType = Number(this.sub_type).toString(16);
     if (options.legacy) {
@@ -259,16 +260,16 @@ export class Binary {
     options?: EJSONOptions
   ): Binary {
     options = options || {};
-    let data: Buffer | undefined;
+    let data: Uint8Array | undefined;
     let type;
     if ('$binary' in doc) {
       if (options.legacy && typeof doc.$binary === 'string' && '$type' in doc) {
         type = doc.$type ? parseInt(doc.$type, 16) : 0;
-        data = Buffer.from(doc.$binary, 'base64');
+        data = ByteUtils.fromBase64(doc.$binary);
       } else {
         if (typeof doc.$binary !== 'string') {
           type = doc.$binary.subType ? parseInt(doc.$binary.subType, 16) : 0;
-          data = Buffer.from(doc.$binary.base64, 'base64');
+          data = ByteUtils.fromBase64(doc.$binary.base64);
         }
       }
     } else if ('$uuid' in doc) {
@@ -287,8 +288,7 @@ export class Binary {
   }
 
   inspect(): string {
-    const asBuffer = this.value(true);
-    return `new Binary(Buffer.from("${asBuffer.toString('hex')}", "hex"), ${this.sub_type})`;
+    return `new Binary(Buffer.from("${ByteUtils.toHex(this.buffer)}", "hex"), ${this.sub_type})`;
   }
 }
 
@@ -315,16 +315,16 @@ export class UUID extends Binary {
    *
    * @param input - Can be a 32 or 36 character hex string (dashes excluded/included) or a 16 byte binary Buffer.
    */
-  constructor(input?: string | Buffer | UUID) {
-    let bytes;
+  constructor(input?: string | Uint8Array | UUID) {
+    let bytes: Uint8Array;
     let hexStr;
     if (input == null) {
       bytes = UUID.generate();
     } else if (input instanceof UUID) {
-      bytes = Buffer.from(input.buffer);
+      bytes = ByteUtils.toLocalBufferType(new Uint8Array(input.buffer));
       hexStr = input.__id;
     } else if (ArrayBuffer.isView(input) && input.byteLength === UUID_BYTE_LENGTH) {
-      bytes = ensureBuffer(input);
+      bytes = ByteUtils.toLocalBufferType(input);
     } else if (typeof input === 'string') {
       bytes = uuidHexStringToBuffer(input);
     } else {
@@ -340,11 +340,11 @@ export class UUID extends Binary {
    * The UUID bytes
    * @readonly
    */
-  get id(): Buffer {
+  get id(): Uint8Array {
     return this.buffer;
   }
 
-  set id(value: Buffer) {
+  set id(value: Uint8Array) {
     this.buffer = value;
 
     if (UUID.cacheHexString) {
@@ -373,8 +373,8 @@ export class UUID extends Binary {
   /**
    * Converts the id into a 36 character (dashes included) hex string, unless a encoding is specified.
    */
-  toString(encoding?: string): string {
-    return encoding ? this.id.toString(encoding) : this.toHexString();
+  toString(): string {
+    return this.toHexString();
   }
 
   /**
@@ -382,6 +382,7 @@ export class UUID extends Binary {
    * A 36 character (dashes included) hex string in the format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
    */
   toJSON(): string {
+    // TODO
     return this.toHexString();
   }
 
@@ -390,17 +391,17 @@ export class UUID extends Binary {
    *
    * @param otherId - UUID instance to compare against.
    */
-  equals(otherId: string | Buffer | UUID): boolean {
+  equals(otherId: string | Uint8Array | UUID): boolean {
     if (!otherId) {
       return false;
     }
 
     if (otherId instanceof UUID) {
-      return otherId.id.equals(this.id);
+      return ByteUtils.equals(otherId.id, this.id);
     }
 
     try {
-      return new UUID(otherId).id.equals(this.id);
+      return ByteUtils.equals(new UUID(otherId).id, this.id);
     } catch {
       return false;
     }
@@ -416,7 +417,7 @@ export class UUID extends Binary {
   /**
    * Generates a populated buffer containing a v4 uuid
    */
-  static generate(): Buffer {
+  static generate(): Uint8Array {
     const bytes = randomBytes(UUID_BYTE_LENGTH);
 
     // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
@@ -424,14 +425,14 @@ export class UUID extends Binary {
     bytes[6] = (bytes[6] & 0x0f) | 0x40;
     bytes[8] = (bytes[8] & 0x3f) | 0x80;
 
-    return Buffer.from(bytes);
+    return bytes;
   }
 
   /**
    * Checks if a value is a valid bson UUID
    * @param input - UUID, string or Buffer to validate.
    */
-  static isValid(input: string | Buffer | UUID): boolean {
+  static isValid(input: string | Uint8Array | UUID): boolean {
     if (!input) {
       return false;
     }
@@ -446,7 +447,7 @@ export class UUID extends Binary {
 
     if (isUint8Array(input)) {
       // check for length & uuid version (https://tools.ietf.org/html/rfc4122#section-4.1.3)
-      if (input.length !== UUID_BYTE_LENGTH) {
+      if (input.byteLength !== UUID_BYTE_LENGTH) {
         return false;
       }
 
