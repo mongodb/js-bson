@@ -190,7 +190,7 @@ export class ObjectId {
    */
   toString(format?: 'hex' | 'base64'): string {
     // Is the id a buffer then use the buffer toString method to return the format
-    if (format === 'base64') return ByteUtils.toHex(this.id);
+    if (format === 'base64') return ByteUtils.toBase64(this.id);
     return this.toHexString();
   }
 

@@ -382,7 +382,6 @@ export class UUID extends Binary {
    * A 36 character (dashes included) hex string in the format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
    */
   toJSON(): string {
-    // TODO
     return this.toHexString();
   }
 
