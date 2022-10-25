@@ -54,15 +54,15 @@ export function getCurrentLocalBSON(libs) {
 
 export async function getLibs() {
   return await Promise.all([
-    // (async () => {
-    //   const { stdout } = await exec('git rev-parse --short HEAD');
-    //   const hash = stdout.trim();
-    //   return {
-    //     name: 'local',
-    //     lib: await import('../../lib/bson.js'),
-    //     version: hash
-    //   };
-    // })(),
+    (async () => {
+      const { stdout } = await exec('git rev-parse --short HEAD');
+      const hash = stdout.trim();
+      return {
+        name: 'local',
+        lib: await import('../../lib/bson.js'),
+        version: hash
+      };
+    })(),
     (async () => ({
       name: 'released',
       lib: await import('../../node_modules/bson_latest/lib/bson.js'),
@@ -76,6 +76,8 @@ export async function getLibs() {
         version: (await readJSONFile('../../node_modules/bson_legacy/package.json')).version
       };
     })()
+    // BSON-EXT is EOL so we do not need to keep testing it, and it has issues installing it
+    // in this no-save way on M1 currently that are not worth fixing.
     // (async () => ({
     //   name: 'bson-ext',
     //   lib: await import('../../node_modules/bson_ext/lib/index.js'),
