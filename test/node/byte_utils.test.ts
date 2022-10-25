@@ -254,6 +254,30 @@ const fromHexTests: ByteUtilTest<'fromHex'>[] = [
       expect(error).to.be.null;
       expect(output).to.have.property('byteLength', 0);
     }
+  },
+  {
+    name: 'should use leading valid hex characters',
+    inputs: ['abxxcd'],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.deep.equal(Buffer.from('abxxcd', 'hex'));
+    }
+  },
+  {
+    name: 'should slice input strings down to nearest even length (len: 1)',
+    inputs: ['a'],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.deep.equal(Buffer.from('a', 'hex'));
+    }
+  },
+  {
+    name: 'should slice input strings down to nearest even length (len: 5)',
+    inputs: ['abcde'],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.deep.equal(Buffer.from('abcde', 'hex'));
+    }
   }
 ];
 const toHexTests: ByteUtilTest<'toHex'>[] = [

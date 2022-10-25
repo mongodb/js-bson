@@ -26,6 +26,8 @@ declare const TextEncoder: TextEncoderConstructor;
 declare const atob: (base64: string) => string;
 declare const btoa: (binary: string) => string;
 
+const HEX_DIGIT = /(\d|[a-f])/i;
+
 export const webByteUtils: ByteUtils = {
   toLocalBufferType(potentialUint8array) {
     if (isUint8Array(potentialUint8array)) {
@@ -96,7 +98,18 @@ export const webByteUtils: ByteUtils = {
   },
 
   fromHex(hex) {
-    return Uint8Array.from(hex.match(/.{2}/g) ?? [], hexDigits => Number.parseInt(hexDigits, 16));
+    const evenLengthHex = hex.length % 2 === 0 ? hex : hex.slice(0, hex.length - 1);
+    const buffer = [];
+
+    for (let i = 0; i < evenLengthHex.length; i += 2) {
+      if (!HEX_DIGIT.test(evenLengthHex[i]) && !HEX_DIGIT.test(evenLengthHex[i + 1])) {
+        break;
+      }
+      const hexDigit = Number.parseInt(`${evenLengthHex[i]}${evenLengthHex[i + 1]}`, 16);
+      buffer.push(hexDigit);
+    }
+
+    return Uint8Array.from(buffer);
   },
 
   toUTF8(uint8array) {
