@@ -157,10 +157,9 @@ export function serialize(object: Document, options: SerializeOptions = {}): Uin
 
   // Create the final buffer
   const finishedBuffer = ByteUtils.allocate(serializationIndex);
-  const desired = buffer.subarray(0, finishedBuffer.byteLength);
 
   // Copy into the finished buffer
-  finishedBuffer.set(desired, 0);
+  ByteUtils.copy(finishedBuffer, buffer, 0, 0, finishedBuffer.byteLength);
 
   // Return the buffer
   return finishedBuffer;
@@ -198,7 +197,8 @@ export function serializeWithBufferAndIndex(
     serializeFunctions,
     ignoreUndefined
   );
-  finalBuffer.set(buffer.subarray(0, serializationIndex), startIndex);
+
+  ByteUtils.copy(finalBuffer, buffer, startIndex, 0, serializationIndex);
 
   // Return the index
   return startIndex + serializationIndex - 1;
@@ -266,7 +266,7 @@ export function deserializeStream(
     { allowObjectSmallerThanBufferSize: true, index: 0 },
     options
   );
-  const bufferData = new Uint8Array(data);
+  const bufferData = ByteUtils.toLocalBufferType(data);
 
   let index = startIndex;
   // Loop over all documents

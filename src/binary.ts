@@ -135,13 +135,12 @@ export class Binary {
       throw new BSONTypeError('only accepts number in a valid unsigned byte range 0-255');
     }
 
-    if (this.buffer.length > this.position) {
+    if (this.buffer.byteLength > this.position) {
       this.buffer[this.position++] = decodedByte;
     } else {
-      const buffer = ByteUtils.allocate(Binary.BUFFER_SIZE + this.buffer.length);
-      // Combine the two buffers together
-      buffer.set(this.buffer.subarray(0, this.position));
-      this.buffer = buffer;
+      const newSpace = ByteUtils.allocate(Binary.BUFFER_SIZE + this.buffer.length);
+      ByteUtils.copy(newSpace, this.buffer, 0, 0, this.buffer.byteLength);
+      this.buffer = newSpace;
       this.buffer[this.position++] = decodedByte;
     }
   }
@@ -156,12 +155,12 @@ export class Binary {
     offset = typeof offset === 'number' ? offset : this.position;
 
     // If the buffer is to small let's extend the buffer
-    if (this.buffer.length < offset + sequence.length) {
-      const buffer = ByteUtils.allocate(this.buffer.length + sequence.length);
-      buffer.set(this.buffer.subarray(0, this.buffer.length), 0);
+    if (this.buffer.byteLength < offset + sequence.length) {
+      const newSpace = ByteUtils.allocate(this.buffer.byteLength + sequence.length);
+      ByteUtils.copy(newSpace, this.buffer, 0, 0, this.buffer.byteLength);
 
       // Assign the new buffer
-      this.buffer = buffer;
+      this.buffer = newSpace;
     }
 
     if (ArrayBuffer.isView(sequence)) {

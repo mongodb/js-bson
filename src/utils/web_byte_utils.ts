@@ -118,5 +118,26 @@ export const webByteUtils: ByteUtils = {
 
   utf8ByteLength(input) {
     return webByteUtils.fromUTF8(input).byteLength;
+  },
+
+  encodeUTF8Into(buffer, source, byteOffset) {
+    const bytes = webByteUtils.fromUTF8(source);
+    buffer.set(bytes, byteOffset);
+    return bytes.byteLength;
+  },
+
+  copy(
+    destination: Uint8Array,
+    source: Uint8Array,
+    destinationBegin: number,
+    sourceBegin: number,
+    sourceEnd: number
+  ) {
+    source =
+      sourceBegin === 0 && sourceEnd === source.byteLength
+        ? source
+        : source.subarray(sourceBegin, sourceEnd);
+    destination.set(source, destinationBegin);
+    return source.byteLength;
   }
 };

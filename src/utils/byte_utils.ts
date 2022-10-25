@@ -29,6 +29,16 @@ export type ByteUtils = {
   toUTF8: (buffer: Uint8Array) => string;
   /** Get the utf8 code unit count from a string if it were to be transformed to utf8 */
   utf8ByteLength: (input: string) => number;
+  /** copy bytes from `source` to `destination` */
+  copy(
+    destination: Uint8Array,
+    source: Uint8Array,
+    destinationBegin: number,
+    sourceBegin: number,
+    sourceEnd: number
+  ): number;
+  /** encode UTF8 bytes generated from `source` string into `destination` at byteOffset. Returns the number of bytes encoded. */
+  encodeUTF8Into(destination: Uint8Array, source: string, byteOffset: number): number;
 };
 
 declare const Buffer: unknown;

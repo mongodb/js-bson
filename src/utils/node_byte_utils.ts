@@ -10,6 +10,8 @@ type NodeJsBuffer = {
   from(array: ArrayBuffer): Uint8Array;
   from(array: ArrayBuffer, byteOffset: number, byteLength: number): Uint8Array;
   from(base64: string, encoding: NodeJsEncoding): Uint8Array;
+  write(string: string, offset: number, length: undefined, encoding: 'utf8'): number;
+  copy(target: Uint8Array, targetStart: number, sourceStart: number, sourceEnd: number): number;
   byteLength(input: string, encoding: 'utf8'): number;
   isBuffer(value: unknown): value is Uint8Array;
   prototype: {
@@ -94,5 +96,24 @@ export const nodeJsByteUtils: ByteUtils = {
 
   utf8ByteLength(input) {
     return Buffer.byteLength(input, 'utf8');
+  },
+
+  encodeUTF8Into(buffer, source, byteOffset) {
+    return (buffer as unknown as NodeJsBuffer).write(source, byteOffset, undefined, 'utf8');
+  },
+
+  copy(
+    destination: Uint8Array,
+    source: Uint8Array,
+    destinationBegin: number,
+    sourceBegin: number,
+    sourceEnd: number
+  ) {
+    return (source as unknown as NodeJsBuffer).copy(
+      destination,
+      destinationBegin,
+      sourceBegin,
+      sourceEnd
+    );
   }
 };
