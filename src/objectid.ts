@@ -1,4 +1,4 @@
-import { BSONError, BSONTypeError } from './error';
+import { BSONTypeError } from './error';
 import { deprecate, isUint8Array, randomBytes } from './parser/utils';
 import { BSONDataView, ByteUtils } from './utils/byte_utils';
 
@@ -75,9 +75,13 @@ export class ObjectId {
       this[kId] = ByteUtils.toLocalBufferType(workingId);
     } else if (typeof workingId === 'string') {
       if (workingId.length === 12) {
-        throw new BSONError(
-          'TODO, we are not supporting this anymore and the behavior change is not worth fixing'
-        );
+        // TODO(NODE-4361): Remove string of length 12 support
+        const bytes = ByteUtils.fromUTF8(workingId);
+        if (bytes.byteLength === 12) {
+          this[kId] = bytes;
+        } else {
+          throw new BSONTypeError('Argument passed in must be a string of 12 bytes');
+        }
       } else if (workingId.length === 24 && checkForHexRegExp.test(workingId)) {
         this[kId] = ByteUtils.fromHex(workingId);
       } else {
@@ -184,13 +188,13 @@ export class ObjectId {
   }
 
   /**
-   * Converts the id into a 24 character hex string for printing
-   * TODO: THIS IS A BREAKAGE.. But implementing this in web is overkill
-   * @param format - hex or base64
+   * Converts the id into a 24 character hex string for printing, unless encoding is provided.
+   * @param encoding - hex or base64
    */
-  toString(format?: 'hex' | 'base64'): string {
+  toString(encoding?: 'hex' | 'base64'): string {
     // Is the id a buffer then use the buffer toString method to return the format
-    if (format === 'base64') return ByteUtils.toBase64(this.id);
+    if (encoding === 'base64') return ByteUtils.toBase64(this.id);
+    if (encoding === 'hex') return this.toHexString();
     return this.toHexString();
   }
 

@@ -1,3 +1,5 @@
+import { BSONError } from '../error';
+import { isAnyArrayBuffer, isUint8Array } from '../parser/utils';
 import type { ByteUtils } from './byte_utils';
 
 type TextDecoder = {
@@ -25,9 +27,25 @@ declare const atob: (base64: string) => string;
 declare const btoa: (binary: string) => string;
 
 export const webByteUtils: ByteUtils = {
-  toLocalBufferType(uint8array) {
-    // on "web" its always a Uint8Array
-    return uint8array;
+  toLocalBufferType(potentialUint8array) {
+    if (isUint8Array(potentialUint8array)) {
+      return potentialUint8array;
+    }
+
+    if (ArrayBuffer.isView(potentialUint8array)) {
+      return new Uint8Array(
+        potentialUint8array.buffer.slice(
+          potentialUint8array.byteOffset,
+          potentialUint8array.byteOffset + potentialUint8array.byteLength
+        )
+      );
+    }
+
+    if (isAnyArrayBuffer(potentialUint8array)) {
+      return new Uint8Array(potentialUint8array);
+    }
+
+    throw new BSONError(`Cannot make a Uint8Array from ${String(potentialUint8array)}`);
   },
 
   allocate(size) {
@@ -69,7 +87,7 @@ export const webByteUtils: ByteUtils = {
     return Array.from(uint8array, byte => byte.toString(16).padStart(2, '0')).join('');
   },
 
-  fromText(text) {
+  fromUTF8(text) {
     return new TextEncoder().encode(text);
   },
 
@@ -81,11 +99,11 @@ export const webByteUtils: ByteUtils = {
     return Uint8Array.from(hex.match(/.{2}/g) ?? [], hexDigits => Number.parseInt(hexDigits, 16));
   },
 
-  toText(uint8array) {
+  toUTF8(uint8array) {
     return new TextDecoder().decode(uint8array);
   },
 
   utf8ByteLength(input) {
-    return webByteUtils.fromText(input).byteLength;
+    return webByteUtils.fromUTF8(input).byteLength;
   }
 };

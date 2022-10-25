@@ -212,7 +212,7 @@ export function serializeWithBufferAndIndex(
  * @public
  */
 export function deserialize(buffer: Uint8Array, options: DeserializeOptions = {}): Document {
-  return internalDeserialize(Uint8Array.from(buffer), options);
+  return internalDeserialize(ByteUtils.toLocalBufferType(buffer), options);
 }
 
 /** @public */

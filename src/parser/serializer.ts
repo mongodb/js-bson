@@ -42,7 +42,7 @@ const regexp = /\x00/; // eslint-disable-line no-control-regex
 const ignoreKeys = new Set(['$db', '$ref', '$id', '$clusterTime']);
 
 function setUtf8String(buffer: Uint8Array, stringToSet: string, offset: number): number {
-  const keyAsBytes = ByteUtils.fromText(stringToSet);
+  const keyAsBytes = ByteUtils.fromUTF8(stringToSet);
   buffer.set(keyAsBytes, offset);
   return keyAsBytes.byteLength;
 }
@@ -814,7 +814,7 @@ export function serializeInto(
           ignoreUndefined
         );
       } else if (typeof value === 'function' && serializeFunctions) {
-        index = serializeFunction(buffer, key, value, index, checkKeys, depth); // Oh lordy, bug!
+        index = serializeFunction(buffer, key, value, index, checkKeys, depth);
       } else if (value['_bsontype'] === 'Binary') {
         index = serializeBinary(buffer, key, value, index);
       } else if (value['_bsontype'] === 'Symbol') {
@@ -918,7 +918,7 @@ export function serializeInto(
           ignoreUndefined
         );
       } else if (typeof value === 'function' && serializeFunctions) {
-        index = serializeFunction(buffer, key, value, index, checkKeys, depth); // Oh lordy, bug!
+        index = serializeFunction(buffer, key, value, index, checkKeys, depth);
       } else if (value['_bsontype'] === 'Binary') {
         index = serializeBinary(buffer, key, value, index);
       } else if (value['_bsontype'] === 'Symbol') {

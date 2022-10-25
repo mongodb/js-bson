@@ -50,18 +50,17 @@ describe('ObjectId', function () {
     expect(() => new ObjectId(objectIdLike)).to.throw(BSONTypeError);
   });
 
-  // TODO
   it('should correctly create ObjectId from object with valid string id', function () {
     const objectValidString24Hex = {
       id: 'aaaaaaaaaaaaaaaaaaaaaaaa'
     };
-    // const objectValidString12Bytes = {
-    //   id: 'abcdefghijkl'
-    // };
+    const objectValidString12Bytes = {
+      id: 'abcdefghijkl'
+    };
     const buf24Hex = Buffer.from('aaaaaaaaaaaaaaaaaaaaaaaa', 'hex');
-    // const buf12Bytes = Buffer.from('abcdefghijkl');
+    const buf12Bytes = Buffer.from('abcdefghijkl');
     expect(new ObjectId(objectValidString24Hex).id).to.deep.equal(buf24Hex);
-    // expect(new ObjectId(objectValidString12Bytes).id).to.deep.equal(buf12Bytes);
+    expect(new ObjectId(objectValidString12Bytes).id).to.deep.equal(buf12Bytes);
   });
 
   it('should correctly create ObjectId from object with valid string id and toHexString method', function () {
@@ -73,12 +72,12 @@ describe('ObjectId', function () {
       id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
       toHexString: new24HexToHexString
     };
-    // const objectValidString12Bytes = {
-    //   id: 'abcdefghijkl',
-    //   toHexString: new24HexToHexString
-    // };
+    const objectValidString12Bytes = {
+      id: 'abcdefghijkl',
+      toHexString: new24HexToHexString
+    };
     expect(new ObjectId(objectValidString24Hex).id).to.deep.equal(buf24hex);
-    // expect(new ObjectId(objectValidString12Bytes).id).to.deep.equal(buf24hex);
+    expect(new ObjectId(objectValidString12Bytes).id).to.deep.equal(buf24hex);
   });
 
   it('should correctly create ObjectId from object with valid Buffer id', function () {
@@ -204,8 +203,7 @@ describe('ObjectId', function () {
     expect(new ObjectId(validStr24Hex).id).to.deep.equal(Buffer.from(validStr24Hex, 'hex'));
   });
 
-  // TODO Oid removed binary string
-  it.skip('should correctly create ObjectId from 12 byte sequence', function () {
+  it('should correctly create ObjectId from 12 byte sequence', function () {
     const byteSequence12 = '111111111111';
     expect(new ObjectId(byteSequence12).id).to.deep.equal(Buffer.from(byteSequence12, 'latin1'));
   });
@@ -264,8 +262,7 @@ describe('ObjectId', function () {
     done();
   });
 
-  // TODO Oid removed binary string
-  it.skip('should throw if a 12-char length but non-12 byte string is passed in', function () {
+  it('should throw if a 12-char length but non-12 byte string is passed in', function () {
     const characterCodesLargerThan256 = 'abcdefŽhijkl';
     const length12Not12Bytes = '🐶🐶🐶🐶🐶🐶';
     expect(() => new ObjectId(characterCodesLargerThan256).toHexString()).to.throw(
@@ -278,8 +275,7 @@ describe('ObjectId', function () {
     );
   });
 
-  // TODO Oid removed binary string
-  it.skip('should have isValid be true for 12-char length and 12-byte length string', function () {
+  it('should have isValid be true for 12-char length and 12-byte length string', function () {
     const plainASCIIstr = 'aaaaaaaaaaaa';
     expect(ObjectId.isValid(plainASCIIstr)).to.be.true;
   });
@@ -328,8 +324,7 @@ describe('ObjectId', function () {
       expect(oid.equals(equalOid)).to.be.true;
     });
 
-    // TODO Oid removed binary string
-    it.skip('should return true if otherId is a valid 12 byte string', () => {
+    it('should return true if otherId is a valid 12 byte string', () => {
       /*
       typeof otherId === 'string' &&
       ObjectId.isValid(otherId) &&

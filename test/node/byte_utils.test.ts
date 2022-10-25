@@ -1,5 +1,6 @@
 import { expect } from 'chai';
-import { types } from 'node:util';
+import { types, inspect } from 'node:util';
+import { isBufferOrUint8Array } from './tools/utils';
 import { ByteUtils } from '../../src/utils/byte_utils';
 import { nodeJsByteUtils } from '../../src/utils/node_byte_utils';
 import { webByteUtils } from '../../src/utils/web_byte_utils';
@@ -20,6 +21,8 @@ const isNode16OrLater = (() => {
   return Number.parseInt(major, 10) >= 16;
 })();
 
+const testArrayBuffer = new ArrayBuffer(8);
+
 const toLocalBufferTypeTests: ByteUtilTest<'toLocalBufferType'>[] = [
   {
     name: 'should transform to local type',
@@ -31,7 +34,51 @@ const toLocalBufferTypeTests: ByteUtilTest<'toLocalBufferType'>[] = [
         expect(Buffer.isBuffer(output), 'expected output to be a Buffer').to.be.true;
       }
     }
-  }
+  },
+  {
+    name: 'should account for the input view byteLength and byteOffset',
+    inputs: [new Uint8Array(testArrayBuffer, 1, 3)],
+    expectation({ web, output }) {
+      if (web) {
+        expect(types.isUint8Array(output), 'expected output to be a Uint8Array').to.be.true;
+      } else {
+        expect(Buffer.isBuffer(output), 'expected output to be a Buffer').to.be.true;
+      }
+      expect(output).to.have.property('byteLength', 3);
+      expect(output).to.have.property('byteOffset', 1);
+    }
+  },
+  ...[
+    Uint8Array,
+    Int8Array,
+    Uint8ClampedArray,
+    Int16Array,
+    Uint16Array,
+    Int32Array,
+    Uint32Array,
+    Float32Array,
+    Float64Array
+  ].map(TypedArray => {
+    return {
+      name: `should create view if input is typed array ${TypedArray.name}`,
+      inputs: [new TypedArray(testArrayBuffer)],
+      expectation({ output, error }) {
+        expect(error).to.be.null;
+        expect(isBufferOrUint8Array(output)).to.be.true;
+        expect(output).to.have.property('byteLength', testArrayBuffer.byteLength);
+      }
+    } as ByteUtilTest<'toLocalBufferType'>;
+  }),
+  ...[0, 12, -1, '', 'foo', null, undefined, ['list'], {}, /x/].map(item => {
+    return {
+      name: `should throw if input is ${typeof item}: ${inspect(item)}`,
+      inputs: [item],
+      expectation({ output, error }) {
+        expect(output).to.be.null;
+        expect(error).to.have.property('name', 'BSONError');
+      }
+    } as ByteUtilTest<'toLocalBufferType'>;
+  })
 ];
 const allocateTests: ByteUtilTest<'allocate'>[] = [
   {
@@ -263,7 +310,7 @@ const toISO88591Tests: ByteUtilTest<'toISO88591'>[] = [
     }
   }
 ];
-const fromTextTests: ByteUtilTest<'fromText'>[] = [
+const fromUTF8Tests: ByteUtilTest<'fromUTF8'>[] = [
   {
     name: 'should create buffer from utf8 input',
     inputs: [Buffer.from('abc\u{1f913}', 'utf8').toString('utf8')],
@@ -281,7 +328,7 @@ const fromTextTests: ByteUtilTest<'fromText'>[] = [
     }
   }
 ];
-const toTextTests: ByteUtilTest<'toText'>[] = [
+const toUTF8Tests: ByteUtilTest<'toUTF8'>[] = [
   {
     name: 'should create utf8 string from buffer input',
     inputs: [Buffer.from('abc\u{1f913}', 'utf8')],
@@ -334,14 +381,44 @@ const table = new Map<keyof ByteUtils, ByteUtilTest<keyof ByteUtils>[]>([
   ['toHex', toHexTests],
   ['fromISO88591', fromISO88591Tests],
   ['toISO88591', toISO88591Tests],
-  ['fromText', fromTextTests],
-  ['toText', toTextTests],
+  ['fromUTF8', fromUTF8Tests],
+  ['toUTF8', toUTF8Tests],
   ['utf8ByteLength', utf8ByteLengthTests]
 ]);
 
 describe('ByteUtils', () => {
   it('should be set to the nodeJsByteUtils', () => {
     expect(ByteUtils).to.equal(nodeJsByteUtils);
+  });
+
+  describe('toLocalBufferType special cases', () => {
+    describe('nodejs', () => {
+      it('should return input instance if it is already the correct type', () => {
+        const nodejsBuffer = Buffer.from('abc', 'utf8');
+        expect(nodeJsByteUtils.toLocalBufferType(nodejsBuffer)).to.equal(nodejsBuffer);
+      });
+
+      it('should create a view on a SharedArrayBuffer', function () {
+        const arrayBufferIn = new SharedArrayBuffer(3);
+        const bufferOut = nodeJsByteUtils.toLocalBufferType(arrayBufferIn);
+        expect(bufferOut).to.be.an.instanceOf(Buffer);
+        expect(bufferOut.buffer).to.equal(arrayBufferIn);
+      });
+    });
+
+    describe('web', () => {
+      it('should return input instance if it is already the correct type', () => {
+        const uint8array = new Uint8Array(8);
+        expect(webByteUtils.toLocalBufferType(uint8array)).to.equal(uint8array);
+      });
+
+      it('should create a view on a SharedArrayBuffer', function () {
+        const arrayBufferIn = new SharedArrayBuffer(3);
+        const bufferOut = nodeJsByteUtils.toLocalBufferType(arrayBufferIn);
+        expect(bufferOut).to.be.an.instanceOf(Buffer);
+        expect(bufferOut.buffer).to.equal(arrayBufferIn);
+      });
+    });
   });
 
   for (const [byteUtilsName, byteUtils] of utils) {

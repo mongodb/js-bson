@@ -1,3 +1,5 @@
+import { BSONError } from '../error';
+import { isAnyArrayBuffer } from '../parser/utils';
 import type { ByteUtils } from './byte_utils';
 
 type NodeJsEncoding = 'base64' | 'hex' | 'utf8' | 'binary';
@@ -5,8 +7,11 @@ type NodeJsBuffer = {
   alloc: (size: number) => Uint8Array;
   from(array: number[]): Uint8Array;
   from(array: Uint8Array): Uint8Array;
+  from(array: ArrayBuffer): Uint8Array;
+  from(array: ArrayBuffer, byteOffset: number, byteLength: number): Uint8Array;
   from(base64: string, encoding: NodeJsEncoding): Uint8Array;
-  isBuffer(value: unknown): value is NodeJsBuffer;
+  byteLength(input: string, encoding: 'utf8'): number;
+  isBuffer(value: unknown): value is Uint8Array;
   prototype: {
     toString: (this: Uint8Array, encoding: NodeJsEncoding) => string;
     equals: (this: Uint8Array, other: Uint8Array) => boolean;
@@ -18,15 +23,29 @@ type NodeJsBuffer = {
 declare const Buffer: NodeJsBuffer;
 
 function bytesToString(buffer: Uint8Array, encoding: NodeJsEncoding) {
-  return Buffer.prototype.toString.call(nodeJsByteUtils.toLocalBufferType(buffer), encoding);
+  // @ts-expect-error: toLocalBufferType returns a Node.js Buffer
+  return nodeJsByteUtils.toLocalBufferType(buffer).toString(encoding);
 }
 
 export const nodeJsByteUtils: ByteUtils = {
-  toLocalBufferType(buffer) {
-    if (Buffer.isBuffer(buffer)) {
-      return buffer;
+  toLocalBufferType(potentialBuffer) {
+    if (Buffer.isBuffer(potentialBuffer)) {
+      return potentialBuffer;
     }
-    return Buffer.from(buffer);
+
+    if (ArrayBuffer.isView(potentialBuffer)) {
+      return Buffer.from(
+        potentialBuffer.buffer,
+        potentialBuffer.byteOffset,
+        potentialBuffer.byteLength
+      );
+    }
+
+    if (isAnyArrayBuffer(potentialBuffer)) {
+      return Buffer.from(potentialBuffer);
+    }
+
+    throw new BSONError(`Cannot create Buffer from ${String(potentialBuffer)}`);
   },
 
   allocate(size) {
@@ -65,15 +84,15 @@ export const nodeJsByteUtils: ByteUtils = {
     return bytesToString(buffer, 'hex');
   },
 
-  fromText(text) {
+  fromUTF8(text) {
     return Buffer.from(text, 'utf8');
   },
 
-  toText(buffer) {
+  toUTF8(buffer) {
     return bytesToString(buffer, 'utf8');
   },
 
   utf8ByteLength(input) {
-    return nodeJsByteUtils.fromText(input).byteLength;
+    return Buffer.byteLength(input, 'utf8');
   }
 };

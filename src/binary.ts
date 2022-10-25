@@ -165,7 +165,7 @@ export class Binary {
     }
 
     if (ArrayBuffer.isView(sequence)) {
-      this.buffer.set(new Uint8Array(sequence), offset);
+      this.buffer.set(ByteUtils.toLocalBufferType(sequence), offset);
       this.position =
         offset + sequence.byteLength > this.position ? offset + sequence.length : this.position;
     } else if (typeof sequence === 'string') {
@@ -207,6 +207,7 @@ export class Binary {
     if (asRaw) {
       return this.buffer.slice(0, this.position);
     }
+    // TODO(NODE-4361): remove binary string support, value(true) should be the default / only option here.
     return ByteUtils.toISO88591(this.buffer.subarray(0, this.position));
   }
 
@@ -219,9 +220,11 @@ export class Binary {
     return ByteUtils.toBase64(this.buffer);
   }
 
-  // TODO: BREAKING
-  toString(): string {
-    return ByteUtils.toText(this.buffer);
+  toString(encoding?: 'hex' | 'base64' | 'utf8'): string {
+    if (encoding === 'hex') return ByteUtils.toHex(this.buffer);
+    if (encoding === 'base64') return ByteUtils.toBase64(this.buffer);
+    if (encoding === 'utf8') return ByteUtils.toUTF8(this.buffer);
+    return ByteUtils.toUTF8(this.buffer);
   }
 
   /** @internal */
@@ -373,7 +376,9 @@ export class UUID extends Binary {
   /**
    * Converts the id into a 36 character (dashes included) hex string, unless a encoding is specified.
    */
-  toString(): string {
+  toString(encoding?: 'hex' | 'base64'): string {
+    if (encoding === 'hex') return ByteUtils.toHex(this.id);
+    if (encoding === 'base64') return ByteUtils.toBase64(this.id);
     return this.toHexString();
   }
 

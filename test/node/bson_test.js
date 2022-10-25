@@ -1694,10 +1694,10 @@ describe('BSON', function () {
     expect(false).to.equal(ObjectId.isValid(true));
     expect(true).to.equal(ObjectId.isValid(0));
     expect(false).to.equal(ObjectId.isValid('invalid'));
-    // TODO Oid removed binary string: expect(true).to.equal(ObjectId.isValid('zzzzzzzzzzzz'));
+    expect(true).to.equal(ObjectId.isValid('zzzzzzzzzzzz'));
     expect(false).to.equal(ObjectId.isValid('zzzzzzzzzzzzzzzzzzzzzzzz'));
     expect(true).to.equal(ObjectId.isValid('000000000000000000000000'));
-    // TODO Oid removed binary string: expect(true).to.equal(ObjectId.isValid(new ObjectId('thisis12char')));
+    expect(true).to.equal(ObjectId.isValid(new ObjectId('thisis12char')));
 
     var tmp = new ObjectId();
     // Cloning tmp so that instanceof fails to fake import from different version/instance of the same npm package

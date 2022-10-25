@@ -3,7 +3,8 @@ import { webByteUtils } from './web_byte_utils';
 
 export type ByteUtils = {
   /** Transforms the input to an instance of Buffer if running on node, otherwise Uint8Array */
-  toLocalBufferType: (buffer: Uint8Array) => Uint8Array;
+  toLocalBufferType(buffer: ArrayBuffer): Uint8Array;
+  toLocalBufferType(buffer: ArrayBufferView): Uint8Array;
   /** Create empty space of size */
   allocate: (size: number) => Uint8Array;
   /** Check if two Uint8Arrays are deep equal */
@@ -23,9 +24,9 @@ export type ByteUtils = {
   /** @deprecated binary strings are a legacy method of data transfer */
   toISO88591: (buffer: Uint8Array) => string;
   /** Create a Uint8Array containing utf8 code units from a string */
-  fromText: (text: string) => Uint8Array;
+  fromUTF8: (text: string) => Uint8Array;
   /** Create a string from utf8 code units */
-  toText: (buffer: Uint8Array) => string;
+  toUTF8: (buffer: Uint8Array) => string;
   /** Get the utf8 code unit count from a string if it were to be transformed to utf8 */
   utf8ByteLength: (input: string) => number;
 };
