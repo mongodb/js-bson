@@ -2,7 +2,7 @@
 import { performance } from 'perf_hooks';
 import { runner, systemInfo, getCurrentLocalBSON } from './lib_runner.mjs';
 
-const iterations = 1_000_000;
+const iterations = 100;
 const startedEntireRun = performance.now();
 console.log(systemInfo(iterations));
 console.log();
@@ -10,7 +10,7 @@ console.log();
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 await runner({
   skip: true,
-  name: 'deserialize({ oid, string }, { validation: { utf8: false } })',
+  name: 'deserialize an objectId and a string without utf8 validation',
   iterations,
   setup(libs) {
     const bson = getCurrentLocalBSON(libs);
@@ -28,7 +28,7 @@ await runner({
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 await runner({
   skip: true,
-  name: 'new Oid(buf)',
+  name: 'objectId constructor',
   iterations,
   setup() {
     return Buffer.from('00'.repeat(12), 'hex');
@@ -40,7 +40,7 @@ await runner({
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 await runner({
   skip: true,
-  name: 'BSON.deserialize(largeDocument)',
+  name: 'deserialize a large document',
   iterations,
   setup(libs) {
     const bson = getCurrentLocalBSON(libs);
@@ -68,7 +68,7 @@ await runner({
 });
 
 await runner({
-  skip: false,
+  skip: true,
   name: 'Double Deserialization',
   iterations,
   setup(libs) {
@@ -81,7 +81,7 @@ await runner({
 });
 
 await runner({
-  skip: false,
+  skip: true,
   name: 'Many Doubles Deserialization',
   iterations,
   setup(libs) {
@@ -95,6 +95,37 @@ await runner({
   },
   run(i, bson, serialized_doubles) {
     bson.lib.deserialize(serialized_doubles);
+  }
+});
+
+/// Batch full of user doc with 20 char strings w/ 20 strings
+/// nextBatch simulate
+/// nextBatch: [ { string * 20 } * 1000 ] /// Garbage call
+await runner({
+  skip: false,
+  name: 'deserialize a large batch of documents each with an array of many strings',
+  iterations,
+  setup(libs) {
+    const bson = libs[0].lib;
+    return bson.serialize({
+      nextBatch: Array.from({ length: 1000 }, () => ({
+        _id: new bson.ObjectId(),
+        arrayField: Array.from({ length: 20 }, (_, i) => '5e99f3f5d3ab06936d36000' + i)
+      }))
+    });
+  },
+  async run(i, bson, document) {
+    await Promise.all(
+      Array.from(
+        { length: 100 },
+        (_, i) =>
+          new Promise(resolve => {
+            setTimeout(() => {
+              resolve(bson.lib.deserialize(document, { validation: { utf8: false } }));
+            }, 20);
+          })
+      )
+    );
   }
 });
 

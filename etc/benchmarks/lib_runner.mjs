@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { performance } from 'perf_hooks';
+import { createHistogram } from 'perf_hooks';
 import { readFile } from 'fs/promises';
 import { cpus, totalmem } from 'os';
 import { exec as execCb } from 'child_process';
-import { promisify } from 'util';
+import { promisify, types } from 'util';
+import { writeFile } from 'fs/promises';
+import v8Profiler from 'v8-profiler-next';
+import chalk from 'chalk';
 const exec = promisify(execCb);
 
 const hw = cpus();
@@ -23,27 +26,26 @@ export const systemInfo = iterations =>
 export const readJSONFile = async path =>
   JSON.parse(await readFile(new URL(path, import.meta.url), { encoding: 'utf8' }));
 
-function average(array) {
-  let sum = 0;
-  for (const value of array) sum += value;
-  return sum / array.length;
-}
-
-function testPerformance(lib, [fn, arg], iterations) {
-  let measurements = [];
+async function testPerformance(lib, [fn, arg], iterations) {
   let thrownError = null;
+  const histogram = createHistogram();
   for (let i = 0; i < iterations; i++) {
-    const start = performance.now();
     try {
-      fn(i, lib, arg);
+      if (types.isAsyncFunction(fn)) {
+        histogram.recordDelta();
+        await fn(i, lib, arg);
+        histogram.recordDelta();
+      } else {
+        histogram.recordDelta();
+        fn(i, lib, arg);
+        histogram.recordDelta();
+      }
     } catch (error) {
       thrownError = error;
       break;
     }
-    const end = performance.now();
-    measurements.push(end - start);
   }
-  return { result: average(measurements).toFixed(8), thrownError };
+  return { histogram, thrownError };
 }
 
 export function getCurrentLocalBSON(libs) {
@@ -73,12 +75,14 @@ export async function getLibs() {
         lib: { ...legacyBSON, ...legacyBSON.prototype },
         version: (await readJSONFile('../../node_modules/bson_legacy/package.json')).version
       };
-    })(),
-    (async () => ({
-      name: 'bson-ext',
-      lib: await import('../../node_modules/bson_ext/lib/index.js'),
-      version: (await readJSONFile('../../node_modules/bson_ext/package.json')).version
-    }))()
+    })()
+    // BSON-EXT is EOL so we do not need to keep testing it, and it has issues installing it
+    // in this no-save way on M1 currently that are not worth fixing.
+    // (async () => ({
+    //   name: 'bson-ext',
+    //   lib: await import('../../node_modules/bson_ext/lib/index.js'),
+    //   version: (await readJSONFile('../../node_modules/bson_ext/package.json')).version
+    // }))()
   ]).catch(error => {
     console.error(error);
     console.error(
@@ -90,6 +94,27 @@ export async function getLibs() {
     process.exit(1);
   });
 }
+
+const printHistogram = (name, h) => {
+  const makeReadableTime = nanoseconds => (nanoseconds / 1e6).toFixed(3).padStart(7, ' ');
+  console.log();
+  console.log(chalk.green(name));
+  console.log('-'.repeat(155));
+  process.stdout.write(`|  ${chalk.cyan('max')}:    ${chalk.red(makeReadableTime(h.max))} ms |`);
+  process.stdout.write(`  ${chalk.cyan('min')}:    ${chalk.red(makeReadableTime(h.min))} ms |`);
+  process.stdout.write(`  ${chalk.cyan('mean')}:   ${chalk.red(makeReadableTime(h.mean))} ms |`);
+  process.stdout.write(`  ${chalk.cyan('stddev')}: ${chalk.red(makeReadableTime(h.stddev))} ms |`);
+  process.stdout.write(
+    `  ${chalk.cyan('p90th')}:  ${chalk.red(makeReadableTime(h.percentile(90)))} ms |`
+  );
+  process.stdout.write(
+    `  ${chalk.cyan('p95th')}:  ${chalk.red(makeReadableTime(h.percentile(95)))} ms |`
+  );
+  process.stdout.write(
+    `  ${chalk.cyan('p99th')}:  ${chalk.red(makeReadableTime(h.percentile(99)))} ms |`
+  );
+  console.log('\n' + '-'.repeat(155));
+};
 
 /**
  * ```ts
@@ -109,19 +134,23 @@ export async function runner({ iterations, setup, name, run, skip }) {
   const BSONLibs = await getLibs();
   const setupResult = setup?.(BSONLibs) ?? null;
 
-  console.log(`\ntesting: ${name}`);
+  console.log('-'.repeat(155));
 
   for (const bson of BSONLibs) {
-    const { result: perf, thrownError } = testPerformance(bson, [run, setupResult], iterations);
+    const profileName = `${bson.name}_${name}`;
+    v8Profiler.startProfiling(profileName, true);
+    const { histogram, thrownError } = await testPerformance(bson, [run, setupResult], iterations);
     if (thrownError != null) {
       console.log(
         `${bson.name.padEnd(14, ' ')} - v ${bson.version.padEnd(8, ' ')} - error ${thrownError}`
       );
     } else {
-      console.log(
-        `${bson.name.padEnd(14, ' ')} - v ${bson.version.padEnd(8, ' ')} - avg ${perf}ms`
-      );
+      printHistogram(`${chalk.greenBright(bson.name)} - ${chalk.blue(name)}`, histogram);
     }
+    const profile = v8Profiler.stopProfiling(profileName);
+    const result = await promisify(profile.export.bind(profile))();
+    await writeFile(`${profileName}.cpuprofile`, result);
+    profile.delete();
   }
 
   console.log();
