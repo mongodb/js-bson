@@ -1,6 +1,4 @@
 import { BSONError } from '../error';
-import { isAnyArrayBuffer, isUint8Array } from '../parser/utils';
-import type { ByteUtils } from './byte_utils';
 
 type TextDecoder = {
   readonly encoding: string;
@@ -26,12 +24,24 @@ declare const TextEncoder: TextEncoderConstructor;
 declare const atob: (base64: string) => string;
 declare const btoa: (binary: string) => string;
 
+type ArrayBufferViewWithTag = ArrayBufferView & {
+  [Symbol.toStringTag]?: string;
+};
+
 const HEX_DIGIT = /(\d|[a-f])/i;
 
-export const webByteUtils: ByteUtils = {
-  toLocalBufferType(potentialUint8array) {
-    if (isUint8Array(potentialUint8array)) {
-      return potentialUint8array;
+export const webByteUtils = {
+  toLocalBufferType(
+    potentialUint8array: Uint8Array | ArrayBufferViewWithTag | ArrayBuffer
+  ): Uint8Array {
+    let stringTag = potentialUint8array?.[Symbol.toStringTag];
+    if (typeof stringTag !== 'string') {
+      stringTag = Object.prototype.toString.call(potentialUint8array);
+      stringTag = stringTag.slice(8, stringTag.indexOf(']'));
+    }
+
+    if (stringTag === 'Uint8Array') {
+      return potentialUint8array as Uint8Array;
     }
 
     if (ArrayBuffer.isView(potentialUint8array)) {
@@ -43,21 +53,21 @@ export const webByteUtils: ByteUtils = {
       );
     }
 
-    if (isAnyArrayBuffer(potentialUint8array)) {
+    if (stringTag === 'ArrayBuffer' || stringTag === 'SharedArrayBuffer') {
       return new Uint8Array(potentialUint8array);
     }
 
     throw new BSONError(`Cannot make a Uint8Array from ${String(potentialUint8array)}`);
   },
 
-  allocate(size) {
+  allocate(size: number): Uint8Array {
     if (typeof size !== 'number') {
       throw new TypeError(`The "size" argument must be of type number. Received ${String(size)}`);
     }
     return new Uint8Array(size);
   },
 
-  equals(a, b) {
+  equals(a: Uint8Array, b: Uint8Array): boolean {
     if (a.byteLength !== b.byteLength) {
       return false;
     }
@@ -69,35 +79,35 @@ export const webByteUtils: ByteUtils = {
     return true;
   },
 
-  fromNumberArray(array) {
+  fromNumberArray(array: number[]): Uint8Array {
     return Uint8Array.from(array);
   },
 
-  fromBase64(base64) {
+  fromBase64(base64: string): Uint8Array {
     return Uint8Array.from(atob(base64), c => c.charCodeAt(0));
   },
 
-  toBase64(uint8array) {
+  toBase64(uint8array: Uint8Array): string {
     return btoa(webByteUtils.toISO88591(uint8array));
   },
 
-  fromISO88591(codePoints) {
+  fromISO88591(codePoints: string): Uint8Array {
     return Uint8Array.from(codePoints, c => c.charCodeAt(0) & 0xff);
   },
 
-  toHex(uint8array) {
+  toHex(uint8array: Uint8Array): string {
     return Array.from(uint8array, byte => byte.toString(16).padStart(2, '0')).join('');
   },
 
-  fromUTF8(text) {
+  fromUTF8(text: string): Uint8Array {
     return new TextEncoder().encode(text);
   },
 
-  toISO88591(uint8array) {
+  toISO88591(uint8array: Uint8Array): string {
     return Array.from(Uint16Array.from(uint8array), b => String.fromCharCode(b)).join('');
   },
 
-  fromHex(hex) {
+  fromHex(hex: string): Uint8Array {
     const evenLengthHex = hex.length % 2 === 0 ? hex : hex.slice(0, hex.length - 1);
     const buffer = [];
 
@@ -112,32 +122,17 @@ export const webByteUtils: ByteUtils = {
     return Uint8Array.from(buffer);
   },
 
-  toUTF8(uint8array) {
+  toUTF8(uint8array: Uint8Array): string {
     return new TextDecoder().decode(uint8array);
   },
 
-  utf8ByteLength(input) {
+  utf8ByteLength(input: string): number {
     return webByteUtils.fromUTF8(input).byteLength;
   },
 
-  encodeUTF8Into(buffer, source, byteOffset) {
+  encodeUTF8Into(buffer: Uint8Array, source: string, byteOffset: number): number {
     const bytes = webByteUtils.fromUTF8(source);
     buffer.set(bytes, byteOffset);
     return bytes.byteLength;
-  },
-
-  copy(
-    destination: Uint8Array,
-    source: Uint8Array,
-    destinationBegin: number,
-    sourceBegin: number,
-    sourceEnd: number
-  ) {
-    source =
-      sourceBegin === 0 && sourceEnd === source.byteLength
-        ? source
-        : source.subarray(sourceBegin, sourceEnd);
-    destination.set(source, destinationBegin);
-    return source.byteLength;
   }
 };

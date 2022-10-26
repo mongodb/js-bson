@@ -250,7 +250,7 @@ function deserializeObject(
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_OID) {
       const oid = ByteUtils.allocate(12);
-      ByteUtils.copy(oid, buffer, 0, index, index + 12);
+      oid.set(buffer.subarray(index, index + 12));
       value = new ObjectId(oid);
       index = index + 12;
     } else if (elementType === constants.BSON_DATA_INT && promoteValues === false) {
@@ -369,7 +369,7 @@ function deserializeObject(
       // Buffer to contain the decimal bytes
       const bytes = ByteUtils.allocate(16);
       // Copy the next 16 bytes into the bytes buffer
-      ByteUtils.copy(bytes, buffer, 0, index, index + 16);
+      bytes.set(buffer.subarray(index, index + 16), 0);
       // Update index
       index = index + 16;
       // Assign the new Decimal128 value
@@ -693,7 +693,7 @@ function deserializeObject(
 
       // Read the oid
       const oidBuffer = ByteUtils.allocate(12);
-      ByteUtils.copy(oidBuffer, buffer, 0, index, index + 12);
+      oidBuffer.set(buffer.subarray(index, index + 12), 0);
       const oid = new ObjectId(oidBuffer);
 
       // Update the index

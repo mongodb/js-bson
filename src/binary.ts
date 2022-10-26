@@ -139,7 +139,7 @@ export class Binary {
       this.buffer[this.position++] = decodedByte;
     } else {
       const newSpace = ByteUtils.allocate(Binary.BUFFER_SIZE + this.buffer.length);
-      ByteUtils.copy(newSpace, this.buffer, 0, 0, this.buffer.byteLength);
+      newSpace.set(this.buffer, 0);
       this.buffer = newSpace;
       this.buffer[this.position++] = decodedByte;
     }
@@ -157,7 +157,7 @@ export class Binary {
     // If the buffer is to small let's extend the buffer
     if (this.buffer.byteLength < offset + sequence.length) {
       const newSpace = ByteUtils.allocate(this.buffer.byteLength + sequence.length);
-      ByteUtils.copy(newSpace, this.buffer, 0, 0, this.buffer.byteLength);
+      newSpace.set(this.buffer, 0);
 
       // Assign the new buffer
       this.buffer = newSpace;

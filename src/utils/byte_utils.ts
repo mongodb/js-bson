@@ -28,19 +28,12 @@ export type ByteUtils = {
   toUTF8: (buffer: Uint8Array) => string;
   /** Get the utf8 code unit count from a string if it were to be transformed to utf8 */
   utf8ByteLength: (input: string) => number;
-  /** copy bytes from `source` to `destination` */
-  copy(
-    destination: Uint8Array,
-    source: Uint8Array,
-    destinationBegin: number,
-    sourceBegin: number,
-    sourceEnd: number
-  ): number;
   /** encode UTF8 bytes generated from `source` string into `destination` at byteOffset. Returns the number of bytes encoded. */
   encodeUTF8Into(destination: Uint8Array, source: string, byteOffset: number): number;
 };
 
 declare const Buffer: { new (): unknown; prototype?: { _isBuffer?: boolean } } | undefined;
+
 /**
  * Check that a global Buffer exists that is a function and
  * does not have a '_isBuffer' property defined on the prototype
@@ -48,6 +41,12 @@ declare const Buffer: { new (): unknown; prototype?: { _isBuffer?: boolean } } |
  */
 const hasGlobalBuffer = typeof Buffer === 'function' && Buffer.prototype?._isBuffer !== true;
 
+/**
+ * This is the only ByteUtils that should be used across the rest of the BSON library.
+ *
+ * The type annotation is important here, it asserts that each of the platform specific
+ * utils implementations are compatible with the common one.
+ */
 export const ByteUtils: ByteUtils = hasGlobalBuffer ? nodeJsByteUtils : webByteUtils;
 
 export class BSONDataView extends DataView {

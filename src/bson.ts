@@ -159,7 +159,7 @@ export function serialize(object: Document, options: SerializeOptions = {}): Uin
   const finishedBuffer = ByteUtils.allocate(serializationIndex);
 
   // Copy into the finished buffer
-  ByteUtils.copy(finishedBuffer, buffer, 0, 0, finishedBuffer.byteLength);
+  finishedBuffer.set(buffer.subarray(0, serializationIndex), 0);
 
   // Return the buffer
   return finishedBuffer;
@@ -198,7 +198,7 @@ export function serializeWithBufferAndIndex(
     ignoreUndefined
   );
 
-  ByteUtils.copy(finalBuffer, buffer, startIndex, 0, serializationIndex);
+  finalBuffer.set(buffer.subarray(0, serializationIndex), startIndex);
 
   // Return the index
   return startIndex + serializationIndex - 1;

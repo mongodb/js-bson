@@ -250,7 +250,7 @@ function serializeObjectId(buffer: Uint8Array, key: string, value: ObjectId, ind
 
   // Write the objectId into the shared buffer
   if (isUint8Array(value.id)) {
-    ByteUtils.copy(buffer, value.id, index, 0, 12);
+    buffer.set(value.id.subarray(0, 12), index);
   } else {
     throw new BSONTypeError('object [' + JSON.stringify(value) + '] is not a valid ObjectId');
   }
@@ -330,7 +330,7 @@ function serializeDecimal128(buffer: Uint8Array, key: string, value: Decimal128,
   index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   // Write the data from the value
-  ByteUtils.copy(buffer, value.bytes, index, 0, 16);
+  buffer.set(value.bytes.subarray(0, 16), index);
   return index + 16;
 }
 
