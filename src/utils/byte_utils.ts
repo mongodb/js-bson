@@ -3,8 +3,7 @@ import { webByteUtils } from './web_byte_utils';
 
 export type ByteUtils = {
   /** Transforms the input to an instance of Buffer if running on node, otherwise Uint8Array */
-  toLocalBufferType(buffer: ArrayBuffer): Uint8Array;
-  toLocalBufferType(buffer: ArrayBufferView): Uint8Array;
+  toLocalBufferType(buffer: Uint8Array | ArrayBufferView | ArrayBuffer): Uint8Array;
   /** Create empty space of size */
   allocate: (size: number) => Uint8Array;
   /** Check if two Uint8Arrays are deep equal */
@@ -41,13 +40,13 @@ export type ByteUtils = {
   encodeUTF8Into(destination: Uint8Array, source: string, byteOffset: number): number;
 };
 
-declare const Buffer: unknown;
+declare const Buffer: { new (): unknown; prototype?: { _isBuffer?: boolean } } | undefined;
 /**
  * Check that a global Buffer exists that is a function and
  * does not have a '_isBuffer' property defined on the prototype
  * (this is to prevent using the npm buffer)
  */
-const hasGlobalBuffer = typeof Buffer === 'function' && Buffer.prototype._isBuffer !== true;
+const hasGlobalBuffer = typeof Buffer === 'function' && Buffer.prototype?._isBuffer !== true;
 
 export const ByteUtils: ByteUtils = hasGlobalBuffer ? nodeJsByteUtils : webByteUtils;
 

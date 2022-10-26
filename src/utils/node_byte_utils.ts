@@ -1,36 +1,35 @@
 import { BSONError } from '../error';
 import { isAnyArrayBuffer } from '../parser/utils';
-import type { ByteUtils } from './byte_utils';
 
 type NodeJsEncoding = 'base64' | 'hex' | 'utf8' | 'binary';
-type NodeJsBuffer = {
-  alloc: (size: number) => Uint8Array;
-  from(array: number[]): Uint8Array;
-  from(array: Uint8Array): Uint8Array;
-  from(array: ArrayBuffer): Uint8Array;
-  from(array: ArrayBuffer, byteOffset: number, byteLength: number): Uint8Array;
-  from(base64: string, encoding: NodeJsEncoding): Uint8Array;
-  write(string: string, offset: number, length: undefined, encoding: 'utf8'): number;
-  copy(target: Uint8Array, targetStart: number, sourceStart: number, sourceEnd: number): number;
-  byteLength(input: string, encoding: 'utf8'): number;
-  isBuffer(value: unknown): value is Uint8Array;
-  prototype: {
+type NodeJsBuffer = ArrayBufferView &
+  Uint8Array & {
+    write(string: string, offset: number, length: undefined, encoding: 'utf8'): number;
+    copy(target: Uint8Array, targetStart: number, sourceStart: number, sourceEnd: number): number;
     toString: (this: Uint8Array, encoding: NodeJsEncoding) => string;
     equals: (this: Uint8Array, other: Uint8Array) => boolean;
   };
+type NodeJsBufferConstructor = Uint8ArrayConstructor & {
+  alloc: (size: number) => NodeJsBuffer;
+  from(array: number[]): NodeJsBuffer;
+  from(array: Uint8Array): NodeJsBuffer;
+  from(array: ArrayBuffer): NodeJsBuffer;
+  from(array: ArrayBuffer, byteOffset: number, byteLength: number): NodeJsBuffer;
+  from(base64: string, encoding: NodeJsEncoding): NodeJsBuffer;
+  byteLength(input: string, encoding: 'utf8'): number;
+  isBuffer(value: unknown): value is NodeJsBuffer;
 };
 
 // This can be nullish, but we gate the nodejs functions on being exported whether or not this exists
 // Node.js global
-declare const Buffer: NodeJsBuffer;
+declare const Buffer: NodeJsBufferConstructor;
 
 function bytesToString(buffer: Uint8Array, encoding: NodeJsEncoding) {
-  // @ts-expect-error: toLocalBufferType returns a Node.js Buffer
   return nodeJsByteUtils.toLocalBufferType(buffer).toString(encoding);
 }
 
-export const nodeJsByteUtils: ByteUtils = {
-  toLocalBufferType(potentialBuffer) {
+export const nodeJsByteUtils = {
+  toLocalBufferType(potentialBuffer: Uint8Array | NodeJsBuffer | ArrayBuffer): NodeJsBuffer {
     if (Buffer.isBuffer(potentialBuffer)) {
       return potentialBuffer;
     }
@@ -50,56 +49,56 @@ export const nodeJsByteUtils: ByteUtils = {
     throw new BSONError(`Cannot create Buffer from ${String(potentialBuffer)}`);
   },
 
-  allocate(size) {
+  allocate(size: number) {
     return Buffer.alloc(size);
   },
 
-  equals(a, b) {
-    return Buffer.prototype.equals.call(a, b);
+  equals(a: Uint8Array, b: Uint8Array) {
+    return nodeJsByteUtils.toLocalBufferType(a).equals(b);
   },
 
-  fromNumberArray(array) {
+  fromNumberArray(array: number[]) {
     return Buffer.from(array);
   },
 
-  fromBase64(base64) {
+  fromBase64(base64: string) {
     return Buffer.from(base64, 'base64');
   },
 
-  toBase64(buffer) {
+  toBase64(buffer: Uint8Array) {
     return bytesToString(buffer, 'base64');
   },
 
-  fromISO88591(codePoints) {
+  fromISO88591(codePoints: string) {
     return Buffer.from(codePoints, 'binary');
   },
 
-  toISO88591(buffer) {
+  toISO88591(buffer: Uint8Array) {
     return bytesToString(buffer, 'binary');
   },
 
-  fromHex(hex) {
+  fromHex(hex: string) {
     return Buffer.from(hex, 'hex');
   },
 
-  toHex(buffer) {
+  toHex(buffer: Uint8Array) {
     return bytesToString(buffer, 'hex');
   },
 
-  fromUTF8(text) {
+  fromUTF8(text: string) {
     return Buffer.from(text, 'utf8');
   },
 
-  toUTF8(buffer) {
+  toUTF8(buffer: Uint8Array) {
     return bytesToString(buffer, 'utf8');
   },
 
-  utf8ByteLength(input) {
+  utf8ByteLength(input: string) {
     return Buffer.byteLength(input, 'utf8');
   },
 
-  encodeUTF8Into(buffer, source, byteOffset) {
-    return (buffer as unknown as NodeJsBuffer).write(source, byteOffset, undefined, 'utf8');
+  encodeUTF8Into(buffer: Uint8Array, source: string, byteOffset: number) {
+    return nodeJsByteUtils.toLocalBufferType(buffer).write(source, byteOffset, undefined, 'utf8');
   },
 
   copy(
@@ -109,11 +108,8 @@ export const nodeJsByteUtils: ByteUtils = {
     sourceBegin: number,
     sourceEnd: number
   ) {
-    return (source as unknown as NodeJsBuffer).copy(
-      destination,
-      destinationBegin,
-      sourceBegin,
-      sourceEnd
-    );
+    return nodeJsByteUtils
+      .toLocalBufferType(source)
+      .copy(destination, destinationBegin, sourceBegin, sourceEnd);
   }
 };
