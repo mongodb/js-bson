@@ -94,11 +94,6 @@ export function isMap(d: unknown): d is Map<unknown, unknown> {
   return Object.prototype.toString.call(d) === '[object Map]';
 }
 
-/** Call to check if your environment has `Buffer` */
-export function haveBuffer(): boolean {
-  return typeof global !== 'undefined' && typeof global.Buffer !== 'undefined';
-}
-
 // To ensure that 0.4 of node works correctly
 export function isDate(d: unknown): d is Date {
   return isObjectLike(d) && Object.prototype.toString.call(d) === '[object Date]';
