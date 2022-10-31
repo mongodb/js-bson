@@ -15,6 +15,12 @@ type ByteUtilTest<K extends keyof ByteUtils> = {
   }) => void;
 };
 
+const isNode14OrLower = (() => {
+  let [majorVersion] = process.version.split('.');
+  majorVersion = majorVersion.slice(1); // drop 'v'
+  return Number.parseInt(majorVersion, 10) <= 14;
+})();
+
 const testArrayBuffer = new ArrayBuffer(8);
 
 const toLocalBufferTypeTests: ByteUtilTest<'toLocalBufferType'>[] = [
@@ -462,34 +468,33 @@ describe('ByteUtils', () => {
   });
 
   for (const [byteUtilsName, byteUtils] of utils) {
-    describe(byteUtilsName, () => {
-      for (const [utility, tests] of table) {
-        describe(utility, () => {
-          for (const test of tests) {
-            it(test.name, function () {
-              expect(byteUtils).to.have.property(utility).that.is.a('function');
-              let output = null;
-              let error = null;
+    for (const [utility, tests] of table) {
+      const maybeDescribe = isNode14OrLower && /base64/i.test(utility) ? describe.skip : describe;
+      maybeDescribe(`${byteUtilsName}.${utility}()`, () => {
+        for (const test of tests) {
+          it(test.name, function () {
+            expect(byteUtils).to.have.property(utility).that.is.a('function');
+            let output = null;
+            let error = null;
 
-              try {
-                output = byteUtils[utility].call(null, ...test.inputs);
-              } catch (thrownError) {
-                error = thrownError;
-              }
+            try {
+              output = byteUtils[utility].call(null, ...test.inputs);
+            } catch (thrownError) {
+              error = thrownError;
+            }
 
-              if (error != null) {
-                expect(output).to.be.null;
-              }
+            if (error != null) {
+              expect(output).to.be.null;
+            }
 
-              if (output != null) {
-                expect(error).to.be.null;
-              }
+            if (output != null) {
+              expect(error).to.be.null;
+            }
 
-              test.expectation({ web: byteUtilsName === 'webByteUtils', output, error });
-            });
-          }
-        });
-      }
-    });
+            test.expectation({ web: byteUtilsName === 'webByteUtils', output, error });
+          });
+        }
+      });
+    }
   }
 });
