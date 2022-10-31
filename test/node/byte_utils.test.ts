@@ -15,12 +15,6 @@ type ByteUtilTest<K extends keyof ByteUtils> = {
   }) => void;
 };
 
-const isNode16OrLater = (() => {
-  let [major] = process.version.split('.');
-  major = major.slice(1); // drop leading 'v'
-  return Number.parseInt(major, 10) >= 16;
-})();
-
 const testArrayBuffer = new ArrayBuffer(8);
 
 const toLocalBufferTypeTests: ByteUtilTest<'toLocalBufferType'>[] = [
@@ -190,12 +184,7 @@ const fromBase64Tests: ByteUtilTest<'fromBase64'>[] = [
   {
     name: 'should create buffer from base64 input',
     inputs: [Buffer.from('abc\u{1f913}', 'utf8').toString('base64')],
-    expectation({ web, output, error }) {
-      if (!isNode16OrLater && web) {
-        // Skip reason: btoa and atob were not made globals until node 16
-        expect(error).to.be.instanceOf(ReferenceError);
-        return;
-      }
+    expectation({ output, error }) {
       expect(error).to.be.null;
       expect(output).to.deep.equal(Buffer.from('abc\u{1f913}', 'utf8'));
     }
@@ -203,12 +192,8 @@ const fromBase64Tests: ByteUtilTest<'fromBase64'>[] = [
   {
     name: 'should return empty buffer for empty string input',
     inputs: [''],
-    expectation({ web, output, error }) {
-      if (!isNode16OrLater && web) {
-        // Skip reason: btoa and atob were not made globals until node 16
-        expect(error).to.be.instanceOf(ReferenceError);
-        return;
-      }
+    expectation({ output, error }) {
+      expect(error).to.be.null;
       expect(output).to.have.property('byteLength', 0);
     }
   }
@@ -217,12 +202,7 @@ const toBase64Tests: ByteUtilTest<'toBase64'>[] = [
   {
     name: 'should create base64 string from buffer input',
     inputs: [Buffer.from('abc\u{1f913}', 'utf8')],
-    expectation({ web, output, error }) {
-      if (!isNode16OrLater && web) {
-        // Skip reason: btoa and atob were not made globals until node 16
-        expect(error).to.be.instanceOf(ReferenceError);
-        return;
-      }
+    expectation({ output, error }) {
       expect(error).to.be.null;
       expect(output).to.deep.equal(Buffer.from('abc\u{1f913}', 'utf8').toString('base64'));
     }
@@ -230,12 +210,7 @@ const toBase64Tests: ByteUtilTest<'toBase64'>[] = [
   {
     name: 'should return empty string for empty buffer input',
     inputs: [Buffer.alloc(0)],
-    expectation({ web, output, error }) {
-      if (!isNode16OrLater && web) {
-        // Skip reason: btoa and atob were not made globals until node 16
-        expect(error).to.be.instanceOf(ReferenceError);
-        return;
-      }
+    expectation({ output, error }) {
       expect(error).to.be.null;
       expect(output).to.be.a('string').with.lengthOf(0);
     }
@@ -264,6 +239,7 @@ const fromHexTests: ByteUtilTest<'fromHex'>[] = [
     expectation({ output, error }) {
       expect(error).to.be.null;
       expect(output).to.deep.equal(Buffer.from('abxxcd', 'hex'));
+      expect(output).to.deep.equal(Buffer.from('ab', 'hex'));
     }
   },
   {
@@ -272,6 +248,8 @@ const fromHexTests: ByteUtilTest<'fromHex'>[] = [
     expectation({ output, error }) {
       expect(error).to.be.null;
       expect(output).to.deep.equal(Buffer.from('a', 'hex'));
+      expect(output).to.deep.equal(Buffer.alloc(0));
+      expect(output).to.have.property('byteLength', 0);
     }
   },
   {
@@ -280,6 +258,39 @@ const fromHexTests: ByteUtilTest<'fromHex'>[] = [
     expectation({ output, error }) {
       expect(error).to.be.null;
       expect(output).to.deep.equal(Buffer.from('abcde', 'hex'));
+      expect(output).to.have.property('byteLength', 2);
+      expect(output).to.have.property(0, 0xab);
+      expect(output).to.have.property(1, 0xcd);
+      expect(output).to.not.have.property(2);
+    }
+  },
+  {
+    name: 'should return empty buffer when no characters are valid hex',
+    inputs: ['xxxx'],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.deep.equal(Buffer.from('xxxx', 'hex'));
+      expect(output).to.have.property('byteLength', 0);
+    }
+  },
+  {
+    name: 'should ignore double digit hex subsequence that ends with invalid character',
+    inputs: ['abcx'],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.deep.equal(Buffer.from('abcx', 'hex'));
+      expect(output).to.have.property('byteLength', 1);
+      expect(output).to.have.property(0, 0xab);
+    }
+  },
+  {
+    name: 'should ignore double digit hex subsequence that starts with invalid character',
+    inputs: ['abcx'],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.deep.equal(Buffer.from('abxc', 'hex'));
+      expect(output).to.have.property('byteLength', 1);
+      expect(output).to.have.property(0, 0xab);
     }
   }
 ];
@@ -414,7 +425,9 @@ const table = new Map<keyof ByteUtils, ByteUtilTest<keyof ByteUtils>[]>([
 ]);
 
 describe('ByteUtils', () => {
-  it('should be set to the nodeJsByteUtils', () => {
+  it('should be set to the nodeJsByteUtils when run on Node.js', () => {
+    // The import at the top of our Mocha tests will always be the nodejs version
+    // since the import will happen in an environment the defines a global Buffer
     expect(ByteUtils).to.equal(nodeJsByteUtils);
   });
 

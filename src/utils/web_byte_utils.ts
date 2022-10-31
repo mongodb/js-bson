@@ -110,10 +110,17 @@ export const webByteUtils = {
     const buffer = [];
 
     for (let i = 0; i < evenLengthHex.length; i += 2) {
-      if (!HEX_DIGIT.test(evenLengthHex[i]) && !HEX_DIGIT.test(evenLengthHex[i + 1])) {
+      const firstDigit = evenLengthHex[i];
+      const secondDigit = evenLengthHex[i + 1];
+
+      if (!HEX_DIGIT.test(firstDigit)) {
         break;
       }
-      const hexDigit = Number.parseInt(`${evenLengthHex[i]}${evenLengthHex[i + 1]}`, 16);
+      if (!HEX_DIGIT.test(secondDigit)) {
+        break;
+      }
+
+      const hexDigit = Number.parseInt(`${firstDigit}${secondDigit}`, 16);
       buffer.push(hexDigit);
     }
 
