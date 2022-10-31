@@ -421,7 +421,10 @@ describe('BSON', function () {
     var deserialized = BSON.deserialize(serialized_data, {
       promoteBuffers: true
     });
-    expect(isBufferOrUint8Array(deserialized.doc)).to.be.true;
+    expect(
+      isBufferOrUint8Array(deserialized.doc),
+      `expected deserialized.doc to be instanceof buffer or uint8Array`
+    ).to.be.true;
     expect(deserialized.doc).to.not.be.instanceOf(Binary);
     expect(doc.doc).to.deep.equal(deserialized.doc);
     done();

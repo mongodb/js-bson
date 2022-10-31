@@ -23,6 +23,7 @@ type NodeJsBufferConstructor = Omit<Uint8ArrayConstructor, 'from'> & {
 // Node.js global
 declare const Buffer: NodeJsBufferConstructor;
 
+/** @internal */
 export const nodeJsByteUtils = {
   toLocalBufferType(potentialBuffer: Uint8Array | NodeJsBuffer | ArrayBuffer): NodeJsBuffer {
     if (Buffer.isBuffer(potentialBuffer)) {
@@ -37,12 +38,14 @@ export const nodeJsByteUtils = {
       );
     }
 
-    let stringTag = potentialBuffer?.[Symbol.toStringTag];
-    if (typeof stringTag !== 'string') {
-      stringTag = Object.prototype.toString.call(potentialBuffer);
-      stringTag = stringTag.slice(8, stringTag.indexOf(']'));
-    }
-    if (stringTag === 'ArrayBuffer' || stringTag === 'SharedArrayBuffer') {
+    const stringTag =
+      potentialBuffer?.[Symbol.toStringTag] ?? Object.prototype.toString.call(potentialBuffer);
+    if (
+      stringTag === 'ArrayBuffer' ||
+      stringTag === 'SharedArrayBuffer' ||
+      stringTag === '[object ArrayBuffer]' ||
+      stringTag === '[object SharedArrayBuffer]'
+    ) {
       return Buffer.from(potentialBuffer);
     }
 
@@ -69,10 +72,12 @@ export const nodeJsByteUtils = {
     return nodeJsByteUtils.toLocalBufferType(buffer).toString('base64');
   },
 
+  /** **Legacy** binary strings are an outdated method of data transfer, see NODE-4361 */
   fromISO88591(codePoints: string): NodeJsBuffer {
     return Buffer.from(codePoints, 'binary');
   },
 
+  /** **Legacy** binary strings are an outdated method of data transfer, see NODE-4361 */
   toISO88591(buffer: Uint8Array): string {
     return nodeJsByteUtils.toLocalBufferType(buffer).toString('binary');
   },

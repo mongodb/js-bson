@@ -29,6 +29,7 @@ chai.use(function (chai) {
   });
 });
 
+// TODO(NODE-4786)
 // Register expect globally, this is no longer necessary since we do not use karma / bundle everything together
 globalThis.expect = chai.expect;
 
@@ -36,7 +37,7 @@ globalThis.expect = chai.expect;
 const web = process.env.WEB === 'true';
 console.error(inspect({ web }, { colors: true }));
 
-// Node.js 16 was when the atob and btoa globals were introduced, so we need replacements for testing on 14
+// TODO(NODE-4787): Node.js 16 was when the atob and btoa globals were introduced, so we need replacements for testing on 14
 const shim_btoa = input => Buffer.prototype.toString.call(Buffer.from(input), 'base64');
 const shim_atob = input => Buffer.from(input, 'base64').toString('binary');
 

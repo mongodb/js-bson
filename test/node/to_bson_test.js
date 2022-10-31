@@ -137,10 +137,10 @@ describe('toBSON', function () {
         // to the BSON lib that was run in a separate context
         return this.skip();
       }
-      Number.prototype.toBSON = () => 'hello';
-      String.prototype.toBSON = () => 'hello';
-      Boolean.prototype.toBSON = () => 'hello';
-      BigInt.prototype.toBSON = () => 'hello';
+      Number.prototype.toBSON = () => `hello ${typeof 0}`;
+      String.prototype.toBSON = () => `hello ${typeof ''}`;
+      Boolean.prototype.toBSON = () => `hello ${typeof false}`;
+      BigInt.prototype.toBSON = () => `hello ${typeof 0n}`;
     });
 
     afterEach(() => {
@@ -153,11 +153,14 @@ describe('toBSON', function () {
 
     const testToBSONFor = value => {
       it(`should use toBSON on false-y ${typeof value} ${value === '' ? "''" : value}`, () => {
+        const expectedString = `hello ${typeof value}`;
         const serialized_data = BSON.serialize({ a: value });
-        expect(serialized_data.indexOf(Buffer.from('hello\0', 'utf8'))).to.be.greaterThan(0);
+        expect(
+          serialized_data.indexOf(Buffer.from(expectedString + '\0', 'utf8'))
+        ).to.be.greaterThan(0);
 
         const deserialized_doc = BSON.deserialize(serialized_data);
-        expect(deserialized_doc).to.have.property('a', 'hello');
+        expect(deserialized_doc).to.have.property('a', expectedString);
       });
     };
 
@@ -173,12 +176,12 @@ describe('toBSON', function () {
       //   int32 0x10 '0\x00' int32 \0
       // \0
       // ---------
-      // with toBSON is 26 bytes (hello + null)
+      // with toBSON is 33 bytes (hello number + null)
       // int32 0x04 'a\x00'
-      //   int32 0x02 '0\x00' int32 'hello\0' \0
+      //   int32 0x02 '0\x00' int32 'hello number\0' \0
       // \0
       const sizeNestedToBSON = BSON.calculateObjectSize({ a: [0] });
-      expect(sizeNestedToBSON).to.equal(26);
+      expect(sizeNestedToBSON).to.equal(33);
     });
   });
 

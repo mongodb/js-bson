@@ -64,7 +64,10 @@ const toLocalBufferTypeTests: ByteUtilTest<'toLocalBufferType'>[] = [
       inputs: [new TypedArray(testArrayBuffer)],
       expectation({ output, error }) {
         expect(error).to.be.null;
-        expect(isBufferOrUint8Array(output)).to.be.true;
+        expect(
+          isBufferOrUint8Array(output),
+          `expected output to be instanceof buffer or uint8Array`
+        ).to.be.true;
         expect(output).to.have.property('byteLength', testArrayBuffer.byteLength);
       }
     } as ByteUtilTest<'toLocalBufferType'>;

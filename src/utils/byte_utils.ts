@@ -1,6 +1,7 @@
 import { nodeJsByteUtils } from './node_byte_utils';
 import { webByteUtils } from './web_byte_utils';
 
+/** @internal */
 export type ByteUtils = {
   /** Transforms the input to an instance of Buffer if running on node, otherwise Uint8Array */
   toLocalBufferType(buffer: Uint8Array | ArrayBufferView | ArrayBuffer): Uint8Array;
@@ -14,14 +15,14 @@ export type ByteUtils = {
   fromBase64: (base64: string) => Uint8Array;
   /** Create a base64 string from bytes */
   toBase64: (buffer: Uint8Array) => string;
+  /** **Legacy** binary strings are an outdated method of data transfer, see NODE-4361 */
+  fromISO88591: (codePoints: string) => Uint8Array;
+  /** **Legacy** binary strings are an outdated method of data transfer, see NODE-4361 */
+  toISO88591: (buffer: Uint8Array) => string;
   /** Create a Uint8Array from a hex string */
   fromHex: (hex: string) => Uint8Array;
   /** Create a hex string from bytes */
   toHex: (buffer: Uint8Array) => string;
-  /** @deprecated binary strings are a legacy method of data transfer */
-  fromISO88591: (codePoints: string) => Uint8Array;
-  /** @deprecated binary strings are a legacy method of data transfer */
-  toISO88591: (buffer: Uint8Array) => string;
   /** Create a Uint8Array containing utf8 code units from a string */
   fromUTF8: (text: string) => Uint8Array;
   /** Create a string from utf8 code units */
@@ -46,6 +47,8 @@ const hasGlobalBuffer = typeof Buffer === 'function' && Buffer.prototype?._isBuf
  *
  * The type annotation is important here, it asserts that each of the platform specific
  * utils implementations are compatible with the common one.
+ *
+ * @internal
  */
 export const ByteUtils: ByteUtils = hasGlobalBuffer ? nodeJsByteUtils : webByteUtils;
 

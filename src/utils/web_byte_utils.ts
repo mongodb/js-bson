@@ -30,15 +30,14 @@ type ArrayBufferViewWithTag = ArrayBufferView & {
 
 const HEX_DIGIT = /(\d|[a-f])/i;
 
+/** @internal */
 export const webByteUtils = {
   toLocalBufferType(
     potentialUint8array: Uint8Array | ArrayBufferViewWithTag | ArrayBuffer
   ): Uint8Array {
-    let stringTag = potentialUint8array?.[Symbol.toStringTag];
-    if (typeof stringTag !== 'string') {
-      stringTag = Object.prototype.toString.call(potentialUint8array);
-      stringTag = stringTag.slice(8, stringTag.indexOf(']'));
-    }
+    const stringTag =
+      potentialUint8array?.[Symbol.toStringTag] ??
+      Object.prototype.toString.call(potentialUint8array);
 
     if (stringTag === 'Uint8Array') {
       return potentialUint8array as Uint8Array;
@@ -53,7 +52,12 @@ export const webByteUtils = {
       );
     }
 
-    if (stringTag === 'ArrayBuffer' || stringTag === 'SharedArrayBuffer') {
+    if (
+      stringTag === 'ArrayBuffer' ||
+      stringTag === 'SharedArrayBuffer' ||
+      stringTag === '[object ArrayBuffer]' ||
+      stringTag === '[object SharedArrayBuffer]'
+    ) {
       return new Uint8Array(potentialUint8array);
     }
 
@@ -91,18 +95,12 @@ export const webByteUtils = {
     return btoa(webByteUtils.toISO88591(uint8array));
   },
 
+  /** **Legacy** binary strings are an outdated method of data transfer, see NODE-4361 */
   fromISO88591(codePoints: string): Uint8Array {
     return Uint8Array.from(codePoints, c => c.charCodeAt(0) & 0xff);
   },
 
-  toHex(uint8array: Uint8Array): string {
-    return Array.from(uint8array, byte => byte.toString(16).padStart(2, '0')).join('');
-  },
-
-  fromUTF8(text: string): Uint8Array {
-    return new TextEncoder().encode(text);
-  },
-
+  /** **Legacy** binary strings are an outdated method of data transfer, see NODE-4361 */
   toISO88591(uint8array: Uint8Array): string {
     return Array.from(Uint16Array.from(uint8array), b => String.fromCharCode(b)).join('');
   },
@@ -120,6 +118,14 @@ export const webByteUtils = {
     }
 
     return Uint8Array.from(buffer);
+  },
+
+  toHex(uint8array: Uint8Array): string {
+    return Array.from(uint8array, byte => byte.toString(16).padStart(2, '0')).join('');
+  },
+
+  fromUTF8(text: string): Uint8Array {
+    return new TextEncoder().encode(text);
   },
 
   toUTF8(uint8array: Uint8Array): string {

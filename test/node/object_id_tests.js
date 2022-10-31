@@ -172,7 +172,10 @@ describe('ObjectId', function () {
     it(`should correctly create ObjectId from ${input} and result in ${output}`, function () {
       const objId = new ObjectId(input);
       expect(objId).to.have.property('id');
-      expect(isBufferOrUint8Array(objId.id)).to.be.true;
+      expect(
+        isBufferOrUint8Array(objId.id),
+        `expected objId.id to be instanceof buffer or uint8Array`
+      ).to.be.true;
       const num = new DataView(objId.id.buffer, objId.id.byteOffset, objId.id.byteLength).getInt32(
         0,
         false
@@ -185,9 +188,18 @@ describe('ObjectId', function () {
     const objNull = new ObjectId(null);
     const objNoArg = new ObjectId();
     const objUndef = new ObjectId(undefined);
-    expect(isBufferOrUint8Array(objNull.id)).to.be.true;
-    expect(isBufferOrUint8Array(objNoArg.id)).to.be.true;
-    expect(isBufferOrUint8Array(objUndef.id)).to.be.true;
+    expect(
+      isBufferOrUint8Array(objNull.id),
+      `expected objNull.id to be instanceof buffer or uint8Array`
+    ).to.be.true;
+    expect(
+      isBufferOrUint8Array(objNoArg.id),
+      `expected objNoArg.id to be instanceof buffer or uint8Array`
+    ).to.be.true;
+    expect(
+      isBufferOrUint8Array(objUndef.id),
+      `expected objUndef.id to be instanceof buffer or uint8Array`
+    ).to.be.true;
   });
 
   it('should throw error if non-12 byte non-24 hex string passed in', function () {
