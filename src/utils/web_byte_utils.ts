@@ -95,12 +95,12 @@ export const webByteUtils = {
     return btoa(webByteUtils.toISO88591(uint8array));
   },
 
-  /** **Legacy** binary strings are an outdated method of data transfer, see NODE-4361 */
+  /** **Legacy** binary strings are an outdated method of data transfer. Do not add public API support for interpreting this format */
   fromISO88591(codePoints: string): Uint8Array {
     return Uint8Array.from(codePoints, c => c.charCodeAt(0) & 0xff);
   },
 
-  /** **Legacy** binary strings are an outdated method of data transfer, see NODE-4361 */
+  /** **Legacy** binary strings are an outdated method of data transfer. Do not add public API support for interpreting this format */
   toISO88591(uint8array: Uint8Array): string {
     return Array.from(Uint16Array.from(uint8array), b => String.fromCharCode(b)).join('');
   },

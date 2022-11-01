@@ -72,12 +72,12 @@ export const nodeJsByteUtils = {
     return nodeJsByteUtils.toLocalBufferType(buffer).toString('base64');
   },
 
-  /** **Legacy** binary strings are an outdated method of data transfer, see NODE-4361 */
+  /** **Legacy** binary strings are an outdated method of data transfer. Do not add public API support for interpreting this format */
   fromISO88591(codePoints: string): NodeJsBuffer {
     return Buffer.from(codePoints, 'binary');
   },
 
-  /** **Legacy** binary strings are an outdated method of data transfer, see NODE-4361 */
+  /** **Legacy** binary strings are an outdated method of data transfer. Do not add public API support for interpreting this format */
   toISO88591(buffer: Uint8Array): string {
     return nodeJsByteUtils.toLocalBufferType(buffer).toString('binary');
   },
