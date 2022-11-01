@@ -231,7 +231,7 @@ export class ObjectId {
     }
 
     if (typeof otherId === 'string' && ObjectId.isValid(otherId) && otherId.length === 12) {
-      return ByteUtils.equals(ByteUtils.fromISO88591(otherId), this.id);
+      return ByteUtils.equals(ByteUtils.fromUTF8(otherId), this.id);
     }
 
     if (
