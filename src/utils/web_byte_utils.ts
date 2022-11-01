@@ -7,7 +7,7 @@ type TextDecoder = {
   decode(input?: Uint8Array): string;
 };
 type TextDecoderConstructor = {
-  new (label?: string, options?: { fatal?: boolean; ignoreBOM?: boolean }): TextDecoder;
+  new (label: 'utf8', options: { fatal: boolean; ignoreBOM?: boolean }): TextDecoder;
 };
 
 type TextEncoder = {
@@ -136,7 +136,7 @@ export const webByteUtils = {
   },
 
   toUTF8(uint8array: Uint8Array): string {
-    return new TextDecoder().decode(uint8array);
+    return new TextDecoder('utf8', { fatal: false }).decode(uint8array);
   },
 
   utf8ByteLength(input: string): number {

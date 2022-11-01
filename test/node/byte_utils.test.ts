@@ -265,9 +265,9 @@ const fromHexTests: ByteUtilTest<'fromHex'>[] = [
       expect(error).to.be.null;
       expect(output).to.deep.equal(Buffer.from('abcde', 'hex'));
       expect(output).to.have.property('byteLength', 2);
-      expect(output).to.have.property(0, 0xab);
-      expect(output).to.have.property(1, 0xcd);
-      expect(output).to.not.have.property(2);
+      expect(output).to.have.property('0', 0xab);
+      expect(output).to.have.property('1', 0xcd);
+      expect(output).to.not.have.property('2');
     }
   },
   {
@@ -286,7 +286,7 @@ const fromHexTests: ByteUtilTest<'fromHex'>[] = [
       expect(error).to.be.null;
       expect(output).to.deep.equal(Buffer.from('abcx', 'hex'));
       expect(output).to.have.property('byteLength', 1);
-      expect(output).to.have.property(0, 0xab);
+      expect(output).to.have.property('0', 0xab);
     }
   },
   {
@@ -296,7 +296,7 @@ const fromHexTests: ByteUtilTest<'fromHex'>[] = [
       expect(error).to.be.null;
       expect(output).to.deep.equal(Buffer.from('abxc', 'hex'));
       expect(output).to.have.property('byteLength', 1);
-      expect(output).to.have.property(0, 0xab);
+      expect(output).to.have.property('0', 0xab);
     }
   }
 ];
@@ -369,6 +369,20 @@ const fromUTF8Tests: ByteUtilTest<'fromUTF8'>[] = [
     expectation({ output, error }) {
       expect(error).to.be.null;
       expect(output).to.have.property('byteLength', 0);
+    }
+  },
+  {
+    name: 'should return bytes with replacement character if string is not encodable',
+    inputs: ['\u{1f913}'.slice(0, 1)],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.have.property('byteLength', 3);
+      expect(output).to.have.property('0', 0xef);
+      expect(output).to.have.property('1', 0xbf);
+      expect(output).to.have.property('2', 0xbd);
+      const backToString = Buffer.from(output!).toString('utf8');
+      const replacementCharacter = '\u{fffd}';
+      expect(backToString).to.equal(replacementCharacter);
     }
   }
 ];
