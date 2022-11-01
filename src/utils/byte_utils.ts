@@ -15,9 +15,9 @@ export type ByteUtils = {
   fromBase64: (base64: string) => Uint8Array;
   /** Create a base64 string from bytes */
   toBase64: (buffer: Uint8Array) => string;
-  /** **Legacy** binary strings are an outdated method of data transfer, see NODE-4361 */
+  /** **Legacy** binary strings are an outdated method of data transfer. Do not add public API support for interpreting this format */
   fromISO88591: (codePoints: string) => Uint8Array;
-  /** **Legacy** binary strings are an outdated method of data transfer, see NODE-4361 */
+  /** **Legacy** binary strings are an outdated method of data transfer. Do not add public API support for interpreting this format */
   toISO88591: (buffer: Uint8Array) => string;
   /** Create a Uint8Array from a hex string */
   fromHex: (hex: string) => Uint8Array;
