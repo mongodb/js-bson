@@ -38,7 +38,8 @@ const toLocalBufferTypeTests: ByteUtilTest<'toLocalBufferType'>[] = [
   {
     name: 'should account for the input view byteLength and byteOffset',
     inputs: [new Uint8Array(testArrayBuffer, 1, 3)],
-    expectation({ web, output }) {
+    expectation({ web, output, error }) {
+      expect(error).to.be.null;
       if (web) {
         expect(types.isUint8Array(output), 'expected output to be a Uint8Array').to.be.true;
       } else {
@@ -291,7 +292,7 @@ const fromHexTests: ByteUtilTest<'fromHex'>[] = [
   },
   {
     name: 'should ignore double digit hex subsequence that starts with invalid character',
-    inputs: ['abcx'],
+    inputs: ['abxc'],
     expectation({ output, error }) {
       expect(error).to.be.null;
       expect(output).to.deep.equal(Buffer.from('abxc', 'hex'));
