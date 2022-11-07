@@ -1,10 +1,11 @@
 'use strict';
 
-const currentNodeBSON = require('./register-bson');
+const currentNodeBSON = require('../register-bson');
 const vm = require('vm');
 const fs = require('fs');
 const rimraf = require('rimraf');
 const cp = require('child_process');
+const { __isWeb__ } = require('../register-bson');
 
 // node-fetch is an es-module
 let fetch;
@@ -23,7 +24,7 @@ let fetch;
  */
 const OLD_VERSIONS = ['v1.1.5', 'v1.1.4'];
 const getZipUrl = ver => `https://github.com/mongodb/js-bson/archive/${ver}.zip`;
-const getImportPath = ver => `../bson-${ver}/js-bson-${ver.substring(1)}`;
+const getImportPath = ver => `../../bson-${ver}/js-bson-${ver.substring(1)}`;
 
 function downloadZip(version, done) {
   // downloads a zip of previous BSON version
@@ -44,6 +45,10 @@ function downloadZip(version, done) {
 }
 
 describe('Mutual version and distribution compatibility', function () {
+  before(function () {
+    if (__isWeb__) this.skip();
+  });
+
   before(async () => {
     fetch = await import('node-fetch').then(mod => mod.default);
   });
@@ -88,9 +93,9 @@ describe('Mutual version and distribution compatibility', function () {
     try {
       fs.writeFileSync(
         './bson.browser.esm.mjs',
-        fs.readFileSync(__dirname + '/../dist/bson.browser.esm.js')
+        fs.readFileSync(__dirname + '/../../dist/bson.browser.esm.js')
       );
-      fs.writeFileSync('./bson.esm.mjs', fs.readFileSync(__dirname + '/../dist/bson.esm.js'));
+      fs.writeFileSync('./bson.esm.mjs', fs.readFileSync(__dirname + '/../../dist/bson.esm.js'));
     } catch (e) {
       // bundling fails in CI on Windows, no idea why, hence also the
       // process.platform !== 'win32' check below
@@ -124,25 +129,25 @@ describe('Mutual version and distribution compatibility', function () {
       name: 'Browser ESM',
       // eval because import is a syntax error in earlier Node.js versions
       // that are still supported in CI
-      load: () => eval(`import("${__dirname}/../bson.browser.esm.mjs")`),
+      load: () => eval(`import("${__dirname}/../../bson.browser.esm.mjs")`),
       usesBufferPolyfill: true
     },
     {
       name: 'Browser UMD',
-      load: () => Promise.resolve(require('../dist/bson.browser.umd.js')),
+      load: () => Promise.resolve(require('../../dist/bson.browser.umd.js')),
       usesBufferPolyfill: true
     },
     {
       name: 'Generic bundle',
       load: () => {
-        const source = fs.readFileSync(__dirname + '/../dist/bson.bundle.js', 'utf8');
+        const source = fs.readFileSync(__dirname + '/../../dist/bson.bundle.js', 'utf8');
         return Promise.resolve(vm.runInNewContext(`${source}; BSON`, { global, process }));
       },
       usesBufferPolyfill: true
     },
     {
       name: 'Node.js ESM',
-      load: () => eval(`import("${__dirname}/../bson.esm.mjs")`)
+      load: () => eval(`import("${__dirname}/../../bson.esm.mjs")`)
     }
   ]);
 
@@ -223,9 +228,7 @@ describe('Mutual version and distribution compatibility', function () {
 
             try {
               // Check that both BSON versions serialize to equal Buffers
-              expect(toBSON.serialize({ object }).toString('hex')).to.equal(
-                fromBSON.serialize({ object }).toString('hex')
-              );
+              expect(toBSON.serialize({ object })).to.deep.equal(fromBSON.serialize({ object }));
               if (!from.legacy) {
                 // Check that serializing using one version and deserializing using
                 // the other gives back the original object.

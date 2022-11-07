@@ -72,7 +72,7 @@ describe('UUID', () => {
     const org = new UUID();
     const copy = new UUID(org);
     expect(org.id).to.not.equal(copy.id);
-    expect(org.id.equals(copy.id)).to.be.true;
+    expect(org.id).to.deep.equal(copy.id);
   });
 
   /**

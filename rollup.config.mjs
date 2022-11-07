@@ -1,11 +1,11 @@
-import pkg from './package.json' assert { type: 'json' };
-import commonjs from 'rollup-plugin-commonjs';
-import nodeBuiltins from 'rollup-plugin-polyfill-node';
+import commonjs from '@rollup/plugin-commonjs';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { babel } from '@rollup/plugin-babel';
 import typescript from '@rollup/plugin-typescript';
-import nodeGlobals from 'rollup-plugin-node-globals';
 import replace from '@rollup/plugin-replace';
+import { readFile } from 'fs/promises';
+
+const pkg = JSON.parse(await readFile('./package.json', { encoding: 'utf8' }));
 
 const tsConfig = {
   allowJs: false,
@@ -38,8 +38,6 @@ const plugins = (options = { browser: false }) => {
   return [
     typescript(tsConfig),
     nodeResolve({ preferBuiltins: false }),
-    nodeBuiltins(),
-    nodeGlobals(),
     replace({
       preventAssignment: true,
       values: {

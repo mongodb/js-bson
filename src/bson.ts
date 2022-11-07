@@ -1,10 +1,8 @@
-import { Buffer } from 'buffer';
 import { Binary, UUID } from './binary';
 import { Code } from './code';
 import { DBRef } from './db_ref';
 import { Decimal128 } from './decimal128';
 import { Double } from './double';
-import { ensureBuffer } from './ensure_buffer';
 import { EJSON } from './extended_json';
 import { Int32 } from './int_32';
 import { Long } from './long';
@@ -20,6 +18,7 @@ import { serializeInto as internalSerialize, SerializeOptions } from './parser/s
 import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
+import { ByteUtils } from './utils/byte_utils';
 export type { UUIDExtended, BinaryExtended, BinaryExtendedLegacy, BinarySequence } from './binary';
 export type { CodeExtended } from './code';
 export {
@@ -107,7 +106,7 @@ export interface Document {
 const MAXSIZE = 1024 * 1024 * 17;
 
 // Current Internal Temporary Serialization Buffer
-let buffer = Buffer.alloc(MAXSIZE);
+let buffer = ByteUtils.allocate(MAXSIZE);
 
 /**
  * Sets the size of the internal serialization buffer.
@@ -118,7 +117,7 @@ let buffer = Buffer.alloc(MAXSIZE);
 export function setInternalBufferSize(size: number): void {
   // Resize the internal serialization buffer if needed
   if (buffer.length < size) {
-    buffer = Buffer.alloc(size);
+    buffer = ByteUtils.allocate(size);
   }
 }
 
@@ -129,7 +128,7 @@ export function setInternalBufferSize(size: number): void {
  * @returns Buffer object containing the serialized object.
  * @public
  */
-export function serialize(object: Document, options: SerializeOptions = {}): Buffer {
+export function serialize(object: Document, options: SerializeOptions = {}): Uint8Array {
   // Unpack the options
   const checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : false;
   const serializeFunctions =
@@ -141,7 +140,7 @@ export function serialize(object: Document, options: SerializeOptions = {}): Buf
 
   // Resize the internal serialization buffer if needed
   if (buffer.length < minInternalBufferSize) {
-    buffer = Buffer.alloc(minInternalBufferSize);
+    buffer = ByteUtils.allocate(minInternalBufferSize);
   }
 
   // Attempt to serialize
@@ -157,10 +156,10 @@ export function serialize(object: Document, options: SerializeOptions = {}): Buf
   );
 
   // Create the final buffer
-  const finishedBuffer = Buffer.alloc(serializationIndex);
+  const finishedBuffer = ByteUtils.allocate(serializationIndex);
 
   // Copy into the finished buffer
-  buffer.copy(finishedBuffer, 0, 0, finishedBuffer.length);
+  finishedBuffer.set(buffer.subarray(0, serializationIndex), 0);
 
   // Return the buffer
   return finishedBuffer;
@@ -177,7 +176,7 @@ export function serialize(object: Document, options: SerializeOptions = {}): Buf
  */
 export function serializeWithBufferAndIndex(
   object: Document,
-  finalBuffer: Buffer,
+  finalBuffer: Uint8Array,
   options: SerializeOptions = {}
 ): number {
   // Unpack the options
@@ -198,7 +197,8 @@ export function serializeWithBufferAndIndex(
     serializeFunctions,
     ignoreUndefined
   );
-  buffer.copy(finalBuffer, startIndex, 0, serializationIndex);
+
+  finalBuffer.set(buffer.subarray(0, serializationIndex), startIndex);
 
   // Return the index
   return startIndex + serializationIndex - 1;
@@ -211,11 +211,8 @@ export function serializeWithBufferAndIndex(
  * @returns returns the deserialized Javascript Object.
  * @public
  */
-export function deserialize(
-  buffer: Buffer | ArrayBufferView | ArrayBuffer,
-  options: DeserializeOptions = {}
-): Document {
-  return internalDeserialize(buffer instanceof Buffer ? buffer : ensureBuffer(buffer), options);
+export function deserialize(buffer: Uint8Array, options: DeserializeOptions = {}): Document {
+  return internalDeserialize(ByteUtils.toLocalBufferType(buffer), options);
 }
 
 /** @public */
@@ -258,7 +255,7 @@ export function calculateObjectSize(
  * @public
  */
 export function deserializeStream(
-  data: Buffer | ArrayBufferView | ArrayBuffer,
+  data: Uint8Array | ArrayBuffer,
   startIndex: number,
   numberOfDocuments: number,
   documents: Document[],
@@ -269,7 +266,7 @@ export function deserializeStream(
     { allowObjectSmallerThanBufferSize: true, index: 0 },
     options
   );
-  const bufferData = ensureBuffer(data);
+  const bufferData = ByteUtils.toLocalBufferType(data);
 
   let index = startIndex;
   // Loop over all documents

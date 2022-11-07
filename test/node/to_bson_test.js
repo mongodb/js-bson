@@ -1,9 +1,7 @@
 'use strict';
 
 const BSON = require('../register-bson');
-const ObjectId = BSON.ObjectId;
-
-const BigInt = global.BigInt;
+const { ObjectId, __isWeb__ } = BSON;
 
 describe('toBSON', function () {
   /**
@@ -133,11 +131,16 @@ describe('toBSON', function () {
   });
 
   describe('when used on global existing types', () => {
-    beforeEach(() => {
-      Number.prototype.toBSON = () => 'hello';
-      String.prototype.toBSON = () => 'hello';
-      Boolean.prototype.toBSON = () => 'hello';
-      if (BigInt) BigInt.prototype.toBSON = () => 'hello';
+    beforeEach(function () {
+      if (__isWeb__) {
+        // These prototype modification do not make it
+        // to the BSON lib that was run in a separate context
+        return this.skip();
+      }
+      Number.prototype.toBSON = () => `hello ${typeof 0}`;
+      String.prototype.toBSON = () => `hello ${typeof ''}`;
+      Boolean.prototype.toBSON = () => `hello ${typeof false}`;
+      BigInt.prototype.toBSON = () => `hello ${typeof 0n}`;
     });
 
     afterEach(() => {
@@ -145,16 +148,19 @@ describe('toBSON', function () {
       delete Number.prototype.toBSON;
       delete String.prototype.toBSON;
       delete Boolean.prototype.toBSON;
-      if (BigInt) delete BigInt.prototype.toBSON;
+      delete BigInt.prototype.toBSON;
     });
 
     const testToBSONFor = value => {
       it(`should use toBSON on false-y ${typeof value} ${value === '' ? "''" : value}`, () => {
+        const expectedString = `hello ${typeof value}`;
         const serialized_data = BSON.serialize({ a: value });
-        expect(serialized_data.indexOf(Buffer.from('hello\0', 'utf8'))).to.be.greaterThan(0);
+        expect(
+          serialized_data.indexOf(Buffer.from(expectedString + '\0', 'utf8'))
+        ).to.be.greaterThan(0);
 
         const deserialized_doc = BSON.deserialize(serialized_data);
-        expect(deserialized_doc).to.have.property('a', 'hello');
+        expect(deserialized_doc).to.have.property('a', expectedString);
       });
     };
 
@@ -162,9 +168,7 @@ describe('toBSON', function () {
     testToBSONFor(NaN);
     testToBSONFor('');
     testToBSONFor(false);
-    if (BigInt) {
-      testToBSONFor(BigInt(0));
-    }
+    testToBSONFor(0n);
 
     it('should use toBSON on false-y number in calculateObjectSize', () => {
       // Normally is 20 bytes
@@ -172,12 +176,12 @@ describe('toBSON', function () {
       //   int32 0x10 '0\x00' int32 \0
       // \0
       // ---------
-      // with toBSON is 26 bytes (hello + null)
+      // with toBSON is 33 bytes (hello number + null)
       // int32 0x04 'a\x00'
-      //   int32 0x02 '0\x00' int32 'hello\0' \0
+      //   int32 0x02 '0\x00' int32 'hello number\0' \0
       // \0
       const sizeNestedToBSON = BSON.calculateObjectSize({ a: [0] });
-      expect(sizeNestedToBSON).to.equal(26);
+      expect(sizeNestedToBSON).to.equal(33);
     });
   });
 
@@ -197,7 +201,10 @@ describe('toBSON', function () {
     expect(size).to.equal(17);
 
     const bytes = BSON.serialize({ toBSON: 1 });
-    expect(bytes.indexOf(Buffer.from('toBSON\0', 'utf8'))).to.be.greaterThan(0);
+    const keyStart = 5;
+    const keyEnd = 12;
+    const serializedKey = bytes.subarray(keyStart, keyEnd);
+    expect(serializedKey).to.deep.equal(Buffer.from('toBSON\0', 'utf8'));
   });
 
   it('should still be omitted if serializeFunctions is true', () => {
@@ -205,7 +212,7 @@ describe('toBSON', function () {
       { toBSON: () => ({ a: 1, fn: () => ({ a: 1 }) }) },
       { serializeFunctions: true }
     );
-    expect(bytes.indexOf(Buffer.from('a\0', 'utf8'))).to.be.greaterThan(0);
+    expect(bytes.indexOf(97)).to.be.greaterThan(0);
     const doc = BSON.deserialize(bytes);
     expect(doc).to.have.property('a', 1);
     expect(doc).to.have.property('fn').that.is.instanceOf(BSON.Code);

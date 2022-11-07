@@ -22,7 +22,7 @@ import {
 expectType<() => UUID>(Binary.prototype.toUUID);
 expectType<() => Binary>(UUID.prototype.toBinary);
 
-expectType<(format?: string) => string>(Binary.prototype.toString);
+expectType<(encoding?: 'hex' | 'base64' | 'utf8' | 'utf-8') => string>(Binary.prototype.toString);
 expectType<(radix?: number) => string>(Double.prototype.toString);
 expectType<(radix?: number) => string>(Long.prototype.toString);
 expectType<(radix?: number) => string>(Int32.prototype.toString);

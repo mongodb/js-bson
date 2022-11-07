@@ -4,7 +4,7 @@ const Buffer = require('buffer').Buffer;
 const BSON = require('../register-bson');
 const Int32 = BSON.Int32;
 const Double = BSON.Double;
-const BinaryParser = require('../binary_parser').BinaryParser;
+const { BinaryParser } = require('./tools/binary_parser');
 
 describe('promote values', function () {
   /**

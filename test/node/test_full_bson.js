@@ -2,7 +2,7 @@
 
 const BSON = require('../register-bson');
 const Buffer = require('buffer').Buffer;
-const BinaryParser = require('../binary_parser').BinaryParser;
+const { BinaryParser } = require('./tools/binary_parser');
 const ObjectId = BSON.ObjectId;
 const Binary = BSON.Binary;
 const BSONRegExp = BSON.BSONRegExp;
@@ -205,30 +205,22 @@ describe('Full BSON', function () {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Buffer', function (done) {
+  it('Should Correctly Serialize and Deserialize Buffer', function () {
     var doc = { doc: Buffer.from('123451234512345') };
     var serialized_data = BSON.serialize(doc);
 
-    expect('123451234512345').to.equal(
-      BSON.deserialize(serialized_data).doc.buffer.toString('ascii')
-    );
-
-    done();
+    expect(doc.doc).to.deep.equal(BSON.deserialize(serialized_data).doc.buffer);
   });
 
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize Buffer with promoteBuffers option', function (done) {
+  it('Should Correctly Serialize and Deserialize Buffer with promoteBuffers option', function () {
     var doc = { doc: Buffer.from('123451234512345') };
     var serialized_data = BSON.serialize(doc);
 
     var options = { promoteBuffers: true };
-    expect('123451234512345').to.equal(
-      BSON.deserialize(serialized_data, options).doc.toString('ascii')
-    );
-
-    done();
+    expect(doc.doc).to.deep.equal(BSON.deserialize(serialized_data, options).doc);
   });
 
   /**

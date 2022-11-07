@@ -1,7 +1,7 @@
-import { Buffer } from 'buffer';
 import { Binary } from '../binary';
 import type { Document } from '../bson';
 import * as constants from '../constants';
+import { ByteUtils } from '../utils/byte_utils';
 import { isAnyArrayBuffer, isDate, isRegExp, normalizedFunctionString } from './utils';
 
 export function calculateObjectSize(
@@ -53,7 +53,7 @@ function calculateElement(
 
   switch (typeof value) {
     case 'string':
-      return 1 + Buffer.byteLength(name, 'utf8') + 1 + 4 + Buffer.byteLength(value, 'utf8') + 1;
+      return 1 + ByteUtils.utf8ByteLength(name) + 1 + 4 + ByteUtils.utf8ByteLength(value) + 1;
     case 'number':
       if (
         Math.floor(value) === value &&
@@ -62,61 +62,61 @@ function calculateElement(
       ) {
         if (value >= constants.BSON_INT32_MIN && value <= constants.BSON_INT32_MAX) {
           // 32 bit
-          return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (4 + 1);
+          return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (4 + 1);
         } else {
-          return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (8 + 1);
+          return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (8 + 1);
         }
       } else {
         // 64 bit
-        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (8 + 1);
+        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (8 + 1);
       }
     case 'undefined':
       if (isArray || !ignoreUndefined)
-        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + 1;
+        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + 1;
       return 0;
     case 'boolean':
-      return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (1 + 1);
+      return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (1 + 1);
     case 'object':
       if (value == null || value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
-        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + 1;
+        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + 1;
       } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
-        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (12 + 1);
+        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (12 + 1);
       } else if (value instanceof Date || isDate(value)) {
-        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (8 + 1);
+        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (8 + 1);
       } else if (
         ArrayBuffer.isView(value) ||
         value instanceof ArrayBuffer ||
         isAnyArrayBuffer(value)
       ) {
         return (
-          (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (1 + 4 + 1) + value.byteLength
+          (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (1 + 4 + 1) + value.byteLength
         );
       } else if (
         value['_bsontype'] === 'Long' ||
         value['_bsontype'] === 'Double' ||
         value['_bsontype'] === 'Timestamp'
       ) {
-        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (8 + 1);
+        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (8 + 1);
       } else if (value['_bsontype'] === 'Decimal128') {
-        return (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (16 + 1);
+        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (16 + 1);
       } else if (value['_bsontype'] === 'Code') {
         // Calculate size depending on the availability of a scope
         if (value.scope != null && Object.keys(value.scope).length > 0) {
           return (
-            (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) +
+            (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
             1 +
             4 +
             4 +
-            Buffer.byteLength(value.code.toString(), 'utf8') +
+            ByteUtils.utf8ByteLength(value.code.toString()) +
             1 +
             calculateObjectSize(value.scope, serializeFunctions, ignoreUndefined)
           );
         } else {
           return (
-            (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) +
+            (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
             1 +
             4 +
-            Buffer.byteLength(value.code.toString(), 'utf8') +
+            ByteUtils.utf8ByteLength(value.code.toString()) +
             1
           );
         }
@@ -125,18 +125,18 @@ function calculateElement(
         // Check what kind of subtype we have
         if (binary.sub_type === Binary.SUBTYPE_BYTE_ARRAY) {
           return (
-            (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) +
+            (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
             (binary.position + 1 + 4 + 1 + 4)
           );
         } else {
           return (
-            (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) + (binary.position + 1 + 4 + 1)
+            (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (binary.position + 1 + 4 + 1)
           );
         }
       } else if (value['_bsontype'] === 'Symbol') {
         return (
-          (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) +
-          Buffer.byteLength(value.value, 'utf8') +
+          (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
+          ByteUtils.utf8ByteLength(value.value) +
           4 +
           1 +
           1
@@ -157,15 +157,15 @@ function calculateElement(
         }
 
         return (
-          (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) +
+          (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
           1 +
           calculateObjectSize(ordered_values, serializeFunctions, ignoreUndefined)
         );
       } else if (value instanceof RegExp || isRegExp(value)) {
         return (
-          (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) +
+          (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
           1 +
-          Buffer.byteLength(value.source, 'utf8') +
+          ByteUtils.utf8ByteLength(value.source) +
           1 +
           (value.global ? 1 : 0) +
           (value.ignoreCase ? 1 : 0) +
@@ -174,16 +174,16 @@ function calculateElement(
         );
       } else if (value['_bsontype'] === 'BSONRegExp') {
         return (
-          (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) +
+          (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
           1 +
-          Buffer.byteLength(value.pattern, 'utf8') +
+          ByteUtils.utf8ByteLength(value.pattern) +
           1 +
-          Buffer.byteLength(value.options, 'utf8') +
+          ByteUtils.utf8ByteLength(value.options) +
           1
         );
       } else {
         return (
-          (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) +
+          (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
           calculateObjectSize(value, serializeFunctions, ignoreUndefined) +
           1
         );
@@ -192,9 +192,9 @@ function calculateElement(
       // WTF for 0.4.X where typeof /someregexp/ === 'function'
       if (value instanceof RegExp || isRegExp(value) || String.call(value) === '[object RegExp]') {
         return (
-          (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) +
+          (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
           1 +
-          Buffer.byteLength(value.source, 'utf8') +
+          ByteUtils.utf8ByteLength(value.source) +
           1 +
           (value.global ? 1 : 0) +
           (value.ignoreCase ? 1 : 0) +
@@ -204,20 +204,20 @@ function calculateElement(
       } else {
         if (serializeFunctions && value.scope != null && Object.keys(value.scope).length > 0) {
           return (
-            (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) +
+            (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
             1 +
             4 +
             4 +
-            Buffer.byteLength(normalizedFunctionString(value), 'utf8') +
+            ByteUtils.utf8ByteLength(normalizedFunctionString(value)) +
             1 +
             calculateObjectSize(value.scope, serializeFunctions, ignoreUndefined)
           );
         } else if (serializeFunctions) {
           return (
-            (name != null ? Buffer.byteLength(name, 'utf8') + 1 : 0) +
+            (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
             1 +
             4 +
-            Buffer.byteLength(normalizedFunctionString(value), 'utf8') +
+            ByteUtils.utf8ByteLength(normalizedFunctionString(value)) +
             1
           );
         }

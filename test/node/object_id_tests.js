@@ -6,6 +6,7 @@ const BSONTypeError = BSON.BSONTypeError;
 const ObjectId = BSON.ObjectId;
 const util = require('util');
 const getSymbolFrom = require('./tools/utils').getSymbolFrom;
+const isBufferOrUint8Array = require('./tools/utils').isBufferOrUint8Array;
 
 describe('ObjectId', function () {
   it('should correctly handle objectId timestamps', function (done) {
@@ -171,8 +172,15 @@ describe('ObjectId', function () {
     it(`should correctly create ObjectId from ${input} and result in ${output}`, function () {
       const objId = new ObjectId(input);
       expect(objId).to.have.property('id');
-      expect(objId.id).to.be.instanceOf(Buffer);
-      expect(objId.id.readUInt32BE(0)).to.equal(output);
+      expect(
+        isBufferOrUint8Array(objId.id),
+        `expected objId.id to be instanceof buffer or uint8Array`
+      ).to.be.true;
+      const num = new DataView(objId.id.buffer, objId.id.byteOffset, objId.id.byteLength).getInt32(
+        0,
+        false
+      );
+      expect(num).to.equal(output);
     });
   }
 
@@ -180,9 +188,18 @@ describe('ObjectId', function () {
     const objNull = new ObjectId(null);
     const objNoArg = new ObjectId();
     const objUndef = new ObjectId(undefined);
-    expect(objNull.id).to.be.instanceOf(Buffer);
-    expect(objNoArg.id).to.be.instanceOf(Buffer);
-    expect(objUndef.id).to.be.instanceOf(Buffer);
+    expect(
+      isBufferOrUint8Array(objNull.id),
+      `expected objNull.id to be instanceof buffer or uint8Array`
+    ).to.be.true;
+    expect(
+      isBufferOrUint8Array(objNoArg.id),
+      `expected objNoArg.id to be instanceof buffer or uint8Array`
+    ).to.be.true;
+    expect(
+      isBufferOrUint8Array(objUndef.id),
+      `expected objUndef.id to be instanceof buffer or uint8Array`
+    ).to.be.true;
   });
 
   it('should throw error if non-12 byte non-24 hex string passed in', function () {

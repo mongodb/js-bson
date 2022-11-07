@@ -1,4 +1,4 @@
-import { Buffer } from 'buffer';
+import { ByteUtils } from '../utils/byte_utils';
 import { getGlobal } from '../utils/global';
 
 type RandomBytesFunction = (size: number) => Uint8Array;
@@ -22,7 +22,7 @@ const insecureRandomBytes: RandomBytesFunction = function insecureRandomBytes(si
     : 'BSON: No cryptographic implementation for random bytes present, falling back to a less secure implementation.';
   console.warn(insecureWarning);
 
-  const result = Buffer.alloc(size);
+  const result = ByteUtils.allocate(size);
   for (let i = 0; i < size; ++i) result[i] = Math.floor(Math.random() * 256);
   return result;
 };
@@ -42,13 +42,13 @@ const detectRandomBytes = (): RandomBytesFunction => {
       // browser crypto implementation(s)
       const target = window.crypto || window.msCrypto; // allow for IE11
       if (target && target.getRandomValues) {
-        return size => target.getRandomValues(Buffer.alloc(size));
+        return size => target.getRandomValues(ByteUtils.allocate(size));
       }
     }
 
     if (typeof global !== 'undefined' && global.crypto && global.crypto.getRandomValues) {
       // allow for RN packages such as https://www.npmjs.com/package/react-native-get-random-values to populate global
-      return size => global.crypto.getRandomValues(Buffer.alloc(size));
+      return size => global.crypto.getRandomValues(ByteUtils.allocate(size));
     }
 
     return insecureRandomBytes;
@@ -92,11 +92,6 @@ export function isRegExp(d: unknown): d is RegExp {
 
 export function isMap(d: unknown): d is Map<unknown, unknown> {
   return Object.prototype.toString.call(d) === '[object Map]';
-}
-
-/** Call to check if your environment has `Buffer` */
-export function haveBuffer(): boolean {
-  return typeof global !== 'undefined' && typeof global.Buffer !== 'undefined';
 }
 
 // To ensure that 0.4 of node works correctly
