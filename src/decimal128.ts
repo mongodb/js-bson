@@ -2,6 +2,7 @@ import { BSONTypeError } from './error';
 import { Long } from './long';
 import { isUint8Array } from './parser/utils';
 import { ByteUtils } from './utils/byte_utils';
+import { kInspect } from './utils/custom_inspect';
 
 const PARSE_STRING_REGEXP = /^(\+|-)?(\d+|(\d*\.\d*))?(E|e)?([-+])?(\d+)?$/;
 const PARSE_INF_REGEXP = /^(\+|-)?(Infinity|inf)$/i;
@@ -765,7 +766,7 @@ export class Decimal128 {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
+  [kInspect](): string {
     return this.inspect();
   }
 

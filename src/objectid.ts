@@ -1,6 +1,7 @@
 import { BSONTypeError } from './error';
 import { deprecate, isUint8Array, randomBytes } from './parser/utils';
 import { BSONDataView, ByteUtils } from './utils/byte_utils';
+import { kInspect } from './utils/custom_inspect';
 
 // Regular expression that checks for hex value
 const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
@@ -322,7 +323,7 @@ export class ObjectId {
    * @returns return the 24 character hex string representation.
    * @internal
    */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
+  [kInspect](): string {
     return this.inspect();
   }
 

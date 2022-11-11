@@ -1,6 +1,7 @@
 import type { EJSONOptions } from './extended_json';
 import { isObjectLike } from './parser/utils';
 import type { Timestamp } from './timestamp';
+import { kInspect } from './utils/custom_inspect';
 
 interface LongWASMHelpers {
   /** Gets the high bits of the last operation performed */
@@ -1027,7 +1028,7 @@ export class Long {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
+  [kInspect](): string {
     return this.inspect();
   }
 

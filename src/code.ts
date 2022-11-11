@@ -1,4 +1,5 @@
 import type { Document } from './bson';
+import { kInspect } from './utils/custom_inspect';
 
 /** @public */
 export interface CodeExtended {
@@ -46,7 +47,7 @@ export class Code {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
+  [kInspect](): string {
     return this.inspect();
   }
 

@@ -1,3 +1,5 @@
+import { kInspect } from './utils/custom_inspect';
+
 /** @public */
 export interface BSONSymbolExtended {
   $symbol: string;
@@ -50,7 +52,7 @@ export class BSONSymbol {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
+  [kInspect](): string {
     return this.inspect();
   }
 }

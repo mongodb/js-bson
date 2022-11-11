@@ -1,3 +1,5 @@
+import { kInspect } from './utils/custom_inspect';
+
 /** @public */
 export interface MinKeyExtended {
   $minKey: 1;
@@ -26,7 +28,7 @@ export class MinKey {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
+  [kInspect](): string {
     return this.inspect();
   }
 

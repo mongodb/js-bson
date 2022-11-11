@@ -4,6 +4,7 @@ import type { EJSONOptions } from './extended_json';
 import { BSONError, BSONTypeError } from './error';
 import { BSON_BINARY_SUBTYPE_UUID_NEW } from './constants';
 import { ByteUtils } from './utils/byte_utils';
+import { kInspect } from './utils/custom_inspect';
 
 /** @public */
 export type BinarySequence = Uint8Array | number[];
@@ -285,7 +286,7 @@ export class Binary {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
+  [kInspect](): string {
     return this.inspect();
   }
 
@@ -475,7 +476,7 @@ export class UUID extends Binary {
    * @returns return the 36 character hex string representation.
    * @internal
    */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
+  [kInspect](): string {
     return this.inspect();
   }
 

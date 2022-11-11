@@ -2,6 +2,7 @@ import type { Document } from './bson';
 import type { EJSONOptions } from './extended_json';
 import type { ObjectId } from './objectid';
 import { isObjectLike } from './parser/utils';
+import { kInspect } from './utils/custom_inspect';
 
 /** @public */
 export interface DBRefLike {
@@ -107,7 +108,7 @@ export class DBRef {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
+  [kInspect](): string {
     return this.inspect();
   }
 

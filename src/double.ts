@@ -1,4 +1,5 @@
 import type { EJSONOptions } from './extended_json';
+import { kInspect } from './utils/custom_inspect';
 
 /** @public */
 export interface DoubleExtended {
@@ -78,7 +79,7 @@ export class Double {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
+  [kInspect](): string {
     return this.inspect();
   }
 

@@ -1,3 +1,5 @@
+import { kInspect } from './utils/custom_inspect';
+
 /** @public */
 export interface MaxKeyExtended {
   $maxKey: 1;
@@ -26,7 +28,7 @@ export class MaxKey {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
+  [kInspect](): string {
     return this.inspect();
   }
 

@@ -1,5 +1,6 @@
 import { Long } from './long';
 import { isObjectLike } from './parser/utils';
+import { kInspect } from './utils/custom_inspect';
 
 /** @public */
 export type TimestampOverrides = '_bsontype' | 'toExtendedJSON' | 'fromExtendedJSON' | 'inspect';
@@ -109,7 +110,7 @@ export class Timestamp extends LongWithoutOverridesClass {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
+  [kInspect](): string {
     return this.inspect();
   }
 
