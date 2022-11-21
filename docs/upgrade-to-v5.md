@@ -79,3 +79,8 @@ We have set our typescript compilation target to `es2020` which aligns with our 
 > **TL;DR**: TODO
 
 TODO(NODE-4771): serializeFunctions bug fix makes function names outside the ascii range get serialized correctly
+> This will preserve newer ECMAScript 2020 features like optional chaining, nullish coalescing, export * as ns, and dynamic import(...) syntax. It also means bigint literals now have a stable target below esnext.
+
+### Remove `Map` export
+
+BSON no longer polyfills es Map and so the export was removed. The removal should reveal any instances where the global `Map` constructor should be used in place of the one BSON used to export.
