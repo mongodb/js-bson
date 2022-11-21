@@ -44,3 +44,9 @@ new TextDecoder('utf-16le').decode(bin.value(true));
 > **TL;DR**: TODO
 
 TODO(NODE-4771): serializeFunctions bug fix makes function names outside the ascii range get serialized correctly
+
+### TS "target" set to es2020
+
+We have set our typescript compilation target to `es2020` which aligns with our minimum supported Node.js version 14+. The following is from the typescript release notes on es2020 support, so it's some of the syntax that can be expected to be preserved after compilation:
+
+> This will preserve newer ECMAScript 2020 features like optional chaining, nullish coalescing, export * as ns, and dynamic import(...) syntax. It also means bigint literals now have a stable target below esnext.
