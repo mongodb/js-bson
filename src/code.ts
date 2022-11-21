@@ -21,8 +21,6 @@ export class Code {
    * @param scope - an optional scope for the function.
    */
   constructor(code: string | Function, scope?: Document) {
-    if (!(this instanceof Code)) return new Code(code, scope);
-
     this.code = code;
     this.scope = scope;
   }

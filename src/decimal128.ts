@@ -136,8 +136,6 @@ export class Decimal128 {
    *                or a string representation as returned by .toString()
    */
   constructor(bytes: Uint8Array | string) {
-    if (!(this instanceof Decimal128)) return new Decimal128(bytes);
-
     if (typeof bytes === 'string') {
       this.bytes = Decimal128.fromString(bytes).bytes;
     } else if (isUint8Array(bytes)) {

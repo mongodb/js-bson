@@ -46,8 +46,6 @@ export class ObjectId {
    * @param inputId - Can be a 24 character hex string, 12 byte binary Buffer, or a number.
    */
   constructor(inputId?: string | number | ObjectId | ObjectIdLike | Uint8Array) {
-    if (!(this instanceof ObjectId)) return new ObjectId(inputId);
-
     // workingId is set based on type of input and whether valid id exists for the input
     let workingId;
     if (typeof inputId === 'object' && inputId && 'id' in inputId) {

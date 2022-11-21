@@ -73,8 +73,6 @@ export class Binary {
    * @param subType - the option binary type.
    */
   constructor(buffer?: string | BinarySequence, subType?: number) {
-    if (!(this instanceof Binary)) return new Binary(buffer, subType);
-
     if (
       !(buffer == null) &&
       !(typeof buffer === 'string') &&

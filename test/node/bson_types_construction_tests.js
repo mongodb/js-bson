@@ -2,34 +2,39 @@
 const BSON = require('../register-bson');
 
 describe('Constructing BSON types', function () {
-  it('with new keyword should work', function () {
+  it('with new keyword should not throw', function () {
+    expect(() => new BSON.ObjectId()).to.not.throw();
+    expect(() => new BSON.BSONRegExp('aaa')).to.not.throw();
+    expect(() => new BSON.BSONSymbol('aaa')).to.not.throw();
+    expect(() => new BSON.Binary('aaa')).to.not.throw();
+    expect(() => new BSON.Code(function () {})).to.not.throw();
+    expect(() => new BSON.Decimal128('123')).to.not.throw();
+    expect(() => new BSON.Double(2.3)).to.not.throw();
+    expect(() => new BSON.Int32(1)).to.not.throw();
+    expect(() => new BSON.Long(0, 0)).to.not.throw();
+    expect(() => new BSON.Timestamp(0, 0)).to.not.throw();
+    expect(() => new BSON.MaxKey()).to.not.throw();
+    expect(() => new BSON.MinKey()).to.not.throw();
+
     const oid = new BSON.ObjectId();
-    new BSON.DBRef('test', oid);
-    new BSON.BSONRegExp('aaa');
-    new BSON.BSONSymbol('aaa');
-    new BSON.Binary('aaa');
-    new BSON.Code(function () {});
-    new BSON.Decimal128('123');
-    new BSON.Double(2.3);
-    new BSON.Int32(1);
-    new BSON.Long(0, 0);
-    new BSON.Timestamp(0, 0);
-    new BSON.MaxKey();
-    new BSON.MinKey();
+    expect(() => BSON.DBRef('test', oid)).to.throw(TypeError, /cannot be invoked/);
   });
-  it('as a function call should work', function () {
-    const oid = BSON.ObjectId();
-    BSON.DBRef('test', oid);
-    BSON.BSONRegExp('aaa');
-    BSON.BSONSymbol('aaa');
-    BSON.Binary('aaa');
-    BSON.Code(function () {});
-    BSON.Decimal128('123');
-    BSON.Double(2.3);
-    BSON.Int32(1);
-    BSON.Long(0, 0);
-    BSON.Timestamp(0, 0);
-    BSON.MaxKey();
-    BSON.MinKey();
+
+  it('without new keyword should throw a TypeError', function () {
+    expect(() => BSON.ObjectId()).to.throw(TypeError, /cannot be invoked/);
+    expect(() => BSON.BSONRegExp('aaa')).to.throw(TypeError, /cannot be invoked/);
+    expect(() => BSON.BSONSymbol('aaa')).to.throw(TypeError, /cannot be invoked/);
+    expect(() => BSON.Binary('aaa')).to.throw(TypeError, /cannot be invoked/);
+    expect(() => BSON.Code(function () {})).to.throw(TypeError, /cannot be invoked/);
+    expect(() => BSON.Decimal128('123')).to.throw(TypeError, /cannot be invoked/);
+    expect(() => BSON.Double(2.3)).to.throw(TypeError, /cannot be invoked/);
+    expect(() => BSON.Int32(1)).to.throw(TypeError, /cannot be invoked/);
+    expect(() => BSON.Long(0, 0)).to.throw(TypeError, /cannot be invoked/);
+    expect(() => BSON.Timestamp(0, 0)).to.throw(TypeError, /cannot be invoked/);
+    expect(() => BSON.MaxKey()).to.throw(TypeError, /cannot be invoked/);
+    expect(() => BSON.MinKey()).to.throw(TypeError, /cannot be invoked/);
+
+    const oid = new BSON.ObjectId();
+    expect(() => BSON.DBRef('test', oid)).to.throw(TypeError, /cannot be invoked/);
   });
 });

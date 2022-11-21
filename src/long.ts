@@ -134,8 +134,6 @@ export class Long {
    * @param unsigned - Whether unsigned or not, defaults to signed
    */
   constructor(low: number | bigint | string = 0, high?: number | boolean, unsigned?: boolean) {
-    if (!(this instanceof Long)) return new Long(low, high, unsigned);
-
     if (typeof low === 'bigint') {
       Object.assign(this, Long.fromBigInt(low, !!high));
     } else if (typeof low === 'string') {

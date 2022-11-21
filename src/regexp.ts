@@ -34,8 +34,6 @@ export class BSONRegExp {
    * @param options - The regular expression options
    */
   constructor(pattern: string, options?: string) {
-    if (!(this instanceof BSONRegExp)) return new BSONRegExp(pattern, options);
-
     this.pattern = pattern;
     this.options = alphabetize(options ?? '');
 

@@ -20,8 +20,6 @@ export class Double {
    * @param value - the number we want to represent as a double.
    */
   constructor(value: number) {
-    if (!(this instanceof Double)) return new Double(value);
-
     if ((value as unknown) instanceof Number) {
       value = value.valueOf();
     }

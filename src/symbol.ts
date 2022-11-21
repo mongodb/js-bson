@@ -16,8 +16,6 @@ export class BSONSymbol {
    * @param value - the string representing the symbol.
    */
   constructor(value: string) {
-    if (!(this instanceof BSONSymbol)) return new BSONSymbol(value);
-
     this.value = value;
   }
 

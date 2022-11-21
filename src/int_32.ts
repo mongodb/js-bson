@@ -20,8 +20,6 @@ export class Int32 {
    * @param value - the number we want to represent as an int32.
    */
   constructor(value: number | string) {
-    if (!(this instanceof Int32)) return new Int32(value);
-
     if ((value as unknown) instanceof Number) {
       value = value.valueOf();
     }

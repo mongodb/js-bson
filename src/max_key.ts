@@ -11,10 +11,6 @@ export interface MaxKeyExtended {
 export class MaxKey {
   _bsontype!: 'MaxKey';
 
-  constructor() {
-    if (!(this instanceof MaxKey)) return new MaxKey();
-  }
-
   /** @internal */
   toExtendedJSON(): MaxKeyExtended {
     return { $maxKey: 1 };

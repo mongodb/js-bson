@@ -43,10 +43,6 @@ export class Timestamp extends LongWithoutOverridesClass {
    */
   constructor(low: number, high: number);
   constructor(low: number | Long | { t: number; i: number }, high?: number) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    if (!(this instanceof Timestamp)) return new Timestamp(low, high);
-
     if (Long.isLong(low)) {
       super(low.low, low.high, true);
     } else if (isObjectLike(low) && typeof low.t !== 'undefined' && typeof low.i !== 'undefined') {
