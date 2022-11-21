@@ -9,7 +9,6 @@ import { BSONError, BSONTypeError } from '../error';
 import { isBSONType } from '../extended_json';
 import type { Int32 } from '../int_32';
 import { Long } from '../long';
-import { Map } from '../map';
 import type { MinKey } from '../min_key';
 import type { ObjectId } from '../objectid';
 import type { BSONRegExp } from '../regexp';
