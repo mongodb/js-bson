@@ -30,7 +30,7 @@ describe('_bsontype identifier', () => {
     // Timestamp overrides the value in its constructor
     const timestamp = new Timestamp({ i: 0, t: 0 });
     expect(timestamp._bsontype).to.equal('Timestamp');
-    expect(Object.getPrototypeOf(timestamp)._bsontype).to.equal('Long');
+    expect(Object.getPrototypeOf(Object.getPrototypeOf(timestamp))._bsontype).to.equal('Long');
   });
 
   // All equal to their constructor names

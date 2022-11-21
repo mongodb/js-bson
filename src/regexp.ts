@@ -25,7 +25,9 @@ export interface BSONRegExpExtended {
  * @category BSONType
  */
 export class BSONRegExp {
-  _bsontype!: 'BSONRegExp';
+  get _bsontype(): 'BSONRegExp' {
+    return 'BSONRegExp';
+  }
 
   pattern!: string;
   options!: string;
@@ -99,5 +101,3 @@ export class BSONRegExp {
     throw new BSONTypeError(`Unexpected BSONRegExp EJSON object form: ${JSON.stringify(doc)}`);
   }
 }
-
-Object.defineProperty(BSONRegExp.prototype, '_bsontype', { value: 'BSONRegExp' });

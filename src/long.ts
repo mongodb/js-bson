@@ -100,10 +100,14 @@ export interface LongExtended {
  * Common constant values ZERO, ONE, NEG_ONE, etc. are found as static properties on this class.
  */
 export class Long {
-  _bsontype!: 'Long';
+  get _bsontype(): 'Long' {
+    return 'Long';
+  }
 
   /** An indicator used to reliably determine if an object is a Long or not. */
-  __isLong__!: true;
+  get __isLong__(): boolean {
+    return true;
+  }
 
   /**
    * The high 32 bits as a signed value.
@@ -143,13 +147,6 @@ export class Long {
       this.high = (high as number) | 0;
       this.unsigned = !!unsigned;
     }
-
-    Object.defineProperty(this, '__isLong__', {
-      value: true,
-      configurable: false,
-      writable: false,
-      enumerable: false
-    });
   }
 
   static TWO_PWR_24 = Long.fromInt(TWO_PWR_24_DBL);
@@ -1033,6 +1030,3 @@ export class Long {
     return `new Long("${this.toString()}"${this.unsigned ? ', true' : ''})`;
   }
 }
-
-Object.defineProperty(Long.prototype, '__isLong__', { value: true });
-Object.defineProperty(Long.prototype, '_bsontype', { value: 'Long' });

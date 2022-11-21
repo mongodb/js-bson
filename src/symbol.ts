@@ -9,7 +9,9 @@ export interface BSONSymbolExtended {
  * @category BSONType
  */
 export class BSONSymbol {
-  _bsontype!: 'Symbol';
+  get _bsontype(): 'Symbol' {
+    return 'Symbol';
+  }
 
   value!: string;
   /**
@@ -52,5 +54,3 @@ export class BSONSymbol {
     return this.inspect();
   }
 }
-
-Object.defineProperty(BSONSymbol.prototype, '_bsontype', { value: 'Symbol' });

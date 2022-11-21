@@ -28,7 +28,9 @@ const kId = Symbol('id');
  * @category BSONType
  */
 export class ObjectId {
-  _bsontype!: 'ObjectID';
+  get _bsontype(): 'ObjectID' {
+    return 'ObjectID';
+  }
 
   /** @internal */
   static index = Math.floor(Math.random() * 0xffffff);
@@ -348,5 +350,3 @@ Object.defineProperty(ObjectId.prototype, 'get_inc', {
 Object.defineProperty(ObjectId, 'get_inc', {
   value: deprecate(() => ObjectId.getInc(), 'Please use the static `ObjectId.getInc()` instead')
 });
-
-Object.defineProperty(ObjectId.prototype, '_bsontype', { value: 'ObjectID' });

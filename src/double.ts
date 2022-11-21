@@ -11,7 +11,9 @@ export interface DoubleExtended {
  * @category BSONType
  */
 export class Double {
-  _bsontype!: 'Double';
+  get _bsontype(): 'Double' {
+    return 'Double';
+  }
 
   value!: number;
   /**
@@ -85,5 +87,3 @@ export class Double {
     return `new Double(${eJSON.$numberDouble})`;
   }
 }
-
-Object.defineProperty(Double.prototype, '_bsontype', { value: 'Double' });

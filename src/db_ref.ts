@@ -26,7 +26,9 @@ export function isDBRefLike(value: unknown): value is DBRefLike {
  * @category BSONType
  */
 export class DBRef {
-  _bsontype!: 'DBRef';
+  get _bsontype(): 'DBRef' {
+    return 'DBRef';
+  }
 
   collection!: string;
   oid!: ObjectId;
@@ -118,5 +120,3 @@ export class DBRef {
     })`;
   }
 }
-
-Object.defineProperty(DBRef.prototype, '_bsontype', { value: 'DBRef' });
