@@ -1,5 +1,14 @@
 # Changes in v5
 
+**TOC**
+
+- [Remove reliance on Node.js Buffer](#remove-reliance-on-nodejs-buffer)
+  - [APIs impacted](#apis-impacted)
+- [Restrict supported encodings in `ObjectId.toString` / `UUID.toString` / `Binary.toString`](#restrict-supported-encodings-in--objectidtostring-----uuidtostring-----binarytostring--to-the-following-encodings----hex-----base64-----utf8--)
+    - [Migration Example](#migration-example)
+-  [`serializeFunctions` bug fix](#-serializefunctions--bug-fix)
+
+
 ## About
 
 The following is a detailed collection of the changes in the major v5 release of the bson package
@@ -11,7 +20,7 @@ for nodejs and web platforms.
 3. if applicable, an example of suggested syntax change (can be included in (1) )
 -->
 
-### Remove reliance on Node.js Buffer
+## Remove reliance on Node.js Buffer
 
 > **TL;DR**: Web environments return Uint8Array; Node.js environments return Buffer
 
@@ -19,13 +28,25 @@ For those that use the BSON library on Node.js, there is no change - the BSON AP
 
 This allows the BSON library to be better at platform independence while keeping its behavior consistent cross platform. The Buffer shim served the library well but brought in more than was necessary for the concerns of the code here.
 
-### `ObjectId.toString` / `UUID.toString` / `Binary.toString`
+### APIs impacted
 
-> **TL;DR**: These `toString` methods only support the following encodings: 'hex', 'base64', 'utf8'
+The following APIs now return Uint8Arrays when the library is loaded in an environment that does not define a global nodejs Buffer.
+
+- `Binary.prototype.buffer`
+- `Binary.prototype.read()`
+- `Binary.prototype.value()`
+- `Decimal128.prototype.bytes`
+- `ObjectId.prototype.id`
+- `ObjectId.generate()`
+- `serialize()`
+- `UUID.prototype.id`
+- `UUID.generate()`
+
+## Restrict supported encodings in `ObjectId.toString` / `UUID.toString` / `Binary.toString` to the following encodings: `'hex' | 'base64' | 'utf8'`
 
 The methods: `ObjectId.toString`, `UUID.toString`, and `Binary.toString` took encodings that were passed through to the Node.js Buffer API. As a result of no longer relying on the presence of `Buffer` we can no longer support [every encoding that Node.js does](https://nodejs.org/dist/latest-v16.x/docs/api/buffer.html#buffers-and-character-encodings). We continue to support `'hex'` and `'base64'` on all three methods and additionally `'utf-8' | 'utf8'` on `Binary.toString`. If any of the other encodings are desired the underlying buffer for all these classes are publicly accessible and while in Node.js will be stored as a Node.js buffer:
 
-##### Migration Example:
+### Migration Example
 
 ```typescript
 // Given Binary constructed from one of the encodings (using 'utf16le' as an example here)
@@ -39,7 +60,7 @@ bin.value(true).toString('utf16le');
 new TextDecoder('utf-16le').decode(bin.value(true));
 ```
 
-### `serializeFunctions` bug fix
+## `serializeFunctions` bug fix
 
 > **TL;DR**: TODO
 
