@@ -11,7 +11,9 @@ export interface DoubleExtended {
  * @category BSONType
  */
 export class Double {
-  _bsontype!: 'Double';
+  get _bsontype(): 'Double' {
+    return 'Double';
+  }
 
   value!: number;
   /**
@@ -20,8 +22,6 @@ export class Double {
    * @param value - the number we want to represent as a double.
    */
   constructor(value: number) {
-    if (!(this instanceof Double)) return new Double(value);
-
     if ((value as unknown) instanceof Number) {
       value = value.valueOf();
     }
@@ -87,5 +87,3 @@ export class Double {
     return `new Double(${eJSON.$numberDouble})`;
   }
 }
-
-Object.defineProperty(Double.prototype, '_bsontype', { value: 'Double' });

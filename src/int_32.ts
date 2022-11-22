@@ -11,7 +11,9 @@ export interface Int32Extended {
  * @category BSONType
  */
 export class Int32 {
-  _bsontype!: 'Int32';
+  get _bsontype(): 'Int32' {
+    return 'Int32';
+  }
 
   value!: number;
   /**
@@ -20,8 +22,6 @@ export class Int32 {
    * @param value - the number we want to represent as an int32.
    */
   constructor(value: number | string) {
-    if (!(this instanceof Int32)) return new Int32(value);
-
     if ((value as unknown) instanceof Number) {
       value = value.valueOf();
     }
@@ -66,5 +66,3 @@ export class Int32 {
     return `new Int32(${this.valueOf()})`;
   }
 }
-
-Object.defineProperty(Int32.prototype, '_bsontype', { value: 'Int32' });

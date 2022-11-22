@@ -28,7 +28,9 @@ export interface BinaryExtended {
  * @category BSONType
  */
 export class Binary {
-  _bsontype!: 'Binary';
+  get _bsontype(): 'Binary' {
+    return 'Binary';
+  }
 
   /**
    * Binary default subtype
@@ -73,8 +75,6 @@ export class Binary {
    * @param subType - the option binary type.
    */
   constructor(buffer?: string | BinarySequence, subType?: number) {
-    if (!(this instanceof Binary)) return new Binary(buffer, subType);
-
     if (
       !(buffer == null) &&
       !(typeof buffer === 'string') &&
@@ -293,8 +293,6 @@ export class Binary {
     return `new Binary(Buffer.from("${ByteUtils.toHex(this.buffer)}", "hex"), ${this.sub_type})`;
   }
 }
-
-Object.defineProperty(Binary.prototype, '_bsontype', { value: 'Binary' });
 
 /** @public */
 export type UUIDExtended = {

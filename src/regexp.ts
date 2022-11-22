@@ -25,7 +25,9 @@ export interface BSONRegExpExtended {
  * @category BSONType
  */
 export class BSONRegExp {
-  _bsontype!: 'BSONRegExp';
+  get _bsontype(): 'BSONRegExp' {
+    return 'BSONRegExp';
+  }
 
   pattern!: string;
   options!: string;
@@ -34,8 +36,6 @@ export class BSONRegExp {
    * @param options - The regular expression options
    */
   constructor(pattern: string, options?: string) {
-    if (!(this instanceof BSONRegExp)) return new BSONRegExp(pattern, options);
-
     this.pattern = pattern;
     this.options = alphabetize(options ?? '');
 
@@ -101,5 +101,3 @@ export class BSONRegExp {
     throw new BSONTypeError(`Unexpected BSONRegExp EJSON object form: ${JSON.stringify(doc)}`);
   }
 }
-
-Object.defineProperty(BSONRegExp.prototype, '_bsontype', { value: 'BSONRegExp' });

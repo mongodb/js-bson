@@ -9,15 +9,15 @@ export interface BSONSymbolExtended {
  * @category BSONType
  */
 export class BSONSymbol {
-  _bsontype!: 'Symbol';
+  get _bsontype(): 'Symbol' {
+    return 'Symbol';
+  }
 
   value!: string;
   /**
    * @param value - the string representing the symbol.
    */
   constructor(value: string) {
-    if (!(this instanceof BSONSymbol)) return new BSONSymbol(value);
-
     this.value = value;
   }
 
@@ -54,5 +54,3 @@ export class BSONSymbol {
     return this.inspect();
   }
 }
-
-Object.defineProperty(BSONSymbol.prototype, '_bsontype', { value: 'Symbol' });

@@ -12,10 +12,10 @@ const tsConfig = {
   checkJs: false,
   strict: true,
   alwaysStrict: true,
-  target: 'es5',
+  target: 'es2020',
   module: 'esnext',
   moduleResolution: 'node',
-  lib: ['ES2017', 'ES2020.BigInt', 'ES2017.TypedArrays'],
+  lib: ['es2020'],
   // We don't make use of tslib helpers
   importHelpers: true,
   noEmitHelpers: false,

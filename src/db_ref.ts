@@ -26,7 +26,9 @@ export function isDBRefLike(value: unknown): value is DBRefLike {
  * @category BSONType
  */
 export class DBRef {
-  _bsontype!: 'DBRef';
+  get _bsontype(): 'DBRef' {
+    return 'DBRef';
+  }
 
   collection!: string;
   oid!: ObjectId;
@@ -39,8 +41,6 @@ export class DBRef {
    * @param db - optional db name, if omitted the reference is local to the current db.
    */
   constructor(collection: string, oid: ObjectId, db?: string, fields?: Document) {
-    if (!(this instanceof DBRef)) return new DBRef(collection, oid, db, fields);
-
     // check if namespace has been provided
     const parts = collection.split('.');
     if (parts.length === 2) {
@@ -120,5 +120,3 @@ export class DBRef {
     })`;
   }
 }
-
-Object.defineProperty(DBRef.prototype, '_bsontype', { value: 'DBRef' });

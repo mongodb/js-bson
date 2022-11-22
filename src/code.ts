@@ -12,7 +12,9 @@ export interface CodeExtended {
  * @category BSONType
  */
 export class Code {
-  _bsontype!: 'Code';
+  get _bsontype(): 'Code' {
+    return 'Code';
+  }
 
   code!: string | Function;
   scope?: Document;
@@ -21,8 +23,6 @@ export class Code {
    * @param scope - an optional scope for the function.
    */
   constructor(code: string | Function, scope?: Document) {
-    if (!(this instanceof Code)) return new Code(code, scope);
-
     this.code = code;
     this.scope = scope;
   }
@@ -57,5 +57,3 @@ export class Code {
     })`;
   }
 }
-
-Object.defineProperty(Code.prototype, '_bsontype', { value: 'Code' });

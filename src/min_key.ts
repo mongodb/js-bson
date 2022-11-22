@@ -9,10 +9,8 @@ export interface MinKeyExtended {
  * @category BSONType
  */
 export class MinKey {
-  _bsontype!: 'MinKey';
-
-  constructor() {
-    if (!(this instanceof MinKey)) return new MinKey();
+  get _bsontype(): 'MinKey' {
+    return 'MinKey';
   }
 
   /** @internal */
@@ -34,5 +32,3 @@ export class MinKey {
     return 'new MinKey()';
   }
 }
-
-Object.defineProperty(MinKey.prototype, '_bsontype', { value: 'MinKey' });

@@ -127,7 +127,9 @@ export interface Decimal128Extended {
  * @category BSONType
  */
 export class Decimal128 {
-  _bsontype!: 'Decimal128';
+  get _bsontype(): 'Decimal128' {
+    return 'Decimal128';
+  }
 
   readonly bytes!: Uint8Array;
 
@@ -136,8 +138,6 @@ export class Decimal128 {
    *                or a string representation as returned by .toString()
    */
   constructor(bytes: Uint8Array | string) {
-    if (!(this instanceof Decimal128)) return new Decimal128(bytes);
-
     if (typeof bytes === 'string') {
       this.bytes = Decimal128.fromString(bytes).bytes;
     } else if (isUint8Array(bytes)) {
@@ -773,5 +773,3 @@ export class Decimal128 {
     return `new Decimal128("${this.toString()}")`;
   }
 }
-
-Object.defineProperty(Decimal128.prototype, '_bsontype', { value: 'Decimal128' });

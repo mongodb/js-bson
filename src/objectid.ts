@@ -28,7 +28,9 @@ const kId = Symbol('id');
  * @category BSONType
  */
 export class ObjectId {
-  _bsontype!: 'ObjectID';
+  get _bsontype(): 'ObjectID' {
+    return 'ObjectID';
+  }
 
   /** @internal */
   static index = Math.floor(Math.random() * 0xffffff);
@@ -46,8 +48,6 @@ export class ObjectId {
    * @param inputId - Can be a 24 character hex string, 12 byte binary Buffer, or a number.
    */
   constructor(inputId?: string | number | ObjectId | ObjectIdLike | Uint8Array) {
-    if (!(this instanceof ObjectId)) return new ObjectId(inputId);
-
     // workingId is set based on type of input and whether valid id exists for the input
     let workingId;
     if (typeof inputId === 'object' && inputId && 'id' in inputId) {
@@ -350,5 +350,3 @@ Object.defineProperty(ObjectId.prototype, 'get_inc', {
 Object.defineProperty(ObjectId, 'get_inc', {
   value: deprecate(() => ObjectId.getInc(), 'Please use the static `ObjectId.getInc()` instead')
 });
-
-Object.defineProperty(ObjectId.prototype, '_bsontype', { value: 'ObjectID' });
