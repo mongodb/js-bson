@@ -1174,37 +1174,6 @@ describe('Decimal128', function () {
     done();
   });
 
-  it('Support toBSON and toObject methods for custom mapping', function (done) {
-    // Create a custom object
-    var MyCustomDecimal = function (value) {
-      this.value = value instanceof Decimal128 ? value.toString() : value;
-    };
-
-    MyCustomDecimal.prototype.toBSON = function () {
-      return Decimal128.fromString(this.value);
-    };
-
-    // Add a custom mapper for the type
-    const saveToObject = Decimal128.prototype.toObject;
-    try {
-      Decimal128.prototype.toObject = function () {
-        return new MyCustomDecimal(this);
-      };
-
-      // Test all methods around a simple serialization at object top level
-      var doc = { value: new MyCustomDecimal('1') };
-      var buffer = BSON.serialize(doc);
-      var back = BSON.deserialize(buffer);
-      expect(back.value instanceof MyCustomDecimal).to.be.ok;
-      expect('1').to.equal(back.value.value);
-    } finally {
-      // prevent this test from breaking later tests which may re-use the same class
-      Decimal128.prototype.toObject = saveToObject;
-    }
-
-    done();
-  });
-
   it('accepts strings in the constructor', () => {
     expect(new Decimal128('0').toString()).to.equal('0');
     expect(new Decimal128('00').toString()).to.equal('0');
