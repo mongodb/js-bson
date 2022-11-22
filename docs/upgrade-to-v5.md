@@ -100,3 +100,7 @@ The following deprecated methods have been removed:
 - `ObjectId.prototype.get_inc`
 - `ObjectId.get_inc`
   - The `static getInc()` is private since invoking it increments the next `ObjectId` index, so invoking would impact the creation of subsequent ObjectIds.
+
+### BSON Element names are now fetched only from object's own properties
+
+Previously objects passed to the `BSON.serialize`, `BSON.calculateObjectSize`, and `EJSON.stringify` API would have the element names enumerated with a `for-in` loop which will emit keys defined on the prototype. Since this is likely surprising, especially if a globally shared prototype has been modified we are now using `Object.keys` to enumerate the element names from a js object.

@@ -1,8 +1,6 @@
-'use strict';
-
-const BSON = require('../register-bson');
+import * as BSON from '../register-bson';
 const EJSON = BSON.EJSON;
-const vm = require('vm');
+import * as vm from 'node:vm';
 
 // BSON types
 const Binary = BSON.Binary;
@@ -30,6 +28,7 @@ function getOldBSON() {
   try {
     // do a dynamic resolve to avoid exception when running browser tests
     const file = require.resolve('bson');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const oldModule = require(file).BSON;
     const funcs = new oldModule.BSON();
     oldModule.serialize = funcs.serialize;
@@ -49,7 +48,7 @@ describe('Extended JSON', function () {
 
   before(function () {
     const buffer = Buffer.alloc(64);
-    for (var i = 0; i < buffer.length; i++) buffer[i] = i;
+    for (let i = 0; i < buffer.length; i++) buffer[i] = i;
     const date = new Date();
     date.setTime(1488372056737);
     doc = {
@@ -80,7 +79,7 @@ describe('Extended JSON', function () {
 
   it('should correctly extend an existing mongodb module', function () {
     // Serialize the document
-    var json =
+    const json =
       '{"_id":{"$numberInt":"100"},"gh":{"$numberInt":"1"},"binary":{"$binary":{"base64":"AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+Pw==","subType":"00"}},"date":{"$date":{"$numberLong":"1488372056737"}},"code":{"$code":"function() {}","$scope":{"a":{"$numberInt":"1"}}},"dbRef":{"$ref":"tests","$id":{"$numberInt":"1"},"$db":"test"},"decimal":{"$numberDecimal":"100"},"double":{"$numberDouble":"10.1"},"int32":{"$numberInt":"10"},"long":{"$numberLong":"200"},"maxKey":{"$maxKey":1},"minKey":{"$minKey":1},"objectId":{"$oid":"111111111111111111111111"},"objectID":{"$oid":"111111111111111111111111"},"oldObjectID":{"$oid":"111111111111111111111111"},"regexp":{"$regularExpression":{"pattern":"hello world","options":"i"}},"symbol":{"$symbol":"symbol"},"timestamp":{"$timestamp":{"t":0,"i":1000}},"int32Number":{"$numberInt":"300"},"doubleNumber":{"$numberDouble":"200.2"},"longNumberIntFit":{"$numberLong":"7036874417766400"},"doubleNumberIntFit":{"$numberLong":"19007199250000000"}}';
 
     expect(json).to.equal(EJSON.stringify(doc, null, 0, { relaxed: false }));
@@ -88,7 +87,7 @@ describe('Extended JSON', function () {
 
   it('should correctly deserialize using the default relaxed mode', function () {
     // Deserialize the document using non strict mode
-    var doc1 = EJSON.parse(EJSON.stringify(doc, null, 0));
+    let doc1 = EJSON.parse(EJSON.stringify(doc, null, 0));
 
     // Validate the values
     expect(300).to.equal(doc1.int32Number);
@@ -108,23 +107,23 @@ describe('Extended JSON', function () {
 
   it('should correctly serialize, and deserialize using built-in BSON', function () {
     // Create a doc
-    var doc1 = {
+    const doc1 = {
       int32: new Int32(10)
     };
 
     // Serialize the document
-    var text = EJSON.stringify(doc1, null, 0, { relaxed: false });
+    const text = EJSON.stringify(doc1, null, 0, { relaxed: false });
     expect(text).to.equal('{"int32":{"$numberInt":"10"}}');
 
     // Deserialize the json in strict and non strict mode
-    var doc2 = EJSON.parse(text, { relaxed: false });
+    let doc2 = EJSON.parse(text, { relaxed: false });
     expect(doc2.int32._bsontype).to.equal('Int32');
     doc2 = EJSON.parse(text);
     expect(doc2.int32).to.equal(10);
   });
 
   it('should correctly serialize bson types when they are values', function () {
-    var serialized = EJSON.stringify(new ObjectId('591801a468f9e7024b6235ea'), { relaxed: false });
+    let serialized = EJSON.stringify(new ObjectId('591801a468f9e7024b6235ea'), { relaxed: false });
     expect(serialized).to.equal('{"$oid":"591801a468f9e7024b6235ea"}');
     serialized = EJSON.stringify(new ObjectID('591801a468f9e7024b6235ea'), { relaxed: false });
     expect(serialized).to.equal('{"$oid":"591801a468f9e7024b6235ea"}');
@@ -182,8 +181,8 @@ describe('Extended JSON', function () {
     expect(EJSON.parse('null')).to.be.null;
     expect(EJSON.parse('[null]')[0]).to.be.null;
 
-    var input = '{"result":[{"_id":{"$oid":"591801a468f9e7024b623939"},"emptyField":null}]}';
-    var parsed = EJSON.parse(input);
+    const input = '{"result":[{"_id":{"$oid":"591801a468f9e7024b623939"},"emptyField":null}]}';
+    const parsed = EJSON.parse(input);
 
     expect(parsed).to.deep.equal({
       result: [{ _id: new ObjectId('591801a468f9e7024b623939'), emptyField: null }]
@@ -333,14 +332,14 @@ describe('Extended JSON', function () {
   it('should work for function-valued and array-valued replacer parameters', function () {
     const doc = { a: new Int32(10), b: new Int32(10) };
 
-    var replacerArray = ['a', '$numberInt'];
-    var serialized = EJSON.stringify(doc, replacerArray, 0, { relaxed: false });
+    const replacerArray = ['a', '$numberInt'];
+    let serialized = EJSON.stringify(doc, replacerArray, 0, { relaxed: false });
     expect(serialized).to.equal('{"a":{"$numberInt":"10"}}');
 
     serialized = EJSON.stringify(doc, replacerArray);
     expect(serialized).to.equal('{"a":10}');
 
-    var replacerFunc = function (key, value) {
+    const replacerFunc = function (key, value) {
       return key === 'b' ? undefined : value;
     };
     serialized = EJSON.stringify(doc, replacerFunc, 0, { relaxed: false });
@@ -351,11 +350,13 @@ describe('Extended JSON', function () {
   });
 
   if (!usingOldBSON) {
-    it.skip('skipping 4.x/1.x interop tests', () => {});
+    it.skip('skipping 4.x/1.x interop tests', () => {
+      // ignore
+    });
   } else {
     it('should interoperate 4.x with 1.x versions of this library', function () {
       const buffer = Buffer.alloc(64);
-      for (var i = 0; i < buffer.length; i++) {
+      for (let i = 0; i < buffer.length; i++) {
         buffer[i] = i;
       }
       const [oldBsonObject, newBsonObject] = [OldBSON, BSON].map(bsonModule => {
@@ -453,7 +454,9 @@ describe('Extended JSON', function () {
     // by mongodb-core, then remove this test case and uncomment the MinKey checks in the test case above
     it('should interop with MinKey 1.x and 4.x, except the case that #310 breaks', function () {
       if (!usingOldBSON) {
-        it.skip('interop tests', () => {});
+        it.skip('interop tests', () => {
+          // ignore
+        });
         return;
       }
 
@@ -515,7 +518,7 @@ describe('Extended JSON', function () {
     const serialized = EJSON.stringify(original);
     expect(serialized).to.equal('{"__proto__":{"a":42}}');
     const deserialized = EJSON.parse(serialized);
-    expect(deserialized).to.have.deep.ownPropertyDescriptor('__proto__', {
+    expect(deserialized).to.have.ownPropertyDescriptor('__proto__', {
       configurable: true,
       enumerable: true,
       writable: true,
@@ -526,7 +529,8 @@ describe('Extended JSON', function () {
 
   context('circular references', () => {
     it('should throw a helpful error message for input with circular references', function () {
-      const obj = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const obj: any = {
         some: {
           property: {
             array: []
@@ -541,7 +545,8 @@ Converting circular structure to EJSON:
     });
 
     it('should throw a helpful error message for input with circular references, one-level nested', function () {
-      const obj = {};
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const obj: any = {};
       obj.obj = obj;
       expect(() => EJSON.serialize(obj)).to.throw(`\
 Converting circular structure to EJSON:
@@ -550,7 +555,8 @@ Converting circular structure to EJSON:
     });
 
     it('should throw a helpful error message for input with circular references, one-level nested inside base object', function () {
-      const obj = {};
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const obj: any = {};
       obj.obj = obj;
       expect(() => EJSON.serialize({ foo: obj })).to.throw(`\
 Converting circular structure to EJSON:
@@ -559,7 +565,8 @@ Converting circular structure to EJSON:
     });
 
     it('should throw a helpful error message for input with circular references, pointing back to base object', function () {
-      const obj = { foo: {} };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const obj: any = { foo: {} };
       obj.foo.obj = obj;
       expect(() => EJSON.serialize(obj)).to.throw(`\
 Converting circular structure to EJSON:
@@ -783,5 +790,13 @@ Converting circular structure to EJSON:
       };
       expect(parsedUUID).to.deep.equal(expectedResult);
     });
+  });
+
+  it('should only enumerate own property keys from input objects', () => {
+    const input = { a: 1 };
+    Object.setPrototypeOf(input, { b: 2 });
+    const string = EJSON.stringify(input);
+    expect(string).to.include(`"a":`);
+    expect(string).to.not.include(`"b":`);
   });
 });

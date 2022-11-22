@@ -826,7 +826,7 @@ export function serializeInto(
     }
 
     // Iterate over all the keys
-    for (const key in object) {
+    for (const key of Object.keys(object)) {
       let value = object[key];
       // Is there an override value
       if (typeof value?.toBSON === 'function') {

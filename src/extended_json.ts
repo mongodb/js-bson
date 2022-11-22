@@ -282,7 +282,7 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
   if (typeof bsontype === 'undefined') {
     // It's a regular object. Recursively serialize its property values.
     const _doc: Document = {};
-    for (const name in doc) {
+    for (const name of Object.keys(doc)) {
       options.seenObjects.push({ propertyName: name, obj: null });
       try {
         const value = serializeValue(doc[name], options);
