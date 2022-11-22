@@ -9,18 +9,30 @@ const getSymbolFrom = require('./tools/utils').getSymbolFrom;
 const isBufferOrUint8Array = require('./tools/utils').isBufferOrUint8Array;
 
 describe('ObjectId', function () {
-  it('should correctly handle objectId timestamps', function (done) {
+  describe('static createFromTime()', () => {
+    it('should create an objectId with user defined value in the timestamp field', function () {
+      const a = ObjectId.createFromTime(1);
+      expect(a.id.slice(0, 4)).to.deep.equal(Buffer.from([0, 0, 0, 1]));
+      expect(a.getTimestamp()).to.deep.equal(new Date(1 * 1000));
+      expect(a.getTimestamp().getTime()).to.equal(1000);
+    });
+  });
+
+  describe('getTimestamp()', () => {
+    it('should fetch the big endian int32 leading the Oid and create a Date instance', function () {
+      const a = new ObjectId('00000002' + '00'.repeat(8));
+      expect(a.id.slice(0, 4)).to.deep.equal(Buffer.from([0, 0, 0, 2]));
+      expect(Object.prototype.toString.call(a.getTimestamp())).to.equal('[object Date]');
+      expect(a.getTimestamp()).to.deep.equal(new Date(2 * 1000));
+      expect(a.getTimestamp().getTime()).to.equal(2000);
+    });
+  });
+
+  it('should create an objectId with user defined value in the timestamp field', function () {
     const a = ObjectId.createFromTime(1);
-    expect(Buffer.from([0, 0, 0, 1])).to.deep.equal(a.id.slice(0, 4));
-    expect(1000).to.equal(a.getTimestamp().getTime());
-
-    const b = new ObjectId();
-    b.generationTime = 1;
-    expect(Buffer.from([0, 0, 0, 1])).to.deep.equal(b.id.slice(0, 4));
-    expect(1).to.equal(b.generationTime);
-    expect(1000).to.equal(b.getTimestamp().getTime());
-
-    done();
+    expect(a.id.slice(0, 4)).to.deep.equal(Buffer.from([0, 0, 0, 1]));
+    expect(a.getTimestamp()).to.deep.equal(new Date(1 * 1000));
+    expect(a.getTimestamp().getTime()).to.equal(1000);
   });
 
   it('should correctly create ObjectId from ObjectId', function () {

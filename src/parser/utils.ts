@@ -2,6 +2,7 @@ import { ByteUtils } from '../utils/byte_utils';
 import { getGlobal } from '../utils/global';
 
 type RandomBytesFunction = (size: number) => Uint8Array;
+declare let console: { warn(...message: unknown[]): void };
 
 /**
  * Normalizes our expected stringified form of a function across versions of node
@@ -106,17 +107,4 @@ export function isDate(d: unknown): d is Date {
  */
 export function isObjectLike(candidate: unknown): candidate is Record<string, unknown> {
   return typeof candidate === 'object' && candidate !== null;
-}
-
-declare let console: { warn(...message: unknown[]): void };
-export function deprecate<T extends Function>(fn: T, message: string): T {
-  let warned = false;
-  function deprecated(this: unknown, ...args: unknown[]) {
-    if (!warned) {
-      console.warn(message);
-      warned = true;
-    }
-    return fn.apply(this, args);
-  }
-  return deprecated as unknown as T;
 }
