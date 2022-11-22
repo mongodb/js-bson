@@ -42,7 +42,7 @@ let BSON;
 if (web) {
   BSON = loadBSONWithGlobal().BSON;
 } else {
-  BSON = require('../src/bson');
+  BSON = require('../src/index');
 }
 
 // Some mocha tests need to know the environment for instanceof assertions or be skipped

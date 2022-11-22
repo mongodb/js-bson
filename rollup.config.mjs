@@ -32,7 +32,7 @@ const tsConfig = {
   tsconfig: false,
   include: ['src/**/*']
 };
-const input = 'src/bson.ts';
+const input = 'src/index.ts';
 
 const plugins = (options = { browser: false }) => {
   return [

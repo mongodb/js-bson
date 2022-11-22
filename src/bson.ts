@@ -247,39 +247,3 @@ export function deserializeStream(
   // Return object containing end index of parsing and list of documents
   return index;
 }
-
-/**
- * BSON default export
- * @deprecated Please use named exports
- * @privateRemarks
- * We want to someday deprecate the default export,
- * so none of the new TS types are being exported on the default
- * @public
- */
-const BSON = {
-  Binary,
-  Code,
-  DBRef,
-  Decimal128,
-  Double,
-  Int32,
-  Long,
-  UUID,
-  Map,
-  MaxKey,
-  MinKey,
-  ObjectId,
-  BSONRegExp,
-  BSONSymbol,
-  Timestamp,
-  EJSON,
-  setInternalBufferSize,
-  serialize,
-  serializeWithBufferAndIndex,
-  deserialize,
-  calculateObjectSize,
-  deserializeStream,
-  BSONError,
-  BSONTypeError
-};
-export default BSON;
