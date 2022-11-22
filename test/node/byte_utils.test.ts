@@ -1,5 +1,5 @@
-import { expect } from 'chai';
 import { types, inspect } from 'node:util';
+import { expect } from 'chai';
 import { isBufferOrUint8Array } from './tools/utils';
 import { ByteUtils } from '../../src/utils/byte_utils';
 import { nodeJsByteUtils } from '../../src/utils/node_byte_utils';
@@ -453,6 +453,17 @@ describe('ByteUtils', () => {
   });
 
   describe('toLocalBufferType special cases', () => {
+    class MyArrayBuffer extends ArrayBuffer {
+      calls = 0;
+      // @ts-expect-error: checking to see if we fallback to Object.prototype.toString
+      get [Symbol.toStringTag]() {
+        this.calls++;
+        if (this.calls === 1) {
+          return null;
+        }
+        return 'ArrayBuffer';
+      }
+    }
     describe('nodejs', () => {
       it('should return input instance if it is already the correct type', () => {
         const nodejsBuffer = Buffer.from('abc', 'utf8');
@@ -464,6 +475,14 @@ describe('ByteUtils', () => {
         const bufferOut = nodeJsByteUtils.toLocalBufferType(arrayBufferIn);
         expect(bufferOut).to.be.an.instanceOf(Buffer);
         expect(bufferOut.buffer).to.equal(arrayBufferIn);
+      });
+
+      it('should attempt fallback to Object.prototype.toString call if toStringTag does not exist on ArrayBuffer', () => {
+        const input = new MyArrayBuffer(0);
+        // @ts-expect-error: Checking a custom type that overrides toStringTag behavior
+        const result = nodeJsByteUtils.toLocalBufferType(input);
+        expect(Buffer.isBuffer(result), 'expected nodejs Buffer instance').to.be.true;
+        expect(input.calls).to.equal(2);
       });
     });
 
@@ -478,6 +497,14 @@ describe('ByteUtils', () => {
         const bufferOut = nodeJsByteUtils.toLocalBufferType(arrayBufferIn);
         expect(bufferOut).to.be.an.instanceOf(Buffer);
         expect(bufferOut.buffer).to.equal(arrayBufferIn);
+      });
+
+      it('should attempt fallback to Object.prototype.toString call if toStringTag does not exist on ArrayBuffer', () => {
+        const input = new MyArrayBuffer(0);
+        // @ts-expect-error: Checking a custom type that overrides toStringTag behavior
+        const result = webByteUtils.toLocalBufferType(input);
+        expect(types.isUint8Array(result), 'expected a Uint8Array instance').to.be.true;
+        expect(input.calls).to.equal(2);
       });
     });
   });
