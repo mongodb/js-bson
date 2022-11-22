@@ -4,7 +4,7 @@
 
 - [Remove reliance on Node.js Buffer](#remove-reliance-on-nodejs-buffer)
   - [APIs impacted](#apis-impacted)
-- [Restrict supported encodings in `ObjectId.toString` / `UUID.toString` / `Binary.toString`](#restrict-supported-encodings-in--objectidtostring-----uuidtostring-----binarytostring--to-the-following-encodings----hex-----base64-----utf8--)
+- [Restrict supported encodings in `ObjectId.toString` / `UUID.toString` / `Binary.toString`](#restrict-supported-encodings-in-objectidtostring--uuidtostring--binarytostring-to-the-following-encodings-hex--base64--utf8)
     - [Migration Example](#migration-example)
 - [serializeFunctions bug fix](#serializefunctions-bug-fix)
 - [TS "target" set to es2020](#ts-target-set-to-es2020)
