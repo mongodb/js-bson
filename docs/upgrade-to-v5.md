@@ -60,7 +60,7 @@ bin.value(true).toString('utf16le');
 new TextDecoder('utf-16le').decode(bin.value(true));
 ```
 
-## `serializeFunctions` bug fix
+## serializeFunctions bug fix
 
 > **TL;DR**: TODO
 
