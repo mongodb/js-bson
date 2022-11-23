@@ -83,4 +83,4 @@ TODO(NODE-4771): serializeFunctions bug fix makes function names outside the asc
 
 ### Remove `Map` export
 
-BSON no longer polyfills es Map and so the export was removed. The removal should reveal any instances where the global `Map` constructor should be used in place of the one BSON used to export.
+This library no longer polyfills [ES Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) and the export "Map" was removed. Users should migrate to using the global Map constructor available in all supported JS environments.
