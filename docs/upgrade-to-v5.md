@@ -1,9 +1,20 @@
 # Changes in v5
 
+## TOC
+
+- [Changes to Support Cross-platform JS API Compatibility](#changes-to-support-cross-platform-js-api-compatibility)
+  - [Remove reliance on Node.js Buffer](#remove-reliance-on-nodejs-buffer)
+    - [Impacted APIs now return Uint8Array in web environments; Node.js environments unaffected](#apis-impacted)
+  - [Restrict supported encodings in `ObjectId.toString` / `UUID.toString` / `Binary.toString`](#restrict-supported-encodings-in-objectidtostring--uuidtostring--binarytostring)
+    - [Migration available if types beyond `'hex' | 'base64' | 'utf8'` are desired](#migration-example)
+- [Other Changes](#other-changes)
+  - [serializeFunctions bug fix](#serializefunctions-bug-fix)
+  - [TS "target" set to es2020](#ts-target-set-to-es2020)
+
 ## About
 
 The following is a detailed collection of the changes in the major v5 release of the bson package
-for nodejs and web platforms.
+for Node.js and web platforms.
 
 <!--
 1. a brief statement of what is breaking (brief as in "x will now return y instead of z", or "x is no longer supported, use y instead", etc
@@ -11,21 +22,37 @@ for nodejs and web platforms.
 3. if applicable, an example of suggested syntax change (can be included in (1) )
 -->
 
+## Changes to Support Cross-platform JS API Compatibility
+
 ### Remove reliance on Node.js Buffer
 
-> **TL;DR**: Web environments return Uint8Array; Node.js environments return Buffer
+> **TL;DR**: Impacted APIs now return Uint8Array in web environments; Node.js environments unaffected
 
 For those that use the BSON library on Node.js, there is no change - the BSON APIs will still return and accept instances of Node.js Buffer. Since we no longer depend on the Buffer web shim for compatibility with browsers, in non-Node.js environments a Uint8Array will be returned instead.
 
 This allows the BSON library to be better at platform independence while keeping its behavior consistent cross platform. The Buffer shim served the library well but brought in more than was necessary for the concerns of the code here.
 
-### `ObjectId.toString` / `UUID.toString` / `Binary.toString`
+#### APIs impacted
 
-> **TL;DR**: These `toString` methods only support the following encodings: 'hex', 'base64', 'utf8'
+The following APIs now return Uint8Arrays when the library is loaded in an environment that does not define a global Node.js Buffer.
+
+- `Binary.prototype.buffer`
+- `Binary.prototype.read()`
+- `Binary.prototype.value()`
+- `Decimal128.prototype.bytes`
+- `ObjectId.prototype.id`
+- `ObjectId.generate()`
+- `serialize()`
+- `UUID.prototype.id`
+- `UUID.generate()`
+
+### Restrict supported encodings in `ObjectId.toString` / `UUID.toString` / `Binary.toString`
+
+> **TL;DR**: The only supported encodings are: `'hex' | 'base64' | 'utf8'`
 
 The methods: `ObjectId.toString`, `UUID.toString`, and `Binary.toString` took encodings that were passed through to the Node.js Buffer API. As a result of no longer relying on the presence of `Buffer` we can no longer support [every encoding that Node.js does](https://nodejs.org/dist/latest-v16.x/docs/api/buffer.html#buffers-and-character-encodings). We continue to support `'hex'` and `'base64'` on all three methods and additionally `'utf-8' | 'utf8'` on `Binary.toString`. If any of the other encodings are desired the underlying buffer for all these classes are publicly accessible and while in Node.js will be stored as a Node.js buffer:
 
-##### Migration Example:
+#### Migration Example
 
 ```typescript
 // Given Binary constructed from one of the encodings (using 'utf16le' as an example here)
@@ -39,14 +66,16 @@ bin.value(true).toString('utf16le');
 new TextDecoder('utf-16le').decode(bin.value(true));
 ```
 
-### `serializeFunctions` bug fix
-
-> **TL;DR**: TODO
-
-TODO(NODE-4771): serializeFunctions bug fix makes function names outside the ascii range get serialized correctly
+## Other Changes
 
 ### TS "target" set to es2020
 
 We have set our typescript compilation target to `es2020` which aligns with our minimum supported Node.js version 14+. The following is from the typescript release notes on es2020 support, so it's some of the syntax that can be expected to be preserved after compilation:
 
-> This will preserve newer ECMAScript 2020 features like optional chaining, nullish coalescing, export * as ns, and dynamic import(...) syntax. It also means bigint literals now have a stable target below esnext.
+> This will preserve newer ECMAScript 2020 features like optional chaining, nullish coalescing, export \* as ns, and dynamic import(...) syntax. It also means bigint literals now have a stable target below esnext.
+
+### serializeFunctions bug fix
+
+> **TL;DR**: TODO
+
+TODO(NODE-4771): serializeFunctions bug fix makes function names outside the ascii range get serialized correctly
