@@ -463,7 +463,7 @@ describe('ByteUtils', () => {
       sinon.restore();
     });
 
-    class MyArrayBuffer extends ArrayBuffer {
+    class MyArrayBufferWithNullishToStringTag extends ArrayBuffer {
       calls = 0;
       // @ts-expect-error: checking to see if we fallback to Object.prototype.toString
       get [Symbol.toStringTag]() {
@@ -471,7 +471,15 @@ describe('ByteUtils', () => {
         if (this.calls === 1) {
           return null;
         }
-        return 'ArrayBuffer';
+        return super[Symbol.toStringTag];
+      }
+    }
+
+    class MyArrayBufferWithNormalToStringTag extends ArrayBuffer {
+      calls = 0;
+      get [Symbol.toStringTag]() {
+        this.calls++;
+        return super[Symbol.toStringTag];
       }
     }
 
@@ -488,8 +496,16 @@ describe('ByteUtils', () => {
         expect(bufferOut.buffer).to.equal(arrayBufferIn);
       });
 
+      it('should use toStringTag getter defined on ArrayBuffer', () => {
+        const input = new MyArrayBufferWithNormalToStringTag(0);
+        const result = nodeJsByteUtils.toLocalBufferType(input);
+        expect(Buffer.isBuffer(result), 'expected nodejs Buffer instance').to.be.true;
+        expect(input.calls).to.equal(1);
+        expect(objectProtoToStringSpy).to.not.have.been.called;
+      });
+
       it('should attempt fallback to Object.prototype.toString call if toStringTag does not exist on ArrayBuffer', () => {
-        const input = new MyArrayBuffer(0);
+        const input = new MyArrayBufferWithNullishToStringTag(0);
         // @ts-expect-error: Checking a custom type that overrides toStringTag behavior
         const result = nodeJsByteUtils.toLocalBufferType(input);
         expect(Buffer.isBuffer(result), 'expected nodejs Buffer instance').to.be.true;
@@ -505,13 +521,21 @@ describe('ByteUtils', () => {
 
       it('should create a view on a SharedArrayBuffer', function () {
         const arrayBufferIn = new SharedArrayBuffer(3);
-        const bufferOut = nodeJsByteUtils.toLocalBufferType(arrayBufferIn);
-        expect(bufferOut).to.be.an.instanceOf(Buffer);
+        const bufferOut = webByteUtils.toLocalBufferType(arrayBufferIn);
+        expect(types.isUint8Array(bufferOut), 'expected Uint8Array instance').to.be.true;
         expect(bufferOut.buffer).to.equal(arrayBufferIn);
       });
 
+      it('should use toStringTag getter defined on ArrayBuffer', () => {
+        const input = new MyArrayBufferWithNormalToStringTag(0);
+        const result = webByteUtils.toLocalBufferType(input);
+        expect(types.isUint8Array(result), 'expected Uint8Array instance').to.be.true;
+        expect(input.calls).to.equal(1);
+        expect(objectProtoToStringSpy).to.not.have.been.called;
+      });
+
       it('should attempt fallback to Object.prototype.toString call if toStringTag does not exist on ArrayBuffer', () => {
-        const input = new MyArrayBuffer(0);
+        const input = new MyArrayBufferWithNullishToStringTag(0);
         // @ts-expect-error: Checking a custom type that overrides toStringTag behavior
         const result = webByteUtils.toLocalBufferType(input);
         expect(types.isUint8Array(result), 'expected a Uint8Array instance').to.be.true;
