@@ -55,7 +55,6 @@ const EXPECTED_EXPORTS = [
   'MaxKey',
   'BSONRegExp',
   'Decimal128',
-  'ObjectID',
   'BSONError',
   'BSONTypeError',
   'setInternalBufferSize',

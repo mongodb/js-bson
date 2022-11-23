@@ -51,8 +51,6 @@ expectError(MinKey.prototype.toJSON);
 expectError(Long.prototype.toJSON);
 expectError(BSONRegExp.prototype.toJSON);
 
-// ObjectID uses a capital for backwards compatibility
-expectType<'ObjectID'>(ObjectId.prototype._bsontype)
 // BSONSymbol was renamed to not conflict with the global JS Symbol
 // but its _bsontype is still 'Symbol'
 expectType<'Symbol'>(BSONSymbol.prototype._bsontype)

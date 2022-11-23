@@ -85,11 +85,7 @@ export {
   MinKey,
   MaxKey,
   BSONRegExp,
-  Decimal128,
-  // In 4.0.0 and 4.0.1, this property name was changed to ObjectId to match the class name.
-  // This caused interoperability problems with previous versions of the library, so in
-  // later builds we changed it back to ObjectID (capital D) to match legacy implementations.
-  ObjectId as ObjectID
+  Decimal128
 };
 export { BSONError, BSONTypeError } from './error';
 
@@ -308,7 +304,6 @@ const BSON = {
   MaxKey,
   MinKey,
   ObjectId,
-  ObjectID: ObjectId,
   BSONRegExp,
   BSONSymbol,
   Timestamp,

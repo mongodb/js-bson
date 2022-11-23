@@ -13,7 +13,7 @@ const Int32 = BSON.Int32;
 const Long = BSON.Long;
 const MaxKey = BSON.MaxKey;
 const MinKey = BSON.MinKey;
-const ObjectID = BSON.ObjectID;
+const ObjectID = BSON.ObjectId;
 const ObjectId = BSON.ObjectId;
 const BSONRegExp = BSON.BSONRegExp;
 const BSONSymbol = BSON.BSONSymbol;
@@ -365,14 +365,14 @@ describe('Extended JSON', function () {
           binary: new bsonModule.Binary(buffer),
           code: new bsonModule.Code('function() {}'),
           dbRef: new bsonModule.DBRef('tests', new Int32(1), 'test'),
-          decimal128: new bsonModule.Decimal128.fromString('9991223372036854775807'),
+          decimal128: bsonModule.Decimal128.fromString('9991223372036854775807'),
           double: new bsonModule.Double(10.1),
           int32: new bsonModule.Int32(10),
-          long: new bsonModule.Long.fromString('1223372036854775807'),
+          long: bsonModule.Long.fromString('1223372036854775807'),
           maxKey: new bsonModule.MaxKey(),
           // minKey: new bsonModule.MinKey(), // broken until #310 is fixed in 1.x
           objectId: bsonModule.ObjectId.createFromHexString('111111111111111111111111'),
-          objectID: bsonModule.ObjectID.createFromHexString('111111111111111111111111'),
+          objectID: bsonModule.ObjectId.createFromHexString('111111111111111111111111'),
           bsonRegExp: new bsonModule.BSONRegExp('hello world', 'i'),
           symbol: bsonModule.BSONSymbol
             ? new bsonModule.BSONSymbol('symbol')
@@ -383,6 +383,7 @@ describe('Extended JSON', function () {
       });
 
       const serializationOptions = {};
+
       const bsonBuffers = {
         oldObjectOldSerializer: OldBSON.serialize(oldBsonObject, serializationOptions),
         oldObjectNewSerializer: BSON.serialize(oldBsonObject, serializationOptions),
@@ -416,7 +417,7 @@ describe('Extended JSON', function () {
       // Browser tests currently don't handle BSON Symbol correctly, so only test this under Node where OldBSON !=== BSON module.
       if (BSON !== OldBSON) {
         expect(deserialized.usingOldDeserializer['symbol'].value).to.equal(
-          deserialized.usingNewDeserializer['symbol']
+          deserialized.usingNewDeserializer['symbol'].toString()
         );
       }
       delete deserialized.usingOldDeserializer['symbol'];

@@ -43,21 +43,7 @@ nvm use --lts
 
 set -o xtrace
 
-
-
-# setup npm cache in a local directory
-cat <<EOT > .npmrc
-devdir=${NPM_CACHE_DIR}/.node-gyp
-init-module=${NPM_CACHE_DIR}/.npm-init.js
-cache=${NPM_CACHE_DIR}
-tmp=${NPM_TMP_DIR}
-registry=https://registry.npmjs.org
-EOT
-
-# install node dependencies
-# npm prepare runs after install and will compile the library
-# TODO(NODE-3555): rollup dependencies for node polyfills have broken peerDeps. We can remove this flag once we've removed them.
-npm install --legacy-peer-deps
+npm install
 
 set +o xtrace
 echo "Running: nvm use ${NODE_VERSION}"
