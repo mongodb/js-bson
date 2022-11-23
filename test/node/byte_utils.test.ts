@@ -4,6 +4,7 @@ import { isBufferOrUint8Array } from './tools/utils';
 import { ByteUtils } from '../../src/utils/byte_utils';
 import { nodeJsByteUtils } from '../../src/utils/node_byte_utils';
 import { webByteUtils } from '../../src/utils/web_byte_utils';
+import * as sinon from 'sinon';
 
 type ByteUtilTest<K extends keyof ByteUtils> = {
   name: string;
@@ -453,6 +454,15 @@ describe('ByteUtils', () => {
   });
 
   describe('toLocalBufferType special cases', () => {
+    let objectProtoToStringSpy;
+    beforeEach(() => {
+      objectProtoToStringSpy = sinon.spy(Object.prototype, 'toString');
+    });
+
+    afterEach(() => {
+      sinon.restore();
+    });
+
     class MyArrayBuffer extends ArrayBuffer {
       calls = 0;
       // @ts-expect-error: checking to see if we fallback to Object.prototype.toString
@@ -464,6 +474,7 @@ describe('ByteUtils', () => {
         return 'ArrayBuffer';
       }
     }
+
     describe('nodejs', () => {
       it('should return input instance if it is already the correct type', () => {
         const nodejsBuffer = Buffer.from('abc', 'utf8');
@@ -482,7 +493,7 @@ describe('ByteUtils', () => {
         // @ts-expect-error: Checking a custom type that overrides toStringTag behavior
         const result = nodeJsByteUtils.toLocalBufferType(input);
         expect(Buffer.isBuffer(result), 'expected nodejs Buffer instance').to.be.true;
-        expect(input.calls).to.equal(2);
+        expect(objectProtoToStringSpy).to.be.calledOnce;
       });
     });
 
@@ -504,7 +515,7 @@ describe('ByteUtils', () => {
         // @ts-expect-error: Checking a custom type that overrides toStringTag behavior
         const result = webByteUtils.toLocalBufferType(input);
         expect(types.isUint8Array(result), 'expected a Uint8Array instance').to.be.true;
-        expect(input.calls).to.equal(2);
+        expect(objectProtoToStringSpy).to.be.calledOnce;
       });
     });
   });

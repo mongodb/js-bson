@@ -10,6 +10,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const chai = require('chai');
 
+chai.use(require('sinon-chai'));
+
 /**
  * In the runInContext "web" testing instanceof checks fail
  * since the error classes are declared in a different realm (?)
