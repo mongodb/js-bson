@@ -5,7 +5,7 @@
 - [Changes to Support Cross-platform JS API Compatibility](#changes-to-support-cross-platform-js-api-compatibility)
   - [Remove reliance on Node.js Buffer](#remove-reliance-on-nodejs-buffer)
     - [Impacted APIs now return Uint8Array in web environments; Node.js environments unaffected](#apis-impacted)
-  - [Restrict supported encodings in `ObjectId.toString` / `UUID.toString` / `Binary.toString`](#restrict-supported-encodings-in-objectidtostring--uuidtostring--binarytostring-to-the-following-encodings-hex--base64--utf8)
+  - [Restrict supported encodings in `ObjectId.toString` / `UUID.toString` / `Binary.toString`](#restrict-supported-encodings-in-objectidtostring--uuidtostring--binarytostring)
     - [Migration available if types beyond `'hex' | 'base64' | 'utf8'` are desired](#migration-example)
 - [Other Changes](#other-changes)
   - [serializeFunctions bug fix](#serializefunctions-bug-fix)
