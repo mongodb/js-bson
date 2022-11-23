@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as BSON from '../register-bson';
 
 describe('ES Map support in serialize()', () => {
-  it('should serialize a empty Map to BSON document', () => {
+  it('serialize a empty Map to BSON document - { }', () => {
     const map = new Map();
     const emptyBSON = new Uint8Array([5, 0, 0, 0, 0]);
     const result = BSON.serialize(map);
@@ -10,7 +10,7 @@ describe('ES Map support in serialize()', () => {
     expect(result, 'byteLength must be 5 followed by null terminator').to.deep.equal(emptyBSON);
   });
 
-  it('should serialize a Map with one key to BSON document', () => {
+  it('serialize a Map with one key to BSON document - { a: 2 }', () => {
     const map = new Map([['a', new BSON.Int32(2)]]);
     const le12 = new Uint8Array([12, 0, 0, 0]);
     const le2 = new Uint8Array([2, 0, 0, 0]);
@@ -24,7 +24,7 @@ describe('ES Map support in serialize()', () => {
     expect(result, 'all documents end with null terminator').to.have.property('11', 0x00);
   });
 
-  it('should serialize a nested Map to BSON document', () => {
+  it('serialize a nested Map to a BSON document - { a: { b: 2 } }', () => {
     // { a: { b: 2 } }
     const map = new Map([['a', new Map([['b', new BSON.Int32(2)]])]]);
     const result = BSON.serialize(map);
@@ -47,7 +47,7 @@ describe('ES Map support in serialize()', () => {
     expect(result, 'all documents end with null terminator').to.have.property('19', 0x00);
   });
 
-  it('should respect Map element name order when names are numeric', () => {
+  it('keep chronological Map key order despite keys being numeric', () => {
     const map = new Map([
       ['2', new BSON.Int32(2)],
       ['1', new BSON.Int32(1)]
