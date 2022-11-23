@@ -14,7 +14,7 @@
 ## About
 
 The following is a detailed collection of the changes in the major v5 release of the bson package
-for nodejs and web platforms.
+for Node.js and web platforms.
 
 <!--
 1. a brief statement of what is breaking (brief as in "x will now return y instead of z", or "x is no longer supported, use y instead", etc
@@ -34,7 +34,7 @@ This allows the BSON library to be better at platform independence while keeping
 
 #### APIs impacted
 
-The following APIs now return Uint8Arrays when the library is loaded in an environment that does not define a global nodejs Buffer.
+The following APIs now return Uint8Arrays when the library is loaded in an environment that does not define a global Node.js Buffer.
 
 - `Binary.prototype.buffer`
 - `Binary.prototype.read()`
