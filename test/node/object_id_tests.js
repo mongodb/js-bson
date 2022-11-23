@@ -10,7 +10,7 @@ const isBufferOrUint8Array = require('./tools/utils').isBufferOrUint8Array;
 
 describe('ObjectId', function () {
   describe('static createFromTime()', () => {
-    it('should create an objectId with user defined value in the timestamp field', function () {
+    it('creates an objectId with user defined value in the timestamp field', function () {
       const a = ObjectId.createFromTime(1);
       expect(a.id.slice(0, 4)).to.deep.equal(Buffer.from([0, 0, 0, 1]));
       expect(a.getTimestamp()).to.deep.equal(new Date(1 * 1000));
@@ -19,7 +19,7 @@ describe('ObjectId', function () {
   });
 
   describe('getTimestamp()', () => {
-    it('should fetch the big endian int32 leading the Oid and create a Date instance', function () {
+    it('fetches the big endian int32 leading the Oid and create a Date instance', function () {
       const a = new ObjectId('00000002' + '00'.repeat(8));
       expect(a.id.slice(0, 4)).to.deep.equal(Buffer.from([0, 0, 0, 2]));
       expect(Object.prototype.toString.call(a.getTimestamp())).to.equal('[object Date]');
@@ -28,7 +28,7 @@ describe('ObjectId', function () {
     });
   });
 
-  it('should create an objectId with user defined value in the timestamp field', function () {
+  it('creates an objectId with user defined value in the timestamp field', function () {
     const a = ObjectId.createFromTime(1);
     expect(a.id.slice(0, 4)).to.deep.equal(Buffer.from([0, 0, 0, 1]));
     expect(a.getTimestamp()).to.deep.equal(new Date(1 * 1000));
