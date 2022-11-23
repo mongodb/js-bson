@@ -2,7 +2,15 @@ import { expect } from 'chai';
 import * as BSON from '../register-bson';
 
 describe('ES Map support in serialize()', () => {
-  it('should serialize a Map to BSON document', () => {
+  it('should serialize a empty Map to BSON document', () => {
+    const map = new Map();
+    const emptyBSON = new Uint8Array([5, 0, 0, 0, 0]);
+    const result = BSON.serialize(map);
+    expect(result).to.have.property('byteLength', 5);
+    expect(result, 'byteLength must be 5 followed by null terminator').to.deep.equal(emptyBSON);
+  });
+
+  it('should serialize a Map with one key to BSON document', () => {
     const map = new Map([['a', new BSON.Int32(2)]]);
     const le12 = new Uint8Array([12, 0, 0, 0]);
     const le2 = new Uint8Array([2, 0, 0, 0]);
