@@ -75,8 +75,9 @@ function deserializeValue(value: any, options: EJSON.Options = {}) {
 
     // if it's an integer, should interpret as smallest BSON integer
     // that can represent it exactly. (if out of range, interpret as double.)
-    if (Math.floor(value) === value) {
+    if (Number.isInteger(value) && !Object.is(value, -0)) {
       if (value >= BSON_INT32_MIN && value <= BSON_INT32_MAX) return new Int32(value);
+      // TODO(NODE-4377): EJSON js number handling diverges from BSON
       if (value >= BSON_INT64_MIN && value <= BSON_INT64_MAX) return Long.fromNumber(value);
     }
 
@@ -216,16 +217,16 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
   }
 
   if (typeof value === 'number' && (!options.relaxed || !isFinite(value))) {
-    // it's an integer
-    if (Math.floor(value) === value) {
-      const int32Range = value >= BSON_INT32_MIN && value <= BSON_INT32_MAX,
-        int64Range = value >= BSON_INT64_MIN && value <= BSON_INT64_MAX;
+    if (Number.isInteger(value) && !Object.is(value, -0)) {
+      const int32Range = value >= BSON_INT32_MIN && value <= BSON_INT32_MAX;
+      const int64Range = value >= BSON_INT64_MIN && value <= BSON_INT64_MAX;
 
       // interpret as being of the smallest BSON integer type that can represent the number exactly
       if (int32Range) return { $numberInt: value.toString() };
+      // TODO(NODE-4377): EJSON js number handling diverges from BSON
       if (int64Range) return { $numberLong: value.toString() };
     }
-    return { $numberDouble: value.toString() };
+    return { $numberDouble: Object.is(value, -0) ? '-0.0' : value.toString() };
   }
 
   if (value instanceof RegExp || isRegExp(value)) {

@@ -1,6 +1,4 @@
-'use strict';
-
-const BSON = require('../register-bson');
+import * as BSON from '../register-bson';
 const Double = BSON.Double;
 
 describe('BSON Double Precision', function () {
@@ -88,5 +86,17 @@ describe('BSON Double Precision', function () {
     const type = serializedDouble[4];
     expect(type).to.not.equal(BSON.BSON_DATA_NUMBER);
     expect(type).to.equal(BSON.BSON_DATA_INT);
+  });
+
+  describe('extended JSON', () => {
+    it('preserves negative zero in canonical format', () => {
+      const result = BSON.EJSON.stringify({ a: -0.0 }, { relaxed: false });
+      expect(result).to.equal(`{"a":{"$numberDouble":"-0.0"}}`);
+    });
+
+    it('loses negative zero in relaxed format', () => {
+      const result = BSON.EJSON.stringify({ a: -0.0 }, { relaxed: true });
+      expect(result).to.equal(`{"a":0}`);
+    });
   });
 });
