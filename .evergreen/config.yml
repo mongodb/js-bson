@@ -31,9 +31,14 @@ functions:
           fi
           export PROJECT_DIRECTORY="$(pwd)"
 
-          # get the latest version of node for given major version
-          NODE_VERSION=$(curl -sL nodejs.org/download/release/latest-v${NODE_MAJOR_VERSION}.x/SHASUMS256.txt -o - | head -n 1 | tr -s ' ' | cut -d' ' -f2 | cut -d- -f2 | cut -dv -f2)
-          echo "LATEST NODE ${NODE_MAJOR_VERSION}.x = $NODE_VERSION"
+          if [ $NODE_MAJOR_VERSION == 'latest' ] 
+          then 
+            NODE_VERSION='node'
+          else 
+            # get the latest version of node for given major version
+            NODE_VERSION=$(curl -sL nodejs.org/download/release/latest-v${NODE_MAJOR_VERSION}.x/SHASUMS256.txt -o - | head -n 1 | tr -s ' ' | cut -d' ' -f2 | cut -d- -f2 | cut -dv -f2)
+            echo "LATEST NODE ${NODE_MAJOR_VERSION}.x = $NODE_VERSION"
+          fi
 
           cat <<EOT > expansion.yml
           CURRENT_VERSION: "$CURRENT_VERSION"
@@ -118,6 +123,16 @@ tasks:
       - func: fetch source
         vars:
           NODE_MAJOR_VERSION: 18
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: node
+  - name: node-tests-latest
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: latest
       - func: install dependencies
       - func: run tests
         vars:
