@@ -6,7 +6,6 @@ import { Double } from './double';
 import { EJSON } from './extended_json';
 import { Int32 } from './int_32';
 import { Long } from './long';
-import { Map } from './map';
 import { MaxKey } from './max_key';
 import { MinKey } from './min_key';
 import { ObjectId } from './objectid';
@@ -74,7 +73,6 @@ export { LongWithoutOverridesClass } from './timestamp';
 export type { SerializeOptions, DeserializeOptions };
 export {
   Code,
-  Map,
   BSONSymbol,
   DBRef,
   Binary,

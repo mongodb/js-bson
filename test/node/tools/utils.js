@@ -176,3 +176,17 @@ const getSymbolFrom = function (target, symbolName, assertExists) {
 };
 
 exports.getSymbolFrom = getSymbolFrom;
+
+module.exports.byStrings = (a, b) => {
+  const res = `${a}`.localeCompare(`${b}`);
+  return res < 0 ? -1 : res > 0 ? 1 : 0;
+};
+
+module.exports.sorted = (iterable, how) => {
+  if (typeof how !== 'function') {
+    throw new TypeError('must provide a "how" function to sorted');
+  }
+  const items = Array.from(iterable);
+  items.sort(how);
+  return items;
+};
