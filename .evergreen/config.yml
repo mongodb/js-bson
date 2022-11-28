@@ -19,39 +19,13 @@ functions:
     - command: git.get_project
       params:
         directory: src
-    - command: shell.exec
+    - command: subprocess.exec
       params:
         working_dir: src
-        script: |
-          # Get the current unique version of this checkout
-          if [ "${is_patch}" = "true" ]; then
-             CURRENT_VERSION=$(git describe)-patch-${version_id}
-          else
-             CURRENT_VERSION=latest
-          fi
-          export PROJECT_DIRECTORY="$(pwd)"
-
-          if [ $NODE_MAJOR_VERSION == 'latest' ] 
-          then 
-            NODE_VERSION='node'
-          else 
-            # get the latest version of node for given major version
-            NODE_VERSION=$(curl -sL nodejs.org/download/release/latest-v${NODE_MAJOR_VERSION}.x/SHASUMS256.txt -o - | head -n 1 | tr -s ' ' | cut -d' ' -f2 | cut -d- -f2 | cut -dv -f2)
-            echo "LATEST NODE ${NODE_MAJOR_VERSION}.x = $NODE_VERSION"
-          fi
-
-          cat <<EOT > expansion.yml
-          CURRENT_VERSION: "$CURRENT_VERSION"
-          PROJECT_DIRECTORY: "$PROJECT_DIRECTORY"
-          NODE_VERSION: "$NODE_VERSION"
-          PREPARE_SHELL: |
-             set -o errexit
-             set -o xtrace
-             export PROJECT_DIRECTORY="$PROJECT_DIRECTORY"
-             export NODE_VERSION="$NODE_VERSION"
-          EOT
-          # See what we've done
-          cat expansion.yml
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - .evergreen/setup-environment.sh
     - command: expansions.update
       params:
         file: src/expansion.yml

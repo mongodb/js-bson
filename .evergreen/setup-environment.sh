@@ -8,11 +8,6 @@ else
 fi
 export PROJECT_DIRECTORY="$(pwd)"
 
-if [ -z "$NODE_MAJOR_VERSION" ]; then
-    echo "node major version was NOT set"
-    exit 1
-fi
-
 if [ "$NODE_MAJOR_VERSION" == 'latest' ]; then 
     NODE_VERSION='node'
     echo "using latest node version"
