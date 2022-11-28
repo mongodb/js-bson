@@ -100,3 +100,7 @@ The following deprecated methods have been removed:
 - `ObjectId.prototype.get_inc`
 - `ObjectId.get_inc`
   - The `static getInc()` is private since invoking it increments the next `ObjectId` index, so invoking would impact the creation of subsequent ObjectIds.
+
+### Negative Zero is now serialized to Double
+
+While use cases for negative zero may be rare it is important that the value is preserved on round trips through the BSON serialization layer. Prior to this change negative zero was possible to preserve with the BSON `new Double(-0)` type, such code can be updated to use `-0` directly.
