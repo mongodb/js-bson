@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
 # Get the current unique version of this checkout
 if [ "${is_patch}" = "true" ]; then
