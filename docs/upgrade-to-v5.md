@@ -85,6 +85,6 @@ TODO(NODE-4771): serializeFunctions bug fix makes function names outside the asc
 
 This library no longer polyfills [ES Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) and the export "Map" was removed. Users should migrate to using the global Map constructor available in all supported JS environments.
 
-### Decimal128 toObject mapper support removed
+### `Decimal128` `toObject()` mapper support removed
 
-Decimal128 can no longer have a toObject static method added on to it for mapping to a custom value. This feature was undocumented an inconsistent with the rest of our BSON types. At this time there is no direct migration. If you are using a cursor in the driver it supports transformations via `.map` and if you are just using BSON directly you will need to find your Decimal128 instances and transform them manually. There is a plan to provide a better mechanism for consistently transforming BSON values tracked here: https://jira.mongodb.org/browse/NODE-4680, please feel free to add a vote or comment a use case to help us land the feature in the most useful form.
+`Decimal128` can no longer have a `toObject()` method added on to its prototype for mapping to a custom value. This feature was undocumented and inconsistent with the rest of our BSON types. At this time there is no direct migration: cursors in the driver support transformations via `.map`, otherwise the `Decimal128` instances will require manual transformation. There is a plan to provide a better mechanism for consistently transforming BSON values tracked in [NODE-4680](https://jira.mongodb.org/browse/NODE-4680), please feel free to add a vote or comment with a use case to help us land the feature in the most useful form.
