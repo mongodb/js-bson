@@ -8,14 +8,20 @@ else
 fi
 export PROJECT_DIRECTORY="$(pwd)"
 
-if [ "$NODE_MAJOR_VERSION" == 'latest' ]; then 
-    NODE_VERSION='node'
-    echo "using latest node version"
-else 
+get_node_version() {
+    local NODE_DOWNLOAD_URI="nodejs.org/download/release/latest-v${NODE_MAJOR_VERSION}.x/SHASUMS256.txt"
+
+    if [ "$NODE_MAJOR_VERSION" == 'latest' ]; then 
+        NODE_DOWNLOAD_URI="nodejs.org/download/release/latest/SHASUMS256.txt"
+    fi
+
     # get the latest version of node for given major version
-    NODE_VERSION=$(curl -sL nodejs.org/download/release/latest-v${NODE_MAJOR_VERSION}.x/SHASUMS256.txt -o - | head -n 1 | tr -s ' ' | cut -d' ' -f2 | cut -d- -f2 | cut -dv -f2)
-    echo "LATEST NODE ${NODE_MAJOR_VERSION}.x = $NODE_VERSION"
-fi
+    echo $(curl -sL $NODE_DOWNLOAD_URI -o - | head -n 1 | tr -s ' ' | cut -d' ' -f2 | cut -d- -f2 | cut -dv -f2)
+}
+
+NODE_VERSION=$(get_node_version)
+
+echo "LATEST NODE ${NODE_MAJOR_VERSION}.x = $NODE_VERSION"
 
 cat <<EOT > expansion.yml
 CURRENT_VERSION: "$CURRENT_VERSION"
