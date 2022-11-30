@@ -373,13 +373,7 @@ function deserializeObject(
       // Update index
       index = index + 16;
       // Assign the new Decimal128 value
-      const decimal128 = new Decimal128(bytes) as Decimal128 | { toObject(): unknown };
-      // If we have an alternative mapper use that
-      if ('toObject' in decimal128 && typeof decimal128.toObject === 'function') {
-        value = decimal128.toObject();
-      } else {
-        value = decimal128;
-      }
+      value = new Decimal128(bytes);
     } else if (elementType === constants.BSON_DATA_BINARY) {
       let binarySize =
         buffer[index++] |
