@@ -1,5 +1,5 @@
 import { BSONTypeError } from './error';
-import { deprecate, isUint8Array, randomBytes } from './parser/utils';
+import { isUint8Array, randomBytes } from './parser/utils';
 import { BSONDataView, ByteUtils } from './utils/byte_utils';
 
 // Regular expression that checks for hex value
@@ -33,7 +33,7 @@ export class ObjectId {
   }
 
   /** @internal */
-  static index = Math.floor(Math.random() * 0xffffff);
+  private static index = Math.floor(Math.random() * 0xffffff);
 
   static cacheHexString: boolean;
 
@@ -113,19 +113,6 @@ export class ObjectId {
     }
   }
 
-  /**
-   * The generation time of this ObjectId instance
-   * @deprecated Please use getTimestamp / createFromTime which returns an int32 epoch
-   */
-  get generationTime(): number {
-    return BSONDataView.fromUint8Array(this.id).getUint32(0, false);
-  }
-
-  set generationTime(value: number) {
-    // Encode time into first 4 bytes
-    BSONDataView.fromUint8Array(this.id).setUint32(0, value, false);
-  }
-
   /** Returns the ObjectId id as a 24 character hex string representation */
   toHexString(): string {
     if (ObjectId.cacheHexString && this.__id) {
@@ -143,11 +130,9 @@ export class ObjectId {
 
   /**
    * Update the ObjectId index
-   * @privateRemarks
-   * Used in generating new ObjectId's on the driver
    * @internal
    */
-  static getInc(): number {
+  private static getInc(): number {
     return (ObjectId.index = (ObjectId.index + 1) % 0xffffff);
   }
 
@@ -330,23 +315,3 @@ export class ObjectId {
     return `new ObjectId("${this.toHexString()}")`;
   }
 }
-
-// Deprecated methods
-Object.defineProperty(ObjectId.prototype, 'generate', {
-  value: deprecate(
-    (time: number) => ObjectId.generate(time),
-    'Please use the static `ObjectId.generate(time)` instead'
-  )
-});
-
-Object.defineProperty(ObjectId.prototype, 'getInc', {
-  value: deprecate(() => ObjectId.getInc(), 'Please use the static `ObjectId.getInc()` instead')
-});
-
-Object.defineProperty(ObjectId.prototype, 'get_inc', {
-  value: deprecate(() => ObjectId.getInc(), 'Please use the static `ObjectId.getInc()` instead')
-});
-
-Object.defineProperty(ObjectId, 'get_inc', {
-  value: deprecate(() => ObjectId.getInc(), 'Please use the static `ObjectId.getInc()` instead')
-});

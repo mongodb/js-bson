@@ -87,3 +87,16 @@ This library no longer polyfills [ES Map](https://developer.mozilla.org/en-US/do
 ### `Decimal128` `toObject()` mapper support removed
 
 `Decimal128` can no longer have a `toObject()` method added on to its prototype for mapping to a custom value. This feature was undocumented and inconsistent with the rest of our BSON types. At this time there is no direct migration: cursors in the driver support transformations via `.map`, otherwise the `Decimal128` instances will require manual transformation. There is a plan to provide a better mechanism for consistently transforming BSON values tracked in [NODE-4680](https://jira.mongodb.org/browse/NODE-4680), please feel free to add a vote or comment with a use case to help us land the feature in the most useful form.
+
+### Remove deprecated ObjectId methods
+
+The following deprecated methods have been removed:
+
+- `ObjectId.prototype.generate`
+  - Instead, generate a new ObjectId with the constructor: `new ObjectId()` or using the `static generate(time?: number)` method.
+- `ObjectId.prototype.generationTime`
+  - Instead, use `static createFromTime()` and `getTimestamp()` to set and inspect these values on an `ObjectId()`
+- `ObjectId.prototype.getInc`
+- `ObjectId.prototype.get_inc`
+- `ObjectId.get_inc`
+  - The `static getInc()` is private since invoking it increments the next `ObjectId` index, so invoking would impact the creation of subsequent ObjectIds.
