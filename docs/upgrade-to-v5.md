@@ -96,14 +96,7 @@ The following deprecated methods have been removed:
   - Instead, generate a new ObjectId with the constructor: `new ObjectId()` or using the `static generate(time?: number)` method.
 - `ObjectId.prototype.generationTime`
   - Instead, use `static createFromTime()` and `getTimestamp()` to set and inspect these values on an `ObjectId()`
-
 - `ObjectId.prototype.getInc`
 - `ObjectId.prototype.get_inc`
 - `ObjectId.get_inc`
-  - The `static getInc()` is private since invoking it increments the next `ObjectId` index, instead users should inspect the counter on newly created ObjectId if it is needed.
-  - See the following code snippet for how to obtain the counter field of an ObjectId:
-
-```ts
-const oid = new ObjectId();
-const counterField = oid.id[9] << 16 | oid.id[10] << 8 | oid.id[11];
-```
+  - The `static getInc()` is private since invoking it increments the next `ObjectId` index, so invoking would impact the creation of subsequent ObjectIds.
