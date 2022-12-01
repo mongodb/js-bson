@@ -73,12 +73,15 @@ function deserializeValue(value: any, options: EJSON.Options = {}) {
       return value;
     }
 
-    // if it's an integer, should interpret as smallest BSON integer
-    // that can represent it exactly. (if out of range, interpret as double.)
     if (Number.isInteger(value) && !Object.is(value, -0)) {
-      if (value >= BSON_INT32_MIN && value <= BSON_INT32_MAX) return new Int32(value);
-      // TODO(NODE-4377): EJSON js number handling diverges from BSON
-      if (value >= BSON_INT64_MIN && value <= BSON_INT64_MAX) return Long.fromNumber(value);
+      // interpret as being of the smallest BSON integer type that can represent the number exactly
+      if (value >= BSON_INT32_MIN && value <= BSON_INT32_MAX) {
+        return new Int32(value);
+      }
+      if (value >= BSON_INT64_MIN && value <= BSON_INT64_MAX) {
+        // TODO(NODE-4377): EJSON js number handling diverges from BSON
+        return Long.fromNumber(value);
+      }
     }
 
     // If the number is a non-integer or out of integer range, should interpret as BSON Double.
@@ -218,13 +221,14 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
 
   if (typeof value === 'number' && (!options.relaxed || !isFinite(value))) {
     if (Number.isInteger(value) && !Object.is(value, -0)) {
-      const int32Range = value >= BSON_INT32_MIN && value <= BSON_INT32_MAX;
-      const int64Range = value >= BSON_INT64_MIN && value <= BSON_INT64_MAX;
-
       // interpret as being of the smallest BSON integer type that can represent the number exactly
-      if (int32Range) return { $numberInt: value.toString() };
-      // TODO(NODE-4377): EJSON js number handling diverges from BSON
-      if (int64Range) return { $numberLong: value.toString() };
+      if (value >= BSON_INT32_MIN && value <= BSON_INT32_MAX) {
+        return { $numberInt: value.toString() };
+      }
+      if (value >= BSON_INT64_MIN && value <= BSON_INT64_MAX) {
+        // TODO(NODE-4377): EJSON js number handling diverges from BSON
+        return { $numberLong: value.toString() };
+      }
     }
     return { $numberDouble: Object.is(value, -0) ? '-0.0' : value.toString() };
   }

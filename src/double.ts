@@ -43,7 +43,7 @@ export class Double {
   }
 
   toString(radix?: number): string {
-    return radix == null && Object.is(this.value, -0) ? '-0' : this.value.toString(radix);
+    return this.value.toString(radix);
   }
 
   /** @internal */
