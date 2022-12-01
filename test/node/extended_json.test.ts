@@ -796,7 +796,8 @@ Converting circular structure to EJSON:
     const input = { a: 1 };
     Object.setPrototypeOf(input, { b: 2 });
     const string = EJSON.stringify(input);
-    expect(string).to.include(`"a":`);
     expect(string).to.not.include(`"b":`);
+    const result = JSON.parse(string);
+    expect(result).to.deep.equal({ a: 1 });
   });
 });
