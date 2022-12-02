@@ -1,6 +1,8 @@
 import * as BSON from '../register-bson';
 const Double = BSON.Double;
 
+import { BSON_DATA_NUMBER, BSON_DATA_INT } from '../../src/constants';
+
 describe('BSON Double Precision', function () {
   context('class Double', function () {
     describe('constructor()', function () {
@@ -84,8 +86,8 @@ describe('BSON Double Precision', function () {
     const value = -0;
     const serializedDouble = BSON.serialize({ d: value });
     const type = serializedDouble[4];
-    expect(type).to.not.equal(BSON.BSON_DATA_NUMBER);
-    expect(type).to.equal(BSON.BSON_DATA_INT);
+    expect(type).to.not.equal(BSON_DATA_NUMBER);
+    expect(type).to.equal(BSON_DATA_INT);
   });
 
   describe('extended JSON', () => {
