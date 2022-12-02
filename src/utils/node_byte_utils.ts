@@ -24,6 +24,25 @@ type NodeJsBufferConstructor = Omit<Uint8ArrayConstructor, 'from'> & {
 declare const Buffer: NodeJsBufferConstructor;
 
 /** @internal */
+export function mathRandomBytes(byteLength: number) {
+  return nodeJsByteUtils.fromNumberArray(
+    Array.from({ length: byteLength }, () => Math.floor(Math.random() * 256))
+  );
+}
+
+/** @internal */
+const localRandomBytes = (() => {
+  try {
+    // What about nodejs es module users.........
+    // @ts-expect-error: require does not exist in our type's globals, but it should in nodejs... most of the time
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    return require('crypto').randomBytes;
+  } catch {
+    return mathRandomBytes;
+  }
+})();
+
+/** @internal */
 export const nodeJsByteUtils = {
   toLocalBufferType(potentialBuffer: Uint8Array | NodeJsBuffer | ArrayBuffer): NodeJsBuffer {
     if (Buffer.isBuffer(potentialBuffer)) {
@@ -104,5 +123,9 @@ export const nodeJsByteUtils = {
 
   encodeUTF8Into(buffer: Uint8Array, source: string, byteOffset: number): number {
     return nodeJsByteUtils.toLocalBufferType(buffer).write(source, byteOffset, undefined, 'utf8');
+  },
+
+  randomBytes(byteLength: number): NodeJsBuffer {
+    return localRandomBytes(byteLength);
   }
 };

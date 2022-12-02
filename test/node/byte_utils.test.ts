@@ -5,6 +5,7 @@ import { ByteUtils } from '../../src/utils/byte_utils';
 import { nodeJsByteUtils } from '../../src/utils/node_byte_utils';
 import { webByteUtils } from '../../src/utils/web_byte_utils';
 import * as sinon from 'sinon';
+import { loadBSONWithGlobal } from '../load_bson';
 
 type ByteUtilTest<K extends keyof ByteUtils> = {
   name: string;
@@ -424,6 +425,26 @@ const utf8ByteLengthTests: ByteUtilTest<'utf8ByteLength'>[] = [
     }
   }
 ];
+const randomBytesTests: ByteUtilTest<'randomBytes'>[] = [
+  {
+    name: 'when byteLength is 0 returns zero byteLength buffer',
+    inputs: [0],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.be.instanceOf(Uint8Array);
+      expect(output).to.have.property('byteLength', 0);
+    }
+  },
+  {
+    name: 'when byteLength is 10 returns ten byteLength buffer',
+    inputs: [10],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.be.instanceOf(Uint8Array);
+      expect(output).to.have.property('byteLength', 10);
+    }
+  }
+];
 
 const utils = new Map([
   ['nodeJsByteUtils', nodeJsByteUtils],
@@ -443,7 +464,8 @@ const table = new Map<keyof ByteUtils, ByteUtilTest<keyof ByteUtils>[]>([
   ['toISO88591', toISO88591Tests],
   ['fromUTF8', fromUTF8Tests],
   ['toUTF8', toUTF8Tests],
-  ['utf8ByteLength', utf8ByteLengthTests]
+  ['utf8ByteLength', utf8ByteLengthTests],
+  ['randomBytes', randomBytesTests]
 ]);
 
 describe('ByteUtils', () => {
@@ -541,6 +563,32 @@ describe('ByteUtils', () => {
         expect(types.isUint8Array(result), 'expected a Uint8Array instance').to.be.true;
         expect(objectProtoToStringSpy).to.be.calledOnce;
       });
+    });
+  });
+
+  describe('randomBytes fallback case', () => {
+    let bsonWithNoCrypto;
+    before(function () {
+      bsonWithNoCrypto = loadBSONWithGlobal({
+        crypto: null,
+        // if we don't add a copy of Math here then we cannot spy on it for the test
+        Math: {
+          pow: Math.pow,
+          floor: Math.floor,
+          random: Math.random
+        }
+      });
+    });
+
+    after(function () {
+      sinon.restore();
+      bsonWithNoCrypto = null;
+    });
+
+    it('should fall back to Math.random implementation for random bytes if crypto is not present', () => {
+      const randomSpy = sinon.spy(bsonWithNoCrypto.Math, 'random');
+      new bsonWithNoCrypto.BSON.UUID();
+      expect(randomSpy).to.have.callCount(16);
     });
   });
 
