@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import * as BSON from '../register-bson';
 const Double = BSON.Double;
 
@@ -91,5 +90,31 @@ describe('BSON Double Precision', function () {
     expect(serializedDouble.subarray(7, 15)).to.deep.equal(
       new Uint8Array(new Float64Array([-0]).buffer)
     );
+  });
+
+  describe('extended JSON', () => {
+    describe('stringify()', () => {
+      it('preserves negative zero in canonical format', () => {
+        const result = BSON.EJSON.stringify({ a: -0.0 }, { relaxed: false });
+        expect(result).to.equal(`{"a":{"$numberDouble":"-0.0"}}`);
+      });
+
+      it('loses negative zero in relaxed format', () => {
+        const result = BSON.EJSON.stringify({ a: -0.0 }, { relaxed: true });
+        expect(result).to.equal(`{"a":0}`);
+      });
+    });
+
+    describe('parse()', () => {
+      it('preserves negative zero in deserialization with relaxed false', () => {
+        const result = BSON.EJSON.parse(`{ "a": -0.0 }`, { relaxed: false });
+        expect(result.a).to.have.property('_bsontype', 'Double');
+      });
+
+      it('preserves negative zero in deserialization with relaxed true', () => {
+        const result = BSON.EJSON.parse(`{ "a": -0.0 }`, { relaxed: true });
+        expect(Object.is(result.a, -0), 'expected prop a to be negative zero').to.be.true;
+      });
+    });
   });
 });

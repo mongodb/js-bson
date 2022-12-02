@@ -47,6 +47,8 @@ function nativeToREJSON(native) {
 }
 
 function normalize(cEJ) {
+  // TODO(NODE-3396): loses information about the original input
+  // ex. parse will preserve -0 but stringify will output +0
   return JSON.stringify(JSON.parse(cEJ));
 }
 
