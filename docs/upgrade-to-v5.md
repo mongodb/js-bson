@@ -103,4 +103,14 @@ The following deprecated methods have been removed:
 
 ### Negative Zero is now serialized to Double
 
-While use cases for negative zero may be rare it is important that the value is preserved on round trips through the BSON serialization layer. Prior to this change negative zero was possible to preserve with the BSON `new Double(-0)` type, such code can be updated to use `-0` directly.
+BSON serialize will now preserve negative zero values as a floating point number.
+
+Previously it was required to use the `Double` type class to preserve `-0`:
+```ts
+BSON.serialize({ d: new Double(-0) })
+```
+
+Now `-0` can be used directly
+```ts
+BSON.serialize({ d: -0 })
+```
