@@ -103,4 +103,12 @@ The following deprecated methods have been removed:
 
 ### BSON Element names are now fetched only from object's own properties
 
-Previously objects passed to the `BSON.serialize`, `BSON.calculateObjectSize`, and `EJSON.stringify` API would have the element names enumerated with a `for-in` loop which will emit keys defined on the prototype. Since this is likely surprising, especially if a globally shared prototype has been modified we are now using `Object.keys` to enumerate the element names from a js object.
+`BSON.serialize`, `EJSON.stringify` and `BSON.calculateObjectSize` now only inspect own properties and do not consider properties defined on the prototype of the input.
+
+```typescript
+const object = { a: 1 };
+Object.setPrototypeOf(object, { b: 2 });
+BSON.deserialize(BSON.serialize(object));
+// now returns { a: 1 } in v5.0
+// would have returned { a: 1, b: 2 } in v4.x
+```
