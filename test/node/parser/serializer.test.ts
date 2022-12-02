@@ -58,12 +58,7 @@ describe('serialize()', () => {
         output: bufferFromHexArray([doubleType, keyA, '6666666666660240'])
       },
       {
-        title: `fractional looking number (100000e-5) but is not fractional is serialized to int32`,
-        input: 100000e-5,
-        output: bufferFromHexArray([int32Type, keyA, '01000000'])
-      },
-      {
-        title: `fractional arithmetic (1.2 + 0.8) that sums to and int is serialized to int32`,
+        title: `fractional arithmetic (1.2 + 0.8) that sums to an int is serialized to int32`,
         input: 1.2 + 0.8,
         output: bufferFromHexArray([int32Type, keyA, '02000000'])
       }
