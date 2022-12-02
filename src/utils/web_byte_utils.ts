@@ -46,9 +46,10 @@ const localRandomBytes = (() => {
     crypto?: { getRandomValues?: (space: Uint8Array) => Uint8Array };
   };
   if (crypto != null && typeof crypto.getRandomValues === 'function') {
-    const { getRandomValues } = crypto;
     return (byteLength: number) => {
-      return getRandomValues(webByteUtils.allocate(byteLength));
+      // @ts-expect-error: crypto.getRandomValues cannot actually be null here
+      // You cannot separate getRandomValues from crypto (need to have this === crypto)
+      return crypto.getRandomValues(webByteUtils.allocate(byteLength));
     };
   } else {
     if (isReactNative()) {

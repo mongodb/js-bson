@@ -430,7 +430,7 @@ const randomBytesTests: ByteUtilTest<'randomBytes'>[] = [
     name: 'when byteLength is 0 returns zero byteLength buffer',
     inputs: [0],
     expectation({ output, error }) {
-      expect(error).to.be.null;
+      expect(error, error?.message).to.be.null;
       expect(output).to.be.instanceOf(Uint8Array);
       expect(output).to.have.property('byteLength', 0);
     }
@@ -439,7 +439,7 @@ const randomBytesTests: ByteUtilTest<'randomBytes'>[] = [
     name: 'when byteLength is 10 returns ten byteLength buffer',
     inputs: [10],
     expectation({ output, error }) {
-      expect(error).to.be.null;
+      expect(error, error?.message).to.be.null;
       expect(output).to.be.instanceOf(Uint8Array);
       expect(output).to.have.property('byteLength', 10);
     }
