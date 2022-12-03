@@ -34,14 +34,14 @@ function isReactNative() {
 }
 
 /** @internal */
-export function mathRandomBytes(byteLength: number) {
+export function webMathRandomBytes(byteLength: number) {
   return webByteUtils.fromNumberArray(
     Array.from({ length: byteLength }, () => Math.floor(Math.random() * 256))
   );
 }
 
 /** @internal */
-const localRandomBytes = (() => {
+const webRandomBytes: (byteLength: number) => Uint8Array = (() => {
   const { crypto } = globalThis as {
     crypto?: { getRandomValues?: (space: Uint8Array) => Uint8Array };
   };
@@ -58,7 +58,7 @@ const localRandomBytes = (() => {
         'BSON: For React Native please polyfill crypto.getRandomValues, e.g. using: https://www.npmjs.com/package/react-native-get-random-values.'
       );
     }
-    return mathRandomBytes;
+    return webMathRandomBytes;
   }
 })();
 
@@ -183,7 +183,5 @@ export const webByteUtils = {
     return bytes.byteLength;
   },
 
-  randomBytes(byteLength: number): Uint8Array {
-    return localRandomBytes(byteLength);
-  }
+  randomBytes: webRandomBytes
 };
