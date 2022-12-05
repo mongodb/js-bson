@@ -107,10 +107,14 @@ BSON serialize will now preserve negative zero values as a floating point number
 
 Previously it was required to use the `Double` type class to preserve `-0`:
 ```ts
-BSON.serialize({ d: new Double(-0) })
+BSON.deserialize(BSON.serialize({ d: -0 }))
+// no type preservation, returns { d: 0 }
+BSON.deserialize(BSON.serialize({ d: new Double(-0) }))
+// type preservation, returns { d: -0 }
 ```
 
 Now `-0` can be used directly
 ```ts
-BSON.serialize({ d: -0 })
+BSON.deserialize(BSON.serialize({ d: -0 }))
+// type preservation, returns { d: -0 }
 ```
