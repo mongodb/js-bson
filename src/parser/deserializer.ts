@@ -314,23 +314,16 @@ function deserializeObject(
         (buffer[index + 1] << 8) |
         (buffer[index + 2] << 16) |
         (buffer[index + 3] << 24);
-      let arrayOptions = options;
+      let arrayOptions: DeserializeOptions = options;
 
       // Stop index
       const stopIndex = index + objectSize;
 
       // All elements of array to be returned as raw bson
       if (fieldsAsRaw && fieldsAsRaw[name]) {
-        arrayOptions = {};
-        for (const n in options) {
-          (
-            arrayOptions as {
-              [key: string]: DeserializeOptions[keyof DeserializeOptions];
-            }
-          )[n] = options[n as keyof DeserializeOptions];
-        }
-        arrayOptions['raw'] = true;
+        arrayOptions = { ...options, raw: true };
       }
+
       if (!globalUTFValidation) {
         arrayOptions = { ...arrayOptions, validation: { utf8: shouldValidateKey } };
       }

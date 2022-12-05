@@ -101,6 +101,18 @@ The following deprecated methods have been removed:
 - `ObjectId.get_inc`
   - The `static getInc()` is private since invoking it increments the next `ObjectId` index, so invoking would impact the creation of subsequent ObjectIds.
 
+### BSON Element names are now fetched only from object's own properties
+
+`BSON.serialize`, `EJSON.stringify` and `BSON.calculateObjectSize` now only inspect own properties and do not consider properties defined on the prototype of the input.
+
+```typescript
+const object = { a: 1 };
+Object.setPrototypeOf(object, { b: 2 });
+BSON.deserialize(BSON.serialize(object));
+// now returns { a: 1 } in v5.0
+// would have returned { a: 1, b: 2 } in v4.x
+```
+
 ### Negative Zero is now serialized to Double
 
 BSON serialize will now preserve negative zero values as a floating point number.
