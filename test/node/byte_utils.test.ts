@@ -23,6 +23,12 @@ const isNode14OrLower = (() => {
   return Number.parseInt(majorVersion, 10) <= 14;
 })();
 
+const isNode19OrHigher = (() => {
+  let [majorVersion] = process.version.split('.');
+  majorVersion = majorVersion.slice(1); // drop 'v'
+  return Number.parseInt(majorVersion, 10) >= 19;
+})();
+
 const testArrayBuffer = new ArrayBuffer(8);
 
 const toLocalBufferTypeTests: ByteUtilTest<'toLocalBufferType'>[] = [
@@ -456,7 +462,13 @@ const randomBytesTests: ByteUtilTest<'randomBytes'>[] = [
     name: 'when byteLength is beyond the supported length for arrays',
     inputs: [4294967296],
     expectation({ output, error }) {
-      expect(error?.name, error?.message).to.equal('RangeError');
+      if (isNode19OrHigher) {
+        // Node 19 on linux (not macos) throws a QuotaExceededError: The requested length exceeds 65,536 bytes
+        // At least we can assert an Error is thrown
+        expect(error).to.exist;
+      } else {
+        expect(error?.name, error?.message).to.equal('RangeError');
+      }
       expect(output).to.not.exist;
     }
   }
