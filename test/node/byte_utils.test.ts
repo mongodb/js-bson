@@ -436,12 +436,28 @@ const randomBytesTests: ByteUtilTest<'randomBytes'>[] = [
     }
   },
   {
-    name: 'when byteLength is 10 returns ten byteLength buffer',
+    name: 'when byteLength is non-zero positive integer returns buffer with input byteLength',
     inputs: [10],
     expectation({ output, error }) {
       expect(error, error?.message).to.be.null;
       expect(output).to.be.instanceOf(Uint8Array);
       expect(output).to.have.property('byteLength', 10);
+    }
+  },
+  {
+    name: 'when byteLength is negative throws an error',
+    inputs: [-1],
+    expectation({ output, error }) {
+      expect(error?.name, error?.message).to.equal('RangeError');
+      expect(output).to.not.exist;
+    }
+  },
+  {
+    name: 'when byteLength is beyond the supported length for arrays',
+    inputs: [4294967296],
+    expectation({ output, error }) {
+      expect(error?.name, error?.message).to.equal('RangeError');
+      expect(output).to.not.exist;
     }
   }
 ];
@@ -567,28 +583,59 @@ describe('ByteUtils', () => {
   });
 
   describe('randomBytes fallback case', () => {
-    let bsonWithNoCrypto;
-    before(function () {
-      bsonWithNoCrypto = loadBSONWithGlobal({
-        crypto: null,
-        // if we don't add a copy of Math here then we cannot spy on it for the test
-        Math: {
-          pow: Math.pow,
-          floor: Math.floor,
-          random: Math.random
-        }
+    describe('web', function () {
+      let bsonWithNoCrypto;
+      before(function () {
+        bsonWithNoCrypto = loadBSONWithGlobal({
+          crypto: null,
+          // if we don't add a copy of Math here then we cannot spy on it for the test
+          Math: {
+            pow: Math.pow,
+            floor: Math.floor,
+            random: Math.random
+          }
+        });
+      });
+
+      after(function () {
+        sinon.restore();
+        bsonWithNoCrypto = null;
+      });
+
+      it('should fall back to Math.random implementation for random bytes if crypto is not present', () => {
+        const randomSpy = sinon.spy(bsonWithNoCrypto.Math, 'random');
+        new bsonWithNoCrypto.BSON.UUID();
+        // 16 is the length of a UUID
+        expect(randomSpy).to.have.callCount(16);
       });
     });
 
-    after(function () {
-      sinon.restore();
-      bsonWithNoCrypto = null;
-    });
+    describe('nodejs es module environment (i.e. no global require method)', function () {
+      let bsonWithNoCryptoAndNoRequire;
+      before(function () {
+        bsonWithNoCryptoAndNoRequire = loadBSONWithGlobal({
+          crypto: null,
+          // if we don't add a copy of Math here then we cannot spy on it for the test
+          Math: {
+            pow: Math.pow,
+            floor: Math.floor,
+            random: Math.random
+          },
+          Buffer: globalThis.Buffer
+        });
+      });
 
-    it('should fall back to Math.random implementation for random bytes if crypto is not present', () => {
-      const randomSpy = sinon.spy(bsonWithNoCrypto.Math, 'random');
-      new bsonWithNoCrypto.BSON.UUID();
-      expect(randomSpy).to.have.callCount(16);
+      after(function () {
+        sinon.restore();
+        bsonWithNoCryptoAndNoRequire = null;
+      });
+
+      it('should fall back to Math.random implementation for random bytes if crypto is not present', () => {
+        const randomSpy = sinon.spy(bsonWithNoCryptoAndNoRequire.Math, 'random');
+        new bsonWithNoCryptoAndNoRequire.BSON.UUID();
+        // 16 is the length of a UUID
+        expect(randomSpy).to.have.callCount(16);
+      });
     });
   });
 

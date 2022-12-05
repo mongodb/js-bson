@@ -35,6 +35,9 @@ function isReactNative() {
 
 /** @internal */
 export function webMathRandomBytes(byteLength: number) {
+  if (byteLength < 0) {
+    throw new RangeError(`The argument 'byteLength' is invalid. Received ${byteLength}`);
+  }
   return webByteUtils.fromNumberArray(
     Array.from({ length: byteLength }, () => Math.floor(Math.random() * 256))
   );
