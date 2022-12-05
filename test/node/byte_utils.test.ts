@@ -637,6 +637,45 @@ describe('ByteUtils', () => {
         expect(randomSpy).to.have.callCount(16);
       });
     });
+
+    describe('react native environment', function () {
+      let bsonWithNoCryptoAndRNProduct;
+      let consoleWarnSpy;
+      before(function () {
+        const fakeConsole = {
+          warn: () => {
+            // ignore
+          }
+        };
+        consoleWarnSpy = sinon.spy(fakeConsole, 'warn');
+        bsonWithNoCryptoAndRNProduct = loadBSONWithGlobal({
+          crypto: null,
+          // if we don't add a copy of Math here then we cannot spy on it for the test
+          Math: {
+            pow: Math.pow,
+            floor: Math.floor,
+            random: Math.random
+          },
+          console: fakeConsole,
+          navigator: { product: 'ReactNative' }
+        });
+      });
+
+      after(function () {
+        sinon.restore();
+        bsonWithNoCryptoAndRNProduct = null;
+      });
+
+      it('should fall back to Math.random implementation for random bytes if crypto is not present', () => {
+        expect(consoleWarnSpy).to.have.been.calledOnceWithExactly(
+          'BSON: For React Native please polyfill crypto.getRandomValues, e.g. using: https://www.npmjs.com/package/react-native-get-random-values.'
+        );
+        const randomSpy = sinon.spy(bsonWithNoCryptoAndRNProduct.Math, 'random');
+        new bsonWithNoCryptoAndRNProduct.BSON.UUID();
+        // 16 is the length of a UUID
+        expect(randomSpy).to.have.callCount(16);
+      });
+    });
   });
 
   for (const [byteUtilsName, byteUtils] of utils) {
