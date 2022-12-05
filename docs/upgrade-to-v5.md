@@ -100,3 +100,21 @@ The following deprecated methods have been removed:
 - `ObjectId.prototype.get_inc`
 - `ObjectId.get_inc`
   - The `static getInc()` is private since invoking it increments the next `ObjectId` index, so invoking would impact the creation of subsequent ObjectIds.
+
+### Negative Zero is now serialized to Double
+
+BSON serialize will now preserve negative zero values as a floating point number.
+
+Previously it was required to use the `Double` type class to preserve `-0`:
+```ts
+BSON.deserialize(BSON.serialize({ d: -0 }))
+// no type preservation, returns { d: 0 }
+BSON.deserialize(BSON.serialize({ d: new Double(-0) }))
+// type preservation, returns { d: -0 }
+```
+
+Now `-0` can be used directly
+```ts
+BSON.deserialize(BSON.serialize({ d: -0 }))
+// type preservation, returns { d: -0 }
+```

@@ -1,6 +1,9 @@
 import * as BSON from '../register-bson';
 const Double = BSON.Double;
 
+const BSON_DOUBLE_TYPE_INDICATOR = 0x01;
+const BSON_INT_TYPE_INDICATOR = 0x10;
+
 describe('BSON Double Precision', function () {
   context('class Double', function () {
     describe('constructor()', function () {
@@ -78,14 +81,15 @@ describe('BSON Double Precision', function () {
     });
   });
 
-  it('NODE-4335: does not preserve -0 in serialize-deserialize roundtrip if JS number is used', function () {
-    // TODO (NODE-4335): -0 should be serialized as double
-    // This test is demonstrating the behavior of -0 being serialized as an int32 something we do NOT want to unintentionally change, but may want to change in the future, which the above ticket serves to track.
+  it('does preserve -0 in serialize as a double', function () {
     const value = -0;
     const serializedDouble = BSON.serialize({ d: value });
     const type = serializedDouble[4];
-    expect(type).to.not.equal(BSON.BSON_DATA_NUMBER);
-    expect(type).to.equal(BSON.BSON_DATA_INT);
+    expect(type).to.equal(BSON_DOUBLE_TYPE_INDICATOR);
+    expect(type).to.not.equal(BSON_INT_TYPE_INDICATOR);
+    expect(serializedDouble.subarray(7, 15)).to.deep.equal(
+      new Uint8Array(new Float64Array([-0]).buffer)
+    );
   });
 
   describe('extended JSON', () => {
