@@ -130,3 +130,7 @@ Now `-0` can be used directly
 BSON.deserialize(BSON.serialize({ d: -0 }))
 // type preservation, returns { d: -0 }
 ```
+
+### Extended JSON `strict` flag removed
+
+Extended JSON `parse` and `stringify` APIs ignore the deprecated `strict` option and it has been removed from the type definitions.
