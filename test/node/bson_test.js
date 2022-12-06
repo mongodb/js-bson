@@ -22,10 +22,6 @@ const vm = require('vm');
 const { assertBuffersEqual, isBufferOrUint8Array } = require('./tools/utils');
 const { inspect } = require('util');
 
-let OldBSON = require('bson_legacy');
-OldBSON = { ...OldBSON, ...OldBSON.prototype };
-const OldObjectID = OldBSON.ObjectID;
-
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
  */
@@ -1817,6 +1813,24 @@ describe('BSON', function () {
     // 1. The current version's class
     // 2. A simulation of the class from library 4.0.0
     // 3. The class currently in use by mongodb (not tested in browser where mongodb is unavailable)
+
+    // test the old ObjectID class (in mongodb-core 3.1) because MongoDB drivers still return it
+    function getOldBSON() {
+      try {
+        // do a dynamic resolve to avoid exception when running browser tests
+        const file = require.resolve('mongodb-core');
+        const oldModule = require(file).BSON;
+        const funcs = new oldModule.BSON();
+        oldModule.serialize = funcs.serialize;
+        oldModule.deserialize = funcs.deserialize;
+        return oldModule;
+      } catch (e) {
+        return BSON; // if mongo is unavailable, e.g. browser tests, just re-use new BSON
+      }
+    }
+
+    const OldBSON = getOldBSON();
+    const OldObjectID = OldBSON === BSON ? BSON.ObjectId : OldBSON.ObjectID;
 
     // create a wrapper simulating the old ObjectId class from v4.0.0
     class ObjectIdv400 {

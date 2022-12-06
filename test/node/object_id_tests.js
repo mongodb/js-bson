@@ -2,9 +2,12 @@
 
 const Buffer = require('buffer').Buffer;
 const BSON = require('../register-bson');
+const EJSON = BSON.EJSON;
 const BSONTypeError = BSON.BSONTypeError;
 const ObjectId = BSON.ObjectId;
 const util = require('util');
+const { expect } = require('chai');
+const { bufferFromHexArray } = require('./tools/utils');
 const getSymbolFrom = require('./tools/utils').getSymbolFrom;
 const isBufferOrUint8Array = require('./tools/utils').isBufferOrUint8Array;
 
@@ -25,6 +28,58 @@ describe('ObjectId', function () {
       expect(Object.prototype.toString.call(a.getTimestamp())).to.equal('[object Date]');
       expect(a.getTimestamp()).to.deep.equal(new Date(2 * 1000));
       expect(a.getTimestamp().getTime()).to.equal(2000);
+    });
+  });
+
+  describe('_bsontype casing cross compatibility', () => {
+    it('EJSON stringify understands capital or lowercase D _bsontype', () => {
+      const resultFromCapitalD = EJSON.stringify(
+        { a: new ObjectId('00'.repeat(12)) },
+        { relaxed: false }
+      );
+      const resultFromLowercaseD = EJSON.stringify(
+        {
+          a: new (class extends ObjectId {
+            get _bsontype() {
+              return 'ObjectId';
+            }
+          })('00'.repeat(12))
+        },
+        { relaxed: false }
+      );
+
+      expect(JSON.parse(resultFromCapitalD))
+        .to.have.property('a')
+        .that.deep.equals({ $oid: '00'.repeat(12) });
+      expect(JSON.parse(resultFromLowercaseD))
+        .to.have.property('a')
+        .that.deep.equals({ $oid: '00'.repeat(12) });
+    });
+
+    it('EJSON stringify understands capital or lowercase D _bsontype', () => {
+      const resultFromCapitalD = BSON.serialize(
+        { a: new ObjectId('00'.repeat(12)) },
+        { relaxed: false }
+      );
+      const resultFromLowercaseD = BSON.serialize(
+        {
+          a: new (class extends ObjectId {
+            get _bsontype() {
+              return 'ObjectId';
+            }
+          })('00'.repeat(12))
+        },
+        { relaxed: false }
+      );
+
+      const expectedBytes = bufferFromHexArray([
+        '07', // oid type
+        '6100', // 'a\x00'
+        '00'.repeat(12) // oid bytes
+      ]);
+
+      expect(resultFromCapitalD).to.deep.equal(expectedBytes);
+      expect(resultFromLowercaseD).to.deep.equal(expectedBytes);
     });
   });
 

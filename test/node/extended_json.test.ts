@@ -1,6 +1,7 @@
 import * as BSON from '../register-bson';
 const EJSON = BSON.EJSON;
 import * as vm from 'node:vm';
+import { expect } from 'chai';
 
 // BSON types
 const Binary = BSON.Binary;
@@ -383,7 +384,6 @@ describe('Extended JSON', function () {
       });
 
       const serializationOptions = {};
-
       const bsonBuffers = {
         oldObjectOldSerializer: OldBSON.serialize(oldBsonObject, serializationOptions),
         oldObjectNewSerializer: BSON.serialize(oldBsonObject, serializationOptions),
@@ -417,7 +417,7 @@ describe('Extended JSON', function () {
       // Browser tests currently don't handle BSON Symbol correctly, so only test this under Node where OldBSON !=== BSON module.
       if (BSON !== OldBSON) {
         expect(deserialized.usingOldDeserializer['symbol'].value).to.equal(
-          deserialized.usingNewDeserializer['symbol'].toString()
+          deserialized.usingNewDeserializer['symbol']
         );
       }
       delete deserialized.usingOldDeserializer['symbol'];
