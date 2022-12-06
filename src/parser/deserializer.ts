@@ -530,18 +530,18 @@ function deserializeObject(
       value = promoteValues ? symbol : new BSONSymbol(symbol);
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_TIMESTAMP) {
-      const lowBits =
+      const i =
         buffer[index++] |
         (buffer[index++] << 8) |
         (buffer[index++] << 16) |
         (buffer[index++] << 24);
-      const highBits =
+      const t =
         buffer[index++] |
         (buffer[index++] << 8) |
         (buffer[index++] << 16) |
         (buffer[index++] << 24);
 
-      value = new Timestamp(lowBits, highBits);
+      value = new Timestamp({ i, t });
     } else if (elementType === constants.BSON_DATA_MIN_KEY) {
       value = new MinKey();
     } else if (elementType === constants.BSON_DATA_MAX_KEY) {

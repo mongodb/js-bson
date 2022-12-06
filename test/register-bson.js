@@ -11,6 +11,7 @@ const path = require('node:path');
 const chai = require('chai');
 
 chai.use(require('sinon-chai'));
+chai.config.truncateThreshold = 0;
 
 /**
  * In the runInContext "web" testing instanceof checks fail
