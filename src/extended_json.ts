@@ -372,15 +372,13 @@ export namespace EJSON {
    * ```
    */
   export function parse(text: string, options?: EJSON.Options): SerializableTypes {
-    options = { relaxed: true, legacy: false, ...options };
-
     return JSON.parse(text, (key, value) => {
       if (key.indexOf('\x00') !== -1) {
         throw new BSONError(
           `BSON Document field names cannot contain null bytes, found: ${JSON.stringify(key)}`
         );
       }
-      return deserializeValue(value, options);
+      return deserializeValue(value, { relaxed: true, legacy: false, ...options });
     });
   }
 
