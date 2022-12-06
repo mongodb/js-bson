@@ -129,7 +129,14 @@ export class Timestamp extends LongWithoutOverridesClass {
 
   /** @internal */
   static fromExtendedJSON(doc: TimestampExtended): Timestamp {
-    return new Timestamp(doc.$timestamp);
+    // The Long check is necessary because extended JSON has different behavior given the size of the input number
+    const i = Long.isLong(doc.$timestamp.i)
+      ? doc.$timestamp.i.getLowBitsUnsigned() // Need to fetch the least significant 32 bits
+      : doc.$timestamp.i;
+    const t = Long.isLong(doc.$timestamp.t)
+      ? doc.$timestamp.t.getLowBitsUnsigned() // Need to fetch the least significant 32 bits
+      : doc.$timestamp.t;
+    return new Timestamp({ t, i });
   }
 
   /** @internal */

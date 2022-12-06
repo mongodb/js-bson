@@ -12,7 +12,7 @@ describe('Constructing BSON types', function () {
     expect(() => new BSON.Double(2.3)).to.not.throw();
     expect(() => new BSON.Int32(1)).to.not.throw();
     expect(() => new BSON.Long(0, 0)).to.not.throw();
-    expect(() => new BSON.Timestamp(0, 0)).to.not.throw();
+    expect(() => new BSON.Timestamp({ t: 0, i: 0 })).to.not.throw();
     expect(() => new BSON.MaxKey()).to.not.throw();
     expect(() => new BSON.MinKey()).to.not.throw();
 
@@ -30,7 +30,7 @@ describe('Constructing BSON types', function () {
     expect(() => BSON.Double(2.3)).to.throw(TypeError, /cannot be invoked/);
     expect(() => BSON.Int32(1)).to.throw(TypeError, /cannot be invoked/);
     expect(() => BSON.Long(0, 0)).to.throw(TypeError, /cannot be invoked/);
-    expect(() => BSON.Timestamp(0, 0)).to.throw(TypeError, /cannot be invoked/);
+    expect(() => BSON.Timestamp({ t: 0, i: 0 })).to.throw(TypeError, /cannot be invoked/);
     expect(() => BSON.MaxKey()).to.throw(TypeError, /cannot be invoked/);
     expect(() => BSON.MinKey()).to.throw(TypeError, /cannot be invoked/);
 
