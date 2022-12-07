@@ -29,7 +29,7 @@ export function calculateObjectSize(
     }
 
     // Calculate size
-    for (const key in object) {
+    for (const key of Object.keys(object)) {
       totalLength += calculateElement(key, object[key], serializeFunctions, false, ignoreUndefined);
     }
   }

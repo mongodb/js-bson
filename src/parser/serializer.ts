@@ -68,47 +68,38 @@ function serializeString(buffer: Uint8Array, key: string, value: string, index: 
   return index;
 }
 
-const SPACE_FOR_FLOAT64 = new Uint8Array(8);
-const DV_FOR_FLOAT64 = new DataView(
-  SPACE_FOR_FLOAT64.buffer,
-  SPACE_FOR_FLOAT64.byteOffset,
-  SPACE_FOR_FLOAT64.byteLength
-);
+const NUMBER_SPACE = new DataView(new ArrayBuffer(8), 0, 8);
+const FOUR_BYTE_VIEW_ON_NUMBER = new Uint8Array(NUMBER_SPACE.buffer, 0, 4);
+const EIGHT_BYTE_VIEW_ON_NUMBER = new Uint8Array(NUMBER_SPACE.buffer, 0, 8);
+
 function serializeNumber(buffer: Uint8Array, key: string, value: number, index: number) {
-  // We have an integer value
-  // TODO(NODE-2529): Add support for big int
-  if (
-    Number.isInteger(value) &&
-    value >= constants.BSON_INT32_MIN &&
-    value <= constants.BSON_INT32_MAX
-  ) {
-    // If the value fits in 32 bits encode as int32
-    // Set int type 32 bits or less
-    buffer[index++] = constants.BSON_DATA_INT;
-    // Number of written bytes
-    const numberOfWrittenBytes = ByteUtils.encodeUTF8Into(buffer, key, index);
-    // Encode the name
-    index = index + numberOfWrittenBytes;
-    buffer[index++] = 0;
-    // Write the int value
-    buffer[index++] = value & 0xff;
-    buffer[index++] = (value >> 8) & 0xff;
-    buffer[index++] = (value >> 16) & 0xff;
-    buffer[index++] = (value >> 24) & 0xff;
+  const isNegativeZero = Object.is(value, -0);
+
+  const type =
+    !isNegativeZero &&
+    Number.isSafeInteger(value) &&
+    value <= constants.BSON_INT32_MAX &&
+    value >= constants.BSON_INT32_MIN
+      ? constants.BSON_DATA_INT
+      : constants.BSON_DATA_NUMBER;
+
+  if (type === constants.BSON_DATA_INT) {
+    NUMBER_SPACE.setInt32(0, value, true);
   } else {
-    // Encode as double
-    buffer[index++] = constants.BSON_DATA_NUMBER;
-    // Number of written bytes
-    const numberOfWrittenBytes = ByteUtils.encodeUTF8Into(buffer, key, index);
-    // Encode the name
-    index = index + numberOfWrittenBytes;
-    buffer[index++] = 0;
-    // Write float
-    DV_FOR_FLOAT64.setFloat64(0, value, true);
-    buffer.set(SPACE_FOR_FLOAT64, index);
-    // Adjust index
-    index = index + 8;
+    NUMBER_SPACE.setFloat64(0, value, true);
   }
+
+  const bytes =
+    type === constants.BSON_DATA_INT ? FOUR_BYTE_VIEW_ON_NUMBER : EIGHT_BYTE_VIEW_ON_NUMBER;
+
+  buffer[index++] = type;
+
+  const numberOfWrittenBytes = ByteUtils.encodeUTF8Into(buffer, key, index);
+  index = index + numberOfWrittenBytes;
+  buffer[index++] = 0x00;
+
+  buffer.set(bytes, index);
+  index += bytes.byteLength;
 
   return index;
 }
@@ -387,8 +378,8 @@ function serializeDouble(buffer: Uint8Array, key: string, value: Double, index: 
   buffer[index++] = 0;
 
   // Write float
-  DV_FOR_FLOAT64.setFloat64(0, value.value, true);
-  buffer.set(SPACE_FOR_FLOAT64, index);
+  NUMBER_SPACE.setFloat64(0, value.value, true);
+  buffer.set(EIGHT_BYTE_VIEW_ON_NUMBER, index);
 
   // Adjust index
   index = index + 8;
@@ -826,7 +817,7 @@ export function serializeInto(
     }
 
     // Iterate over all the keys
-    for (const key in object) {
+    for (const key of Object.keys(object)) {
       let value = object[key];
       // Is there an override value
       if (typeof value?.toBSON === 'function') {
