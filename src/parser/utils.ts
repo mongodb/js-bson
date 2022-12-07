@@ -1,11 +1,3 @@
-/**
- * Normalizes our expected stringified form of a function across versions of node
- * @param fn - The function to stringify
- */
-export function normalizedFunctionString(fn: Function): string {
-  return fn.toString().replace('function(', 'function (');
-}
-
 export function isAnyArrayBuffer(value: unknown): value is ArrayBuffer {
   return ['[object ArrayBuffer]', '[object SharedArrayBuffer]'].includes(
     Object.prototype.toString.call(value)

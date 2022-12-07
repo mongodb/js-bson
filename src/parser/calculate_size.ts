@@ -2,7 +2,7 @@ import { Binary } from '../binary';
 import type { Document } from '../bson';
 import * as constants from '../constants';
 import { ByteUtils } from '../utils/byte_utils';
-import { isAnyArrayBuffer, isDate, isRegExp, normalizedFunctionString } from './utils';
+import { isAnyArrayBuffer, isDate, isRegExp } from './utils';
 
 export function calculateObjectSize(
   object: Document,
@@ -189,38 +189,14 @@ function calculateElement(
         );
       }
     case 'function':
-      // WTF for 0.4.X where typeof /someregexp/ === 'function'
-      if (value instanceof RegExp || isRegExp(value) || String.call(value) === '[object RegExp]') {
+      if (serializeFunctions) {
         return (
           (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
           1 +
-          ByteUtils.utf8ByteLength(value.source) +
-          1 +
-          (value.global ? 1 : 0) +
-          (value.ignoreCase ? 1 : 0) +
-          (value.multiline ? 1 : 0) +
+          4 +
+          ByteUtils.utf8ByteLength(value.toString()) +
           1
         );
-      } else {
-        if (serializeFunctions && value.scope != null && Object.keys(value.scope).length > 0) {
-          return (
-            (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
-            1 +
-            4 +
-            4 +
-            ByteUtils.utf8ByteLength(normalizedFunctionString(value)) +
-            1 +
-            calculateObjectSize(value.scope, serializeFunctions, ignoreUndefined)
-          );
-        } else if (serializeFunctions) {
-          return (
-            (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
-            1 +
-            4 +
-            ByteUtils.utf8ByteLength(normalizedFunctionString(value)) +
-            1
-          );
-        }
       }
   }
 

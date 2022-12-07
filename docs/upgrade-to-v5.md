@@ -130,3 +130,33 @@ Now `-0` can be used directly
 BSON.deserialize(BSON.serialize({ d: -0 }))
 // type preservation, returns { d: -0 }
 ```
+
+### `Code` only stores a string
+
+The `Code` class only stores stringified javascript.
+It can still be constructed from a javascript function.
+
+```typescript
+const myCode = new Code(function iLoveJavascript() { console.log('I love javascript') });
+// myCode.code === "function iLoveJavascript() { console.log('I love javascript') }"
+```
+
+### `BSON.deserialize()` only returns `Code` instances
+
+The deserialize options: `evalFunctions`, `cacheFunctions`, and `cacheFunctionsCrc32` have been removed.
+The `evalFunctions` option, when enabled, would return BSON Code typed values as eval-ed javascript functions, now it will always return Code instances.
+
+See the following snippet for how to migrate:
+```typescript
+const bsonBytes = BSON.serialize(
+  { iLoveJavascript: function () { console.log('I love javascript') } },
+  { serializeFunctions: true } // serializeFunctions still works!
+);
+const result = BSON.deserialize(bsonBytes)
+// result.iLoveJavascript instanceof Code
+// result.iLoveJavascript.code === "function iLoveJavascript() {}"
+const iLoveJavascript = new Function(`return ${result.iLoveJavascript.code}`)();
+iLoveJavascript();
+// prints "I love javascript"
+// iLoveJavascript.name === "iLoveJavascript"
+```

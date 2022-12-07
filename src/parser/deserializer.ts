@@ -19,16 +19,6 @@ import { validateUtf8 } from '../validate_utf8';
 
 /** @public */
 export interface DeserializeOptions {
-  /** evaluate functions in the BSON document scoped to the object deserialized. */
-  evalFunctions?: boolean;
-  /** cache evaluated functions for reuse. */
-  cacheFunctions?: boolean;
-  /**
-   * use a crc32 code for caching, otherwise use the string of the function.
-   * @deprecated this option to use the crc32 function never worked as intended
-   * due to the fact that the crc32 function itself was never implemented.
-   * */
-  cacheFunctionsCrc32?: boolean;
   /** when deserializing a Long will fit it into a Number if it's smaller than 53 bits */
   promoteLongs?: boolean;
   /** when deserializing a Binary will return it as a node.js Buffer instance. */
@@ -66,8 +56,6 @@ export interface DeserializeOptions {
 // Internal long versions
 const JS_INT_MAX_LONG = Long.fromNumber(constants.JS_INT_MAX);
 const JS_INT_MIN_LONG = Long.fromNumber(constants.JS_INT_MIN);
-
-const functionCache: { [hash: string]: Function } = {};
 
 export function deserialize(
   buffer: Uint8Array,
@@ -120,9 +108,6 @@ function deserializeObject(
   options: DeserializeOptions,
   isArray = false
 ) {
-  const evalFunctions = options['evalFunctions'] == null ? false : options['evalFunctions'];
-  const cacheFunctions = options['cacheFunctions'] == null ? false : options['cacheFunctions'];
-
   const fieldsAsRaw = options['fieldsAsRaw'] == null ? null : options['fieldsAsRaw'];
 
   // Return raw bson buffer instead of parsing it
@@ -566,18 +551,7 @@ function deserializeObject(
         shouldValidateKey
       );
 
-      // If we are evaluating the functions
-      if (evalFunctions) {
-        // If we have cache enabled let's look for the md5 of the function in the cache
-        if (cacheFunctions) {
-          // Got to do this to avoid V8 deoptimizing the call due to finding eval
-          value = isolateEval(functionString, functionCache, object);
-        } else {
-          value = isolateEval(functionString);
-        }
-      } else {
-        value = new Code(functionString);
-      }
+      value = new Code(functionString);
 
       // Update parse index position
       index = index + stringSize;
@@ -640,20 +614,7 @@ function deserializeObject(
         throw new BSONError('code_w_scope total size is too long, clips outer document');
       }
 
-      // If we are evaluating the functions
-      if (evalFunctions) {
-        // If we have cache enabled let's look for the md5 of the function in the cache
-        if (cacheFunctions) {
-          // Got to do this to avoid V8 deoptimizing the call due to finding eval
-          value = isolateEval(functionString, functionCache, object);
-        } else {
-          value = isolateEval(functionString);
-        }
-
-        value.scope = scopeObject;
-      } else {
-        value = new Code(functionString, scopeObject);
-      }
+      value = new Code(functionString, scopeObject);
     } else if (elementType === constants.BSON_DATA_DBPOINTER) {
       // Get the code string size
       const stringSize =
@@ -723,28 +684,6 @@ function deserializeObject(
   }
 
   return object;
-}
-
-/**
- * Ensure eval is isolated, store the result in functionCache.
- *
- * @internal
- */
-function isolateEval(
-  functionString: string,
-  functionCache?: { [hash: string]: Function },
-  object?: Document
-) {
-  // eslint-disable-next-line @typescript-eslint/no-implied-eval
-  if (!functionCache) return new Function(functionString);
-  // Check for cache hit, eval if missing and return cached function
-  if (functionCache[functionString] == null) {
-    // eslint-disable-next-line @typescript-eslint/no-implied-eval
-    functionCache[functionString] = new Function(functionString);
-  }
-
-  // Set the object
-  return functionCache[functionString].bind(object);
 }
 
 function getValidatedString(
