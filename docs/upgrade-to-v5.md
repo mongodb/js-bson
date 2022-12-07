@@ -153,3 +153,13 @@ new Timestamp(1, 2); // as an int64: 8589934593
 // in 5.x BSON
 new Timestamp({ t: 2, i: 1 }); // as an int64: 8589934593
 ```
+
+Additionally, the `t` and `i` fields of `{ t: number; i: number }` are now validated more strictly to ensure your Timestamps are being constructed as expected.
+
+For example:
+```typescript
+new Timestamp({ t: -2, i: 1 });
+// Will throw, both fields need to be positive
+new Timestamp({ t: 2, i: 0xFFFF_FFFF + 1 });
+// Will throw, both fields need to be less than or equal to the unsigned int32 max value
+```
