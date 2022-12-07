@@ -1,14 +1,15 @@
 import { expect } from 'chai';
 import * as BSON from '../register-bson';
-import type { Document } from '../..';
+import type { Code, Document } from '../..';
 import { inspect } from 'node:util';
 import { isMap } from 'node:util/types';
+import { DBRef } from '../register-bson';
 
 const EJSON = BSON.EJSON;
 
 function setOn(object: Document | unknown[] | Map<string, unknown>, value: unknown) {
   if (Array.isArray(object)) {
-    object[Math.floor(Math.random() * 250)] = value;
+    object[Math.floor(Math.random() * object.length)] = value;
   } else if (isMap(object)) {
     // @ts-expect-error: "readonly" map case does not apply
     object.set('a', value);
@@ -18,6 +19,7 @@ function setOn(object: Document | unknown[] | Map<string, unknown>, value: unkno
 }
 
 function* generateTests() {
+  // arbitrarily depth choice here... it could fail at 26! but is that worth testing?
   const levelsOfDepth = 25;
   for (let lvl = 2; lvl < levelsOfDepth; lvl++) {
     const isRootMap = Math.random() < 0.5;
@@ -30,7 +32,8 @@ function* generateTests() {
         referenceChoice < 0.3
           ? {}
           : referenceChoice > 0.3 && referenceChoice < 0.6
-          ? []
+          ? // Just making an arbitrarily largish non-sparse array here
+            Array.from({ length: Math.floor(Math.random() * 255) + 5 }, () => null)
           : new Map();
 
       setOn(lastReference, newLevel);
@@ -48,12 +51,28 @@ function* generateTests() {
 }
 
 describe('Cyclic reference detection', () => {
-  context('BSON circular references', () => {
+  context('fuzz BSON circular references', () => {
     for (const test of generateTests()) {
       it(test.title, () => {
         expect(() => BSON.serialize(test.input), inspect(test.input)).to.throw(/circular/);
       });
     }
+  });
+
+  context('in Code with scope', () => {
+    it('throws if code.scope is circular', () => {
+      const root: { code: Code | null } = { code: null };
+      root.code = new BSON.Code('function() {}', { a: root });
+      expect(() => BSON.serialize(root)).to.throw(/circular/);
+    });
+  });
+
+  context('in DBRef with fields', () => {
+    it('throws if dbref.fields is circular', () => {
+      const root: { dbref: DBRef | null } = { dbref: null };
+      root.dbref = new BSON.DBRef('test', new BSON.ObjectId(), 'test', { a: root });
+      expect(() => BSON.serialize(root)).to.throw(/circular/);
+    });
   });
 
   context('EJSON circular references', () => {
