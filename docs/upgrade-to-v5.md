@@ -130,3 +130,26 @@ Now `-0` can be used directly
 BSON.deserialize(BSON.serialize({ d: -0 }))
 // type preservation, returns { d: -0 }
 ```
+
+### Timestamp constructor validation
+
+The `Timestamp` type no longer accepts two number arguments for the low and high bits of the int64 value.
+
+Supported constructors are as follows:
+
+```typescript
+class Timestamp {
+  constructor(int: bigint);
+  constructor(long: Long);
+  constructor(value: { t: number; i: number });
+}
+```
+
+Any code that use the two number argument style of constructing a Timestamp will need to be migrated to one of the supported constructors. We recommend using the `{ t: number; i: number }` style input, representing the timestamp and increment respectively.
+
+```typescript
+// in 4.x BSON
+new Timestamp(1, 2); // as an int64: 8589934593
+// in 5.x BSON
+new Timestamp({ t: 2, i: 1 }); // as an int64: 8589934593
+```
