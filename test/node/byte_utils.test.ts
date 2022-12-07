@@ -594,7 +594,7 @@ describe('ByteUtils', () => {
     });
   });
 
-  describe('randomBytes fallback case', () => {
+  describe('randomBytes fallback case when crypto is not present', () => {
     describe('web', function () {
       let bsonWithNoCrypto;
       before(function () {
@@ -614,7 +614,7 @@ describe('ByteUtils', () => {
         bsonWithNoCrypto = null;
       });
 
-      it('should fall back to Math.random implementation for random bytes if crypto is not present', () => {
+      it('UUID constructor will invoke Math.random 16 times', () => {
         const randomSpy = sinon.spy(bsonWithNoCrypto.Math, 'random');
         new bsonWithNoCrypto.BSON.UUID();
         // 16 is the length of a UUID
@@ -622,7 +622,7 @@ describe('ByteUtils', () => {
       });
     });
 
-    describe('nodejs es module environment (i.e. no global require method)', function () {
+    describe('nodejs es module environment where no global require method is present', function () {
       let bsonWithNoCryptoAndNoRequire;
       before(function () {
         bsonWithNoCryptoAndNoRequire = loadBSONWithGlobal({
@@ -642,7 +642,7 @@ describe('ByteUtils', () => {
         bsonWithNoCryptoAndNoRequire = null;
       });
 
-      it('should fall back to Math.random implementation for random bytes if crypto is not present', () => {
+      it('UUID constructor will invoke Math.random 16 times', () => {
         const randomSpy = sinon.spy(bsonWithNoCryptoAndNoRequire.Math, 'random');
         new bsonWithNoCryptoAndNoRequire.BSON.UUID();
         // 16 is the length of a UUID
@@ -650,7 +650,7 @@ describe('ByteUtils', () => {
       });
     });
 
-    describe('react native environment', function () {
+    describe('react native environment when crypto is not present', function () {
       let bsonWithNoCryptoAndRNProduct;
       let consoleWarnSpy;
       before(function () {
@@ -678,10 +678,13 @@ describe('ByteUtils', () => {
         bsonWithNoCryptoAndRNProduct = null;
       });
 
-      it('should fall back to Math.random implementation for random bytes if crypto is not present', () => {
+      it('a console warning is logged with a message about how to make crypto available', () => {
         expect(consoleWarnSpy).to.have.been.calledOnceWithExactly(
           'BSON: For React Native please polyfill crypto.getRandomValues, e.g. using: https://www.npmjs.com/package/react-native-get-random-values.'
         );
+      });
+
+      it('UUID constructor will invoke Math.random 16 times', () => {
         const randomSpy = sinon.spy(bsonWithNoCryptoAndRNProduct.Math, 'random');
         new bsonWithNoCryptoAndRNProduct.BSON.UUID();
         // 16 is the length of a UUID
