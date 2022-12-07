@@ -528,54 +528,6 @@ describe('Extended JSON', function () {
     expect(deserialized.__proto__.a).to.equal(42);
   });
 
-  context('circular references', () => {
-    it('should throw a helpful error message for input with circular references', function () {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const obj: any = {
-        some: {
-          property: {
-            array: []
-          }
-        }
-      };
-      obj.some.property.array.push(obj.some);
-      expect(() => EJSON.serialize(obj)).to.throw(`\
-Converting circular structure to EJSON:
-    (root) -> some -> property -> array -> index 0
-                \\-----------------------------/`);
-    });
-
-    it('should throw a helpful error message for input with circular references, one-level nested', function () {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const obj: any = {};
-      obj.obj = obj;
-      expect(() => EJSON.serialize(obj)).to.throw(`\
-Converting circular structure to EJSON:
-    (root) -> obj
-       \\-------/`);
-    });
-
-    it('should throw a helpful error message for input with circular references, one-level nested inside base object', function () {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const obj: any = {};
-      obj.obj = obj;
-      expect(() => EJSON.serialize({ foo: obj })).to.throw(`\
-Converting circular structure to EJSON:
-    (root) -> foo -> obj
-               \\------/`);
-    });
-
-    it('should throw a helpful error message for input with circular references, pointing back to base object', function () {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const obj: any = { foo: {} };
-      obj.foo.obj = obj;
-      expect(() => EJSON.serialize(obj)).to.throw(`\
-Converting circular structure to EJSON:
-    (root) -> foo -> obj
-       \\--------------/`);
-    });
-  });
-
   context('when dealing with legacy extended json', function () {
     describe('.stringify', function () {
       context('when serializing binary', function () {

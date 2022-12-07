@@ -130,3 +130,24 @@ Now `-0` can be used directly
 BSON.deserialize(BSON.serialize({ d: -0 }))
 // type preservation, returns { d: -0 }
 ```
+
+### `BSON.serialize()` validation
+
+The BSON format does not support encoding arrays as the **root** object.
+However, in javascript arrays are just objects where the keys are numeric (and a magic `length` property), so round tripping an array (ex. `[1, 2]`) though BSON would return `{ '0': 1, '1': 2 }`.
+
+`BSON.serialize()` now validates input types, the input to serialize must be an object or a `Map`, arrays will now cause an error.
+
+```typescript
+BSON.serialize([1, 2, 3])
+// BSONError: serialize does not support an array as the root input
+```
+
+if the functionality of turning arrays into an object with numeric keys is useful see the following example:
+
+```typescript
+// Migration example:
+const result = BSON.serialize(Object.fromEntries([1, true, 'blue'].entries()))
+BSON.deserialize(result)
+// { '0': 1, '1': true, '2': 'blue' }
+```

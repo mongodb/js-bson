@@ -1848,7 +1848,9 @@ describe('BSON', function () {
 
     // Array
     const array = [new ObjectIdv400(), new OldObjectID(), new ObjectId()];
-    const deserializedArrayAsMap = BSON.deserialize(BSON.serialize(array));
+    const deserializedArrayAsMap = BSON.deserialize(
+      BSON.serialize(Object.fromEntries(array.entries()))
+    );
     const deserializedArray = Object.keys(deserializedArrayAsMap).map(
       x => deserializedArrayAsMap[x]
     );

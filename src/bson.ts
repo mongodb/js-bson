@@ -150,7 +150,7 @@ export function serialize(object: Document, options: SerializeOptions = {}): Uin
     0,
     serializeFunctions,
     ignoreUndefined,
-    []
+    null
   );
 
   // Create the final buffer
@@ -193,7 +193,8 @@ export function serializeWithBufferAndIndex(
     0,
     0,
     serializeFunctions,
-    ignoreUndefined
+    ignoreUndefined,
+    null
   );
 
   finalBuffer.set(buffer.subarray(0, serializationIndex), startIndex);
