@@ -133,4 +133,13 @@ BSON.deserialize(BSON.serialize({ d: -0 }))
 
 ### Extended JSON `strict` flag removed
 
-Extended JSON `parse` and `stringify` APIs ignore the deprecated `strict` option and it has been removed from the type definitions.
+Extended JSON `parse` and `stringify` APIs ignore the deprecated `strict` option and it has been removed from the type definitions. All usages of `strict` should be removed and the `relaxed` setting should be used instead. The `relaxed` setting is the inverse of `strict` so take note of the following migration example:
+
+```typescript
+// parse
+EJSON.parse("...",  { strict: true  }); /* migrate to */ EJSON.parse("...",  { relaxed: false });
+EJSON.parse("...",  { strict: false }); /* migrate to */ EJSON.parse("...",  { relaxed: true });
+// stringify
+EJSON.stringify({}, { strict: true  }); /* migrate to */ EJSON.stringify({}, { relaxed: false });
+EJSON.stringify({}, { strict: false }); /* migrate to */ EJSON.stringify({}, { relaxed: true });
+```
