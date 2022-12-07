@@ -13,15 +13,7 @@ import type { MinKey } from '../min_key';
 import type { ObjectId } from '../objectid';
 import type { BSONRegExp } from '../regexp';
 import { ByteUtils } from '../utils/byte_utils';
-import {
-  isBigInt64Array,
-  isBigUInt64Array,
-  isDate,
-  isMap,
-  isRegExp,
-  isUint8Array,
-  normalizedFunctionString
-} from './utils';
+import { isBigInt64Array, isBigUInt64Array, isDate, isMap, isRegExp, isUint8Array } from './utils';
 
 /** @public */
 export interface SerializeOptions {
@@ -386,14 +378,7 @@ function serializeDouble(buffer: Uint8Array, key: string, value: Double, index: 
   return index;
 }
 
-function serializeFunction(
-  buffer: Uint8Array,
-  key: string,
-  value: Function,
-  index: number,
-  _checkKeys = false,
-  _depth = 0
-) {
+function serializeFunction(buffer: Uint8Array, key: string, value: Function, index: number) {
   buffer[index++] = constants.BSON_DATA_CODE;
   // Number of written bytes
   const numberOfWrittenBytes = ByteUtils.encodeUTF8Into(buffer, key, index);
@@ -401,7 +386,7 @@ function serializeFunction(
   index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   // Function string
-  const functionString = normalizedFunctionString(value);
+  const functionString = value.toString();
 
   // Write the string
   const size = ByteUtils.encodeUTF8Into(buffer, functionString, index + 4) + 1;
@@ -441,7 +426,7 @@ function serializeCode(
 
     // Serialize the function
     // Get the function string
-    const functionString = typeof value.code === 'string' ? value.code : value.code.toString();
+    const functionString = value.code;
     // Index adjustment
     index = index + 4;
     // Write string into buffer
@@ -679,7 +664,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'Double') {
         index = serializeDouble(buffer, key, value, index);
       } else if (typeof value === 'function' && serializeFunctions) {
-        index = serializeFunction(buffer, key, value, index, checkKeys, depth);
+        index = serializeFunction(buffer, key, value, index);
       } else if (value['_bsontype'] === 'Code') {
         index = serializeCode(
           buffer,
@@ -790,7 +775,7 @@ export function serializeInto(
           ignoreUndefined
         );
       } else if (typeof value === 'function' && serializeFunctions) {
-        index = serializeFunction(buffer, key, value, index, checkKeys, depth);
+        index = serializeFunction(buffer, key, value, index);
       } else if (value['_bsontype'] === 'Binary') {
         index = serializeBinary(buffer, key, value, index);
       } else if (value['_bsontype'] === 'Symbol') {
@@ -894,7 +879,7 @@ export function serializeInto(
           ignoreUndefined
         );
       } else if (typeof value === 'function' && serializeFunctions) {
-        index = serializeFunction(buffer, key, value, index, checkKeys, depth);
+        index = serializeFunction(buffer, key, value, index);
       } else if (value['_bsontype'] === 'Binary') {
         index = serializeBinary(buffer, key, value, index);
       } else if (value['_bsontype'] === 'Symbol') {
