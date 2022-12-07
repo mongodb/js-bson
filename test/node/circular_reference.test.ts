@@ -1,8 +1,7 @@
 import { expect } from 'chai';
 import * as BSON from '../register-bson';
 import type { Code, Document } from '../..';
-import { inspect } from 'node:util';
-import { isMap } from 'node:util/types';
+import { inspect, types } from 'node:util';
 import { DBRef } from '../register-bson';
 
 const EJSON = BSON.EJSON;
@@ -10,7 +9,7 @@ const EJSON = BSON.EJSON;
 function setOn(object: Document | unknown[] | Map<string, unknown>, value: unknown) {
   if (Array.isArray(object)) {
     object[Math.floor(Math.random() * object.length)] = value;
-  } else if (isMap(object)) {
+  } else if (types.isMap(object)) {
     // @ts-expect-error: "readonly" map case does not apply
     object.set('a', value);
   } else {
