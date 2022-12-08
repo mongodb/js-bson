@@ -28,6 +28,43 @@ type ArrayBufferViewWithTag = ArrayBufferView & {
   [Symbol.toStringTag]?: string;
 };
 
+function isReactNative() {
+  const { navigator } = globalThis as { navigator?: { product?: string } };
+  return typeof navigator === 'object' && navigator.product === 'ReactNative';
+}
+
+/** @internal */
+export function webMathRandomBytes(byteLength: number) {
+  if (byteLength < 0) {
+    throw new RangeError(`The argument 'byteLength' is invalid. Received ${byteLength}`);
+  }
+  return webByteUtils.fromNumberArray(
+    Array.from({ length: byteLength }, () => Math.floor(Math.random() * 256))
+  );
+}
+
+/** @internal */
+const webRandomBytes: (byteLength: number) => Uint8Array = (() => {
+  const { crypto } = globalThis as {
+    crypto?: { getRandomValues?: (space: Uint8Array) => Uint8Array };
+  };
+  if (crypto != null && typeof crypto.getRandomValues === 'function') {
+    return (byteLength: number) => {
+      // @ts-expect-error: crypto.getRandomValues cannot actually be null here
+      // You cannot separate getRandomValues from crypto (need to have this === crypto)
+      return crypto.getRandomValues(webByteUtils.allocate(byteLength));
+    };
+  } else {
+    if (isReactNative()) {
+      const { console } = globalThis as { console?: { warn?: (message: string) => void } };
+      console?.warn?.(
+        'BSON: For React Native please polyfill crypto.getRandomValues, e.g. using: https://www.npmjs.com/package/react-native-get-random-values.'
+      );
+    }
+    return webMathRandomBytes;
+  }
+})();
+
 const HEX_DIGIT = /(\d|[a-f])/i;
 
 /** @internal */
@@ -147,5 +184,7 @@ export const webByteUtils = {
     const bytes = webByteUtils.fromUTF8(source);
     buffer.set(bytes, byteOffset);
     return bytes.byteLength;
-  }
+  },
+
+  randomBytes: webRandomBytes
 };

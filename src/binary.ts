@@ -1,5 +1,5 @@
 import { bufferToUuidHexString, uuidHexStringToBuffer, uuidValidateString } from './uuid_utils';
-import { isUint8Array, randomBytes } from './parser/utils';
+import { isUint8Array } from './parser/utils';
 import type { EJSONOptions } from './extended_json';
 import { BSONError, BSONTypeError } from './error';
 import { BSON_BINARY_SUBTYPE_UUID_NEW } from './constants';
@@ -419,7 +419,7 @@ export class UUID extends Binary {
    * Generates a populated buffer containing a v4 uuid
    */
   static generate(): Uint8Array {
-    const bytes = randomBytes(UUID_BYTE_LENGTH);
+    const bytes = ByteUtils.randomBytes(UUID_BYTE_LENGTH);
 
     // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
     // Kindly borrowed from https://github.com/uuidjs/uuid/blob/master/src/v4.js
