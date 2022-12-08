@@ -17,7 +17,7 @@ describe('deserializer()', () => {
     });
   });
 
-  describe('evalFunctions is ignored', () => {
+  describe('when passing an evalFunctions option', () => {
     const codeTypeBSON = bufferFromHexArray([
       '0D', // javascript type
       '6100', // 'a\x00'
@@ -42,7 +42,7 @@ describe('deserializer()', () => {
       bufferFromHexArray(['08', '6200', '01']).toString('hex') // scope: { b: true }
     ]);
 
-    it('only Code instances are returned', () => {
+    it('only returns Code instances', () => {
       // @ts-expect-error: Checking removed options
       const resultCode = BSON.deserialize(codeTypeBSON, { evalFunctions: true });
       expect(resultCode).to.have.nested.property('a._bsontype', 'Code');
