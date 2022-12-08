@@ -18,34 +18,20 @@ function setOn(object: Document | unknown[] | Map<string, unknown>, value: unkno
 }
 
 function* generateTests() {
-  // arbitrarily depth choice here... it could fail at 26! but is that worth testing?
-  const levelsOfDepth = 25;
-  for (let lvl = 2; lvl < levelsOfDepth; lvl++) {
-    const isRootMap = Math.random() < 0.5;
-    const root = isRootMap ? new Map() : {};
+  for (const makeRoot of [() => new Map(), () => ({})]) {
+    for (const makeNestedType of [() => new Map(), () => ({}), () => []]) {
+      const root = makeRoot();
+      const nested = makeNestedType();
+      setOn(root, nested);
+      setOn(nested, root);
 
-    let lastReference = root;
-    for (let depth = 1; depth < lvl; depth++) {
-      const referenceChoice = Math.random();
-      const newLevel =
-        referenceChoice < 0.3
-          ? {}
-          : referenceChoice > 0.3 && referenceChoice < 0.6
-          ? // Just making an arbitrarily largish non-sparse array here
-            Array.from({ length: Math.floor(Math.random() * 255) + 5 }, () => null)
-          : new Map();
-
-      setOn(lastReference, newLevel);
-      lastReference = newLevel;
+      yield {
+        title: `root that is a ${types.isMap(root) ? 'map' : 'object'} with a nested ${
+          types.isMap(nested) ? 'map' : Array.isArray(nested) ? 'array' : 'object'
+        } with a circular reference to the root throws`,
+        input: root
+      };
     }
-
-    // Add the cycle
-    setOn(lastReference, root);
-
-    yield {
-      title: `cyclic reference nested ${lvl} levels will cause the serializer to throw`,
-      input: root
-    };
   }
 }
 
