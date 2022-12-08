@@ -1,5 +1,5 @@
 import { BSONTypeError } from './error';
-import { isUint8Array, randomBytes } from './parser/utils';
+import { isUint8Array } from './parser/utils';
 import { BSONDataView, ByteUtils } from './utils/byte_utils';
 
 // Regular expression that checks for hex value
@@ -154,7 +154,7 @@ export class ObjectId {
 
     // set PROCESS_UNIQUE if yet not initialized
     if (PROCESS_UNIQUE === null) {
-      PROCESS_UNIQUE = randomBytes(5);
+      PROCESS_UNIQUE = ByteUtils.randomBytes(5);
     }
 
     // 5-byte process unique
