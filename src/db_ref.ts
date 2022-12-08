@@ -1,7 +1,6 @@
 import type { Document } from './bson';
 import type { EJSONOptions } from './extended_json';
 import type { ObjectId } from './objectid';
-import { isObjectLike } from './parser/utils';
 
 /** @public */
 export interface DBRefLike {
@@ -13,10 +12,14 @@ export interface DBRefLike {
 /** @internal */
 export function isDBRefLike(value: unknown): value is DBRefLike {
   return (
-    isObjectLike(value) &&
+    value != null &&
+    typeof value === 'object' &&
+    '$id' in value &&
     value.$id != null &&
+    '$ref' in value &&
     typeof value.$ref === 'string' &&
-    (value.$db == null || typeof value.$db === 'string')
+    // If '$db' is defined it MUST be a string, otherwise it should be absent
+    (!('$db' in value) || ('$db' in value && typeof value.$db === 'string'))
   );
 }
 

@@ -7,6 +7,7 @@
     "target": "es2020",
     "module": "commonjs",
     "moduleResolution": "node",
+    "skipLibCheck": true,
     "lib": [
       "es2020",
     ],

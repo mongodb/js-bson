@@ -7,6 +7,7 @@ require('source-map-support').install({
 const { inspect } = require('node:util');
 const chai = require('chai');
 chai.use(require('sinon-chai'));
+chai.config.truncateThreshold = 0;
 
 const { loadBSONWithGlobal } = require('./load_bson');
 

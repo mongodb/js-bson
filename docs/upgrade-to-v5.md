@@ -76,9 +76,7 @@ We have set our typescript compilation target to `es2020` which aligns with our 
 
 ### serializeFunctions bug fix
 
-> **TL;DR**: TODO
-
-TODO(NODE-4771): serializeFunctions bug fix makes function names outside the ascii range get serialized correctly
+If serializeFunctions was enabled and the functions being serialized had a name that is outside of [Controls and Basic Latin](https://en.wikibooks.org/wiki/Unicode/Character_reference/0000-0FFF) character ranges (a.k.a utf8 bytes: 0x00-0x7F) they would be incorrectly serialized.
 
 ### Remove `Map` export
 
@@ -131,6 +129,43 @@ BSON.deserialize(BSON.serialize({ d: -0 }))
 // type preservation, returns { d: -0 }
 ```
 
+### Capital "D" ObjectID export removed
+
+For clarity the deprecated and duplicate export `ObjectID` has been removed. `ObjectId` matches the class name and is equal in every way to the capital "D" export.
+
+### Timestamp constructor validation
+
+The `Timestamp` type no longer accepts two number arguments for the low and high bits of the int64 value.
+
+Supported constructors are as follows:
+
+```typescript
+class Timestamp {
+  constructor(int: bigint);
+  constructor(long: Long);
+  constructor(value: { t: number; i: number });
+}
+```
+
+Any code that use the two number argument style of constructing a Timestamp will need to be migrated to one of the supported constructors. We recommend using the `{ t: number; i: number }` style input, representing the timestamp and increment respectively.
+
+```typescript
+// in 4.x BSON
+new Timestamp(1, 2); // as an int64: 8589934593
+// in 5.x BSON
+new Timestamp({ t: 2, i: 1 }); // as an int64: 8589934593
+```
+
+Additionally, the `t` and `i` fields of `{ t: number; i: number }` are now validated more strictly to ensure your Timestamps are being constructed as expected.
+
+For example:
+```typescript
+new Timestamp({ t: -2, i: 1 });
+// Will throw, both fields need to be positive
+new Timestamp({ t: 2, i: 0xFFFF_FFFF + 1 });
+// Will throw, both fields need to be less than or equal to the unsigned int32 max value
+```
+
 ### `Code` only stores a string
 
 The `Code` class only stores stringified javascript.
@@ -159,4 +194,3 @@ const iLoveJavascript = new Function(`return ${result.iLoveJavascript.code}`)();
 iLoveJavascript();
 // prints "I love javascript"
 // iLoveJavascript.name === "iLoveJavascript"
-```

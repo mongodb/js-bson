@@ -1,8 +1,7 @@
 import * as BSON from '../register-bson';
 const Double = BSON.Double;
 
-const BSON_DOUBLE_TYPE_INDICATOR = 0x01;
-const BSON_INT_TYPE_INDICATOR = 0x10;
+import { BSON_DATA_NUMBER, BSON_DATA_INT } from '../../src/constants';
 
 describe('BSON Double Precision', function () {
   context('class Double', function () {
@@ -82,11 +81,10 @@ describe('BSON Double Precision', function () {
   });
 
   it('does preserve -0 in serialize as a double', function () {
-    const value = -0;
-    const serializedDouble = BSON.serialize({ d: value });
+    const serializedDouble = BSON.serialize({ d: -0 });
     const type = serializedDouble[4];
-    expect(type).to.equal(BSON_DOUBLE_TYPE_INDICATOR);
-    expect(type).to.not.equal(BSON_INT_TYPE_INDICATOR);
+    expect(type).to.equal(BSON_DATA_NUMBER);
+    expect(type).to.not.equal(BSON_DATA_INT);
     expect(serializedDouble.subarray(7, 15)).to.deep.equal(
       new Uint8Array(new Float64Array([-0]).buffer)
     );

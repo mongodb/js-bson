@@ -24,16 +24,6 @@ export function isMap(d: unknown): d is Map<unknown, unknown> {
   return Object.prototype.toString.call(d) === '[object Map]';
 }
 
-// To ensure that 0.4 of node works correctly
 export function isDate(d: unknown): d is Date {
-  return isObjectLike(d) && Object.prototype.toString.call(d) === '[object Date]';
-}
-
-/**
- * @internal
- * this is to solve the `'someKey' in x` problem where x is unknown.
- * https://github.com/typescript-eslint/typescript-eslint/issues/1071#issuecomment-541955753
- */
-export function isObjectLike(candidate: unknown): candidate is Record<string, unknown> {
-  return typeof candidate === 'object' && candidate !== null;
+  return Object.prototype.toString.call(d) === '[object Date]';
 }
