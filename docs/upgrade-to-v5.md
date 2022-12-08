@@ -130,3 +130,7 @@ Now `-0` can be used directly
 BSON.deserialize(BSON.serialize({ d: -0 }))
 // type preservation, returns { d: -0 }
 ```
+
+### Capital "D" ObjectID export removed
+
+For clarity the deprecated and duplicate export `ObjectID` has been removed. `ObjectId` matches the class name and is equal in every way to the capital "D" export.

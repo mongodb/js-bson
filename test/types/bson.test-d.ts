@@ -51,7 +51,7 @@ expectError(MinKey.prototype.toJSON);
 expectError(Long.prototype.toJSON);
 expectError(BSONRegExp.prototype.toJSON);
 
-// ObjectID uses a capital for backwards compatibility
+// ObjectID uses a capital "D", this does not relate to the class name, or export name, only the determination for serialization
 expectType<'ObjectID'>(ObjectId.prototype._bsontype)
 // BSONSymbol was renamed to not conflict with the global JS Symbol
 // but its _bsontype is still 'Symbol'
