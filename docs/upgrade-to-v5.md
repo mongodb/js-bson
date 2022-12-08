@@ -76,9 +76,7 @@ We have set our typescript compilation target to `es2020` which aligns with our 
 
 ### serializeFunctions bug fix
 
-> **TL;DR**: TODO
-
-TODO(NODE-4771): serializeFunctions bug fix makes function names outside the ascii range get serialized correctly
+If serializeFunctions was enabled and the functions being serialized had a name that is outside of [Controls and Basic Latin](https://en.wikibooks.org/wiki/Unicode/Character_reference/0000-0FFF) character ranges (a.k.a utf8 bytes: 0x00-0x7F) they would be incorrectly serialized.
 
 ### Remove `Map` export
 
