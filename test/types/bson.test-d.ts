@@ -30,7 +30,7 @@ expectType<(radix?: number) => string>(Int32.prototype.toString);
 expectType<() => Decimal128Extended>(Decimal128.prototype.toJSON);
 expectType<
   () => {
-    code: string | Function;
+    code: string;
     scope?: Document;
   }
 >(Code.prototype.toJSON);
