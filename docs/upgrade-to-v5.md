@@ -134,3 +134,36 @@ BSON.deserialize(BSON.serialize({ d: -0 }))
 ### Capital "D" ObjectID export removed
 
 For clarity the deprecated and duplicate export `ObjectID` has been removed. `ObjectId` matches the class name and is equal in every way to the capital "D" export.
+
+### Timestamp constructor validation
+
+The `Timestamp` type no longer accepts two number arguments for the low and high bits of the int64 value.
+
+Supported constructors are as follows:
+
+```typescript
+class Timestamp {
+  constructor(int: bigint);
+  constructor(long: Long);
+  constructor(value: { t: number; i: number });
+}
+```
+
+Any code that use the two number argument style of constructing a Timestamp will need to be migrated to one of the supported constructors. We recommend using the `{ t: number; i: number }` style input, representing the timestamp and increment respectively.
+
+```typescript
+// in 4.x BSON
+new Timestamp(1, 2); // as an int64: 8589934593
+// in 5.x BSON
+new Timestamp({ t: 2, i: 1 }); // as an int64: 8589934593
+```
+
+Additionally, the `t` and `i` fields of `{ t: number; i: number }` are now validated more strictly to ensure your Timestamps are being constructed as expected.
+
+For example:
+```typescript
+new Timestamp({ t: -2, i: 1 });
+// Will throw, both fields need to be positive
+new Timestamp({ t: 2, i: 0xFFFF_FFFF + 1 });
+// Will throw, both fields need to be less than or equal to the unsigned int32 max value
+```

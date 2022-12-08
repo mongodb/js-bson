@@ -10,7 +10,7 @@ import { Long } from './long';
 import { MaxKey } from './max_key';
 import { MinKey } from './min_key';
 import { ObjectId } from './objectid';
-import { isDate, isObjectLike, isRegExp } from './parser/utils';
+import { isDate, isRegExp } from './parser/utils';
 import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
@@ -36,7 +36,10 @@ type BSONType =
 
 export function isBSONType(value: unknown): value is BSONType {
   return (
-    isObjectLike(value) && Reflect.has(value, '_bsontype') && typeof value._bsontype === 'string'
+    value != null &&
+    typeof value === 'object' &&
+    '_bsontype' in value &&
+    typeof value._bsontype === 'string'
   );
 }
 

@@ -1,5 +1,4 @@
 import type { EJSONOptions } from './extended_json';
-import { isObjectLike } from './parser/utils';
 import type { Timestamp } from './timestamp';
 
 interface LongWASMHelpers {
@@ -327,7 +326,12 @@ export class Long {
    * Tests if the specified object is a Long.
    */
   static isLong(value: unknown): value is Long {
-    return isObjectLike(value) && value['__isLong__'] === true;
+    return (
+      value != null &&
+      typeof value === 'object' &&
+      '__isLong__' in value &&
+      value.__isLong__ === true
+    );
   }
 
   /**
