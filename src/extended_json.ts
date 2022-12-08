@@ -276,7 +276,10 @@ const BSON_TYPE_MAPPINGS = {
   MaxKey: () => new MaxKey(),
   MinKey: () => new MinKey(),
   ObjectID: (o: ObjectId) => new ObjectId(o),
-  ObjectId: (o: ObjectId) => new ObjectId(o), // support 4.0.0/4.0.1 before _bsontype was reverted back to ObjectID
+  // The _bsontype for ObjectId is spelled with a capital "D", to the mapping above will be used (most of the time)
+  // specifically BSON versions 4.0.0 and 4.0.1 the _bsontype was changed to "ObjectId" so we keep this mapping to support
+  // those version of BSON
+  ObjectId: (o: ObjectId) => new ObjectId(o),
   BSONRegExp: (o: BSONRegExp) => new BSONRegExp(o.pattern, o.options),
   Symbol: (o: BSONSymbol) => new BSONSymbol(o.value),
   Timestamp: (o: Timestamp) => Timestamp.fromBits(o.low, o.high)

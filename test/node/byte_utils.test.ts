@@ -5,6 +5,7 @@ import { ByteUtils } from '../../src/utils/byte_utils';
 import { nodeJsByteUtils } from '../../src/utils/node_byte_utils';
 import { webByteUtils } from '../../src/utils/web_byte_utils';
 import * as sinon from 'sinon';
+import { loadBSONWithGlobal } from '../load_bson';
 
 type ByteUtilTest<K extends keyof ByteUtils> = {
   name: string;
@@ -20,6 +21,12 @@ const isNode14OrLower = (() => {
   let [majorVersion] = process.version.split('.');
   majorVersion = majorVersion.slice(1); // drop 'v'
   return Number.parseInt(majorVersion, 10) <= 14;
+})();
+
+const isNode19OrHigher = (() => {
+  let [majorVersion] = process.version.split('.');
+  majorVersion = majorVersion.slice(1); // drop 'v'
+  return Number.parseInt(majorVersion, 10) >= 19;
 })();
 
 const testArrayBuffer = new ArrayBuffer(8);
@@ -424,6 +431,48 @@ const utf8ByteLengthTests: ByteUtilTest<'utf8ByteLength'>[] = [
     }
   }
 ];
+const randomBytesTests: ByteUtilTest<'randomBytes'>[] = [
+  {
+    name: 'when byteLength is 0 returns zero byteLength buffer',
+    inputs: [0],
+    expectation({ output, error }) {
+      expect(error, error?.message).to.be.null;
+      expect(output).to.be.instanceOf(Uint8Array);
+      expect(output).to.have.property('byteLength', 0);
+    }
+  },
+  {
+    name: 'when byteLength is non-zero positive integer returns buffer with input byteLength',
+    inputs: [10],
+    expectation({ output, error }) {
+      expect(error, error?.message).to.be.null;
+      expect(output).to.be.instanceOf(Uint8Array);
+      expect(output).to.have.property('byteLength', 10);
+    }
+  },
+  {
+    name: 'when byteLength is negative throws an error',
+    inputs: [-1],
+    expectation({ output, error }) {
+      expect(error?.name, error?.message).to.equal('RangeError');
+      expect(output).to.not.exist;
+    }
+  },
+  {
+    name: 'when byteLength is beyond the supported length for arrays',
+    inputs: [4294967296],
+    expectation({ output, error }) {
+      if (isNode19OrHigher) {
+        // Node 19 on linux (not macos) throws a QuotaExceededError: The requested length exceeds 65,536 bytes
+        // At least we can assert an Error is thrown
+        expect(error).to.exist;
+      } else {
+        expect(error?.name, error?.message).to.equal('RangeError');
+      }
+      expect(output).to.not.exist;
+    }
+  }
+];
 
 const utils = new Map([
   ['nodeJsByteUtils', nodeJsByteUtils],
@@ -443,7 +492,8 @@ const table = new Map<keyof ByteUtils, ByteUtilTest<keyof ByteUtils>[]>([
   ['toISO88591', toISO88591Tests],
   ['fromUTF8', fromUTF8Tests],
   ['toUTF8', toUTF8Tests],
-  ['utf8ByteLength', utf8ByteLengthTests]
+  ['utf8ByteLength', utf8ByteLengthTests],
+  ['randomBytes', randomBytesTests]
 ]);
 
 describe('ByteUtils', () => {
@@ -540,6 +590,105 @@ describe('ByteUtils', () => {
         const result = webByteUtils.toLocalBufferType(input);
         expect(types.isUint8Array(result), 'expected a Uint8Array instance').to.be.true;
         expect(objectProtoToStringSpy).to.be.calledOnce;
+      });
+    });
+  });
+
+  describe('randomBytes fallback case when crypto is not present', () => {
+    describe('web', function () {
+      let bsonWithNoCrypto;
+      before(function () {
+        bsonWithNoCrypto = loadBSONWithGlobal({
+          crypto: null,
+          // if we don't add a copy of Math here then we cannot spy on it for the test
+          Math: {
+            pow: Math.pow,
+            floor: Math.floor,
+            random: Math.random
+          }
+        });
+      });
+
+      after(function () {
+        sinon.restore();
+        bsonWithNoCrypto = null;
+      });
+
+      it('UUID constructor will invoke Math.random 16 times', () => {
+        const randomSpy = sinon.spy(bsonWithNoCrypto.Math, 'random');
+        new bsonWithNoCrypto.BSON.UUID();
+        // 16 is the length of a UUID
+        expect(randomSpy).to.have.callCount(16);
+      });
+    });
+
+    describe('nodejs es module environment where no global require method is present', function () {
+      let bsonWithNoCryptoAndNoRequire;
+      before(function () {
+        bsonWithNoCryptoAndNoRequire = loadBSONWithGlobal({
+          crypto: null,
+          // if we don't add a copy of Math here then we cannot spy on it for the test
+          Math: {
+            pow: Math.pow,
+            floor: Math.floor,
+            random: Math.random
+          },
+          Buffer: globalThis.Buffer
+        });
+      });
+
+      after(function () {
+        sinon.restore();
+        bsonWithNoCryptoAndNoRequire = null;
+      });
+
+      it('UUID constructor will invoke Math.random 16 times', () => {
+        const randomSpy = sinon.spy(bsonWithNoCryptoAndNoRequire.Math, 'random');
+        new bsonWithNoCryptoAndNoRequire.BSON.UUID();
+        // 16 is the length of a UUID
+        expect(randomSpy).to.have.callCount(16);
+      });
+    });
+
+    describe('react native environment when crypto is not present', function () {
+      let bsonWithNoCryptoAndRNProduct;
+      let consoleWarnSpy;
+      before(function () {
+        const fakeConsole = {
+          warn: () => {
+            // ignore
+          }
+        };
+        consoleWarnSpy = sinon.spy(fakeConsole, 'warn');
+        bsonWithNoCryptoAndRNProduct = loadBSONWithGlobal({
+          crypto: null,
+          // if we don't add a copy of Math here then we cannot spy on it for the test
+          Math: {
+            pow: Math.pow,
+            floor: Math.floor,
+            random: Math.random
+          },
+          console: fakeConsole,
+          navigator: { product: 'ReactNative' }
+        });
+      });
+
+      after(function () {
+        sinon.restore();
+        bsonWithNoCryptoAndRNProduct = null;
+      });
+
+      it('a console warning is logged with a message about how to make crypto available', () => {
+        expect(consoleWarnSpy).to.have.been.calledOnceWithExactly(
+          'BSON: For React Native please polyfill crypto.getRandomValues, e.g. using: https://www.npmjs.com/package/react-native-get-random-values.'
+        );
+      });
+
+      it('UUID constructor will invoke Math.random 16 times', () => {
+        const randomSpy = sinon.spy(bsonWithNoCryptoAndRNProduct.Math, 'random');
+        new bsonWithNoCryptoAndRNProduct.BSON.UUID();
+        // 16 is the length of a UUID
+        expect(randomSpy).to.have.callCount(16);
       });
     });
   });

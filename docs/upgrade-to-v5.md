@@ -131,6 +131,10 @@ BSON.deserialize(BSON.serialize({ d: -0 }))
 // type preservation, returns { d: -0 }
 ```
 
+### Capital "D" ObjectID export removed
+
+For clarity the deprecated and duplicate export `ObjectID` has been removed. `ObjectId` matches the class name and is equal in every way to the capital "D" export.
+
 ### Timestamp constructor validation
 
 The `Timestamp` type no longer accepts two number arguments for the low and high bits of the int64 value.

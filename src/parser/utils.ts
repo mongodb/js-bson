@@ -1,9 +1,3 @@
-import { ByteUtils } from '../utils/byte_utils';
-import { getGlobal } from '../utils/global';
-
-type RandomBytesFunction = (size: number) => Uint8Array;
-declare let console: { warn(...message: unknown[]): void };
-
 /**
  * Normalizes our expected stringified form of a function across versions of node
  * @param fn - The function to stringify
@@ -11,63 +5,6 @@ declare let console: { warn(...message: unknown[]): void };
 export function normalizedFunctionString(fn: Function): string {
   return fn.toString().replace('function(', 'function (');
 }
-
-function isReactNative() {
-  const g = getGlobal<{ navigator?: { product?: string } }>();
-  return typeof g.navigator === 'object' && g.navigator.product === 'ReactNative';
-}
-
-const insecureRandomBytes: RandomBytesFunction = function insecureRandomBytes(size: number) {
-  const insecureWarning = isReactNative()
-    ? 'BSON: For React Native please polyfill crypto.getRandomValues, e.g. using: https://www.npmjs.com/package/react-native-get-random-values.'
-    : 'BSON: No cryptographic implementation for random bytes present, falling back to a less secure implementation.';
-  console.warn(insecureWarning);
-
-  const result = ByteUtils.allocate(size);
-  for (let i = 0; i < size; ++i) result[i] = Math.floor(Math.random() * 256);
-  return result;
-};
-
-/* We do not want to have to include DOM types just for this check */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare let window: any;
-declare let require: Function;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare let global: any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare let process: any; // Used by @rollup/plugin-replace
-
-const detectRandomBytes = (): RandomBytesFunction => {
-  if (process.browser) {
-    if (typeof window !== 'undefined') {
-      // browser crypto implementation(s)
-      const target = window.crypto || window.msCrypto; // allow for IE11
-      if (target && target.getRandomValues) {
-        return size => target.getRandomValues(ByteUtils.allocate(size));
-      }
-    }
-
-    if (typeof global !== 'undefined' && global.crypto && global.crypto.getRandomValues) {
-      // allow for RN packages such as https://www.npmjs.com/package/react-native-get-random-values to populate global
-      return size => global.crypto.getRandomValues(ByteUtils.allocate(size));
-    }
-
-    return insecureRandomBytes;
-  } else {
-    let requiredRandomBytes: RandomBytesFunction | null | undefined;
-    try {
-      requiredRandomBytes = require('crypto').randomBytes;
-    } catch (e) {
-      // keep the fallback
-    }
-
-    // NOTE: in transpiled cases the above require might return null/undefined
-
-    return requiredRandomBytes || insecureRandomBytes;
-  }
-};
-
-export const randomBytes = detectRandomBytes();
 
 export function isAnyArrayBuffer(value: unknown): value is ArrayBuffer {
   return ['[object ArrayBuffer]', '[object SharedArrayBuffer]'].includes(
