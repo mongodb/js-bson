@@ -530,18 +530,21 @@ function deserializeObject(
       value = promoteValues ? symbol : new BSONSymbol(symbol);
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_TIMESTAMP) {
-      const lowBits =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
-      const highBits =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
+      // We intentionally **do not** use bit shifting here
+      // Bit shifting in javascript coerces numbers to **signed** int32s
+      // We need to keep i, and t unsigned
+      const i =
+        buffer[index++] +
+        buffer[index++] * (1 << 8) +
+        buffer[index++] * (1 << 16) +
+        buffer[index++] * (1 << 24);
+      const t =
+        buffer[index++] +
+        buffer[index++] * (1 << 8) +
+        buffer[index++] * (1 << 16) +
+        buffer[index++] * (1 << 24);
 
-      value = new Timestamp(lowBits, highBits);
+      value = new Timestamp({ i, t });
     } else if (elementType === constants.BSON_DATA_MIN_KEY) {
       value = new MinKey();
     } else if (elementType === constants.BSON_DATA_MAX_KEY) {
