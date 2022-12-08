@@ -170,7 +170,9 @@ new Timestamp({ t: 2, i: 0xFFFF_FFFF + 1 });
 
 ### Extended JSON `strict` flag removed
 
-Extended JSON `parse` and `stringify` APIs ignore the deprecated `strict` option and it has been removed from the type definitions. All usages of `strict` should be removed and the `relaxed` setting should be used instead. The `relaxed` setting is the inverse of `strict` so take note of the following migration example:
+Extended JSON `parse` and `stringify` APIs no longer support the `strict` option, please use the `relaxed` option instead.
+
+**Note** that the `relaxed` setting is the inverse of `strict`. See the following migration example:
 
 ```typescript
 // parse
