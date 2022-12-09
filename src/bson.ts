@@ -3,13 +3,11 @@ import { Code } from './code';
 import { DBRef } from './db_ref';
 import { Decimal128 } from './decimal128';
 import { Double } from './double';
-import { EJSON } from './extended_json';
 import { Int32 } from './int_32';
 import { Long } from './long';
 import { MaxKey } from './max_key';
 import { MinKey } from './min_key';
 import { ObjectId } from './objectid';
-import { BSONError, BSONTypeError } from './error';
 import { calculateObjectSize as internalCalculateObjectSize } from './parser/calculate_size';
 // Parts of the parser
 import { deserialize as internalDeserialize, DeserializeOptions } from './parser/deserializer';
