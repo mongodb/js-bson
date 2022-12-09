@@ -59,7 +59,7 @@ export async function getLibs() {
       const hash = stdout.trim();
       return {
         name: 'local',
-        lib: await import('../../lib/bson.js'),
+        lib: await import('../../lib/index.js'),
         version: hash
       };
     })(),
