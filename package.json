@@ -80,10 +80,10 @@
   "config": {
     "native": false
   },
-  "main": "lib/bson.js",
+  "main": "lib/index.js",
   "module": "dist/bson.esm.js",
   "browser": {
-    "./lib/bson.js": "./dist/bson.browser.umd.js",
+    "./lib/index.js": "./dist/bson.browser.umd.js",
     "./dist/bson.esm.js": "./dist/bson.browser.esm.js"
   },
   "engines": {

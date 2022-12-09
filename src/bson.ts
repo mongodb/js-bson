@@ -3,13 +3,11 @@ import { Code } from './code';
 import { DBRef } from './db_ref';
 import { Decimal128 } from './decimal128';
 import { Double } from './double';
-import { EJSON } from './extended_json';
 import { Int32 } from './int_32';
 import { Long } from './long';
 import { MaxKey } from './max_key';
 import { MinKey } from './min_key';
 import { ObjectId } from './objectid';
-import { BSONError, BSONTypeError } from './error';
 import { calculateObjectSize as internalCalculateObjectSize } from './parser/calculate_size';
 // Parts of the parser
 import { deserialize as internalDeserialize, DeserializeOptions } from './parser/deserializer';
@@ -247,39 +245,3 @@ export function deserializeStream(
   // Return object containing end index of parsing and list of documents
   return index;
 }
-
-/**
- * BSON default export
- * @deprecated Please use named exports
- * @privateRemarks
- * We want to someday deprecate the default export,
- * so none of the new TS types are being exported on the default
- * @public
- */
-const BSON = {
-  Binary,
-  Code,
-  DBRef,
-  Decimal128,
-  Double,
-  Int32,
-  Long,
-  UUID,
-  Map,
-  MaxKey,
-  MinKey,
-  ObjectId,
-  BSONRegExp,
-  BSONSymbol,
-  Timestamp,
-  EJSON,
-  setInternalBufferSize,
-  serialize,
-  serializeWithBufferAndIndex,
-  deserialize,
-  calculateObjectSize,
-  deserializeStream,
-  BSONError,
-  BSONTypeError
-};
-export default BSON;

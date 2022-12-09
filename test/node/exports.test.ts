@@ -1,3 +1,4 @@
+import { expect } from 'chai';
 import * as BSON from '../register-bson';
 import { sorted, byStrings } from './tools/utils';
 
@@ -30,7 +31,7 @@ const EXPECTED_EXPORTS = [
   'deserialize',
   'calculateObjectSize',
   'deserializeStream',
-  'default'
+  'BSON'
 ];
 
 const EXPECTED_EJSON_EXPORTS = ['parse', 'stringify', 'serialize', 'deserialize'];
