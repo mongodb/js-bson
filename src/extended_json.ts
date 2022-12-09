@@ -359,11 +359,6 @@ export namespace EJSON {
     legacy?: boolean;
     /** Enable Extended JSON's `relaxed` mode, which attempts to return native JS types where possible, rather than BSON types */
     relaxed?: boolean;
-    /**
-     * Disable Extended JSON's `relaxed` mode, which attempts to return BSON types where possible, rather than native JS types
-     * @deprecated Please use the relaxed property instead
-     */
-    strict?: boolean;
   }
 
   /**
@@ -383,19 +378,13 @@ export namespace EJSON {
    * ```
    */
   export function parse(text: string, options?: EJSON.Options): SerializableTypes {
-    const finalOptions = Object.assign({}, { relaxed: true, legacy: false }, options);
-
-    // relaxed implies not strict
-    if (typeof finalOptions.relaxed === 'boolean') finalOptions.strict = !finalOptions.relaxed;
-    if (typeof finalOptions.strict === 'boolean') finalOptions.relaxed = !finalOptions.strict;
-
     return JSON.parse(text, (key, value) => {
       if (key.indexOf('\x00') !== -1) {
         throw new BSONError(
           `BSON Document field names cannot contain null bytes, found: ${JSON.stringify(key)}`
         );
       }
-      return deserializeValue(value, finalOptions);
+      return deserializeValue(value, { relaxed: true, legacy: false, ...options });
     });
   }
 

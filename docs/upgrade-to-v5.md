@@ -165,3 +165,17 @@ new Timestamp({ t: -2, i: 1 });
 new Timestamp({ t: 2, i: 0xFFFF_FFFF + 1 });
 // Will throw, both fields need to be less than or equal to the unsigned int32 max value
 ```
+
+### Extended JSON `strict` flag removed
+
+Extended JSON `parse` and `stringify` APIs no longer support the `strict` option, please use the `relaxed` option instead.
+
+**Note** that the `relaxed` setting is the inverse of `strict`. See the following migration example:
+
+```typescript
+// parse
+EJSON.parse("...",  { strict: true  }); /* migrate to */ EJSON.parse("...",  { relaxed: false });
+EJSON.parse("...",  { strict: false }); /* migrate to */ EJSON.parse("...",  { relaxed: true });
+// stringify
+EJSON.stringify({}, { strict: true  }); /* migrate to */ EJSON.stringify({}, { relaxed: false });
+EJSON.stringify({}, { strict: false }); /* migrate to */ EJSON.stringify({}, { relaxed: true });
