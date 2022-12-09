@@ -2,7 +2,7 @@ import type { Document } from './bson';
 
 /** @public */
 export interface CodeExtended {
-  $code: string | Function;
+  $code: string;
   $scope?: Document;
 }
 
@@ -16,19 +16,27 @@ export class Code {
     return 'Code';
   }
 
-  code!: string | Function;
-  scope?: Document;
+  code: string;
+
+  // a code instance having a null scope is what determines whether
+  // it is BSONType 0x0D (just code) / 0x0F (code with scope)
+  scope: Document | null;
+
   /**
    * @param code - a string or function.
    * @param scope - an optional scope for the function.
    */
-  constructor(code: string | Function, scope?: Document) {
-    this.code = code;
-    this.scope = scope;
+  constructor(code: string | Function, scope?: Document | null) {
+    this.code = code.toString();
+    this.scope = scope ?? null;
   }
 
-  toJSON(): { code: string | Function; scope?: Document } {
-    return { code: this.code, scope: this.scope };
+  toJSON(): { code: string; scope?: Document } {
+    if (this.scope != null) {
+      return { code: this.code, scope: this.scope };
+    }
+
+    return { code: this.code };
   }
 
   /** @internal */
@@ -53,7 +61,7 @@ export class Code {
   inspect(): string {
     const codeJson = this.toJSON();
     return `new Code("${String(codeJson.code)}"${
-      codeJson.scope ? `, ${JSON.stringify(codeJson.scope)}` : ''
+      codeJson.scope != null ? `, ${JSON.stringify(codeJson.scope)}` : ''
     })`;
   }
 }
