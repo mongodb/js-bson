@@ -1,6 +1,7 @@
 import * as BSON from '../register-bson';
 const EJSON = BSON.EJSON;
 import * as vm from 'node:vm';
+import { expect } from 'chai';
 
 // BSON types
 const Binary = BSON.Binary;
@@ -13,7 +14,7 @@ const Int32 = BSON.Int32;
 const Long = BSON.Long;
 const MaxKey = BSON.MaxKey;
 const MinKey = BSON.MinKey;
-const ObjectID = BSON.ObjectID;
+const ObjectID = BSON.ObjectId;
 const ObjectId = BSON.ObjectId;
 const BSONRegExp = BSON.BSONRegExp;
 const BSONSymbol = BSON.BSONSymbol;
@@ -85,8 +86,8 @@ describe('Extended JSON', function () {
     expect(json).to.equal(EJSON.stringify(doc, null, 0, { relaxed: false }));
   });
 
-  it('should correctly deserialize using the default relaxed mode', function () {
-    // Deserialize the document using non strict mode
+  it('should correctly deserialize using the default relaxed mode (relaxed=true)', function () {
+    // Deserialize the document using relaxed=true mode
     let doc1 = EJSON.parse(EJSON.stringify(doc, null, 0));
 
     // Validate the values
@@ -95,7 +96,7 @@ describe('Extended JSON', function () {
     expect(0x19000000000000).to.equal(doc1.longNumberIntFit);
     expect(19007199250000000).to.equal(doc1.doubleNumberIntFit);
 
-    // Deserialize the document using strict mode
+    // Deserialize the document using relaxed=false
     doc1 = EJSON.parse(EJSON.stringify(doc, null, 0), { relaxed: false });
 
     // Validate the values
@@ -116,9 +117,10 @@ describe('Extended JSON', function () {
     const text = EJSON.stringify(doc1, null, 0, { relaxed: false });
     expect(text).to.equal('{"int32":{"$numberInt":"10"}}');
 
-    // Deserialize the json in strict and non strict mode
+    // Deserialize the json in relaxed=false mode
     let doc2 = EJSON.parse(text, { relaxed: false });
     expect(doc2.int32._bsontype).to.equal('Int32');
+    // Deserialize the json in relaxed=true mode
     doc2 = EJSON.parse(text);
     expect(doc2.int32).to.equal(10);
   });
@@ -365,14 +367,14 @@ describe('Extended JSON', function () {
           binary: new bsonModule.Binary(buffer),
           code: new bsonModule.Code('function() {}'),
           dbRef: new bsonModule.DBRef('tests', new Int32(1), 'test'),
-          decimal128: new bsonModule.Decimal128.fromString('9991223372036854775807'),
+          decimal128: bsonModule.Decimal128.fromString('9991223372036854775807'),
           double: new bsonModule.Double(10.1),
           int32: new bsonModule.Int32(10),
-          long: new bsonModule.Long.fromString('1223372036854775807'),
+          long: bsonModule.Long.fromString('1223372036854775807'),
           maxKey: new bsonModule.MaxKey(),
           // minKey: new bsonModule.MinKey(), // broken until #310 is fixed in 1.x
           objectId: bsonModule.ObjectId.createFromHexString('111111111111111111111111'),
-          objectID: bsonModule.ObjectID.createFromHexString('111111111111111111111111'),
+          objectID: bsonModule.ObjectId.createFromHexString('111111111111111111111111'),
           bsonRegExp: new bsonModule.BSONRegExp('hello world', 'i'),
           symbol: bsonModule.BSONSymbol
             ? new bsonModule.BSONSymbol('symbol')
@@ -540,7 +542,7 @@ describe('Extended JSON', function () {
       });
 
       context('when serializing date', function () {
-        context('when using strict mode', function () {
+        context('when using relaxed=false mode', function () {
           it('stringifies $date with with ISO-8601 string', function () {
             const date = new Date(1452124800000);
             const doc = { field: date };
@@ -618,7 +620,7 @@ describe('Extended JSON', function () {
       });
 
       context('when deserializing date', function () {
-        context('when using strict mode', function () {
+        context('when using relaxed=false mode', function () {
           it('parses $date with with ISO-8601 string', function () {
             const date = new Date(1452124800000);
             const doc = { field: date };
@@ -630,7 +632,7 @@ describe('Extended JSON', function () {
           });
         });
 
-        context('when using relaxed mode', function () {
+        context('when using relaxed=true mode', function () {
           it('parses $date number with millis since epoch', function () {
             const date = new Date(1452124800000);
             const doc = { field: date };

@@ -2,6 +2,7 @@
 'use strict';
 
 const Buffer = require('buffer').Buffer;
+const { expect } = require('chai');
 const BSON = require('../register-bson');
 const BSONError = BSON.BSONError;
 const EJSON = BSON.EJSON;

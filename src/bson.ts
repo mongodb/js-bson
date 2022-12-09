@@ -3,13 +3,11 @@ import { Code } from './code';
 import { DBRef } from './db_ref';
 import { Decimal128 } from './decimal128';
 import { Double } from './double';
-import { EJSON } from './extended_json';
 import { Int32 } from './int_32';
 import { Long } from './long';
 import { MaxKey } from './max_key';
 import { MinKey } from './min_key';
 import { ObjectId } from './objectid';
-import { BSONError, BSONTypeError } from './error';
 import { calculateObjectSize as internalCalculateObjectSize } from './parser/calculate_size';
 // Parts of the parser
 import { deserialize as internalDeserialize, DeserializeOptions } from './parser/deserializer';
@@ -20,42 +18,6 @@ import { Timestamp } from './timestamp';
 import { ByteUtils } from './utils/byte_utils';
 export type { UUIDExtended, BinaryExtended, BinaryExtendedLegacy, BinarySequence } from './binary';
 export type { CodeExtended } from './code';
-export {
-  BSON_BINARY_SUBTYPE_BYTE_ARRAY,
-  BSON_BINARY_SUBTYPE_DEFAULT,
-  BSON_BINARY_SUBTYPE_FUNCTION,
-  BSON_BINARY_SUBTYPE_MD5,
-  BSON_BINARY_SUBTYPE_USER_DEFINED,
-  BSON_BINARY_SUBTYPE_UUID,
-  BSON_BINARY_SUBTYPE_UUID_NEW,
-  BSON_BINARY_SUBTYPE_ENCRYPTED,
-  BSON_BINARY_SUBTYPE_COLUMN,
-  BSON_DATA_ARRAY,
-  BSON_DATA_BINARY,
-  BSON_DATA_BOOLEAN,
-  BSON_DATA_CODE,
-  BSON_DATA_CODE_W_SCOPE,
-  BSON_DATA_DATE,
-  BSON_DATA_DBPOINTER,
-  BSON_DATA_DECIMAL128,
-  BSON_DATA_INT,
-  BSON_DATA_LONG,
-  BSON_DATA_MAX_KEY,
-  BSON_DATA_MIN_KEY,
-  BSON_DATA_NULL,
-  BSON_DATA_NUMBER,
-  BSON_DATA_OBJECT,
-  BSON_DATA_OID,
-  BSON_DATA_REGEXP,
-  BSON_DATA_STRING,
-  BSON_DATA_SYMBOL,
-  BSON_DATA_TIMESTAMP,
-  BSON_DATA_UNDEFINED,
-  BSON_INT32_MAX,
-  BSON_INT32_MIN,
-  BSON_INT64_MAX,
-  BSON_INT64_MIN
-} from './constants';
 export type { DBRefLike } from './db_ref';
 export type { Decimal128Extended } from './decimal128';
 export type { DoubleExtended } from './double';
@@ -85,13 +47,10 @@ export {
   MinKey,
   MaxKey,
   BSONRegExp,
-  Decimal128,
-  // In 4.0.0 and 4.0.1, this property name was changed to ObjectId to match the class name.
-  // This caused interoperability problems with previous versions of the library, so in
-  // later builds we changed it back to ObjectID (capital D) to match legacy implementations.
-  ObjectId as ObjectID
+  Decimal128
 };
 export { BSONError, BSONTypeError } from './error';
+export { BSONType } from './constants';
 
 /** @public */
 export interface Document {
@@ -287,40 +246,3 @@ export function deserializeStream(
   // Return object containing end index of parsing and list of documents
   return index;
 }
-
-/**
- * BSON default export
- * @deprecated Please use named exports
- * @privateRemarks
- * We want to someday deprecate the default export,
- * so none of the new TS types are being exported on the default
- * @public
- */
-const BSON = {
-  Binary,
-  Code,
-  DBRef,
-  Decimal128,
-  Double,
-  Int32,
-  Long,
-  UUID,
-  Map,
-  MaxKey,
-  MinKey,
-  ObjectId,
-  ObjectID: ObjectId,
-  BSONRegExp,
-  BSONSymbol,
-  Timestamp,
-  EJSON,
-  setInternalBufferSize,
-  serialize,
-  serializeWithBufferAndIndex,
-  deserialize,
-  calculateObjectSize,
-  deserializeStream,
-  BSONError,
-  BSONTypeError
-};
-export default BSON;

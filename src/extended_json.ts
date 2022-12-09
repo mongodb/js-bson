@@ -10,7 +10,7 @@ import { Long } from './long';
 import { MaxKey } from './max_key';
 import { MinKey } from './min_key';
 import { ObjectId } from './objectid';
-import { isDate, isObjectLike, isRegExp } from './parser/utils';
+import { isDate, isRegExp } from './parser/utils';
 import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
@@ -36,7 +36,10 @@ type BSONType =
 
 export function isBSONType(value: unknown): value is BSONType {
   return (
-    isObjectLike(value) && Reflect.has(value, '_bsontype') && typeof value._bsontype === 'string'
+    value != null &&
+    typeof value === 'object' &&
+    '_bsontype' in value &&
+    typeof value._bsontype === 'string'
   );
 }
 
@@ -273,7 +276,10 @@ const BSON_TYPE_MAPPINGS = {
   MaxKey: () => new MaxKey(),
   MinKey: () => new MinKey(),
   ObjectID: (o: ObjectId) => new ObjectId(o),
-  ObjectId: (o: ObjectId) => new ObjectId(o), // support 4.0.0/4.0.1 before _bsontype was reverted back to ObjectID
+  // The _bsontype for ObjectId is spelled with a capital "D", to the mapping above will be used (most of the time)
+  // specifically BSON versions 4.0.0 and 4.0.1 the _bsontype was changed to "ObjectId" so we keep this mapping to support
+  // those version of BSON
+  ObjectId: (o: ObjectId) => new ObjectId(o),
   BSONRegExp: (o: BSONRegExp) => new BSONRegExp(o.pattern, o.options),
   Symbol: (o: BSONSymbol) => new BSONSymbol(o.value),
   Timestamp: (o: Timestamp) => Timestamp.fromBits(o.low, o.high)
@@ -353,11 +359,6 @@ export namespace EJSON {
     legacy?: boolean;
     /** Enable Extended JSON's `relaxed` mode, which attempts to return native JS types where possible, rather than BSON types */
     relaxed?: boolean;
-    /**
-     * Disable Extended JSON's `relaxed` mode, which attempts to return BSON types where possible, rather than native JS types
-     * @deprecated Please use the relaxed property instead
-     */
-    strict?: boolean;
   }
 
   /**
@@ -377,19 +378,13 @@ export namespace EJSON {
    * ```
    */
   export function parse(text: string, options?: EJSON.Options): SerializableTypes {
-    const finalOptions = Object.assign({}, { relaxed: true, legacy: false }, options);
-
-    // relaxed implies not strict
-    if (typeof finalOptions.relaxed === 'boolean') finalOptions.strict = !finalOptions.relaxed;
-    if (typeof finalOptions.strict === 'boolean') finalOptions.relaxed = !finalOptions.strict;
-
     return JSON.parse(text, (key, value) => {
       if (key.indexOf('\x00') !== -1) {
         throw new BSONError(
           `BSON Document field names cannot contain null bytes, found: ${JSON.stringify(key)}`
         );
       }
-      return deserializeValue(value, finalOptions);
+      return deserializeValue(value, { relaxed: true, legacy: false, ...options });
     });
   }
 

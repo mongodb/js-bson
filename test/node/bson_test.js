@@ -2,6 +2,7 @@
 
 const { Buffer } = require('buffer');
 const BSON = require('../register-bson');
+const { BSON_INT32_MAX, BSON_BINARY_SUBTYPE_USER_DEFINED } = require('../../src/constants');
 const Code = BSON.Code;
 const BSONRegExp = BSON.BSONRegExp;
 const Binary = BSON.Binary;
@@ -434,7 +435,7 @@ describe('BSON', function () {
    * @ignore
    */
   it('Should Correctly Serialize and Deserialize Number 4', function (done) {
-    var doc = { doc: BSON.BSON_INT32_MAX + 10 };
+    var doc = { doc: BSON_INT32_MAX + 10 };
     var serialized_data = BSON.serialize(doc);
 
     var serialized_data2 = Buffer.alloc(BSON.calculateObjectSize(doc));
@@ -443,7 +444,7 @@ describe('BSON', function () {
 
     var deserialized = BSON.deserialize(serialized_data);
     // expect(deserialized.doc instanceof Binary).to.be.ok;
-    expect(BSON.BSON_INT32_MAX + 10).to.equal(deserialized.doc);
+    expect(BSON_INT32_MAX + 10).to.equal(deserialized.doc);
     done();
   });
 
@@ -853,7 +854,7 @@ describe('BSON', function () {
    */
   it('Should Correctly Serialize and Deserialize a User defined Binary object', function (done) {
     var bin = new Binary();
-    bin.sub_type = BSON.BSON_BINARY_SUBTYPE_USER_DEFINED;
+    bin.sub_type = BSON_BINARY_SUBTYPE_USER_DEFINED;
     var string = 'binstring';
     for (var index = 0; index < string.length; index++) {
       bin.put(string.charAt(index));
@@ -867,7 +868,7 @@ describe('BSON', function () {
     assertBuffersEqual(done, serialized_data, serialized_data2, 0);
     var deserialized_data = BSON.deserialize(serialized_data);
 
-    expect(deserialized_data.doc.sub_type).to.deep.equal(BSON.BSON_BINARY_SUBTYPE_USER_DEFINED);
+    expect(deserialized_data.doc.sub_type).to.deep.equal(BSON_BINARY_SUBTYPE_USER_DEFINED);
     expect(doc.doc.value()).to.deep.equal(deserialized_data.doc.value());
     done();
   });
