@@ -41,7 +41,15 @@ describe('serialize()', () => {
       expect(() => BSON.serialize([])).to.throw(/does not support an array/);
     });
 
-    it('does not non-objects as the root input', () => {
+    it('does not permit objects with a _bsontype string to be serialized at the root', () => {
+      expect(() => BSON.serialize({ _bsontype: 'iLoveJavascript' })).to.throw(/BSON types cannot/);
+      // a nested invalid _bsontype throws something different
+      expect(() => BSON.serialize({ a: { _bsontype: 'iLoveJavascript' } })).to.throw(
+        /invalid _bsontype/
+      );
+    });
+
+    it('does not permit non-objects as the root input', () => {
       // @ts-expect-error: Testing invalid input
       expect(() => BSON.serialize(true)).to.throw(/does not support non-object/);
       // @ts-expect-error: Testing invalid input

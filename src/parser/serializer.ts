@@ -646,6 +646,8 @@ export function serializeInto(
     }
     if (typeof object !== 'object') {
       throw new BSONError('serialize does not support non-object as the root input');
+    } else if ('_bsontype' in object && typeof object._bsontype === 'string') {
+      throw new BSONError(`BSON types cannot be serialized as a document`);
     }
 
     path = new Set();
