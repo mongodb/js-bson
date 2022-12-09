@@ -205,7 +205,7 @@ const bsonBytes = BSON.serialize(
 );
 const result = BSON.deserialize(bsonBytes)
 // result.iLoveJavascript instanceof Code
-// result.iLoveJavascript.code === "function iLoveJavascript() {}"
+// result.iLoveJavascript.code === "function () { console.log('I love javascript') }"
 const iLoveJavascript = new Function(`return ${result.iLoveJavascript.code}`)();
 iLoveJavascript();
 // prints "I love javascript"
