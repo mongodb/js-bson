@@ -22,6 +22,7 @@ type NodeJsBufferConstructor = Omit<Uint8ArrayConstructor, 'from'> & {
 // This can be nullish, but we gate the nodejs functions on being exported whether or not this exists
 // Node.js global
 declare const Buffer: NodeJsBufferConstructor;
+declare const require: (mod: 'crypto') => { randomBytes: (byteLength: number) => Uint8Array };
 
 /** @internal */
 export function nodejsMathRandomBytes(byteLength: number) {
@@ -30,17 +31,15 @@ export function nodejsMathRandomBytes(byteLength: number) {
   );
 }
 
-/** @internal */
+/** @internal REQUIRE WILL BE REWRITTEN: Modify this code with caution */
 const nodejsRandomBytes: (byteLength: number) => Uint8Array = (() => {
   try {
-    // What about nodejs es module users.........
-    // @ts-expect-error: require does not exist in our type's globals, but it should in nodejs... most of the time
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     return require('crypto').randomBytes;
   } catch {
     return nodejsMathRandomBytes;
   }
 })();
+/* REQUIRE WILL BE REWRITTEN END: Modify the above code with caution */
 
 /** @internal */
 export const nodeJsByteUtils = {

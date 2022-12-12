@@ -40,7 +40,7 @@ console.error(inspect({ web }, { colors: true }));
 
 let BSON;
 if (web) {
-  BSON = loadBSONWithGlobal().BSON;
+  BSON = loadBSONWithGlobal().exports;
 } else {
   BSON = require('../src/index');
 }

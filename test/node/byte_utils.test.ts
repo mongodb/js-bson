@@ -5,7 +5,8 @@ import { ByteUtils } from '../../src/utils/byte_utils';
 import { nodeJsByteUtils } from '../../src/utils/node_byte_utils';
 import { webByteUtils } from '../../src/utils/web_byte_utils';
 import * as sinon from 'sinon';
-import { loadBSONWithGlobal } from '../load_bson';
+import { loadBSONWithGlobal, load_ESM_BSON_WithGlobal } from '../load_bson';
+import * as crypto from 'node:crypto';
 
 type ByteUtilTest<K extends keyof ByteUtils> = {
   name: string;
@@ -596,9 +597,10 @@ describe('ByteUtils', () => {
 
   describe('randomBytes fallback case when crypto is not present', () => {
     describe('web', function () {
-      let bsonWithNoCrypto;
+      let bsonWithNoCryptoCtx;
+      let bsonWithNoCryptoMod;
       before(function () {
-        bsonWithNoCrypto = loadBSONWithGlobal({
+        const { context, exports } = loadBSONWithGlobal({
           crypto: null,
           // if we don't add a copy of Math here then we cannot spy on it for the test
           Math: {
@@ -607,51 +609,47 @@ describe('ByteUtils', () => {
             random: Math.random
           }
         });
+        bsonWithNoCryptoCtx = context;
+        bsonWithNoCryptoMod = exports;
       });
 
       after(function () {
         sinon.restore();
-        bsonWithNoCrypto = null;
+        bsonWithNoCryptoCtx = null;
+        bsonWithNoCryptoMod = null;
       });
 
       it('UUID constructor will invoke Math.random 16 times', () => {
-        const randomSpy = sinon.spy(bsonWithNoCrypto.Math, 'random');
-        new bsonWithNoCrypto.BSON.UUID();
+        const randomSpy = sinon.spy(bsonWithNoCryptoCtx.Math, 'random');
+        new bsonWithNoCryptoMod.BSON.UUID();
         // 16 is the length of a UUID
         expect(randomSpy).to.have.callCount(16);
       });
     });
 
-    describe('nodejs es module environment where no global require method is present', function () {
-      let bsonWithNoCryptoAndNoRequire;
-      before(function () {
-        bsonWithNoCryptoAndNoRequire = loadBSONWithGlobal({
-          crypto: null,
-          // if we don't add a copy of Math here then we cannot spy on it for the test
-          Math: {
-            pow: Math.pow,
-            floor: Math.floor,
-            random: Math.random
-          },
-          Buffer: globalThis.Buffer
-        });
+    describe('nodejs es module environment dynamically imports crypto', function () {
+      let bsonImportedFromESMMod;
+
+      beforeEach(async function () {
+        const { exports } = await load_ESM_BSON_WithGlobal({});
+        bsonImportedFromESMMod = exports;
       });
 
       after(function () {
         sinon.restore();
-        bsonWithNoCryptoAndNoRequire = null;
+        bsonImportedFromESMMod = null;
       });
 
-      it('UUID constructor will invoke Math.random 16 times', () => {
-        const randomSpy = sinon.spy(bsonWithNoCryptoAndNoRequire.Math, 'random');
-        new bsonWithNoCryptoAndNoRequire.BSON.UUID();
-        // 16 is the length of a UUID
-        expect(randomSpy).to.have.callCount(16);
+      it('UUID constructor will use crypto randomBytes', () => {
+        const randomBytesSpy = sinon.spy(crypto, 'randomBytes');
+        new bsonImportedFromESMMod.BSON.UUID();
+        expect(randomBytesSpy).to.have.callCount(1);
       });
     });
 
     describe('react native environment when crypto is not present', function () {
-      let bsonWithNoCryptoAndRNProduct;
+      let bsonWithNoCryptoAndRNProductCtx;
+      let bsonWithNoCryptoAndRNProductMod;
       let consoleWarnSpy;
       before(function () {
         const fakeConsole = {
@@ -660,7 +658,7 @@ describe('ByteUtils', () => {
           }
         };
         consoleWarnSpy = sinon.spy(fakeConsole, 'warn');
-        bsonWithNoCryptoAndRNProduct = loadBSONWithGlobal({
+        const { context, exports } = loadBSONWithGlobal({
           crypto: null,
           // if we don't add a copy of Math here then we cannot spy on it for the test
           Math: {
@@ -671,11 +669,15 @@ describe('ByteUtils', () => {
           console: fakeConsole,
           navigator: { product: 'ReactNative' }
         });
+
+        bsonWithNoCryptoAndRNProductCtx = context;
+        bsonWithNoCryptoAndRNProductMod = exports;
       });
 
       after(function () {
         sinon.restore();
-        bsonWithNoCryptoAndRNProduct = null;
+        bsonWithNoCryptoAndRNProductCtx = null;
+        bsonWithNoCryptoAndRNProductMod = null;
       });
 
       it('a console warning is logged with a message about how to make crypto available', () => {
@@ -685,8 +687,8 @@ describe('ByteUtils', () => {
       });
 
       it('UUID constructor will invoke Math.random 16 times', () => {
-        const randomSpy = sinon.spy(bsonWithNoCryptoAndRNProduct.Math, 'random');
-        new bsonWithNoCryptoAndRNProduct.BSON.UUID();
+        const randomSpy = sinon.spy(bsonWithNoCryptoAndRNProductCtx.Math, 'random');
+        new bsonWithNoCryptoAndRNProductMod.BSON.UUID();
         // 16 is the length of a UUID
         expect(randomSpy).to.have.callCount(16);
       });

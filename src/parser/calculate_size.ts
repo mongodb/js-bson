@@ -4,7 +4,7 @@ import * as constants from '../constants';
 import { ByteUtils } from '../utils/byte_utils';
 import { isAnyArrayBuffer, isDate, isRegExp } from './utils';
 
-export function calculateObjectSize(
+export function internalCalculateObjectSize(
   object: Document,
   serializeFunctions?: boolean,
   ignoreUndefined?: boolean
@@ -109,7 +109,7 @@ function calculateElement(
             4 +
             ByteUtils.utf8ByteLength(value.code.toString()) +
             1 +
-            calculateObjectSize(value.scope, serializeFunctions, ignoreUndefined)
+            internalCalculateObjectSize(value.scope, serializeFunctions, ignoreUndefined)
           );
         } else {
           return (
@@ -159,7 +159,7 @@ function calculateElement(
         return (
           (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
           1 +
-          calculateObjectSize(ordered_values, serializeFunctions, ignoreUndefined)
+          internalCalculateObjectSize(ordered_values, serializeFunctions, ignoreUndefined)
         );
       } else if (value instanceof RegExp || isRegExp(value)) {
         return (
@@ -184,7 +184,7 @@ function calculateElement(
       } else {
         return (
           (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
-          calculateObjectSize(value, serializeFunctions, ignoreUndefined) +
+          internalCalculateObjectSize(value, serializeFunctions, ignoreUndefined) +
           1
         );
       }

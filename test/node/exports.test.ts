@@ -15,7 +15,6 @@ const EXPECTED_EXPORTS = [
   'ObjectId',
   'UUID',
   'Long',
-  'LongWithoutOverridesClass',
   'Timestamp',
   'Double',
   'Int32',

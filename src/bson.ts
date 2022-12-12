@@ -8,10 +8,10 @@ import { Long } from './long';
 import { MaxKey } from './max_key';
 import { MinKey } from './min_key';
 import { ObjectId } from './objectid';
-import { calculateObjectSize as internalCalculateObjectSize } from './parser/calculate_size';
+import { internalCalculateObjectSize } from './parser/calculate_size';
 // Parts of the parser
-import { deserialize as internalDeserialize, DeserializeOptions } from './parser/deserializer';
-import { serializeInto as internalSerialize, SerializeOptions } from './parser/serializer';
+import { internalDeserialize, DeserializeOptions } from './parser/deserializer';
+import { serializeInto, SerializeOptions } from './parser/serializer';
 import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
@@ -22,7 +22,6 @@ export type { DBRefLike } from './db_ref';
 export type { Decimal128Extended } from './decimal128';
 export type { DoubleExtended } from './double';
 export type { EJSONOptions } from './extended_json';
-export { EJSON } from './extended_json';
 export type { Int32Extended } from './int_32';
 export type { LongExtended } from './long';
 export type { MaxKeyExtended } from './max_key';
@@ -31,8 +30,9 @@ export type { ObjectIdExtended, ObjectIdLike } from './objectid';
 export type { BSONRegExpExtended, BSONRegExpExtendedLegacy } from './regexp';
 export type { BSONSymbolExtended } from './symbol';
 export type { LongWithoutOverrides, TimestampExtended, TimestampOverrides } from './timestamp';
-export { LongWithoutOverridesClass } from './timestamp';
+export type { LongWithoutOverridesClass } from './timestamp';
 export type { SerializeOptions, DeserializeOptions };
+
 export {
   Code,
   BSONSymbol,
@@ -51,6 +51,7 @@ export {
 };
 export { BSONError, BSONTypeError } from './error';
 export { BSONType } from './constants';
+export { EJSON } from './extended_json';
 
 /** @public */
 export interface Document {
@@ -101,7 +102,7 @@ export function serialize(object: Document, options: SerializeOptions = {}): Uin
   }
 
   // Attempt to serialize
-  const serializationIndex = internalSerialize(
+  const serializationIndex = serializeInto(
     buffer,
     object,
     checkKeys,
@@ -145,7 +146,7 @@ export function serializeWithBufferAndIndex(
   const startIndex = typeof options.index === 'number' ? options.index : 0;
 
   // Attempt to serialize
-  const serializationIndex = internalSerialize(
+  const serializationIndex = serializeInto(
     buffer,
     object,
     checkKeys,
