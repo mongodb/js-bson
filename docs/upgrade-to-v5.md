@@ -187,6 +187,37 @@ EJSON.stringify({}, { strict: false }); /* migrate to */ EJSON.stringify({}, { r
 * If you import BSON esmodule style `import BSON from 'bson'` then this code will crash upon loading. **TODO: This is not the case right now but it will be after NODE-4713.**
   * This error will throw: `SyntaxError: The requested module 'bson' does not provide an export named 'default'`.
 
+### `class Code` always converts `.code` to string
+
+The `Code` class still supports the same constructor arguments as before.
+It will now convert the first argument to a string before saving it to the code property, see the following:
+
+```typescript
+const myCode = new Code(function iLoveJavascript() { console.log('I love javascript') });
+// myCode.code === "function iLoveJavascript() { console.log('I love javascript') }"
+// typeof myCode.code === 'string'
+```
+
+### `BSON.deserialize()` only returns `Code` instances
+
+The deserialize options: `evalFunctions`, `cacheFunctions`, and `cacheFunctionsCrc32` have been removed.
+The `evalFunctions` option, when enabled, would return BSON Code typed values as eval-ed javascript functions, now it will always return Code instances.
+
+See the following snippet for how to migrate:
+```typescript
+const bsonBytes = BSON.serialize(
+  { iLoveJavascript: function () { console.log('I love javascript') } },
+  { serializeFunctions: true } // serializeFunctions still works!
+);
+const result = BSON.deserialize(bsonBytes)
+// result.iLoveJavascript instanceof Code
+// result.iLoveJavascript.code === "function () { console.log('I love javascript') }"
+const iLoveJavascript = new Function(`return ${result.iLoveJavascript.code}`)();
+iLoveJavascript();
+// prints "I love javascript"
+// iLoveJavascript.name === "iLoveJavascript"
+```
+
 ### `BSON.serialize()` validation
 
 The BSON format does not support encoding arrays as the **root** object.
