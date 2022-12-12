@@ -49,6 +49,20 @@ describe('serialize()', () => {
       );
     });
 
+    it('does permit objects with a _bsontype prop that is not a string', () => {
+      const expected = bufferFromHexArray([
+        '10', // int32
+        Buffer.from('_bsontype\x00', 'utf8').toString('hex'),
+        '02000000'
+      ]);
+      const result = BSON.serialize({ _bsontype: 2 });
+      expect(result).to.deep.equal(expected);
+
+      expect(() => BSON.serialize({ _bsontype: true })).to.not.throw();
+      expect(() => BSON.serialize({ _bsontype: /a/ })).to.not.throw();
+      expect(() => BSON.serialize({ _bsontype: new Date() })).to.not.throw();
+    });
+
     it('does not permit non-objects as the root input', () => {
       // @ts-expect-error: Testing invalid input
       expect(() => BSON.serialize(true)).to.throw(/does not support non-object/);
