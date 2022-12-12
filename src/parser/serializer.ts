@@ -14,6 +14,7 @@ import type { ObjectId } from '../objectid';
 import type { BSONRegExp } from '../regexp';
 import { ByteUtils } from '../utils/byte_utils';
 import {
+  isAnyArrayBuffer,
   isBigInt64Array,
   isBigUInt64Array,
   isDate,
@@ -648,6 +649,13 @@ export function serializeInto(
       throw new BSONError('serialize does not support non-object as the root input');
     } else if ('_bsontype' in object && typeof object._bsontype === 'string') {
       throw new BSONError(`BSON types cannot be serialized as a document`);
+    } else if (
+      isDate(object) ||
+      isRegExp(object) ||
+      isUint8Array(object) ||
+      isAnyArrayBuffer(object)
+    ) {
+      throw new BSONError(`date, regexp, typedarray, and arraybuffer cannot be BSON documents`);
     }
 
     path = new Set();

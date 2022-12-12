@@ -80,5 +80,13 @@ describe('serialize()', () => {
         })
       ).to.throw(/does not support non-object/);
     });
+
+    it('does not permit certain objects that are typically values as the root input', () => {
+      expect(() => BSON.serialize(new Date())).to.throw(/cannot be BSON documents/);
+      expect(() => BSON.serialize(/a/)).to.throw(/cannot be BSON documents/);
+      expect(() => BSON.serialize(new ArrayBuffer(2))).to.throw(/cannot be BSON documents/);
+      expect(() => BSON.serialize(Buffer.alloc(2))).to.throw(/cannot be BSON documents/);
+      expect(() => BSON.serialize(new Uint8Array(3))).to.throw(/cannot be BSON documents/);
+    });
   });
 });
