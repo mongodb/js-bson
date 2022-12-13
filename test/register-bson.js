@@ -9,7 +9,7 @@ const chai = require('chai');
 chai.use(require('sinon-chai'));
 chai.config.truncateThreshold = 0;
 
-const { loadBSONWithGlobal } = require('./load_bson');
+const { loadCJSModuleBSON } = require('./load_bson');
 
 /**
  * In the runInContext "web" testing instanceof checks fail
@@ -40,7 +40,7 @@ console.error(inspect({ web }, { colors: true }));
 
 let BSON;
 if (web) {
-  BSON = loadBSONWithGlobal().exports;
+  BSON = loadCJSModuleBSON().exports;
 } else {
   BSON = require('../src/index');
 }

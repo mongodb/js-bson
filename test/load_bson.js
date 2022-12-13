@@ -23,7 +23,7 @@ const commonGlobals = {
   }
 };
 
-function loadBSONWithGlobal(globals) {
+function loadCJSModuleBSON(globals) {
   const filename = path.resolve(__dirname, `../lib/bson.cjs`);
   const code = fs.readFileSync(filename, { encoding: 'utf8' });
   // These are the only globals BSON strictly depends on
@@ -39,7 +39,7 @@ function loadBSONWithGlobal(globals) {
   return { context, exports: context.exports };
 }
 
-async function load_ESM_BSON_WithGlobal(globals) {
+async function loadESModuleBSON(globals) {
   const filename = path.resolve(__dirname, `../lib/bson.mjs`);
   const code = await fs.promises.readFile(filename, { encoding: 'utf8' });
 
@@ -57,4 +57,7 @@ async function load_ESM_BSON_WithGlobal(globals) {
   return { context, exports: bsonMjs.namespace };
 }
 
-module.exports = { loadBSONWithGlobal, load_ESM_BSON_WithGlobal };
+module.exports = {
+  loadCJSModuleBSON,
+  loadESModuleBSON
+};

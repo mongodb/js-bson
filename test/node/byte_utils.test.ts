@@ -5,7 +5,7 @@ import { ByteUtils } from '../../src/utils/byte_utils';
 import { nodeJsByteUtils } from '../../src/utils/node_byte_utils';
 import { webByteUtils } from '../../src/utils/web_byte_utils';
 import * as sinon from 'sinon';
-import { loadBSONWithGlobal, load_ESM_BSON_WithGlobal } from '../load_bson';
+import { loadCJSModuleBSON, loadESModuleBSON } from '../load_bson';
 import * as crypto from 'node:crypto';
 
 type ByteUtilTest<K extends keyof ByteUtils> = {
@@ -600,7 +600,7 @@ describe('ByteUtils', () => {
       let bsonWithNoCryptoCtx;
       let bsonWithNoCryptoMod;
       before(function () {
-        const { context, exports } = loadBSONWithGlobal({
+        const { context, exports } = loadCJSModuleBSON({
           crypto: null,
           // if we don't add a copy of Math here then we cannot spy on it for the test
           Math: {
@@ -631,7 +631,7 @@ describe('ByteUtils', () => {
       let bsonImportedFromESMMod;
 
       beforeEach(async function () {
-        const { exports } = await load_ESM_BSON_WithGlobal({});
+        const { exports } = await loadESModuleBSON({});
         bsonImportedFromESMMod = exports;
       });
 
@@ -658,7 +658,7 @@ describe('ByteUtils', () => {
           }
         };
         consoleWarnSpy = sinon.spy(fakeConsole, 'warn');
-        const { context, exports } = loadBSONWithGlobal({
+        const { context, exports } = loadCJSModuleBSON({
           crypto: null,
           // if we don't add a copy of Math here then we cannot spy on it for the test
           Math: {
