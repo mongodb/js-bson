@@ -11,19 +11,18 @@ describe('BSON BigInt Support', function () {
       this.skip('JS VM does not support BigInt');
     }
   });
-  it('Should serialize an int that fits in int32', function () {
+  it('Correctly serializes a BigInt that fits in int32', function () {
     const testDoc = { b: BigInt(32) };
-    expect(() => BSON.serialize(testDoc)).to.throw(BSONTypeError);
 
-    // const serializedDoc = BSON.serialize(testDoc);
-    // // prettier-ignore
-    // const resultBuffer = Buffer.from([0x0C, 0x00, 0x00, 0x00, 0x10, 0x62, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00]);
-    // const resultDoc = BSON.deserialize(serializedDoc);
-    // expect(Array.from(serializedDoc)).to.have.members(Array.from(resultBuffer));
-    // expect(BigInt(resultDoc.b)).to.equal(testDoc.b);
+    const serializedDoc = BSON.serialize(testDoc);
+    // prettier-ignore
+    const resultBuffer = Buffer.from([0x0C, 0x00, 0x00, 0x00, 0x12, 0x62, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00]);
+    const resultDoc = BSON.deserialize(serializedDoc);
+    expect(Array.from(serializedDoc)).to.have.members(Array.from(resultBuffer));
+    expect(BigInt(resultDoc.b)).to.equal(testDoc.b);
   });
 
-  it('Should serialize an int that fits in int64', function () {
+  it('Correctly serializes a BigInt that fits in int64', function () {
     const testDoc = { b: BigInt(0x1ffffffff) };
     expect(() => BSON.serialize(testDoc)).to.throw(BSONTypeError);
 
@@ -35,7 +34,7 @@ describe('BSON BigInt Support', function () {
     // expect(BigInt(resultDoc.b)).to.equal(testDoc.b);
   });
 
-  it('Should serialize an int that fits in decimal128', function () {
+  it('Correctly serializes a BigInt that fits in decimal128', function () {
     const testDoc = { b: BigInt('9223372036854776001') }; // int64 max + 1
     expect(() => BSON.serialize(testDoc)).to.throw(BSONTypeError);
 
@@ -47,6 +46,10 @@ describe('BSON BigInt Support', function () {
     // expect(resultDoc.b._bsontype).to.equal('Decimal128');
     // expect(BigInt(resultDoc.b.toString())).to.equal(testDoc.b);
   });
+
+  it('Correctly truncates a BigInt that doesn\'t fit into an int64');
+
+  it('');
 
   it('Should throw if BigInt is too large to serialize', function () {
     const testDoc = {
