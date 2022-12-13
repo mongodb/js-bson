@@ -12,7 +12,7 @@ import { Long } from '../long';
 import type { MinKey } from '../min_key';
 import type { ObjectId } from '../objectid';
 import type { BSONRegExp } from '../regexp';
-import { ByteUtils, BSONDataView } from '../utils/byte_utils';
+import { ByteUtils } from '../utils/byte_utils';
 import {
   isAnyArrayBuffer,
   isBigInt64Array,
@@ -104,18 +104,17 @@ function serializeNumber(buffer: Uint8Array, key: string, value: number, index: 
   return index;
 }
 
-function serializeBigInt(buffer: Uint8Array, key: string, value: BigInt, index: number) {
-  const primitiveValue = value.valueOf();
+function serializeBigInt(buffer: Uint8Array, key: string, value: bigint, index: number) {
   buffer[index++] = constants.BSON_DATA_LONG;
   // Number of written bytes
   const numberOfWrittenBytes = ByteUtils.encodeUTF8Into(buffer, key, index);
   // Encode the name
   index += numberOfWrittenBytes;
   buffer[index++] = 0;
+  NUMBER_SPACE.setBigInt64(0, value, true);
   // Write BigInt value
-  const bigIntDataView = BSONDataView.fromUint8Array(buffer.subarray(index, index + 8)); 
-  bigIntDataView.setBigInt64(0, primitiveValue, true); 
-  index += 8;
+  buffer.set(EIGHT_BYTE_VIEW_ON_NUMBER, index);
+  index += EIGHT_BYTE_VIEW_ON_NUMBER.byteLength;
   return index;
 }
 
