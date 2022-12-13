@@ -13,7 +13,15 @@ import type { MinKey } from '../min_key';
 import type { ObjectId } from '../objectid';
 import type { BSONRegExp } from '../regexp';
 import { ByteUtils } from '../utils/byte_utils';
-import { isBigInt64Array, isBigUInt64Array, isDate, isMap, isRegExp, isUint8Array } from './utils';
+import {
+  isAnyArrayBuffer,
+  isBigInt64Array,
+  isBigUInt64Array,
+  isDate,
+  isMap,
+  isRegExp,
+  isUint8Array
+} from './utils';
 
 /** @public */
 export interface SerializeOptions {
@@ -270,18 +278,18 @@ function serializeObject(
   key: string,
   value: Document,
   index: number,
-  checkKeys = false,
-  depth = 0,
-  serializeFunctions = false,
-  ignoreUndefined = true,
-  path: Document[] = []
+  checkKeys: boolean,
+  depth: number,
+  serializeFunctions: boolean,
+  ignoreUndefined: boolean,
+  path: Set<Document>
 ) {
-  for (let i = 0; i < path.length; i++) {
-    if (path[i] === value) throw new BSONError('cyclic dependency detected');
+  if (path.has(value)) {
+    throw new BSONError('Cannot convert circular structure to BSON');
   }
 
-  // Push value to stack
-  path.push(value);
+  path.add(value);
+
   // Write the type
   buffer[index++] = Array.isArray(value) ? constants.BSON_DATA_ARRAY : constants.BSON_DATA_OBJECT;
   // Number of written bytes
@@ -299,8 +307,9 @@ function serializeObject(
     ignoreUndefined,
     path
   );
-  // Pop stack
-  path.pop();
+
+  path.delete(value);
+
   return endIndex;
 }
 
@@ -410,7 +419,8 @@ function serializeCode(
   checkKeys = false,
   depth = 0,
   serializeFunctions = false,
-  ignoreUndefined = true
+  ignoreUndefined = true,
+  path: Set<Document>
 ) {
   if (value.scope && typeof value.scope === 'object') {
     // Write the type
@@ -441,7 +451,6 @@ function serializeCode(
     // Write the
     index = index + codeSize + 4;
 
-    //
     // Serialize the scope value
     const endIndex = serializeInto(
       buffer,
@@ -450,7 +459,8 @@ function serializeCode(
       index,
       depth + 1,
       serializeFunctions,
-      ignoreUndefined
+      ignoreUndefined,
+      path
     );
     index = endIndex - 1;
 
@@ -555,7 +565,8 @@ function serializeDBRef(
   value: DBRef,
   index: number,
   depth: number,
-  serializeFunctions: boolean
+  serializeFunctions: boolean,
+  path: Set<Document>
 ) {
   // Write the type
   buffer[index++] = constants.BSON_DATA_OBJECT;
@@ -577,7 +588,16 @@ function serializeDBRef(
   }
 
   output = Object.assign(output, value.fields);
-  const endIndex = serializeInto(buffer, output, false, index, depth + 1, serializeFunctions);
+  const endIndex = serializeInto(
+    buffer,
+    output,
+    false,
+    index,
+    depth + 1,
+    serializeFunctions,
+    true,
+    path
+  );
 
   // Calculate object size
   const size = endIndex - startIndex;
@@ -593,18 +613,48 @@ function serializeDBRef(
 export function serializeInto(
   buffer: Uint8Array,
   object: Document,
-  checkKeys = false,
-  startingIndex = 0,
-  depth = 0,
-  serializeFunctions = false,
-  ignoreUndefined = true,
-  path: Document[] = []
+  checkKeys: boolean,
+  startingIndex: number,
+  depth: number,
+  serializeFunctions: boolean,
+  ignoreUndefined: boolean,
+  path: Set<Document> | null
 ): number {
-  startingIndex = startingIndex || 0;
-  path = path || [];
+  if (path == null) {
+    // We are at the root input
+    if (object == null) {
+      // ONLY the root should turn into an empty document
+      // BSON Empty document has a size of 5 (LE)
+      buffer[0] = 0x05;
+      buffer[1] = 0x00;
+      buffer[2] = 0x00;
+      buffer[3] = 0x00;
+      // All documents end with null terminator
+      buffer[4] = 0x00;
+      return 5;
+    }
+
+    if (Array.isArray(object)) {
+      throw new BSONError('serialize does not support an array as the root input');
+    }
+    if (typeof object !== 'object') {
+      throw new BSONError('serialize does not support non-object as the root input');
+    } else if ('_bsontype' in object && typeof object._bsontype === 'string') {
+      throw new BSONError(`BSON types cannot be serialized as a document`);
+    } else if (
+      isDate(object) ||
+      isRegExp(object) ||
+      isUint8Array(object) ||
+      isAnyArrayBuffer(object)
+    ) {
+      throw new BSONError(`date, regexp, typedarray, and arraybuffer cannot be BSON documents`);
+    }
+
+    path = new Set();
+  }
 
   // Push the object to the path
-  path.push(object);
+  path.add(object);
 
   // Start place to serialize into
   let index = startingIndex + 4;
@@ -674,14 +724,15 @@ export function serializeInto(
           checkKeys,
           depth,
           serializeFunctions,
-          ignoreUndefined
+          ignoreUndefined,
+          path
         );
       } else if (value['_bsontype'] === 'Binary') {
         index = serializeBinary(buffer, key, value, index);
       } else if (value['_bsontype'] === 'Symbol') {
         index = serializeSymbol(buffer, key, value, index);
       } else if (value['_bsontype'] === 'DBRef') {
-        index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions);
+        index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions, path);
       } else if (value['_bsontype'] === 'BSONRegExp') {
         index = serializeBSONRegExp(buffer, key, value, index);
       } else if (value['_bsontype'] === 'Int32') {
@@ -772,7 +823,8 @@ export function serializeInto(
           checkKeys,
           depth,
           serializeFunctions,
-          ignoreUndefined
+          ignoreUndefined,
+          path
         );
       } else if (typeof value === 'function' && serializeFunctions) {
         index = serializeFunction(buffer, key, value, index);
@@ -781,7 +833,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'Symbol') {
         index = serializeSymbol(buffer, key, value, index);
       } else if (value['_bsontype'] === 'DBRef') {
-        index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions);
+        index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions, path);
       } else if (value['_bsontype'] === 'BSONRegExp') {
         index = serializeBSONRegExp(buffer, key, value, index);
       } else if (value['_bsontype'] === 'Int32') {
@@ -876,7 +928,8 @@ export function serializeInto(
           checkKeys,
           depth,
           serializeFunctions,
-          ignoreUndefined
+          ignoreUndefined,
+          path
         );
       } else if (typeof value === 'function' && serializeFunctions) {
         index = serializeFunction(buffer, key, value, index);
@@ -885,7 +938,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'Symbol') {
         index = serializeSymbol(buffer, key, value, index);
       } else if (value['_bsontype'] === 'DBRef') {
-        index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions);
+        index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions, path);
       } else if (value['_bsontype'] === 'BSONRegExp') {
         index = serializeBSONRegExp(buffer, key, value, index);
       } else if (value['_bsontype'] === 'Int32') {
@@ -899,7 +952,7 @@ export function serializeInto(
   }
 
   // Remove the path
-  path.pop();
+  path.delete(object);
 
   // Final padding byte for object
   buffer[index++] = 0x00;
