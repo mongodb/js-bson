@@ -6,11 +6,6 @@ describe('BSON BigInt serialization Support', function () {
   // Index for the data type byte of a BSON document with a single element
   const DATA_TYPE_OFFSET = 4;
   before(function () {
-    try {
-      BigInt(0);
-    } catch (_) {
-      this.skip('JS VM does not support BigInt');
-    }
   });
 
   it('Serializes bigints with the correct BSON type', function () {
@@ -92,20 +87,6 @@ describe('BSON BigInt serialization Support', function () {
       '0100000000000000'
     ]);
     expect(serializedDoc).to.deep.equal(expectedSerialization);
-  });
-
-  it('Calls toBSON on a BigInt value if it exists', function () {
-    BigInt.prototype.toBSON = () => `hello`;
-    const testDoc = { a: 0n };
-    const serializedDoc = BSON.serialize(testDoc);
-    const expectedSerialization = byteUtils.bufferFromHexArray([
-      '02',
-      '6100',
-      '06000000',
-      Buffer.from('hello\x00', 'utf8').toString('hex')
-    ]);
-    expect(serializedDoc).to.deep.equal(expectedSerialization);
-    delete BigInt.prototype.toBSON;
   });
 
   it('Accept BigInts in Long constructor', function () {
