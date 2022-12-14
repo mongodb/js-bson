@@ -19,6 +19,8 @@ import { validateUtf8 } from '../validate_utf8';
 
 /** @public */
 export interface DeserializeOptions {
+  /** when deserializing a Long, it will be returned as a BigInt */
+  useBigInt?: boolean;
   /** when deserializing a Long will fit it into a Number if it's smaller than 53 bits */
   promoteLongs?: boolean;
   /** when deserializing a Binary will return it as a node.js Buffer instance. */
@@ -96,7 +98,7 @@ export function deserialize(
     );
   }
 
-  // Start deserializtion
+  // Start deserialization
   return deserializeObject(buffer, index, options, isArray);
 }
 
@@ -117,9 +119,14 @@ function deserializeObject(
   const bsonRegExp = typeof options['bsonRegExp'] === 'boolean' ? options['bsonRegExp'] : false;
 
   // Controls the promotion of values vs wrapper classes
-  const promoteBuffers = options['promoteBuffers'] == null ? false : options['promoteBuffers'];
-  const promoteLongs = options['promoteLongs'] == null ? true : options['promoteLongs'];
-  const promoteValues = options['promoteValues'] == null ? true : options['promoteValues'];
+  const promoteBuffers = options.promoteBuffers ?? false;
+  const promoteLongs = options.promoteLongs ?? true;
+  const promoteValues = options.promoteValues ?? true;
+  const useBigInt = options.useBigInt ?? false;  
+
+  if (useBigInt && !promoteValues) {
+    throw new BSONError("Must either request bigint or Long for int64 deserialization");
+  }
 
   // Ensures default validation option if none given
   const validation = options.validation == null ? { utf8: true } : options.validation;
@@ -334,8 +341,11 @@ function deserializeObject(
         (buffer[index++] << 16) |
         (buffer[index++] << 24);
       const long = new Long(lowBits, highBits);
+      if (useBigInt) {
+        value = BigInt(lowBits) | (BigInt(highBits) << 32n);
+      }
       // Promote the long if possible
-      if (promoteLongs && promoteValues === true) {
+      else if (promoteLongs && promoteValues === true) {
         value =
           long.lessThanOrEqual(JS_INT_MAX_LONG) && long.greaterThanOrEqual(JS_INT_MIN_LONG)
             ? long.toNumber()
