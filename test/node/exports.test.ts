@@ -45,4 +45,9 @@ describe('bson entrypoint', () => {
       sorted(EXPECTED_EJSON_EXPORTS, byStrings)
     );
   });
+
+  it('EJSON export is frozen and does not inherit the global prototype', () => {
+    expect(BSON.EJSON).to.be.frozen;
+    expect(Object.getPrototypeOf(BSON.EJSON)).to.be.null;
+  });
 });

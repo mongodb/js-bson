@@ -445,10 +445,15 @@ function EJSONdeserialize(ejson: Document, options?: EJSONOptions): any {
 }
 
 /** @public */
-export const EJSON = Object.freeze({
-  __proto__: null,
-  parse,
-  stringify,
-  serialize: EJSONserialize,
-  deserialize: EJSONdeserialize
-});
+const EJSON: {
+  parse: typeof parse;
+  stringify: typeof stringify;
+  serialize: typeof EJSONserialize;
+  deserialize: typeof EJSONdeserialize;
+} = Object.create(null);
+EJSON.parse = parse;
+EJSON.stringify = stringify;
+EJSON.serialize = EJSONserialize;
+EJSON.deserialize = EJSONdeserialize;
+Object.freeze(EJSON);
+export { EJSON };
