@@ -94,7 +94,21 @@ describe('BSON BigInt Support', function () {
     expect(serializedDoc).to.deep.equal(expectedSerialization);
   });
 
-  it('Should accept BigInts in Long constructor', function () {
+  it("Calls toBSON on a bigint value if it exists", function() {
+    BigInt.prototype.toBSON = () => `hello`;
+    const testDoc = {a : 0n};
+    const serializedDoc = BSON.serialize(testDoc);
+    const expectedSerialization = byteUtils.bufferFromHexArray([
+      '02',
+      '6100',
+      '06000000',
+      Buffer.from('hello\x00', 'utf8').toString('hex')
+    ]);
+    expect(serializedDoc).to.deep.equal(expectedSerialization);
+    delete BigInt.prototype.toBSON;
+  });
+
+  it('Accept BigInts in Long constructor', function () {
     const Long = BSON.Long;
     expect(new Long(BigInt('0')).toString()).to.equal('0');
     expect(new Long(BigInt('-1')).toString()).to.equal('-1');
