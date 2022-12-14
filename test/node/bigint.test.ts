@@ -1,6 +1,6 @@
-import * as BSON from '../register-bson';
-import * as byteUtils from './tools/utils';
-import * as CONSTANTS from '../../src/constants';
+import { BSON } from '../register-bson';
+import { bufferFromHexArray } from './tools/utils';
+import { BSON_DATA_LONG } from '../../src/constants';
 
 describe('BSON BigInt serialization Support', function () {
   // Index for the data type byte of a BSON document with a single element
@@ -9,13 +9,13 @@ describe('BSON BigInt serialization Support', function () {
   it('Serializes bigints with the correct BSON type', function () {
     const testDoc = { a: 0n };
     const serializedDoc = BSON.serialize(testDoc);
-    expect(serializedDoc[DATA_TYPE_OFFSET]).to.equal(CONSTANTS.BSON_DATA_LONG);
+    expect(serializedDoc[DATA_TYPE_OFFSET]).to.equal(BSON_DATA_LONG);
   });
 
   it('Serializes bigints into little-endian byte order', function () {
     const testDoc = { a: 0x1234567812345678n };
     const serializedDoc = BSON.serialize(testDoc);
-    const expectedResult = byteUtils.bufferFromHexArray([
+    const expectedResult = bufferFromHexArray([
       '12', // int64 type
       '6100', // 'a' key with key null terminator
       '7856341278563412'
@@ -26,7 +26,7 @@ describe('BSON BigInt serialization Support', function () {
   it('Correctly serializes a BigInt that can be safely represented as a Number', function () {
     const testDoc = { a: 0x23n };
     const serializedDoc = BSON.serialize(testDoc);
-    const expectedResult = byteUtils.bufferFromHexArray([
+    const expectedResult = bufferFromHexArray([
       '12', // int64 type
       '6100', // 'a' key with key null terminator
       '2300000000000000' // little endian int64
@@ -37,7 +37,7 @@ describe('BSON BigInt serialization Support', function () {
   it('Correctly serializes a BigInt in the valid range [-2^63, 2^63 - 1]', function () {
     const testDoc = { a: 0xfffffffffffffff1n };
     const serializedDoc = BSON.serialize(testDoc);
-    const expectedResult = byteUtils.bufferFromHexArray([
+    const expectedResult = bufferFromHexArray([
       '12', // int64
       '6100', // 'a' key with key null terminator
       'f1ffffffffffffff'
@@ -48,7 +48,7 @@ describe('BSON BigInt serialization Support', function () {
   it('Correctly wraps to negative on a BigInt that is larger than (2^63 -1)', function () {
     const maxIntPlusOne = { a: 2n ** 63n };
     const serializedMaxIntPlusOne = BSON.serialize(maxIntPlusOne);
-    const expectedResultForMaxIntPlusOne = byteUtils.bufferFromHexArray([
+    const expectedResultForMaxIntPlusOne = bufferFromHexArray([
       '12', // int64
       '6100', // 'a' key with key null terminator
       '0000000000000080'
@@ -59,7 +59,7 @@ describe('BSON BigInt serialization Support', function () {
   it('Correctly serializes BigInts at the edges of the valid range [-2^63, 2^63 - 1]', function () {
     const maxPositiveInt64 = { a: 2n ** 63n - 1n };
     const serializedMaxPositiveInt64 = BSON.serialize(maxPositiveInt64);
-    const expectedSerializationForMaxPositiveInt64 = byteUtils.bufferFromHexArray([
+    const expectedSerializationForMaxPositiveInt64 = bufferFromHexArray([
       '12', // int64
       '6100', // 'a' key with key null terminator
       'ffffffffffffff7f'
@@ -68,7 +68,7 @@ describe('BSON BigInt serialization Support', function () {
 
     const minPositiveInt64 = { a: -(2n ** 63n) };
     const serializedMinPositiveInt64 = BSON.serialize(minPositiveInt64);
-    const expectedSerializationForMinPositiveInt64 = byteUtils.bufferFromHexArray([
+    const expectedSerializationForMinPositiveInt64 = bufferFromHexArray([
       '12', // int64
       '6100', // 'a' key with key null terminator
       '0000000000000080'
@@ -79,7 +79,7 @@ describe('BSON BigInt serialization Support', function () {
   it('Correctly truncates a BigInt that is larger than a 64-bit int', function () {
     const testDoc = { a: 2n ** 64n + 1n };
     const serializedDoc = BSON.serialize(testDoc);
-    const expectedSerialization = byteUtils.bufferFromHexArray([
+    const expectedSerialization = bufferFromHexArray([
       '12', //int64
       '6100', // 'a' key with key null terminator
       '0100000000000000'
