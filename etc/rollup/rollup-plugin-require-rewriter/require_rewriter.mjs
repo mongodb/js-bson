@@ -23,12 +23,12 @@ export class RequireRewriter {
     }
 
     const start = code.indexOf('const nodejsRandomBytes');
-    const endString = `return require('crypto').randomBytes;`;
+    const endString = `return require('node:crypto').randomBytes;`;
     const end = code.indexOf(endString) + endString.length;
 
     if (start < 0 || end < 0) {
       throw new Error(
-        `Unexpected! 'const nodejsRandomBytes' or 'return require('crypto').randomBytes;' not found`
+        `Unexpected! 'const nodejsRandomBytes' or 'return require('node:crypto').randomBytes;' not found`
       );
     }
 
