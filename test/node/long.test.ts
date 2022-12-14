@@ -1,7 +1,4 @@
-'use strict';
-
-const BSON = require('../register-bson');
-const Long = BSON.Long;
+import { Long } from '../register-bson';
 
 describe('Long', function () {
   it('accepts strings in the constructor', function () {
@@ -16,15 +13,12 @@ describe('Long', function () {
   });
 
   it('Accept BigInts in Long constructor', function () {
-    const Long = BSON.Long;
-    expect(new Long(BigInt('0')).toString()).to.equal('0');
-    expect(new Long(BigInt('-1')).toString()).to.equal('-1');
-    expect(new Long(BigInt('-1'), true).toString()).to.equal('18446744073709551615');
-    expect(new Long(BigInt('123456789123456789')).toString()).to.equal('123456789123456789');
-    expect(new Long(BigInt('123456789123456789'), true).toString()).to.equal('123456789123456789');
-    expect(new Long(BigInt('13835058055282163712')).toString()).to.equal('-4611686018427387904');
-    expect(new Long(BigInt('13835058055282163712'), true).toString()).to.equal(
-      '13835058055282163712'
-    );
+    expect(new Long(0n).toString()).to.equal('0');
+    expect(new Long(-1n).toString()).to.equal('-1');
+    expect(new Long(-1n, true).toString()).to.equal('18446744073709551615');
+    expect(new Long(123456789123456789n).toString()).to.equal('123456789123456789');
+    expect(new Long(123456789123456789n, true).toString()).to.equal('123456789123456789');
+    expect(new Long(13835058055282163712n).toString()).to.equal('-4611686018427387904');
+    expect(new Long(13835058055282163712n, true).toString()).to.equal('13835058055282163712');
   });
 });
