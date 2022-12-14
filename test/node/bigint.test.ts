@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 describe("BSON BigInt deserialization support", function() {
   it.only('Throws error when useBigInt==true and promoteValues==false', function() {
-    const testSerializedDoc = bufferFromHexArray( // {a : 0n}
+    const testSerializedDoc = bufferFromHexArray( // { a : 0n }
       [
         '12',
         '6100',
