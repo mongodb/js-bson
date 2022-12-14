@@ -83,7 +83,7 @@ describe('BSON BigInt serialization Support', function () {
     expect(serializedMinPositiveInt64).to.deep.equal(expectedSerializationForMinPositiveInt64);
   });
 
-  it("Correctly truncates a BigInt that is larger than a 64-bit int", function () {
+  it('Correctly truncates a BigInt that is larger than a 64-bit int', function () {
     const testDoc = { test: 2n ** 64n + 1n };
     const serializedDoc = BSON.serialize(testDoc);
     const expectedSerialization = byteUtils.bufferFromHexArray([
