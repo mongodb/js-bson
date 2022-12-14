@@ -2,7 +2,7 @@ import * as BSON from '../register-bson';
 import * as byteUtils from './tools/utils';
 import * as CONSTANTS from '../../src/constants';
 
-describe('BSON BigInt Support', function () {
+describe('BSON BigInt serialization Support', function () {
   // Index for the data type byte of a BSON document with a single element
   const DATA_TYPE_OFFSET = 4;
   before(function () {
@@ -30,7 +30,7 @@ describe('BSON BigInt Support', function () {
     expect(serializedDoc).to.deep.equal(expectedResult);
   });
 
-  it('Correctly serializes a BigInt that fits in int32', function () {
+  it('Correctly serializes a BigInt that can be safely represented as a Number', function () {
     const testDoc = { a: BigInt(0x23) };
     const serializedDoc = BSON.serialize(testDoc);
     const expectedResult = byteUtils.bufferFromHexArray([
@@ -41,7 +41,7 @@ describe('BSON BigInt Support', function () {
     expect(serializedDoc).to.deep.equal(expectedResult);
   });
 
-  it('Correctly serializes a BigInt that fits in int64', function () {
+  it('Correctly serializes a BigInt in the valid range [-2^63, 2^63 - 1]', function () {
     const testDoc = { b: BigInt(0xfffffffffffffff1n) };
     const serializedDoc = BSON.serialize(testDoc);
     const expectedResult = byteUtils.bufferFromHexArray([
@@ -63,7 +63,7 @@ describe('BSON BigInt Support', function () {
     expect(serializedMaxIntPlusOne).to.deep.equal(expectedResultForMaxIntPlusOne);
   });
 
-  it('Correctly serializes bigints at the end edges of the valid range (-2^63 and 2^63 - 1)', function () {
+  it('Correctly serializes BigInts at the edges of the valid range [-2^63, 2^63 - 1]', function () {
     const maxPositiveInt64 = { test: 2n ** 63n - 1n };
     const serializedMaxPositiveInt64 = BSON.serialize(maxPositiveInt64);
     const expectedSerializationForMaxPositiveInt64 = byteUtils.bufferFromHexArray([
@@ -83,7 +83,7 @@ describe('BSON BigInt Support', function () {
     expect(serializedMinPositiveInt64).to.deep.equal(expectedSerializationForMinPositiveInt64);
   });
 
-  it("Correctly truncates a BigInt that doesn't fit into an int64", function () {
+  it("Correctly truncates a BigInt that is larger than a 64-bit int", function () {
     const testDoc = { test: 2n ** 64n + 1n };
     const serializedDoc = BSON.serialize(testDoc);
     const expectedSerialization = byteUtils.bufferFromHexArray([
@@ -94,7 +94,7 @@ describe('BSON BigInt Support', function () {
     expect(serializedDoc).to.deep.equal(expectedSerialization);
   });
 
-  it('Calls toBSON on a bigint value if it exists', function () {
+  it('Calls toBSON on a BigInt value if it exists', function () {
     BigInt.prototype.toBSON = () => `hello`;
     const testDoc = { a: 0n };
     const serializedDoc = BSON.serialize(testDoc);
