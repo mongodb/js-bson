@@ -5,8 +5,6 @@ import * as CONSTANTS from '../../src/constants';
 describe('BSON BigInt serialization Support', function () {
   // Index for the data type byte of a BSON document with a single element
   const DATA_TYPE_OFFSET = 4;
-  before(function () {
-  });
 
   it('Serializes bigints with the correct BSON type', function () {
     const testDoc = { a: 0n };
@@ -87,18 +85,5 @@ describe('BSON BigInt serialization Support', function () {
       '0100000000000000'
     ]);
     expect(serializedDoc).to.deep.equal(expectedSerialization);
-  });
-
-  it('Accept BigInts in Long constructor', function () {
-    const Long = BSON.Long;
-    expect(new Long(BigInt('0')).toString()).to.equal('0');
-    expect(new Long(BigInt('-1')).toString()).to.equal('-1');
-    expect(new Long(BigInt('-1'), true).toString()).to.equal('18446744073709551615');
-    expect(new Long(BigInt('123456789123456789')).toString()).to.equal('123456789123456789');
-    expect(new Long(BigInt('123456789123456789'), true).toString()).to.equal('123456789123456789');
-    expect(new Long(BigInt('13835058055282163712')).toString()).to.equal('-4611686018427387904');
-    expect(new Long(BigInt('13835058055282163712'), true).toString()).to.equal(
-      '13835058055282163712'
-    );
   });
 });
