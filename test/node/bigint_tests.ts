@@ -94,9 +94,9 @@ describe('BSON BigInt Support', function () {
     expect(serializedDoc).to.deep.equal(expectedSerialization);
   });
 
-  it("Calls toBSON on a bigint value if it exists", function() {
+  it('Calls toBSON on a bigint value if it exists', function () {
     BigInt.prototype.toBSON = () => `hello`;
-    const testDoc = {a : 0n};
+    const testDoc = { a: 0n };
     const serializedDoc = BSON.serialize(testDoc);
     const expectedSerialization = byteUtils.bufferFromHexArray([
       '02',
