@@ -19,9 +19,9 @@ import { validateUtf8 } from '../validate_utf8';
 
 /** @public */
 export interface DeserializeOptions {
-  /** when deserializing a Long, it will be returned as a BigInt */
+  /** when deserializing a Long will return as a BigInt. */
   useBigInt64?: boolean;
-  /** when deserializing a Long will fit it into a Number if it's smaller than 53 bits */
+  /** when deserializing a Long will fit it into a Number if it's smaller than 53 bits. */
   promoteLongs?: boolean;
   /** when deserializing a Binary will return it as a node.js Buffer instance. */
   promoteBuffers?: boolean;
@@ -31,7 +31,7 @@ export interface DeserializeOptions {
   fieldsAsRaw?: Document;
   /** return BSON regular expressions as BSONRegExp instances. */
   bsonRegExp?: boolean;
-  /** allows the buffer to be larger than the parsed BSON object */
+  /** allows the buffer to be larger than the parsed BSON object. */
   allowObjectSmallerThanBufferSize?: boolean;
   /** Offset into buffer to begin reading document from */
   index?: number;

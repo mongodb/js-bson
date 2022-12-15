@@ -304,7 +304,7 @@ Serialize a Javascript object using a predefined Buffer and index into the buffe
 | buffer | <code>Buffer</code> |  | the buffer containing the serialized set of BSON documents. |
 | [options.evalFunctions] | <code>Object</code> | <code>false</code> | evaluate functions in the BSON document scoped to the object deserialized. |
 | [options.cacheFunctions] | <code>Object</code> | <code>false</code> | cache evaluated functions for reuse. |
-| [options.useBigInt64] | <code>boolean</code> | <code>false</code> | when deserializing a Long will return a BigInt. |
+| [options.useBigInt64] | <code>Object</code> | <code>false</code> | when deserializing a Long will return a BigInt. |
 | [options.promoteLongs] | <code>Object</code> | <code>true</code> | when deserializing a Long will fit it into a Number if it's smaller than 53 bits |
 | [options.promoteBuffers] | <code>Object</code> | <code>false</code> | when deserializing a Binary will return it as a node.js Buffer instance. |
 | [options.promoteValues] | <code>Object</code> | <code>false</code> | when deserializing will promote BSON values to their Node.js closest equivalent types. |
