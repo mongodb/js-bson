@@ -122,14 +122,14 @@ function deserializeObject(
   const promoteBuffers = options.promoteBuffers ?? false;
   const promoteLongs = options.promoteLongs ?? true;
   const promoteValues = options.promoteValues ?? true;
-  const useBigInt64 = options.useBigInt64 ?? false;  
+  const useBigInt64 = options.useBigInt64 ?? false;
 
   if (useBigInt64 && !promoteValues) {
-    throw new BSONError("Must either request bigint or Long for int64 deserialization");
+    throw new BSONError('Must either request bigint or Long for int64 deserialization');
   }
 
   if (useBigInt64 && !promoteLongs) {
-    throw new BSONError("Must either request bigint or Longs for int64 deserialization");
+    throw new BSONError('Must either request bigint or Longs for int64 deserialization');
   }
 
   // Ensures default validation option if none given
