@@ -13,15 +13,7 @@ import type { MinKey } from '../min_key';
 import type { ObjectId } from '../objectid';
 import type { BSONRegExp } from '../regexp';
 import { ByteUtils } from '../utils/byte_utils';
-import {
-  isAnyArrayBuffer,
-  isBigInt64Array,
-  isBigUInt64Array,
-  isDate,
-  isMap,
-  isRegExp,
-  isUint8Array
-} from './utils';
+import { isAnyArrayBuffer, isDate, isMap, isRegExp, isUint8Array } from './utils';
 
 /** @public */
 export interface SerializeOptions {
