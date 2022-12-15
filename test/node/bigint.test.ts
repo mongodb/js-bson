@@ -7,16 +7,16 @@ describe('BSON BigInt serialization Support', function () {
   // Index for the data type byte of a BSON document with a
   // NOTE: These offsets only apply for documents with the shape {a : <n>}
   // where n is a BigInt
-  class SerializedDocParts {
+  type SerializedDocParts = {
     dataType: number;
     key: string;
     value: bigint;
-  }
-
-  // NOTE: this function operates on serialized BSON documents with the shape { <key> : <n>}
-  // where n is some int64
-  // This function assumes that keys are properly encoded with the necessary null byte at the
-  // end and only at the end of the key
+  };
+  /**
+   * NOTE: this function operates on serialized BSON documents with the shape { <key> : <n> }
+   * where n is some int64. This function assumes that keys are properly encoded
+   * with the necessary null byte at the end and only at the end of the key string
+   */
   function getSerializedDocParts(serializedDoc: Uint8Array): SerializedDocParts {
     const DATA_TYPE_OFFSET = 4;
     const KEY_OFFSET = 5;
@@ -32,13 +32,11 @@ describe('BSON BigInt serialization Support', function () {
       'utf8'
     );
 
-    const result = {
+    return {
       dataType: dataView.getInt8(DATA_TYPE_OFFSET),
       key: key.slice(0, keyLength - 1),
       value: dataView.getBigInt64(valueOffset, true)
     };
-
-    return result;
   }
 
   it('serializes bigints with the correct BSON type', function () {
