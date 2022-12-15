@@ -20,7 +20,7 @@ import { validateUtf8 } from '../validate_utf8';
 /** @public */
 export interface DeserializeOptions {
   /** when deserializing a Long, it will be returned as a BigInt */
-  useBigInt?: boolean;
+  useBigInt64?: boolean;
   /** when deserializing a Long will fit it into a Number if it's smaller than 53 bits */
   promoteLongs?: boolean;
   /** when deserializing a Binary will return it as a node.js Buffer instance. */
@@ -122,10 +122,14 @@ function deserializeObject(
   const promoteBuffers = options.promoteBuffers ?? false;
   const promoteLongs = options.promoteLongs ?? true;
   const promoteValues = options.promoteValues ?? true;
-  const useBigInt = options.useBigInt ?? false;  
+  const useBigInt64 = options.useBigInt64 ?? false;  
 
-  if (useBigInt && !promoteValues) {
+  if (useBigInt64 && !promoteValues) {
     throw new BSONError("Must either request bigint or Long for int64 deserialization");
+  }
+
+  if (useBigInt64 && !promoteLongs) {
+    throw new BSONError("Must either request bigint or Longs for int64 deserialization");
   }
 
   // Ensures default validation option if none given
@@ -341,7 +345,7 @@ function deserializeObject(
         (buffer[index++] << 16) |
         (buffer[index++] << 24);
       const long = new Long(lowBits, highBits);
-      if (useBigInt) {
+      if (useBigInt64) {
         value = BigInt(lowBits) | (BigInt(highBits) << 32n);
       }
       // Promote the long if possible
