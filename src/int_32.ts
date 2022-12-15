@@ -14,6 +14,10 @@ export class Int32 {
   get _bsontype(): 'Int32' {
     return 'Int32';
   }
+  /** @internal */
+  get [Symbol.for('@@mdb.bson.version')](): 5 {
+    return 5;
+  }
 
   value!: number;
   /**

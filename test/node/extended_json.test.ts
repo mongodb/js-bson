@@ -14,35 +14,10 @@ const Int32 = BSON.Int32;
 const Long = BSON.Long;
 const MaxKey = BSON.MaxKey;
 const MinKey = BSON.MinKey;
-const ObjectID = BSON.ObjectId;
 const ObjectId = BSON.ObjectId;
 const BSONRegExp = BSON.BSONRegExp;
 const BSONSymbol = BSON.BSONSymbol;
 const Timestamp = BSON.Timestamp;
-
-// Several tests in this file can test interop between current library versions and library version 1.1.0, because
-// between 1.1.0 and 4.0.0 there was a significant rewrite. To minimize maintenance issues of a hard dependency on
-// the old version, these interop tests are inactive by default. To activate, edit the check:test script in package.json:
-//   "check:test": "npm i --no-save --force bson@1.1.0 && mocha ./test/node && npm uninstall --no-save --force bson@1.1.0"
-//
-function getOldBSON() {
-  try {
-    // do a dynamic resolve to avoid exception when running browser tests
-    const file = require.resolve('bson');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const oldModule = require(file).BSON;
-    const funcs = new oldModule.BSON();
-    oldModule.serialize = funcs.serialize;
-    oldModule.deserialize = funcs.deserialize;
-    return oldModule;
-  } catch (e) {
-    return BSON; // if old bson lib is unavailable, e.g. browser tests, just re-use new BSON
-  }
-}
-
-const OldBSON = getOldBSON();
-const OldObjectID = OldBSON === BSON ? BSON.ObjectId : OldBSON.ObjectID;
-const usingOldBSON = OldBSON !== BSON;
 
 describe('Extended JSON', function () {
   let doc = {};
@@ -66,8 +41,6 @@ describe('Extended JSON', function () {
       maxKey: new MaxKey(),
       minKey: new MinKey(),
       objectId: ObjectId.createFromHexString('111111111111111111111111'),
-      objectID: ObjectID.createFromHexString('111111111111111111111111'),
-      oldObjectID: OldObjectID.createFromHexString('111111111111111111111111'),
       regexp: new BSONRegExp('hello world', 'i'),
       symbol: new BSONSymbol('symbol'),
       timestamp: Timestamp.fromNumber(1000),
@@ -81,7 +54,7 @@ describe('Extended JSON', function () {
   it('should correctly extend an existing mongodb module', function () {
     // TODO(NODE-4377): doubleNumberIntFit should be a double not a $numberLong
     const json =
-      '{"_id":{"$numberInt":"100"},"gh":{"$numberInt":"1"},"binary":{"$binary":{"base64":"AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+Pw==","subType":"00"}},"date":{"$date":{"$numberLong":"1488372056737"}},"code":{"$code":"function() {}","$scope":{"a":{"$numberInt":"1"}}},"dbRef":{"$ref":"tests","$id":{"$numberInt":"1"},"$db":"test"},"decimal":{"$numberDecimal":"100"},"double":{"$numberDouble":"10.1"},"int32":{"$numberInt":"10"},"long":{"$numberLong":"200"},"maxKey":{"$maxKey":1},"minKey":{"$minKey":1},"objectId":{"$oid":"111111111111111111111111"},"objectID":{"$oid":"111111111111111111111111"},"oldObjectID":{"$oid":"111111111111111111111111"},"regexp":{"$regularExpression":{"pattern":"hello world","options":"i"}},"symbol":{"$symbol":"symbol"},"timestamp":{"$timestamp":{"t":0,"i":1000}},"int32Number":{"$numberInt":"300"},"doubleNumber":{"$numberDouble":"200.2"},"longNumberIntFit":{"$numberLong":"7036874417766400"},"doubleNumberIntFit":{"$numberLong":"19007199250000000"}}';
+      '{"_id":{"$numberInt":"100"},"gh":{"$numberInt":"1"},"binary":{"$binary":{"base64":"AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+Pw==","subType":"00"}},"date":{"$date":{"$numberLong":"1488372056737"}},"code":{"$code":"function() {}","$scope":{"a":{"$numberInt":"1"}}},"dbRef":{"$ref":"tests","$id":{"$numberInt":"1"},"$db":"test"},"decimal":{"$numberDecimal":"100"},"double":{"$numberDouble":"10.1"},"int32":{"$numberInt":"10"},"long":{"$numberLong":"200"},"maxKey":{"$maxKey":1},"minKey":{"$minKey":1},"objectId":{"$oid":"111111111111111111111111"},"regexp":{"$regularExpression":{"pattern":"hello world","options":"i"}},"symbol":{"$symbol":"symbol"},"timestamp":{"$timestamp":{"t":0,"i":1000}},"int32Number":{"$numberInt":"300"},"doubleNumber":{"$numberDouble":"200.2"},"longNumberIntFit":{"$numberLong":"7036874417766400"},"doubleNumberIntFit":{"$numberLong":"19007199250000000"}}';
 
     expect(json).to.equal(EJSON.stringify(doc, null, 0, { relaxed: false }));
   });
@@ -128,30 +101,12 @@ describe('Extended JSON', function () {
   it('should correctly serialize bson types when they are values', function () {
     let serialized = EJSON.stringify(new ObjectId('591801a468f9e7024b6235ea'), { relaxed: false });
     expect(serialized).to.equal('{"$oid":"591801a468f9e7024b6235ea"}');
-    serialized = EJSON.stringify(new ObjectID('591801a468f9e7024b6235ea'), { relaxed: false });
-    expect(serialized).to.equal('{"$oid":"591801a468f9e7024b6235ea"}');
-    serialized = EJSON.stringify(new OldObjectID('591801a468f9e7024b6235ea'), { relaxed: false });
-    expect(serialized).to.equal('{"$oid":"591801a468f9e7024b6235ea"}');
 
     serialized = EJSON.stringify(new Int32(42), { relaxed: false });
     expect(serialized).to.equal('{"$numberInt":"42"}');
     serialized = EJSON.stringify(
       {
         _id: { $nin: [new ObjectId('591801a468f9e7024b6235ea')] }
-      },
-      { relaxed: false }
-    );
-    expect(serialized).to.equal('{"_id":{"$nin":[{"$oid":"591801a468f9e7024b6235ea"}]}}');
-    serialized = EJSON.stringify(
-      {
-        _id: { $nin: [new ObjectID('591801a468f9e7024b6235ea')] }
-      },
-      { relaxed: false }
-    );
-    expect(serialized).to.equal('{"_id":{"$nin":[{"$oid":"591801a468f9e7024b6235ea"}]}}');
-    serialized = EJSON.stringify(
-      {
-        _id: { $nin: [new OldObjectID('591801a468f9e7024b6235ea')] }
       },
       { relaxed: false }
     );
@@ -237,8 +192,6 @@ describe('Extended JSON', function () {
       maxKey: new MaxKey(),
       minKey: new MinKey(),
       objectId: ObjectId.createFromHexString('111111111111111111111111'),
-      objectID: ObjectID.createFromHexString('111111111111111111111111'),
-      oldObjectID: OldObjectID.createFromHexString('111111111111111111111111'),
       bsonRegExp: new BSONRegExp('hello world', 'i'),
       symbol: new BSONSymbol('symbol'),
       timestamp: new Timestamp(),
@@ -258,8 +211,6 @@ describe('Extended JSON', function () {
       maxKey: { $maxKey: 1 },
       minKey: { $minKey: 1 },
       objectId: { $oid: '111111111111111111111111' },
-      objectID: { $oid: '111111111111111111111111' },
-      oldObjectID: { $oid: '111111111111111111111111' },
       bsonRegExp: { $regularExpression: { pattern: 'hello world', options: 'i' } },
       symbol: { $symbol: 'symbol' },
       timestamp: { $timestamp: { t: 0, i: 0 } },
@@ -280,8 +231,6 @@ describe('Extended JSON', function () {
       maxKey: { $maxKey: 1 },
       minKey: { $minKey: 1 },
       objectId: { $oid: '111111111111111111111111' },
-      objectID: { $oid: '111111111111111111111111' },
-      oldObjectID: { $oid: '111111111111111111111111' },
       bsonRegExp: { $regularExpression: { pattern: 'hello world', options: 'i' } },
       symbol: { $symbol: 'symbol' },
       timestamp: { $timestamp: { t: 0, i: 0 } }
@@ -314,8 +263,6 @@ describe('Extended JSON', function () {
     expect(result.minKey).to.be.an.instanceOf(BSON.MinKey);
     // objectID
     expect(result.objectId.toString()).to.equal('111111111111111111111111');
-    expect(result.objectID.toString()).to.equal('111111111111111111111111');
-    expect(result.oldObjectID.toString()).to.equal('111111111111111111111111');
     //bsonRegExp
     expect(result.bsonRegExp).to.be.an.instanceOf(BSON.BSONRegExp);
     expect(result.bsonRegExp.pattern).to.equal('hello world');
@@ -351,159 +298,6 @@ describe('Extended JSON', function () {
     serialized = EJSON.stringify(doc, replacerFunc);
     expect(serialized).to.equal('{"a":10}');
   });
-
-  if (!usingOldBSON) {
-    it.skip('skipping 4.x/1.x interop tests', () => {
-      // ignore
-    });
-  } else {
-    it('should interoperate 4.x with 1.x versions of this library', function () {
-      const buffer = Buffer.alloc(64);
-      for (let i = 0; i < buffer.length; i++) {
-        buffer[i] = i;
-      }
-      const [oldBsonObject, newBsonObject] = [OldBSON, BSON].map(bsonModule => {
-        const bsonTypes = {
-          binary: new bsonModule.Binary(buffer),
-          code: new bsonModule.Code('function() {}'),
-          dbRef: new bsonModule.DBRef('tests', new Int32(1), 'test'),
-          decimal128: bsonModule.Decimal128.fromString('9991223372036854775807'),
-          double: new bsonModule.Double(10.1),
-          int32: new bsonModule.Int32(10),
-          long: bsonModule.Long.fromString('1223372036854775807'),
-          maxKey: new bsonModule.MaxKey(),
-          // minKey: new bsonModule.MinKey(), // broken until #310 is fixed in 1.x
-          objectId: bsonModule.ObjectId.createFromHexString('111111111111111111111111'),
-          objectID: bsonModule.ObjectId.createFromHexString('111111111111111111111111'),
-          bsonRegExp: new bsonModule.BSONRegExp('hello world', 'i'),
-          symbol: bsonModule.BSONSymbol
-            ? new bsonModule.BSONSymbol('symbol')
-            : new bsonModule.Symbol('symbol'),
-          timestamp: new bsonModule.Timestamp()
-        };
-        return bsonTypes;
-      });
-
-      const serializationOptions = {};
-      const bsonBuffers = {
-        oldObjectOldSerializer: OldBSON.serialize(oldBsonObject, serializationOptions),
-        oldObjectNewSerializer: BSON.serialize(oldBsonObject, serializationOptions),
-        newObjectOldSerializer: OldBSON.serialize(newBsonObject, serializationOptions),
-        newObjectNewSerializer: BSON.serialize(newBsonObject, serializationOptions)
-      };
-
-      const expectedBufferBase64 =
-        'VgEAAAViaW5hcnkAQAAAAAAAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/DWNvZGUADgAAAGZ1bmN0aW9uKCkge30AA2RiUmVmACwAAAACJHJlZgAGAAAAdGVzdHMAECRpZAABAAAAAiRkYgAFAAAAdGVzdAAAE2RlY2ltYWwxMjgA//837RjxE6AdAgAAAABAMAFkb3VibGUAMzMzMzMzJEAQaW50MzIACgAAABJsb25nAP//38RiSvoQf21heEtleQAHb2JqZWN0SWQAERERERERERERERERB29iamVjdElEABEREREREREREREREQtic29uUmVnRXhwAGhlbGxvIHdvcmxkAGkADnN5bWJvbAAHAAAAc3ltYm9sABF0aW1lc3RhbXAAAAAAAAAAAAAA';
-      const expectedBuffer = Buffer.from(expectedBufferBase64, 'base64');
-
-      // Regardless of which library version created the objects, and which library version
-      // is being used to serialize the objects, validate that the correct BSON is returned.
-      expect(expectedBuffer).to.deep.equal(bsonBuffers.newObjectNewSerializer);
-      expect(expectedBuffer).to.deep.equal(bsonBuffers.newObjectOldSerializer);
-      expect(expectedBuffer).to.deep.equal(bsonBuffers.oldObjectNewSerializer);
-      expect(expectedBuffer).to.deep.equal(bsonBuffers.oldObjectOldSerializer);
-
-      // Finally, validate that the BSON buffer above is correctly deserialized back to EJSON by the new library,
-      // regardless of which library version's deserializer is used.  This is useful because the 1.x deserializer
-      // generates 1.x objects, while the 4.x serializer generates 4.x objects. The 4.x EJSON serializer should
-      // be able to handle both.
-      const deserializationOptions = { promoteValues: false };
-      const deserialized = {
-        usingOldDeserializer: OldBSON.deserialize(expectedBuffer, deserializationOptions),
-        usingNewDeserializer: BSON.deserialize(expectedBuffer, deserializationOptions)
-      };
-      // Apparently the Symbol BSON type was deprecated in V4. Symbols in BSON are deserialized as strings in V4
-      // Therefore, for this type we know there will be a difference between the V1 library and the V4 library,
-      // so remove Symbol from the list of BSON types that are being compared.
-      // Browser tests currently don't handle BSON Symbol correctly, so only test this under Node where OldBSON !=== BSON module.
-      if (BSON !== OldBSON) {
-        expect(deserialized.usingOldDeserializer['symbol'].value).to.equal(
-          deserialized.usingNewDeserializer['symbol']
-        );
-      }
-      delete deserialized.usingOldDeserializer['symbol'];
-      delete deserialized.usingNewDeserializer['symbol'];
-
-      const ejsonExpected = {
-        binary: {
-          $binary: {
-            base64:
-              'AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+Pw==',
-            subType: '00'
-          }
-        },
-        code: { $code: 'function() {}' },
-        dbRef: { $ref: 'tests', $id: { $numberInt: '1' }, $db: 'test' },
-        decimal128: { $numberDecimal: '9991223372036854775807' },
-        double: { $numberDouble: '10.1' },
-        int32: { $numberInt: '10' },
-        long: { $numberLong: '1223372036854775807' },
-        maxKey: { $maxKey: 1 },
-        // minKey: { $minKey: 1 },  // broken until #310 is fixed in 1.x branch
-        objectId: { $oid: '111111111111111111111111' },
-        objectID: { $oid: '111111111111111111111111' },
-        bsonRegExp: { $regularExpression: { pattern: 'hello world', options: 'i' } },
-        // symbol: { $symbol: 'symbol' },  // removed because this type is deprecated. See comment above.
-        timestamp: { $timestamp: { t: 0, i: 0 } }
-      };
-      const ejsonSerializeOptions = { relaxed: false };
-      const resultOld = EJSON.serialize(deserialized.usingOldDeserializer, ejsonSerializeOptions);
-      expect(resultOld).to.deep.equal(ejsonExpected);
-      const resultNew = EJSON.serialize(deserialized.usingNewDeserializer, ejsonSerializeOptions);
-      expect(resultNew).to.deep.equal(ejsonExpected);
-    });
-
-    // Must special-case the test for MinKey, because of #310.  When #310 is fixed and is picked up
-    // by mongodb-core, then remove this test case and uncomment the MinKey checks in the test case above
-    it('should interop with MinKey 1.x and 4.x, except the case that #310 breaks', function () {
-      if (!usingOldBSON) {
-        it.skip('interop tests', () => {
-          // ignore
-        });
-        return;
-      }
-
-      const serializationOptions = {};
-      const deserializationOptions = { promoteValues: false };
-
-      // when #310 is fixed and the fix makes it into mongodb-core.
-      const [oldMinKey, newMinKey] = [OldBSON, BSON].map(bsonModule => {
-        const bsonTypes = {
-          minKey: new bsonModule.MinKey()
-        };
-        return bsonTypes;
-      });
-
-      const expectedBufferBase64MinKey = 'DQAAAP9taW5LZXkAAA==';
-      const expectedBufferMinKey = Buffer.from(expectedBufferBase64MinKey, 'base64');
-
-      const bsonBuffersMinKey = {
-        oldObjectOldSerializer: OldBSON.serialize(oldMinKey, serializationOptions),
-        oldObjectNewSerializer: BSON.serialize(oldMinKey, serializationOptions),
-        newObjectOldSerializer: OldBSON.serialize(newMinKey, serializationOptions),
-        newObjectNewSerializer: BSON.serialize(newMinKey, serializationOptions)
-      };
-
-      expect(expectedBufferMinKey).to.deep.equal(bsonBuffersMinKey.newObjectNewSerializer);
-      // expect(expectedBufferMinKey).to.deep.equal(bsonBuffersMinKey.newObjectOldSerializer);  // this is the case that's broken by #310
-      expect(expectedBufferMinKey).to.deep.equal(bsonBuffersMinKey.oldObjectNewSerializer);
-      expect(expectedBufferMinKey).to.deep.equal(bsonBuffersMinKey.oldObjectOldSerializer);
-
-      const ejsonExpected = {
-        minKey: { $minKey: 1 }
-      };
-
-      const deserialized = {
-        usingOldDeserializer: OldBSON.deserialize(expectedBufferMinKey, deserializationOptions),
-        usingNewDeserializer: BSON.deserialize(expectedBufferMinKey, deserializationOptions)
-      };
-      const ejsonSerializeOptions = { relaxed: false };
-      const resultOld = EJSON.serialize(deserialized.usingOldDeserializer, ejsonSerializeOptions);
-      expect(resultOld).to.deep.equal(ejsonExpected);
-      const resultNew = EJSON.serialize(deserialized.usingNewDeserializer, ejsonSerializeOptions);
-      expect(resultNew).to.deep.equal(ejsonExpected);
-    });
-  }
 
   it('should throw if invalid BSON types are input to EJSON serializer', function () {
     const oid = new ObjectId('111111111111111111111111');

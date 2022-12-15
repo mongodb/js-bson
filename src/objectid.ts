@@ -28,8 +28,12 @@ const kId = Symbol('id');
  * @category BSONType
  */
 export class ObjectId {
-  get _bsontype(): 'ObjectID' {
-    return 'ObjectID';
+  get _bsontype(): 'ObjectId' {
+    return 'ObjectId';
+  }
+  /** @internal */
+  get [Symbol.for('@@mdb.bson.version')](): 5 {
+    return 5;
   }
 
   /** @internal */

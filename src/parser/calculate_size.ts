@@ -79,7 +79,7 @@ function calculateElement(
     case 'object':
       if (value == null || value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
         return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + 1;
-      } else if (value['_bsontype'] === 'ObjectId' || value['_bsontype'] === 'ObjectID') {
+      } else if (value['_bsontype'] === 'ObjectId') {
         return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (12 + 1);
       } else if (value instanceof Date || isDate(value)) {
         return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (8 + 1);

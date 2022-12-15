@@ -32,6 +32,10 @@ export class Timestamp extends LongWithoutOverridesClass {
   get _bsontype(): 'Timestamp' {
     return 'Timestamp';
   }
+  /** @internal */
+  get [Symbol.for('@@mdb.bson.version')](): 5 {
+    return 5;
+  }
 
   static readonly MAX_VALUE = Long.MAX_UNSIGNED_VALUE;
 

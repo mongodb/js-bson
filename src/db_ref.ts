@@ -32,6 +32,10 @@ export class DBRef {
   get _bsontype(): 'DBRef' {
     return 'DBRef';
   }
+  /** @internal */
+  get [Symbol.for('@@mdb.bson.version')](): 5 {
+    return 5;
+  }
 
   collection!: string;
   oid!: ObjectId;

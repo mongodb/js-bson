@@ -44,9 +44,11 @@ describe('serialize()', () => {
     it('does not permit objects with a _bsontype string to be serialized at the root', () => {
       expect(() => BSON.serialize({ _bsontype: 'iLoveJavascript' })).to.throw(/BSON types cannot/);
       // a nested invalid _bsontype throws something different
-      expect(() => BSON.serialize({ a: { _bsontype: 'iLoveJavascript' } })).to.throw(
-        /invalid _bsontype/
-      );
+      expect(() =>
+        BSON.serialize({
+          a: { _bsontype: 'iLoveJavascript', [Symbol.for('@@mdb.bson.version')]: 5 }
+        })
+      ).to.throw(/invalid _bsontype/);
     });
 
     it('does permit objects with a _bsontype prop that is not a string', () => {

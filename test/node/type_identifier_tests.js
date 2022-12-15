@@ -18,12 +18,11 @@ const {
 } = require('../register-bson');
 
 describe('_bsontype identifier', () => {
-  // The two out of the norm types:
-  it('should be equal to ObjectID for ObjectId', () => {
-    expect(ObjectId.prototype._bsontype).to.equal('ObjectID');
+  it('should be equal to ObjectId for ObjectId', () => {
+    expect(ObjectId.prototype._bsontype).to.equal('ObjectId');
   });
-  it('should be equal to Symbol for BSONSymbol', () => {
-    expect(BSONSymbol.prototype._bsontype).to.equal('Symbol');
+  it('should be equal to BSONSymbol for BSONSymbol', () => {
+    expect(BSONSymbol.prototype._bsontype).to.equal('BSONSymbol');
   });
   it('should be equal to Timestamp for Timestamp', () => {
     // TODO(NODE-2624): Make Timestamp hold its long value on a property rather than be a subclass

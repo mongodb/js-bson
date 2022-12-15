@@ -28,6 +28,10 @@ export class BSONRegExp {
   get _bsontype(): 'BSONRegExp' {
     return 'BSONRegExp';
   }
+  /** @internal */
+  get [Symbol.for('@@mdb.bson.version')](): 5 {
+    return 5;
+  }
 
   pattern!: string;
   options!: string;
@@ -99,5 +103,14 @@ export class BSONRegExp {
       );
     }
     throw new BSONTypeError(`Unexpected BSONRegExp EJSON object form: ${JSON.stringify(doc)}`);
+  }
+
+  /** @internal */
+  [Symbol.for('nodejs.util.inspect.custom')](): string {
+    return this.inspect();
+  }
+
+  inspect(): string {
+    return `new BSONRegExp(${JSON.stringify(this.pattern)}, ${JSON.stringify(this.options)})`;
   }
 }

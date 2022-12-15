@@ -102,6 +102,10 @@ export class Long {
   get _bsontype(): 'Long' {
     return 'Long';
   }
+  /** @internal */
+  get [Symbol.for('@@mdb.bson.version')](): 5 {
+    return 5;
+  }
 
   /** An indicator used to reliably determine if an object is a Long or not. */
   get __isLong__(): boolean {

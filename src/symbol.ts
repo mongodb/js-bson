@@ -9,8 +9,12 @@ export interface BSONSymbolExtended {
  * @category BSONType
  */
 export class BSONSymbol {
-  get _bsontype(): 'Symbol' {
-    return 'Symbol';
+  get _bsontype(): 'BSONSymbol' {
+    return 'BSONSymbol';
+  }
+  /** @internal */
+  get [Symbol.for('@@mdb.bson.version')](): 5 {
+    return 5;
   }
 
   value!: string;

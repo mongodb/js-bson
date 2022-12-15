@@ -31,6 +31,10 @@ export class Binary {
   get _bsontype(): 'Binary' {
     return 'Binary';
   }
+  /** @internal */
+  get [Symbol.for('@@mdb.bson.version')](): 5 {
+    return 5;
+  }
 
   /**
    * Binary default subtype
@@ -305,6 +309,11 @@ const UUID_BYTE_LENGTH = 16;
  * @public
  */
 export class UUID extends Binary {
+  /** @internal */
+  get [Symbol.for('@@mdb.bson.version')](): 5 {
+    return 5;
+  }
+
   static cacheHexString: boolean;
 
   /** UUID hexString cache @internal */

@@ -130,6 +130,10 @@ export class Decimal128 {
   get _bsontype(): 'Decimal128' {
     return 'Decimal128';
   }
+  /** @internal */
+  get [Symbol.for('@@mdb.bson.version')](): 5 {
+    return 5;
+  }
 
   readonly bytes!: Uint8Array;
 

@@ -12,6 +12,10 @@ export class MaxKey {
   get _bsontype(): 'MaxKey' {
     return 'MaxKey';
   }
+  /** @internal */
+  get [Symbol.for('@@mdb.bson.version')](): 5 {
+    return 5;
+  }
 
   /** @internal */
   toExtendedJSON(): MaxKeyExtended {
