@@ -796,7 +796,7 @@ export function serializeInto(
         index = serializeString(buffer, key, value, index);
       } else if (type === 'number') {
         index = serializeNumber(buffer, key, value, index);
-      } else if (type === 'bigint' || isBigInt64Array(value) || isBigUInt64Array(value)) {
+      } else if (type === 'bigint') {
         index = serializeBigInt(buffer, key, value, index);
       } else if (type === 'boolean') {
         index = serializeBoolean(buffer, key, value, index);
