@@ -4,10 +4,7 @@ import { expect } from 'chai';
 
 describe('BSON BigInt deserialization support', function () {
   describe('BSON.deserialize()', function () {
-    let testSerializedDoc: Buffer;
-    before(function () {
-      testSerializedDoc = bufferFromHexArray(['12', '6100', '2300000000000000']);
-    });
+    const testSerializedDoc = bufferFromHexArray(['12', '6100', '2300000000000000']);
 
     it('deserializes int64 to Number when useBigInt64,promoteValues, promoteLongs are default', function () {
       const deserializedDoc = BSON.deserialize(testSerializedDoc);
