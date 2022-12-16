@@ -57,7 +57,7 @@ export interface DeserializeOptions {
 const JS_INT_MAX_LONG = Long.fromNumber(constants.JS_INT_MAX);
 const JS_INT_MIN_LONG = Long.fromNumber(constants.JS_INT_MIN);
 
-export function deserialize(
+export function internalDeserialize(
   buffer: Uint8Array,
   options: DeserializeOptions,
   isArray?: boolean

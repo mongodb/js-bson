@@ -15,7 +15,6 @@ const EXPECTED_EXPORTS = [
   'ObjectId',
   'UUID',
   'Long',
-  'LongWithoutOverridesClass',
   'Timestamp',
   'Double',
   'Int32',
@@ -45,5 +44,10 @@ describe('bson entrypoint', () => {
     expect(sorted(Object.keys(BSON.EJSON), byStrings)).to.deep.equal(
       sorted(EXPECTED_EJSON_EXPORTS, byStrings)
     );
+  });
+
+  it('EJSON export is frozen and does not inherit the global prototype', () => {
+    expect(BSON.EJSON).to.be.frozen;
+    expect(Object.getPrototypeOf(BSON.EJSON)).to.be.null;
   });
 });

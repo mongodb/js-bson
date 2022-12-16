@@ -6,7 +6,6 @@ import type { DBRefLike } from '../db_ref';
 import type { Decimal128 } from '../decimal128';
 import type { Double } from '../double';
 import { BSONError, BSONTypeError } from '../error';
-import { isBSONType } from '../extended_json';
 import type { Int32 } from '../int_32';
 import { Long } from '../long';
 import type { MinKey } from '../min_key';
@@ -703,11 +702,7 @@ export function serializeInto(
           ignoreUndefined,
           path
         );
-      } else if (
-        typeof value === 'object' &&
-        isBSONType(value) &&
-        value._bsontype === 'Decimal128'
-      ) {
+      } else if (value['_bsontype'] === 'Decimal128') {
         index = serializeDecimal128(buffer, key, value, index);
       } else if (value['_bsontype'] === 'Long' || value['_bsontype'] === 'Timestamp') {
         index = serializeLong(buffer, key, value, index);
