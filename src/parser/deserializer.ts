@@ -14,7 +14,7 @@ import { ObjectId } from '../objectid';
 import { BSONRegExp } from '../regexp';
 import { BSONSymbol } from '../symbol';
 import { Timestamp } from '../timestamp';
-import { ByteUtils } from '../utils/byte_utils';
+import { BSONDataView, ByteUtils } from '../utils/byte_utils';
 import { validateUtf8 } from '../validate_utf8';
 
 /** @public */
@@ -334,6 +334,8 @@ function deserializeObject(
       value = null;
     } else if (elementType === constants.BSON_DATA_LONG) {
       // Unpack the low and high bits
+      const dataview = BSONDataView.fromUint8Array(buffer.subarray(index, index + 8));
+
       const lowBits =
         buffer[index++] |
         (buffer[index++] << 8) |
@@ -346,7 +348,7 @@ function deserializeObject(
         (buffer[index++] << 24);
       const long = new Long(lowBits, highBits);
       if (useBigInt64) {
-        value = BigInt(lowBits) | (BigInt(highBits) << 32n);
+        value = dataview.getBigInt64(0, true);
       }
       // Promote the long if possible
       else if (promoteLongs && promoteValues === true) {
