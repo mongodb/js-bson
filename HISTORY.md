@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.0.0-alpha.1](https://github.com/mongodb/js-bson/compare/v5.0.0-alpha.0...v5.0.0-alpha.1) (2022-12-19)
+
+### Bug Fixes
+
+* fix: BSONSymbol serialize not recognized issue ([5b38dd8](https://github.com/mongodb/js-bson/commit/5b38dd84027ac072c67fbaee6cf08e2a44be2980))
+
+
 ## [5.0.0-alpha.0](https://github.com/mongodb/js-bson/compare/v4.7.0...v5.0.0-alpha.0) (2022-12-16)
 
 
