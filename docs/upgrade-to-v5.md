@@ -238,3 +238,29 @@ const result = BSON.serialize(Object.fromEntries([1, true, 'blue'].entries()))
 BSON.deserialize(result)
 // { '0': 1, '1': true, '2': 'blue' }
 ```
+
+### Exports and available bundles
+
+Most users should be unaffected by these changes, Node.js `require()` / Node.js `import` will fetch the corresponding BSON library as expected.
+And for folks using bundlers like, webpack or rollup a tree shakable es module bundle will be pulled in because of the settings in our package.json.
+
+Our package.json defines the following `"exports"` settings.
+```json
+{
+  "main": "./lib/bson.cjs",
+  "module": "./lib/bson.mjs",
+  "browser": "./lib/bson.mjs",
+  "exports": {
+    "browser": "./lib/bson.mjs",
+    "import": "./lib/bson.mjs",
+    "require": "./lib/bson.cjs"
+  }
+}
+```
+
+You can now find compiled bundles of the BSON library in 3 common formats in the `lib` directory.
+
+- CommonJS - `lib/bson.cjs`
+- ES Module - `lib/bson.mjs`
+- Immediate Invoked Function Expression (IIFE) - `lib/bson.bundle.js`
+  - Typically used when trying to import JS on the web CDN style, but the ES Module (`.mjs`) bundle is fully browser compatible and should be preferred if it works in your use case.
