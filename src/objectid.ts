@@ -1,3 +1,4 @@
+import { BSON_MAJOR_VERSION } from './constants';
 import { BSONTypeError } from './error';
 import { isUint8Array } from './parser/utils';
 import { BSONDataView, ByteUtils } from './utils/byte_utils';
@@ -32,8 +33,8 @@ export class ObjectId {
     return 'ObjectId';
   }
   /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): 5 {
-    return 5;
+  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
+    return BSON_MAJOR_VERSION;
   }
 
   /** @internal */

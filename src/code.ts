@@ -1,4 +1,5 @@
 import type { Document } from './bson';
+import { BSON_MAJOR_VERSION } from './constants';
 
 /** @public */
 export interface CodeExtended {
@@ -16,8 +17,8 @@ export class Code {
     return 'Code';
   }
   /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): 5 {
-    return 5;
+  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
+    return BSON_MAJOR_VERSION;
   }
 
   code: string;

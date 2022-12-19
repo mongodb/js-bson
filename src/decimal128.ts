@@ -1,3 +1,4 @@
+import { BSON_MAJOR_VERSION } from './constants';
 import { BSONTypeError } from './error';
 import { Long } from './long';
 import { isUint8Array } from './parser/utils';
@@ -131,8 +132,8 @@ export class Decimal128 {
     return 'Decimal128';
   }
   /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): 5 {
-    return 5;
+  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
+    return BSON_MAJOR_VERSION;
   }
 
   readonly bytes!: Uint8Array;

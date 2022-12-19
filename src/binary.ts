@@ -2,7 +2,7 @@ import { bufferToUuidHexString, uuidHexStringToBuffer, uuidValidateString } from
 import { isUint8Array } from './parser/utils';
 import type { EJSONOptions } from './extended_json';
 import { BSONError, BSONTypeError } from './error';
-import { BSON_BINARY_SUBTYPE_UUID_NEW } from './constants';
+import { BSON_BINARY_SUBTYPE_UUID_NEW, BSON_MAJOR_VERSION } from './constants';
 import { ByteUtils } from './utils/byte_utils';
 
 /** @public */
@@ -32,8 +32,8 @@ export class Binary {
     return 'Binary';
   }
   /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): 5 {
-    return 5;
+  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
+    return BSON_MAJOR_VERSION;
   }
 
   /**
@@ -310,8 +310,8 @@ const UUID_BYTE_LENGTH = 16;
  */
 export class UUID extends Binary {
   /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): 5 {
-    return 5;
+  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
+    return BSON_MAJOR_VERSION;
   }
 
   static cacheHexString: boolean;

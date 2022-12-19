@@ -1,4 +1,5 @@
 import type { Document } from './bson';
+import { BSON_MAJOR_VERSION } from './constants';
 import type { EJSONOptions } from './extended_json';
 import type { ObjectId } from './objectid';
 
@@ -33,8 +34,8 @@ export class DBRef {
     return 'DBRef';
   }
   /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): 5 {
-    return 5;
+  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
+    return BSON_MAJOR_VERSION;
   }
 
   collection!: string;

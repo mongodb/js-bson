@@ -1,3 +1,4 @@
+import { BSON_MAJOR_VERSION } from './constants';
 import type { EJSONOptions } from './extended_json';
 import type { Timestamp } from './timestamp';
 
@@ -103,8 +104,8 @@ export class Long {
     return 'Long';
   }
   /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): 5 {
-    return 5;
+  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
+    return BSON_MAJOR_VERSION;
   }
 
   /** An indicator used to reliably determine if an object is a Long or not. */
