@@ -726,7 +726,7 @@ export function serializeInto(
         );
       } else if (value._bsontype === 'Binary') {
         index = serializeBinary(buffer, key, value, index);
-      } else if (value._bsontype === 'Symbol') {
+      } else if (value._bsontype === 'BSONSymbol') {
         index = serializeSymbol(buffer, key, value, index);
       } else if (value._bsontype === 'DBRef') {
         index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions, path);
@@ -829,7 +829,7 @@ export function serializeInto(
         index = serializeFunction(buffer, key, value, index);
       } else if (value._bsontype === 'Binary') {
         index = serializeBinary(buffer, key, value, index);
-      } else if (value._bsontype === 'Symbol') {
+      } else if (value._bsontype === 'BSONSymbol') {
         index = serializeSymbol(buffer, key, value, index);
       } else if (value._bsontype === 'DBRef') {
         index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions, path);
@@ -936,7 +936,7 @@ export function serializeInto(
         index = serializeFunction(buffer, key, value, index);
       } else if (value._bsontype === 'Binary') {
         index = serializeBinary(buffer, key, value, index);
-      } else if (value._bsontype === 'Symbol') {
+      } else if (value._bsontype === 'BSONSymbol') {
         index = serializeSymbol(buffer, key, value, index);
       } else if (value._bsontype === 'DBRef') {
         index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions, path);
