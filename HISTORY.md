@@ -2,6 +2,52 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.0.0-alpha.0](https://github.com/mongodb/js-bson/compare/v4.7.0...v5.0.0-alpha.0) (2022-12-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **NODE-4892:** error on bson types not from this version
+* **NODE-4713:** modernize bundling (#534)
+* **NODE-1921:** validate serializer root input (#537)
+* **NODE-4711:** remove evalFunctions option (#539)
+* **NODE-4706:** validate Timestamp ctor argument (#536)
+* **NODE-4710:** remove capital D ObjectID export (#528)
+* **NODE-4862:** add BSONType enum and remove internal constants from export (#532)
+* **NODE-4410:** only enumerate own properties (#527)
+* **NODE-4850:** serialize negative zero to double (#529)
+* **NODE-4704:** remove deprecated ObjectId methods (#525)
+* **NODE-4461:** remove Decimal128 toObject transformer (#526)
+* **NODE-4712:** remove unused Map polyfill (#523)
+* **NODE-4440:** bump TS target version to es2020 (#520)
+* **NODE-4802:** Refactor BSON to work with cross platform JS APIs (#518)
+* **NODE-4435:** drop support for nodejs versions below 14 (#517)
+
+### Features
+
+* **NODE-4892:** error on bson types not from this version ([c95f4c1](https://github.com/mongodb/js-bson/commit/c95f4c11fbdfe7d55cb19198d68a17327d6d260d))
+* **NODE-4713:** modernize bundling ([#534](https://github.com/mongodb/js-bson/issues/534)) ([28ce4d5](https://github.com/mongodb/js-bson/commit/28ce4d584ce399d99c41c5f5fd022b6e16f7b913))
+* **NODE-1921:** validate serializer root input ([#537](https://github.com/mongodb/js-bson/issues/537)) ([95d5edf](https://github.com/mongodb/js-bson/commit/95d5edf5c4f8a1cd6c23deaac3a446959fde779e))
+* **NODE-4711:** remove evalFunctions option ([#539](https://github.com/mongodb/js-bson/issues/539)) ([0427eb5](https://github.com/mongodb/js-bson/commit/0427eb588073a07d9e88ddf6155d2c1891ae5ad1))
+* **NODE-4706:** validate Timestamp ctor argument ([#536](https://github.com/mongodb/js-bson/issues/536)) ([f90bcc3](https://github.com/mongodb/js-bson/commit/f90bcc3))
+* **NODE-4710:** remove capital D ObjectID export ([#528](https://github.com/mongodb/js-bson/issues/528)) ([8511225](https://github.com/mongodb/js-bson/commit/8511225))
+* **NODE-4862:** add BSONType enum and remove internal constants from export ([#532](https://github.com/mongodb/js-bson/issues/532)) ([196f9f8](https://github.com/mongodb/js-bson/commit/196f9f8))
+* **NODE-4410:** only enumerate own properties ([#527](https://github.com/mongodb/js-bson/issues/527)) ([5103e4d](https://github.com/mongodb/js-bson/commit/5103e4d))
+* **NODE-4850:** serialize negative zero to double ([#529](https://github.com/mongodb/js-bson/issues/529)) ([be74b30](https://github.com/mongodb/js-bson/commit/be74b30))
+* **NODE-4704:** remove deprecated ObjectId methods ([#525](https://github.com/mongodb/js-bson/issues/525)) ([f1cccf2](https://github.com/mongodb/js-bson/commit/f1cccf2))
+* **NODE-4461:** remove Decimal128 toObject transformer ([#526](https://github.com/mongodb/js-bson/issues/526)) ([14a7473](https://github.com/mongodb/js-bson/commit/14a7473))
+* **NODE-4712:** remove unused Map polyfill ([#523](https://github.com/mongodb/js-bson/issues/523)) ([1fb6dc6](https://github.com/mongodb/js-bson/commit/1fb6dc6))
+* **NODE-4440:** bump TS target version to es2020 ([#520](https://github.com/mongodb/js-bson/issues/520)) ([491d8b7](https://github.com/mongodb/js-bson/commit/491d8b7))
+* **NODE-4802:** Refactor BSON to work with cross platform JS APIs ([#518](https://github.com/mongodb/js-bson/issues/518)) ([3d3d0dc](https://github.com/mongodb/js-bson/commit/3d3d0dc))
+* **NODE-4435:** drop support for nodejs versions below 14 ([#517](https://github.com/mongodb/js-bson/issues/517)) ([027ffb7](https://github.com/mongodb/js-bson/commit/027ffb7))
+
+
+### Bug Fixes
+
+* **NODE-4464:** stringify and parse negative zero to and from $numberDouble: -0.0 ([#531](https://github.com/mongodb/js-bson/issues/531)) ([a469e91](https://github.com/mongodb/js-bson/commit/a469e91))
+* **NODE-4771:** serializeFunctions breaks function names outside of basic latin ([#538](https://github.com/mongodb/js-bson/issues/538)) ([35a9234](https://github.com/mongodb/js-bson/commit/35a92341c0860fb41cbd5761250c565154ce1353))
+
+
 ## [4.7.0](https://github.com/mongodb/js-bson/compare/v4.6.5...v4.7.0) (2022-08-18)
 
 
