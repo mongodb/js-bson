@@ -1,10 +1,7 @@
 # BSON parser
 
-BSON is short for "Binary JSON," and is the binary-encoded serialization of JSON-like documents. You can learn more about it in [the specification](http://bsonspec.org).
-
-This browser version of the BSON parser is compiled using [rollup](https://rollupjs.org/) and the current version is pre-compiled in the `dist` directory.
-
-This is the default BSON parser, however, there is a C++ Node.js addon version as well that does not support the browser. It can be found at [mongod-js/bson-ext](https://github.com/mongodb-js/bson-ext).
+BSON is short for "Binary JSON," and is the binary-encoded serialization of JSON-like documents.
+You can learn more about it in [the specification](http://bsonspec.org).
 
 ### Table of Contents
 - [Usage](#usage)
@@ -32,106 +29,43 @@ npm install
 npm run build
 ```
 
-### Node (no bundling)
-A simple example of how to use BSON in `Node.js`:
+### Node.js or Bundling Usage
+
+When using a bundler or Node.js you can import bson using the package name:
 
 ```js
-const BSON = require('bson');
-const Long = BSON.Long;
+import { BSON, EJSON, ObjectId } from 'bson';
+// or:
+// const { BSON, EJSON, ObjectId } = require('bson');
 
-// Serialize a document
-const doc = { long: Long.fromNumber(100) };
-const data = BSON.serialize(doc);
-console.log('data:', data);
-
-// Deserialize the resulting Buffer
-const doc_2 = BSON.deserialize(data);
-console.log('doc_2:', doc_2);
+const bytes = BSON.serialize({ _id: new ObjectId() });
+console.log(bytes);
+const doc = BSON.deserialize(bytes);
+console.log(EJSON.stringify(doc));
+// {"_id":{"$oid":"..."}}
 ```
 
-### Browser (no bundling)
+### Browser Usage
 
-If you are not using a bundler like webpack, you can include `dist/bson.bundle.js` using a script tag.  It includes polyfills for built-in node types like `Buffer`.
+If you are working directly in the browser without a bundler please use the `.mjs` bundle like so:
 
 ```html
-<script src="./dist/bson.bundle.js"></script>
+<script type="module">
+  import { BSON, EJSON, ObjectId } from './lib/bson.mjs';
 
-<script>
-  function start() {
-    // Get the Long type
-    const Long = BSON.Long;
-
-    // Serialize a document
-    const doc = { long: Long.fromNumber(100) }
-    const data = BSON.serialize(doc);
-    console.log('data:', data);
-
-    // De serialize it again
-    const doc_2 = BSON.deserialize(data);
-    console.log('doc_2:', doc_2);
-  }
+  const bytes = BSON.serialize({ _id: new ObjectId() });
+  console.log(bytes);
+  const doc = BSON.deserialize(bytes);
+  console.log(EJSON.stringify(doc));
+  // {"_id":{"$oid":"..."}}
 </script>
 ```
 
-### Using webpack
-
-If using webpack, you can use your normal import/require syntax of your project to pull in the `bson` library.
-
-ES6 Example:
-
-```js
-import { Long, serialize, deserialize } from 'bson';
-
-// Serialize a document
-const doc = { long: Long.fromNumber(100) };
-const data = serialize(doc);
-console.log('data:', data);
-
-// De serialize it again
-const doc_2 = deserialize(data);
-console.log('doc_2:', doc_2);
-```
-
-ES5 Example:
-
-```js
-const BSON = require('bson');
-const Long = BSON.Long;
-
-// Serialize a document
-const doc = { long: Long.fromNumber(100) };
-const data = BSON.serialize(doc);
-console.log('data:', data);
-
-// Deserialize the resulting Buffer
-const doc_2 = BSON.deserialize(data);
-console.log('doc_2:', doc_2);
-```
-
-Depending on your settings, webpack will under the hood resolve to one of the following:
-
-- `dist/bson.browser.esm.js` If your project is in the browser and using ES6 modules (Default for `webworker` and `web` targets)
-- `dist/bson.browser.umd.js` If your project is in the browser and not using ES6 modules
-- `dist/bson.esm.js` If your project is in Node.js and using ES6 modules (Default for `node` targets)
-- `lib/bson.js` (the normal include path) If your project is in Node.js and not using ES6 modules
-
-For more information, see [this page on webpack's `resolve.mainFields`](https://webpack.js.org/configuration/resolve/#resolvemainfields) and [the `package.json` for this project](./package.json#L52)
-
-### Usage with Angular
-
-Starting with Angular 6, Angular CLI removed the shim for `global` and other node built-in variables (original comment [here](https://github.com/angular/angular-cli/issues/9827#issuecomment-386154063)). If you are using BSON with Angular, you may need to add the following shim to your `polyfills.ts` file:
-
-```js
-// In polyfills.ts
-(window as any).global = window;
-```
-
-- [Original Comment by Angular CLI](https://github.com/angular/angular-cli/issues/9827#issuecomment-386154063)
-- [Original Source for Solution](https://stackoverflow.com/a/50488337/4930088)
-
 ## Installation
 
-`npm install bson`
+```sh
+npm install bson
+```
 
 ## Documentation
 
