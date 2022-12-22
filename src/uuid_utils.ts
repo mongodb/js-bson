@@ -1,4 +1,4 @@
-import { BSONTypeError } from './error';
+import { BSONError } from './error';
 import { ByteUtils } from './utils/byte_utils';
 
 // Validation regex for v4 uuid (validates with or without dashes)
@@ -10,7 +10,7 @@ export const uuidValidateString = (str: string): boolean =>
 
 export const uuidHexStringToBuffer = (hexString: string): Uint8Array => {
   if (!uuidValidateString(hexString)) {
-    throw new BSONTypeError(
+    throw new BSONError(
       'UUID string representations must be a 32 or 36 character hex string (dashes excluded/included). Format: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" or "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx".'
     );
   }

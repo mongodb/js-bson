@@ -1,3 +1,4 @@
+import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
 import type { Timestamp } from './timestamp';
 
@@ -245,7 +246,7 @@ export class Long {
    * @returns The corresponding Long value
    */
   static fromString(str: string, unsigned?: boolean, radix?: number): Long {
-    if (str.length === 0) throw Error('empty string');
+    if (str.length === 0) throw new BSONError('empty string');
     if (str === 'NaN' || str === 'Infinity' || str === '+Infinity' || str === '-Infinity')
       return Long.ZERO;
     if (typeof unsigned === 'number') {
@@ -255,10 +256,10 @@ export class Long {
       unsigned = !!unsigned;
     }
     radix = radix || 10;
-    if (radix < 2 || 36 < radix) throw RangeError('radix');
+    if (radix < 2 || 36 < radix) throw new BSONError('radix');
 
     let p;
-    if ((p = str.indexOf('-')) > 0) throw Error('interior hyphen');
+    if ((p = str.indexOf('-')) > 0) throw new BSONError('interior hyphen');
     else if (p === 0) {
       return Long.fromString(str.substring(1), unsigned, radix).neg();
     }
@@ -426,7 +427,7 @@ export class Long {
    */
   divide(divisor: string | number | Long | Timestamp): Long {
     if (!Long.isLong(divisor)) divisor = Long.fromValue(divisor);
-    if (divisor.isZero()) throw Error('division by zero');
+    if (divisor.isZero()) throw new BSONError('division by zero');
 
     // use wasm support if present
     if (wasm) {
@@ -954,7 +955,7 @@ export class Long {
    */
   toString(radix?: number): string {
     radix = radix || 10;
-    if (radix < 2 || 36 < radix) throw RangeError('radix');
+    if (radix < 2 || 36 < radix) throw new BSONError('radix');
     if (this.isZero()) return '0';
     if (this.isNegative()) {
       // Unsigned Longs are never negative

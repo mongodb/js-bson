@@ -1,4 +1,4 @@
-import { BSONTypeError } from './error';
+import { BSONError } from './error';
 import { Long } from './long';
 import { isUint8Array } from './parser/utils';
 import { ByteUtils } from './utils/byte_utils';
@@ -113,7 +113,7 @@ function lessThan(left: Long, right: Long): boolean {
 }
 
 function invalidErr(string: string, message: string) {
-  throw new BSONTypeError(`"${string}" is not a valid Decimal128 string - ${message}`);
+  throw new BSONError(`"${string}" is not a valid Decimal128 string - ${message}`);
 }
 
 /** @public */
@@ -142,11 +142,11 @@ export class Decimal128 {
       this.bytes = Decimal128.fromString(bytes).bytes;
     } else if (isUint8Array(bytes)) {
       if (bytes.byteLength !== 16) {
-        throw new BSONTypeError('Decimal128 must take a Buffer of 16 bytes');
+        throw new BSONError('Decimal128 must take a Buffer of 16 bytes');
       }
       this.bytes = bytes;
     } else {
-      throw new BSONTypeError('Decimal128 must take a Buffer or string');
+      throw new BSONError('Decimal128 must take a Buffer or string');
     }
   }
 
@@ -201,7 +201,7 @@ export class Decimal128 {
     // TODO: implementing a custom parsing for this, or refactoring the regex would yield
     //       further gains.
     if (representation.length >= 7000) {
-      throw new BSONTypeError('' + representation + ' not a valid Decimal128 string');
+      throw new BSONError('' + representation + ' not a valid Decimal128 string');
     }
 
     // Results
@@ -211,7 +211,7 @@ export class Decimal128 {
 
     // Validate the string
     if ((!stringMatch && !infMatch && !nanMatch) || representation.length === 0) {
-      throw new BSONTypeError('' + representation + ' not a valid Decimal128 string');
+      throw new BSONError('' + representation + ' not a valid Decimal128 string');
     }
 
     if (stringMatch) {
@@ -283,7 +283,7 @@ export class Decimal128 {
     }
 
     if (sawRadix && !nDigitsRead)
-      throw new BSONTypeError('' + representation + ' not a valid Decimal128 string');
+      throw new BSONError('' + representation + ' not a valid Decimal128 string');
 
     // Read exponent if exists
     if (representation[index] === 'e' || representation[index] === 'E') {

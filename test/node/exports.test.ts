@@ -23,7 +23,6 @@ const EXPECTED_EXPORTS = [
   'BSONRegExp',
   'Decimal128',
   'BSONError',
-  'BSONTypeError',
   'setInternalBufferSize',
   'serialize',
   'serializeWithBufferAndIndex',
