@@ -285,6 +285,29 @@ Deserialize stream data as BSON documents.
 
 **Returns**: <code>Number</code> - returns the next index in the buffer after deserialization **x** numbers of documents.
 
+## Error Handling
+
+It is our recommendation to use `BSONError.isBSONError()` checks on errors and to avoid relying on parsing `error.message` and `error.name` strings in your code. We guarantee `BSONError.isBSONError()` checks will pass according to semver guidelines, but errors may be sub-classed or their messages may change at any time, even patch releases, as we see fit to increase the helpfulness of the errors.
+
+Any new errors we add to the driver will directly extend an existing error class and no existing error will be moved to a different parent class outside of a major release.
+This means `BSONError.isBSONError()` will always be able to accurately capture the errors that our BSON library throws.
+
+Hypothetical example: A collection in our Db has an issue with UTF-8 data:
+
+```ts
+let documentCount = 0;
+const cursor = collection.find({}, { utf8Validation: true });
+try {
+  for await (const doc of cursor) documentCount += 1;
+} catch (error) {
+  if (BSONError.isBSONError(error)) {
+    console.log(`Found the troublemaker UTF-8!: ${documentCount} ${error.message}`);
+    return documentCount;
+  }
+  throw error;
+}
+```
+
 ## FAQ
 
 #### Why does `undefined` get converted to `null`?
