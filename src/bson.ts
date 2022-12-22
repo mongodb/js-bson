@@ -49,7 +49,7 @@ export {
   BSONRegExp,
   Decimal128
 };
-export { BSONError, BSONTypeError } from './error';
+export { BSONError } from './error';
 export { BSONType } from './constants';
 export { EJSON } from './extended_json';
 
