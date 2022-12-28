@@ -309,6 +309,41 @@ try {
 }
 ```
 
+## React Native
+
+BSON requires `TextEncoder`, `TextDecoder`, `atob`, `btoa`, and `crypto.getRandomValues` to be available on the global object in browser-like environments.
+
+Since React Native has a different JS engine with different globals than either browser or Node.js has, polyfills of those APIs are required to get React Native projects working with BSON or EJSON.
+
+```sh
+npm install --save react-native-get-random-values text-encoding-polyfill base-64
+```
+
+The following snippet should be placed at the top of your index.js file for React Native projects using the BSON library.
+
+```typescript
+// Required Polyfills For ReactNative
+import {encode, decode} from 'base-64';
+if (global.btoa == null) {
+  global.btoa = encode;
+}
+if (global.atob == null) {
+  global.atob = decode;
+}
+import 'text-encoding-polyfill';
+import 'react-native-get-random-values';
+```
+
+Import the BSON library like so:
+
+```typescript
+import { BSON, EJSON } from 'bson';
+```
+
+This will resolve the `node_modules/bson/lib/bson.cjs` bundle per the setting we have in the `"exports"` section of our [package.json](./package.json).
+
+> *Reasoning:* React Native must use the commonjs syntax version of BSON to avoid the unsupported syntax of a top-level await that is used in the es module build.
+
 ## FAQ
 
 #### Why does `undefined` get converted to `null`?
