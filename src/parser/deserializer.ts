@@ -129,7 +129,7 @@ function deserializeObject(
   }
 
   if (useBigInt64 && !promoteLongs) {
-    throw new BSONError('Must either request bigint or Longs for int64 deserialization');
+    throw new BSONError('Must either request bigint or Long for int64 deserialization');
   }
 
   // Ensures default validation option if none given
