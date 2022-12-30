@@ -5,7 +5,7 @@ import { BSON_INT32_MAX, BSON_INT32_MIN, BSON_INT64_MAX, BSON_INT64_MIN } from '
 import { DBRef, isDBRefLike } from './db_ref';
 import { Decimal128 } from './decimal128';
 import { Double } from './double';
-import { BSONError, BSONTypeError } from './error';
+import { BSONError } from './error';
 import { Int32 } from './int_32';
 import { Long } from './long';
 import { MaxKey } from './max_key';
@@ -192,7 +192,7 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
         circularPart.length + (alreadySeen.length + current.length) / 2 - 1
       );
 
-      throw new BSONTypeError(
+      throw new BSONError(
         'Converting circular structure to EJSON:\n' +
           `    ${leadingPart}${alreadySeen}${circularPart}${current}\n` +
           `    ${leadingSpace}\\${dashes}/`
@@ -324,7 +324,7 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
       // Copy the object into this library's version of that type.
       const mapper = BSON_TYPE_MAPPINGS[doc._bsontype];
       if (!mapper) {
-        throw new BSONTypeError('Unrecognized or invalid _bsontype: ' + doc._bsontype);
+        throw new BSONError('Unrecognized or invalid _bsontype: ' + doc._bsontype);
       }
       outDoc = mapper(outDoc);
     }

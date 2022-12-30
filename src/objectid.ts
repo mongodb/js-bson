@@ -1,5 +1,5 @@
 import { BSON_MAJOR_VERSION } from './constants';
-import { BSONTypeError } from './error';
+import { BSONError } from './error';
 import { isUint8Array } from './parser/utils';
 import { BSONDataView, ByteUtils } from './utils/byte_utils';
 
@@ -57,9 +57,7 @@ export class ObjectId {
     let workingId;
     if (typeof inputId === 'object' && inputId && 'id' in inputId) {
       if (typeof inputId.id !== 'string' && !ArrayBuffer.isView(inputId.id)) {
-        throw new BSONTypeError(
-          'Argument passed in must have an id that is of type string or Buffer'
-        );
+        throw new BSONError('Argument passed in must have an id that is of type string or Buffer');
       }
       if ('toHexString' in inputId && typeof inputId.toHexString === 'function') {
         workingId = ByteUtils.fromHex(inputId.toHexString());
@@ -85,17 +83,17 @@ export class ObjectId {
         if (bytes.byteLength === 12) {
           this[kId] = bytes;
         } else {
-          throw new BSONTypeError('Argument passed in must be a string of 12 bytes');
+          throw new BSONError('Argument passed in must be a string of 12 bytes');
         }
       } else if (workingId.length === 24 && checkForHexRegExp.test(workingId)) {
         this[kId] = ByteUtils.fromHex(workingId);
       } else {
-        throw new BSONTypeError(
+        throw new BSONError(
           'Argument passed in must be a string of 12 bytes or a string of 24 hex characters or an integer'
         );
       }
     } else {
-      throw new BSONTypeError('Argument passed in does not match the accepted types');
+      throw new BSONError('Argument passed in does not match the accepted types');
     }
     // If we are caching the hex string
     if (ObjectId.cacheHexString) {
@@ -271,7 +269,7 @@ export class ObjectId {
   static createFromHexString(hexString: string): ObjectId {
     // Throw an error if it's not a valid setup
     if (typeof hexString === 'undefined' || (hexString != null && hexString.length !== 24)) {
-      throw new BSONTypeError(
+      throw new BSONError(
         'Argument passed in must be a single String of 12 bytes or a string of 24 hex characters'
       );
     }

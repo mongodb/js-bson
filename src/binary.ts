@@ -1,7 +1,7 @@
 import { bufferToUuidHexString, uuidHexStringToBuffer, uuidValidateString } from './uuid_utils';
 import { isUint8Array } from './parser/utils';
 import type { EJSONOptions } from './extended_json';
-import { BSONError, BSONTypeError } from './error';
+import { BSONError } from './error';
 import { BSON_BINARY_SUBTYPE_UUID_NEW, BSON_MAJOR_VERSION } from './constants';
 import { ByteUtils } from './utils/byte_utils';
 
@@ -86,7 +86,7 @@ export class Binary {
       !(buffer instanceof ArrayBuffer) &&
       !Array.isArray(buffer)
     ) {
-      throw new BSONTypeError(
+      throw new BSONError(
         'Binary can only be constructed from string, Buffer, TypedArray, or Array<number>'
       );
     }
@@ -121,9 +121,9 @@ export class Binary {
   put(byteValue: string | number | Uint8Array | number[]): void {
     // If it's a string and a has more than one character throw an error
     if (typeof byteValue === 'string' && byteValue.length !== 1) {
-      throw new BSONTypeError('only accepts single character String');
+      throw new BSONError('only accepts single character String');
     } else if (typeof byteValue !== 'number' && byteValue.length !== 1)
-      throw new BSONTypeError('only accepts single character Uint8Array or Array');
+      throw new BSONError('only accepts single character Uint8Array or Array');
 
     // Decode the byte value once
     let decodedByte: number;
@@ -136,7 +136,7 @@ export class Binary {
     }
 
     if (decodedByte < 0 || decodedByte > 255) {
-      throw new BSONTypeError('only accepts number in a valid unsigned byte range 0-255');
+      throw new BSONError('only accepts number in a valid unsigned byte range 0-255');
     }
 
     if (this.buffer.byteLength > this.position) {
@@ -283,7 +283,7 @@ export class Binary {
       data = uuidHexStringToBuffer(doc.$uuid);
     }
     if (!data) {
-      throw new BSONTypeError(`Unexpected Binary Extended JSON format ${JSON.stringify(doc)}`);
+      throw new BSONError(`Unexpected Binary Extended JSON format ${JSON.stringify(doc)}`);
     }
     return type === BSON_BINARY_SUBTYPE_UUID_NEW ? new UUID(data) : new Binary(data, type);
   }
@@ -337,7 +337,7 @@ export class UUID extends Binary {
     } else if (typeof input === 'string') {
       bytes = uuidHexStringToBuffer(input);
     } else {
-      throw new BSONTypeError(
+      throw new BSONError(
         'Argument passed in UUID constructor must be a UUID, a 16 byte Buffer or a 32/36 character hex string (dashes excluded/included, format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).'
       );
     }
