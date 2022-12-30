@@ -194,8 +194,8 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
 
       throw new BSONError(
         'Converting circular structure to EJSON:\n' +
-          `    ${leadingPart}${alreadySeen}${circularPart}${current}\n` +
-          `    ${leadingSpace}\\${dashes}/`
+        `    ${leadingPart}${alreadySeen}${circularPart}${current}\n` +
+        `    ${leadingSpace}\\${dashes}/`
       );
     }
     options.seenObjects[options.seenObjects.length - 1].obj = value;
@@ -232,6 +232,10 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
       }
     }
     return { $numberDouble: Object.is(value, -0) ? '-0.0' : value.toString() };
+  }
+
+  if (typeof value === 'bigint' && (!options.relaxed)) {
+    return { $numberLong: value.toString() };
   }
 
   if (value instanceof RegExp || isRegExp(value)) {
