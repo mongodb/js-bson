@@ -2,8 +2,8 @@ import { BSON, BSONError } from '../register-bson';
 import { bufferFromHexArray } from './tools/utils';
 import { expect } from 'chai';
 
-describe('BSON BigInt deserialization support', function() {
-  describe('BSON.deserialize()', function() {
+describe('BSON BigInt deserialization support', function () {
+  describe('BSON.deserialize()', function () {
     type DeserialzationOptions = {
       useBigInt64: boolean | undefined;
       promoteValues: boolean | undefined;
@@ -20,7 +20,7 @@ describe('BSON BigInt deserialization support', function() {
     const promoteLongsValues = [true, false, undefined];
     const promoteValuesValues = [true, false, undefined];
 
-    const tests = useBigInt64Values.flatMap(useBigInt64 => {
+    const testTable = useBigInt64Values.flatMap(useBigInt64 => {
       return promoteLongsValues.flatMap(promoteLongs => {
         return promoteValuesValues.flatMap(promoteValues => {
           const useBigInt64Set = useBigInt64 ?? false;
@@ -51,19 +51,22 @@ describe('BSON BigInt deserialization support', function() {
     });
 
     it('meta test: should test table correctly', () => {
-      expect(tests).to.have.lengthOf(27);
-      expect(tests.filter(t => t.shouldThrow)).to.have.lengthOf(5);
-      expect(tests.filter(t => !t.shouldThrow)).to.have.lengthOf(22);
+      expect(testTable).to.have.lengthOf(27);
+      expect(testTable.filter(t => t.shouldThrow)).to.have.lengthOf(5);
+      expect(testTable.filter(t => !t.shouldThrow)).to.have.lengthOf(22);
     });
 
     function generateTestDescription(entry: TestTableEntry): string {
       const options = entry.options;
-      const promoteValues = `promoteValues ${options.promoteValues === undefined ? 'is default' : `is ${options.promoteValues}`
-        }`;
-      const promoteLongs = `promoteLongs ${options.promoteLongs === undefined ? 'is default' : `is ${options.promoteLongs}`
-        }`;
-      const useBigInt64 = `useBigInt64 ${options.useBigInt64 === undefined ? 'is default' : `is ${options.useBigInt64}`
-        }`;
+      const promoteValues = `promoteValues ${
+        options.promoteValues === undefined ? 'is default' : `is ${options.promoteValues}`
+      }`;
+      const promoteLongs = `promoteLongs ${
+        options.promoteLongs === undefined ? 'is default' : `is ${options.promoteLongs}`
+      }`;
+      const useBigInt64 = `useBigInt64 ${
+        options.useBigInt64 === undefined ? 'is default' : `is ${options.useBigInt64}`
+      }`;
       const flagString = `${useBigInt64}, ${promoteValues}, and ${promoteLongs}`;
       if (entry.shouldThrow) {
         return `throws when ${flagString}`;
@@ -74,23 +77,24 @@ describe('BSON BigInt deserialization support', function() {
 
     function generateTest(test: TestTableEntry) {
       const options = test.options;
+      const deserialize = () => {
+        return BSON.deserialize(testSerializedDoc, options);
+      };
       if (test.shouldThrow) {
         return () => {
-          expect(() => {
-            BSON.deserialize(testSerializedDoc, options);
-          }).to.throw(BSONError, test.expectedErrorMessage ?? '');
+          expect(deserialize).to.throw(BSONError, test.expectedErrorMessage);
         };
       } else {
         return () => {
-          const deserializedDoc = BSON.deserialize(testSerializedDoc, options);
+          const deserializedDoc = deserialize();
           expect(deserializedDoc).to.deep.equal(test.expectedResult);
         };
       }
     }
 
-    for (const entry of tests) {
-      const test = generateTest(entry);
-      const description = generateTestDescription(entry);
+    for (const tableEntry of testTable) {
+      const test = generateTest(tableEntry);
+      const description = generateTestDescription(tableEntry);
 
       it(description, test);
     }
