@@ -180,22 +180,35 @@ describe('Extended JSON', function() {
     expect(EJSON.parse(serialized)).to.deep.equal(numbers);
   });
 
-  it.only('should correctly serialize bigint values in canonical mode', function() {
+  it.only('serializes bigint values to Int32 when they are >= -2^32 and <= 2^32 -1', function() {
+    const number = {a: 100n};
+    const serialized = EJSON.stringify(number, {relaxed: false});
+    expect(serialized).to.equal('{"a":{"$numberInt":"100"}}');
+  });
+
+  it.only('serializes bigint values to Int64 when they are < -2^32, > 2^32 -1, > 2^64 -1, and < -2^64', function() {
+    const number = {a: 2n ** 33n};
+    const serialized = EJSON.stringify(number, {relaxed: false});
+    expect(serialized).to.equal('');
+  });
+
+  it('serializes bigint values to Double when they are > 2^64 - 1 and < -2^64);
+  it.only('correctly serializes bigint values in canonical mode', function() {
     const numbers = { a: 100n, b: (2n ** 54n) };
     const serialized = EJSON.stringify(numbers, { relaxed: false });
     expect(serialized).to.equal('{"a":{"$numberLong":"100"},"b":{"$numberLong":"18014398509481984"}}');
   });
 
-  it.only('should correctly serialize bigint values in relaxed mode', function() {
-    const numbers = { a: 100n, b: (2n ** 54n) };
+  it.only('correctly serializes bigint values in relaxed mode that are safe to represent with a javascript number', function() {
+    const numbers = { a: 100n, b: BigInt(Number.MAX_SAFE_INTEGER) };
     const serialized = EJSON.stringify(numbers);
-    expect(serialized).to.equal('{"a":100,"b":18014398509481984}');
+    expect(serialized).to.equal('{"a":100,"b":9007199254740991}');
   });
 
-  it.only('should correctly serialize bigint values in relaxed mode that are not safe to represent with javascript number', function() {
+  it.only('correctly serializes bigint values in relaxed mode that are not safe to represent with javascript number', function() {
     const numbers = { a: 100n, b: BigInt(Number.MAX_SAFE_INTEGER) + 2n };
     const serialized = EJSON.stringify(numbers);
-    expect(serialized).to.equal('{"a":100,"b":9007199254740993}');
+    expect(serialized).to.equal('{"a":100,"b":9007199254740992}');
   });
 
   it('should correctly parse null values', function() {
