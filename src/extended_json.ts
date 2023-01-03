@@ -234,8 +234,11 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
     return { $numberDouble: Object.is(value, -0) ? '-0.0' : value.toString() };
   }
 
-  if (typeof value === 'bigint' && (!options.relaxed)) {
-    return { $numberLong: value.toString() };
+  if (typeof value === 'bigint') {
+    if (!options.relaxed) {
+      return { $numberLong: value.toString() };
+    }
+    return Number(BigInt.asIntN(64, value)); // FIXME(NODE-4873): This is yucky
   }
 
   if (value instanceof RegExp || isRegExp(value)) {
