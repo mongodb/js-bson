@@ -50,7 +50,7 @@ describe('BSON BigInt deserialization support', function () {
       });
     });
 
-    it('meta test: should test table correctly', () => {
+    it('meta test: generates 27 tests with exactly 5 error cases and 22 success cases', () => {
       expect(testTable).to.have.lengthOf(27);
       expect(testTable.filter(t => t.shouldThrow)).to.have.lengthOf(5);
       expect(testTable.filter(t => !t.shouldThrow)).to.have.lengthOf(22);
