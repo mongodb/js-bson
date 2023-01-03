@@ -349,9 +349,8 @@ function deserializeObject(
       const long = new Long(lowBits, highBits);
       if (useBigInt64) {
         value = dataview.getBigInt64(0, true);
-      }
-      // Promote the long if possible
-      else if (promoteLongs && promoteValues === true) {
+      } else if (promoteLongs && promoteValues === true) {
+        // Promote the long if possible
         value =
           long.lessThanOrEqual(JS_INT_MAX_LONG) && long.greaterThanOrEqual(JS_INT_MIN_LONG)
             ? long.toNumber()
