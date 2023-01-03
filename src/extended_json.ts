@@ -194,8 +194,8 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
 
       throw new BSONError(
         'Converting circular structure to EJSON:\n' +
-        `    ${leadingPart}${alreadySeen}${circularPart}${current}\n` +
-        `    ${leadingSpace}\\${dashes}/`
+          `    ${leadingPart}${alreadySeen}${circularPart}${current}\n` +
+          `    ${leadingSpace}\\${dashes}/`
       );
     }
     options.seenObjects[options.seenObjects.length - 1].obj = value;
@@ -236,17 +236,9 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
 
   if (typeof value === 'bigint') {
     if (!options.relaxed) {
-      // Interpret as smallest BSON integer type that can represent the number exactly
-      if (value >= BSON_INT32_MIN && value <= BSON_INT32_MAX) {
-        return { $numberInt: value.toString() };
-      }
-      if (value >= BSON_INT64_MIN && value <= BSON_INT64_MAX) {
-        return { $numberLong: value.toString() };
-      }
-      // Fallback to double if number is out of signed-64-bit int range
-      return { $numberDouble: value.toString() };
+      return { $numberLong: BigInt.asIntN(64, value).toString() };
     }
-    return Number(BigInt.asIntN(64, value)); 
+    return Number(BigInt.asIntN(64, value));
   }
 
   if (value instanceof RegExp || isRegExp(value)) {
