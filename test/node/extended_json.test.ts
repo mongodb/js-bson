@@ -205,7 +205,7 @@ describe('Extended JSON', function () {
   });
 
   it('truncates bigint values in the same way as BSON.serialize in relaxed mode', function () {
-    const number = { a: 0x1234_0000_1234_5678_9999n }; // Ensure that the serialized number can be exactly represented as a JS number
+    const number = { a: 0x1234_0000_1234_5678_9999n }; // Ensure that the truncated number can be exactly represented as a JS number
     const stringified = EJSON.stringify(number, { relaxed: true });
     const serializedDoc = BSON.serialize(number);
 
@@ -218,6 +218,7 @@ describe('Extended JSON', function () {
 
     expect(parsed.a).to.equal(Number(dataView.getBigInt64(VALUE_OFFSET, true)));
   });
+
 
   it('serializes bigint values to numberLong in canonical mode', function () {
     const number = { a: 2n };
