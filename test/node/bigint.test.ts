@@ -102,7 +102,6 @@ describe('BSON BigInt support', function () {
     }
   });
 
-
   describe('BSON.serialize()', function () {
     // Index for the data type byte of a BSON document with a
     // NOTE: These offsets only apply for documents with the shape {a : <n>}
