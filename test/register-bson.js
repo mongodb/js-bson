@@ -19,6 +19,15 @@ const { loadCJSModuleBSON } = require('./load_bson');
 chai.use(function (chai) {
   const throwsAssertion = chai.Assertion.prototype.throw;
   chai.Assertion.addMethod('throw', function (...args) {
+    const isNegated = chai.util.flag(this, 'negate');
+    if (!isNegated) {
+      // to.not.throw() is acceptable to not have an argument
+      // to.throw() should always provide an Error class
+      expect(args).to.have.length.of.at.least(1);
+      // prevent to.throw(undefined) nor to.throw(null)
+      expect(args[0]).to.exist;
+    }
+
     try {
       throwsAssertion.call(this, ...args);
     } catch (assertionError) {

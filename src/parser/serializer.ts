@@ -12,15 +12,7 @@ import type { MinKey } from '../min_key';
 import type { ObjectId } from '../objectid';
 import type { BSONRegExp } from '../regexp';
 import { ByteUtils } from '../utils/byte_utils';
-import {
-  isAnyArrayBuffer,
-  isBigInt64Array,
-  isBigUInt64Array,
-  isDate,
-  isMap,
-  isRegExp,
-  isUint8Array
-} from './utils';
+import { isAnyArrayBuffer, isDate, isMap, isRegExp, isUint8Array } from './utils';
 
 /** @public */
 export interface SerializeOptions {
@@ -100,6 +92,20 @@ function serializeNumber(buffer: Uint8Array, key: string, value: number, index: 
   buffer.set(bytes, index);
   index += bytes.byteLength;
 
+  return index;
+}
+
+function serializeBigInt(buffer: Uint8Array, key: string, value: bigint, index: number) {
+  buffer[index++] = constants.BSON_DATA_LONG;
+  // Number of written bytes
+  const numberOfWrittenBytes = ByteUtils.encodeUTF8Into(buffer, key, index);
+  // Encode the name
+  index += numberOfWrittenBytes;
+  buffer[index++] = 0;
+  NUMBER_SPACE.setBigInt64(0, value, true);
+  // Write BigInt value
+  buffer.set(EIGHT_BYTE_VIEW_ON_NUMBER, index);
+  index += EIGHT_BYTE_VIEW_ON_NUMBER.byteLength;
   return index;
 }
 
@@ -675,7 +681,7 @@ export function serializeInto(
       } else if (typeof value === 'number') {
         index = serializeNumber(buffer, key, value, index);
       } else if (typeof value === 'bigint') {
-        throw new BSONError('Unsupported type BigInt, please use Decimal128');
+        index = serializeBigInt(buffer, key, value, index);
       } else if (typeof value === 'boolean') {
         index = serializeBoolean(buffer, key, value, index);
       } else if (value instanceof Date || isDate(value)) {
@@ -779,8 +785,8 @@ export function serializeInto(
         index = serializeString(buffer, key, value, index);
       } else if (type === 'number') {
         index = serializeNumber(buffer, key, value, index);
-      } else if (type === 'bigint' || isBigInt64Array(value) || isBigUInt64Array(value)) {
-        throw new BSONError('Unsupported type BigInt, please use Decimal128');
+      } else if (type === 'bigint') {
+        index = serializeBigInt(buffer, key, value, index);
       } else if (type === 'boolean') {
         index = serializeBoolean(buffer, key, value, index);
       } else if (value instanceof Date || isDate(value)) {
@@ -885,7 +891,7 @@ export function serializeInto(
       } else if (type === 'number') {
         index = serializeNumber(buffer, key, value, index);
       } else if (type === 'bigint') {
-        throw new BSONError('Unsupported type BigInt, please use Decimal128');
+        index = serializeBigInt(buffer, key, value, index);
       } else if (type === 'boolean') {
         index = serializeBoolean(buffer, key, value, index);
       } else if (value instanceof Date || isDate(value)) {

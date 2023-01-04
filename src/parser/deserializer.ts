@@ -14,12 +14,14 @@ import { ObjectId } from '../objectid';
 import { BSONRegExp } from '../regexp';
 import { BSONSymbol } from '../symbol';
 import { Timestamp } from '../timestamp';
-import { ByteUtils } from '../utils/byte_utils';
+import { BSONDataView, ByteUtils } from '../utils/byte_utils';
 import { validateUtf8 } from '../validate_utf8';
 
 /** @public */
 export interface DeserializeOptions {
-  /** when deserializing a Long will fit it into a Number if it's smaller than 53 bits */
+  /** when deserializing a Long will return as a BigInt. */
+  useBigInt64?: boolean;
+  /** when deserializing a Long will fit it into a Number if it's smaller than 53 bits. */
   promoteLongs?: boolean;
   /** when deserializing a Binary will return it as a node.js Buffer instance. */
   promoteBuffers?: boolean;
@@ -29,7 +31,7 @@ export interface DeserializeOptions {
   fieldsAsRaw?: Document;
   /** return BSON regular expressions as BSONRegExp instances. */
   bsonRegExp?: boolean;
-  /** allows the buffer to be larger than the parsed BSON object */
+  /** allows the buffer to be larger than the parsed BSON object. */
   allowObjectSmallerThanBufferSize?: boolean;
   /** Offset into buffer to begin reading document from */
   index?: number;
@@ -96,7 +98,7 @@ export function internalDeserialize(
     );
   }
 
-  // Start deserializtion
+  // Start deserialization
   return deserializeObject(buffer, index, options, isArray);
 }
 
@@ -117,9 +119,18 @@ function deserializeObject(
   const bsonRegExp = typeof options['bsonRegExp'] === 'boolean' ? options['bsonRegExp'] : false;
 
   // Controls the promotion of values vs wrapper classes
-  const promoteBuffers = options['promoteBuffers'] == null ? false : options['promoteBuffers'];
-  const promoteLongs = options['promoteLongs'] == null ? true : options['promoteLongs'];
-  const promoteValues = options['promoteValues'] == null ? true : options['promoteValues'];
+  const promoteBuffers = options.promoteBuffers ?? false;
+  const promoteLongs = options.promoteLongs ?? true;
+  const promoteValues = options.promoteValues ?? true;
+  const useBigInt64 = options.useBigInt64 ?? false;
+
+  if (useBigInt64 && !promoteValues) {
+    throw new BSONError('Must either request bigint or Long for int64 deserialization');
+  }
+
+  if (useBigInt64 && !promoteLongs) {
+    throw new BSONError('Must either request bigint or Long for int64 deserialization');
+  }
 
   // Ensures default validation option if none given
   const validation = options.validation == null ? { utf8: true } : options.validation;
@@ -323,6 +334,8 @@ function deserializeObject(
       value = null;
     } else if (elementType === constants.BSON_DATA_LONG) {
       // Unpack the low and high bits
+      const dataview = BSONDataView.fromUint8Array(buffer.subarray(index, index + 8));
+
       const lowBits =
         buffer[index++] |
         (buffer[index++] << 8) |
@@ -334,8 +347,10 @@ function deserializeObject(
         (buffer[index++] << 16) |
         (buffer[index++] << 24);
       const long = new Long(lowBits, highBits);
-      // Promote the long if possible
-      if (promoteLongs && promoteValues === true) {
+      if (useBigInt64) {
+        value = dataview.getBigInt64(0, true);
+      } else if (promoteLongs && promoteValues === true) {
+        // Promote the long if possible
         value =
           long.lessThanOrEqual(JS_INT_MAX_LONG) && long.greaterThanOrEqual(JS_INT_MIN_LONG)
             ? long.toNumber()

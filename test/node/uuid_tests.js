@@ -4,8 +4,7 @@ const { Buffer } = require('buffer');
 const { Binary, UUID } = require('../register-bson');
 const { inspect } = require('util');
 const { validate: uuidStringValidate, version: uuidStringVersion } = require('uuid');
-const BSON = require('../register-bson');
-const BSONTypeError = BSON.BSONTypeError;
+const { BSON, BSONError } = require('../register-bson');
 const BSON_DATA_BINARY = BSON.BSONType.binData;
 const { BSON_BINARY_SUBTYPE_UUID_NEW } = require('../../src/constants');
 
@@ -80,7 +79,7 @@ describe('UUID', () => {
    */
   it('should throw if passed invalid 36-char uuid hex string', () => {
     expect(() => new UUID(LOWERCASE_DASH_SEPARATED_UUID_STRING)).to.not.throw();
-    expect(() => new UUID('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')).to.throw(BSONTypeError);
+    expect(() => new UUID('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')).to.throw(BSONError);
     // Note: The version is missing here ^
   });
 
@@ -89,7 +88,7 @@ describe('UUID', () => {
    */
   it('should throw if passed unsupported argument', () => {
     expect(() => new UUID(LOWERCASE_DASH_SEPARATED_UUID_STRING)).to.not.throw();
-    expect(() => new UUID({})).to.throw(BSONTypeError);
+    expect(() => new UUID({})).to.throw(BSONError);
   });
 
   /**
@@ -142,13 +141,13 @@ describe('UUID', () => {
     const validRandomBuffer = Buffer.from('Hello World!');
     const binRand = new Binary(validRandomBuffer);
 
-    expect(() => binRand.toUUID()).to.throw();
+    expect(() => binRand.toUUID()).to.throw(BSONError);
 
     const validUuidV3String = '25f0d698-15b9-3a7a-96b1-a573061e29c9';
     const validUuidV3Buffer = Buffer.from(validUuidV3String.replace(/-/g, ''), 'hex');
     const binV3 = new Binary(validUuidV3Buffer, Binary.SUBTYPE_UUID_OLD);
 
-    expect(() => binV3.toUUID()).to.throw();
+    expect(() => binV3.toUUID()).to.throw(BSONError);
 
     const validUuidV4String = 'bd2d74fe-bad8-430c-aeac-b01d073a1eb6';
     const validUuidV4Buffer = Buffer.from(validUuidV4String.replace(/-/g, ''), 'hex');

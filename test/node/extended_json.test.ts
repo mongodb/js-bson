@@ -2,6 +2,7 @@ import * as BSON from '../register-bson';
 const EJSON = BSON.EJSON;
 import * as vm from 'node:vm';
 import { expect } from 'chai';
+import { BSONError } from '../../src';
 
 // BSON types
 const Binary = BSON.Binary;
@@ -305,8 +306,8 @@ describe('Extended JSON', function () {
     const badDoc = { bad: badBsonType };
     const badArray = [oid, badDoc];
     // const badMap = new Map([['a', badBsonType], ['b', badDoc], ['c', badArray]]);
-    expect(() => EJSON.serialize(badDoc)).to.throw();
-    expect(() => EJSON.serialize(badArray)).to.throw();
+    expect(() => EJSON.serialize(badDoc)).to.throw(BSONError);
+    expect(() => EJSON.serialize(badArray)).to.throw(BSONError);
     // expect(() => EJSON.serialize(badMap)).to.throw(); // uncomment when EJSON supports ES6 Map
   });
 

@@ -1410,14 +1410,14 @@ describe('BSON', function () {
 
     expect(() => {
       parser.deserialize(data);
-    }).to.throw();
+    }).to.throw(BSONError);
 
     data = Buffer.alloc(5);
     data[0] = 0xff;
     data[1] = 0xff;
     expect(() => {
       parser.deserialize(data);
-    }).to.throw();
+    }).to.throw(BSONError);
 
     // Finish up
     done();
@@ -1817,9 +1817,9 @@ describe('BSON', function () {
       ['c', badArray]
     ]);
 
-    expect(() => BSON.serialize(badDoc)).to.throw();
-    expect(() => BSON.serialize(badArray)).to.throw();
-    expect(() => BSON.serialize(badMap)).to.throw();
+    expect(() => BSON.serialize(badDoc)).to.throw(BSONError);
+    expect(() => BSON.serialize(badArray)).to.throw(BSONError);
+    expect(() => BSON.serialize(badMap)).to.throw(BSONError);
   });
 
   describe('Should support util.inspect for', function () {
