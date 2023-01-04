@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { BSON, Double } from '../register-bson';
 
 import { BSON_DATA_NUMBER, BSON_DATA_INT } from '../../src/constants';
+import { inspect } from 'node:util';
 
 describe('BSON Double Precision', function () {
   context('class Double', function () {
@@ -33,6 +34,30 @@ describe('BSON Double Precision', function () {
           const testNumber = Math.random() * Number.MAX_VALUE;
           const double = new Double(testNumber);
           expect(double.toString(radix)).to.equal(testNumber.toString(radix));
+        });
+      }
+    });
+
+    describe('.toExtendedJSON()', () => {
+      const tests = [
+        { input: new Double(0), output: { $numberDouble: '0.0' } },
+        { input: new Double(-0), output: { $numberDouble: '-0.0' } },
+        { input: new Double(3), output: { $numberDouble: '3.0' } },
+        { input: new Double(-3), output: { $numberDouble: '-3.0' } },
+        { input: new Double(3.4), output: { $numberDouble: '3.4' } },
+        { input: new Double(Number.EPSILON), output: { $numberDouble: '2.220446049250313e-16' } },
+        { input: new Double(12345e7), output: { $numberDouble: '123450000000.0' } },
+        { input: new Double(12345e-1), output: { $numberDouble: '1234.5' } },
+        { input: new Double(-12345e-1), output: { $numberDouble: '-1234.5' } },
+        { input: new Double(Infinity), output: { $numberDouble: 'Infinity' } },
+        { input: new Double(-Infinity), output: { $numberDouble: '-Infinity' } },
+        { input: new Double(NaN), output: { $numberDouble: 'NaN' } }
+      ];
+
+      for (const { input, output } of tests) {
+        const title = `returns ${inspect(output)} when Double is ${input}`;
+        it(title, () => {
+          expect(output).to.deep.equal(input.toExtendedJSON({ relaxed: false }));
         });
       }
     });
