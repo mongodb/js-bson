@@ -1,4 +1,4 @@
-import { BSONError, BSONTypeError } from './error';
+import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
 
 function alphabetize(str: string): string {
@@ -98,6 +98,6 @@ export class BSONRegExp {
         BSONRegExp.parseOptions(doc.$regularExpression.options)
       );
     }
-    throw new BSONTypeError(`Unexpected BSONRegExp EJSON object form: ${JSON.stringify(doc)}`);
+    throw new BSONError(`Unexpected BSONRegExp EJSON object form: ${JSON.stringify(doc)}`);
   }
 }

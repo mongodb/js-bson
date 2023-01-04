@@ -12,5 +12,8 @@
   "timeout": 10000,
   "failZero": true,
   "sort": true,
-  "color": true
+  "color": true,
+  "node-option": [
+    "experimental-vm-modules"
+  ]
 }

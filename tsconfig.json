@@ -12,10 +12,10 @@
       "es2020",
     ],
     "outDir": "lib",
-    // We don't make use of tslib helpers
     "importHelpers": false,
     "noEmitHelpers": false,
     "noEmitOnError": true,
+    "emitDeclarationOnly": true,
     // make use of import type where applicable
     "importsNotUsedAsValues": "error",
     // Generate separate source maps files with sourceContent included
