@@ -185,7 +185,14 @@ describe('BSON Corpus', function () {
               const nativeFromCB = bsonToNative(cB);
 
               if (cEJ.includes('1.2345678921232E+18')) {
-                // The round tripped value should be equal in interpreted value, not in exact character match
+                // The following is special test logic for a "Double type" bson corpus test that uses a different
+                // string format for the resulting double value
+                // The test does not have a loss in precision, just different exponential output
+                // We want to ensure that the stringified value when interpreted as a double is equal
+                // as opposed to the string being precisely the same
+                if (description !== 'Double type') {
+                  throw new Error('Unexpected test using 1.2345678921232E+18');
+                }
                 const eJSONParsedAsJSON = JSON.parse(cEJ);
                 const eJSONParsed = EJSON.parse(cEJ, { relaxed: false });
                 expect(eJSONParsedAsJSON).to.have.nested.property('d.$numberDouble');
