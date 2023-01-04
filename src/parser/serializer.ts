@@ -5,23 +5,14 @@ import * as constants from '../constants';
 import type { DBRefLike } from '../db_ref';
 import type { Decimal128 } from '../decimal128';
 import type { Double } from '../double';
-import { BSONError, BSONTypeError } from '../error';
-import { isBSONType } from '../extended_json';
+import { BSONError } from '../error';
 import type { Int32 } from '../int_32';
 import { Long } from '../long';
 import type { MinKey } from '../min_key';
 import type { ObjectId } from '../objectid';
 import type { BSONRegExp } from '../regexp';
 import { ByteUtils } from '../utils/byte_utils';
-import {
-  isAnyArrayBuffer,
-  isBigInt64Array,
-  isBigUInt64Array,
-  isDate,
-  isMap,
-  isRegExp,
-  isUint8Array
-} from './utils';
+import { isAnyArrayBuffer, isDate, isMap, isRegExp, isUint8Array } from './utils';
 
 /** @public */
 export interface SerializeOptions {
@@ -104,6 +95,20 @@ function serializeNumber(buffer: Uint8Array, key: string, value: number, index: 
   return index;
 }
 
+function serializeBigInt(buffer: Uint8Array, key: string, value: bigint, index: number) {
+  buffer[index++] = constants.BSON_DATA_LONG;
+  // Number of written bytes
+  const numberOfWrittenBytes = ByteUtils.encodeUTF8Into(buffer, key, index);
+  // Encode the name
+  index += numberOfWrittenBytes;
+  buffer[index++] = 0;
+  NUMBER_SPACE.setBigInt64(0, value, true);
+  // Write BigInt value
+  buffer.set(EIGHT_BYTE_VIEW_ON_NUMBER, index);
+  index += EIGHT_BYTE_VIEW_ON_NUMBER.byteLength;
+  return index;
+}
+
 function serializeNull(buffer: Uint8Array, key: string, _: unknown, index: number) {
   // Set long type
   buffer[index++] = constants.BSON_DATA_NULL;
@@ -166,7 +171,7 @@ function serializeRegExp(buffer: Uint8Array, key: string, value: RegExp, index: 
   index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   if (value.source && value.source.match(regexp) != null) {
-    throw Error('value ' + value.source + ' must not contain null bytes');
+    throw new BSONError('value ' + value.source + ' must not contain null bytes');
   }
   // Adjust the index
   index = index + ByteUtils.encodeUTF8Into(buffer, value.source, index);
@@ -195,7 +200,7 @@ function serializeBSONRegExp(buffer: Uint8Array, key: string, value: BSONRegExp,
   if (value.pattern.match(regexp) != null) {
     // The BSON spec doesn't allow keys with null bytes because keys are
     // null-terminated.
-    throw Error('pattern ' + value.pattern + ' must not contain null bytes');
+    throw new BSONError('pattern ' + value.pattern + ' must not contain null bytes');
   }
 
   // Adjust the index
@@ -242,7 +247,7 @@ function serializeObjectId(buffer: Uint8Array, key: string, value: ObjectId, ind
   if (isUint8Array(value.id)) {
     buffer.set(value.id.subarray(0, 12), index);
   } else {
-    throw new BSONTypeError('object [' + JSON.stringify(value) + '] is not a valid ObjectId');
+    throw new BSONError('object [' + JSON.stringify(value) + '] is not a valid ObjectId');
   }
 
   // Adjust index
@@ -676,7 +681,7 @@ export function serializeInto(
       } else if (typeof value === 'number') {
         index = serializeNumber(buffer, key, value, index);
       } else if (typeof value === 'bigint') {
-        throw new BSONTypeError('Unsupported type BigInt, please use Decimal128');
+        index = serializeBigInt(buffer, key, value, index);
       } else if (typeof value === 'boolean') {
         index = serializeBoolean(buffer, key, value, index);
       } else if (value instanceof Date || isDate(value)) {
@@ -703,11 +708,7 @@ export function serializeInto(
           ignoreUndefined,
           path
         );
-      } else if (
-        typeof value === 'object' &&
-        isBSONType(value) &&
-        value._bsontype === 'Decimal128'
-      ) {
+      } else if (value['_bsontype'] === 'Decimal128') {
         index = serializeDecimal128(buffer, key, value, index);
       } else if (value['_bsontype'] === 'Long' || value['_bsontype'] === 'Timestamp') {
         index = serializeLong(buffer, key, value, index);
@@ -740,7 +741,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index);
       } else if (typeof value['_bsontype'] !== 'undefined') {
-        throw new BSONTypeError(`Unrecognized or invalid _bsontype: ${String(value['_bsontype'])}`);
+        throw new BSONError(`Unrecognized or invalid _bsontype: ${String(value['_bsontype'])}`);
       }
     }
   } else if (object instanceof Map || isMap(object)) {
@@ -766,14 +767,14 @@ export function serializeInto(
         if (key.match(regexp) != null) {
           // The BSON spec doesn't allow keys with null bytes because keys are
           // null-terminated.
-          throw Error('key ' + key + ' must not contain null bytes');
+          throw new BSONError('key ' + key + ' must not contain null bytes');
         }
 
         if (checkKeys) {
           if ('$' === key[0]) {
-            throw Error('key ' + key + " must not start with '$'");
+            throw new BSONError('key ' + key + " must not start with '$'");
           } else if (~key.indexOf('.')) {
-            throw Error('key ' + key + " must not contain '.'");
+            throw new BSONError('key ' + key + " must not contain '.'");
           }
         }
       }
@@ -782,8 +783,8 @@ export function serializeInto(
         index = serializeString(buffer, key, value, index);
       } else if (type === 'number') {
         index = serializeNumber(buffer, key, value, index);
-      } else if (type === 'bigint' || isBigInt64Array(value) || isBigUInt64Array(value)) {
-        throw new BSONTypeError('Unsupported type BigInt, please use Decimal128');
+      } else if (type === 'bigint') {
+        index = serializeBigInt(buffer, key, value, index);
       } else if (type === 'boolean') {
         index = serializeBoolean(buffer, key, value, index);
       } else if (value instanceof Date || isDate(value)) {
@@ -841,7 +842,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index);
       } else if (typeof value['_bsontype'] !== 'undefined') {
-        throw new BSONTypeError(`Unrecognized or invalid _bsontype: ${String(value['_bsontype'])}`);
+        throw new BSONError(`Unrecognized or invalid _bsontype: ${String(value['_bsontype'])}`);
       }
     }
   } else {
@@ -849,7 +850,7 @@ export function serializeInto(
       // Provided a custom serialization method
       object = object.toBSON();
       if (object != null && typeof object !== 'object') {
-        throw new BSONTypeError('toBSON function did not return an object');
+        throw new BSONError('toBSON function did not return an object');
       }
     }
 
@@ -869,14 +870,14 @@ export function serializeInto(
         if (key.match(regexp) != null) {
           // The BSON spec doesn't allow keys with null bytes because keys are
           // null-terminated.
-          throw Error('key ' + key + ' must not contain null bytes');
+          throw new BSONError('key ' + key + ' must not contain null bytes');
         }
 
         if (checkKeys) {
           if ('$' === key[0]) {
-            throw Error('key ' + key + " must not start with '$'");
+            throw new BSONError('key ' + key + " must not start with '$'");
           } else if (~key.indexOf('.')) {
-            throw Error('key ' + key + " must not contain '.'");
+            throw new BSONError('key ' + key + " must not contain '.'");
           }
         }
       }
@@ -886,7 +887,7 @@ export function serializeInto(
       } else if (type === 'number') {
         index = serializeNumber(buffer, key, value, index);
       } else if (type === 'bigint') {
-        throw new BSONTypeError('Unsupported type BigInt, please use Decimal128');
+        index = serializeBigInt(buffer, key, value, index);
       } else if (type === 'boolean') {
         index = serializeBoolean(buffer, key, value, index);
       } else if (value instanceof Date || isDate(value)) {
@@ -946,7 +947,7 @@ export function serializeInto(
       } else if (value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index);
       } else if (typeof value['_bsontype'] !== 'undefined') {
-        throw new BSONTypeError(`Unrecognized or invalid _bsontype: ${String(value['_bsontype'])}`);
+        throw new BSONError(`Unrecognized or invalid _bsontype: ${String(value['_bsontype'])}`);
       }
     }
   }

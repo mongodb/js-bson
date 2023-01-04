@@ -1,10 +1,11 @@
 import { Binary } from './binary';
 import type { Document } from './bson';
 import { Code } from './code';
+import { BSON_INT32_MAX, BSON_INT32_MIN, BSON_INT64_MAX, BSON_INT64_MIN } from './constants';
 import { DBRef, isDBRefLike } from './db_ref';
 import { Decimal128 } from './decimal128';
 import { Double } from './double';
-import { BSONError, BSONTypeError } from './error';
+import { BSONError } from './error';
 import { Int32 } from './int_32';
 import { Long } from './long';
 import { MaxKey } from './max_key';
@@ -16,7 +17,12 @@ import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
 
 /** @public */
-export type EJSONOptions = EJSON.Options;
+export type EJSONOptions = {
+  /** Output using the Extended JSON v1 spec */
+  legacy?: boolean;
+  /** Enable Extended JSON's `relaxed` mode, which attempts to return native JS types where possible, rather than BSON types */
+  relaxed?: boolean;
+};
 
 /** @internal */
 type BSONType =
@@ -34,7 +40,7 @@ type BSONType =
   | BSONSymbol
   | Timestamp;
 
-export function isBSONType(value: unknown): value is BSONType {
+function isBSONType(value: unknown): value is BSONType {
   return (
     value != null &&
     typeof value === 'object' &&
@@ -42,14 +48,6 @@ export function isBSONType(value: unknown): value is BSONType {
     typeof value._bsontype === 'string'
   );
 }
-
-// INT32 boundaries
-const BSON_INT32_MAX = 0x7fffffff;
-const BSON_INT32_MIN = -0x80000000;
-// INT64 boundaries
-// const BSON_INT64_MAX = 0x7fffffffffffffff; // TODO(NODE-4377): This number cannot be precisely represented in JS
-const BSON_INT64_MAX = 0x8000000000000000;
-const BSON_INT64_MIN = -0x8000000000000000;
 
 // all the types where we don't need to do any special processing and can just pass the EJSON
 //straight to type.fromExtendedJSON
@@ -70,7 +68,7 @@ const keysToCodecs = {
 } as const;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function deserializeValue(value: any, options: EJSON.Options = {}) {
+function deserializeValue(value: any, options: EJSONOptions = {}) {
   if (typeof value === 'number') {
     if (options.relaxed || options.legacy) {
       return value;
@@ -149,7 +147,7 @@ function deserializeValue(value: any, options: EJSON.Options = {}) {
   return value;
 }
 
-type EJSONSerializeOptions = EJSON.Options & {
+type EJSONSerializeOptions = EJSONOptions & {
   seenObjects: { obj: unknown; propertyName: string }[];
 };
 
@@ -194,7 +192,7 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
         circularPart.length + (alreadySeen.length + current.length) / 2 - 1
       );
 
-      throw new BSONTypeError(
+      throw new BSONError(
         'Converting circular structure to EJSON:\n' +
           `    ${leadingPart}${alreadySeen}${circularPart}${current}\n` +
           `    ${leadingSpace}\\${dashes}/`
@@ -323,7 +321,7 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
       // Copy the object into this library's version of that type.
       const mapper = BSON_TYPE_MAPPINGS[doc._bsontype];
       if (!mapper) {
-        throw new BSONTypeError('Unrecognized or invalid _bsontype: ' + doc._bsontype);
+        throw new BSONError('Unrecognized or invalid _bsontype: ' + doc._bsontype);
       }
       outDoc = mapper(outDoc);
     }
@@ -347,116 +345,115 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
 }
 
 /**
- * EJSON parse / stringify API
- * @public
+ * Parse an Extended JSON string, constructing the JavaScript value or object described by that
+ * string.
+ *
+ * @example
+ * ```js
+ * const { EJSON } = require('bson');
+ * const text = '{ "int32": { "$numberInt": "10" } }';
+ *
+ * // prints { int32: { [String: '10'] _bsontype: 'Int32', value: '10' } }
+ * console.log(EJSON.parse(text, { relaxed: false }));
+ *
+ * // prints { int32: 10 }
+ * console.log(EJSON.parse(text));
+ * ```
  */
-// the namespace here is used to emulate `export * as EJSON from '...'`
-// which as of now (sept 2020) api-extractor does not support
-// eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace EJSON {
-  export interface Options {
-    /** Output using the Extended JSON v1 spec */
-    legacy?: boolean;
-    /** Enable Extended JSON's `relaxed` mode, which attempts to return native JS types where possible, rather than BSON types */
-    relaxed?: boolean;
-  }
-
-  /**
-   * Parse an Extended JSON string, constructing the JavaScript value or object described by that
-   * string.
-   *
-   * @example
-   * ```js
-   * const { EJSON } = require('bson');
-   * const text = '{ "int32": { "$numberInt": "10" } }';
-   *
-   * // prints { int32: { [String: '10'] _bsontype: 'Int32', value: '10' } }
-   * console.log(EJSON.parse(text, { relaxed: false }));
-   *
-   * // prints { int32: 10 }
-   * console.log(EJSON.parse(text));
-   * ```
-   */
-  export function parse(text: string, options?: EJSON.Options): SerializableTypes {
-    return JSON.parse(text, (key, value) => {
-      if (key.indexOf('\x00') !== -1) {
-        throw new BSONError(
-          `BSON Document field names cannot contain null bytes, found: ${JSON.stringify(key)}`
-        );
-      }
-      return deserializeValue(value, { relaxed: true, legacy: false, ...options });
-    });
-  }
-
-  export type JSONPrimitive = string | number | boolean | null;
-  export type SerializableTypes = Document | Array<JSONPrimitive | Document> | JSONPrimitive;
-
-  /**
-   * Converts a BSON document to an Extended JSON string, optionally replacing values if a replacer
-   * function is specified or optionally including only the specified properties if a replacer array
-   * is specified.
-   *
-   * @param value - The value to convert to extended JSON
-   * @param replacer - A function that alters the behavior of the stringification process, or an array of String and Number objects that serve as a whitelist for selecting/filtering the properties of the value object to be included in the JSON string. If this value is null or not provided, all properties of the object are included in the resulting JSON string
-   * @param space - A String or Number object that's used to insert white space into the output JSON string for readability purposes.
-   * @param options - Optional settings
-   *
-   * @example
-   * ```js
-   * const { EJSON } = require('bson');
-   * const Int32 = require('mongodb').Int32;
-   * const doc = { int32: new Int32(10) };
-   *
-   * // prints '{"int32":{"$numberInt":"10"}}'
-   * console.log(EJSON.stringify(doc, { relaxed: false }));
-   *
-   * // prints '{"int32":10}'
-   * console.log(EJSON.stringify(doc));
-   * ```
-   */
-  export function stringify(
-    value: SerializableTypes,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    replacer?: (number | string)[] | ((this: any, key: string, value: any) => any) | EJSON.Options,
-    space?: string | number,
-    options?: EJSON.Options
-  ): string {
-    if (space != null && typeof space === 'object') {
-      options = space;
-      space = 0;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function parse(text: string, options?: EJSONOptions): any {
+  return JSON.parse(text, (key, value) => {
+    if (key.indexOf('\x00') !== -1) {
+      throw new BSONError(
+        `BSON Document field names cannot contain null bytes, found: ${JSON.stringify(key)}`
+      );
     }
-    if (replacer != null && typeof replacer === 'object' && !Array.isArray(replacer)) {
-      options = replacer;
-      replacer = undefined;
-      space = 0;
-    }
-    const serializeOptions = Object.assign({ relaxed: true, legacy: false }, options, {
-      seenObjects: [{ propertyName: '(root)', obj: null }]
-    });
-
-    const doc = serializeValue(value, serializeOptions);
-    return JSON.stringify(doc, replacer as Parameters<JSON['stringify']>[1], space);
-  }
-
-  /**
-   * Serializes an object to an Extended JSON string, and reparse it as a JavaScript object.
-   *
-   * @param value - The object to serialize
-   * @param options - Optional settings passed to the `stringify` function
-   */
-  export function serialize(value: SerializableTypes, options?: EJSON.Options): Document {
-    options = options || {};
-    return JSON.parse(stringify(value, options));
-  }
-
-  /**
-   * Deserializes an Extended JSON object into a plain JavaScript object with native/BSON types
-   *
-   * @param ejson - The Extended JSON object to deserialize
-   * @param options - Optional settings passed to the parse method
-   */
-  export function deserialize(ejson: Document, options?: EJSON.Options): SerializableTypes {
-    options = options || {};
-    return parse(JSON.stringify(ejson), options);
-  }
+    return deserializeValue(value, { relaxed: true, legacy: false, ...options });
+  });
 }
+
+/**
+ * Converts a BSON document to an Extended JSON string, optionally replacing values if a replacer
+ * function is specified or optionally including only the specified properties if a replacer array
+ * is specified.
+ *
+ * @param value - The value to convert to extended JSON
+ * @param replacer - A function that alters the behavior of the stringification process, or an array of String and Number objects that serve as a whitelist for selecting/filtering the properties of the value object to be included in the JSON string. If this value is null or not provided, all properties of the object are included in the resulting JSON string
+ * @param space - A String or Number object that's used to insert white space into the output JSON string for readability purposes.
+ * @param options - Optional settings
+ *
+ * @example
+ * ```js
+ * const { EJSON } = require('bson');
+ * const Int32 = require('mongodb').Int32;
+ * const doc = { int32: new Int32(10) };
+ *
+ * // prints '{"int32":{"$numberInt":"10"}}'
+ * console.log(EJSON.stringify(doc, { relaxed: false }));
+ *
+ * // prints '{"int32":10}'
+ * console.log(EJSON.stringify(doc));
+ * ```
+ */
+function stringify(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  value: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  replacer?: (number | string)[] | ((this: any, key: string, value: any) => any) | EJSONOptions,
+  space?: string | number,
+  options?: EJSONOptions
+): string {
+  if (space != null && typeof space === 'object') {
+    options = space;
+    space = 0;
+  }
+  if (replacer != null && typeof replacer === 'object' && !Array.isArray(replacer)) {
+    options = replacer;
+    replacer = undefined;
+    space = 0;
+  }
+  const serializeOptions = Object.assign({ relaxed: true, legacy: false }, options, {
+    seenObjects: [{ propertyName: '(root)', obj: null }]
+  });
+
+  const doc = serializeValue(value, serializeOptions);
+  return JSON.stringify(doc, replacer as Parameters<JSON['stringify']>[1], space);
+}
+
+/**
+ * Serializes an object to an Extended JSON string, and reparse it as a JavaScript object.
+ *
+ * @param value - The object to serialize
+ * @param options - Optional settings passed to the `stringify` function
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function EJSONserialize(value: any, options?: EJSONOptions): Document {
+  options = options || {};
+  return JSON.parse(stringify(value, options));
+}
+
+/**
+ * Deserializes an Extended JSON object into a plain JavaScript object with native/BSON types
+ *
+ * @param ejson - The Extended JSON object to deserialize
+ * @param options - Optional settings passed to the parse method
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function EJSONdeserialize(ejson: Document, options?: EJSONOptions): any {
+  options = options || {};
+  return parse(JSON.stringify(ejson), options);
+}
+
+/** @public */
+const EJSON: {
+  parse: typeof parse;
+  stringify: typeof stringify;
+  serialize: typeof EJSONserialize;
+  deserialize: typeof EJSONdeserialize;
+} = Object.create(null);
+EJSON.parse = parse;
+EJSON.stringify = stringify;
+EJSON.serialize = EJSONserialize;
+EJSON.deserialize = EJSONdeserialize;
+Object.freeze(EJSON);
+export { EJSON };

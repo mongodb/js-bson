@@ -238,3 +238,53 @@ const result = BSON.serialize(Object.fromEntries([1, true, 'blue'].entries()))
 BSON.deserialize(result)
 // { '0': 1, '1': true, '2': 'blue' }
 ```
+
+### Exports and available bundles
+
+Most users should be unaffected by these changes, Node.js `require()` / Node.js `import` will fetch the corresponding BSON library as expected.
+And for folks using bundlers like, webpack or rollup a tree shakable es module bundle will be pulled in because of the settings in our package.json.
+
+Our package.json defines the following `"exports"` settings.
+```json
+{
+  "main": "./lib/bson.cjs",
+  "module": "./lib/bson.mjs",
+  "browser": "./lib/bson.mjs",
+  "exports": {
+    "browser": "./lib/bson.mjs",
+    "import": "./lib/bson.mjs",
+    "require": "./lib/bson.cjs"
+  }
+}
+```
+
+You can now find compiled bundles of the BSON library in 3 common formats in the `lib` directory.
+
+- CommonJS - `lib/bson.cjs`
+- ES Module - `lib/bson.mjs`
+- Immediate Invoked Function Expression (IIFE) - `lib/bson.bundle.js`
+  - Typically used when trying to import JS on the web CDN style, but the ES Module (`.mjs`) bundle is fully browser compatible and should be preferred if it works in your use case.
+
+### `BSONTypeError` removed and `BSONError` offers filtering functionality with `static isBSONError()`
+
+`BSONTypeError` has been removed because it was not a subclass of BSONError so would not return true for an `instanceof` check against `BSONError`. To learn more about our expectations of error handling see [this section of the mongodb driver's readme](https://github.com/mongodb/node-mongodb-native/tree/main#error-handling).
+
+
+A `BSONError` can be thrown from deep within a library that relies on BSON, having one error super class for the library helps with programmatic filtering of an error's origin.
+Since BSON can be used in environments where instances may originate from across realms, `BSONError` has a static `isBSONError()` method that helps with determining if an object is a `BSONError` instance (much like [Array.isArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray)).
+It is our recommendation to use `isBSONError()` checks on errors and to avoid relying on parsing `error.message` and `error.name` strings in your code. We guarantee `isBSONError()` checks will pass according to semver guidelines, but errors may be sub-classed or their messages may change at any time, even patch releases, as we see fit to increase the helpfulness of the errors.
+
+Hypothetical example: A collection in our Db has an issue with UTF-8 data:
+```ts
+let documentCount = 0;
+const cursor = collection.find({}, { utf8Validation: true });
+try {
+  for await (const doc of cursor) documentCount += 1;
+} catch (error) {
+  if (BSONError.isBSONError(error)) {
+    console.log(`Found the troublemaker UTF-8!: ${documentCount} ${error.message}`);
+    return documentCount;
+  }
+  throw error;
+}
+```

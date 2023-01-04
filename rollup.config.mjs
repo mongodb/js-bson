@@ -1,12 +1,8 @@
-import commonjs from '@rollup/plugin-commonjs';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
-import { babel } from '@rollup/plugin-babel';
 import typescript from '@rollup/plugin-typescript';
-import replace from '@rollup/plugin-replace';
-import { readFile } from 'fs/promises';
+import { RequireRewriter } from './etc/rollup/rollup-plugin-require-rewriter/require_rewriter.mjs';
 
-const pkg = JSON.parse(await readFile('./package.json', { encoding: 'utf8' }));
-
+/** @type {typescript.RollupTypescriptOptions} */
 const tsConfig = {
   allowJs: false,
   checkJs: false,
@@ -15,9 +11,9 @@ const tsConfig = {
   target: 'es2020',
   module: 'esnext',
   moduleResolution: 'node',
+  removeComments: true,
   lib: ['es2020'],
-  // We don't make use of tslib helpers
-  importHelpers: true,
+  importHelpers: false,
   noEmitHelpers: false,
   noEmitOnError: true,
   // make use of import type where applicable
@@ -34,67 +30,37 @@ const tsConfig = {
 };
 const input = 'src/index.ts';
 
-const plugins = (options = { browser: false }) => {
-  return [
-    typescript(tsConfig),
-    nodeResolve({ preferBuiltins: false }),
-    replace({
-      preventAssignment: true,
-      values: {
-        'process.browser': options.browser
-      }
-    }),
-    commonjs({ extensions: ['.js', '.ts'] }),
-    babel({
-      babelHelpers: 'external',
-      plugins: ['@babel/plugin-external-helpers'],
-      presets: [['@babel/env', { modules: false }]]
-    })
-  ];
-};
-
-const external = Object.keys(pkg.dependencies || {});
-
-const defaultName = 'BSON';
-
-export default [
+/** @type {import('rollup').RollupOptions} */
+const config = [
   {
     input,
-    output: {
-      file: 'dist/bson.esm.js',
-      format: 'es',
-      name: defaultName,
-      exports: 'named',
-      sourcemap: true
-    },
-    plugins: plugins(),
-    external
+    plugins: [typescript(tsConfig), nodeResolve({ resolveOnly: [] })],
+    output: [
+      {
+        file: 'lib/bson.cjs',
+        format: 'commonjs',
+        exports: 'named',
+        sourcemap: true
+      },
+      {
+        file: 'lib/bson.bundle.js',
+        format: 'iife',
+        name: 'BSON',
+        exports: 'named',
+        indent: false,
+        sourcemap: true
+      }
+    ]
   },
   {
     input,
-    output: [
-      {
-        file: 'dist/bson.browser.umd.js',
-        format: 'umd',
-        name: defaultName,
-        exports: 'named',
-        sourcemap: true
-      },
-      {
-        file: 'dist/bson.browser.esm.js',
-        format: 'es',
-        name: defaultName,
-        exports: 'named',
-        sourcemap: true
-      },
-      {
-        file: 'dist/bson.bundle.js',
-        format: 'iife',
-        name: defaultName,
-        exports: 'named',
-        sourcemap: true
-      }
-    ],
-    plugins: plugins({ browser: true })
+    plugins: [typescript(tsConfig), new RequireRewriter(), nodeResolve({ resolveOnly: [] })],
+    output: {
+      file: 'lib/bson.mjs',
+      format: 'esm',
+      sourcemap: true
+    }
   }
 ];
+
+export default config;
