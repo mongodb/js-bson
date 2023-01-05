@@ -219,7 +219,6 @@ describe('Extended JSON', function () {
     expect(parsed.a).to.equal(Number(dataView.getBigInt64(VALUE_OFFSET, true)));
   });
 
-
   it('serializes bigint values to numberLong in canonical mode', function () {
     const number = { a: 2n };
     const serialized = EJSON.stringify(number, { relaxed: false });
@@ -236,6 +235,36 @@ describe('Extended JSON', function () {
     const numbers = { a: -(2n ** 53n) - 1n, b: 2n ** 53n + 2n };
     const serialized = EJSON.stringify(numbers, { relaxed: true });
     expect(serialized).to.equal('{"a":-9007199254740992,"b":9007199254740994}');
+  });
+
+  it('produces bigint strings that pass loose equality checks with native bigint values that are are 64 bits wide or less', function () {
+    const number = { a: 12345n };
+    const serialized = EJSON.stringify(number, { relaxed: false });
+    const parsed = JSON.parse(serialized);
+    // eslint-disable-next-line eqeqeq
+    expect(parsed.a.$numberLong == 12345n).true;
+  });
+
+  it('produces bigint strings that are equal to the strings generated when using BigInt.toString when the bigint values used are 64 bits wide or less', function () {
+    const number = { a: 12345n };
+    const serialized = EJSON.stringify(number, { relaxed: false });
+    const parsed = JSON.parse(serialized);
+    expect(parsed.a.$numberLong).to.equal(12345n.toString());
+  });
+
+  it('produces bigint strings that fail loose equality checks with native bigint values that are more than 64 bits wide', function () {
+    const number = { a: 0x1234_5678_1234_5678_9999n };
+    const serialized = EJSON.stringify(number, { relaxed: false });
+    const parsed = JSON.parse(serialized);
+    // eslint-disable-next-line eqeqeq
+    expect(parsed.a.$numberLong == 0x1234_5678_1234_5678_9999n).false;
+  });
+
+  it('produces bigint strings that are not equal to the strings generated when using BigInt.toString when the bigint values used are more than 64 bits wide', function () {
+    const number = { a: 0x1234_5678_1234_5678_9999n };
+    const serialized = EJSON.stringify(number, { relaxed: false });
+    const parsed = JSON.parse(serialized);
+    expect(parsed.a.$numberLong).to.not.equal(0x1234_5678_1234_5678_9999n.toString());
   });
 
   it('should correctly parse null values', function () {
