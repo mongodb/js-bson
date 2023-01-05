@@ -1021,9 +1021,12 @@ export class Long {
     if (options && options.relaxed) return this.toNumber();
     return { $numberLong: this.toString() };
   }
-  static fromExtendedJSON(doc: { $numberLong: string }, options?: EJSONOptions): number | Long {
-    const result = Long.fromString(doc.$numberLong);
-    return options && options.relaxed ? result.toNumber() : result;
+  static fromExtendedJSON(doc: { $numberLong: string }, options?: EJSONOptions): number | Long | bigint {
+    const longResult = Long.fromString(doc.$numberLong);
+    if (options && options.relaxed) {
+      return options && options.useBigInt64 ? BigInt(doc.$numberLong) : longResult.toNumber();
+    }
+    return longResult;
   }
 
   /** @internal */

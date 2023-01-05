@@ -22,6 +22,8 @@ export type EJSONOptions = {
   legacy?: boolean;
   /** Enable Extended JSON's `relaxed` mode, which attempts to return native JS types where possible, rather than BSON types */
   relaxed?: boolean;
+  /** Enable native bigint support */
+  useBigInt64?: boolean;
 };
 
 /** @internal */
@@ -81,12 +83,22 @@ function deserializeValue(value: any, options: EJSONOptions = {}) {
       }
       if (value >= BSON_INT64_MIN && value <= BSON_INT64_MAX) {
         // TODO(NODE-4377): EJSON js number handling diverges from BSON
-        return Long.fromNumber(value);
+        if (!options.useBigInt64) {
+          return Long.fromNumber(value);
+        }
+        return BigInt(value);
       }
     }
 
     // If the number is a non-integer or out of integer range, should interpret as BSON Double.
     return new Double(value);
+  }
+
+  if (typeof value === 'bigint') {
+    if (options.useBigInt64) {
+      return value;
+    }
+    return Long.fromBigInt(value);
   }
 
   // from here on out we're looking for bson types, so bail if its not an object
@@ -194,8 +206,8 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
 
       throw new BSONError(
         'Converting circular structure to EJSON:\n' +
-          `    ${leadingPart}${alreadySeen}${circularPart}${current}\n` +
-          `    ${leadingSpace}\\${dashes}/`
+        `    ${leadingPart}${alreadySeen}${circularPart}${current}\n` +
+        `    ${leadingSpace}\\${dashes}/`
       );
     }
     options.seenObjects[options.seenObjects.length - 1].obj = value;
@@ -368,7 +380,7 @@ function parse(text: string, options?: EJSONOptions): any {
         `BSON Document field names cannot contain null bytes, found: ${JSON.stringify(key)}`
       );
     }
-    return deserializeValue(value, { relaxed: true, legacy: false, ...options });
+    return deserializeValue(value, { relaxed: true, legacy: false, useBigInt64: false, ...options });
   });
 }
 
