@@ -339,7 +339,9 @@ import { BSON, EJSON } from 'bson';
 
 This will resolve the `node_modules/bson/lib/bson.cjs` bundle per the setting we have in the `"exports"` section of our [package.json](./package.json).
 
-> *Reasoning:* React Native must use the commonjs syntax version of BSON to avoid the unsupported syntax of a top-level await that is used in the es module build.
+### Technical Note about React Native module import
+
+The `"exports"` definition in our `package.json` will result in BSON's CommonJS bundle being imported in a React Native project instead of the ES module bundle.  Importing the CommonJS bundle is necessary because BSON's ES module bundle of BSON uses top-level await, which is not supported syntax in [React Native's runtime hermes](https://hermesengine.dev/).
 
 ## FAQ
 
