@@ -309,6 +309,40 @@ try {
 }
 ```
 
+## React Native
+
+BSON requires that `TextEncoder`, `TextDecoder`, `atob`, `btoa`, and `crypto.getRandomValues` are available globally.  These are present in most Javascript runtimes but require polyfilling in React Native.  Polyfills for the missing functionality can be installed with the following command:
+```sh
+npm install --save react-native-get-random-values text-encoding-polyfill base-64
+```
+
+The following snippet should be placed at the top of the entrypoint (by default this is the root `index.js` file) for React Native projects using the BSON library.  These lines must be placed for any code that imports `BSON`.
+
+```typescript
+// Required Polyfills For ReactNative
+import {encode, decode} from 'base-64';
+if (global.btoa == null) {
+  global.btoa = encode;
+}
+if (global.atob == null) {
+  global.atob = decode;
+}
+import 'text-encoding-polyfill';
+import 'react-native-get-random-values';
+```
+
+Finally, import the `BSON` library like so:
+
+```typescript
+import { BSON, EJSON } from 'bson';
+```
+
+This will cause React Native to import the `node_modules/bson/lib/bson.cjs` bundle (see the `"react-native"` setting we have in the `"exports"` section of our [package.json](./package.json).)
+
+### Technical Note about React Native module import
+
+The `"exports"` definition in our `package.json` will result in BSON's CommonJS bundle being imported in a React Native project instead of the ES module bundle.  Importing the CommonJS bundle is necessary because BSON's ES module bundle of BSON uses top-level await, which is not supported syntax in [React Native's runtime hermes](https://hermesengine.dev/).
+
 ## FAQ
 
 #### Why does `undefined` get converted to `null`?
