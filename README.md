@@ -337,7 +337,7 @@ Finally, import the `BSON` library like so:
 import { BSON, EJSON } from 'bson';
 ```
 
-This will resolve the `node_modules/bson/lib/bson.cjs` bundle per the setting we have in the `"exports"` section of our [package.json](./package.json).
+This will cause React Native to import the `node_modules/bson/lib/bson.cjs` bundle (see the `"react-native"` setting we have in the `"exports"` section of our [package.json](./package.json).)
 
 ### Technical Note about React Native module import
 
