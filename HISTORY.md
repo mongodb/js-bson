@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.7.1](https://github.com/mongodb/js-bson/compare/v4.7.0...v4.7.1) (2023-01-05)
+
+
+### Bug Fixes
+
+* **NODE-4905:** double precision accuracy in canonical EJSON ([#549](https://github.com/mongodb/js-bson/issues/549)) ([d86bd52](https://github.com/mongodb/js-bson/commit/d86bd52661e7f5d26479f6b63acac7950f505d69))
+
 ## [4.7.0](https://github.com/mongodb/js-bson/compare/v4.6.5...v4.7.0) (2022-08-18)
 
 
