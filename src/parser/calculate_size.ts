@@ -1,5 +1,6 @@
 import { Binary } from '../binary';
 import type { Document } from '../bson';
+import { BSONError } from '../error';
 import * as constants from '../constants';
 import { ByteUtils } from '../utils/byte_utils';
 import { isAnyArrayBuffer, isDate, isRegExp } from './utils';
@@ -77,7 +78,17 @@ function calculateElement(
     case 'boolean':
       return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (1 + 1);
     case 'object':
-      if (value == null || value['_bsontype'] === 'MinKey' || value['_bsontype'] === 'MaxKey') {
+      if (
+        value != null &&
+        typeof value._bsontype === 'string' &&
+        value[Symbol.for('@@mdb.bson.version')] !== constants.BSON_MAJOR_VERSION
+      ) {
+        throw new BSONError('Unsupported BSON version, bson types must be from bson 5.0 or later');
+      } else if (
+        value == null ||
+        value['_bsontype'] === 'MinKey' ||
+        value['_bsontype'] === 'MaxKey'
+      ) {
         return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + 1;
       } else if (value['_bsontype'] === 'ObjectId') {
         return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (12 + 1);

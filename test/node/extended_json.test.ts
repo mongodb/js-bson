@@ -550,4 +550,12 @@ describe('Extended JSON', function () {
     const result = JSON.parse(string);
     expect(result).to.deep.equal({ a: 1 });
   });
+
+  it(`throws if Symbol.for('@@mdb.bson.version') is the wrong version in EJSON.stringify`, () => {
+    expect(() =>
+      EJSON.stringify({
+        a: { _bsontype: 'Int32', value: 2, [Symbol.for('@@mdb.bson.version')]: 1 }
+      })
+    ).to.throw(BSONError, /Unsupported BSON version/i);
+  });
 });

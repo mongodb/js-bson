@@ -1,7 +1,13 @@
 import { Binary } from './binary';
 import type { Document } from './bson';
 import { Code } from './code';
-import { BSON_INT32_MAX, BSON_INT32_MIN, BSON_INT64_MAX, BSON_INT64_MIN } from './constants';
+import {
+  BSON_INT32_MAX,
+  BSON_INT32_MIN,
+  BSON_INT64_MAX,
+  BSON_INT64_MIN,
+  BSON_MAJOR_VERSION
+} from './constants';
 import { DBRef, isDBRefLike } from './db_ref';
 import { Decimal128 } from './decimal128';
 import { Double } from './double';
@@ -310,7 +316,7 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
     doc != null &&
     typeof doc === 'object' &&
     typeof doc._bsontype === 'string' &&
-    doc[Symbol.for('@@mdb.bson.version')] == null
+    doc[Symbol.for('@@mdb.bson.version')] !== BSON_MAJOR_VERSION
   ) {
     throw new BSONError('Unsupported BSON version, bson types must be from bson 5.0 or later');
   } else if (isBSONType(doc)) {

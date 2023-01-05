@@ -706,7 +706,10 @@ export function serializeInto(
           ignoreUndefined,
           path
         );
-      } else if (typeof value === 'object' && value[Symbol.for('@@mdb.bson.version')] == null) {
+      } else if (
+        typeof value === 'object' &&
+        value[Symbol.for('@@mdb.bson.version')] !== constants.BSON_MAJOR_VERSION
+      ) {
         throw new BSONError('Unsupported BSON version, bson types must be from bson 5.0 or later');
       } else if (value._bsontype === 'ObjectId') {
         index = serializeObjectId(buffer, key, value, index);
@@ -809,7 +812,10 @@ export function serializeInto(
           ignoreUndefined,
           path
         );
-      } else if (typeof value === 'object' && value[Symbol.for('@@mdb.bson.version')] == null) {
+      } else if (
+        typeof value === 'object' &&
+        value[Symbol.for('@@mdb.bson.version')] !== constants.BSON_MAJOR_VERSION
+      ) {
         throw new BSONError('Unsupported BSON version, bson types must be from bson 5.0 or later');
       } else if (value._bsontype === 'ObjectId') {
         index = serializeObjectId(buffer, key, value, index);
@@ -916,7 +922,10 @@ export function serializeInto(
           ignoreUndefined,
           path
         );
-      } else if (typeof value === 'object' && value[Symbol.for('@@mdb.bson.version')] == null) {
+      } else if (
+        typeof value === 'object' &&
+        value[Symbol.for('@@mdb.bson.version')] !== constants.BSON_MAJOR_VERSION
+      ) {
         throw new BSONError('Unsupported BSON version, bson types must be from bson 5.0 or later');
       } else if (value._bsontype === 'ObjectId') {
         index = serializeObjectId(buffer, key, value, index);

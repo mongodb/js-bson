@@ -1,6 +1,7 @@
 import * as BSON from '../../register-bson';
 import { bufferFromHexArray } from '../tools/utils';
 import { expect } from 'chai';
+import { BSONError } from '../../register-bson';
 
 describe('serialize()', () => {
   it('should only enumerate own property keys from input objects', () => {
@@ -89,6 +90,14 @@ describe('serialize()', () => {
       expect(() => BSON.serialize(new ArrayBuffer(2))).to.throw(/cannot be BSON documents/);
       expect(() => BSON.serialize(Buffer.alloc(2))).to.throw(/cannot be BSON documents/);
       expect(() => BSON.serialize(new Uint8Array(3))).to.throw(/cannot be BSON documents/);
+    });
+
+    it(`throws if Symbol.for('@@mdb.bson.version') is the wrong version`, () => {
+      expect(() =>
+        BSON.serialize({
+          a: { _bsontype: 'Int32', value: 2, [Symbol.for('@@mdb.bson.version')]: 1 }
+        })
+      ).to.throw(BSONError, /Unsupported BSON version/i);
     });
   });
 });
