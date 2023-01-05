@@ -331,7 +331,7 @@ import 'text-encoding-polyfill';
 import 'react-native-get-random-values';
 ```
 
-Import the BSON library like so:
+Finally, import the `BSON` library like so:
 
 ```typescript
 import { BSON, EJSON } from 'bson';
