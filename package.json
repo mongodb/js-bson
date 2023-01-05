@@ -75,11 +75,11 @@
   },
   "main": "./lib/bson.cjs",
   "module": "./lib/bson.mjs",
-  "browser": "./lib/bson.mjs",
   "exports": {
-    "browser": "./lib/bson.mjs",
     "import": "./lib/bson.mjs",
-    "require": "./lib/bson.cjs"
+    "require": "./lib/bson.cjs",
+    "react-native": "./lib/bson.cjs",
+    "browser": "./lib/bson.mjs"
   },
   "engines": {
     "node": ">=14.20.1"
