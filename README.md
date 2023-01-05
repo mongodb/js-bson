@@ -316,7 +316,7 @@ BSON requires that `TextEncoder`, `TextDecoder`, `atob`, `btoa`, and `crypto.get
 npm install --save react-native-get-random-values text-encoding-polyfill base-64
 ```
 
-The following snippet should be placed at the top of your index.js file for React Native projects using the BSON library.
+The following snippet should be placed at the top of the entrypoint (by default this is the root `index.js` file) for React Native projects using the BSON library.  These lines must be placed for any code that imports `BSON`.
 
 ```typescript
 // Required Polyfills For ReactNative
