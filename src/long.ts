@@ -1022,7 +1022,10 @@ export class Long {
     return { $numberLong: this.toString() };
   }
   // NOTE: We handle the defaults for the EJSON options very poorly here.
-  static fromExtendedJSON(doc: { $numberLong: string }, options?: EJSONOptions): number | Long | bigint {
+  static fromExtendedJSON(
+    doc: { $numberLong: string },
+    options?: EJSONOptions
+  ): number | Long | bigint {
     const longResult = Long.fromString(doc.$numberLong);
     const defaults = { useBigInt64: false, relaxed: true, legacy: false };
     options = { ...defaults, ...options };

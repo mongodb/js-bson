@@ -206,8 +206,8 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
 
       throw new BSONError(
         'Converting circular structure to EJSON:\n' +
-        `    ${leadingPart}${alreadySeen}${circularPart}${current}\n` +
-        `    ${leadingSpace}\\${dashes}/`
+          `    ${leadingPart}${alreadySeen}${circularPart}${current}\n` +
+          `    ${leadingSpace}\\${dashes}/`
       );
     }
     options.seenObjects[options.seenObjects.length - 1].obj = value;
@@ -380,7 +380,12 @@ function parse(text: string, options?: EJSONOptions): any {
         `BSON Document field names cannot contain null bytes, found: ${JSON.stringify(key)}`
       );
     }
-    return deserializeValue(value, { relaxed: true, legacy: false, useBigInt64: false, ...options });
+    return deserializeValue(value, {
+      relaxed: true,
+      legacy: false,
+      useBigInt64: false,
+      ...options
+    });
   });
 }
 
