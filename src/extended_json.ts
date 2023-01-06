@@ -97,13 +97,6 @@ function deserializeValue(value: any, options: EJSONOptions = {}) {
     return new Double(value);
   }
 
-  if (typeof value === 'bigint') {
-    if (options.useBigInt64) {
-      return value;
-    }
-    return Long.fromBigInt(value);
-  }
-
   // from here on out we're looking for bson types, so bail if its not an object
   if (value == null || typeof value !== 'object') return value;
 
@@ -209,8 +202,8 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
 
       throw new BSONError(
         'Converting circular structure to EJSON:\n' +
-        `    ${leadingPart}${alreadySeen}${circularPart}${current}\n` +
-        `    ${leadingSpace}\\${dashes}/`
+          `    ${leadingPart}${alreadySeen}${circularPart}${current}\n` +
+          `    ${leadingSpace}\\${dashes}/`
       );
     }
     options.seenObjects[options.seenObjects.length - 1].obj = value;
