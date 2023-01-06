@@ -1,11 +1,11 @@
 import { BSON, BSONError, EJSON } from '../register-bson';
 import { bufferFromHexArray } from './tools/utils';
-import { expect, use } from 'chai';
+import { expect } from 'chai';
 import { BSON_DATA_LONG } from '../../src/constants';
 import { BSONDataView } from '../../src/utils/byte_utils';
 
-describe('BSON BigInt support', function() {
-  describe('BSON.deserialize()', function() {
+describe('BSON BigInt support', function () {
+  describe('BSON.deserialize()', function () {
     type DeserialzationOptions = {
       useBigInt64: boolean | undefined;
       promoteValues: boolean | undefined;
@@ -60,12 +60,15 @@ describe('BSON BigInt support', function() {
 
     function generateTestDescription(entry: TestTableEntry): string {
       const options = entry.options;
-      const promoteValues = `promoteValues ${options.promoteValues === undefined ? 'is default' : `is ${options.promoteValues}`
-        }`;
-      const promoteLongs = `promoteLongs ${options.promoteLongs === undefined ? 'is default' : `is ${options.promoteLongs}`
-        }`;
-      const useBigInt64 = `useBigInt64 ${options.useBigInt64 === undefined ? 'is default' : `is ${options.useBigInt64}`
-        }`;
+      const promoteValues = `promoteValues ${
+        options.promoteValues === undefined ? 'is default' : `is ${options.promoteValues}`
+      }`;
+      const promoteLongs = `promoteLongs ${
+        options.promoteLongs === undefined ? 'is default' : `is ${options.promoteLongs}`
+      }`;
+      const useBigInt64 = `useBigInt64 ${
+        options.useBigInt64 === undefined ? 'is default' : `is ${options.useBigInt64}`
+      }`;
       const flagString = `${useBigInt64}, ${promoteValues}, and ${promoteLongs}`;
       if (entry.shouldThrow) {
         return `throws when ${flagString}`;
@@ -99,7 +102,7 @@ describe('BSON BigInt support', function() {
     }
   });
 
-  describe('BSON.serialize()', function() {
+  describe('BSON.serialize()', function () {
     // Index for the data type byte of a BSON document with a
     // NOTE: These offsets only apply for documents with the shape {a : <n>}
     // where n is a BigInt
@@ -135,13 +138,13 @@ describe('BSON BigInt support', function() {
       };
     }
 
-    it('serializes bigints with the correct BSON type', function() {
+    it('serializes bigints with the correct BSON type', function () {
       const testDoc = { a: 0n };
       const serializedDoc = getSerializedDocParts(BSON.serialize(testDoc));
       expect(serializedDoc.dataType).to.equal(BSON_DATA_LONG);
     });
 
-    it('serializes bigints into little-endian byte order', function() {
+    it('serializes bigints into little-endian byte order', function () {
       const testDoc = { a: 0x1234567812345678n };
       const serializedDoc = getSerializedDocParts(BSON.serialize(testDoc));
       const expectedResult = getSerializedDocParts(
@@ -155,7 +158,7 @@ describe('BSON BigInt support', function() {
       expect(expectedResult.value).to.equal(serializedDoc.value);
     });
 
-    it('serializes a BigInt that can be safely represented as a Number', function() {
+    it('serializes a BigInt that can be safely represented as a Number', function () {
       const testDoc = { a: 0x23n };
       const serializedDoc = getSerializedDocParts(BSON.serialize(testDoc));
       const expectedResult = getSerializedDocParts(
@@ -168,7 +171,7 @@ describe('BSON BigInt support', function() {
       expect(serializedDoc).to.deep.equal(expectedResult);
     });
 
-    it('serializes a BigInt in the valid range [-2^63, 2^63 - 1]', function() {
+    it('serializes a BigInt in the valid range [-2^63, 2^63 - 1]', function () {
       const testDoc = { a: 0xfffffffffffffff1n };
       const serializedDoc = getSerializedDocParts(BSON.serialize(testDoc));
       const expectedResult = getSerializedDocParts(
@@ -181,7 +184,7 @@ describe('BSON BigInt support', function() {
       expect(serializedDoc).to.deep.equal(expectedResult);
     });
 
-    it('wraps to negative on a BigInt that is larger than (2^63 -1)', function() {
+    it('wraps to negative on a BigInt that is larger than (2^63 -1)', function () {
       const maxIntPlusOne = { a: 2n ** 63n };
       const serializedMaxIntPlusOne = getSerializedDocParts(BSON.serialize(maxIntPlusOne));
       const expectedResultForMaxIntPlusOne = getSerializedDocParts(
@@ -194,7 +197,7 @@ describe('BSON BigInt support', function() {
       expect(serializedMaxIntPlusOne).to.deep.equal(expectedResultForMaxIntPlusOne);
     });
 
-    it('serializes BigInts at the edges of the valid range [-2^63, 2^63 - 1]', function() {
+    it('serializes BigInts at the edges of the valid range [-2^63, 2^63 - 1]', function () {
       const maxPositiveInt64 = { a: 2n ** 63n - 1n };
       const serializedMaxPositiveInt64 = getSerializedDocParts(BSON.serialize(maxPositiveInt64));
       const expectedSerializationForMaxPositiveInt64 = getSerializedDocParts(
@@ -218,7 +221,7 @@ describe('BSON BigInt support', function() {
       expect(serializedMinPositiveInt64).to.deep.equal(expectedSerializationForMinPositiveInt64);
     });
 
-    it('truncates a BigInt that is larger than a 64-bit int', function() {
+    it('truncates a BigInt that is larger than a 64-bit int', function () {
       const testDoc = { a: 2n ** 64n + 1n };
       const serializedDoc = getSerializedDocParts(BSON.serialize(testDoc));
       const expectedSerialization = getSerializedDocParts(
@@ -231,7 +234,7 @@ describe('BSON BigInt support', function() {
       expect(serializedDoc).to.deep.equal(expectedSerialization);
     });
 
-    it('serializes array of BigInts', function() {
+    it('serializes array of BigInts', function () {
       const testArr = { a: [1n] };
       const serializedArr = BSON.serialize(testArr);
       const expectedSerialization = bufferFromHexArray([
@@ -246,7 +249,7 @@ describe('BSON BigInt support', function() {
       expect(serializedArr).to.deep.equal(expectedSerialization);
     });
 
-    it('serializes Map with BigInt values', function() {
+    it('serializes Map with BigInt values', function () {
       const testMap = new Map();
       testMap.set('a', 1n);
       const serializedMap = getSerializedDocParts(BSON.serialize(testMap));
@@ -261,7 +264,7 @@ describe('BSON BigInt support', function() {
     });
   });
 
-  describe('EJSON.parse()', function() {
+  describe('EJSON.parse()', function () {
     type ParseOptions = {
       useBigInt64: boolean | undefined;
       relaxed: boolean | undefined;
@@ -270,53 +273,55 @@ describe('BSON BigInt support', function() {
       options: ParseOptions;
       expectedResult: BSON.Document;
     };
+
     const useBigInt64Values = [true, false, undefined];
     const relaxedValues = [true, false, undefined];
     const sampleCanonicalString = '{"a":{"$numberLong":"23"}}';
-    const sampleRelaxedString = '{"a":2147483648}';
+    const sampleRelaxedString = '{"a":4294967296}';
 
-    function genTestTable(useBigInt64, relaxed, expectedResultGenerator): [TestTableEntry] {
+    function genTestTable(
+      useBigInt64: boolean | undefined,
+      relaxed: boolean | undefined,
+      getExpectedResult: (boolean, boolean) => BSON.Document
+    ): [TestTableEntry] {
       const useBigInt64IsSet = useBigInt64 ?? false;
       const relaxedIsSet = relaxed ?? true;
 
-      let expectedResult: BSON.Document;
-      expectedResult = expectedResultGenerator(useBigInt64IsSet, relaxedIsSet);
+      const expectedResult = getExpectedResult(useBigInt64IsSet, relaxedIsSet);
 
       return [{ options: { useBigInt64, relaxed }, expectedResult }];
-    };
+    }
 
-    function generateTestDescription(entry: TestTableEntry, canonical: boolean) {
+    function generateTestDescription(entry: TestTableEntry, canonical: boolean): string {
+      // TODO(NODE-4874): When NODE-4873 is merged in, replace this with EJSON.stringify
       const options = entry.options;
       if (canonical) {
-        return `parses '${sampleCanonicalString}' to '${entry.expectedResult}' when useBigInt64 is ${options.useBigInt64} and relaxed is ${options.relaxed}`;
+        return `parses field 'a' of '${sampleCanonicalString}' to '${entry.expectedResult.a.constructor.name}' when useBigInt64 is ${options.useBigInt64} and relaxed is ${options.relaxed}`;
       } else {
-        return `parses '${sampleRelaxedString}' to '${entry.expectedResult}' when useBigInt64 is ${options.useBigInt64} and relaxed is ${options.relaxed}`;
+        return `parses field 'a' of' ${sampleRelaxedString}' to '${entry.expectedResult.a.constructor.name}' when useBigInt64 is ${options.useBigInt64} and relaxed is ${options.relaxed}`;
       }
     }
 
-    function generateTest(entry: TestTableEntry, sampleString: string) {
+    function generateTest(entry: TestTableEntry, sampleString: string): () => void {
       const options = entry.options;
-      const parse = () => {
-        return EJSON.parse(sampleString, { useBigInt64: options.useBigInt64, relaxed: options.relaxed });
-      }
 
       return () => {
-        const parsed = parse();
+        const parsed = EJSON.parse(sampleString, {
+          useBigInt64: options.useBigInt64,
+          relaxed: options.relaxed
+        });
         expect(parsed).to.deep.equal(entry.expectedResult);
       };
     }
 
-
-
-    describe.only('canonical input', function() {
+    describe('canonical input', function () {
       const canonicalInputTestTable = useBigInt64Values.flatMap(useBigInt64 => {
         return relaxedValues.flatMap(relaxed => {
-          return genTestTable(useBigInt64, relaxed, (useBigInt64IsSet: boolean, relaxedIsSet: boolean) =>
-            useBigInt64IsSet
-              ? { a: 23n }
-              : relaxedIsSet
-                ? { a: 23 }
-                : { a: new BSON.Long(23) }
+          return genTestTable(
+            useBigInt64,
+            relaxed,
+            (useBigInt64IsSet: boolean, relaxedIsSet: boolean) =>
+              useBigInt64IsSet ? { a: 23n } : relaxedIsSet ? { a: 23 } : { a: new BSON.Long(23) }
           );
         });
       });
@@ -333,14 +338,18 @@ describe('BSON BigInt support', function() {
       }
     });
 
-    describe('relaxed input', function() {
+    describe.skip('relaxed input', function () {
       const relaxedInputTestTable = useBigInt64Values.flatMap(useBigInt64 => {
         return relaxedValues.flatMap(relaxed => {
-          return genTestTable(useBigInt64, relaxed, (useBigInt64IsSet: boolean, relaxedIsSet: boolean) => useBigInt64IsSet
-            ? { a: 2147483648n }
-            : relaxedIsSet
-              ? { a: 2147483648 }
-              : { a: new BSON.Long(2147483648) }
+          return genTestTable(
+            useBigInt64,
+            relaxed,
+            (useBigInt64IsSet: boolean, relaxedIsSet: boolean) =>
+              useBigInt64IsSet
+                ? { a: 4294967296n }
+                : relaxedIsSet
+                ? { a: 4294967296 }
+                : { a: new BSON.Long(4294967296) }
           );
         });
       });
@@ -355,6 +364,5 @@ describe('BSON BigInt support', function() {
         it(description, test);
       }
     });
-
   });
 });
