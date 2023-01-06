@@ -40,6 +40,7 @@ describe('BSON Double Precision', function () {
       const tests = [
         { input: 0, output: { $numberDouble: '0' } },
         { input: -0, output: { $numberDouble: '-0.0' } },
+        { input: '-0.0', output: { $numberDouble: '-0.0' } },
         { input: 3, output: { $numberDouble: '3' } },
         { input: -3, output: { $numberDouble: '-3' } },
         { input: 3.4, output: { $numberDouble: '3.4' } },
