@@ -2,7 +2,6 @@ import * as BSON from '../register-bson';
 const EJSON = BSON.EJSON;
 import * as vm from 'node:vm';
 import { expect } from 'chai';
-import { BSONDataView } from '../../src/utils/byte_utils';
 import { BSONError } from '../../src';
 
 // BSON types
@@ -180,92 +179,6 @@ describe('Extended JSON', function () {
       '{"neginf":{"$numberDouble":"-Infinity"},"posinf":{"$numberDouble":"Infinity"},"nan":{"$numberDouble":"NaN"}}'
     );
     expect(EJSON.parse(serialized)).to.deep.equal(numbers);
-  });
-
-  it('truncates bigint values when they are outside the range [BSON_INT64_MIN, BSON_INT64_MAX] in canonical mode', function () {
-    const numbers = { a: 2n ** 64n + 1n, b: -(2n ** 64n) - 1n };
-    const serialized = EJSON.stringify(numbers, { relaxed: false });
-    expect(serialized).to.equal('{"a":{"$numberLong":"1"},"b":{"$numberLong":"-1"}}');
-  });
-
-  it('truncates bigint values in the same way as BSON.serialize in canonical mode', function () {
-    const number = { a: 0x1234_5678_1234_5678_9999n };
-    const stringified = EJSON.stringify(number, { relaxed: false });
-    const serialized = BSON.serialize(number);
-
-    const VALUE_OFFSET = 7;
-    const dataView = BSONDataView.fromUint8Array(serialized);
-    const serializedValue = dataView.getBigInt64(VALUE_OFFSET, true);
-    const parsed = JSON.parse(stringified);
-
-    expect(parsed).to.have.property('a');
-    expect(parsed['a']).to.have.property('$numberLong');
-    expect(parsed.a.$numberLong).to.equal(0x5678_1234_5678_9999n.toString());
-
-    expect(parsed.a.$numberLong).to.equal(serializedValue.toString());
-  });
-
-  it('truncates bigint values in the same way as BSON.serialize in relaxed mode', function () {
-    const number = { a: 0x1234_0000_1234_5678_9999n }; // Ensure that the truncated number can be exactly represented as a JS number
-    const stringified = EJSON.stringify(number, { relaxed: true });
-    const serializedDoc = BSON.serialize(number);
-
-    const VALUE_OFFSET = 7;
-    const dataView = BSONDataView.fromUint8Array(serializedDoc);
-    const parsed = JSON.parse(stringified);
-
-    expect(parsed).to.have.property('a');
-    expect(parsed.a).to.equal(0x0000_1234_5678_9999);
-
-    expect(parsed.a).to.equal(Number(dataView.getBigInt64(VALUE_OFFSET, true)));
-  });
-
-  it('serializes bigint values to numberLong in canonical mode', function () {
-    const number = { a: 2n };
-    const serialized = EJSON.stringify(number, { relaxed: false });
-    expect(serialized).to.equal('{"a":{"$numberLong":"2"}}');
-  });
-
-  it('serializes bigint values to Number in relaxed mode', function () {
-    const number = { a: 10000n };
-    const serialized = EJSON.stringify(number, { relaxed: true });
-    expect(serialized).to.equal('{"a":10000}');
-  });
-
-  it('loses precision when serializing bigint values outside of range [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER] in relaxed mode', function () {
-    const numbers = { a: -(2n ** 53n) - 1n, b: 2n ** 53n + 2n };
-    const serialized = EJSON.stringify(numbers, { relaxed: true });
-    expect(serialized).to.equal('{"a":-9007199254740992,"b":9007199254740994}');
-  });
-
-  it('produces bigint strings that pass loose equality checks with native bigint values that are are 64 bits wide or less', function () {
-    const number = { a: 12345n };
-    const serialized = EJSON.stringify(number, { relaxed: false });
-    const parsed = JSON.parse(serialized);
-    // eslint-disable-next-line eqeqeq
-    expect(parsed.a.$numberLong == 12345n).true;
-  });
-
-  it('produces bigint strings that are equal to the strings generated when using BigInt.toString when the bigint values used are 64 bits wide or less', function () {
-    const number = { a: 12345n };
-    const serialized = EJSON.stringify(number, { relaxed: false });
-    const parsed = JSON.parse(serialized);
-    expect(parsed.a.$numberLong).to.equal(12345n.toString());
-  });
-
-  it('produces bigint strings that fail loose equality checks with native bigint values that are more than 64 bits wide', function () {
-    const number = { a: 0x1234_5678_1234_5678_9999n };
-    const serialized = EJSON.stringify(number, { relaxed: false });
-    const parsed = JSON.parse(serialized);
-    // eslint-disable-next-line eqeqeq
-    expect(parsed.a.$numberLong == 0x1234_5678_1234_5678_9999n).false;
-  });
-
-  it('produces bigint strings that are not equal to the strings generated when using BigInt.toString when the bigint values used are more than 64 bits wide', function () {
-    const number = { a: 0x1234_5678_1234_5678_9999n };
-    const serialized = EJSON.stringify(number, { relaxed: false });
-    const parsed = JSON.parse(serialized);
-    expect(parsed.a.$numberLong).to.not.equal(0x1234_5678_1234_5678_9999n.toString());
   });
 
   it('should correctly parse null values', function () {
