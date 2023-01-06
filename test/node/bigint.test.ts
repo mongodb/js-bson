@@ -292,14 +292,10 @@ describe('BSON BigInt support', function () {
       return [{ options: { useBigInt64, relaxed }, expectedResult }];
     }
 
-    function generateTestDescription(entry: TestTableEntry, canonical: boolean): string {
+    function generateTestDescription(entry: TestTableEntry, inputString: string): string {
       // TODO(NODE-4874): When NODE-4873 is merged in, replace this with EJSON.stringify
       const options = entry.options;
-      if (canonical) {
-        return `parses field 'a' of '${sampleCanonicalString}' to '${entry.expectedResult.a.constructor.name}' when useBigInt64 is ${options.useBigInt64} and relaxed is ${options.relaxed}`;
-      } else {
-        return `parses field 'a' of' ${sampleRelaxedString}' to '${entry.expectedResult.a.constructor.name}' when useBigInt64 is ${options.useBigInt64} and relaxed is ${options.relaxed}`;
-      }
+      return `parses field 'a' of '${inputString}' to '${entry.expectedResult.a.constructor.name}' when useBigInt64 is ${options.useBigInt64} and relaxed is ${options.relaxed}`;
     }
 
     function generateTest(entry: TestTableEntry, sampleString: string): () => void {
@@ -321,7 +317,11 @@ describe('BSON BigInt support', function () {
             useBigInt64,
             relaxed,
             (useBigInt64IsSet: boolean, relaxedIsSet: boolean) =>
-              useBigInt64IsSet ? { a: 23n } : relaxedIsSet ? { a: 23 } : { a: new BSON.Long(23) }
+              useBigInt64IsSet
+                ? { a: 23n }
+                : relaxedIsSet
+                ? { a: 23 }
+                : { a: BSON.Long.fromNumber(23) }
           );
         });
       });
@@ -332,13 +332,13 @@ describe('BSON BigInt support', function () {
 
       for (const entry of canonicalInputTestTable) {
         const test = generateTest(entry, sampleCanonicalString);
-        const description = generateTestDescription(entry, true);
+        const description = generateTestDescription(entry, sampleCanonicalString);
 
         it(description, test);
       }
     });
 
-    describe.skip('relaxed input', function () {
+    describe('relaxed input', function () {
       const relaxedInputTestTable = useBigInt64Values.flatMap(useBigInt64 => {
         return relaxedValues.flatMap(relaxed => {
           return genTestTable(
@@ -349,7 +349,7 @@ describe('BSON BigInt support', function () {
                 ? { a: 4294967296n }
                 : relaxedIsSet
                 ? { a: 4294967296 }
-                : { a: new BSON.Long(4294967296) }
+                : { a: BSON.Long.fromNumber(4294967296) }
           );
         });
       });
@@ -357,9 +357,16 @@ describe('BSON BigInt support', function () {
         expect(relaxedInputTestTable).to.have.lengthOf(9);
       });
 
+      /*
+      const entry = relaxedInputTestTable[5];
+      const test = generateTest(entry, sampleRelaxedString);
+      const description = generateTestDescription(entry, sampleRelaxedString);
+      it.only(description, test);
+      */
+
       for (const entry of relaxedInputTestTable) {
         const test = generateTest(entry, sampleRelaxedString);
-        const description = generateTestDescription(entry, false);
+        const description = generateTestDescription(entry, sampleRelaxedString);
 
         it(description, test);
       }
