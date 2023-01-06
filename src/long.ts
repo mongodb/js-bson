@@ -1021,7 +1021,6 @@ export class Long {
     if (options && options.relaxed) return this.toNumber();
     return { $numberLong: this.toString() };
   }
-  // NOTE: We handle the defaults for the EJSON options very poorly here.
   static fromExtendedJSON(
     doc: { $numberLong: string },
     options?: EJSONOptions
