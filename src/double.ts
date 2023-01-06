@@ -58,11 +58,7 @@ export class Double {
       return { $numberDouble: '-0.0' };
     }
 
-    if (Number.isInteger(this.value)) {
-      return { $numberDouble: `${this.value}.0` };
-    } else {
-      return { $numberDouble: `${this.value}` };
-    }
+    return { $numberDouble: this.value.toString() };
   }
 
   /** @internal */
