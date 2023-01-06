@@ -245,7 +245,9 @@ describe('BSON Corpus', function () {
                 // TODO(NODE-4377): EJSON transforms large doubles into longs
                 expect(eJSONFromBSONAsJSON).to.have.nested.property(
                   Number.isFinite(testInputAsFloat) && Number.isInteger(testInputAsFloat)
-                    ? testInputAsFloat <= 0x7fffffff && testInputAsFloat >= -0x80000000
+                    ? testInputAsFloat <= 0x7fffffff &&
+                      testInputAsFloat >= -0x80000000 &&
+                      !Object.is(testInputAsFloat, -0)
                       ? 'd.$numberInt'
                       : 'd.$numberLong'
                     : 'd.$numberDouble'
