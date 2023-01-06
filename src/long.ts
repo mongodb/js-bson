@@ -1021,10 +1021,16 @@ export class Long {
     if (options && options.relaxed) return this.toNumber();
     return { $numberLong: this.toString() };
   }
+  // NOTE: We handle the defaults for the EJSON options very poorly here.
   static fromExtendedJSON(doc: { $numberLong: string }, options?: EJSONOptions): number | Long | bigint {
     const longResult = Long.fromString(doc.$numberLong);
-    if (options && options.relaxed) {
-      return options && options.useBigInt64 ? BigInt(doc.$numberLong) : longResult.toNumber();
+    const defaults = { useBigInt64: false, relaxed: true, legacy: false };
+    options = { ...defaults, ...options };
+    if (options.useBigInt64 ?? false) {
+      return BigInt(doc.$numberLong);
+    }
+    if (options.relaxed ?? true) {
+      return longResult.toNumber();
     }
     return longResult;
   }
