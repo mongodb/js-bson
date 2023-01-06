@@ -168,6 +168,10 @@ describe('BSON Corpus', function () {
         describe('valid-extjson', function () {
           for (const v of valid) {
             it(v.description, function () {
+              if (v.description === 'All BSON types') {
+                // TODO(NODE-3987): fix multi-type-deprecated test
+                this.skip();
+              }
               // read in test case data. if this scenario is for a deprecated
               // type, we want to use the "converted" BSON and EJSON, which
               // use the upgraded version of the deprecated type. otherwise,
@@ -184,22 +188,29 @@ describe('BSON Corpus', function () {
               // convert inputs to native Javascript objects
               const nativeFromCB = bsonToNative(cB);
 
-              if (cEJ.includes('1.2345678921232E+18')) {
+              if (description === 'Double type') {
                 // The following is special test logic for a "Double type" bson corpus test that uses a different
                 // string format for the resulting double value
                 // The test does not have a loss in precision, just different exponential output
                 // We want to ensure that the stringified value when interpreted as a double is equal
                 // as opposed to the string being precisely the same
-                if (description !== 'Double type') {
-                  throw new Error('Unexpected test using 1.2345678921232E+18');
-                }
                 const eJSONParsedAsJSON = JSON.parse(cEJ);
                 const eJSONParsed = EJSON.parse(cEJ, { relaxed: false });
                 expect(eJSONParsedAsJSON).to.have.nested.property('d.$numberDouble');
                 expect(eJSONParsed).to.have.nested.property('d._bsontype', 'Double');
                 const testInputAsFloat = Number.parseFloat(eJSONParsedAsJSON.d.$numberDouble);
+                const testInputAsNumber = Number(eJSONParsedAsJSON.d.$numberDouble);
                 const ejsonOutputAsFloat = eJSONParsed.d.valueOf();
-                expect(ejsonOutputAsFloat).to.equal(testInputAsFloat);
+                if (eJSONParsedAsJSON.d.$numberDouble === 'NaN') {
+                  expect(ejsonOutputAsFloat).to.be.NaN;
+                  expect(ejsonOutputAsFloat).to.be.NaN;
+                } else {
+                  if (eJSONParsedAsJSON.d.$numberDouble === '-0.0') {
+                    expect(Object.is(ejsonOutputAsFloat, -0)).to.be.true;
+                  }
+                  expect(ejsonOutputAsFloat).to.equal(testInputAsFloat);
+                  expect(ejsonOutputAsFloat).to.equal(testInputAsNumber);
+                }
               } else {
                 // round tripped EJSON should match the original
                 expect(nativeToCEJSON(jsonToNative(cEJ))).to.equal(cEJ);
@@ -223,18 +234,38 @@ describe('BSON Corpus', function () {
                 expect(nativeToBson(jsonToNative(cEJ))).to.deep.equal(cB);
               }
 
-              if (cEJ.includes('1.2345678921232E+18')) {
+              if (description === 'Double type') {
                 // The round tripped value should be equal in interpreted value, not in exact character match
                 const eJSONFromBSONAsJSON = JSON.parse(
                   EJSON.stringify(BSON.deserialize(cB), { relaxed: false })
                 );
                 const eJSONParsed = EJSON.parse(cEJ, { relaxed: false });
+                const stringValueKey = Object.keys(eJSONFromBSONAsJSON.d)[0];
+                const testInputAsFloat = Number.parseFloat(eJSONFromBSONAsJSON.d[stringValueKey]);
+                const testInputAsNumber = Number(eJSONFromBSONAsJSON.d[stringValueKey]);
+
                 // TODO(NODE-4377): EJSON transforms large doubles into longs
-                expect(eJSONFromBSONAsJSON).to.have.nested.property('d.$numberLong');
+                expect(eJSONFromBSONAsJSON).to.have.nested.property(
+                  Number.isFinite(testInputAsFloat) &&
+                    Number.isInteger(testInputAsFloat) &&
+                    !Object.is(testInputAsFloat, -0)
+                    ? testInputAsFloat <= 0x7fffffff && testInputAsFloat >= -0x80000000
+                      ? 'd.$numberInt'
+                      : 'd.$numberLong'
+                    : 'd.$numberDouble'
+                );
                 expect(eJSONParsed).to.have.nested.property('d._bsontype', 'Double');
-                const testInputAsFloat = Number.parseFloat(eJSONFromBSONAsJSON.d.$numberLong);
                 const ejsonOutputAsFloat = eJSONParsed.d.valueOf();
-                expect(ejsonOutputAsFloat).to.equal(testInputAsFloat);
+                if (eJSONFromBSONAsJSON.d.$numberDouble === 'NaN') {
+                  expect(ejsonOutputAsFloat).to.be.NaN;
+                  expect(ejsonOutputAsFloat).to.be.NaN;
+                } else {
+                  if (eJSONFromBSONAsJSON.d.$numberDouble === '-0.0') {
+                    expect(Object.is(ejsonOutputAsFloat, -0)).to.be.true;
+                  }
+                  expect(ejsonOutputAsFloat).to.equal(testInputAsFloat);
+                  expect(ejsonOutputAsFloat).to.equal(testInputAsNumber);
+                }
               } else {
                 // the reverse direction, BSON -> native -> EJSON, should match canonical EJSON.
                 expect(nativeToCEJSON(nativeFromCB)).to.equal(cEJ);

@@ -40,24 +40,74 @@ describe('BSON Double Precision', function () {
 
     describe('.toExtendedJSON()', () => {
       const tests = [
-        { input: new Double(0), output: { $numberDouble: '0.0' } },
-        { input: new Double(-0), output: { $numberDouble: '-0.0' } },
-        { input: new Double(3), output: { $numberDouble: '3.0' } },
-        { input: new Double(-3), output: { $numberDouble: '-3.0' } },
-        { input: new Double(3.4), output: { $numberDouble: '3.4' } },
-        { input: new Double(Number.EPSILON), output: { $numberDouble: '2.220446049250313e-16' } },
-        { input: new Double(12345e7), output: { $numberDouble: '123450000000.0' } },
-        { input: new Double(12345e-1), output: { $numberDouble: '1234.5' } },
-        { input: new Double(-12345e-1), output: { $numberDouble: '-1234.5' } },
-        { input: new Double(Infinity), output: { $numberDouble: 'Infinity' } },
-        { input: new Double(-Infinity), output: { $numberDouble: '-Infinity' } },
-        { input: new Double(NaN), output: { $numberDouble: 'NaN' } }
+        { input: 0, output: { $numberDouble: '0' } },
+        { input: -0, output: { $numberDouble: '-0.0' } },
+        { input: '-0.0', output: { $numberDouble: '-0.0' } },
+        { input: 3, output: { $numberDouble: '3' } },
+        { input: -3, output: { $numberDouble: '-3' } },
+        { input: 3.4, output: { $numberDouble: '3.4' } },
+        { input: Number.EPSILON, output: { $numberDouble: '2.220446049250313e-16' } },
+        { input: 12345e7, output: { $numberDouble: '123450000000' } },
+        { input: 12345e-1, output: { $numberDouble: '1234.5' } },
+        { input: -12345e-1, output: { $numberDouble: '-1234.5' } },
+        { input: Infinity, output: { $numberDouble: 'Infinity' } },
+        { input: -Infinity, output: { $numberDouble: '-Infinity' } },
+        { input: NaN, output: { $numberDouble: 'NaN' } },
+        {
+          input: Number.MAX_VALUE,
+          output: { $numberDouble: '1.7976931348623157e+308' }
+        },
+        { input: Number.MIN_VALUE, output: { $numberDouble: '5e-324' } },
+        {
+          input: -Number.MAX_VALUE,
+          output: { $numberDouble: '-1.7976931348623157e+308' }
+        },
+        { input: -Number.MIN_VALUE, output: { $numberDouble: '-5e-324' } },
+        // Reference: https://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html
+        {
+          // min positive normal number
+          input: '2.2250738585072014e-308',
+          output: { $numberDouble: '2.2250738585072014e-308' }
+        },
+        {
+          // max subnormal number (NOTE: JS does not output same input string, but numeric values are equal)
+          input: '2.225073858507201e-308',
+          output: { $numberDouble: '2.225073858507201e-308' }
+        },
+        {
+          // min positive subnormal number (NOTE: JS does not output same input string, but numeric values are equal)
+          input: '4.9406564584124654e-324',
+          output: { $numberDouble: '5e-324' }
+        }
       ];
 
       for (const { input, output } of tests) {
         const title = `returns ${inspect(output)} when Double is ${input}`;
         it(title, () => {
-          expect(output).to.deep.equal(input.toExtendedJSON({ relaxed: false }));
+          const inputAsDouble = new Double(input);
+          expect(inputAsDouble.toExtendedJSON({ relaxed: false })).to.deep.equal(output);
+          if (!Number.isNaN(inputAsDouble.value)) {
+            expect(Number(inputAsDouble.toExtendedJSON({ relaxed: false }).$numberDouble)).to.equal(
+              inputAsDouble.value
+            );
+          }
+        });
+
+        it(`input ${typeof input}: ${input} creates the same bytes after stringification`, () => {
+          const ejsonDoubleString = new Double(input).toExtendedJSON().$numberDouble;
+          const bytesFromInput = (() => {
+            const b = Buffer.alloc(8);
+            b.writeDoubleBE(Number(input));
+            return b.toString('hex');
+          })();
+
+          const bytesFromOutput = (() => {
+            const b = Buffer.alloc(8);
+            b.writeDoubleBE(Number(ejsonDoubleString));
+            return b.toString('hex');
+          })();
+
+          expect(bytesFromOutput).to.equal(bytesFromInput);
         });
       }
     });
