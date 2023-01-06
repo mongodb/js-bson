@@ -183,6 +183,15 @@ describe('toBSON', function () {
       const sizeNestedToBSON = BSON.calculateObjectSize({ a: [0] });
       expect(sizeNestedToBSON).to.equal(33);
     });
+
+    it('uses toBSON on elements of a Map', () => {
+      const map = new Map();
+      map.set('a', 100);
+
+      const serializedData = BSON.serialize(map);
+      const deserializedData = BSON.deserialize(serializedData);
+      expect(deserializedData).to.have.property('a', 'hello number');
+    });
   });
 
   it('should use toBSON in calculateObjectSize', () => {
