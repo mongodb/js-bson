@@ -55,10 +55,12 @@ export class Double {
     if (Object.is(Math.sign(this.value), -0)) {
       // NOTE: JavaScript has +0 and -0, apparently to model limit calculations. If a user
       // explicitly provided `-0` then we need to ensure the sign makes it into the output
-      return { $numberDouble: '-0.0' };
+      return { $numberDouble: `-${this.value.toFixed(1)}` };
     }
 
-    return { $numberDouble: this.value.toString() };
+    return {
+      $numberDouble: Number.isInteger(this.value) ? this.value.toFixed(1) : this.value.toString()
+    };
   }
 
   /** @internal */
