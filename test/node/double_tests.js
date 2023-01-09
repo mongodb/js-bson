@@ -38,14 +38,14 @@ describe('BSON Double Precision', function () {
 
     describe('.toExtendedJSON()', () => {
       const tests = [
-        { input: 0, output: { $numberDouble: '0' } },
+        { input: 0, output: { $numberDouble: '0.0' } },
         { input: -0, output: { $numberDouble: '-0.0' } },
         { input: '-0.0', output: { $numberDouble: '-0.0' } },
-        { input: 3, output: { $numberDouble: '3' } },
-        { input: -3, output: { $numberDouble: '-3' } },
+        { input: 3, output: { $numberDouble: '3.0' } },
+        { input: -3, output: { $numberDouble: '-3.0' } },
         { input: 3.4, output: { $numberDouble: '3.4' } },
         { input: Number.EPSILON, output: { $numberDouble: '2.220446049250313e-16' } },
-        { input: 12345e7, output: { $numberDouble: '123450000000' } },
+        { input: 12345e7, output: { $numberDouble: '123450000000.0' } },
         { input: 12345e-1, output: { $numberDouble: '1234.5' } },
         { input: -12345e-1, output: { $numberDouble: '-1234.5' } },
         { input: Infinity, output: { $numberDouble: 'Infinity' } },
@@ -76,6 +76,12 @@ describe('BSON Double Precision', function () {
           // min positive subnormal number (NOTE: JS does not output same input string, but numeric values are equal)
           input: '4.9406564584124654e-324',
           output: { $numberDouble: '5e-324' }
+        },
+        {
+          // https://262.ecma-international.org/13.0/#sec-number.prototype.tofixed
+          // Note: calling toString on this integer returns 1000000000000000100, so toFixed is more precise
+          input: '1000000000000000128',
+          output: { $numberDouble: '1000000000000000128.0' }
         }
       ];
 
