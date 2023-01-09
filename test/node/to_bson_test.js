@@ -184,7 +184,7 @@ describe('toBSON', function () {
       expect(sizeNestedToBSON).to.equal(33);
     });
 
-    it('uses toBSON on elements of a Map', () => {
+    it('uses toBSON on values contained in a map', () => {
       const map = new Map();
       map.set('a', 100);
 
