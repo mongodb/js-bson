@@ -165,11 +165,6 @@ describe('BSON Corpus', function () {
         describe('valid-extjson', function () {
           for (const v of valid) {
             it(v.description, function () {
-              if (v.description === 'All BSON types') {
-                // TODO(NODE-3987): fix multi-type-deprecated test
-                this.skip();
-              }
-
               // read in test case data. if this scenario is for a deprecated
               // type, we want to use the "converted" BSON and EJSON, which
               // use the upgraded version of the deprecated type. otherwise,
