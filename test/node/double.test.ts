@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import { BSON, Double } from '../register-bson';
 
 import { BSON_DATA_NUMBER, BSON_DATA_INT } from '../../src/constants';
-import { inspect } from 'node:util';
 
 describe('BSON Double Precision', function () {
   context('class Double', function () {
