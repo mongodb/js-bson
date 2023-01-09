@@ -168,10 +168,6 @@ describe('BSON Corpus', function () {
         describe('valid-extjson', function () {
           for (const v of valid) {
             it(v.description, function () {
-              if (v.description === 'All BSON types') {
-                // TODO(NODE-3987): fix multi-type-deprecated test
-                this.skip();
-              }
               // read in test case data. if this scenario is for a deprecated
               // type, we want to use the "converted" BSON and EJSON, which
               // use the upgraded version of the deprecated type. otherwise,
@@ -202,7 +198,6 @@ describe('BSON Corpus', function () {
                 const testInputAsNumber = Number(eJSONParsedAsJSON.d.$numberDouble);
                 const ejsonOutputAsFloat = eJSONParsed.d.valueOf();
                 if (eJSONParsedAsJSON.d.$numberDouble === 'NaN') {
-                  expect(ejsonOutputAsFloat).to.be.NaN;
                   expect(ejsonOutputAsFloat).to.be.NaN;
                 } else {
                   if (eJSONParsedAsJSON.d.$numberDouble === '-0.0') {
@@ -257,7 +252,6 @@ describe('BSON Corpus', function () {
                 expect(eJSONParsed).to.have.nested.property('d._bsontype', 'Double');
                 const ejsonOutputAsFloat = eJSONParsed.d.valueOf();
                 if (eJSONFromBSONAsJSON.d.$numberDouble === 'NaN') {
-                  expect(ejsonOutputAsFloat).to.be.NaN;
                   expect(ejsonOutputAsFloat).to.be.NaN;
                 } else {
                   if (eJSONFromBSONAsJSON.d.$numberDouble === '-0.0') {
