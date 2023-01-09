@@ -2,7 +2,6 @@
 
 const BSON = require('../register-bson');
 const Double = BSON.Double;
-const inspect = require('util').inspect;
 
 describe('BSON Double Precision', function () {
   context('class Double', function () {
