@@ -201,7 +201,6 @@ describe('BSON Corpus', function () {
                 const ejsonOutputAsFloat = eJSONParsed.d.valueOf();
                 if (eJSONParsedAsJSON.d.$numberDouble === 'NaN') {
                   expect(ejsonOutputAsFloat).to.be.NaN;
-                  expect(ejsonOutputAsFloat).to.be.NaN;
                 } else {
                   if (eJSONParsedAsJSON.d.$numberDouble === '-0.0') {
                     expect(Object.is(ejsonOutputAsFloat, -0)).to.be.true;
@@ -255,7 +254,6 @@ describe('BSON Corpus', function () {
                 expect(eJSONParsed).to.have.nested.property('d._bsontype', 'Double');
                 const ejsonOutputAsFloat = eJSONParsed.d.valueOf();
                 if (eJSONFromBSONAsJSON.d.$numberDouble === 'NaN') {
-                  expect(ejsonOutputAsFloat).to.be.NaN;
                   expect(ejsonOutputAsFloat).to.be.NaN;
                 } else {
                   if (eJSONFromBSONAsJSON.d.$numberDouble === '-0.0') {
