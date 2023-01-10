@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.0.0-alpha.2](https://github.com/mongodb/js-bson/compare/v5.0.0-alpha.1...v5.0.0-alpha.2) (2023-01-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* **NODE-4890:** make all thrown errors into BSONErrors (#545)
+
+### Features
+
+* **NODE-4870:** Support BigInt serialization ([#541](https://github.com/mongodb/js-bson/issues/541)) ([e9e40a2](https://github.com/mongodb/js-bson/commit/e9e40a2cceb6392065a4f217d17fc4211aa1bbd7))
+* **NODE-4871:** Add support for int64 deserialization to BigInt ([#542](https://github.com/mongodb/js-bson/issues/542)) ([9ff60ba](https://github.com/mongodb/js-bson/commit/9ff60baedf2c3fcd5faf3760d4df03235531c608))
+* **NODE-4890:** make all thrown errors into BSONErrors ([#545](https://github.com/mongodb/js-bson/issues/545)) ([5b837a9](https://github.com/mongodb/js-bson/commit/5b837a9e5019016529a83700f3ba3065d5e53e80))
+* **NODE-4927:** exports in package.json for react native and document how to polyfill for BSON ([#550](https://github.com/mongodb/js-bson/issues/550)) ([3b4b61e](https://github.com/mongodb/js-bson/commit/3b4b61ed8dfbe7e7f8635e4584e1b17a91c1c4df))
+
+
+### Bug Fixes
+
+* calculate object size and test for error case ([02f26dd](https://github.com/mongodb/js-bson/commit/02f26dda765ac95aab41c9e622caf4429a49ba83))
+* **NODE-4887:** serializeInto does not check for the presence of a toBSON method for values in Map entries ([#555](https://github.com/mongodb/js-bson/issues/555)) ([ebc1c76](https://github.com/mongodb/js-bson/commit/ebc1c765276e83c9e8f073efdf41b27d4e5e7d7b))
+* **NODE-4905:** double precision accuracy in canonical EJSON ([#548](https://github.com/mongodb/js-bson/issues/548)) ([e0dbb17](https://github.com/mongodb/js-bson/commit/e0dbb17d0a13f3aca9879f08cba3573b2a84fd8d))
+* **NODE-4932:** remove .0 suffix from double extended json values ([#554](https://github.com/mongodb/js-bson/issues/554)) ([946866d](https://github.com/mongodb/js-bson/commit/946866d1a1b265f13c0e6c542f54b9786726fa85))
+
 ### [5.0.0-alpha.1](https://github.com/mongodb/js-bson/compare/v5.0.0-alpha.0...v5.0.0-alpha.1) (2022-12-19)
 
 ### Bug Fixes
