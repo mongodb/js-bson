@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import { BSON, Double } from '../register-bson';
 
 import { BSON_DATA_NUMBER, BSON_DATA_INT } from '../../src/constants';
-import { inspect } from 'node:util';
 
 describe('BSON Double Precision', function () {
   context('class Double', function () {
@@ -40,24 +39,158 @@ describe('BSON Double Precision', function () {
 
     describe('.toExtendedJSON()', () => {
       const tests = [
-        { input: new Double(0), output: { $numberDouble: '0.0' } },
-        { input: new Double(-0), output: { $numberDouble: '-0.0' } },
-        { input: new Double(3), output: { $numberDouble: '3.0' } },
-        { input: new Double(-3), output: { $numberDouble: '-3.0' } },
-        { input: new Double(3.4), output: { $numberDouble: '3.4' } },
-        { input: new Double(Number.EPSILON), output: { $numberDouble: '2.220446049250313e-16' } },
-        { input: new Double(12345e7), output: { $numberDouble: '123450000000.0' } },
-        { input: new Double(12345e-1), output: { $numberDouble: '1234.5' } },
-        { input: new Double(-12345e-1), output: { $numberDouble: '-1234.5' } },
-        { input: new Double(Infinity), output: { $numberDouble: 'Infinity' } },
-        { input: new Double(-Infinity), output: { $numberDouble: '-Infinity' } },
-        { input: new Double(NaN), output: { $numberDouble: 'NaN' } }
+        {
+          title: 'returns "0.0" when input is a number 0',
+          input: 0,
+          output: { $numberDouble: '0.0' }
+        },
+        {
+          title: 'returns "-0.0" when input is a number -0',
+          input: -0,
+          output: { $numberDouble: '-0.0' }
+        },
+        {
+          title: 'returns "0.0" when input is a string "-0.0"',
+          input: '-0.0',
+          output: { $numberDouble: '-0.0' }
+        },
+        {
+          title: 'returns "3.0" when input is a number 3',
+          input: 3,
+          output: { $numberDouble: '3.0' }
+        },
+        {
+          title: 'returns "-3.0" when input is a number -3',
+          input: -3,
+          output: { $numberDouble: '-3.0' }
+        },
+        {
+          title: 'returns "3.4" when input is a number 3.4',
+          input: 3.4,
+          output: { $numberDouble: '3.4' }
+        },
+        {
+          title: 'returns "2.220446049250313e-16" when input is Number.EPSILON',
+          input: Number.EPSILON,
+          output: { $numberDouble: '2.220446049250313e-16' }
+        },
+        {
+          title: 'returns "123450000000.0" when input is a number 12345e7',
+          input: 12345e7,
+          output: { $numberDouble: '123450000000.0' }
+        },
+        {
+          title: 'returns "1234.5" when input is a number 12345e-1',
+          input: 12345e-1,
+          output: { $numberDouble: '1234.5' }
+        },
+        {
+          title: 'returns "-1234.5" when input is a number -12345e-1',
+          input: -12345e-1,
+          output: { $numberDouble: '-1234.5' }
+        },
+        {
+          title: 'returns "Infinity" when input is a number Infinity',
+          input: Infinity,
+          output: { $numberDouble: 'Infinity' }
+        },
+        {
+          title: 'returns "-Infinity" when input is a number -Infinity',
+          input: -Infinity,
+          output: { $numberDouble: '-Infinity' }
+        },
+        {
+          title: 'returns "NaN" when input is a number NaN',
+          input: NaN,
+          output: { $numberDouble: 'NaN' }
+        },
+        {
+          title: 'returns "1.7976931348623157e+308" when input is a number Number.MAX_VALUE',
+          input: Number.MAX_VALUE,
+          output: { $numberDouble: '1.7976931348623157e+308' }
+        },
+        {
+          title: 'returns "5e-324" when input is a number Number.MIN_VALUE',
+          input: Number.MIN_VALUE,
+          output: { $numberDouble: '5e-324' }
+        },
+        {
+          title: 'returns "-1.7976931348623157e+308" when input is a number -Number.MAX_VALUE',
+          input: -Number.MAX_VALUE,
+          output: { $numberDouble: '-1.7976931348623157e+308' }
+        },
+        {
+          title: 'returns "-5e-324" when input is a number -Number.MIN_VALUE',
+          input: -Number.MIN_VALUE,
+          output: { $numberDouble: '-5e-324' }
+        },
+        {
+          // Reference: https://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html
+          // min positive normal number
+          title:
+            'returns "2.2250738585072014e-308" when input is a number the minimum positive normal value',
+          input: '2.2250738585072014e-308',
+          output: { $numberDouble: '2.2250738585072014e-308' }
+        },
+        {
+          // max subnormal number
+          title:
+            'returns "2.225073858507201e-308" when input is a number the maximum positive subnormal value',
+          input: '2.225073858507201e-308',
+          output: { $numberDouble: '2.225073858507201e-308' }
+        },
+        {
+          // min positive subnormal number (NOTE: JS does not output same input string, but numeric values are equal)
+          title: 'returns "5e-324" when input is a number the minimum positive subnormal value',
+          input: '4.9406564584124654e-324',
+          output: { $numberDouble: '5e-324' }
+        },
+        {
+          // https://262.ecma-international.org/13.0/#sec-number.prototype.tofixed
+          // Note: calling toString on this integer returns 1000000000000000100, so toFixed is more precise
+          // This test asserts we do not change _current_ behavior, however preserving this value is not
+          // something that is possible in BSON, if a future version of this library were to emit
+          // "1000000000000000100.0" instead, it would not be incorrect from a BSON/MongoDB/Double precision perspective,
+          //  it would just constrain the string output to what is possible with 8 bytes of floating point precision
+          title:
+            'returns "1000000000000000128.0" when input is an int-like number beyond 8-byte double precision',
+          input: '1000000000000000128',
+          output: { $numberDouble: '1000000000000000128.0' }
+        }
       ];
 
-      for (const { input, output } of tests) {
-        const title = `returns ${inspect(output)} when Double is ${input}`;
+      for (const test of tests) {
+        const input = test.input;
+        const output = test.output;
+        const title = test.title;
         it(title, () => {
-          expect(output).to.deep.equal(input.toExtendedJSON({ relaxed: false }));
+          const inputAsDouble = new Double(input);
+          expect(inputAsDouble.toExtendedJSON({ relaxed: false })).to.deep.equal(output);
+          if (!Number.isNaN(inputAsDouble.value)) {
+            expect(Number(inputAsDouble.toExtendedJSON({ relaxed: false }).$numberDouble)).to.equal(
+              inputAsDouble.value
+            );
+          }
+        });
+
+        it(`preserves the byte wise value of ${input} (${typeof input}) after stringification`, () => {
+          // Asserts the same bytes can be reconstructed from the generated string,
+          // sometimes the string changes "4.9406564584124654e-324" -> "5e-324"
+          // but both represent the same ieee754 double bytes
+          const ejsonDoubleString = new Double(input).toExtendedJSON().$numberDouble;
+          const bytesFromInput = (() => {
+            const b = Buffer.alloc(8);
+            b.writeDoubleBE(Number(input));
+            return b.toString('hex');
+          })();
+
+          const bytesFromOutput = (() => {
+            const b = Buffer.alloc(8);
+            b.writeDoubleBE(Number(ejsonDoubleString));
+            return b.toString('hex');
+          })();
+
+          expect(bytesFromOutput).to.equal(bytesFromInput);
         });
       }
     });
