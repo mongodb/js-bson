@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.7.2](https://github.com/mongodb/js-bson/compare/v4.7.1...v4.7.2) (2023-01-10)
+
+
+### Bug Fixes
+
+* **NODE-4932:** remove .0 suffix from double extended json values ([#553](https://github.com/mongodb/js-bson/issues/553)) ([a298d22](https://github.com/mongodb/js-bson/commit/a298d22173e7e07789d86051f95f76153f29e10a))
+
 ### [4.7.1](https://github.com/mongodb/js-bson/compare/v4.7.0...v4.7.1) (2023-01-05)
 
 
