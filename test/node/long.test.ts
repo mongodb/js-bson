@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import { Long } from '../register-bson';
 
-describe('Long', function() {
-  it('accepts strings in the constructor', function() {
+describe('Long', function () {
+  it('accepts strings in the constructor', function () {
     expect(new Long('0').toString()).to.equal('0');
     expect(new Long('00').toString()).to.equal('0');
     expect(new Long('-1').toString()).to.equal('-1');
@@ -13,7 +13,7 @@ describe('Long', function() {
     expect(new Long('13835058055282163712', true).toString()).to.equal('13835058055282163712');
   });
 
-  it('accepts BigInts in Long constructor', function() {
+  it('accepts BigInts in Long constructor', function () {
     expect(new Long(0n).toString()).to.equal('0');
     expect(new Long(-1n).toString()).to.equal('-1');
     expect(new Long(-1n, true).toString()).to.equal('18446744073709551615');
@@ -23,13 +23,19 @@ describe('Long', function() {
     expect(new Long(13835058055282163712n, true).toString()).to.equal('13835058055282163712');
   });
 
-  describe.only('static fromExtendedJSON()', function() {
-    it('is not affected by the legacy flag', function() {
-      const ejsonDoc = { $numberLong: "123456789123456789" };
+  describe('static fromExtendedJSON()', function () {
+    it('is not affected by the legacy flag', function () {
+      const ejsonDoc = { $numberLong: '123456789123456789' };
       const longRelaxedLegacy = Long.fromExtendedJSON(ejsonDoc, { legacy: true, relaxed: true });
-      const longRelaxedNonLegacy = Long.fromExtendedJSON(ejsonDoc, { legacy: false, relaxed: true });
-      const longCanonicalLegacy = Long.fromExtendedJSON(ejsonDoc, { legacy: true, relaxed: false});
-      const longCanonicalNonLegacy = Long.fromExtendedJSON(ejsonDoc, { legacy: false, relaxed: false});
+      const longRelaxedNonLegacy = Long.fromExtendedJSON(ejsonDoc, {
+        legacy: false,
+        relaxed: true
+      });
+      const longCanonicalLegacy = Long.fromExtendedJSON(ejsonDoc, { legacy: true, relaxed: false });
+      const longCanonicalNonLegacy = Long.fromExtendedJSON(ejsonDoc, {
+        legacy: false,
+        relaxed: false
+      });
 
       expect(longRelaxedLegacy).to.deep.equal(longRelaxedNonLegacy);
       expect(longCanonicalLegacy).to.deep.equal(longCanonicalNonLegacy);
