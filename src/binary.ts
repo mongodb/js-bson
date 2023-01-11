@@ -307,11 +307,6 @@ const UUID_BYTE_LENGTH = 16;
  * @public
  */
 export class UUID extends Binary {
-  /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
-    return BSON_MAJOR_VERSION;
-  }
-
   static cacheHexString: boolean;
 
   /** UUID hexString cache @internal */
