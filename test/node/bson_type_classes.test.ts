@@ -60,7 +60,7 @@ describe('BSON Type classes common interfaces', () => {
       }
     });
     for (const [name, creator] of BSONTypeClassCtors) {
-      it(`${name} inherits from BSONTypeClass`, () => {
+      it(`${name} inherits from BSONValue`, () => {
         expect(creator()).to.be.instanceOf(BSONValue);
       });
     }
