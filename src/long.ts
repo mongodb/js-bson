@@ -1,6 +1,7 @@
 import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
 import type { Timestamp } from './timestamp';
+import { BSON_INT64_MAX, BSON_INT64_MIN } from './constants';
 
 interface LongWASMHelpers {
   /** Gets the high bits of the last operation performed */
@@ -74,6 +75,18 @@ const INT_CACHE: { [key: number]: Long } = {};
 
 /** A cache of the Long representations of small unsigned integer values. */
 const UINT_CACHE: { [key: number]: Long } = {};
+
+/**
+  * Validate an int64 string.
+  *
+  * Fails on strings longer than 22 characters
+  * Fails on non-decimal strings */
+function validateInt64String(input: string): boolean {
+  if (input.length > 22) {
+    return false;
+  }
+  return /^(\+|\-)?[1-9][0-9]+$/.test(input);
+}
 
 /** @public */
 export interface LongExtended {
@@ -1025,11 +1038,22 @@ export class Long {
     doc: { $numberLong: string },
     options?: EJSONOptions
   ): number | Long | bigint {
-    const longResult = Long.fromString(doc.$numberLong);
     const defaults = { useBigInt64: false, relaxed: true };
     const ejsonOptions = { ...defaults, ...options };
+
+    if (!validateInt64String(doc.$numberLong)) {
+      throw new BSONError('Invalid int64 string');
+    }
+    const longResult = Long.fromString(doc.$numberLong);
+
     if (ejsonOptions.useBigInt64) {
-      return BigInt(doc.$numberLong);
+      const INT64_MAX = BigInt('0x7fffffffffffffff');
+      const INT64_MIN = BigInt('0xffffffffffffffff');
+      const result = BigInt(doc.$numberLong);
+      if (result > INT64_MAX || result < INT64_MIN) {
+        throw new BSONError('EJSON numberLong must be in int64 range');
+      }
+      return result;
     }
     if (ejsonOptions.relaxed) {
       return longResult.toNumber();

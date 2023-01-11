@@ -76,7 +76,7 @@ function deserializeValue(value: any, options: EJSONOptions = {}) {
     const in64BitRange = value <= BSON_INT64_MAX && value >= BSON_INT64_MIN;
 
     if (options.relaxed || options.legacy) {
-      return Number.isInteger(value) && options.useBigInt64 ? BigInt(value) : value;
+      return value;
     }
 
     if (Number.isInteger(value) && !Object.is(value, -0)) {
@@ -202,8 +202,8 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
 
       throw new BSONError(
         'Converting circular structure to EJSON:\n' +
-          `    ${leadingPart}${alreadySeen}${circularPart}${current}\n` +
-          `    ${leadingSpace}\\${dashes}/`
+        `    ${leadingPart}${alreadySeen}${circularPart}${current}\n` +
+        `    ${leadingSpace}\\${dashes}/`
       );
     }
     options.seenObjects[options.seenObjects.length - 1].obj = value;
