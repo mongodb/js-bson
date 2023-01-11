@@ -277,7 +277,8 @@ describe('BSON BigInt support', function () {
     const useBigInt64Values = [true, false, undefined];
     const relaxedValues = [true, false, undefined];
     const sampleCanonicalString = '{"a":{"$numberLong":"23"}}';
-    const sampleRelaxedString = '{"a":4294967296}';
+    const sampleRelaxedIntegerString = '{"a":4294967296}';
+    const sampleRelaxedDoubleString = '{"a": 2147483647.9}';
 
     function genTestTable(
       useBigInt64: boolean | undefined,
@@ -336,11 +337,10 @@ describe('BSON BigInt support', function () {
 
         it(description, test);
       }
-
     });
 
-    describe('relaxed input', function () {
-      const relaxedInputTestTable = useBigInt64Values.flatMap(useBigInt64 => {
+    describe('relaxed integer input', function () {
+      const relaxedIntegerInputTestTable = useBigInt64Values.flatMap(useBigInt64 => {
         return relaxedValues.flatMap(relaxed => {
           return genTestTable(
             useBigInt64,
@@ -355,28 +355,34 @@ describe('BSON BigInt support', function () {
         });
       });
       it('meta test: generates 9 tests', () => {
-        expect(relaxedInputTestTable).to.have.lengthOf(9);
+        expect(relaxedIntegerInputTestTable).to.have.lengthOf(9);
       });
 
-      /*
-      const entry = relaxedInputTestTable[5];
-      const test = generateTest(entry, sampleRelaxedString);
-      const description = generateTestDescription(entry, sampleRelaxedString);
-      it.only(description, test);
-      */
-
-      for (const entry of relaxedInputTestTable) {
-        const test = generateTest(entry, sampleRelaxedString);
-        const description = generateTestDescription(entry, sampleRelaxedString);
+      for (const entry of relaxedIntegerInputTestTable) {
+        const test = generateTest(entry, sampleRelaxedIntegerString);
+        const description = generateTestDescription(entry, sampleRelaxedIntegerString);
 
         it(description, test);
       }
+    });
 
-      it('returns a double when passed in a double outside int32 range and when useBigInt64 is true', function() {
-        const inputString= '{"a" : 2147483647.9}'; 
-        const output = EJSON.parse(inputString, {useBigInt64: true, relaxed: true});
-        expect(typeof output.a).to.equal('number');
+    describe('relaxed double input where double is outside of int32 range and useBigInt64 is true', function () {
+      const relaxedDoubleInputTestTable = relaxedValues.flatMap(relaxed => {
+        return genTestTable(true, relaxed, (_, relaxedIsSet: boolean) =>
+          relaxedIsSet ? { a: 2147483647.9 } : { a: new BSON.Double(2147483647.9) }
+        );
       });
+
+      it('meta test: generates 3 tests', () => {
+        expect(relaxedDoubleInputTestTable).to.have.lengthOf(3);
+      });
+
+      for (const entry of relaxedDoubleInputTestTable) {
+        const test = generateTest(entry, sampleRelaxedDoubleString);
+        const description = generateTestDescription(entry, sampleRelaxedDoubleString);
+
+        it(description, test);
+      }
     });
   });
 });
