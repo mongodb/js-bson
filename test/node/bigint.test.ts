@@ -274,7 +274,7 @@ describe('BSON BigInt support', function () {
       expectedResult: BSON.Document;
     };
 
-    // NOTE: legacy is not changed here as it does not affect the output of parsing a Long/Number
+    // NOTE: legacy is not changed here as it does not affect the output of parsing a Long
     const useBigInt64Values = [true, false, undefined];
     const relaxedValues = [true, false, undefined];
     const sampleCanonicalString = '{"a":{"$numberLong":"23"}}';
