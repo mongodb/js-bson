@@ -23,13 +23,16 @@ describe('Long', function() {
     expect(new Long(13835058055282163712n, true).toString()).to.equal('13835058055282163712');
   });
 
-  describe('static fromExtendedJSON()', function() {
+  describe.only('static fromExtendedJSON()', function() {
     it('is not affected by the legacy flag', function() {
       const ejsonDoc = { $numberLong: "123456789123456789" };
-      const longLegacy = Long.fromExtendedJSON(ejsonDoc, { legacy: true });
-      const longNonLegacy = Long.fromExtendedJSON(ejsonDoc, { legacy: false });
+      const longRelaxedLegacy = Long.fromExtendedJSON(ejsonDoc, { legacy: true, relaxed: true });
+      const longRelaxedNonLegacy = Long.fromExtendedJSON(ejsonDoc, { legacy: false, relaxed: true });
+      const longCanonicalLegacy = Long.fromExtendedJSON(ejsonDoc, { legacy: true, relaxed: false});
+      const longCanonicalNonLegacy = Long.fromExtendedJSON(ejsonDoc, { legacy: false, relaxed: false});
 
-      expect(longLegacy).to.deep.equal(longNonLegacy);
+      expect(longRelaxedLegacy).to.deep.equal(longRelaxedNonLegacy);
+      expect(longCanonicalLegacy).to.deep.equal(longCanonicalNonLegacy);
     });
   });
 });
