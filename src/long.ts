@@ -1026,12 +1026,12 @@ export class Long {
     options?: EJSONOptions
   ): number | Long | bigint {
     const longResult = Long.fromString(doc.$numberLong);
-    const defaults = { useBigInt64: false, relaxed: true, legacy: false };
-    options = { ...defaults, ...options };
-    if (options.useBigInt64 ?? false) {
+    const defaults = { useBigInt64: false, relaxed: true };
+    const ejsonOptions = { ...defaults, ...options };
+    if (ejsonOptions.useBigInt64) {
       return BigInt(doc.$numberLong);
     }
-    if (options.relaxed ?? true) {
+    if (ejsonOptions.relaxed) {
       return longResult.toNumber();
     }
     return longResult;

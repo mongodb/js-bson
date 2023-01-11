@@ -370,7 +370,7 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parse(text: string, options?: EJSONOptions): any {
-  options = {
+  const ejsonOptions = {
     useBigInt64: options?.useBigInt64 ?? false,
     relaxed: options?.relaxed ?? true,
     legacy: options?.legacy ?? false
@@ -381,7 +381,7 @@ function parse(text: string, options?: EJSONOptions): any {
         `BSON Document field names cannot contain null bytes, found: ${JSON.stringify(key)}`
       );
     }
-    return deserializeValue(value, options);
+    return deserializeValue(value, ejsonOptions);
   });
 }
 
