@@ -74,12 +74,9 @@ function deserializeValue(value: any, options: EJSONOptions = {}) {
   if (typeof value === 'number') {
     const in32BitRange = value <= BSON_INT32_MAX && value >= BSON_INT32_MIN;
     const in64BitRange = value <= BSON_INT64_MAX && value >= BSON_INT64_MIN;
-    if (options.useBigInt64 && !in32BitRange && in64BitRange) {
-      return BigInt(value);
-    }
 
     if (options.relaxed || options.legacy) {
-      return value;
+      return Number.isInteger(value) && options.useBigInt64 ? BigInt(value) : value;
     }
 
     if (Number.isInteger(value) && !Object.is(value, -0)) {
@@ -89,6 +86,9 @@ function deserializeValue(value: any, options: EJSONOptions = {}) {
       }
       if (in64BitRange) {
         // TODO(NODE-4377): EJSON js number handling diverges from BSON
+        if (options.useBigInt64) {
+          return BigInt(value);
+        }
         return Long.fromNumber(value);
       }
     }

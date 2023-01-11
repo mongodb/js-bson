@@ -336,6 +336,7 @@ describe('BSON BigInt support', function () {
 
         it(description, test);
       }
+
     });
 
     describe('relaxed input', function () {
@@ -370,6 +371,12 @@ describe('BSON BigInt support', function () {
 
         it(description, test);
       }
+
+      it('returns a double when passed in a double outside int32 range and when useBigInt64 is true', function() {
+        const inputString= '{"a" : 2147483647.9}'; 
+        const output = EJSON.parse(inputString, {useBigInt64: true, relaxed: true});
+        expect(typeof output.a).to.equal('number');
+      });
     });
   });
 });
