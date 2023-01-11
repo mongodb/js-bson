@@ -1,4 +1,4 @@
-import { BSON_MAJOR_VERSION } from './constants';
+import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
 import type { Timestamp } from './timestamp';
@@ -100,13 +100,9 @@ export interface LongExtended {
  * case would often result in infinite recursion.
  * Common constant values ZERO, ONE, NEG_ONE, etc. are found as static properties on this class.
  */
-export class Long {
+export class Long extends BSONValue {
   get _bsontype(): 'Long' {
     return 'Long';
-  }
-  /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
-    return BSON_MAJOR_VERSION;
   }
 
   /** An indicator used to reliably determine if an object is a Long or not. */
@@ -143,6 +139,7 @@ export class Long {
    * @param unsigned - Whether unsigned or not, defaults to signed
    */
   constructor(low: number | bigint | string = 0, high?: number | boolean, unsigned?: boolean) {
+    super();
     if (typeof low === 'bigint') {
       Object.assign(this, Long.fromBigInt(low, !!high));
     } else if (typeof low === 'string') {

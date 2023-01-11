@@ -1,4 +1,4 @@
-import { BSON_MAJOR_VERSION } from './constants';
+import { BSONValue } from './bson_value';
 
 /** @public */
 export interface MaxKeyExtended {
@@ -10,13 +10,9 @@ export interface MaxKeyExtended {
  * @public
  * @category BSONType
  */
-export class MaxKey {
+export class MaxKey extends BSONValue {
   get _bsontype(): 'MaxKey' {
     return 'MaxKey';
-  }
-  /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
-    return BSON_MAJOR_VERSION;
   }
 
   /** @internal */

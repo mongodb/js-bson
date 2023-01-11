@@ -4,6 +4,7 @@ import type { EJSONOptions } from './extended_json';
 import { BSONError } from './error';
 import { BSON_BINARY_SUBTYPE_UUID_NEW, BSON_MAJOR_VERSION } from './constants';
 import { ByteUtils } from './utils/byte_utils';
+import { BSONValue } from './bson_value';
 
 /** @public */
 export type BinarySequence = Uint8Array | number[];
@@ -27,13 +28,9 @@ export interface BinaryExtended {
  * @public
  * @category BSONType
  */
-export class Binary {
+export class Binary extends BSONValue {
   get _bsontype(): 'Binary' {
     return 'Binary';
-  }
-  /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
-    return BSON_MAJOR_VERSION;
   }
 
   /**
@@ -79,6 +76,7 @@ export class Binary {
    * @param subType - the option binary type.
    */
   constructor(buffer?: string | BinarySequence, subType?: number) {
+    super();
     if (
       !(buffer == null) &&
       !(typeof buffer === 'string') &&

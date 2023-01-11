@@ -1,4 +1,4 @@
-import { BSON_MAJOR_VERSION } from './constants';
+import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
 
@@ -25,13 +25,9 @@ export interface BSONRegExpExtended {
  * @public
  * @category BSONType
  */
-export class BSONRegExp {
+export class BSONRegExp extends BSONValue {
   get _bsontype(): 'BSONRegExp' {
     return 'BSONRegExp';
-  }
-  /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
-    return BSON_MAJOR_VERSION;
   }
 
   pattern!: string;
@@ -41,6 +37,7 @@ export class BSONRegExp {
    * @param options - The regular expression options
    */
   constructor(pattern: string, options?: string) {
+    super();
     this.pattern = pattern;
     this.options = alphabetize(options ?? '');
 

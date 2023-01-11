@@ -1,4 +1,4 @@
-import { BSON_MAJOR_VERSION } from './constants';
+import { BSONValue } from './bson_value';
 import type { EJSONOptions } from './extended_json';
 
 /** @public */
@@ -11,13 +11,9 @@ export interface Int32Extended {
  * @public
  * @category BSONType
  */
-export class Int32 {
+export class Int32 extends BSONValue {
   get _bsontype(): 'Int32' {
     return 'Int32';
-  }
-  /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
-    return BSON_MAJOR_VERSION;
   }
 
   value!: number;
@@ -27,6 +23,7 @@ export class Int32 {
    * @param value - the number we want to represent as an int32.
    */
   constructor(value: number | string) {
+    super();
     if ((value as unknown) instanceof Number) {
       value = value.valueOf();
     }

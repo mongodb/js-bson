@@ -1,5 +1,5 @@
 import type { Document } from './bson';
-import { BSON_MAJOR_VERSION } from './constants';
+import { BSONValue } from './bson_value';
 import type { EJSONOptions } from './extended_json';
 import type { ObjectId } from './objectid';
 
@@ -29,13 +29,9 @@ export function isDBRefLike(value: unknown): value is DBRefLike {
  * @public
  * @category BSONType
  */
-export class DBRef {
+export class DBRef extends BSONValue {
   get _bsontype(): 'DBRef' {
     return 'DBRef';
-  }
-  /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
-    return BSON_MAJOR_VERSION;
   }
 
   collection!: string;
@@ -49,6 +45,7 @@ export class DBRef {
    * @param db - optional db name, if omitted the reference is local to the current db.
    */
   constructor(collection: string, oid: ObjectId, db?: string, fields?: Document) {
+    super();
     // check if namespace has been provided
     const parts = collection.split('.');
     if (parts.length === 2) {

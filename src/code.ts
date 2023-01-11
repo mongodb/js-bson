@@ -1,5 +1,5 @@
 import type { Document } from './bson';
-import { BSON_MAJOR_VERSION } from './constants';
+import { BSONValue } from './bson_value';
 
 /** @public */
 export interface CodeExtended {
@@ -12,13 +12,9 @@ export interface CodeExtended {
  * @public
  * @category BSONType
  */
-export class Code {
+export class Code extends BSONValue {
   get _bsontype(): 'Code' {
     return 'Code';
-  }
-  /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
-    return BSON_MAJOR_VERSION;
   }
 
   code: string;
@@ -32,6 +28,7 @@ export class Code {
    * @param scope - an optional scope for the function.
    */
   constructor(code: string | Function, scope?: Document | null) {
+    super();
     this.code = code.toString();
     this.scope = scope ?? null;
   }

@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { __isWeb__ } from '../register-bson';
 import {
   Binary,
   BSONRegExp,
@@ -13,7 +14,8 @@ import {
   MinKey,
   ObjectId,
   Timestamp,
-  UUID
+  UUID,
+  BSONValue
 } from '../register-bson';
 
 const BSONTypeClasses = [
@@ -33,7 +35,37 @@ const BSONTypeClasses = [
   UUID
 ];
 
+const BSONTypeClassCtors = new Map<string, () => BSONValue>([
+  ['Binary', () => new Binary()],
+  ['Code', () => new Code('function () {}')],
+  ['DBRef', () => new DBRef('name', new ObjectId('00'.repeat(12)))],
+  ['Decimal128', () => new Decimal128('1.23')],
+  ['Double', () => new Double(1.23)],
+  ['Int32', () => new Int32(1)],
+  ['Long', () => new Long(1n)],
+  ['MinKey', () => new MinKey()],
+  ['MaxKey', () => new MaxKey()],
+  ['ObjectId', () => new ObjectId('00'.repeat(12))],
+  ['BSONRegExp', () => new BSONRegExp('abc', 'i')],
+  ['BSONSymbol', () => new BSONSymbol('name')],
+  ['Timestamp', () => new Timestamp({ t: 1, i: 2 })],
+  ['UUID', () => new UUID()]
+]);
+
 describe('BSON Type classes common interfaces', () => {
+  context('shared inheritance from BSONValue', () => {
+    before(function () {
+      if (__isWeb__) {
+        return this.currentTest?.skip();
+      }
+    });
+    for (const [name, creator] of BSONTypeClassCtors) {
+      it(`${name} inherits from BSONTypeClass`, () => {
+        expect(creator()).to.be.instanceOf(BSONValue);
+      });
+    }
+  });
+
   for (const TypeClass of BSONTypeClasses) {
     describe(TypeClass.name, () => {
       if (TypeClass.name !== 'UUID') {

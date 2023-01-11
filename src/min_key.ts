@@ -1,4 +1,4 @@
-import { BSON_MAJOR_VERSION } from './constants';
+import { BSONValue } from './bson_value';
 
 /** @public */
 export interface MinKeyExtended {
@@ -10,13 +10,9 @@ export interface MinKeyExtended {
  * @public
  * @category BSONType
  */
-export class MinKey {
+export class MinKey extends BSONValue {
   get _bsontype(): 'MinKey' {
     return 'MinKey';
-  }
-  /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
-    return BSON_MAJOR_VERSION;
   }
 
   /** @internal */

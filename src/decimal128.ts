@@ -1,4 +1,4 @@
-import { BSON_MAJOR_VERSION } from './constants';
+import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import { Long } from './long';
 import { isUint8Array } from './parser/utils';
@@ -127,13 +127,9 @@ export interface Decimal128Extended {
  * @public
  * @category BSONType
  */
-export class Decimal128 {
+export class Decimal128 extends BSONValue {
   get _bsontype(): 'Decimal128' {
     return 'Decimal128';
-  }
-  /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
-    return BSON_MAJOR_VERSION;
   }
 
   readonly bytes!: Uint8Array;
@@ -143,6 +139,7 @@ export class Decimal128 {
    *                or a string representation as returned by .toString()
    */
   constructor(bytes: Uint8Array | string) {
+    super();
     if (typeof bytes === 'string') {
       this.bytes = Decimal128.fromString(bytes).bytes;
     } else if (isUint8Array(bytes)) {

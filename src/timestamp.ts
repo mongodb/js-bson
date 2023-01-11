@@ -1,4 +1,3 @@
-import { BSON_MAJOR_VERSION } from './constants';
 import { BSONError } from './error';
 import type { Int32 } from './int_32';
 import { Long } from './long';
@@ -32,10 +31,6 @@ export interface TimestampExtended {
 export class Timestamp extends LongWithoutOverridesClass {
   get _bsontype(): 'Timestamp' {
     return 'Timestamp';
-  }
-  /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
-    return BSON_MAJOR_VERSION;
   }
 
   static readonly MAX_VALUE = Long.MAX_UNSIGNED_VALUE;
