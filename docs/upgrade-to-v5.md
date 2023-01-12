@@ -294,3 +294,13 @@ try {
 Starting with v5.0.0 of the BSON library instances of types from previous versions will throw an error when passed to the serializer.
 This is to ensure that types are always serialized correctly and that there is no unexpected silent BSON serialization mistakes that could occur when mixing versions.
 It's unexpected for any applications to have more than one version of the BSON library but with nested dependencies and re-exporting, this new error will illuminate those incorrect combinations.
+
+```ts
+// npm install bson4@npm:bson@4
+// npm install bson5@npm:bson@5
+import { ObjectId } from 'bson4';
+import { serialize } from 'bson5';
+
+serialize({ _id: new ObjectId() });
+// Uncaught BSONVersionError: Unsupported BSON version, bson types must be from bson 5.0 or later
+```
