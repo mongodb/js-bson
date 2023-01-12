@@ -2,7 +2,7 @@ import { bufferToUuidHexString, uuidHexStringToBuffer, uuidValidateString } from
 import { isUint8Array } from './parser/utils';
 import type { EJSONOptions } from './extended_json';
 import { BSONError } from './error';
-import { BSON_BINARY_SUBTYPE_UUID_NEW, BSON_MAJOR_VERSION } from './constants';
+import { BSON_BINARY_SUBTYPE_UUID_NEW } from './constants';
 import { ByteUtils } from './utils/byte_utils';
 import { BSONValue } from './bson_value';
 
