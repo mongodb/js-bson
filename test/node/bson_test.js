@@ -1808,7 +1808,8 @@ describe('BSON', function () {
 
   it('should throw if invalid BSON types are input to BSON serializer', function () {
     const oid = new ObjectId('111111111111111111111111');
-    const badBsonType = Object.assign({}, oid, { _bsontype: 'bogus' });
+    const badBsonType = new ObjectId('111111111111111111111111');
+    Object.defineProperty(badBsonType, '_bsontype', { value: 'bogus' });
     const badDoc = { bad: badBsonType };
     const badArray = [oid, badDoc];
     const badMap = new Map([
@@ -1817,9 +1818,9 @@ describe('BSON', function () {
       ['c', badArray]
     ]);
 
-    expect(() => BSON.serialize(badDoc)).to.throw(BSONError);
-    expect(() => BSON.serialize(badArray)).to.throw(BSONError);
-    expect(() => BSON.serialize(badMap)).to.throw(BSONError);
+    expect(() => BSON.serialize(badDoc)).to.throw(/invalid _bsontype/);
+    expect(() => BSON.serialize({ badArray })).to.throw(/invalid _bsontype/);
+    expect(() => BSON.serialize(badMap)).to.throw(/invalid _bsontype/);
   });
 
   describe('Should support util.inspect for', function () {

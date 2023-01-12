@@ -1,7 +1,7 @@
 import * as BSON from '../../register-bson';
 import { bufferFromHexArray } from '../tools/utils';
 import { expect } from 'chai';
-import { BSONError } from '../../register-bson';
+import { BSONVersionError } from '../../register-bson';
 
 describe('serialize()', () => {
   it('should only enumerate own property keys from input objects', () => {
@@ -97,7 +97,7 @@ describe('serialize()', () => {
         BSON.serialize({
           a: { _bsontype: 'Int32', value: 2, [Symbol.for('@@mdb.bson.version')]: 1 }
         })
-      ).to.throw(BSONError, /Unsupported BSON version/i);
+      ).to.throw(BSONVersionError, /Unsupported BSON version/i);
     });
   });
 });
