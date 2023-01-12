@@ -18,9 +18,11 @@ describe('BSON Double Precision', function () {
         expect(new Double(new Number(value)).valueOf()).to.equal(value);
       });
 
-      it('stringified number', () => {
-        expect(new Double('1').valueOf()).to.equal(1);
-        expect(new Double('-0.0').valueOf()).to.equal(-0);
+      context('when providing a stringified number', () => {
+        it('sets the proper value', () => {
+          expect(new Double('1').valueOf()).to.equal(1);
+          expect(new Double('-0.0').valueOf()).to.equal(-0);
+        });
       });
     });
 
@@ -185,25 +187,30 @@ describe('BSON Double Precision', function () {
         });
       }
 
-      it('preserves the stringified value of an integer that is beyond the precision of an 8-byte float', () => {
+      context('when provided an integer beyond the precision of an 8-byte float', () => {
         // https://262.ecma-international.org/13.0/#sec-number.prototype.tofixed
         // Note: calling toString on this integer returns 1000000000000000100, so toFixed is more precise
         // This test asserts we do not change _current_ behavior, however preserving this value is not
         // something that is possible in BSON, if a future version of this library were to emit
         // "1000000000000000100.0" instead, it would not be incorrect from a BSON/MongoDB/Double precision perspective,
         //  it would just constrain the string output to what is possible with 8 bytes of floating point precision
+        const integer = 1000000000000000128;
+        const integerString = `${integer}`;
 
-        // Note both the following assertions pass b/c the number is beyond the precision
-        expect(new Double('1000000000000000128').value).to.equal(1000000000000000128);
-        expect(new Double('1000000000000000128').value).to.equal(1000000000000000100);
-
-        // The following shows the when the string is an input the EJSON output still preserves the ending "28"
-        expect(new Double('1000000000000000128').toExtendedJSON({ relaxed: false })).to.deep.equal({
-          $numberDouble: '1000000000000000128.0'
+        it('passes equality when the number is beyond the presision', () => {
+          expect(new Double(integerString).value).to.equal(1000000000000000128);
+          expect(new Double(integerString).value).to.equal(1000000000000000100);
         });
-        // The same is true when the input is a JS number
-        expect(new Double(1000000000000000128).toExtendedJSON({ relaxed: false })).to.deep.equal({
-          $numberDouble: '1000000000000000128.0'
+
+        it('preserves the string value', () => {
+          // The following shows the when the string is an input the EJSON output still preserves the ending "28"
+          expect(new Double(integerString).toExtendedJSON({ relaxed: false })).to.deep.equal({
+            $numberDouble: '1000000000000000128.0'
+          });
+          // The same is true when the input is a JS number
+          expect(new Double(integer).toExtendedJSON({ relaxed: false })).to.deep.equal({
+            $numberDouble: '1000000000000000128.0'
+          });
         });
       });
     });
