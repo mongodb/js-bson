@@ -99,5 +99,13 @@ describe('serialize()', () => {
         })
       ).to.throw(BSONVersionError, /Unsupported BSON version/i);
     });
+
+    it(`throws if Symbol.for('@@mdb.bson.version') is not defined`, () => {
+      expect(() =>
+        BSON.serialize({
+          a: { _bsontype: 'Int32', value: 2 }
+        })
+      ).to.throw(BSONVersionError, /Unsupported BSON version/i);
+    });
   });
 });

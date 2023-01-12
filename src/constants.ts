@@ -1,7 +1,5 @@
 /** @internal */
-export type BSON_MAJOR_VERSION = 5;
-/** @internal */
-export const BSON_MAJOR_VERSION: BSON_MAJOR_VERSION = 5;
+export const BSON_MAJOR_VERSION = 5 as const;
 
 /** @internal */
 export const BSON_INT32_MAX = 0x7fffffff;
