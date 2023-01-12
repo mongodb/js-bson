@@ -8,6 +8,7 @@ const EXPECTED_EXPORTS = [
 
   'BSONType',
   'BSONValue',
+  'BSONVersionError',
   'EJSON',
   'Code',
   'BSONSymbol',

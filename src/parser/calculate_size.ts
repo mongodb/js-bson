@@ -1,6 +1,6 @@
 import { Binary } from '../binary';
 import type { Document } from '../bson';
-import { BSONError } from '../error';
+import { BSONVersionError } from '../error';
 import * as constants from '../constants';
 import { ByteUtils } from '../utils/byte_utils';
 import { isAnyArrayBuffer, isDate, isRegExp } from './utils';
@@ -83,7 +83,7 @@ function calculateElement(
         typeof value._bsontype === 'string' &&
         value[Symbol.for('@@mdb.bson.version')] !== constants.BSON_MAJOR_VERSION
       ) {
-        throw new BSONError('Unsupported BSON version, bson types must be from bson 5.0 or later');
+        throw new BSONVersionError();
       } else if (
         value == null ||
         value['_bsontype'] === 'MinKey' ||

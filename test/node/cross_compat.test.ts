@@ -64,9 +64,9 @@ const BSONTypeClasses = {
 };
 
 describe('Prevent previous major versions from working with BSON v5 serialize and stringify', function () {
-  for (const [typeName, typeMaker] of Object.entries(BSONTypeClasses)) {
+  for (const [typeName, typeFactory] of Object.entries(BSONTypeClasses)) {
     it(`serialize throws if ${typeName} is missing a version symbol`, () => {
-      const type = typeMaker();
+      const type = typeFactory();
       Object.defineProperty(type, Symbol.for('@@mdb.bson.version'), { value: null }); // set an own property that overrides the getter
       expect(() => BSON.serialize({ type })).to.throw(/Unsupported BSON version/);
       expect(() => BSON.serialize({ a: [type] })).to.throw(/Unsupported BSON version/);
@@ -74,7 +74,7 @@ describe('Prevent previous major versions from working with BSON v5 serialize an
     });
 
     it(`stringify throws if ${typeName} is missing a version symbol`, () => {
-      const type = typeMaker();
+      const type = typeFactory();
       Object.defineProperty(type, Symbol.for('@@mdb.bson.version'), { value: null }); // set an own property that overrides the getter
       expect(() => EJSON.stringify({ type })).to.throw(/Unsupported BSON version/);
       expect(() => EJSON.stringify({ a: [type] })).to.throw(/Unsupported BSON version/);

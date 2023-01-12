@@ -11,7 +11,7 @@ import {
 import { DBRef, isDBRefLike } from './db_ref';
 import { Decimal128 } from './decimal128';
 import { Double } from './double';
-import { BSONError } from './error';
+import { BSONError, BSONVersionError } from './error';
 import { Int32 } from './int_32';
 import { Long } from './long';
 import { MaxKey } from './max_key';
@@ -318,7 +318,7 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
     typeof doc._bsontype === 'string' &&
     doc[Symbol.for('@@mdb.bson.version')] !== BSON_MAJOR_VERSION
   ) {
-    throw new BSONError('Unsupported BSON version, bson types must be from bson 5.0 or later');
+    throw new BSONVersionError();
   } else if (isBSONType(doc)) {
     // the "document" is really just a BSON type object
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -43,3 +43,14 @@ export class BSONError extends Error {
     );
   }
 }
+
+/** @public */
+export class BSONVersionError extends BSONError {
+  get name(): 'BSONVersionError' {
+    return 'BSONVersionError';
+  }
+
+  constructor() {
+    super('Unsupported BSON version, bson types must be from bson 5.0 or later');
+  }
+}

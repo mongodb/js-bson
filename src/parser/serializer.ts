@@ -5,7 +5,7 @@ import * as constants from '../constants';
 import type { DBRefLike } from '../db_ref';
 import type { Decimal128 } from '../decimal128';
 import type { Double } from '../double';
-import { BSONError } from '../error';
+import { BSONError, BSONVersionError } from '../error';
 import type { Int32 } from '../int_32';
 import { Long } from '../long';
 import type { MinKey } from '../min_key';
@@ -710,7 +710,7 @@ export function serializeInto(
         typeof value === 'object' &&
         value[Symbol.for('@@mdb.bson.version')] !== constants.BSON_MAJOR_VERSION
       ) {
-        throw new BSONError('Unsupported BSON version, bson types must be from bson 5.0 or later');
+        throw new BSONVersionError();
       } else if (value._bsontype === 'ObjectId') {
         index = serializeObjectId(buffer, key, value, index);
       } else if (value._bsontype === 'Decimal128') {
@@ -820,7 +820,7 @@ export function serializeInto(
         typeof value === 'object' &&
         value[Symbol.for('@@mdb.bson.version')] !== constants.BSON_MAJOR_VERSION
       ) {
-        throw new BSONError('Unsupported BSON version, bson types must be from bson 5.0 or later');
+        throw new BSONVersionError();
       } else if (value._bsontype === 'ObjectId') {
         index = serializeObjectId(buffer, key, value, index);
       } else if (type === 'object' && value._bsontype === 'Decimal128') {
@@ -930,7 +930,7 @@ export function serializeInto(
         typeof value === 'object' &&
         value[Symbol.for('@@mdb.bson.version')] !== constants.BSON_MAJOR_VERSION
       ) {
-        throw new BSONError('Unsupported BSON version, bson types must be from bson 5.0 or later');
+        throw new BSONVersionError();
       } else if (value._bsontype === 'ObjectId') {
         index = serializeObjectId(buffer, key, value, index);
       } else if (type === 'object' && value._bsontype === 'Decimal128') {
