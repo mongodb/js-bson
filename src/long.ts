@@ -1051,11 +1051,11 @@ export class Long {
     if (ejsonOptions.useBigInt64) {
       const INT64_MAX = BigInt('0x7fffffffffffffff');
       const INT64_MIN = -BigInt('0x8000000000000000');
-      const result = BigInt(doc.$numberLong);
-      if (result > INT64_MAX || result < INT64_MIN) {
+      const bigIntResult = BigInt(doc.$numberLong);
+      if (bigIntResult > INT64_MAX || bigIntResult < INT64_MIN) {
         throw new BSONError('EJSON numberLong must be in int64 range');
       }
-      return result;
+      return bigIntResult;
     }
     if (ejsonOptions.relaxed) {
       return longResult.toNumber();
