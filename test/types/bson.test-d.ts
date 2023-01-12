@@ -16,7 +16,8 @@ import {
   UUID,
   DBRefLike,
   Document,
-  Decimal128Extended
+  Decimal128Extended,
+  BSONValue
 } from '../../bson'; // import from generated bson.d.ts
 
 expectType<() => UUID>(Binary.prototype.toUUID);
@@ -70,3 +71,8 @@ expectType<'MaxKey'>(MaxKey.prototype._bsontype)
 expectType<'MinKey'>(MinKey.prototype._bsontype)
 expectType<'BSONRegExp'>(BSONRegExp.prototype._bsontype)
 expectType<'Binary'>(UUID.prototype._bsontype)
+
+// Common BSONValue interface
+declare const bsonValue: BSONValue;
+expectType<string>(bsonValue._bsontype);
+expectType<() => string>(bsonValue.inspect);

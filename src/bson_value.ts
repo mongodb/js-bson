@@ -8,4 +8,7 @@ export abstract class BSONValue {
   get [Symbol.for('@@mdb.bson.version')](): BSON_MAJOR_VERSION {
     return BSON_MAJOR_VERSION;
   }
+
+  abstract inspect(): string;
+  abstract toExtendedJSON(): unknown;
 }

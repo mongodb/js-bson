@@ -33,7 +33,6 @@ export class BSONSymbol extends BSONValue {
     return this.value;
   }
 
-  /** @internal */
   inspect(): string {
     return `new BSONSymbol("${this.value}")`;
   }
