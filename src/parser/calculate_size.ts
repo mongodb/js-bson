@@ -84,13 +84,9 @@ function calculateElement(
         value[Symbol.for('@@mdb.bson.version')] !== constants.BSON_MAJOR_VERSION
       ) {
         throw new BSONVersionError();
-      } else if (
-        value == null ||
-        value['_bsontype'] === 'MinKey' ||
-        value['_bsontype'] === 'MaxKey'
-      ) {
+      } else if (value == null || value._bsontype === 'MinKey' || value._bsontype === 'MaxKey') {
         return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + 1;
-      } else if (value['_bsontype'] === 'ObjectId') {
+      } else if (value._bsontype === 'ObjectId') {
         return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (12 + 1);
       } else if (value instanceof Date || isDate(value)) {
         return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (8 + 1);
@@ -103,14 +99,14 @@ function calculateElement(
           (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (1 + 4 + 1) + value.byteLength
         );
       } else if (
-        value['_bsontype'] === 'Long' ||
-        value['_bsontype'] === 'Double' ||
-        value['_bsontype'] === 'Timestamp'
+        value._bsontype === 'Long' ||
+        value._bsontype === 'Double' ||
+        value._bsontype === 'Timestamp'
       ) {
         return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (8 + 1);
-      } else if (value['_bsontype'] === 'Decimal128') {
+      } else if (value._bsontype === 'Decimal128') {
         return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (16 + 1);
-      } else if (value['_bsontype'] === 'Code') {
+      } else if (value._bsontype === 'Code') {
         // Calculate size depending on the availability of a scope
         if (value.scope != null && Object.keys(value.scope).length > 0) {
           return (
@@ -131,7 +127,7 @@ function calculateElement(
             1
           );
         }
-      } else if (value['_bsontype'] === 'Binary') {
+      } else if (value._bsontype === 'Binary') {
         const binary: Binary = value;
         // Check what kind of subtype we have
         if (binary.sub_type === Binary.SUBTYPE_BYTE_ARRAY) {
@@ -144,7 +140,7 @@ function calculateElement(
             (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (binary.position + 1 + 4 + 1)
           );
         }
-      } else if (value['_bsontype'] === 'Symbol') {
+      } else if (value._bsontype === 'Symbol') {
         return (
           (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
           ByteUtils.utf8ByteLength(value.value) +
@@ -152,7 +148,7 @@ function calculateElement(
           1 +
           1
         );
-      } else if (value['_bsontype'] === 'DBRef') {
+      } else if (value._bsontype === 'DBRef') {
         // Set up correct object for serialization
         const ordered_values = Object.assign(
           {
@@ -183,7 +179,7 @@ function calculateElement(
           (value.multiline ? 1 : 0) +
           1
         );
-      } else if (value['_bsontype'] === 'BSONRegExp') {
+      } else if (value._bsontype === 'BSONRegExp') {
         return (
           (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
           1 +
