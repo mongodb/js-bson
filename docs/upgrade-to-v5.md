@@ -288,3 +288,9 @@ try {
   throw error;
 }
 ```
+
+### Explicit cross version incompatibility
+
+Starting with v5.0.0 of the BSON library instances of types from previous versions will throw an error when passed to the serializer.
+This is to ensure that types are always serialized correctly and that there is no unexpected silent BSON serialization mistakes that could occur when mixing versions.
+It's unexpected for any applications to have more than one version of the BSON library but with nested dependencies and re-exporting, this new error will illuminate those incorrect combinations.
