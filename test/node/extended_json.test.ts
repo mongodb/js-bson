@@ -301,7 +301,7 @@ describe('Extended JSON', function () {
   });
 
   it.skip('should throw if invalid BSON types are input to EJSON serializer', function () {
-    // TODO This doesn't throw for the reason you'd expect it to
+    // TODO(NODE-4952): Increase EJSON strictness w.r.t _bsontype validation
     const oid = new ObjectId('111111111111111111111111');
     const badBsonType = new ObjectId('111111111111111111111111');
     Object.defineProperty(badBsonType, '_bsontype', { value: 'bogus' });
