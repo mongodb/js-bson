@@ -7,11 +7,6 @@ export const BSON_INT64_MAX = Math.pow(2, 63) - 1;
 /** @internal */
 export const BSON_INT64_MIN = -Math.pow(2, 63);
 
-/** @internal */
-export const BSON_INT64_MAX_N = 2n ** 63n -1n; 
-/** @internal */
-export const BSON_INT64_MIN_N = 2n ** 63n -1n; 
-
 /**
  * Any integer up to 2^53 can be precisely represented by a double.
  * @internal
