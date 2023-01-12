@@ -31,8 +31,6 @@ chai.use(function (chai) {
     try {
       throwsAssertion.call(this, ...args);
     } catch (assertionError) {
-      console.log(JSON.stringify(assertionError), 2);
-      // FIXME(NODE-4874)
       if (assertionError.actual?.name === assertionError.expected) {
         return;
       }
