@@ -75,15 +75,16 @@ const INT_CACHE: { [key: number]: Long } = {};
 /** A cache of the Long representations of small unsigned integer values. */
 const UINT_CACHE: { [key: number]: Long } = {};
 
-const MAX_INT64_STRING_LENGTH = 22;
+const MAX_INT64_STRING_LENGTH = 20;
 
 /**
  * @internal
- * Validate an int64 string.
+ * Checks that an int64 string is of the correct length and is represented in
+ * base 10
  *
- * Fails on strings longer than 22 characters
+ * Fails on strings longer than MAX_INT64_STRING_LENGTH characters
  * Fails on non-decimal strings */
-function validateInt64String(input: string): boolean {
+function isInt64StrDecimalWithCorrectLength(input: string): boolean {
   if (input.length > MAX_INT64_STRING_LENGTH) {
     return false;
   }
@@ -1043,10 +1044,9 @@ export class Long {
     const defaults = { useBigInt64: false, relaxed: true };
     const ejsonOptions = { ...defaults, ...options };
 
-    if (!validateInt64String(doc.$numberLong)) {
+    if (!isInt64StrDecimalWithCorrectLength(doc.$numberLong)) {
       throw new BSONError('Invalid int64 string');
     }
-    const longResult = Long.fromString(doc.$numberLong);
 
     if (ejsonOptions.useBigInt64) {
       const INT64_MAX = BigInt('0x7fffffffffffffff');
@@ -1057,6 +1057,8 @@ export class Long {
       }
       return bigIntResult;
     }
+
+    const longResult = Long.fromString(doc.$numberLong);
     if (ejsonOptions.relaxed) {
       return longResult.toNumber();
     }
