@@ -45,7 +45,7 @@ describe('BSON Double Precision', function () {
       }
     });
 
-    describe('.toExtendedJSON()', () => {
+    describe('.toExtendedJSON({ relaxed: false })', () => {
       const tests = [
         {
           title: 'zero',
