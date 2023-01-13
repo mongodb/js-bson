@@ -47,7 +47,7 @@ describe('BSON Double Precision', function () {
     describe('.toExtendedJSON()', () => {
       const tests = [
         {
-          title: 'returns 0 with a decimal point when value is 0',
+          title: 'preserves zero with a decimal point when value is 0',
           input: 0,
           output: { $numberDouble: '0.0' }
         },
@@ -152,40 +152,42 @@ describe('BSON Double Precision', function () {
         }
       ];
 
-      for (const test of tests) {
-        const input = test.input;
-        const output = test.output;
-        const title = test.title;
-        it(title, () => {
-          const inputAsDouble = new Double(input);
-          expect(inputAsDouble.toExtendedJSON({ relaxed: false })).to.deep.equal(output);
-          if (!Number.isNaN(inputAsDouble.value)) {
-            expect(Number(inputAsDouble.toExtendedJSON({ relaxed: false }).$numberDouble)).to.equal(
-              inputAsDouble.value
-            );
-          }
-        });
+      context('returns a stringified value that', () => {
+        for (const test of tests) {
+          const input = test.input;
+          const output = test.output;
+          const title = test.title;
+          it(title, () => {
+            const inputAsDouble = new Double(input);
+            expect(inputAsDouble.toExtendedJSON({ relaxed: false })).to.deep.equal(output);
+            if (!Number.isNaN(inputAsDouble.value)) {
+              expect(
+                Number(inputAsDouble.toExtendedJSON({ relaxed: false }).$numberDouble)
+              ).to.equal(inputAsDouble.value);
+            }
+          });
 
-        it(`preserves the byte wise value of ${input} (${typeof input}) after stringification`, () => {
-          // Asserts the same bytes can be reconstructed from the generated string,
-          // sometimes the string changes "4.9406564584124654e-324" -> "5e-324"
-          // but both represent the same ieee754 double bytes
-          const ejsonDoubleString = new Double(input).toExtendedJSON().$numberDouble;
-          const bytesFromInput = (() => {
-            const b = Buffer.alloc(8);
-            b.writeDoubleBE(Number(input));
-            return b.toString('hex');
-          })();
+          it(`preserves the byte wise value of ${input} (${typeof input})`, () => {
+            // Asserts the same bytes can be reconstructed from the generated string,
+            // sometimes the string changes "4.9406564584124654e-324" -> "5e-324"
+            // but both represent the same ieee754 double bytes
+            const ejsonDoubleString = new Double(input).toExtendedJSON().$numberDouble;
+            const bytesFromInput = (() => {
+              const b = Buffer.alloc(8);
+              b.writeDoubleBE(Number(input));
+              return b.toString('hex');
+            })();
 
-          const bytesFromOutput = (() => {
-            const b = Buffer.alloc(8);
-            b.writeDoubleBE(Number(ejsonDoubleString));
-            return b.toString('hex');
-          })();
+            const bytesFromOutput = (() => {
+              const b = Buffer.alloc(8);
+              b.writeDoubleBE(Number(ejsonDoubleString));
+              return b.toString('hex');
+            })();
 
-          expect(bytesFromOutput).to.equal(bytesFromInput);
-        });
-      }
+            expect(bytesFromOutput).to.equal(bytesFromInput);
+          });
+        }
+      });
 
       context('when provided an integer beyond the precision of an 8-byte float', () => {
         // https://262.ecma-international.org/13.0/#sec-number.prototype.tofixed
