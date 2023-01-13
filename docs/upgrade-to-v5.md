@@ -185,7 +185,7 @@ EJSON.stringify({}, { strict: false }); /* migrate to */ EJSON.stringify({}, { r
 ### The BSON default export has been removed.
 
 * If you import BSON `commonjs` style `const BSON = require('bson')` then the `BSON.default` property is no longer present.
-* If you import BSON `esmodule` style `import BSON from 'bson'` then this code will crash upon loading. **TODO: This is not the case right now but it will be after [NODE-4713](https://jira.mongodb.org/browse/NODE-4713).**
+* If you import BSON `esmodule` style `import BSON from 'bson'` then this code will crash upon loading.
   * This error will throw: `SyntaxError: The requested module 'bson' does not provide an export named 'default'`.
 
 ### `class Code` always converts `.code` to string
