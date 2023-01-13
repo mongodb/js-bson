@@ -29,7 +29,7 @@ The following is a detailed collection of the changes in the major v5 release of
 
 For those that use the BSON library on Node.js, there is no change - the BSON APIs will still return and accept instances of Node.js `Buffer`. Since we no longer depend on the `Buffer` web shim for compatibility with browsers, in non-Node.js environments a `Uint8Array` will be returned instead.
 
-This allows the BSON library to be more platform independent while keeping its behavior consistent cross platform. The `Buffer` shim served the library well but brought in more than was necessary for the concerns of the code here.
+This allows the BSON library to be more platform independent while keeping its behavior consistent cross platform. 
 
 #### APIs impacted
 
