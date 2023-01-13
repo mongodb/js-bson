@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { BSON, Double } from '../register-bson';
 
 import { BSON_DATA_NUMBER, BSON_DATA_INT } from '../../src/constants';
+import { inspect } from 'node:util';
 
 describe('BSON Double Precision', function () {
   context('class Double', function () {
@@ -47,117 +48,114 @@ describe('BSON Double Precision', function () {
     describe('.toExtendedJSON()', () => {
       const tests = [
         {
-          title: 'preserves zero with a decimal point when value is 0',
+          title: 'zero',
           input: 0,
           output: { $numberDouble: '0.0' }
         },
         {
-          title: 'preserves negative zero when value is negative zero',
+          title: 'negative zero',
           input: -0,
           output: { $numberDouble: '-0.0' }
         },
         {
-          title: 'preserves a small integer-like value',
+          title: 'a small integer-like value',
           input: 3,
           output: { $numberDouble: '3.0' }
         },
         {
-          title: 'preserves a small negative integer-like value',
+          title: 'a small negative integer-like value',
           input: -3,
           output: { $numberDouble: '-3.0' }
         },
         {
-          title: 'preserves a small fractional value',
+          title: 'a small fractional value',
           input: 3.4,
           output: { $numberDouble: '3.4' }
         },
         {
-          title: 'preserves a the smallest fractional increment (epsilon)',
+          title: 'the smallest fractional increment (epsilon)',
           input: Number.EPSILON,
           output: { $numberDouble: '2.220446049250313e-16' }
         },
         {
-          title: 'preserves the value of an integer was written in scientific notation',
+          title: 'an integer that was written in scientific notation',
           input: 12345e7,
           output: { $numberDouble: '123450000000.0' }
         },
         {
-          title: 'preserves the value of a fraction that was written in scientific notation',
+          title: 'a fraction that was written in scientific notation',
           input: 12345e-1,
           output: { $numberDouble: '1234.5' }
         },
         {
-          title:
-            'preserves the value of a negative fraction that was written in scientific notation',
+          title: 'a negative fraction that was written in scientific notation',
           input: -12345e-1,
           output: { $numberDouble: '-1234.5' }
         },
         {
-          title: 'preserves positive infinity',
+          title: 'positive infinity',
           input: Infinity,
           output: { $numberDouble: 'Infinity' }
         },
         {
-          title: 'preserves negative infinity',
+          title: 'negative infinity',
           input: -Infinity,
           output: { $numberDouble: '-Infinity' }
         },
         {
-          title: 'preserves NaN',
+          title: 'NaN',
           input: NaN,
           output: { $numberDouble: 'NaN' }
         },
         {
-          title:
-            'preserves the maximum possible value for 8 byte floats provided by Number.MAX_VALUE',
+          title: 'the maximum possible value for 8 byte floats provided by Number.MAX_VALUE',
           input: Number.MAX_VALUE,
           output: { $numberDouble: '1.7976931348623157e+308' }
         },
         {
-          title:
-            'preserves the minimum possible value for 8 byte floats provided by Number.MIN_VALUE',
+          title: 'the minimum possible value for 8 byte floats provided by Number.MIN_VALUE',
           input: Number.MIN_VALUE,
           output: { $numberDouble: '5e-324' }
         },
         {
           title:
-            'preserves the maximum possible negative value for 8 byte floats provided by -Number.MAX_VALUE',
+            'the maximum possible negative value for 8 byte floats provided by -Number.MAX_VALUE',
           input: -Number.MAX_VALUE,
           output: { $numberDouble: '-1.7976931348623157e+308' }
         },
         {
           title:
-            'preserves the minimum possible negative value for 8 byte floats provided by -Number.MIN_VALUE',
+            'the minimum possible negative value for 8 byte floats provided by -Number.MIN_VALUE',
           input: -Number.MIN_VALUE,
           output: { $numberDouble: '-5e-324' }
         },
         {
           // Reference: https://docs.oracle.com/cd/E19957-01/806-3568/ncg_math.html
           // min positive normal number
-          title: 'preserves the minimum possible stringified normal value',
+          title: 'the minimum possible stringified normal value',
           input: '2.2250738585072014e-308',
           output: { $numberDouble: '2.2250738585072014e-308' }
         },
         {
           // max subnormal number
-          title: 'preserves the max possible stringified subnormal value',
+          title: 'the max possible stringified subnormal value',
           input: '2.225073858507201e-308',
           output: { $numberDouble: '2.225073858507201e-308' }
         },
         {
           // min positive subnormal number (NOTE: JS does not output same input string, but numeric values are equal)
-          title: 'simplifies but preserves the minimum possible subnormal value',
+          title: 'minimum possible subnormal value as a string',
           input: '4.9406564584124654e-324',
           output: { $numberDouble: '5e-324' }
         }
       ];
 
-      context('returns a stringified value that', () => {
-        for (const test of tests) {
-          const input = test.input;
-          const output = test.output;
-          const title = test.title;
-          it(title, () => {
+      for (const test of tests) {
+        const input = test.input;
+        const output = test.output;
+        const title = test.title;
+        context(`when the Double value is ${title}`, () => {
+          it(`returns canonical EJSON format ${inspect(test.output)}`, () => {
             const inputAsDouble = new Double(input);
             expect(inputAsDouble.toExtendedJSON({ relaxed: false })).to.deep.equal(output);
             if (!Number.isNaN(inputAsDouble.value)) {
@@ -167,7 +165,7 @@ describe('BSON Double Precision', function () {
             }
           });
 
-          it(`preserves the byte wise value of ${input} (${typeof input})`, () => {
+          it(`returns a string that preserves the byte wise value of ${input} (${typeof input})`, () => {
             // Asserts the same bytes can be reconstructed from the generated string,
             // sometimes the string changes "4.9406564584124654e-324" -> "5e-324"
             // but both represent the same ieee754 double bytes
@@ -186,8 +184,8 @@ describe('BSON Double Precision', function () {
 
             expect(bytesFromOutput).to.equal(bytesFromInput);
           });
-        }
-      });
+        });
+      }
 
       context('when provided an integer beyond the precision of an 8-byte float', () => {
         // https://262.ecma-international.org/13.0/#sec-number.prototype.tofixed
