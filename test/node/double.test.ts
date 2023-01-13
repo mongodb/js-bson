@@ -169,7 +169,9 @@ describe('BSON Double Precision', function () {
             // Asserts the same bytes can be reconstructed from the generated string,
             // sometimes the string changes "4.9406564584124654e-324" -> "5e-324"
             // but both represent the same ieee754 double bytes
-            const ejsonDoubleString = new Double(input).toExtendedJSON().$numberDouble;
+            const ejsonDoubleString = new Double(input).toExtendedJSON({
+              relaxed: false
+            }).$numberDouble;
             const bytesFromInput = (() => {
               const b = Buffer.alloc(8);
               b.writeDoubleBE(Number(input));
