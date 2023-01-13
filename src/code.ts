@@ -1,4 +1,5 @@
 import type { Document } from './bson';
+import { BSONValue } from './bson_value';
 
 /** @public */
 export interface CodeExtended {
@@ -11,7 +12,7 @@ export interface CodeExtended {
  * @public
  * @category BSONType
  */
-export class Code {
+export class Code extends BSONValue {
   get _bsontype(): 'Code' {
     return 'Code';
   }
@@ -27,6 +28,7 @@ export class Code {
    * @param scope - an optional scope for the function.
    */
   constructor(code: string | Function, scope?: Document | null) {
+    super();
     this.code = code.toString();
     this.scope = scope ?? null;
   }

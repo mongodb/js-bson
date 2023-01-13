@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { loadESModuleBSON } from '../load_bson';
 
-import { __isWeb__, BSONError } from '../register-bson';
+import { __isWeb__, BSONError, BSONVersionError } from '../register-bson';
 
 const instanceOfChecksWork = !__isWeb__;
 
@@ -81,5 +81,15 @@ describe('BSONError', function () {
     const bsonErr = new BSONError('This is a BSONError message');
     expect(bsonErr.name).equals('BSONError');
     expect(bsonErr.message).equals('This is a BSONError message');
+  });
+
+  describe('class BSONVersionError', () => {
+    it('is a BSONError instance', () => {
+      expect(BSONError.isBSONError(new BSONVersionError())).to.be.true;
+    });
+
+    it('has a name property equal to "BSONVersionError"', () => {
+      expect(new BSONVersionError()).to.have.property('name', 'BSONVersionError');
+    });
   });
 });

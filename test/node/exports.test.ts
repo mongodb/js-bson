@@ -7,6 +7,8 @@ const EXPECTED_EXPORTS = [
   '__isWeb__',
 
   'BSONType',
+  'BSONValue',
+  'BSONVersionError',
   'EJSON',
   'Code',
   'BSONSymbol',
