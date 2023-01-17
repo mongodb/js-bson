@@ -23,7 +23,7 @@ describe('Long', function () {
     expect(new Long(13835058055282163712n, true).toString()).to.equal('13835058055282163712');
   });
 
-  describe('static fromExtendedJSON()', function () {
+  describe.only('static fromExtendedJSON()', function () {
     it('is not affected by the legacy flag', function () {
       const ejsonDoc = { $numberLong: '123456789123456789' };
       const longRelaxedLegacy = Long.fromExtendedJSON(ejsonDoc, { legacy: true, relaxed: true });
@@ -41,33 +41,119 @@ describe('Long', function () {
       expect(longCanonicalLegacy).to.deep.equal(longCanonicalNonLegacy);
     });
 
+    describe.only('accepts', function () {
+      it('+0', function () {
+        const ejsonDoc = { $numberLong: '+0' };
+        expect(Long.fromExtendedJSON(ejsonDoc, { relaxed: false })).to.deep.equal(
+          Long.fromNumber(0)
+        );
+      });
+
+      it('negative integers within int64 range', function () {
+        const ejsonDoc = { $numberLong: '-1235498139' };
+        expect(Long.fromExtendedJSON(ejsonDoc, { relaxed: false })).to.deep.equal(
+          Long.fromNumber(-1235498139)
+        );
+      });
+
+      it('positive numbers within int64 range', function () {
+        const ejsonDoc = { $numberLong: '1234567129' };
+        expect(Long.fromExtendedJSON(ejsonDoc, { relaxed: false })).to.deep.equal(
+          Long.fromNumber(1234567129)
+        );
+      });
+    });
+
     describe('rejects with BSONError', function () {
       it('hex strings', function () {
         const ejsonDoc = { $numberLong: '0xffffffff' };
-        expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(BSONError);
+        expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(
+          BSONError,
+          'int64 string is not a valid decimal integer'
+        );
       });
 
       it('octal strings', function () {
         const ejsonDoc = { $numberLong: '0o1234567' };
-        expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(BSONError);
+        expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(
+          BSONError,
+          'int64 string is not a valid decimal integer'
+        );
       });
 
-      it('strings longer than 22 characters', function () {
+      it('binary strings', function () {
+        const ejsonDoc = { $numberLong: '0b010101101011' };
+        expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(
+          BSONError,
+          'int64 string is not a valid decimal integer'
+        );
+      });
+
+      it('strings longer than 20 characters', function () {
         const ejsonDoc = { $numberLong: '99999999999999999999999' };
-        expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(BSONError);
+        expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(
+          BSONError,
+          'int64 string is too long'
+        );
       });
 
       it('strings with leading zeros', function () {
         const ejsonDoc = { $numberLong: '000123456' };
-        expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(BSONError);
+        expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(
+          BSONError,
+          'int64 string is not a valid decimal integer'
+        );
       });
+
       it('non-numeric strings', function () {
         const ejsonDoc = { $numberLong: 'hello world' };
-        expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(BSONError);
+        expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(
+          BSONError,
+          'int64 string is not a valid decimal integer'
+        );
       });
-      it('strings encoding numbers larger than 64 bits wide when useBigInt64 is true', function () {
-        const ejsonDoc = { $numberLong: 0xf_ffff_ffff_ffff_ffffn.toString() };
-        expect(() => Long.fromExtendedJSON(ejsonDoc, { useBigInt64: true })).to.throw(BSONError);
+
+      it('-0', function () {
+        const ejsonDoc = { $numberLong: '-0' };
+        expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(
+          BSONError,
+          'int64 string is not a valid decimal integer'
+        );
+      });
+    });
+
+    describe.only('when useBigInt64=true', function () {
+      it('rejects strings encoding positive numbers larger than 64 bits wide', function () {
+        const ejsonDoc = { $numberLong: 0xffff_ffff_ffff_ffffn.toString() };
+        expect(() => Long.fromExtendedJSON(ejsonDoc, { useBigInt64: true })).to.throw(
+          BSONError,
+          'EJSON numberLong must be in int64 range'
+        );
+      });
+
+      it('strings encoding negative numbers larger than 64 bits wide', function () {
+        const ejsonDoc = { $numberLong: '-' + 0xbfff_ffff_ffff_ffffn.toString() };
+        expect(() => Long.fromExtendedJSON(ejsonDoc, { useBigInt64: true })).to.throw(
+          BSONError,
+          'EJSON numberLong must be in int64 range'
+        );
+      });
+    });
+
+    describe.only('when useBigInt64=false', function () {
+      it('truncates strings encoding positive numbers larger than 64 bits wide', function () {
+        const ejsonDoc = { $numberLong: 0xffff_ffff_ffff_ffffn.toString() };
+        expect(
+          Long.fromExtendedJSON(ejsonDoc, { useBigInt64: false, relaxed: false })
+        ).to.deep.equal(Long.fromNumber(-1));
+      });
+
+      it('truncates strings encoding negative numbers larger than 64 bits wide', function () {
+        const ejsonDoc = { $numberLong: '-' + 0xffff_ffff_ffff_0000n.toString() };
+        expect(() => Long.fromExtendedJSON(ejsonDoc, { useBigInt64: false, relaxed: false })).to.throw(
+          BSONError,
+          'EJSON numberLong must be in int64 range'
+        );
       });
     });
   });
