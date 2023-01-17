@@ -72,6 +72,7 @@ const keysToCodecs = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function deserializeValue(value: any, options: EJSONOptions = {}) {
   if (typeof value === 'number') {
+    // TODO(NODE-4377): EJSON js number handling diverges from BSON
     const in32BitRange = value <= BSON_INT32_MAX && value >= BSON_INT32_MIN;
     const in64BitRange = value <= BSON_INT64_MAX && value >= BSON_INT64_MIN;
 
@@ -85,7 +86,6 @@ function deserializeValue(value: any, options: EJSONOptions = {}) {
         return new Int32(value);
       }
       if (in64BitRange) {
-        // TODO(NODE-4377): EJSON js number handling diverges from BSON
         if (options.useBigInt64) {
           return BigInt(value);
         }
