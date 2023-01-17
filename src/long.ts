@@ -77,20 +77,6 @@ const UINT_CACHE: { [key: number]: Long } = {};
 
 const MAX_INT64_STRING_LENGTH = 20;
 
-/**
- * @internal
- * Checks that an int64 string is of the correct length and is represented in
- * base 10
- *
- * Fails on strings longer than MAX_INT64_STRING_LENGTH characters
- * Fails on non-decimal strings */
-function isInt64StrDecimalWithCorrectLength(input: string): boolean {
-  if (input.length > MAX_INT64_STRING_LENGTH) {
-    return false;
-  }
-  return /^(\+|-)?(0|[1-9][0-9]*)$/.test(input);
-}
-
 /** @public */
 export interface LongExtended {
   $numberLong: string;
@@ -1043,9 +1029,14 @@ export class Long {
   ): number | Long | bigint {
     const defaults = { useBigInt64: false, relaxed: true };
     const ejsonOptions = { ...defaults, ...options };
+    const decimalRegEx = /^(\+?0|(\+|-)?[1-9][0-9]*)$/;
 
-    if (!isInt64StrDecimalWithCorrectLength(doc.$numberLong)) {
-      throw new BSONError('Invalid int64 string');
+    if (doc.$numberLong.length > MAX_INT64_STRING_LENGTH) {
+      throw new BSONError('int64 string is too long');
+    }
+
+    if (!decimalRegEx.test(doc.$numberLong)) {
+      throw new BSONError('int64 string is not in decimal');
     }
 
     if (ejsonOptions.useBigInt64) {
