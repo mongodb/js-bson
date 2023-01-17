@@ -294,10 +294,14 @@ describe('BSON BigInt support', function () {
       return [{ options: { useBigInt64, relaxed }, expectedResult }];
     }
 
-    function generateTestDescription(entry: TestTableEntry, inputString: string): string {
+    function generateBehaviourDescription(entry: TestTableEntry, inputString: string): string {
       // TODO(NODE-4874): When NODE-4873 is merged in, replace this with EJSON.stringify
+      return `parses field 'a' of '${inputString}' to '${entry.expectedResult.a.constructor.name}' `;
+    }
+
+    function generateConditionDescription(entry: TestTableEntry): string {
       const options = entry.options;
-      return `parses field 'a' of '${inputString}' to '${entry.expectedResult.a.constructor.name}' when useBigInt64 is ${options.useBigInt64} and relaxed is ${options.relaxed}`;
+      return `when useBigInt64 is ${options.useBigInt64} and relaxed is ${options.relaxed}`;
     }
 
     function generateTest(entry: TestTableEntry, sampleString: string): () => void {
@@ -310,6 +314,18 @@ describe('BSON BigInt support', function () {
         });
         expect(parsed).to.deep.equal(entry.expectedResult);
       };
+    }
+
+    function createTestsFromTestTable(table: TestTableEntry[], sampleString: string) {
+      for (const entry of table) {
+        const test = generateTest(entry, sampleString);
+        const condDescription = generateConditionDescription(entry);
+        const behaviourDescription = generateBehaviourDescription(entry, sampleString);
+
+        describe(condDescription, function () {
+          it(behaviourDescription, test);
+        });
+      }
     }
 
     describe('canonical input', function () {
@@ -332,12 +348,7 @@ describe('BSON BigInt support', function () {
         expect(canonicalInputTestTable).to.have.lengthOf(9);
       });
 
-      for (const entry of canonicalInputTestTable) {
-        const test = generateTest(entry, sampleCanonicalString);
-        const description = generateTestDescription(entry, sampleCanonicalString);
-
-        it(description, test);
-      }
+      createTestsFromTestTable(canonicalInputTestTable, sampleCanonicalString);
     });
 
     describe('relaxed integer input', function () {
@@ -359,12 +370,7 @@ describe('BSON BigInt support', function () {
         expect(relaxedIntegerInputTestTable).to.have.lengthOf(9);
       });
 
-      for (const entry of relaxedIntegerInputTestTable) {
-        const test = generateTest(entry, sampleRelaxedIntegerString);
-        const description = generateTestDescription(entry, sampleRelaxedIntegerString);
-
-        it(description, test);
-      }
+      createTestsFromTestTable(relaxedIntegerInputTestTable, sampleRelaxedIntegerString);
     });
 
     describe('relaxed double input where double is outside of int32 range and useBigInt64 is true', function () {
@@ -378,12 +384,7 @@ describe('BSON BigInt support', function () {
         expect(relaxedDoubleInputTestTable).to.have.lengthOf(3);
       });
 
-      for (const entry of relaxedDoubleInputTestTable) {
-        const test = generateTest(entry, sampleRelaxedDoubleString);
-        const description = generateTestDescription(entry, sampleRelaxedDoubleString);
-
-        it(description, test);
-      }
+      createTestsFromTestTable(relaxedDoubleInputTestTable, sampleRelaxedDoubleString);
     });
   });
 });
