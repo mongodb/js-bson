@@ -1,3 +1,5 @@
+import { BSON_MAJOR_VERSION } from './constants';
+
 /**
  * @public
  * `BSONError` objects are thrown when runtime errors occur.
@@ -40,6 +42,19 @@ export class BSONError extends Error {
       'name' in value &&
       'message' in value &&
       'stack' in value
+    );
+  }
+}
+
+/** @public */
+export class BSONVersionError extends BSONError {
+  get name(): 'BSONVersionError' {
+    return 'BSONVersionError';
+  }
+
+  constructor() {
+    super(
+      `Unsupported BSON version, bson types must be from bson ${BSON_MAJOR_VERSION}.0 or later`
     );
   }
 }

@@ -1,3 +1,5 @@
+import { BSONValue } from './bson_value';
+
 /** @public */
 export interface MaxKeyExtended {
   $maxKey: 1;
@@ -8,7 +10,7 @@ export interface MaxKeyExtended {
  * @public
  * @category BSONType
  */
-export class MaxKey {
+export class MaxKey extends BSONValue {
   get _bsontype(): 'MaxKey' {
     return 'MaxKey';
   }

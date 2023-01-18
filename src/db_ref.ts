@@ -1,4 +1,5 @@
 import type { Document } from './bson';
+import { BSONValue } from './bson_value';
 import type { EJSONOptions } from './extended_json';
 import type { ObjectId } from './objectid';
 
@@ -28,7 +29,7 @@ export function isDBRefLike(value: unknown): value is DBRefLike {
  * @public
  * @category BSONType
  */
-export class DBRef {
+export class DBRef extends BSONValue {
   get _bsontype(): 'DBRef' {
     return 'DBRef';
   }
@@ -44,6 +45,7 @@ export class DBRef {
    * @param db - optional db name, if omitted the reference is local to the current db.
    */
   constructor(collection: string, oid: ObjectId, db?: string, fields?: Document) {
+    super();
     // check if namespace has been provided
     const parts = collection.split('.');
     if (parts.length === 2) {

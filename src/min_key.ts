@@ -1,3 +1,5 @@
+import { BSONValue } from './bson_value';
+
 /** @public */
 export interface MinKeyExtended {
   $minKey: 1;
@@ -8,7 +10,7 @@ export interface MinKeyExtended {
  * @public
  * @category BSONType
  */
-export class MinKey {
+export class MinKey extends BSONValue {
   get _bsontype(): 'MinKey' {
     return 'MinKey';
   }

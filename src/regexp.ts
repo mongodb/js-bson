@@ -1,3 +1,4 @@
+import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
 
@@ -24,7 +25,7 @@ export interface BSONRegExpExtended {
  * @public
  * @category BSONType
  */
-export class BSONRegExp {
+export class BSONRegExp extends BSONValue {
   get _bsontype(): 'BSONRegExp' {
     return 'BSONRegExp';
   }
@@ -36,6 +37,7 @@ export class BSONRegExp {
    * @param options - The regular expression options
    */
   constructor(pattern: string, options?: string) {
+    super();
     this.pattern = pattern;
     this.options = alphabetize(options ?? '');
 
@@ -99,5 +101,14 @@ export class BSONRegExp {
       );
     }
     throw new BSONError(`Unexpected BSONRegExp EJSON object form: ${JSON.stringify(doc)}`);
+  }
+
+  /** @internal */
+  [Symbol.for('nodejs.util.inspect.custom')](): string {
+    return this.inspect();
+  }
+
+  inspect(): string {
+    return `new BSONRegExp(${JSON.stringify(this.pattern)}, ${JSON.stringify(this.options)})`;
   }
 }

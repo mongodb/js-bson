@@ -16,7 +16,8 @@ import {
   UUID,
   DBRefLike,
   Document,
-  Decimal128Extended
+  Decimal128Extended,
+  BSONValue
 } from '../../bson'; // import from generated bson.d.ts
 
 expectType<() => UUID>(Binary.prototype.toUUID);
@@ -51,18 +52,14 @@ expectError(MinKey.prototype.toJSON);
 expectError(Long.prototype.toJSON);
 expectError(BSONRegExp.prototype.toJSON);
 
-// ObjectID uses a capital "D", this does not relate to the class name, or export name, only the determination for serialization
-expectType<'ObjectID'>(ObjectId.prototype._bsontype)
-// BSONSymbol was renamed to not conflict with the global JS Symbol
-// but its _bsontype is still 'Symbol'
-expectType<'Symbol'>(BSONSymbol.prototype._bsontype)
-
 // We hack TS to say that the prototype has _bsontype='Timestamp'
 // but it actually is _bsontype='Long', inside the Timestamp constructor
 // we override the property on the instance
 // TODO(NODE-2624): Make Timestamp hold its long value on a property rather than be a subclass
 expectType<'Timestamp'>(Timestamp.prototype._bsontype)
 
+expectType<'ObjectId'>(ObjectId.prototype._bsontype)
+expectType<'BSONSymbol'>(BSONSymbol.prototype._bsontype)
 expectType<'Binary'>(Binary.prototype._bsontype)
 expectType<'Code'>(Code.prototype._bsontype)
 expectType<'DBRef'>(DBRef.prototype._bsontype)
@@ -74,3 +71,8 @@ expectType<'MaxKey'>(MaxKey.prototype._bsontype)
 expectType<'MinKey'>(MinKey.prototype._bsontype)
 expectType<'BSONRegExp'>(BSONRegExp.prototype._bsontype)
 expectType<'Binary'>(UUID.prototype._bsontype)
+
+// Common BSONValue interface
+declare const bsonValue: BSONValue;
+expectType<string>(bsonValue._bsontype);
+expectType<() => string>(bsonValue.inspect);

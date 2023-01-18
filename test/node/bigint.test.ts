@@ -385,6 +385,102 @@ describe('BSON BigInt support', function () {
       });
 
       createTestsFromTestTable(relaxedDoubleInputTestTable, sampleRelaxedDoubleString);
+  describe('EJSON.stringify()', function () {
+    context('canonical mode (relaxed=false)', function () {
+      it('truncates bigint values when they are outside the range [BSON_INT64_MIN, BSON_INT64_MAX]', function () {
+        const numbers = { a: 2n ** 64n + 1n, b: -(2n ** 64n) - 1n };
+        const serialized = EJSON.stringify(numbers, { relaxed: false });
+        expect(serialized).to.equal('{"a":{"$numberLong":"1"},"b":{"$numberLong":"-1"}}');
+      });
+
+      it('truncates bigint values in the same way as BSON.serialize', function () {
+        const number = { a: 0x1234_5678_1234_5678_9999n };
+        const stringified = EJSON.stringify(number, { relaxed: false });
+        const serialized = BSON.serialize(number);
+
+        const VALUE_OFFSET = 7;
+        const dataView = BSONDataView.fromUint8Array(serialized);
+        const serializedValue = dataView.getBigInt64(VALUE_OFFSET, true);
+        const parsed = JSON.parse(stringified);
+
+        expect(parsed).to.have.property('a');
+        expect(parsed['a']).to.have.property('$numberLong');
+        expect(parsed.a.$numberLong).to.equal(0x5678_1234_5678_9999n.toString());
+
+        expect(parsed.a.$numberLong).to.equal(serializedValue.toString());
+      });
+      it('serializes bigint values to numberLong in canonical mode', function () {
+        const number = { a: 2n };
+        const serialized = EJSON.stringify(number, { relaxed: false });
+        expect(serialized).to.equal('{"a":{"$numberLong":"2"}}');
+      });
+    });
+
+    context('relaxed mode (relaxed=true)', function () {
+      it('truncates bigint values in the same way as BSON.serialize', function () {
+        const number = { a: 0x1234_0000_1234_5678_9999n }; // Ensure that the truncated number can be exactly represented as a JS number
+        const stringified = EJSON.stringify(number, { relaxed: true });
+        const serializedDoc = BSON.serialize(number);
+
+        const VALUE_OFFSET = 7;
+        const dataView = BSONDataView.fromUint8Array(serializedDoc);
+        const parsed = JSON.parse(stringified);
+
+        expect(parsed).to.have.property('a');
+        expect(parsed.a).to.equal(0x0000_1234_5678_9999);
+
+        expect(parsed.a).to.equal(Number(dataView.getBigInt64(VALUE_OFFSET, true)));
+      });
+
+      it('serializes bigint values to Number', function () {
+        const number = { a: 10000n };
+        const serialized = EJSON.stringify(number, { relaxed: true });
+        expect(serialized).to.equal('{"a":10000}');
+      });
+
+      it('loses precision when serializing bigint values outside of range [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER]', function () {
+        const numbers = { a: -(2n ** 53n) - 1n, b: 2n ** 53n + 2n };
+        const serialized = EJSON.stringify(numbers, { relaxed: true });
+        expect(serialized).to.equal('{"a":-9007199254740992,"b":9007199254740994}');
+      });
+    });
+
+    context('when passed bigint values that are 64 bits wide or less', function () {
+      let parsed;
+
+      before(function () {
+        const number = { a: 12345n };
+        const serialized = EJSON.stringify(number, { relaxed: false });
+        parsed = JSON.parse(serialized);
+      });
+
+      it('passes loose equality checks with native bigint values', function () {
+        // eslint-disable-next-line eqeqeq
+        expect(parsed.a.$numberLong == 12345n).true;
+      });
+
+      it('equals the result of BigInt.toString', function () {
+        expect(parsed.a.$numberLong).to.equal(12345n.toString());
+      });
+    });
+
+    context('when passed bigint values that are more than 64 bits wide', function () {
+      let parsed;
+
+      before(function () {
+        const number = { a: 0x1234_5678_1234_5678_9999n };
+        const serialized = EJSON.stringify(number, { relaxed: false });
+        parsed = JSON.parse(serialized);
+      });
+
+      it('fails loose equality checks with native bigint values', function () {
+        // eslint-disable-next-line eqeqeq
+        expect(parsed.a.$numberLong == 0x1234_5678_1234_5678_9999n).false;
+      });
+
+      it('not equal to results of BigInt.toString', function () {
+        expect(parsed.a.$numberLong).to.not.equal(0x1234_5678_1234_5678_9999n.toString());
+      });
     });
   });
 });

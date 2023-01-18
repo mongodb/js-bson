@@ -1,3 +1,4 @@
+import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import { isUint8Array } from './parser/utils';
 import { BSONDataView, ByteUtils } from './utils/byte_utils';
@@ -27,9 +28,9 @@ const kId = Symbol('id');
  * @public
  * @category BSONType
  */
-export class ObjectId {
-  get _bsontype(): 'ObjectID' {
-    return 'ObjectID';
+export class ObjectId extends BSONValue {
+  get _bsontype(): 'ObjectId' {
+    return 'ObjectId';
   }
 
   /** @internal */
@@ -48,6 +49,7 @@ export class ObjectId {
    * @param inputId - Can be a 24 character hex string, 12 byte binary Buffer, or a number.
    */
   constructor(inputId?: string | number | ObjectId | ObjectIdLike | Uint8Array) {
+    super();
     // workingId is set based on type of input and whether valid id exists for the input
     let workingId;
     if (typeof inputId === 'object' && inputId && 'id' in inputId) {
