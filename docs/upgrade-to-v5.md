@@ -251,13 +251,14 @@ Our `package.json` defines the following `"exports"` settings.
 {
   "main": "./lib/bson.cjs",
   "module": "./lib/bson.mjs",
-  "browser": "./lib/bson.mjs",
   "exports": {
-    "browser": "./lib/bson.mjs",
     "import": "./lib/bson.mjs",
-    "require": "./lib/bson.cjs"
-  }
+    "require": "./lib/bson.cjs",
+    "react-native": "./lib/bson.cjs",
+    "browser": "./lib/bson.mjs"
+  },
 }
+
 ```
 
 You can now find compiled bundles of the BSON library in 3 common formats in the `lib` directory.
