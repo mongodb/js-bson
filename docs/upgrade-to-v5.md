@@ -278,7 +278,7 @@ Since BSON can be used in environments where instances may originate from across
 
 It is our recommendation to use `isBSONError()` checks on errors and to avoid relying on parsing `error.message` and `error.name` strings in your code. We guarantee `isBSONError()` checks will pass according to semver guidelines, but errors may be sub-classed or their messages may change at any time, even patch releases, as we see fit to increase the helpfulness of the errors.
 
-Hypothetical example: A collection in our database has an issue with UTF-8 data:
+Hypothetical example: A collection in our database contains invalid UTF-8 data:
 ```ts
 let documentCount = 0;
 const cursor = collection.find({}, { utf8Validation: true });
