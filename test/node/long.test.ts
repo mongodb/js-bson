@@ -124,16 +124,16 @@ describe('Long', function () {
 
     describe('when useBigInt64=true', function () {
       describe('rejects', function () {
-        it('strings encoding positive numbers larger than 64 bits wide', function () {
-          const ejsonDoc = { $numberLong: '9223372036854775808' };
+        it('positive numbers outside int64 range', function () {
+          const ejsonDoc = { $numberLong: '9223372036854775808' }; // 2^63
           expect(() => Long.fromExtendedJSON(ejsonDoc, { useBigInt64: true })).to.throw(
             BSONError,
             'EJSON numberLong must be in int64 range'
           );
         });
 
-        it('strings encoding negative numbers larger than 64 bits wide', function () {
-          const ejsonDoc = { $numberLong: '9223372036854775808' };
+        it('negative numbers outside int64 range', function () {
+          const ejsonDoc = { $numberLong: '-9223372036854775809' }; // -2^63 - 1
           expect(() => Long.fromExtendedJSON(ejsonDoc, { useBigInt64: true })).to.throw(
             BSONError,
             'EJSON numberLong must be in int64 range'
@@ -144,15 +144,15 @@ describe('Long', function () {
 
     describe('when useBigInt64=false', function () {
       describe('truncates', function () {
-        it('strings encoding positive numbers larger than 64 bits wide', function () {
-          const ejsonDoc = { $numberLong: '9223372036854775808' };
+        it('positive numbers outside int64 range', function () {
+          const ejsonDoc = { $numberLong: '9223372036854775808' }; // 2^63
           expect(
             Long.fromExtendedJSON(ejsonDoc, { useBigInt64: false, relaxed: false })
           ).to.deep.equal(Long.fromBigInt(-9223372036854775808n));
         });
 
-        it('strings encoding negative numbers larger than 64 bits wide', function () {
-          const ejsonDoc = { $numberLong: '-9223372036854775809' };
+        it('negative numbers outside int64 range', function () {
+          const ejsonDoc = { $numberLong: '-9223372036854775809' }; // -2^63 - 1
           expect(
             Long.fromExtendedJSON(ejsonDoc, { useBigInt64: false, relaxed: false })
           ).to.deep.equal(Long.fromBigInt(9223372036854775807n));
