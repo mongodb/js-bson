@@ -1,4 +1,7 @@
 /** @internal */
+export const BSON_MAJOR_VERSION = 5 as const;
+
+/** @internal */
 export const BSON_INT32_MAX = 0x7fffffff;
 /** @internal */
 export const BSON_INT32_MIN = -0x80000000;

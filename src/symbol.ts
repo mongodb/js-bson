@@ -1,3 +1,5 @@
+import { BSONValue } from './bson_value';
+
 /** @public */
 export interface BSONSymbolExtended {
   $symbol: string;
@@ -8,9 +10,9 @@ export interface BSONSymbolExtended {
  * @public
  * @category BSONType
  */
-export class BSONSymbol {
-  get _bsontype(): 'Symbol' {
-    return 'Symbol';
+export class BSONSymbol extends BSONValue {
+  get _bsontype(): 'BSONSymbol' {
+    return 'BSONSymbol';
   }
 
   value!: string;
@@ -18,6 +20,7 @@ export class BSONSymbol {
    * @param value - the string representing the symbol.
    */
   constructor(value: string) {
+    super();
     this.value = value;
   }
 
@@ -30,7 +33,6 @@ export class BSONSymbol {
     return this.value;
   }
 
-  /** @internal */
   inspect(): string {
     return `new BSONSymbol("${this.value}")`;
   }

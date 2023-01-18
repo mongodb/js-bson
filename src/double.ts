@@ -1,3 +1,4 @@
+import { BSONValue } from './bson_value';
 import type { EJSONOptions } from './extended_json';
 
 /** @public */
@@ -10,7 +11,7 @@ export interface DoubleExtended {
  * @public
  * @category BSONType
  */
-export class Double {
+export class Double extends BSONValue {
   get _bsontype(): 'Double' {
     return 'Double';
   }
@@ -22,6 +23,7 @@ export class Double {
    * @param value - the number we want to represent as a double.
    */
   constructor(value: number) {
+    super();
     if ((value as unknown) instanceof Number) {
       value = value.valueOf();
     }

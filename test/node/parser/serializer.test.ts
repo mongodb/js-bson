@@ -1,6 +1,7 @@
 import * as BSON from '../../register-bson';
 import { bufferFromHexArray } from '../tools/utils';
 import { expect } from 'chai';
+import { BSONVersionError } from '../../register-bson';
 
 describe('serialize()', () => {
   it('should only enumerate own property keys from input objects', () => {
@@ -44,9 +45,11 @@ describe('serialize()', () => {
     it('does not permit objects with a _bsontype string to be serialized at the root', () => {
       expect(() => BSON.serialize({ _bsontype: 'iLoveJavascript' })).to.throw(/BSON types cannot/);
       // a nested invalid _bsontype throws something different
-      expect(() => BSON.serialize({ a: { _bsontype: 'iLoveJavascript' } })).to.throw(
-        /invalid _bsontype/
-      );
+      expect(() =>
+        BSON.serialize({
+          a: { _bsontype: 'iLoveJavascript', [Symbol.for('@@mdb.bson.version')]: 5 }
+        })
+      ).to.throw(/invalid _bsontype/);
     });
 
     it('does permit objects with a _bsontype prop that is not a string', () => {
@@ -87,6 +90,22 @@ describe('serialize()', () => {
       expect(() => BSON.serialize(new ArrayBuffer(2))).to.throw(/cannot be BSON documents/);
       expect(() => BSON.serialize(Buffer.alloc(2))).to.throw(/cannot be BSON documents/);
       expect(() => BSON.serialize(new Uint8Array(3))).to.throw(/cannot be BSON documents/);
+    });
+
+    it(`throws if Symbol.for('@@mdb.bson.version') is the wrong version`, () => {
+      expect(() =>
+        BSON.serialize({
+          a: { _bsontype: 'Int32', value: 2, [Symbol.for('@@mdb.bson.version')]: 1 }
+        })
+      ).to.throw(BSONVersionError, /Unsupported BSON version/i);
+    });
+
+    it(`throws if Symbol.for('@@mdb.bson.version') is not defined`, () => {
+      expect(() =>
+        BSON.serialize({
+          a: { _bsontype: 'Int32', value: 2 }
+        })
+      ).to.throw(BSONVersionError, /Unsupported BSON version/i);
     });
   });
 });

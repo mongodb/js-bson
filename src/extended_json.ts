@@ -1,11 +1,17 @@
 import { Binary } from './binary';
 import type { Document } from './bson';
 import { Code } from './code';
-import { BSON_INT32_MAX, BSON_INT32_MIN, BSON_INT64_MAX, BSON_INT64_MIN } from './constants';
+import {
+  BSON_INT32_MAX,
+  BSON_INT32_MIN,
+  BSON_INT64_MAX,
+  BSON_INT64_MIN,
+  BSON_MAJOR_VERSION
+} from './constants';
 import { DBRef, isDBRefLike } from './db_ref';
 import { Decimal128 } from './decimal128';
 import { Double } from './double';
-import { BSONError } from './error';
+import { BSONError, BSONVersionError } from './error';
 import { Int32 } from './int_32';
 import { Long } from './long';
 import { MaxKey } from './max_key';
@@ -273,13 +279,9 @@ const BSON_TYPE_MAPPINGS = {
     ),
   MaxKey: () => new MaxKey(),
   MinKey: () => new MinKey(),
-  ObjectID: (o: ObjectId) => new ObjectId(o),
-  // The _bsontype for ObjectId is spelled with a capital "D", to the mapping above will be used (most of the time)
-  // specifically BSON versions 4.0.0 and 4.0.1 the _bsontype was changed to "ObjectId" so we keep this mapping to support
-  // those version of BSON
   ObjectId: (o: ObjectId) => new ObjectId(o),
   BSONRegExp: (o: BSONRegExp) => new BSONRegExp(o.pattern, o.options),
-  Symbol: (o: BSONSymbol) => new BSONSymbol(o.value),
+  BSONSymbol: (o: BSONSymbol) => new BSONSymbol(o.value),
   Timestamp: (o: Timestamp) => Timestamp.fromBits(o.low, o.high)
 } as const;
 
@@ -310,6 +312,13 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
       }
     }
     return _doc;
+  } else if (
+    doc != null &&
+    typeof doc === 'object' &&
+    typeof doc._bsontype === 'string' &&
+    doc[Symbol.for('@@mdb.bson.version')] !== BSON_MAJOR_VERSION
+  ) {
+    throw new BSONVersionError();
   } else if (isBSONType(doc)) {
     // the "document" is really just a BSON type object
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
