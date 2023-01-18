@@ -1032,11 +1032,11 @@ export class Long {
     const { useBigInt64 = false, relaxed = true } = { ...options };
 
     if (doc.$numberLong.length > MAX_INT64_STRING_LENGTH) {
-      throw new BSONError('int64 string is too long');
+      throw new BSONError(`$numberLong string "${doc.$numberLong}"is too long`);
     }
 
     if (!DECIMAL_REG_EX.test(doc.$numberLong)) {
-      throw new BSONError('int64 string is not a valid decimal integer');
+      throw new BSONError(`$numberLong string "${doc.$numberLong}" is in an invalid format`);
     }
 
     if (useBigInt64) {
@@ -1044,7 +1044,12 @@ export class Long {
       const INT64_MIN = -BigInt('0x8000000000000000');
       const bigIntResult = BigInt(doc.$numberLong);
       if (bigIntResult > INT64_MAX || bigIntResult < INT64_MIN) {
-        throw new BSONError('EJSON numberLong must be in int64 range');
+        throw new BSONError(
+          `EJSON numberLong must be in int64 range; got ${BigInt.asIntN(
+            64,
+            bigIntResult
+          ).toString()}`
+        );
       }
       return bigIntResult;
     }

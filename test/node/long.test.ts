@@ -69,7 +69,7 @@ describe('Long', function () {
         const ejsonDoc = { $numberLong: '0xffffffff' };
         expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(
           BSONError,
-          'int64 string is not a valid decimal integer'
+          /is in an invalid format/
         );
       });
 
@@ -77,7 +77,7 @@ describe('Long', function () {
         const ejsonDoc = { $numberLong: '0o1234567' };
         expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(
           BSONError,
-          'int64 string is not a valid decimal integer'
+          /is in an invalid format/
         );
       });
 
@@ -85,23 +85,20 @@ describe('Long', function () {
         const ejsonDoc = { $numberLong: '0b010101101011' };
         expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(
           BSONError,
-          'int64 string is not a valid decimal integer'
+          /is in an invalid format/
         );
       });
 
       it('strings longer than 20 characters', function () {
         const ejsonDoc = { $numberLong: '99999999999999999999999' };
-        expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(
-          BSONError,
-          'int64 string is too long'
-        );
+        expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(BSONError, /is too long/);
       });
 
       it('strings with leading zeros', function () {
         const ejsonDoc = { $numberLong: '000123456' };
         expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(
           BSONError,
-          'int64 string is not a valid decimal integer'
+          /is in an invalid format/
         );
       });
 
@@ -109,7 +106,7 @@ describe('Long', function () {
         const ejsonDoc = { $numberLong: 'hello world' };
         expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(
           BSONError,
-          'int64 string is not a valid decimal integer'
+          /is in an invalid format/
         );
       });
 
@@ -117,7 +114,7 @@ describe('Long', function () {
         const ejsonDoc = { $numberLong: '-0' };
         expect(() => Long.fromExtendedJSON(ejsonDoc)).to.throw(
           BSONError,
-          'int64 string is not a valid decimal integer'
+          /is in an invalid format/
         );
       });
     });
@@ -128,7 +125,7 @@ describe('Long', function () {
           const ejsonDoc = { $numberLong: '9223372036854775808' }; // 2^63
           expect(() => Long.fromExtendedJSON(ejsonDoc, { useBigInt64: true })).to.throw(
             BSONError,
-            'EJSON numberLong must be in int64 range'
+            /EJSON numberLong must be in int64 range; got/
           );
         });
 
@@ -136,7 +133,7 @@ describe('Long', function () {
           const ejsonDoc = { $numberLong: '-9223372036854775809' }; // -2^63 - 1
           expect(() => Long.fromExtendedJSON(ejsonDoc, { useBigInt64: true })).to.throw(
             BSONError,
-            'EJSON numberLong must be in int64 range'
+            /EJSON numberLong must be in int64 range; got/
           );
         });
       });
