@@ -33,7 +33,7 @@ This allows the BSON library to be more platform independent while keeping its b
 
 #### APIs impacted
 
-The following APIs now return `Uint8Arrays` when the library is loaded in an environment that does not define a global Node.js Buffer.
+The following APIs now return `Uint8Arrays` when the library is loaded in an environment that does not define a global Node.js `Buffer`.
 
 - `Binary.prototype.buffer`
 - `Binary.prototype.read()`
