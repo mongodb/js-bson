@@ -232,7 +232,7 @@ BSON.serialize([1, 2, 3])
 // BSONError: serialize does not support an array as the root input
 ```
 
-If the functionality of turning arrays into an object with numeric keys is useful see the following example:
+If the functionality of turning arrays into an object with numeric keys is useful, see the following example:
 
 ```typescript
 // Migration example:
