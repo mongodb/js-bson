@@ -244,7 +244,7 @@ BSON.deserialize(result)
 ### Exports and available bundles
 
 Most users should be unaffected by these changes, Node.js `require()` / Node.js `import` will fetch the corresponding BSON library as expected.
-And for folks using bundlers like, webpack or rollup a tree shakable ES module bundle will be pulled in because of the settings in our `package.json`.
+And for folks using bundlers like webpack or rollup, a tree shakable ES module bundle will be pulled in because of the settings in our `package.json`.
 
 Our `package.json` defines the following `"exports"` settings.
 ```json
