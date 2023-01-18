@@ -23,7 +23,7 @@ describe('Long', function () {
     expect(new Long(13835058055282163712n, true).toString()).to.equal('13835058055282163712');
   });
 
-  describe.only('static fromExtendedJSON()', function () {
+  describe('static fromExtendedJSON()', function () {
     it('is not affected by the legacy flag', function () {
       const ejsonDoc = { $numberLong: '123456789123456789' };
       const longRelaxedLegacy = Long.fromExtendedJSON(ejsonDoc, { legacy: true, relaxed: true });
@@ -41,7 +41,7 @@ describe('Long', function () {
       expect(longCanonicalLegacy).to.deep.equal(longCanonicalNonLegacy);
     });
 
-    describe.only('accepts', function () {
+    describe('accepts', function () {
       it('+0', function () {
         const ejsonDoc = { $numberLong: '+0' };
         expect(Long.fromExtendedJSON(ejsonDoc, { relaxed: false })).to.deep.equal(
@@ -122,38 +122,41 @@ describe('Long', function () {
       });
     });
 
-    describe.only('when useBigInt64=true', function () {
-      it('rejects strings encoding positive numbers larger than 64 bits wide', function () {
-        const ejsonDoc = { $numberLong: 0xffff_ffff_ffff_ffffn.toString() };
-        expect(() => Long.fromExtendedJSON(ejsonDoc, { useBigInt64: true })).to.throw(
-          BSONError,
-          'EJSON numberLong must be in int64 range'
-        );
-      });
+    describe('when useBigInt64=true', function () {
+      describe('rejects', function () {
+        it('strings encoding positive numbers larger than 64 bits wide', function () {
+          const ejsonDoc = { $numberLong: '9223372036854775808' };
+          expect(() => Long.fromExtendedJSON(ejsonDoc, { useBigInt64: true })).to.throw(
+            BSONError,
+            'EJSON numberLong must be in int64 range'
+          );
+        });
 
-      it('strings encoding negative numbers larger than 64 bits wide', function () {
-        const ejsonDoc = { $numberLong: '-' + 0xbfff_ffff_ffff_ffffn.toString() };
-        expect(() => Long.fromExtendedJSON(ejsonDoc, { useBigInt64: true })).to.throw(
-          BSONError,
-          'EJSON numberLong must be in int64 range'
-        );
+        it('strings encoding negative numbers larger than 64 bits wide', function () {
+          const ejsonDoc = { $numberLong: '9223372036854775808' };
+          expect(() => Long.fromExtendedJSON(ejsonDoc, { useBigInt64: true })).to.throw(
+            BSONError,
+            'EJSON numberLong must be in int64 range'
+          );
+        });
       });
     });
 
-    describe.only('when useBigInt64=false', function () {
-      it('truncates strings encoding positive numbers larger than 64 bits wide', function () {
-        const ejsonDoc = { $numberLong: 0xffff_ffff_ffff_ffffn.toString() };
-        expect(
-          Long.fromExtendedJSON(ejsonDoc, { useBigInt64: false, relaxed: false })
-        ).to.deep.equal(Long.fromNumber(-1));
-      });
+    describe('when useBigInt64=false', function () {
+      describe('truncates', function () {
+        it('strings encoding positive numbers larger than 64 bits wide', function () {
+          const ejsonDoc = { $numberLong: '9223372036854775808' };
+          expect(
+            Long.fromExtendedJSON(ejsonDoc, { useBigInt64: false, relaxed: false })
+          ).to.deep.equal(Long.fromBigInt(-9223372036854775808n));
+        });
 
-      it('truncates strings encoding negative numbers larger than 64 bits wide', function () {
-        const ejsonDoc = { $numberLong: '-' + 0xffff_ffff_ffff_0000n.toString() };
-        expect(() => Long.fromExtendedJSON(ejsonDoc, { useBigInt64: false, relaxed: false })).to.throw(
-          BSONError,
-          'EJSON numberLong must be in int64 range'
-        );
+        it('strings encoding negative numbers larger than 64 bits wide', function () {
+          const ejsonDoc = { $numberLong: '-9223372036854775809' };
+          expect(
+            Long.fromExtendedJSON(ejsonDoc, { useBigInt64: false, relaxed: false })
+          ).to.deep.equal(Long.fromBigInt(9223372036854775807n));
+        });
       });
     });
   });
