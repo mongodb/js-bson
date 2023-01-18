@@ -1029,8 +1029,7 @@ export class Long {
     doc: { $numberLong: string },
     options?: EJSONOptions
   ): number | Long | bigint {
-    const defaults = { useBigInt64: false, relaxed: true };
-    const ejsonOptions = { ...defaults, ...options };
+    const { useBigInt64 = false, relaxed = true } = { ...options };
 
     if (doc.$numberLong.length > MAX_INT64_STRING_LENGTH) {
       throw new BSONError('int64 string is too long');
@@ -1040,7 +1039,7 @@ export class Long {
       throw new BSONError('int64 string is not a valid decimal integer');
     }
 
-    if (ejsonOptions.useBigInt64) {
+    if (useBigInt64) {
       const INT64_MAX = BigInt('0x7fffffffffffffff');
       const INT64_MIN = -BigInt('0x8000000000000000');
       const bigIntResult = BigInt(doc.$numberLong);
@@ -1051,7 +1050,7 @@ export class Long {
     }
 
     const longResult = Long.fromString(doc.$numberLong);
-    if (ejsonOptions.relaxed) {
+    if (relaxed) {
       return longResult.toNumber();
     }
     return longResult;
