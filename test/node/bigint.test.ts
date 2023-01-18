@@ -263,223 +263,225 @@ describe('BSON BigInt support', function () {
       expect(serializedMap).to.deep.equal(expectedSerialization);
     });
   });
+});
 
-  describe('EJSON.parse()', function () {
-    type ParseOptions = {
-      useBigInt64: boolean | undefined;
-      relaxed: boolean | undefined;
+describe('EJSON.parse()', function () {
+  type ParseOptions = {
+    useBigInt64: boolean | undefined;
+    relaxed: boolean | undefined;
+  };
+  type TestTableEntry = {
+    options: ParseOptions;
+    expectedResult: BSON.Document;
+  };
+
+  // NOTE: legacy is not changed here as it does not affect the output of parsing a Long
+  const useBigInt64Values = [true, false, undefined];
+  const relaxedValues = [true, false, undefined];
+  const sampleCanonicalString = '{"a":{"$numberLong":"23"}}';
+  const sampleRelaxedIntegerString = '{"a":4294967296}';
+  const sampleRelaxedDoubleString = '{"a": 2147483647.9}';
+
+  function genTestTable(
+    useBigInt64: boolean | undefined,
+    relaxed: boolean | undefined,
+    getExpectedResult: (boolean, boolean) => BSON.Document
+  ): [TestTableEntry] {
+    const useBigInt64IsSet = useBigInt64 ?? false;
+    const relaxedIsSet = relaxed ?? true;
+
+    const expectedResult = getExpectedResult(useBigInt64IsSet, relaxedIsSet);
+
+    return [{ options: { useBigInt64, relaxed }, expectedResult }];
+  }
+
+  function generateBehaviourDescription(entry: TestTableEntry, inputString: string): string {
+    // TODO(NODE-4874): When NODE-4873 is merged in, replace this with EJSON.stringify
+    return `parses field 'a' of '${inputString}' to '${entry.expectedResult.a.constructor.name}' `;
+  }
+
+  function generateConditionDescription(entry: TestTableEntry): string {
+    const options = entry.options;
+    return `when useBigInt64 is ${options.useBigInt64} and relaxed is ${options.relaxed}`;
+  }
+
+  function generateTest(entry: TestTableEntry, sampleString: string): () => void {
+    const options = entry.options;
+
+    return () => {
+      const parsed = EJSON.parse(sampleString, {
+        useBigInt64: options.useBigInt64,
+        relaxed: options.relaxed
+      });
+      expect(parsed).to.deep.equal(entry.expectedResult);
     };
-    type TestTableEntry = {
-      options: ParseOptions;
-      expectedResult: BSON.Document;
-    };
+  }
 
-    // NOTE: legacy is not changed here as it does not affect the output of parsing a Long
-    const useBigInt64Values = [true, false, undefined];
-    const relaxedValues = [true, false, undefined];
-    const sampleCanonicalString = '{"a":{"$numberLong":"23"}}';
-    const sampleRelaxedIntegerString = '{"a":4294967296}';
-    const sampleRelaxedDoubleString = '{"a": 2147483647.9}';
+  function createTestsFromTestTable(table: TestTableEntry[], sampleString: string) {
+    for (const entry of table) {
+      const test = generateTest(entry, sampleString);
+      const condDescription = generateConditionDescription(entry);
+      const behaviourDescription = generateBehaviourDescription(entry, sampleString);
 
-    function genTestTable(
-      useBigInt64: boolean | undefined,
-      relaxed: boolean | undefined,
-      getExpectedResult: (boolean, boolean) => BSON.Document
-    ): [TestTableEntry] {
-      const useBigInt64IsSet = useBigInt64 ?? false;
-      const relaxedIsSet = relaxed ?? true;
-
-      const expectedResult = getExpectedResult(useBigInt64IsSet, relaxedIsSet);
-
-      return [{ options: { useBigInt64, relaxed }, expectedResult }];
-    }
-
-    function generateBehaviourDescription(entry: TestTableEntry, inputString: string): string {
-      // TODO(NODE-4874): When NODE-4873 is merged in, replace this with EJSON.stringify
-      return `parses field 'a' of '${inputString}' to '${entry.expectedResult.a.constructor.name}' `;
-    }
-
-    function generateConditionDescription(entry: TestTableEntry): string {
-      const options = entry.options;
-      return `when useBigInt64 is ${options.useBigInt64} and relaxed is ${options.relaxed}`;
-    }
-
-    function generateTest(entry: TestTableEntry, sampleString: string): () => void {
-      const options = entry.options;
-
-      return () => {
-        const parsed = EJSON.parse(sampleString, {
-          useBigInt64: options.useBigInt64,
-          relaxed: options.relaxed
-        });
-        expect(parsed).to.deep.equal(entry.expectedResult);
-      };
-    }
-
-    function createTestsFromTestTable(table: TestTableEntry[], sampleString: string) {
-      for (const entry of table) {
-        const test = generateTest(entry, sampleString);
-        const condDescription = generateConditionDescription(entry);
-        const behaviourDescription = generateBehaviourDescription(entry, sampleString);
-
-        describe(condDescription, function () {
-          it(behaviourDescription, test);
-        });
-      }
-    }
-
-    describe('canonical input', function () {
-      const canonicalInputTestTable = useBigInt64Values.flatMap(useBigInt64 => {
-        return relaxedValues.flatMap(relaxed => {
-          return genTestTable(
-            useBigInt64,
-            relaxed,
-            (useBigInt64IsSet: boolean, relaxedIsSet: boolean) =>
-              useBigInt64IsSet
-                ? { a: 23n }
-                : relaxedIsSet
-                ? { a: 23 }
-                : { a: BSON.Long.fromNumber(23) }
-          );
-        });
+      describe(condDescription, function () {
+        it(behaviourDescription, test);
       });
+    }
+  }
 
-      it('meta test: generates 9 tests', () => {
-        expect(canonicalInputTestTable).to.have.lengthOf(9);
-      });
-
-      createTestsFromTestTable(canonicalInputTestTable, sampleCanonicalString);
-    });
-
-    describe('relaxed integer input', function () {
-      const relaxedIntegerInputTestTable = useBigInt64Values.flatMap(useBigInt64 => {
-        return relaxedValues.flatMap(relaxed => {
-          return genTestTable(
-            useBigInt64,
-            relaxed,
-            (useBigInt64IsSet: boolean, relaxedIsSet: boolean) =>
-              relaxedIsSet
-                ? { a: 4294967296 }
-                : useBigInt64IsSet
-                ? { a: 4294967296n }
-                : { a: BSON.Long.fromNumber(4294967296) }
-          );
-        });
-      });
-      it('meta test: generates 9 tests', () => {
-        expect(relaxedIntegerInputTestTable).to.have.lengthOf(9);
-      });
-
-      createTestsFromTestTable(relaxedIntegerInputTestTable, sampleRelaxedIntegerString);
-    });
-
-    describe('relaxed double input where double is outside of int32 range and useBigInt64 is true', function () {
-      const relaxedDoubleInputTestTable = relaxedValues.flatMap(relaxed => {
-        return genTestTable(true, relaxed, (_, relaxedIsSet: boolean) =>
-          relaxedIsSet ? { a: 2147483647.9 } : { a: new BSON.Double(2147483647.9) }
+  describe('canonical input', function () {
+    const canonicalInputTestTable = useBigInt64Values.flatMap(useBigInt64 => {
+      return relaxedValues.flatMap(relaxed => {
+        return genTestTable(
+          useBigInt64,
+          relaxed,
+          (useBigInt64IsSet: boolean, relaxedIsSet: boolean) =>
+            useBigInt64IsSet
+              ? { a: 23n }
+              : relaxedIsSet
+              ? { a: 23 }
+              : { a: BSON.Long.fromNumber(23) }
         );
       });
-
-      it('meta test: generates 3 tests', () => {
-        expect(relaxedDoubleInputTestTable).to.have.lengthOf(3);
-      });
-
-      createTestsFromTestTable(relaxedDoubleInputTestTable, sampleRelaxedDoubleString);
-  describe('EJSON.stringify()', function () {
-    context('canonical mode (relaxed=false)', function () {
-      it('truncates bigint values when they are outside the range [BSON_INT64_MIN, BSON_INT64_MAX]', function () {
-        const numbers = { a: 2n ** 64n + 1n, b: -(2n ** 64n) - 1n };
-        const serialized = EJSON.stringify(numbers, { relaxed: false });
-        expect(serialized).to.equal('{"a":{"$numberLong":"1"},"b":{"$numberLong":"-1"}}');
-      });
-
-      it('truncates bigint values in the same way as BSON.serialize', function () {
-        const number = { a: 0x1234_5678_1234_5678_9999n };
-        const stringified = EJSON.stringify(number, { relaxed: false });
-        const serialized = BSON.serialize(number);
-
-        const VALUE_OFFSET = 7;
-        const dataView = BSONDataView.fromUint8Array(serialized);
-        const serializedValue = dataView.getBigInt64(VALUE_OFFSET, true);
-        const parsed = JSON.parse(stringified);
-
-        expect(parsed).to.have.property('a');
-        expect(parsed['a']).to.have.property('$numberLong');
-        expect(parsed.a.$numberLong).to.equal(0x5678_1234_5678_9999n.toString());
-
-        expect(parsed.a.$numberLong).to.equal(serializedValue.toString());
-      });
-      it('serializes bigint values to numberLong in canonical mode', function () {
-        const number = { a: 2n };
-        const serialized = EJSON.stringify(number, { relaxed: false });
-        expect(serialized).to.equal('{"a":{"$numberLong":"2"}}');
-      });
     });
 
-    context('relaxed mode (relaxed=true)', function () {
-      it('truncates bigint values in the same way as BSON.serialize', function () {
-        const number = { a: 0x1234_0000_1234_5678_9999n }; // Ensure that the truncated number can be exactly represented as a JS number
-        const stringified = EJSON.stringify(number, { relaxed: true });
-        const serializedDoc = BSON.serialize(number);
-
-        const VALUE_OFFSET = 7;
-        const dataView = BSONDataView.fromUint8Array(serializedDoc);
-        const parsed = JSON.parse(stringified);
-
-        expect(parsed).to.have.property('a');
-        expect(parsed.a).to.equal(0x0000_1234_5678_9999);
-
-        expect(parsed.a).to.equal(Number(dataView.getBigInt64(VALUE_OFFSET, true)));
-      });
-
-      it('serializes bigint values to Number', function () {
-        const number = { a: 10000n };
-        const serialized = EJSON.stringify(number, { relaxed: true });
-        expect(serialized).to.equal('{"a":10000}');
-      });
-
-      it('loses precision when serializing bigint values outside of range [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER]', function () {
-        const numbers = { a: -(2n ** 53n) - 1n, b: 2n ** 53n + 2n };
-        const serialized = EJSON.stringify(numbers, { relaxed: true });
-        expect(serialized).to.equal('{"a":-9007199254740992,"b":9007199254740994}');
-      });
+    it('meta test: generates 9 tests', () => {
+      expect(canonicalInputTestTable).to.have.lengthOf(9);
     });
 
-    context('when passed bigint values that are 64 bits wide or less', function () {
-      let parsed;
+    createTestsFromTestTable(canonicalInputTestTable, sampleCanonicalString);
+  });
 
-      before(function () {
-        const number = { a: 12345n };
-        const serialized = EJSON.stringify(number, { relaxed: false });
-        parsed = JSON.parse(serialized);
-      });
-
-      it('passes loose equality checks with native bigint values', function () {
-        // eslint-disable-next-line eqeqeq
-        expect(parsed.a.$numberLong == 12345n).true;
-      });
-
-      it('equals the result of BigInt.toString', function () {
-        expect(parsed.a.$numberLong).to.equal(12345n.toString());
+  describe('relaxed integer input', function () {
+    const relaxedIntegerInputTestTable = useBigInt64Values.flatMap(useBigInt64 => {
+      return relaxedValues.flatMap(relaxed => {
+        return genTestTable(
+          useBigInt64,
+          relaxed,
+          (useBigInt64IsSet: boolean, relaxedIsSet: boolean) =>
+            relaxedIsSet
+              ? { a: 4294967296 }
+              : useBigInt64IsSet
+              ? { a: 4294967296n }
+              : { a: BSON.Long.fromNumber(4294967296) }
+        );
       });
     });
+    it('meta test: generates 9 tests', () => {
+      expect(relaxedIntegerInputTestTable).to.have.lengthOf(9);
+    });
 
-    context('when passed bigint values that are more than 64 bits wide', function () {
-      let parsed;
+    createTestsFromTestTable(relaxedIntegerInputTestTable, sampleRelaxedIntegerString);
+  });
 
-      before(function () {
-        const number = { a: 0x1234_5678_1234_5678_9999n };
-        const serialized = EJSON.stringify(number, { relaxed: false });
-        parsed = JSON.parse(serialized);
+  describe('relaxed double input where double is outside of int32 range and useBigInt64 is true', function () {
+    const relaxedDoubleInputTestTable = relaxedValues.flatMap(relaxed => {
+      return genTestTable(true, relaxed, (_, relaxedIsSet: boolean) =>
+        relaxedIsSet ? { a: 2147483647.9 } : { a: new BSON.Double(2147483647.9) }
+      );
+    });
+
+    it('meta test: generates 3 tests', () => {
+      expect(relaxedDoubleInputTestTable).to.have.lengthOf(3);
+    });
+
+    createTestsFromTestTable(relaxedDoubleInputTestTable, sampleRelaxedDoubleString);
+    describe('EJSON.stringify()', function () {
+      context('canonical mode (relaxed=false)', function () {
+        it('truncates bigint values when they are outside the range [BSON_INT64_MIN, BSON_INT64_MAX]', function () {
+          const numbers = { a: 2n ** 64n + 1n, b: -(2n ** 64n) - 1n };
+          const serialized = EJSON.stringify(numbers, { relaxed: false });
+          expect(serialized).to.equal('{"a":{"$numberLong":"1"},"b":{"$numberLong":"-1"}}');
+        });
+
+        it('truncates bigint values in the same way as BSON.serialize', function () {
+          const number = { a: 0x1234_5678_1234_5678_9999n };
+          const stringified = EJSON.stringify(number, { relaxed: false });
+          const serialized = BSON.serialize(number);
+
+          const VALUE_OFFSET = 7;
+          const dataView = BSONDataView.fromUint8Array(serialized);
+          const serializedValue = dataView.getBigInt64(VALUE_OFFSET, true);
+          const parsed = JSON.parse(stringified);
+
+          expect(parsed).to.have.property('a');
+          expect(parsed['a']).to.have.property('$numberLong');
+          expect(parsed.a.$numberLong).to.equal(0x5678_1234_5678_9999n.toString());
+
+          expect(parsed.a.$numberLong).to.equal(serializedValue.toString());
+        });
+        it('serializes bigint values to numberLong in canonical mode', function () {
+          const number = { a: 2n };
+          const serialized = EJSON.stringify(number, { relaxed: false });
+          expect(serialized).to.equal('{"a":{"$numberLong":"2"}}');
+        });
       });
 
-      it('fails loose equality checks with native bigint values', function () {
-        // eslint-disable-next-line eqeqeq
-        expect(parsed.a.$numberLong == 0x1234_5678_1234_5678_9999n).false;
+      context('relaxed mode (relaxed=true)', function () {
+        it('truncates bigint values in the same way as BSON.serialize', function () {
+          const number = { a: 0x1234_0000_1234_5678_9999n }; // Ensure that the truncated number can be exactly represented as a JS number
+          const stringified = EJSON.stringify(number, { relaxed: true });
+          const serializedDoc = BSON.serialize(number);
+
+          const VALUE_OFFSET = 7;
+          const dataView = BSONDataView.fromUint8Array(serializedDoc);
+          const parsed = JSON.parse(stringified);
+
+          expect(parsed).to.have.property('a');
+          expect(parsed.a).to.equal(0x0000_1234_5678_9999);
+
+          expect(parsed.a).to.equal(Number(dataView.getBigInt64(VALUE_OFFSET, true)));
+        });
+
+        it('serializes bigint values to Number', function () {
+          const number = { a: 10000n };
+          const serialized = EJSON.stringify(number, { relaxed: true });
+          expect(serialized).to.equal('{"a":10000}');
+        });
+
+        it('loses precision when serializing bigint values outside of range [Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER]', function () {
+          const numbers = { a: -(2n ** 53n) - 1n, b: 2n ** 53n + 2n };
+          const serialized = EJSON.stringify(numbers, { relaxed: true });
+          expect(serialized).to.equal('{"a":-9007199254740992,"b":9007199254740994}');
+        });
       });
 
-      it('not equal to results of BigInt.toString', function () {
-        expect(parsed.a.$numberLong).to.not.equal(0x1234_5678_1234_5678_9999n.toString());
+      context('when passed bigint values that are 64 bits wide or less', function () {
+        let parsed;
+
+        before(function () {
+          const number = { a: 12345n };
+          const serialized = EJSON.stringify(number, { relaxed: false });
+          parsed = JSON.parse(serialized);
+        });
+
+        it('passes loose equality checks with native bigint values', function () {
+          // eslint-disable-next-line eqeqeq
+          expect(parsed.a.$numberLong == 12345n).true;
+        });
+
+        it('equals the result of BigInt.toString', function () {
+          expect(parsed.a.$numberLong).to.equal(12345n.toString());
+        });
+      });
+
+      context('when passed bigint values that are more than 64 bits wide', function () {
+        let parsed;
+
+        before(function () {
+          const number = { a: 0x1234_5678_1234_5678_9999n };
+          const serialized = EJSON.stringify(number, { relaxed: false });
+          parsed = JSON.parse(serialized);
+        });
+
+        it('fails loose equality checks with native bigint values', function () {
+          // eslint-disable-next-line eqeqeq
+          expect(parsed.a.$numberLong == 0x1234_5678_1234_5678_9999n).false;
+        });
+
+        it('not equal to results of BigInt.toString', function () {
+          expect(parsed.a.$numberLong).to.not.equal(0x1234_5678_1234_5678_9999n.toString());
+        });
       });
     });
   });
