@@ -28,6 +28,8 @@ export type EJSONOptions = {
   legacy?: boolean;
   /** Enable Extended JSON's `relaxed` mode, which attempts to return native JS types where possible, rather than BSON types */
   relaxed?: boolean;
+  /** Enable native bigint support */
+  useBigInt64?: boolean;
 };
 
 /** @internal */
@@ -76,17 +78,23 @@ const keysToCodecs = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function deserializeValue(value: any, options: EJSONOptions = {}) {
   if (typeof value === 'number') {
+    // TODO(NODE-4377): EJSON js number handling diverges from BSON
+    const in32BitRange = value <= BSON_INT32_MAX && value >= BSON_INT32_MIN;
+    const in64BitRange = value <= BSON_INT64_MAX && value >= BSON_INT64_MIN;
+
     if (options.relaxed || options.legacy) {
       return value;
     }
 
     if (Number.isInteger(value) && !Object.is(value, -0)) {
       // interpret as being of the smallest BSON integer type that can represent the number exactly
-      if (value >= BSON_INT32_MIN && value <= BSON_INT32_MAX) {
+      if (in32BitRange) {
         return new Int32(value);
       }
-      if (value >= BSON_INT64_MIN && value <= BSON_INT64_MAX) {
-        // TODO(NODE-4377): EJSON js number handling diverges from BSON
+      if (in64BitRange) {
+        if (options.useBigInt64) {
+          return BigInt(value);
+        }
         return Long.fromNumber(value);
       }
     }
@@ -378,13 +386,18 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parse(text: string, options?: EJSONOptions): any {
+  const ejsonOptions = {
+    useBigInt64: options?.useBigInt64 ?? false,
+    relaxed: options?.relaxed ?? true,
+    legacy: options?.legacy ?? false
+  };
   return JSON.parse(text, (key, value) => {
     if (key.indexOf('\x00') !== -1) {
       throw new BSONError(
         `BSON Document field names cannot contain null bytes, found: ${JSON.stringify(key)}`
       );
     }
-    return deserializeValue(value, { relaxed: true, legacy: false, ...options });
+    return deserializeValue(value, ejsonOptions);
   });
 }
 

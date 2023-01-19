@@ -1,4 +1,4 @@
-import { BSON, EJSON, BSONError } from '../register-bson';
+import { BSON, BSONError, EJSON } from '../register-bson';
 import { bufferFromHexArray } from './tools/utils';
 import { expect } from 'chai';
 import { BSON_DATA_LONG } from '../../src/constants';
@@ -261,6 +261,129 @@ describe('BSON BigInt support', function () {
         ])
       );
       expect(serializedMap).to.deep.equal(expectedSerialization);
+    });
+  });
+
+  describe('EJSON.parse()', function () {
+    type ParseOptions = {
+      useBigInt64: boolean | undefined;
+      relaxed: boolean | undefined;
+    };
+    type TestTableEntry = {
+      options: ParseOptions;
+      expectedResult: BSON.Document;
+    };
+
+    // NOTE: legacy is not changed here as it does not affect the output of parsing a Long
+    const useBigInt64Values = [true, false, undefined];
+    const relaxedValues = [true, false, undefined];
+    const sampleCanonicalString = '{"a":{"$numberLong":"23"}}';
+    const sampleRelaxedIntegerString = '{"a":4294967296}';
+    const sampleRelaxedDoubleString = '{"a": 2147483647.9}';
+
+    function genTestTable(
+      useBigInt64: boolean | undefined,
+      relaxed: boolean | undefined,
+      getExpectedResult: (boolean, boolean) => BSON.Document
+    ): [TestTableEntry] {
+      const useBigInt64IsSet = useBigInt64 ?? false;
+      const relaxedIsSet = relaxed ?? true;
+
+      const expectedResult = getExpectedResult(useBigInt64IsSet, relaxedIsSet);
+
+      return [{ options: { useBigInt64, relaxed }, expectedResult }];
+    }
+
+    function generateBehaviourDescription(entry: TestTableEntry, inputString: string): string {
+      return `parses field 'a' of '${inputString}' to '${entry.expectedResult.a.constructor.name}' `;
+    }
+
+    function generateConditionDescription(entry: TestTableEntry): string {
+      const options = entry.options;
+      return `when useBigInt64 is ${options.useBigInt64} and relaxed is ${options.relaxed}`;
+    }
+
+    function generateTest(entry: TestTableEntry, sampleString: string): () => void {
+      const options = entry.options;
+
+      return () => {
+        const parsed = EJSON.parse(sampleString, {
+          useBigInt64: options.useBigInt64,
+          relaxed: options.relaxed
+        });
+        expect(parsed).to.deep.equal(entry.expectedResult);
+      };
+    }
+
+    function createTestsFromTestTable(table: TestTableEntry[], sampleString: string) {
+      for (const entry of table) {
+        const test = generateTest(entry, sampleString);
+        const condDescription = generateConditionDescription(entry);
+        const behaviourDescription = generateBehaviourDescription(entry, sampleString);
+
+        describe(condDescription, function () {
+          it(behaviourDescription, test);
+        });
+      }
+    }
+
+    describe('canonical input', function () {
+      const canonicalInputTestTable = useBigInt64Values.flatMap(useBigInt64 => {
+        return relaxedValues.flatMap(relaxed => {
+          return genTestTable(
+            useBigInt64,
+            relaxed,
+            (useBigInt64IsSet: boolean, relaxedIsSet: boolean) =>
+              useBigInt64IsSet
+                ? { a: 23n }
+                : relaxedIsSet
+                ? { a: 23 }
+                : { a: BSON.Long.fromNumber(23) }
+          );
+        });
+      });
+
+      it('meta test: generates 9 tests', () => {
+        expect(canonicalInputTestTable).to.have.lengthOf(9);
+      });
+
+      createTestsFromTestTable(canonicalInputTestTable, sampleCanonicalString);
+    });
+
+    describe('relaxed integer input', function () {
+      const relaxedIntegerInputTestTable = useBigInt64Values.flatMap(useBigInt64 => {
+        return relaxedValues.flatMap(relaxed => {
+          return genTestTable(
+            useBigInt64,
+            relaxed,
+            (useBigInt64IsSet: boolean, relaxedIsSet: boolean) =>
+              relaxedIsSet
+                ? { a: 4294967296 }
+                : useBigInt64IsSet
+                ? { a: 4294967296n }
+                : { a: BSON.Long.fromNumber(4294967296) }
+          );
+        });
+      });
+      it('meta test: generates 9 tests', () => {
+        expect(relaxedIntegerInputTestTable).to.have.lengthOf(9);
+      });
+
+      createTestsFromTestTable(relaxedIntegerInputTestTable, sampleRelaxedIntegerString);
+    });
+
+    describe('relaxed double input where double is outside of int32 range and useBigInt64 is true', function () {
+      const relaxedDoubleInputTestTable = relaxedValues.flatMap(relaxed => {
+        return genTestTable(true, relaxed, (_, relaxedIsSet: boolean) =>
+          relaxedIsSet ? { a: 2147483647.9 } : { a: new BSON.Double(2147483647.9) }
+        );
+      });
+
+      it('meta test: generates 3 tests', () => {
+        expect(relaxedDoubleInputTestTable).to.have.lengthOf(3);
+      });
+
+      createTestsFromTestTable(relaxedDoubleInputTestTable, sampleRelaxedDoubleString);
     });
   });
 

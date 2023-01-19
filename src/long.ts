@@ -76,6 +76,10 @@ const INT_CACHE: { [key: number]: Long } = {};
 /** A cache of the Long representations of small unsigned integer values. */
 const UINT_CACHE: { [key: number]: Long } = {};
 
+const MAX_INT64_STRING_LENGTH = 20;
+
+const DECIMAL_REG_EX = /^(\+?0|(\+|-)?[1-9][0-9]*)$/;
+
 /** @public */
 export interface LongExtended {
   $numberLong: string;
@@ -1023,9 +1027,30 @@ export class Long extends BSONValue {
     if (options && options.relaxed) return this.toNumber();
     return { $numberLong: this.toString() };
   }
-  static fromExtendedJSON(doc: { $numberLong: string }, options?: EJSONOptions): number | Long {
-    const result = Long.fromString(doc.$numberLong);
-    return options && options.relaxed ? result.toNumber() : result;
+  static fromExtendedJSON(
+    doc: { $numberLong: string },
+    options?: EJSONOptions
+  ): number | Long | bigint {
+    const { useBigInt64 = false, relaxed = true } = { ...options };
+
+    if (doc.$numberLong.length > MAX_INT64_STRING_LENGTH) {
+      throw new BSONError('$numberLong string is too long');
+    }
+
+    if (!DECIMAL_REG_EX.test(doc.$numberLong)) {
+      throw new BSONError(`$numberLong string "${doc.$numberLong}" is in an invalid format`);
+    }
+
+    if (useBigInt64) {
+      const bigIntResult = BigInt(doc.$numberLong);
+      return BigInt.asIntN(64, bigIntResult);
+    }
+
+    const longResult = Long.fromString(doc.$numberLong);
+    if (relaxed) {
+      return longResult.toNumber();
+    }
+    return longResult;
   }
 
   /** @internal */
