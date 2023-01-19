@@ -295,7 +295,6 @@ describe('BSON BigInt support', function () {
     }
 
     function generateBehaviourDescription(entry: TestTableEntry, inputString: string): string {
-      // TODO(NODE-4874): When NODE-4873 is merged in, replace this with EJSON.stringify
       return `parses field 'a' of '${inputString}' to '${entry.expectedResult.a.constructor.name}' `;
     }
 
