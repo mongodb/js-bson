@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.0.0-alpha.3](https://github.com/mongodb/js-bson/compare/v4.7.0...v5.0.0-alpha.3) (2023-01-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* **NODE-4892:** error on bson types not from this version (#543)
+* **NODE-4890:** make all thrown errors into BSONErrors (#545)
+* **NODE-4713:** modernize bundling (#534)
+* **NODE-1921:** validate serializer root input (#537)
+* **NODE-4711:** remove evalFunctions option (#539)
+
+### Features
+
+* **NODE-1921:** validate serializer root input ([#537](https://github.com/mongodb/js-bson/issues/537)) ([95d5edf](https://github.com/mongodb/js-bson/commit/95d5edf5c4f8a1cd6c23deaac3a446959fde779e))
+* **NODE-4711:** remove evalFunctions option ([#539](https://github.com/mongodb/js-bson/issues/539)) ([0427eb5](https://github.com/mongodb/js-bson/commit/0427eb588073a07d9e88ddf6155d2c1891ae5ad1))
+* **NODE-4713:** modernize bundling ([#534](https://github.com/mongodb/js-bson/issues/534)) ([28ce4d5](https://github.com/mongodb/js-bson/commit/28ce4d584ce399d99c41c5f5fd022b6e16f7b913))
+* **NODE-4870:** Support BigInt serialization ([#541](https://github.com/mongodb/js-bson/issues/541)) ([e9e40a2](https://github.com/mongodb/js-bson/commit/e9e40a2cceb6392065a4f217d17fc4211aa1bbd7))
+* **NODE-4871:** Add support for int64 deserialization to BigInt ([#542](https://github.com/mongodb/js-bson/issues/542)) ([9ff60ba](https://github.com/mongodb/js-bson/commit/9ff60baedf2c3fcd5faf3760d4df03235531c608))
+* **NODE-4873:** support EJSON stringify from BigInt to $numberLong ([#547](https://github.com/mongodb/js-bson/issues/547)) ([37e8690](https://github.com/mongodb/js-bson/commit/37e86901cfa7e8e19bf2c2790280b16ae0c44626))
+* **NODE-4874:** support EJSON parse for BigInt from $numberLong ([#552](https://github.com/mongodb/js-bson/issues/552)) ([854aa70](https://github.com/mongodb/js-bson/commit/854aa70cd8ded233346e430ba5e2895ff23ec3f2))
+* **NODE-4890:** make all thrown errors into BSONErrors ([#545](https://github.com/mongodb/js-bson/issues/545)) ([5b837a9](https://github.com/mongodb/js-bson/commit/5b837a9e5019016529a83700f3ba3065d5e53e80))
+* **NODE-4892:** error on bson types not from this version ([#543](https://github.com/mongodb/js-bson/issues/543)) ([d9f0eaa](https://github.com/mongodb/js-bson/commit/d9f0eaa243ceeba8dd82e9c3b07fd8bca10cfc44))
+* **NODE-4927:** exports in package.json for react native and document how to polyfill for BSON ([#550](https://github.com/mongodb/js-bson/issues/550)) ([3b4b61e](https://github.com/mongodb/js-bson/commit/3b4b61ed8dfbe7e7f8635e4584e1b17a91c1c4df))
+
+
+### Bug Fixes
+
+* **NODE-4771:** serializeFunctions breaks function names outside of basic latin ([#538](https://github.com/mongodb/js-bson/issues/538)) ([35a9234](https://github.com/mongodb/js-bson/commit/35a92341c0860fb41cbd5761250c565154ce1353))
+* **NODE-4887:** serializeInto does not check for the presence of a toBSON method for values in Map entries ([#555](https://github.com/mongodb/js-bson/issues/555)) ([ebc1c76](https://github.com/mongodb/js-bson/commit/ebc1c765276e83c9e8f073efdf41b27d4e5e7d7b))
+* **NODE-4905:** double precision accuracy in canonical EJSON ([#548](https://github.com/mongodb/js-bson/issues/548)) ([e0dbb17](https://github.com/mongodb/js-bson/commit/e0dbb17d0a13f3aca9879f08cba3573b2a84fd8d))
+* **NODE-4932:** remove .0 suffix from double extended json values ([#554](https://github.com/mongodb/js-bson/issues/554)) ([946866d](https://github.com/mongodb/js-bson/commit/946866d1a1b265f13c0e6c542f54b9786726fa85))
+
 ## [4.7.0](https://github.com/mongodb/js-bson/compare/v4.6.5...v4.7.0) (2022-08-18)
 
 
