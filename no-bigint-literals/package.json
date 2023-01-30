@@ -1,0 +1,8 @@
+{
+  "name": "eslint-plugin-no-bigint-literals",
+  "version": "1.0.0",
+  "description": "Simple eslint plugin to disallow the use of bigint literals",
+  "main": "index.js",
+  "keywords": [],
+  "author": ""
+}

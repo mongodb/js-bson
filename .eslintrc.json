@@ -26,7 +26,8 @@
   },
   "plugins": [
     "prettier",
-    "eslint-plugin-tsdoc"
+    "eslint-plugin-tsdoc",
+    "no-bigint-literals"
   ],
   "reportUnusedDisableDirectives": true,
   "rules": {
@@ -62,7 +63,8 @@
     "@typescript-eslint/no-unsafe-assignment": "off",
     "@typescript-eslint/no-unsafe-return": "off",
     "@typescript-eslint/no-unsafe-argument": "off",
-    "@typescript-eslint/no-unsafe-call": "off"
+    "@typescript-eslint/no-unsafe-call": "off",
+    "no-bigint-literals/no-bigint-literals": "error"
   },
   "overrides": [
     {
