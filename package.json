@@ -46,7 +46,6 @@
     "eslint-plugin-tsdoc": "^0.2.17",
     "magic-string": "^0.27.0",
     "mocha": "10.1.0",
-    "no-bigint-literals": "file:no-bigint-literals",
     "node-fetch": "^3.2.10",
     "nyc": "^15.1.0",
     "prettier": "^2.8.1",
