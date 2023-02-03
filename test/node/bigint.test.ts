@@ -457,6 +457,9 @@ describe('BSON BigInt support', function () {
       let parsed;
 
       before(function () {
+        if (__noBigInt__) {
+          return;
+        }
         const number = { a: 12345n };
         const serialized = EJSON.stringify(number, { relaxed: false });
         parsed = JSON.parse(serialized);
@@ -476,6 +479,9 @@ describe('BSON BigInt support', function () {
       let parsed;
 
       before(function () {
+        if (__noBigInt__) {
+          return;
+        }
         const number = { a: 0x1234_5678_1234_5678_9999n };
         const serialized = EJSON.stringify(number, { relaxed: false });
         parsed = JSON.parse(serialized);

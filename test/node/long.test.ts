@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Long, BSONError } from '../register-bson';
+import { Long, BSONError, __noBigInt__ } from '../register-bson';
 
 describe('Long', function () {
   it('accepts strings in the constructor', function () {
@@ -14,6 +14,9 @@ describe('Long', function () {
   });
 
   it('accepts BigInts in Long constructor', function () {
+    if (__noBigInt__) {
+      this.currentTest?.skip();
+    }
     expect(new Long(0n).toString()).to.equal('0');
     expect(new Long(-1n).toString()).to.equal('-1');
     expect(new Long(-1n, true).toString()).to.equal('18446744073709551615');
@@ -120,6 +123,11 @@ describe('Long', function () {
     });
 
     describe('when useBigInt64=true', function () {
+      beforeEach(function () {
+        if (__noBigInt__) {
+          this.currentTest?.skip();
+        }
+      });
       describe('truncates', function () {
         it('positive numbers outside int64 range', function () {
           const ejsonDoc = { $numberLong: '9223372036854775808' }; // 2^63
@@ -143,14 +151,14 @@ describe('Long', function () {
           const ejsonDoc = { $numberLong: '9223372036854775808' }; // 2^63
           expect(
             Long.fromExtendedJSON(ejsonDoc, { useBigInt64: false, relaxed: false })
-          ).to.deep.equal(Long.fromBigInt(-9223372036854775808n));
+          ).to.deep.equal(Long.fromString('-9223372036854775808'));
         });
 
         it('negative numbers outside int64 range', function () {
           const ejsonDoc = { $numberLong: '-9223372036854775809' }; // -2^63 - 1
           expect(
             Long.fromExtendedJSON(ejsonDoc, { useBigInt64: false, relaxed: false })
-          ).to.deep.equal(Long.fromBigInt(9223372036854775807n));
+          ).to.deep.equal(Long.fromString('9223372036854775807'));
         });
       });
     });
