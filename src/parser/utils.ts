@@ -27,3 +27,22 @@ export function isMap(d: unknown): d is Map<unknown, unknown> {
 export function isDate(d: unknown): d is Date {
   return Object.prototype.toString.call(d) === '[object Date]';
 }
+
+/** @internal */
+export type StylizeFunction = (x: unknown, style: string) => string;
+/** @internal */
+export type InspectParameterFn = (x: unknown, options: unknown) => string;
+export function getStylizeFunction(options?: unknown): StylizeFunction {
+  const nodeJsStylize = (
+    options != null &&
+    typeof options === 'object' &&
+    'stylize' in options &&
+    typeof options.stylize === 'function'
+      ? options.stylize
+      : null
+  ) as (x: unknown, style: string) => string;
+  if (nodeJsStylize) return nodeJsStylize;
+
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  return v => `${v}`;
+}

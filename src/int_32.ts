@@ -1,5 +1,6 @@
 import { BSONValue } from './bson_value';
 import type { EJSONOptions } from './extended_json';
+import { getStylizeFunction } from './parser/utils';
 
 /** @public */
 export interface Int32Extended {
@@ -60,11 +61,12 @@ export class Int32 extends BSONValue {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
+  [Symbol.for('nodejs.util.inspect.custom')](depth?: number, options?: unknown): string {
+    return this.inspect(depth, options);
   }
 
-  inspect(): string {
-    return `new Int32(${this.valueOf()})`;
+  inspect(depth?: number, options?: unknown): string {
+    const stylize = getStylizeFunction(options);
+    return `new Int32(${stylize(this.value, 'number')})`;
   }
 }

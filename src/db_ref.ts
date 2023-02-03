@@ -2,6 +2,7 @@ import type { Document } from './bson';
 import { BSONValue } from './bson_value';
 import type { EJSONOptions } from './extended_json';
 import type { ObjectId } from './objectid';
+import { getStylizeFunction, InspectParameterFn } from './parser/utils';
 
 /** @public */
 export interface DBRefLike {
@@ -112,16 +113,28 @@ export class DBRef extends BSONValue {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
+  [Symbol.for('nodejs.util.inspect.custom')](
+    depth?: number,
+    options?: unknown,
+    inspect?: InspectParameterFn
+  ): string {
+    return this.inspect(depth, options, inspect);
   }
 
-  inspect(): string {
-    // NOTE: if OID is an ObjectId class it will just print the oid string.
-    const oid =
-      this.oid === undefined || this.oid.toString === undefined ? this.oid : this.oid.toString();
-    return `new DBRef("${this.namespace}", new ObjectId("${String(oid)}")${
-      this.db ? `, "${this.db}"` : ''
-    })`;
+  inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
+    const stylize = getStylizeFunction(options);
+    inspect ??= v => JSON.stringify(v);
+
+    const args = [stylize(`"${this.namespace}"`, 'string'), this.oid.inspect(depth, options)];
+
+    if (this.db) {
+      args.push(stylize(`"${this.db}"`, 'string'));
+    }
+
+    if (Object.keys(this.fields).length > 0) {
+      args.push(inspect(this.fields, options));
+    }
+
+    return `new DBRef(${args.join(', ')})`;
   }
 }

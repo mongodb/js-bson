@@ -1,4 +1,5 @@
 import { BSONValue } from './bson_value';
+import { getStylizeFunction } from './parser/utils';
 
 /** @public */
 export interface BSONSymbolExtended {
@@ -33,10 +34,6 @@ export class BSONSymbol extends BSONValue {
     return this.value;
   }
 
-  inspect(): string {
-    return `new BSONSymbol(${JSON.stringify(this.value)})`;
-  }
-
   toJSON(): string {
     return this.value;
   }
@@ -54,5 +51,15 @@ export class BSONSymbol extends BSONValue {
   /** @internal */
   [Symbol.for('nodejs.util.inspect.custom')](): string {
     return this.inspect();
+  }
+
+  /** @internal */
+  [Symbol.for('nodejs.util.inspect.custom')](depth?: number, options?: unknown): string {
+    return this.inspect(depth, options);
+  }
+
+  inspect(depth?: number, options?: unknown): string {
+    const stylize = getStylizeFunction(options);
+    return `new BSONSymbol(${stylize(`"${this.value}"`, 'string')})`;
   }
 }

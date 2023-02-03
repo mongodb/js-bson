@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { inspect } from 'node:util';
 import { __isWeb__ } from '../register-bson';
 import {
   Binary,
@@ -63,6 +64,14 @@ describe('BSON Type classes common interfaces', () => {
     for (const [name, creator] of BSONTypeClassCtors) {
       it(`${name} inherits from BSONValue`, () => {
         expect(creator()).to.be.instanceOf(BSONValue);
+      });
+
+      context.only(`${name}[Symbol.for('nodejs.util.inspect.custom')] supports color`, () => {
+        it('returns string with ANSI colors', () => {
+          const value = creator();
+          const string = inspect(value, { colors: true });
+          expect(string).include('\x1b');
+        });
       });
     }
   });

@@ -1,4 +1,4 @@
-import { isAnyArrayBuffer, isUint8Array } from './parser/utils';
+import { isAnyArrayBuffer, getStylizeFunction, isUint8Array } from './parser/utils';
 import type { EJSONOptions } from './extended_json';
 import { BSONError } from './error';
 import { BSON_BINARY_SUBTYPE_UUID_NEW } from './constants';
@@ -264,13 +264,15 @@ export class Binary extends BSONValue {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
+  [Symbol.for('nodejs.util.inspect.custom')](depth?: number, options?: unknown): string {
+    return this.inspect(depth, options);
   }
 
-  inspect(): string {
+  inspect(depth?: number, options?: unknown): string {
+    const stylize = getStylizeFunction(options);
     const base64 = ByteUtils.toBase64(this.buffer.subarray(0, this.position));
-    return `Binary.createFromBase64("${base64}", ${this.sub_type})`;
+    const base64Arg = stylize(`"${base64}"`, 'string');
+    return `Binary.createFromBase64(${base64Arg}, ${this.sub_type})`;
   }
 }
 
@@ -465,11 +467,12 @@ export class UUID extends Binary {
    * @returns return the 36 character hex string representation.
    * @internal
    */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
+  [Symbol.for('nodejs.util.inspect.custom')](depth?: number, options?: unknown): string {
+    return this.inspect(depth, options);
   }
 
-  inspect(): string {
-    return `new UUID("${this.toHexString()}")`;
+  inspect(depth?: number, options?: unknown): string {
+    const stylize = getStylizeFunction(options);
+    return `new UUID(${stylize(`"${this.toHexString()}"`, 'string')})`;
   }
 }
