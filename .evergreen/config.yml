@@ -45,8 +45,8 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          echo "NODE_VERSION=${NODE_VERSION} TEST_TARGET=${TEST_TARGET}"
-          NODE_VERSION=${NODE_VERSION} ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh ${TEST_TARGET}
+          echo "NODE_VERSION=${NODE_VERSION} NO_BIGINT=${NO_BIGINT} TEST_TARGET=${TEST_TARGET}"
+          NODE_VERSION=${NODE_VERSION} NO_BIGINT=${NO_BIGINT} ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh ${TEST_TARGET}
   run checks:
     - command: shell.exec
       type: test
@@ -121,6 +121,17 @@ tasks:
       - func: run tests
         vars:
           TEST_TARGET: web
+  - name: no-bigint-web-tests
+    tags: ["no-bigint", "web"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 18
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: web
+          NO_BIGINT: true
   - name: run-checks
     tags:
       - run-checks

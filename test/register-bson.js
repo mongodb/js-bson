@@ -16,9 +16,9 @@ const { loadCJSModuleBSON } = require('./load_bson');
  * since the error classes are declared in a different realm (?)
  * So here we augment the chai assertion to fallback on checking the name property of the error instance
  */
-chai.use(function (chai) {
+chai.use(function(chai) {
   const throwsAssertion = chai.Assertion.prototype.throw;
-  chai.Assertion.addMethod('throw', function (...args) {
+  chai.Assertion.addMethod('throw', function(...args) {
     const isNegated = chai.util.flag(this, 'negate');
     if (!isNegated) {
       // to.not.throw() is acceptable to not have an argument
@@ -45,15 +45,21 @@ globalThis.expect = chai.expect;
 
 // Controls whether to run BSON library declaration in an node or "web" environment
 const web = process.env.WEB === 'true';
+const noBigInt = process.env.NO_BIGINT === 'true';
 console.error(inspect({ web }, { colors: true }));
 
 let BSON;
 if (web) {
-  BSON = loadCJSModuleBSON().exports;
+  if (noBigInt) {
+    BSON = loadCJSModuleBSON({ BigInt: null }).exports;
+  } else {
+    BSON = loadCJSModuleBSON().exports;
+  }
 } else {
   BSON = require('../src/index');
 }
 
 // Some mocha tests need to know the environment for instanceof assertions or be skipped
 BSON.__isWeb__ = web;
+BSON.__noBigInt__ = noBigInt;
 module.exports = BSON;

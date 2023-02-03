@@ -17,6 +17,7 @@ case $1 in
     ;;
   "web")
     export WEB="true"
+    export NO_BIGINT="${NO_BIGINT:-false}"
     npm run check:web
     ;;
   *)
