@@ -1,12 +1,16 @@
-import { BSON, BSONError, EJSON } from '../register-bson';
+import { BSON, BSONError, EJSON, __noBigInt__ } from '../register-bson';
 import { bufferFromHexArray } from './tools/utils';
 import { expect } from 'chai';
 import { BSON_DATA_LONG } from '../../src/constants';
-import * as sinon from 'sinon';
 import { BSONDataView } from '../../src/utils/byte_utils';
-import { loadCJSModuleBSON } from '../load_bson';
 
 describe('BSON BigInt support', function () {
+  beforeEach(function () {
+    if (__noBigInt__) {
+      this.currentTest?.skip();
+    }
+  });
+
   describe('BSON.deserialize()', function () {
     type DeserialzationOptions = {
       useBigInt64: boolean | undefined;
@@ -484,132 +488,6 @@ describe('BSON BigInt support', function () {
 
       it('not equal to results of BigInt.toString', function () {
         expect(parsed.a.$numberLong).to.not.equal(0x1234_5678_1234_5678_9999n.toString());
-      });
-    });
-  });
-
-  // NOTE: We do not test BSON.serialize or EJSON.stringify as the only cases where
-  // these functions would make use of BigInt functionality is when explicitly
-  // provided bigint arguments
-  describe('when useBigInt64=false', function () {
-    const serializedDoc = BSON.serialize({ a: 10n });
-    const stringifiedDoc = EJSON.stringify({ a: 2 ** 50 }, { useBigInt64: true, relaxed: false });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let bsonNoBigIntMod: any;
-
-    let getBigInt64Calls = 0;
-    let setBigInt64Calls = 0;
-    let getBigUint64Calls = 0;
-    let setBigUint64Calls = 0;
-    before(function () {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { _, exports } = loadCJSModuleBSON({
-        BigInt: null,
-        DataView: class extends DataView {
-          getBigInt64(byteOffset: number, littleEndian?: boolean): bigint {
-            getBigInt64Calls += 1;
-            return super.getBigInt64(byteOffset, littleEndian);
-          }
-          getBigUint64(byteOffset: number, littleEndian?: boolean): bigint {
-            getBigUint64Calls += 1;
-            return super.getBigUint64(byteOffset, littleEndian);
-          }
-          setBigUint64(byteOffset: number, value: bigint, littleEndian?: boolean): void {
-            setBigUint64Calls += 1;
-            super.setBigUint64(byteOffset, value, littleEndian);
-          }
-          setBigInt64(byteOffset: number, value: bigint, littleEndian?: boolean): void {
-            setBigInt64Calls += 1;
-            super.setBigInt64(byteOffset, value, littleEndian);
-          }
-        }
-      });
-
-      bsonNoBigIntMod = exports;
-    });
-
-    beforeEach(function () {
-      getBigInt64Calls = 0;
-      setBigInt64Calls = 0;
-      getBigUint64Calls = 0;
-      setBigUint64Calls = 0;
-    });
-
-    after(function () {
-      bsonNoBigIntMod = undefined;
-    });
-
-    afterEach(function () {
-      sinon.restore();
-    });
-
-    context('BSON.deserialize', function () {
-      const deserialize = () =>
-        bsonNoBigIntMod.BSON.deserialize(serializedDoc, { useBigInt64: false });
-
-      it('must not throw when BigInt is unavailable', function () {
-        expect(deserialize).to.not.throw();
-      });
-
-      it('must not call Long.fromBigInt', function () {
-        const fromBigIntSpy = sinon.spy(bsonNoBigIntMod.BSON.Long.fromBigInt);
-        deserialize();
-        expect(fromBigIntSpy).to.not.have.been.called;
-      });
-
-      it('must not call DataView.getBigInt64', function () {
-        deserialize();
-        expect(getBigInt64Calls).to.equal(0);
-      });
-
-      it('must not call DataView.setBigInt64', function () {
-        deserialize();
-        expect(setBigInt64Calls).to.equal(0);
-      });
-
-      it('must not call DataView.getBigUint64', function () {
-        deserialize();
-        expect(getBigUint64Calls).to.equal(0);
-      });
-
-      it('must not call DataView.setBigUint64', function () {
-        deserialize();
-        expect(setBigUint64Calls).to.equal(0);
-      });
-    });
-
-    context('EJSON.parse', function () {
-      const parse = () =>
-        bsonNoBigIntMod.EJSON.parse(stringifiedDoc, { useBigInt64: false, relaxed: false });
-
-      it('must not throw when BigInt is unavailable', function () {
-        expect(parse).to.not.throw();
-      });
-
-      it('must not call Long.fromBigInt', function () {
-        const fromBigIntSpy = sinon.spy(bsonNoBigIntMod.BSON.Long.fromBigInt);
-        expect(parse).to.not.throw();
-        expect(fromBigIntSpy).to.not.have.been.called;
-      });
-
-      it('must not call DataView.getBigInt64', function () {
-        expect(parse).to.not.throw();
-        expect(getBigInt64Calls).to.equal(0);
-      });
-
-      it('must not call DataView.setBigInt64', function () {
-        expect(parse).to.not.throw();
-        expect(setBigInt64Calls).to.equal(0);
-      });
-
-      it('must not call DataView.getBigUint64', function () {
-        expect(parse).to.not.throw();
-        expect(getBigUint64Calls).to.equal(0);
-      });
-
-      it('must not call DataView.setBigUint64', function () {
-        expect(parse).to.not.throw();
-        expect(setBigUint64Calls).to.equal(0);
       });
     });
   });
