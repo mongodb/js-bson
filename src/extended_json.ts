@@ -93,6 +93,7 @@ function deserializeValue(value: any, options: EJSONOptions = {}) {
       }
       if (in64BitRange) {
         if (options.useBigInt64) {
+          // eslint-disable-next-line no-bigint-usage/no-calls-to-BigInt-methods
           return BigInt(value);
         }
         return Long.fromNumber(value);
@@ -249,10 +250,12 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
   }
 
   if (typeof value === 'bigint') {
+    /* eslint-disable no-bigint-usage/no-calls-to-BigInt-methods */
     if (!options.relaxed) {
       return { $numberLong: BigInt.asIntN(64, value).toString() };
     }
     return Number(BigInt.asIntN(64, value));
+    /* eslint-enable */
   }
 
   if (value instanceof RegExp || isRegExp(value)) {
