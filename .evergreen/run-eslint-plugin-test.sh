@@ -11,6 +11,6 @@ export PATH="/opt/mongodbtoolchain/v2/bin:$PATH"
 export NVM_DIR="${NODE_ARTIFACTS_PATH}/nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-cd src/etc/eslint/no-bigint-usage
+cd etc/eslint/no-bigint-usage
 npm install
 npm run test

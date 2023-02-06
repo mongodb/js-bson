@@ -70,12 +70,13 @@ functions:
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
   run eslint plugin tests:
-    - command: shell.exec
+    - command: subprocess.exec
       type: test
       params:
         working_dir: src
         timeout_secs: 60
         env:
+          NODE_VERSION: ${NODE_VERSION}
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
         binary: bash
         args:
