@@ -65,7 +65,10 @@
     "@typescript-eslint/no-unsafe-argument": "off",
     "@typescript-eslint/no-unsafe-call": "off",
     "no-bigint-usage/no-bigint-literals": "error",
-    "no-bigint-usage/no-calls-to-BigInt-methods": "error"
+    "no-restricted-globals": [
+      "error",
+      "BigInt"
+    ]
   },
   "overrides": [
     {
