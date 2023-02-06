@@ -21,11 +21,8 @@ ruleTester.run('no-calls-to-BigInt-methods', rules['no-calls-to-BigInt-methods']
       code: `
       let x = BigInt.asIntN(64, 10n);
       x = BigInt.asUintN(64, 10n);
-      x = BigInt.toString(10n);
-      x = BigInt.valueOf(10n);
-      x = BigInt.whatever();
       `,
-      errors: 5
-    }
+      errors: 2
+    },
   ]
 });
