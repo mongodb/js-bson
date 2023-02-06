@@ -87,10 +87,11 @@
   },
   "scripts": {
     "pretest": "npm run build",
-    "test": "npm run check:node && npm run check:web",
+    "test": "npm run check:node && npm run check:web && npm run check:web-no-bigint",
     "check:node": "WEB=false mocha test/node",
     "check:tsd": "npm run build:dts && tsd",
     "check:web": "WEB=true mocha test/node",
+    "check:web-no-bigint": "WEB=true NO_BIGINT=true mocha test/node",
     "build:ts": "node ./node_modules/typescript/bin/tsc",
     "build:dts": "npm run build:ts && api-extractor run --typescript-compiler-folder node_modules/typescript --local && rimraf 'lib/**/*.d.ts*' lib/parser lib/utils",
     "build:bundle": "rollup -c rollup.config.mjs",
