@@ -29,3 +29,5 @@ docs/public
 *.0x
 *.cpuprofile
 *.heapprofile
+
+.nvmrc

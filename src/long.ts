@@ -896,6 +896,7 @@ export class Long extends BSONValue {
 
   /** Converts the Long to a BigInt (arbitrary precision). */
   toBigInt(): bigint {
+    // eslint-disable-next-line no-restricted-globals -- This is allowed here as it is explicitly requesting a bigint
     return BigInt(this.toString());
   }
 
@@ -1042,8 +1043,10 @@ export class Long extends BSONValue {
     }
 
     if (useBigInt64) {
+      /* eslint-disable no-restricted-globals -- Can use BigInt here as useBigInt64=true */
       const bigIntResult = BigInt(doc.$numberLong);
       return BigInt.asIntN(64, bigIntResult);
+      /* eslint-enable */
     }
 
     const longResult = Long.fromString(doc.$numberLong);

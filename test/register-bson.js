@@ -45,15 +45,31 @@ globalThis.expect = chai.expect;
 
 // Controls whether to run BSON library declaration in an node or "web" environment
 const web = process.env.WEB === 'true';
-console.error(inspect({ web }, { colors: true }));
+const noBigInt = process.env.NO_BIGINT === 'true';
+console.error(inspect({ web, noBigInt }, { colors: true }));
 
 let BSON;
 if (web) {
-  BSON = loadCJSModuleBSON().exports;
+  if (noBigInt) {
+    BSON = loadCJSModuleBSON({
+      BigInt: null,
+      DataView: class extends DataView {
+        getBigInt64 = null;
+        getBigUint64 = null;
+        setBigUint64 = null;
+        setBigInt64 = null;
+      },
+      BigInt64Array: null,
+      BigUint64Array: null
+    }).exports;
+  } else {
+    BSON = loadCJSModuleBSON().exports;
+  }
 } else {
   BSON = require('../src/index');
 }
 
 // Some mocha tests need to know the environment for instanceof assertions or be skipped
 BSON.__isWeb__ = web;
+BSON.__noBigInt__ = noBigInt;
 module.exports = BSON;

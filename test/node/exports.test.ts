@@ -5,6 +5,7 @@ import { sorted, byStrings } from './tools/utils';
 const EXPECTED_EXPORTS = [
   // This is our added web indicator not a real export but a small exception for this test.
   '__isWeb__',
+  '__noBigInt__',
 
   'BSONType',
   'BSONValue',

@@ -45,8 +45,8 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          echo "NODE_VERSION=${NODE_VERSION} TEST_TARGET=${TEST_TARGET}"
-          NODE_VERSION=${NODE_VERSION} ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh ${TEST_TARGET}
+          echo "NODE_VERSION=${NODE_VERSION} NO_BIGINT=${NO_BIGINT} TEST_TARGET=${TEST_TARGET}"
+          NODE_VERSION=${NODE_VERSION} NO_BIGINT=${NO_BIGINT} ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh ${TEST_TARGET}
   run checks:
     - command: shell.exec
       type: test
@@ -69,6 +69,18 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
+  run eslint plugin tests:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 60
+        env:
+          NODE_VERSION: ${NODE_VERSION}
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        binary: bash
+        args:
+          - .evergreen/run-eslint-plugin-test.sh
 
 tasks:
   - name: node-tests-v14
@@ -121,6 +133,17 @@ tasks:
       - func: run tests
         vars:
           TEST_TARGET: web
+  - name: no-bigint-web-tests
+    tags: ["no-bigint", "web"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 18
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: web
+          NO_BIGINT: true
   - name: run-checks
     tags:
       - run-checks
@@ -160,12 +183,19 @@ tasks:
         vars:
           TS_VERSION: "next"
           TRY_COMPILING_LIBRARY: "false"
+  - name: check-eslint-plugin
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 18
+      - func: install dependencies
+      - func: run eslint plugin tests
 
 buildvariants:
   - name: linux
     display_name: RHEL 8.0
     run_on: rhel80-small
-    tasks: [".node", ".web"]
+    tasks: [".node", ".web", "check-eslint-plugin"]
   - name: lint
     display_name: lint
     run_on: rhel80-small

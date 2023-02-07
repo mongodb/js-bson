@@ -1,10 +1,16 @@
-import { BSON, BSONError, EJSON } from '../register-bson';
+import { BSON, BSONError, EJSON, __noBigInt__ } from '../register-bson';
 import { bufferFromHexArray } from './tools/utils';
 import { expect } from 'chai';
 import { BSON_DATA_LONG } from '../../src/constants';
 import { BSONDataView } from '../../src/utils/byte_utils';
 
 describe('BSON BigInt support', function () {
+  beforeEach(function () {
+    if (__noBigInt__) {
+      this.currentTest?.skip();
+    }
+  });
+
   describe('BSON.deserialize()', function () {
     type DeserialzationOptions = {
       useBigInt64: boolean | undefined;
@@ -284,7 +290,7 @@ describe('BSON BigInt support', function () {
     function genTestTable(
       useBigInt64: boolean | undefined,
       relaxed: boolean | undefined,
-      getExpectedResult: (boolean, boolean) => BSON.Document
+      getExpectedResult: (arg0: boolean, arg1: boolean) => BSON.Document
     ): [TestTableEntry] {
       const useBigInt64IsSet = useBigInt64 ?? false;
       const relaxedIsSet = relaxed ?? true;
@@ -451,6 +457,9 @@ describe('BSON BigInt support', function () {
       let parsed;
 
       before(function () {
+        if (__noBigInt__) {
+          return;
+        }
         const number = { a: 12345n };
         const serialized = EJSON.stringify(number, { relaxed: false });
         parsed = JSON.parse(serialized);
@@ -470,6 +479,9 @@ describe('BSON BigInt support', function () {
       let parsed;
 
       before(function () {
+        if (__noBigInt__) {
+          return;
+        }
         const number = { a: 0x1234_5678_1234_5678_9999n };
         const serialized = EJSON.stringify(number, { relaxed: false });
         parsed = JSON.parse(serialized);
