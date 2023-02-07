@@ -434,6 +434,8 @@ export class Decimal128 extends BSONValue {
                 return new Decimal128(isNegative ? INF_NEGATIVE_BUFFER : INF_POSITIVE_BUFFER);
               }
             }
+          } else {
+            break;
           }
         }
       }
