@@ -477,6 +477,9 @@ describe('Decimal128', function () {
 
     expect(bytes).to.deep.equal(result.bytes);
 
+    result = Decimal128.fromString('37.499999999999999196428571428571375');
+    expect(result.toString()).to.deep.equal('37.49999999999999919642857142857138');
+
     // // Create decimal from string value 15E-6177
     // result = Decimal128.fromString('15E-6177');
     // bytes = Buffer.from(
