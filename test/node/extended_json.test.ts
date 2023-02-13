@@ -2,7 +2,7 @@ import * as BSON from '../register-bson';
 const EJSON = BSON.EJSON;
 import * as vm from 'node:vm';
 import { expect } from 'chai';
-import { BSONVersionError } from '../../src';
+import { BSONVersionError, BSONRuntimeError } from '../../src';
 
 // BSON types
 const Binary = BSON.Binary;
@@ -438,6 +438,29 @@ describe('Extended JSON', function () {
               relaxed: true
             });
             expect(bson).to.deep.equal(doc);
+          });
+        });
+
+        context('when using useBigInt64=true', function () {
+          it('parses $date.$numberLong with millis since epoch', function () {
+            if (BSON.__noBigInt__) {
+              this.skip();
+            }
+            const date = new Date(1676315495987);
+            const doc = { field: date };
+            const stringified = EJSON.stringify(doc, { relaxed: false });
+            const parsedDoc = EJSON.parse(stringified, { useBigInt64: true, relaxed: false });
+            expect(parsedDoc).to.deep.equal(doc);
+          });
+        });
+
+        context('when deserializing object with invalid $date key', function () {
+          it('throws a BSONRuntimeError', function () {
+            const doc = { field: { $date: new ArrayBuffer(10) } };
+            const s = EJSON.stringify(doc, { relaxed: false });
+            expect(() => {
+              EJSON.parse(s, { relaxed: false });
+            }).to.throw(BSONRuntimeError, /Unrecognized type/i);
           });
         });
       });
