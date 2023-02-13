@@ -58,3 +58,14 @@ export class BSONVersionError extends BSONError {
     );
   }
 }
+
+/** @public */
+export class BSONRuntimeError extends BSONError {
+  get name(): 'BSONRuntimeError' {
+    return 'BSONRuntimeError';
+  }
+
+  constructor(message: string) {
+    super(message);
+  }
+}
