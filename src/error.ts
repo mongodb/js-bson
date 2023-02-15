@@ -4,7 +4,9 @@ import { BSON_MAJOR_VERSION } from './constants';
  * @public
  * @category Error
  *
- * `BSONError` objects are thrown when runtime errors occur.
+ * `BSONError` objects are thrown when BSON ecounters an error.
+ *
+ * This is the parent calss for all the other errors thrown in this library.
  */
 export class BSONError extends Error {
   /**
