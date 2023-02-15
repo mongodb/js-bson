@@ -2,6 +2,8 @@ import { BSON_MAJOR_VERSION } from './constants';
 
 /**
  * @public
+ * @category Error
+ *
  * `BSONError` objects are thrown when runtime errors occur.
  */
 export class BSONError extends Error {
@@ -46,7 +48,10 @@ export class BSONError extends Error {
   }
 }
 
-/** @public */
+/**
+ * @public
+ * @category Error
+ */
 export class BSONVersionError extends BSONError {
   get name(): 'BSONVersionError' {
     return 'BSONVersionError';
@@ -59,7 +64,14 @@ export class BSONVersionError extends BSONError {
   }
 }
 
-/** @public */
+/**
+ * @public
+ * @category Error
+ *
+ * An error generated when BSON functions encounter an unexpected input
+ * or reaches an unexpected/invalid internal state
+ *
+ */
 export class BSONRuntimeError extends BSONError {
   get name(): 'BSONRuntimeError' {
     return 'BSONRuntimeError';
