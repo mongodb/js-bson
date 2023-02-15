@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { loadESModuleBSON } from '../load_bson';
 
-import { __isWeb__, BSONError, BSONVersionError } from '../register-bson';
+import { __isWeb__, BSONError, BSONVersionError, BSONRuntimeError } from '../register-bson';
 
 const instanceOfChecksWork = !__isWeb__;
 
@@ -90,6 +90,16 @@ describe('BSONError', function () {
 
     it('has a name property equal to "BSONVersionError"', () => {
       expect(new BSONVersionError()).to.have.property('name', 'BSONVersionError');
+    });
+  });
+
+  describe('class BSONRuntimeError', function () {
+    it('is a BSONError instance', function () {
+      expect(BSONError.isBSONError(new BSONRuntimeError('Oopsie'))).to.be.true;
+    });
+
+    it('has a name property equal to "BSONRuntimeError"', function () {
+      expect(new BSONRuntimeError('Woops!')).to.have.property('name', 'BSONRuntimeError');
     });
   });
 });
