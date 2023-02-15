@@ -6,7 +6,7 @@ import { BSON_MAJOR_VERSION } from './constants';
  *
  * `BSONError` objects are thrown when BSON ecounters an error.
  *
- * This is the parent calss for all the other errors thrown in this library.
+ * This is the parent class for all the other errors thrown by this library.
  */
 export class BSONError extends Error {
   /**
