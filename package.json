@@ -77,8 +77,14 @@
   "main": "./lib/bson.cjs",
   "module": "./lib/bson.mjs",
   "exports": {
-    "import": "./lib/bson.mjs",
-    "require": "./lib/bson.cjs",
+    "import": {
+      "types": "./bson.d.ts",
+      "default": "./lib/bson.mjs"
+    },
+    "require": {
+      "types": "./bson.d.ts",
+      "default": "./lib/bson.cjs"
+    },
     "react-native": "./lib/bson.cjs",
     "browser": "./lib/bson.mjs"
   },
