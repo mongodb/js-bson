@@ -81,6 +81,17 @@ functions:
         binary: bash
         args:
           - .evergreen/run-eslint-plugin-test.sh
+  run bundling:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        binary: bash
+        env:
+          NODE_VERSION: ${NODE_VERSION}
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        args:
+          - .evergreen/run-bundling-test.sh
 
 tasks:
   - name: node-tests-v14
@@ -133,6 +144,13 @@ tasks:
       - func: run tests
         vars:
           TEST_TARGET: web
+  - name: bundling-tests
+    commands:
+      - func: fetch source
+        vars:
+          NODE_MAJOR_VERSION: 18
+      - func: install dependencies
+      - func: run bundling
   - name: no-bigint-web-tests
     tags: ["no-bigint", "web"]
     commands:
@@ -204,3 +222,4 @@ buildvariants:
       - check-typescript-oldest
       - check-typescript-current
       - check-typescript-next
+      - bundling-tests
