@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.0.1](https://github.com/mongodb/js-bson/compare/v5.0.0...v5.0.1) (2023-02-16)
+
+
+### Bug Fixes
+
+* **NODE-5025:** no type definitions for es module ([#563](https://github.com/mongodb/js-bson/issues/563)) ([50e90fc](https://github.com/mongodb/js-bson/commit/50e90fc1a7ff4a313a382b62a9b4972e2b8a62f2))
+* **NODE-5048:** webpack unable to bundle import with leading 'node:' ([#564](https://github.com/mongodb/js-bson/issues/564)) ([3aed24a](https://github.com/mongodb/js-bson/commit/3aed24a006bec43839269ac05007b0c5eb2b42bd))
+* **NODE-5056:** EJSON.parse date handling when useBigInt64=true ([#562](https://github.com/mongodb/js-bson/issues/562)) ([d5088af](https://github.com/mongodb/js-bson/commit/d5088afab081b671215f2157bf3dabf38ef4ea7f))
+
 ## [5.0.0](https://github.com/mongodb/js-bson/compare/v5.0.0-alpha.3...v5.0.0) (2023-01-31)
 
 ## [5.0.0-alpha.3](https://github.com/mongodb/js-bson/compare/v4.7.0...v5.0.0-alpha.3) (2023-01-20)
