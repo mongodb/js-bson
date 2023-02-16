@@ -2,7 +2,11 @@ import { BSON_MAJOR_VERSION } from './constants';
 
 /**
  * @public
- * `BSONError` objects are thrown when runtime errors occur.
+ * @category Error
+ *
+ * `BSONError` objects are thrown when BSON ecounters an error.
+ *
+ * This is the parent class for all the other errors thrown by this library.
  */
 export class BSONError extends Error {
   /**
@@ -46,7 +50,10 @@ export class BSONError extends Error {
   }
 }
 
-/** @public */
+/**
+ * @public
+ * @category Error
+ */
 export class BSONVersionError extends BSONError {
   get name(): 'BSONVersionError' {
     return 'BSONVersionError';
@@ -56,5 +63,23 @@ export class BSONVersionError extends BSONError {
     super(
       `Unsupported BSON version, bson types must be from bson ${BSON_MAJOR_VERSION}.0 or later`
     );
+  }
+}
+
+/**
+ * @public
+ * @category Error
+ *
+ * An error generated when BSON functions encounter an unexpected input
+ * or reaches an unexpected/invalid internal state
+ *
+ */
+export class BSONRuntimeError extends BSONError {
+  get name(): 'BSONRuntimeError' {
+    return 'BSONRuntimeError';
+  }
+
+  constructor(message: string) {
+    super(message);
   }
 }

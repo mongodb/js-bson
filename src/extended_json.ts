@@ -11,7 +11,7 @@ import {
 import { DBRef, isDBRefLike } from './db_ref';
 import { Decimal128 } from './decimal128';
 import { Double } from './double';
-import { BSONError, BSONVersionError } from './error';
+import { BSONError, BSONRuntimeError, BSONVersionError } from './error';
 import { Int32 } from './int_32';
 import { Long } from './long';
 import { MaxKey } from './max_key';
@@ -125,10 +125,14 @@ function deserializeValue(value: any, options: EJSONOptions = {}) {
     if (options.legacy) {
       if (typeof d === 'number') date.setTime(d);
       else if (typeof d === 'string') date.setTime(Date.parse(d));
+      else if (typeof d === 'bigint') date.setTime(Number(d));
+      else throw new BSONRuntimeError(`Unrecognized type for EJSON date: ${typeof d}`);
     } else {
       if (typeof d === 'string') date.setTime(Date.parse(d));
       else if (Long.isLong(d)) date.setTime(d.toNumber());
       else if (typeof d === 'number' && options.relaxed) date.setTime(d);
+      else if (typeof d === 'bigint') date.setTime(Number(d));
+      else throw new BSONRuntimeError(`Unrecognized type for EJSON date: ${typeof d}`);
     }
     return date;
   }
