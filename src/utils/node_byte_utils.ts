@@ -22,7 +22,7 @@ type NodeJsBufferConstructor = Omit<Uint8ArrayConstructor, 'from'> & {
 // This can be nullish, but we gate the nodejs functions on being exported whether or not this exists
 // Node.js global
 declare const Buffer: NodeJsBufferConstructor;
-declare const require: (mod: 'node:crypto') => { randomBytes: (byteLength: number) => Uint8Array };
+declare const require: (mod: 'crypto') => { randomBytes: (byteLength: number) => Uint8Array };
 
 /** @internal */
 export function nodejsMathRandomBytes(byteLength: number) {
@@ -48,7 +48,7 @@ export function nodejsMathRandomBytes(byteLength: number) {
  */
 const nodejsRandomBytes: (byteLength: number) => Uint8Array = (() => {
   try {
-    return require('node:crypto').randomBytes;
+    return require('crypto').randomBytes;
   } catch {
     return nodejsMathRandomBytes;
   }
