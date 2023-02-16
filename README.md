@@ -309,20 +309,6 @@ try {
 }
 ```
 
-## Webpack
-
-In order to use BSON with webpack the following settings to the config object exported by `webpack.config.js` are required:
-- `experiments: { topLevelAwait: true }`
-- `resolve: { fallback: { crypto: false } }`
-
-See our example webpack project in `test/bundling/webpack`.
-
-> Note: We do not expect these options to be necessary forever.
->
-> Top Level Await is stage 4 so it should eventually become stable in bundlers as well.
->
-> Setting `crypto` to resolve to an empty module is only necessary because our supported versions of Node.js do not yet have a `crypto` global. When we support Node.js 20 or later, both Node.js and web code paths will be able to use the global removing the need for an `import`.
-
 ## React Native
 
 BSON requires that `TextEncoder`, `TextDecoder`, `atob`, `btoa`, and `crypto.getRandomValues` are available globally.  These are present in most Javascript runtimes but require polyfilling in React Native.  Polyfills for the missing functionality can be installed with the following command:
