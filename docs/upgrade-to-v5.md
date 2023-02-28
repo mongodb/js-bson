@@ -29,7 +29,7 @@ The following is a detailed collection of the changes in the major v5 release of
 
 For those that use the BSON library on Node.js, there is no change - the BSON APIs will still return and accept instances of Node.js `Buffer`. Since we no longer depend on the `Buffer` web shim for compatibility with browsers, in non-Node.js environments a `Uint8Array` will be returned instead.
 
-This allows the BSON library to be more platform independent while keeping its behavior consistent cross platform. 
+This allows the BSON library to be more platform independent while keeping its behavior consistent cross platform.
 
 #### APIs impacted
 
@@ -73,6 +73,10 @@ We have set our TypeScript compilation target to `es2020` which aligns with our 
 
 > This will preserve newer ECMAScript 2020 features like optional chaining, nullish coalescing, export \* as ns, and dynamic import(...) syntax. It also means bigint literals now have a stable target below esnext.
 
+#### `class` syntax
+
+Previously, our compilation target was set such that our BSON `class`(s) became functions in the shipped code, allowing callers to omit the `new` keyword. As a result of the above `"target"` upgrade the library now ships javascript `class` syntax which requires callers to use the `new` keyword.
+
 ### `serializeFunctions` bug fix
 
 If `serializeFunctions` was enabled and the functions being serialized had a name that is outside of [Controls and Basic Latin](https://en.wikibooks.org/wiki/Unicode/Character_reference/0000-0FFF) character ranges (a.k.a utf8 bytes: `0x00-0x7F`) they would be incorrectly serialized.
@@ -83,7 +87,7 @@ This library no longer polyfills [ES Map](https://developer.mozilla.org/en-US/do
 
 ### `Decimal128` `toObject()` mapper support removed
 
-`Decimal128` can no longer have a `toObject()` method added on to its prototype for mapping to a custom value. This feature was undocumented and inconsistent with the rest of our BSON types. 
+`Decimal128` can no longer have a `toObject()` method added on to its prototype for mapping to a custom value. This feature was undocumented and inconsistent with the rest of our BSON types.
 
 At this time there is no direct migration. Cursors in the driver support transformations via `.map`, otherwise the `Decimal128` instances will require manual transformation. There is a plan to provide a better mechanism for consistently transforming BSON values tracked in [NODE-4680](https://jira.mongodb.org/browse/NODE-4680). Please feel free to add a vote or comment with a use case to help us land the feature in the most useful form.
 
