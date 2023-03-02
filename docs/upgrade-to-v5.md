@@ -75,7 +75,7 @@ We have set our TypeScript compilation target to `es2020` which aligns with our 
 
 #### `class` syntax
 
-Previously, our compilation target was set such that our BSON `class`(s) became functions in the shipped code, allowing callers to omit the `new` keyword. As a result of the above `"target"` upgrade the library now ships javascript `class` syntax which requires callers to use the `new` keyword.
+Previously, our compilation target was set such that each BSON `class` became a function in the shipped code, allowing callers to omit the `new` keyword. Because of the `"target"` upgrade, the library now ships javascript `class` syntax which requires callers to use the `new` keyword.
 
 ### `serializeFunctions` bug fix
 
