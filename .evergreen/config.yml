@@ -33,12 +33,12 @@ functions:
   install dependencies:
     - command: subprocess.exec
       type: setup
-      add_expansions_to_env: true
       params:
         working_dir: src
         binary: bash
+        add_expansions_to_env: true
         args:
-          - ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+          - .evergreen/install-dependencies.sh
 
   run tests:
     - command: shell.exec
@@ -47,8 +47,9 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          echo "NODE_VERSION=${NODE_VERSION} NO_BIGINT=${NO_BIGINT} TEST_TARGET=${TEST_TARGET}"
-          NODE_VERSION=${NODE_VERSION} NO_BIGINT=${NO_BIGINT} ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh ${TEST_TARGET}
+          echo "NO_BIGINT=${NO_BIGINT} TEST_TARGET=${TEST_TARGET}"
+          NO_BIGINT=${NO_BIGINT} ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh ${TEST_TARGET}
+
   run checks:
     - command: shell.exec
       type: test
@@ -56,7 +57,7 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          echo "NODE_VERSION=${NODE_VERSION} TEST_TARGET=${TEST_TARGET}"
+          echo "TEST_TARGET=${TEST_TARGET}"
           bash ${PROJECT_DIRECTORY}/.evergreen/run-checks.sh
   run typescript:
     - command: subprocess.exec
@@ -78,7 +79,6 @@ functions:
         working_dir: src
         timeout_secs: 60
         env:
-          NODE_VERSION: ${NODE_VERSION}
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
         binary: bash
         args:
@@ -90,7 +90,6 @@ functions:
         working_dir: src
         binary: bash
         env:
-          NODE_VERSION: ${NODE_VERSION}
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
         args:
           - .evergreen/run-bundling-test.sh
@@ -131,7 +130,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: latest
+          NODE_LTS_NAME: latest
       - func: install dependencies
       - func: run tests
         vars:

@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 if [ -z "$NODE_LTS_NAME" ]; then
-  echo "NODE_MAJOR_VERSION environment variable must be specified"
+  echo "NODE_LTS_NAME environment variable must be specified"
   exit 1
 fi
 
