@@ -46,7 +46,7 @@ globalThis.expect = chai.expect;
 // Controls whether to run BSON library declaration in an node or "web" environment
 const web = process.env.WEB === 'true';
 const noBigInt = process.env.NO_BIGINT === 'true';
-console.error(inspect({ web, noBigInt }, { colors: true }));
+console.error(inspect({ web, noBigInt, nodeVersion: process.version }, { colors: true }));
 
 let BSON;
 if (web) {
