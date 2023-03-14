@@ -585,20 +585,41 @@ describe('Extended JSON', function () {
     ).to.throw(BSONVersionError, /Unsupported BSON version/i);
   });
 
-  it('serializes a Map object with string keys', () => {
-    const input: Map<string, unknown> = new Map();
-    input.set('a', { a: 100, b: 200 });
-    input.set('b', 100.0);
+  context('Map objects', function () {
+    it('serializes an empty Map object', () => {
+      const input = new Map();
+      expect(EJSON.stringify(input)).to.equal('{}');
+    });
 
-    const str = EJSON.stringify(input);
-    expect(str).to.equal('{"a":{"a":100,"b":200},"b":100}');
-  });
+    it('serializes a nested Map object', () => {
+      const input = new Map([
+        [
+          'a',
+          new Map([
+            ['a', 100],
+            ['b', 200]
+          ])
+        ]
+      ]);
 
-  it('throws BSONError when passed Map object with non-string keys', () => {
-    const input: Map<number, unknown> = new Map();
-    input.set(1, 100);
-    input.set(2, 100.0);
+      const str = EJSON.stringify(input);
+      expect(str).to.equal('{"a":{"a":100,"b":200}}');
+    });
 
-    expect(() => EJSON.stringify(input)).to.throw(BSONError);
+    it('serializes a Map with one string key', () => {
+      const input = new Map([['a', 100]]);
+
+      const str = EJSON.stringify(input);
+      expect(str).to.equal('{"a":100}');
+    });
+
+    it('throws BSONError when passed Map object with non-string keys', () => {
+      const input: Map<number, unknown> = new Map([
+        [1, 100],
+        [2, 200]
+      ]);
+
+      expect(() => EJSON.stringify(input)).to.throw(BSONError);
+    });
   });
 });
