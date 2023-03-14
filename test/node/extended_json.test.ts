@@ -3,6 +3,7 @@ const EJSON = BSON.EJSON;
 import * as vm from 'node:vm';
 import { expect } from 'chai';
 import { BSONVersionError, BSONRuntimeError } from '../../src';
+import { BSONError } from '../register-bson';
 
 // BSON types
 const Binary = BSON.Binary;
@@ -582,5 +583,22 @@ describe('Extended JSON', function () {
         a: { _bsontype: 'Int32', value: 2, [Symbol.for('@@mdb.bson.version')]: 1 }
       })
     ).to.throw(BSONVersionError, /Unsupported BSON version/i);
+  });
+
+  it('serializes a Map object with string keys', () => {
+    const input: Map<string, unknown> = new Map();
+    input.set('a', { a: 100, b: 200 });
+    input.set('b', 100.0);
+
+    const str = EJSON.stringify(input);
+    expect(str).to.equal('{"a":{"a":100,"b":200},"b":100}');
+  });
+
+  it('throws BSONError when passed Map object with non-string keys', () => {
+    const input: Map<number, unknown> = new Map();
+    input.set(1, 100);
+    input.set(2, 100.0);
+
+    expect(() => EJSON.stringify(input)).to.throw(BSONError);
   });
 });
