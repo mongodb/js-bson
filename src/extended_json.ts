@@ -191,7 +191,7 @@ function getISOString(date: Date) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function serializeValue(value: any, options: EJSONSerializeOptions): any {
   if (value instanceof Map || isMap(value)) {
-    const obj: Record<string, unknown> = {};
+    const obj: Record<string, unknown> = Object.create(null);
     for (const [k, v] of value.entries()) {
       if (typeof k !== 'string') {
         throw new BSONError('Can only serialize maps with string keys');
