@@ -192,7 +192,7 @@ function getISOString(date: Date) {
 function serializeValue(value: any, options: EJSONSerializeOptions): any {
   if (value instanceof Map || isMap(value)) {
     const obj: Record<string, unknown> = Object.create(null);
-    for (const [k, v] of value.entries()) {
+    for (const [k, v] of value) {
       if (typeof k !== 'string') {
         throw new BSONError('Can only serialize maps with string keys');
       }
