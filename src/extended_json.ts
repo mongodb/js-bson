@@ -201,6 +201,7 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
 
     return serializeValue(obj, options);
   }
+
   if ((typeof value === 'object' || typeof value === 'function') && value !== null) {
     const index = options.seenObjects.findIndex(entry => entry.obj === value);
     if (index !== -1) {
