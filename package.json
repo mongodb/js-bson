@@ -13,7 +13,7 @@
     "etc/prepare.js"
   ],
   "types": "bson.d.ts",
-  "version": "5.0.1",
+  "version": "5.1.0",
   "author": {
     "name": "The MongoDB NodeJS Team",
     "email": "dbx-node@mongodb.com"

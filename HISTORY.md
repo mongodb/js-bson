@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.1.0](https://github.com/mongodb/js-bson/compare/v5.0.1...v5.1.0) (2023-03-16)
+
+
+### Features
+
+* **NODE-4789:** support Map stringification in EJSON ([#567](https://github.com/mongodb/js-bson/issues/567)) ([c70c82d](https://github.com/mongodb/js-bson/commit/c70c82dd815fcf7a58dba025578764177da4ef5a))
+
 ### [5.0.1](https://github.com/mongodb/js-bson/compare/v5.0.0...v5.0.1) (2023-02-16)
 
 
