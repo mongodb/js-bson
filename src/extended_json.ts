@@ -17,7 +17,7 @@ import { Long } from './long';
 import { MaxKey } from './max_key';
 import { MinKey } from './min_key';
 import { ObjectId } from './objectid';
-import { isDate, isRegExp } from './parser/utils';
+import { isDate, isRegExp, isMap } from './parser/utils';
 import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
@@ -190,6 +190,18 @@ function getISOString(date: Date) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function serializeValue(value: any, options: EJSONSerializeOptions): any {
+  if (value instanceof Map || isMap(value)) {
+    const obj: Record<string, unknown> = Object.create(null);
+    for (const [k, v] of value) {
+      if (typeof k !== 'string') {
+        throw new BSONError('Can only serialize maps with string keys');
+      }
+      obj[k] = v;
+    }
+
+    return serializeValue(obj, options);
+  }
+
   if ((typeof value === 'object' || typeof value === 'function') && value !== null) {
     const index = options.seenObjects.findIndex(entry => entry.obj === value);
     if (index !== -1) {

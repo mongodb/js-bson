@@ -3,6 +3,7 @@ const EJSON = BSON.EJSON;
 import * as vm from 'node:vm';
 import { expect } from 'chai';
 import { BSONVersionError, BSONRuntimeError } from '../../src';
+import { BSONError } from '../register-bson';
 
 // BSON types
 const Binary = BSON.Binary;
@@ -582,5 +583,43 @@ describe('Extended JSON', function () {
         a: { _bsontype: 'Int32', value: 2, [Symbol.for('@@mdb.bson.version')]: 1 }
       })
     ).to.throw(BSONVersionError, /Unsupported BSON version/i);
+  });
+
+  context('Map objects', function () {
+    it('serializes an empty Map object', () => {
+      const input = new Map();
+      expect(EJSON.stringify(input)).to.equal('{}');
+    });
+
+    it('serializes a nested Map object', () => {
+      const input = new Map([
+        [
+          'a',
+          new Map([
+            ['a', 100],
+            ['b', 200]
+          ])
+        ]
+      ]);
+
+      const str = EJSON.stringify(input);
+      expect(str).to.equal('{"a":{"a":100,"b":200}}');
+    });
+
+    it('serializes a Map with one string key', () => {
+      const input = new Map([['a', 100]]);
+
+      const str = EJSON.stringify(input);
+      expect(str).to.equal('{"a":100}');
+    });
+
+    it('throws BSONError when passed Map object with non-string keys', () => {
+      const input: Map<number, unknown> = new Map([
+        [1, 100],
+        [2, 200]
+      ]);
+
+      expect(() => EJSON.stringify(input)).to.throw(BSONError);
+    });
   });
 });
