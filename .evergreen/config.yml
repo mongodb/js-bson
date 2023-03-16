@@ -29,15 +29,17 @@ functions:
     - command: expansions.update
       params:
         file: src/expansion.yml
+
   install dependencies:
-    - command: shell.exec
+    - command: subprocess.exec
       type: setup
       params:
         working_dir: src
-        script: |
-          ${PREPARE_SHELL}
-          echo "NODE_VERSION=${NODE_VERSION}"
-          NODE_VERSION=${NODE_VERSION} ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - .evergreen/install-dependencies.sh
+
   run tests:
     - command: shell.exec
       type: test
@@ -54,7 +56,7 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          echo "NODE_VERSION=${NODE_VERSION} TEST_TARGET=${TEST_TARGET}"
+          echo "TEST_TARGET=${TEST_TARGET}"
           bash ${PROJECT_DIRECTORY}/.evergreen/run-checks.sh
   run typescript:
     - command: subprocess.exec
@@ -116,7 +118,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 14
+          NODE_LTS_NAME: fermium
       - func: install dependencies
       - func: run tests
         vars:
@@ -126,7 +128,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 16
+          NODE_LTS_NAME: gallium
       - func: install dependencies
       - func: run tests
         vars:
@@ -136,7 +138,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 18
+          NODE_LTS_NAME: hydrogen
       - func: install dependencies
       - func: run tests
         vars:
@@ -146,7 +148,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: latest
+          NODE_LTS_NAME: latest
       - func: install dependencies
       - func: run tests
         vars:
@@ -161,20 +163,21 @@ tasks:
       - func: run tests
         vars:
           TEST_TARGET: browser
+          NODE_LTS_NAME: hydrogen
   - name: run-checks
     tags:
       - run-checks
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 18
+          NODE_LTS_NAME: hydrogen
       - func: install dependencies
       - func: run checks
   - name: check-typescript-oldest
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 18
+          NODE_LTS_NAME: hydrogen
       - func: install dependencies
       - func: "run typescript"
         vars:
@@ -184,7 +187,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 18
+          NODE_LTS_NAME: hydrogen
       - func: install dependencies
       - func: "run typescript"
         vars:
@@ -194,7 +197,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 18
+          NODE_LTS_NAME: hydrogen
       - func: install dependencies
       - func: "run typescript"
         vars:
