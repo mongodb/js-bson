@@ -1,6 +1,5 @@
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
-import { RequireRewriter } from './etc/rollup/rollup-plugin-require-rewriter/require_rewriter.mjs';
 
 /** @type {typescript.RollupTypescriptOptions} */
 const tsConfig = {
@@ -54,7 +53,7 @@ const config = [
   },
   {
     input,
-    plugins: [typescript(tsConfig), new RequireRewriter(), nodeResolve({ resolveOnly: [] })],
+    plugins: [typescript(tsConfig), nodeResolve({ resolveOnly: [] })],
     output: {
       file: 'lib/bson.mjs',
       format: 'esm',
