@@ -322,7 +322,13 @@ export class Binary extends BSONValue {
   }
 
   inspect(): string {
-    return `new Binary(Buffer.from("${ByteUtils.toHex(this.buffer)}", "hex"), ${this.sub_type})`;
+    if (this.position === 0) {
+      return this.sub_type !== Binary.BSON_BINARY_SUBTYPE_DEFAULT
+        ? `new Binary(undefined, ${this.sub_type})`
+        : 'new Binary()';
+    }
+    const base64 = ByteUtils.toBase64(this.buffer.subarray(0, this.position));
+    return `Binary.createFromBase64("${base64}", ${this.sub_type})`;
   }
 }
 
