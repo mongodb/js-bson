@@ -31,21 +31,7 @@ export function nodejsMathRandomBytes(byteLength: number) {
   );
 }
 
-/**
- * @internal
- * WARNING: REQUIRE WILL BE REWRITTEN
- *
- * This code is carefully used by require_rewriter.mjs any modifications must be reflected in the plugin.
- *
- * @remarks
- * "crypto" is the only dependency BSON needs. This presents a problem for creating a bundle of the BSON library
- * in an es module format that can be used both on the browser and in Node.js. In Node.js when BSON is imported as
- * an es module, there will be no global require function defined, making the code below fallback to the much less desireable math.random bytes.
- * In order to make our es module bundle work as expected on Node.js we need to change this `require()` to a dynamic import, and the dynamic
- * import must be top-level awaited since es modules are async. So we rely on a custom rollup plugin to seek out the following lines of code
- * and replace `require` with `await import` and the IIFE line (`nodejsRandomBytes = (() => { ... })()`) with `nodejsRandomBytes = await (async () => { ... })()`
- * when generating an es module bundle.
- */
+/** @internal */
 const nodejsRandomBytes: (byteLength: number) => Uint8Array = (() => {
   try {
     return require('crypto').randomBytes;
