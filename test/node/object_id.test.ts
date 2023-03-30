@@ -1,12 +1,10 @@
-'use strict';
-
-const Buffer = require('buffer').Buffer;
-const { BSON, BSONError, EJSON, ObjectId } = require('../register-bson');
-const util = require('util');
-const { expect } = require('chai');
-const { bufferFromHexArray } = require('./tools/utils');
-const getSymbolFrom = require('./tools/utils').getSymbolFrom;
-const isBufferOrUint8Array = require('./tools/utils').isBufferOrUint8Array;
+import { Buffer } from 'buffer';
+import { BSON, BSONError, EJSON, ObjectId } from '../register-bson';
+import * as util from 'util';
+import { expect } from 'chai';
+import { bufferFromHexArray } from './tools/utils';
+import { getSymbolFrom } from './tools/utils';
+import { isBufferOrUint8Array } from './tools/utils';
 
 describe('ObjectId', function () {
   describe('static createFromTime()', () => {
