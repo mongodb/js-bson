@@ -274,6 +274,28 @@ export class ObjectId extends BSONValue {
     return new ObjectId(ByteUtils.fromHex(hexString));
   }
 
+  /** Creates an ObjectId instance from a base64 string */
+  static createFromBase64(base64: string): ObjectId {
+    const bytes = ByteUtils.fromBase64(base64);
+    return new ObjectId(bytes);
+  }
+
+  /**
+   * Creates a new view over sequence and constructs a new ObjectId instance.
+   *
+   * @param sequence - A sequence of binary data
+   * @param byteOffset - An offset to start the view from
+   * @param byteLength - A length to set the view to
+   */
+  static createFromBytes(
+    sequence: Uint8Array | ArrayBuffer | SharedArrayBuffer,
+    byteOffset = 0,
+    byteLength = sequence.byteLength
+  ): ObjectId {
+    const bytes = ByteUtils.toLocalBufferType(sequence).subarray(byteOffset, byteLength);
+    return new ObjectId(bytes);
+  }
+
   /**
    * Checks if a value is a valid bson ObjectId
    *
