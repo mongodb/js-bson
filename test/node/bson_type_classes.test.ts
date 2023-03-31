@@ -15,8 +15,7 @@ import {
   ObjectId,
   Timestamp,
   UUID,
-  BSONValue,
-  BSON
+  BSONValue
 } from '../register-bson';
 import * as vm from 'node:vm';
 
