@@ -1,12 +1,10 @@
-'use strict';
-
-const { Buffer } = require('buffer');
-const { Binary, UUID } = require('../register-bson');
-const { inspect } = require('util');
-const { validate: uuidStringValidate, version: uuidStringVersion } = require('uuid');
-const { BSON, BSONError } = require('../register-bson');
+import { Binary, UUID } from '../register-bson';
+import { inspect } from 'util';
+import { validate as uuidStringValidate, version as uuidStringVersion } from 'uuid';
+import { BSON, BSONError } from '../register-bson';
 const BSON_DATA_BINARY = BSON.BSONType.binData;
-const { BSON_BINARY_SUBTYPE_UUID_NEW } = require('../../src/constants');
+import { BSON_BINARY_SUBTYPE_UUID_NEW } from '../../src/constants';
+import { expect } from 'chai';
 
 // Test values
 const UPPERCASE_DASH_SEPARATED_UUID_STRING = 'AAAAAAAA-AAAA-4AAA-AAAA-AAAAAAAAAAAA';
