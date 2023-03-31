@@ -81,6 +81,28 @@ describe('class Binary', () => {
   });
 
   context('inspect()', () => {
+    it('when value is default returns "new Binary()"', () => {
+      expect(new Binary().inspect()).to.equal('new Binary()');
+    });
+
+    it('when value is empty returns "new Binary()"', () => {
+      expect(new Binary(new Uint8Array(0)).inspect()).to.equal('new Binary()');
+    });
+
+    it('when value is default with a subtype returns "new Binary()"', () => {
+      expect(new Binary(null, 0x23).inspect()).to.equal('new Binary(undefined, 35)');
+    });
+
+    it('when value is empty with a subtype returns "new Binary(undefined, 35)"', () => {
+      expect(new Binary(new Uint8Array(0), 0x23).inspect()).to.equal('new Binary(undefined, 35)');
+    });
+
+    it('when value is empty returns "Binary.createFromBase64("", 0)"', () => {
+      expect(new Binary(Buffer.from('abcdef', 'utf8')).inspect()).to.equal(
+        'Binary.createFromBase64("YWJjZGVm", 0)'
+      );
+    });
+
     context('when result is executed', () => {
       it('is deep equal with a Binary that has no data', () => {
         const bsonValue = new Binary();
