@@ -200,4 +200,43 @@ describe('UUID', () => {
       expect(deserializedUUID).to.deep.equal(expectedResult);
     });
   });
+
+  context('createFromHexString()', () => {
+    context('when called with a hex sequence', () => {
+      it('returns a UUID instance with the decoded bytes', () => {
+        const bytes = Buffer.from(UPPERCASE_VALUES_ONLY_UUID_STRING, 'hex');
+
+        const uuidDashed = UUID.createFromHexString(UPPERCASE_DASH_SEPARATED_UUID_STRING);
+        expect(uuidDashed).to.have.deep.property('buffer', bytes);
+        expect(uuidDashed).to.be.instanceOf(UUID);
+
+        const uuidNoDashed = UUID.createFromHexString(UPPERCASE_VALUES_ONLY_UUID_STRING);
+        expect(uuidNoDashed).to.have.deep.property('buffer', bytes);
+        expect(uuidNoDashed).to.be.instanceOf(UUID);
+      });
+    });
+
+    context('when called with an incorrect length string', () => {
+      it('throws an error indicating the expected length of 32 or 36 characters', () => {
+        expect(() => UUID.createFromHexString('')).to.throw(/32 or 36 character/);
+      });
+    });
+  });
+
+  context('createFromBase64()', () => {
+    context('when called with a base64 sequence', () => {
+      it('returns a UUID instance with the decoded bytes', () => {
+        const bytes = Buffer.from(UPPERCASE_VALUES_ONLY_UUID_STRING, 'hex');
+        const uuid = UUID.createFromBase64(bytes.toString('base64'));
+        expect(uuid).to.have.deep.property('buffer', bytes);
+        expect(uuid).to.be.instanceOf(UUID);
+      });
+    });
+
+    context('when called with an incorrect length string', () => {
+      it('throws an error indicating the expected length of 16 byte Buffer', () => {
+        expect(() => UUID.createFromBase64('')).to.throw(/16 byte Buffer/);
+      });
+    });
+  });
 });
