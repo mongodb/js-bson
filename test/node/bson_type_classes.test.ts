@@ -104,7 +104,12 @@ describe('BSON Type classes common interfaces', () => {
     for (const [name, factory] of BSONTypeClassCtors) {
       it(`${name} returns string that is runnable and has deep equality`, () => {
         const bsonValue = factory();
-        const ctx = { ...BSON, module: { exports: { result: null } } };
+        // All BSON types should only need exactly their constructor available on the global
+        const ctx = { [name]: bsonValue.constructor, module: { exports: { result: null } } };
+        if (name === 'DBRef') {
+          // DBRef is the only type that requires another BSON type
+          ctx.ObjectId = ObjectId;
+        }
         vm.runInNewContext(`module.exports.result = ${bsonValue.inspect()}`, ctx);
         expect(ctx.module.exports.result).to.deep.equal(bsonValue);
       });
