@@ -15,8 +15,10 @@ import {
   ObjectId,
   Timestamp,
   UUID,
-  BSONValue
+  BSONValue,
+  BSON
 } from '../register-bson';
+import * as vm from 'node:vm';
 
 const BSONTypeClasses = [
   Binary,
@@ -97,4 +99,15 @@ describe('BSON Type classes common interfaces', () => {
           .that.is.a('function'));
     });
   }
+
+  context(`when inspect() is called`, () => {
+    for (const [name, factory] of BSONTypeClassCtors) {
+      it(`${name} returns string that is runnable and has deep equality`, () => {
+        const bsonValue = factory();
+        const ctx = { ...BSON, module: { exports: { result: null } } };
+        vm.runInNewContext(`module.exports.result = ${bsonValue.inspect()}`, ctx);
+        expect(ctx.module.exports.result).to.deep.equal(bsonValue);
+      });
+    }
+  });
 });

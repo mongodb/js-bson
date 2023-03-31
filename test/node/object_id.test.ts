@@ -475,4 +475,36 @@ describe('ObjectId', function () {
     // class method equality
     expect(Buffer.prototype.equals.call(inBuffer, outBuffer.id)).to.be.true;
   });
+
+  context('createFromHexString()', () => {
+    context('when called with a hex sequence', () => {
+      it('returns a ObjectId instance with the decoded bytes', () => {
+        const bytes = Buffer.from('0'.repeat(24), 'hex');
+        const binary = ObjectId.createFromHexString(bytes.toString('hex'));
+        expect(binary).to.have.deep.property('id', bytes);
+      });
+    });
+
+    context('when called with an incorrect length string', () => {
+      it('throws an error indicating the expected length of 24', () => {
+        expect(() => ObjectId.createFromHexString('')).to.throw(/24/);
+      });
+    });
+  });
+
+  context('createFromBase64()', () => {
+    context('when called with a base64 sequence', () => {
+      it('returns a ObjectId instance with the decoded bytes', () => {
+        const bytes = Buffer.from('A'.repeat(16), 'base64');
+        const binary = ObjectId.createFromBase64(bytes.toString('base64'));
+        expect(binary).to.have.deep.property('id', bytes);
+      });
+    });
+
+    context('when called with an incorrect length string', () => {
+      it('throws an error indicating the expected length of 16', () => {
+        expect(() => ObjectId.createFromBase64('')).to.throw(/16/);
+      });
+    });
+  });
 });

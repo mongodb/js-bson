@@ -1,5 +1,6 @@
 import { expect } from 'chai';
-import { Binary } from '../register-bson';
+import * as vm from 'node:vm';
+import { Binary, BSON } from '../register-bson';
 
 describe('class Binary', () => {
   context('constructor()', () => {
@@ -12,6 +13,95 @@ describe('class Binary', () => {
       const emptyZeroedArray = new Uint8Array(256);
       emptyZeroedArray.fill(0x00);
       expect(binary.buffer).to.deep.equal(emptyZeroedArray);
+    });
+  });
+
+  context('createFromHexString()', () => {
+    context('when called with a hex sequence', () => {
+      it('returns a Binary instance with the decoded bytes', () => {
+        const bytes = Buffer.from('abc', 'utf8');
+        const binary = Binary.createFromHexString(bytes.toString('hex'));
+        expect(binary).to.have.deep.property('buffer', bytes);
+        expect(binary).to.have.property('sub_type', 0);
+      });
+
+      it('returns a Binary instance with the decoded bytes and subtype', () => {
+        const bytes = Buffer.from('abc', 'utf8');
+        const binary = Binary.createFromHexString(bytes.toString('hex'), 0x23);
+        expect(binary).to.have.deep.property('buffer', bytes);
+        expect(binary).to.have.property('sub_type', 0x23);
+      });
+    });
+
+    context('when called with an empty string', () => {
+      it('creates an empty binary', () => {
+        const binary = Binary.createFromHexString('');
+        expect(binary).to.have.deep.property('buffer', new Uint8Array(0));
+        expect(binary).to.have.property('sub_type', 0);
+      });
+
+      it('creates an empty binary with subtype', () => {
+        const binary = Binary.createFromHexString('', 0x42);
+        expect(binary).to.have.deep.property('buffer', new Uint8Array(0));
+        expect(binary).to.have.property('sub_type', 0x42);
+      });
+    });
+  });
+
+  context('createFromBase64()', () => {
+    context('when called with a base64 sequence', () => {
+      it('returns a Binary instance with the decoded bytes', () => {
+        const bytes = Buffer.from('abc', 'utf8');
+        const binary = Binary.createFromBase64(bytes.toString('base64'));
+        expect(binary).to.have.deep.property('buffer', bytes);
+        expect(binary).to.have.property('sub_type', 0);
+      });
+
+      it('returns a Binary instance with the decoded bytes and subtype', () => {
+        const bytes = Buffer.from('abc', 'utf8');
+        const binary = Binary.createFromBase64(bytes.toString('base64'), 0x23);
+        expect(binary).to.have.deep.property('buffer', bytes);
+        expect(binary).to.have.property('sub_type', 0x23);
+      });
+    });
+
+    context('when called with an empty string', () => {
+      it('creates an empty binary', () => {
+        const binary = Binary.createFromBase64('');
+        expect(binary).to.have.deep.property('buffer', new Uint8Array(0));
+        expect(binary).to.have.property('sub_type', 0);
+      });
+
+      it('creates an empty binary with subtype', () => {
+        const binary = Binary.createFromBase64('', 0x42);
+        expect(binary).to.have.deep.property('buffer', new Uint8Array(0));
+        expect(binary).to.have.property('sub_type', 0x42);
+      });
+    });
+  });
+
+  context('inspect()', () => {
+    context('when result is executed', () => {
+      it('is deep equal with a Binary that has no data', () => {
+        const bsonValue = new Binary();
+        const ctx = { ...BSON, module: { exports: { result: null } } };
+        vm.runInNewContext(`module.exports.result = ${bsonValue.inspect()}`, ctx);
+        expect(ctx.module.exports.result).to.deep.equal(bsonValue);
+      });
+
+      it('is deep equal with a Binary that has a subtype but no data', () => {
+        const bsonValue = new Binary(undefined, 0x23);
+        const ctx = { ...BSON, module: { exports: { result: null } } };
+        vm.runInNewContext(`module.exports.result = ${bsonValue.inspect()}`, ctx);
+        expect(ctx.module.exports.result).to.deep.equal(bsonValue);
+      });
+
+      it('is deep equal with a Binary that has data', () => {
+        const bsonValue = new Binary(Buffer.from('abc', 'utf8'));
+        const ctx = { ...BSON, module: { exports: { result: null } } };
+        vm.runInNewContext(`module.exports.result = ${bsonValue.inspect()}`, ctx);
+        expect(ctx.module.exports.result).to.deep.equal(bsonValue);
+      });
     });
   });
 });

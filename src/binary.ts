@@ -260,32 +260,12 @@ export class Binary extends BSONValue {
 
   /** Creates an Binary instance from a hex digit string */
   static createFromHexString(hex: string, subType?: number): Binary {
-    const bytes = ByteUtils.fromHex(hex);
-    return new Binary(bytes, subType);
+    return new Binary(ByteUtils.fromHex(hex), subType);
   }
 
   /** Creates an Binary instance from a base64 string */
   static createFromBase64(base64: string, subType?: number): Binary {
-    const bytes = ByteUtils.fromBase64(base64);
-    return new Binary(bytes, subType);
-  }
-
-  /**
-   * Creates a new view over sequence and constructs a new Binary instance.
-   *
-   * @param sequence - A sequence of binary data
-   * @param subType - BSON Binary subtype, defaults to zero
-   * @param byteOffset - An offset to start the view from
-   * @param byteLength - A length to set the view to
-   */
-  static createFromBytes(
-    sequence: Uint8Array | ArrayBuffer | SharedArrayBuffer,
-    subType = 0,
-    byteOffset = 0,
-    byteLength = sequence.byteLength
-  ): Binary {
-    const bytes = ByteUtils.toLocalBufferType(sequence).subarray(byteOffset, byteLength);
-    return new Binary(bytes, subType);
+    return new Binary(ByteUtils.fromBase64(base64), subType);
   }
 
   /** @internal */
@@ -508,22 +488,6 @@ export class UUID extends Binary {
   /** Creates an UUID from a base64 string representation of an UUID. */
   static override createFromBase64(base64: string): UUID {
     const bytes = ByteUtils.fromBase64(base64);
-    return new UUID(bytes);
-  }
-
-  /**
-   * Creates a new view over sequence and constructs a new UUID instance.
-   *
-   * @param sequence - A sequence of binary data
-   * @param byteOffset - An offset to start the view from
-   * @param byteLength - A length to set the view to
-   */
-  static override createFromBytes(
-    sequence: Uint8Array | ArrayBuffer | SharedArrayBuffer,
-    byteOffset = 0,
-    byteLength = sequence.byteLength
-  ): UUID {
-    const bytes = ByteUtils.toLocalBufferType(sequence).subarray(byteOffset, byteLength);
     return new UUID(bytes);
   }
 
