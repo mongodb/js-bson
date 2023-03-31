@@ -487,8 +487,7 @@ export class UUID extends Binary {
 
   /** Creates an UUID from a base64 string representation of an UUID. */
   static override createFromBase64(base64: string): UUID {
-    const bytes = ByteUtils.fromBase64(base64);
-    return new UUID(bytes);
+    return new UUID(ByteUtils.fromBase64(base64));
   }
 
   /**
