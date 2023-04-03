@@ -37,7 +37,7 @@ const BSONTypeClasses = [
 ];
 
 const BSONTypeClassCtors = new Map<string, () => BSONValue>([
-  ['Binary', () => new Binary()],
+  ['Binary', () => new Binary(new Uint8Array(0), 0)],
   ['Code', () => new Code('function () {}')],
   ['DBRef', () => new DBRef('name', new ObjectId('00'.repeat(12)))],
   ['Decimal128', () => new Decimal128('1.23')],

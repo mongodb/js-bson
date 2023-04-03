@@ -81,38 +81,53 @@ describe('class Binary', () => {
   });
 
   context('inspect()', () => {
-    it('when value is default returns "new Binary()"', () => {
-      expect(new Binary().inspect()).to.equal('new Binary()');
-    });
-
-    it('when value is empty returns "new Binary()"', () => {
-      expect(new Binary(new Uint8Array(0)).inspect()).to.equal('new Binary()');
-    });
-
-    it('when value is default with a subtype returns "new Binary()"', () => {
-      expect(new Binary(null, 0x23).inspect()).to.equal('new Binary(undefined, 35)');
-    });
-
-    it('when value is empty with a subtype returns "new Binary(undefined, 35)"', () => {
-      expect(new Binary(new Uint8Array(0), 0x23).inspect()).to.equal('new Binary(undefined, 35)');
+    it('when value is default returns "Binary.createFromBase64("", 0)"', () => {
+      expect(new Binary().inspect()).to.equal('Binary.createFromBase64("", 0)');
     });
 
     it('when value is empty returns "Binary.createFromBase64("", 0)"', () => {
+      expect(new Binary(new Uint8Array(0)).inspect()).to.equal('Binary.createFromBase64("", 0)');
+    });
+
+    it('when value is default with a subtype returns "Binary.createFromBase64("", 35)"', () => {
+      expect(new Binary(null, 0x23).inspect()).to.equal('Binary.createFromBase64("", 35)');
+    });
+
+    it('when value is empty with a subtype returns "Binary.createFromBase64("", 35)"', () => {
+      expect(new Binary(new Uint8Array(0), 0x23).inspect()).to.equal(
+        'Binary.createFromBase64("", 35)'
+      );
+    });
+
+    it('when value has utf8 "abcdef" encoded returns "Binary.createFromBase64("YWJjZGVm", 0)"', () => {
       expect(new Binary(Buffer.from('abcdef', 'utf8')).inspect()).to.equal(
         'Binary.createFromBase64("YWJjZGVm", 0)'
       );
     });
 
     context('when result is executed', () => {
-      it('is deep equal with a Binary that has no data', () => {
+      it('has a position of zero when constructed with default space', () => {
         const bsonValue = new Binary();
+        const ctx = { ...BSON, module: { exports: { result: null } } };
+        vm.runInNewContext(`module.exports.result = ${bsonValue.inspect()}`, ctx);
+        expect(ctx.module.exports.result).to.have.property('position', 0);
+        expect(ctx.module.exports.result).to.have.property('sub_type', 0);
+
+        // While the default Binary has 256 bytes the newly constructed one will have 0
+        // both will have a position of zero so when serialized to BSON they are the equivalent.
+        expect(ctx.module.exports.result).to.have.nested.property('buffer.byteLength', 0);
+        expect(bsonValue).to.have.nested.property('buffer.byteLength', 256);
+      });
+
+      it('is deep equal with a Binary that has no data', () => {
+        const bsonValue = new Binary(new Uint8Array(0));
         const ctx = { ...BSON, module: { exports: { result: null } } };
         vm.runInNewContext(`module.exports.result = ${bsonValue.inspect()}`, ctx);
         expect(ctx.module.exports.result).to.deep.equal(bsonValue);
       });
 
       it('is deep equal with a Binary that has a subtype but no data', () => {
-        const bsonValue = new Binary(undefined, 0x23);
+        const bsonValue = new Binary(new Uint8Array(0), 0x23);
         const ctx = { ...BSON, module: { exports: { result: null } } };
         vm.runInNewContext(`module.exports.result = ${bsonValue.inspect()}`, ctx);
         expect(ctx.module.exports.result).to.deep.equal(bsonValue);
