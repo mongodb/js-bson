@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.2.0](https://github.com/mongodb/js-bson/compare/v5.1.0...v5.2.0) (2023-04-04)
+
+
+### Features
+
+* **NODE-4855:** add hex and base64 ctor methods to Binary and ObjectId ([#569](https://github.com/mongodb/js-bson/issues/569)) ([0d49a63](https://github.com/mongodb/js-bson/commit/0d49a636052b540a8fc7bd9210db33a8a52f951e))
+
 ## [5.1.0](https://github.com/mongodb/js-bson/compare/v5.0.1...v5.1.0) (2023-03-16)
 
 
