@@ -258,6 +258,16 @@ export class Binary extends BSONValue {
     );
   }
 
+  /** Creates an Binary instance from a hex digit string */
+  static createFromHexString(hex: string, subType?: number): Binary {
+    return new Binary(ByteUtils.fromHex(hex), subType);
+  }
+
+  /** Creates an Binary instance from a base64 string */
+  static createFromBase64(base64: string, subType?: number): Binary {
+    return new Binary(ByteUtils.fromBase64(base64), subType);
+  }
+
   /** @internal */
   static fromExtendedJSON(
     doc: BinaryExtendedLegacy | BinaryExtended | UUIDExtended,
@@ -292,7 +302,8 @@ export class Binary extends BSONValue {
   }
 
   inspect(): string {
-    return `new Binary(Buffer.from("${ByteUtils.toHex(this.buffer)}", "hex"), ${this.sub_type})`;
+    const base64 = ByteUtils.toBase64(this.buffer.subarray(0, this.position));
+    return `Binary.createFromBase64("${base64}", ${this.sub_type})`;
   }
 }
 
@@ -464,9 +475,14 @@ export class UUID extends Binary {
    * Creates an UUID from a hex string representation of an UUID.
    * @param hexString - 32 or 36 character hex string (dashes excluded/included).
    */
-  static createFromHexString(hexString: string): UUID {
+  static override createFromHexString(hexString: string): UUID {
     const buffer = uuidHexStringToBuffer(hexString);
     return new UUID(buffer);
+  }
+
+  /** Creates an UUID from a base64 string representation of an UUID. */
+  static override createFromBase64(base64: string): UUID {
+    return new UUID(ByteUtils.fromBase64(base64));
   }
 
   /**

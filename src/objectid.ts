@@ -264,14 +264,20 @@ export class ObjectId extends BSONValue {
    * @param hexString - create a ObjectId from a passed in 24 character hexstring.
    */
   static createFromHexString(hexString: string): ObjectId {
-    // Throw an error if it's not a valid setup
-    if (typeof hexString === 'undefined' || (hexString != null && hexString.length !== 24)) {
-      throw new BSONError(
-        'Argument passed in must be a single String of 12 bytes or a string of 24 hex characters'
-      );
+    if (hexString?.length !== 24) {
+      throw new BSONError('hex string must be 24 characters');
     }
 
     return new ObjectId(ByteUtils.fromHex(hexString));
+  }
+
+  /** Creates an ObjectId instance from a base64 string */
+  static createFromBase64(base64: string): ObjectId {
+    if (base64?.length !== 16) {
+      throw new BSONError('base64 string must be 16 characters');
+    }
+
+    return new ObjectId(ByteUtils.fromBase64(base64));
   }
 
   /**

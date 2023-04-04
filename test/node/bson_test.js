@@ -1829,9 +1829,7 @@ describe('BSON', function () {
      */
     it('Binary', function () {
       const binary = new Binary(Buffer.from('0123456789abcdef0123456789abcdef', 'hex'), 4);
-      expect(inspect(binary)).to.equal(
-        'new Binary(Buffer.from("0123456789abcdef0123456789abcdef", "hex"), 4)'
-      );
+      expect(inspect(binary)).to.equal('Binary.createFromBase64("ASNFZ4mrze8BI0VniavN7w==", 4)');
     });
 
     /**

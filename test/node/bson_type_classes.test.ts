@@ -17,6 +17,7 @@ import {
   UUID,
   BSONValue
 } from '../register-bson';
+import * as vm from 'node:vm';
 
 const BSONTypeClasses = [
   Binary,
@@ -36,7 +37,7 @@ const BSONTypeClasses = [
 ];
 
 const BSONTypeClassCtors = new Map<string, () => BSONValue>([
-  ['Binary', () => new Binary()],
+  ['Binary', () => new Binary(new Uint8Array(0), 0)],
   ['Code', () => new Code('function () {}')],
   ['DBRef', () => new DBRef('name', new ObjectId('00'.repeat(12)))],
   ['Decimal128', () => new Decimal128('1.23')],
@@ -97,4 +98,20 @@ describe('BSON Type classes common interfaces', () => {
           .that.is.a('function'));
     });
   }
+
+  context(`when inspect() is called`, () => {
+    for (const [name, factory] of BSONTypeClassCtors) {
+      it(`${name} returns string that is runnable and has deep equality`, () => {
+        const bsonValue = factory();
+        // All BSON types should only need exactly their constructor available on the global
+        const ctx = { [name]: bsonValue.constructor, module: { exports: { result: null } } };
+        if (name === 'DBRef') {
+          // DBRef is the only type that requires another BSON type
+          ctx.ObjectId = ObjectId;
+        }
+        vm.runInNewContext(`module.exports.result = ${bsonValue.inspect()}`, ctx);
+        expect(ctx.module.exports.result).to.deep.equal(bsonValue);
+      });
+    }
+  });
 });
