@@ -241,7 +241,7 @@ Serialize a Javascript object using a predefined Buffer and index into the buffe
 | [options.useBigInt64] | <code>Object</code> | <code>false</code> | when deserializing a Long will return a BigInt. |
 | [options.promoteLongs] | <code>Object</code> | <code>true</code> | when deserializing a Long will fit it into a Number if it's smaller than 53 bits |
 | [options.promoteBuffers] | <code>Object</code> | <code>false</code> | when deserializing a Binary will return it as a node.js Buffer instance. |
-| [options.promoteValues] | <code>Object</code> | <code>false</code> | when deserializing will promote BSON values to their Node.js closest equivalent types. |
+| [options.promoteValues] | <code>Object</code> | <code>true</code> | when deserializing will promote BSON values to their Node.js closest equivalent types. |
 | [options.fieldsAsRaw] | <code>Object</code> | <code></code> | allow to specify if there what fields we wish to return as unserialized raw buffer. |
 | [options.bsonRegExp] | <code>Object</code> | <code>false</code> | return BSON regular expressions as BSONRegExp instances. |
 | [options.allowObjectSmallerThanBufferSize] | <code>boolean</code> | <code>false</code> | allows the buffer to be larger than the parsed BSON object. |
