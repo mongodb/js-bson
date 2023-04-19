@@ -1,10 +1,11 @@
-import { Binary, UUID } from '../register-bson';
+import { Binary, EJSON, UUID } from '../register-bson';
 import { inspect } from 'util';
 import { validate as uuidStringValidate, version as uuidStringVersion } from 'uuid';
 import { BSON, BSONError } from '../register-bson';
 const BSON_DATA_BINARY = BSON.BSONType.binData;
 import { BSON_BINARY_SUBTYPE_UUID_NEW } from '../../src/constants';
 import { expect } from 'chai';
+import { bufferFromHexArray, int32ToHex } from './tools/utils';
 
 // Test values
 const UPPERCASE_DASH_SEPARATED_UUID_STRING = 'AAAAAAAA-AAAA-4AAA-AAAA-AAAAAAAAAAAA';
@@ -161,6 +162,31 @@ describe('UUID', () => {
       const expectedResult = {
         uuid: new UUID('878dac12-01cc-4830-b271-cbc8518e63ad')
       };
+      expect(deserializedUUID).to.deep.equal(expectedResult);
+    });
+
+    context('when UUID bytes are not in v4 format', () => {
+      it('returns UUID instance', () => {
+        const nullUUID = '00'.repeat(16);
+        const serializedUUID = bufferFromHexArray([
+          '05', // binData type
+          '6100', // 'a' & null
+          int32ToHex(nullUUID.length / 2), // binary starts with int32 length
+          '04', // uuid subtype
+          nullUUID // uuid bytes
+        ]);
+        const deserializedUUID = BSON.deserialize(serializedUUID);
+        const expectedResult = { a: new UUID(nullUUID) };
+        expect(deserializedUUID).to.deep.equal(expectedResult);
+      });
+    });
+  });
+
+  context('fromExtendedJSON()', () => {
+    it('returns UUID instance', () => {
+      const nullUUID = '00'.repeat(16);
+      const deserializedUUID = EJSON.parse(`{ "a": { "$uuid": "${'00'.repeat(16)}" } }`);
+      const expectedResult = { a: new UUID(nullUUID) };
       expect(deserializedUUID).to.deep.equal(expectedResult);
     });
   });

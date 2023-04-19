@@ -128,6 +128,14 @@ const bufferFromHexArray = array => {
 
 exports.bufferFromHexArray = bufferFromHexArray;
 
+function int32ToHex(int32) {
+  const buf = Buffer.alloc(4);
+  buf.writeInt32LE(int32, 0);
+  return buf.toString('hex');
+}
+
+exports.int32ToHex = int32ToHex;
+
 /**
  * A helper to calculate the byte size of a string (including null)
  *
