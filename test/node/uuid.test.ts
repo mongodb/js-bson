@@ -13,9 +13,6 @@ const LOWERCASE_DASH_SEPARATED_UUID_STRING = 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaa
 const LOWERCASE_VALUES_ONLY_UUID_STRING = 'aaaaaaaaaaaa4aaaaaaaaaaaaaaaaaaa';
 
 describe('UUID', () => {
-  /**
-   * @ignore
-   */
   it('should correctly generate a valid UUID v4 from empty constructor', () => {
     const uuid = new UUID();
     const uuidHexStr = uuid.toHexString();
@@ -23,9 +20,6 @@ describe('UUID', () => {
     expect(uuidStringVersion(uuidHexStr)).to.equal(Binary.SUBTYPE_UUID);
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly create UUIDs from UPPERCASE & lowercase 36 char dash-separated hex string', () => {
     const uuid1 = new UUID(UPPERCASE_DASH_SEPARATED_UUID_STRING);
     expect(uuid1.equals(UPPERCASE_DASH_SEPARATED_UUID_STRING)).to.be.true;
@@ -36,9 +30,6 @@ describe('UUID', () => {
     expect(uuid2.toString()).to.equal(LOWERCASE_DASH_SEPARATED_UUID_STRING);
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly create UUIDs from UPPERCASE & lowercase 32 char hex string (no dash separators)', () => {
     const uuid1 = new UUID(UPPERCASE_VALUES_ONLY_UUID_STRING);
     expect(uuid1.equals(UPPERCASE_VALUES_ONLY_UUID_STRING)).to.be.true;
@@ -49,9 +40,6 @@ describe('UUID', () => {
     expect(uuid2.toHexString(false)).to.equal(LOWERCASE_VALUES_ONLY_UUID_STRING);
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly create UUID from Buffer', () => {
     const uuid1 = new UUID(Buffer.from(UPPERCASE_VALUES_ONLY_UUID_STRING, 'hex'));
     expect(uuid1.equals(UPPERCASE_DASH_SEPARATED_UUID_STRING)).to.be.true;
@@ -62,9 +50,6 @@ describe('UUID', () => {
     expect(uuid2.toString()).to.equal(LOWERCASE_DASH_SEPARATED_UUID_STRING);
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly create UUID from UUID (copying existing buffer)', () => {
     const org = new UUID();
     const copy = new UUID(org);
@@ -72,26 +57,17 @@ describe('UUID', () => {
     expect(org.id).to.deep.equal(copy.id);
   });
 
-  /**
-   * @ignore
-   */
   it('should throw if passed invalid 36-char uuid hex string', () => {
     expect(() => new UUID(LOWERCASE_DASH_SEPARATED_UUID_STRING)).to.not.throw();
     expect(() => new UUID('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')).to.throw(BSONError);
     // Note: The version is missing here ^
   });
 
-  /**
-   * @ignore
-   */
   it('should throw if passed unsupported argument', () => {
     expect(() => new UUID(LOWERCASE_DASH_SEPARATED_UUID_STRING)).to.not.throw();
     expect(() => new UUID({})).to.throw(BSONError);
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly check if a buffer isValid', () => {
     const validBuffer = Buffer.from(UPPERCASE_VALUES_ONLY_UUID_STRING, 'hex');
     const invalidBuffer1 = Buffer.from('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'hex');
@@ -104,9 +80,6 @@ describe('UUID', () => {
     expect(UUID.isValid(validBuffer)).to.be.true;
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly convert to and from a Binary instance', () => {
     const uuid = new UUID(LOWERCASE_DASH_SEPARATED_UUID_STRING);
     expect(UUID.isValid(uuid)).to.be.true;
@@ -118,9 +91,6 @@ describe('UUID', () => {
     expect(uuid2.toHexString()).to.equal(LOWERCASE_DASH_SEPARATED_UUID_STRING);
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly convert to and from a Binary instance', () => {
     const uuid = new UUID(LOWERCASE_DASH_SEPARATED_UUID_STRING);
     expect(UUID.isValid(uuid)).to.be.true;
@@ -132,9 +102,6 @@ describe('UUID', () => {
     expect(uuid.equals(uuid2)).to.be.true;
   });
 
-  /**
-   * @ignore
-   */
   it('should throw when converted from an incompatible Binary instance', () => {
     const validRandomBuffer = Buffer.from('Hello World!');
     const binRand = new Binary(validRandomBuffer);
@@ -154,9 +121,6 @@ describe('UUID', () => {
     expect(() => binV4.toUUID()).to.not.throw();
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly allow for node.js inspect to work with UUID', () => {
     const uuid = new UUID(UPPERCASE_DASH_SEPARATED_UUID_STRING);
     expect(inspect(uuid)).to.equal(`new UUID("${LOWERCASE_DASH_SEPARATED_UUID_STRING}")`);
