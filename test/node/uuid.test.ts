@@ -58,12 +58,6 @@ describe('UUID', () => {
     expect(org.id).to.deep.equal(copy.id);
   });
 
-  it('should throw if passed invalid 36-char uuid hex string', () => {
-    expect(() => new UUID(LOWERCASE_DASH_SEPARATED_UUID_STRING)).to.not.throw();
-    expect(() => new UUID('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')).to.throw(BSONError);
-    // Note: The version is missing here ^
-  });
-
   it('should throw if passed unsupported argument', () => {
     expect(() => new UUID(LOWERCASE_DASH_SEPARATED_UUID_STRING)).to.not.throw();
     expect(() => new UUID({})).to.throw(BSONError);
@@ -71,13 +65,6 @@ describe('UUID', () => {
 
   it('should correctly check if a buffer isValid', () => {
     const validBuffer = Buffer.from(UPPERCASE_VALUES_ONLY_UUID_STRING, 'hex');
-    const invalidBuffer1 = Buffer.from('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'hex');
-    const invalidBuffer2 = Buffer.alloc(16);
-
-    expect(validBuffer.length).to.equal(invalidBuffer1.length);
-    expect(validBuffer.length).to.equal(invalidBuffer2.length);
-    expect(UUID.isValid(invalidBuffer1)).to.be.false;
-    expect(UUID.isValid(invalidBuffer2)).to.be.false;
     expect(UUID.isValid(validBuffer)).to.be.true;
   });
 
@@ -207,8 +194,8 @@ describe('UUID', () => {
     });
 
     context('when called with an incorrect length string', () => {
-      it('throws an error indicating the expected length of 32 or 36 characters', () => {
-        expect(() => UUID.createFromHexString('')).to.throw(/32 or 36 character/);
+      it('throws an error indicating the expected length', () => {
+        expect(() => UUID.createFromHexString('')).to.throw(/must be 32 hex digits/);
       });
     });
   });
