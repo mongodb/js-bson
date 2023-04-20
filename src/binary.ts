@@ -321,7 +321,9 @@ const UUID_WITH_DASHES = /^[0-F]{8}-[0-F]{4}-[0-F]{4}-[0-F]{4}-[0-F]{12}$/i;
  */
 export class UUID extends Binary {
   /**
-   * Create an UUID type
+   * Create a UUID type
+   *
+   * When the argument to the constructor is omitted a random v4 UUID will be generated.
    *
    * @param input - Can be a 32 or 36 character hex string (dashes excluded/included) or a 16 byte binary Buffer.
    */
