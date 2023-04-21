@@ -287,7 +287,7 @@ export class Binary extends BSONValue {
       }
     } else if ('$uuid' in doc) {
       type = 4;
-      data = UUID.uuidBytesFromString(doc.$uuid);
+      data = UUID.bytesFromString(doc.$uuid);
     }
     if (!data) {
       throw new BSONError(`Unexpected Binary Extended JSON format ${JSON.stringify(doc)}`);
@@ -336,7 +336,7 @@ export class UUID extends Binary {
     } else if (ArrayBuffer.isView(input) && input.byteLength === UUID_BYTE_LENGTH) {
       bytes = ByteUtils.toLocalBufferType(input);
     } else if (typeof input === 'string') {
-      bytes = UUID.uuidBytesFromString(input);
+      bytes = UUID.bytesFromString(input);
     } else {
       throw new BSONError(
         'Argument passed in UUID constructor must be a UUID, a 16 byte Buffer or a 32/36 character hex string (dashes excluded/included, format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).'
@@ -462,7 +462,7 @@ export class UUID extends Binary {
    * @param hexString - 32 or 36 character hex string (dashes excluded/included).
    */
   static override createFromHexString(hexString: string): UUID {
-    const buffer = UUID.uuidBytesFromString(hexString);
+    const buffer = UUID.bytesFromString(hexString);
     return new UUID(buffer);
   }
 
@@ -472,7 +472,7 @@ export class UUID extends Binary {
   }
 
   /** @internal */
-  static uuidBytesFromString(representation: string) {
+  static bytesFromString(representation: string) {
     if (!UUID.isValidUUIDString(representation)) {
       throw new BSONError(
         'UUID string representation must be 32 hex digits or canonical hyphenated representation'
