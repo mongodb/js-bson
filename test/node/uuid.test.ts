@@ -5,7 +5,7 @@ import { BSON, BSONError } from '../register-bson';
 const BSON_DATA_BINARY = BSON.BSONType.binData;
 import { BSON_BINARY_SUBTYPE_UUID_NEW } from '../../src/constants';
 import { expect } from 'chai';
-import { bufferFromHexArray, int32ToHex } from './tools/utils';
+import { bufferFromHexArray, int32LEToHex } from './tools/utils';
 
 // Test values
 const UPPERCASE_DASH_SEPARATED_UUID_STRING = 'AAAAAAAA-AAAA-4AAA-AAAA-AAAAAAAAAAAA';
@@ -158,7 +158,7 @@ describe('UUID', () => {
         const serializedUUID = bufferFromHexArray([
           '05', // binData type
           '6100', // 'a' & null
-          int32ToHex(nullUUID.length / 2), // binary starts with int32 length
+          int32LEToHex(nullUUID.length / 2), // binary starts with int32 length
           '04', // uuid subtype
           nullUUID // uuid bytes
         ]);
