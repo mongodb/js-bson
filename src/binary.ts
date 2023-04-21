@@ -443,10 +443,6 @@ export class UUID extends Binary {
       return false;
     }
 
-    if (input instanceof UUID) {
-      return true;
-    }
-
     if (typeof input === 'string') {
       return UUID.isValidUUIDString(input);
     }
@@ -455,7 +451,11 @@ export class UUID extends Binary {
       return input.byteLength === UUID_BYTE_LENGTH;
     }
 
-    return false;
+    return (
+      input._bsontype === 'Binary' &&
+      input.sub_type === this.SUBTYPE_UUID &&
+      input.buffer.byteLength === 16
+    );
   }
 
   /**

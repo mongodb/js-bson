@@ -63,9 +63,42 @@ describe('UUID', () => {
     expect(() => new UUID({})).to.throw(BSONError);
   });
 
-  it('should correctly check if a buffer isValid', () => {
-    const validBuffer = Buffer.from(UPPERCASE_VALUES_ONLY_UUID_STRING, 'hex');
-    expect(UUID.isValid(validBuffer)).to.be.true;
+  context('isValid()', () => {
+    it('returns true for hex string with dashes', () => {
+      expect(UUID.isValid(UPPERCASE_VALUES_ONLY_UUID_STRING)).to.be.true;
+    });
+
+    it('returns true for hex string without dashes', () => {
+      expect(UUID.isValid(LOWERCASE_VALUES_ONLY_UUID_STRING)).to.be.true;
+    });
+
+    it('returns true for hex string that is not uuid v4', () => {
+      expect(UUID.isValid('00'.repeat(16))).to.be.true;
+    });
+
+    it('returns true for buffer of length 16', () => {
+      expect(UUID.isValid(Buffer.alloc(16))).to.be.true;
+    });
+
+    it('returns false for buffer not of length 16', () => {
+      expect(UUID.isValid(Buffer.alloc(10))).to.be.false;
+    });
+
+    it('returns false for falsy inputs', () => {
+      expect(UUID.isValid()).to.be.false;
+      expect(UUID.isValid(null)).to.be.false;
+      expect(UUID.isValid(false)).to.be.false;
+      expect(UUID.isValid('')).to.be.false;
+    });
+
+    it('returns true for Binary instances of UUID', () => {
+      expect(UUID.isValid(new UUID())).to.be.true;
+      expect(UUID.isValid(Binary.createFromHexString('00'.repeat(16), 4))).to.be.true;
+    });
+
+    it('returns false for Binary instance of the wrong length', () => {
+      expect(UUID.isValid(Binary.createFromHexString('00', 4))).to.be.false;
+    });
   });
 
   it('should correctly convert to and from a Binary instance', () => {
