@@ -320,6 +320,7 @@ const UUID_WITH_DASHES = /^[0-F]{8}-[0-F]{4}-[0-F]{4}-[0-F]{4}-[0-F]{12}$/i;
  * @public
  */
 export class UUID extends Binary {
+  static cacheHexString = false;
   /**
    * Create a UUID type
    *
