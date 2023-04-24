@@ -312,8 +312,8 @@ export type UUIDExtended = {
 };
 
 const UUID_BYTE_LENGTH = 16;
-const UUID_WITHOUT_DASHES = /^[0-F]{32}$/i;
-const UUID_WITH_DASHES = /^[0-F]{8}-[0-F]{4}-[0-F]{4}-[0-F]{4}-[0-F]{12}$/i;
+const UUID_WITHOUT_DASHES = /^[0-9A-F]{32}$/i;
+const UUID_WITH_DASHES = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
 
 /**
  * A class representation of the BSON UUID type.
