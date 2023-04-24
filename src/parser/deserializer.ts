@@ -432,11 +432,11 @@ function deserializeObject(
 
         if (promoteBuffers && promoteValues) {
           value = _buffer;
-        } else if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW) {
-          const binary = new Binary(buffer.slice(index, index + binarySize), subType);
-          value = UUID.isValid(binary) ? binary.toUUID() : binary;
         } else {
           value = new Binary(buffer.slice(index, index + binarySize), subType);
+          if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW && UUID.isValid(value)) {
+            value = value.toUUID();
+          }
         }
       }
 
