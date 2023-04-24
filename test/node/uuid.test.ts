@@ -185,6 +185,16 @@ describe('UUID', () => {
       expect(deserializedUUID).to.deep.equal(expectedResult);
     });
 
+    it('returns Binary when value is subtype 4 but invalid UUID', () => {
+      const exampleUUID = Binary.createFromHexString('aaaaaaaa', 4);
+      const serializedUUID = BSON.serialize({ uuid: exampleUUID });
+      const deserializedUUID = BSON.deserialize(serializedUUID);
+      const expectedResult = {
+        uuid: Binary.createFromHexString('aaaaaaaa', 4)
+      };
+      expect(deserializedUUID).to.deep.equal(expectedResult);
+    });
+
     context('when UUID bytes are not in v4 format', () => {
       it('returns UUID instance', () => {
         const nullUUID = '00'.repeat(16);

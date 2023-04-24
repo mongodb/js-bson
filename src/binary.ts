@@ -438,7 +438,7 @@ export class UUID extends Binary {
    * Checks if a value is a valid bson UUID
    * @param input - UUID, string or Buffer to validate.
    */
-  static isValid(input: string | Uint8Array | UUID): boolean {
+  static isValid(input: string | Uint8Array | UUID | Binary): boolean {
     if (!input) {
       return false;
     }
