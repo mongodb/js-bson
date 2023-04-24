@@ -1,10 +1,11 @@
-import { Binary, UUID } from '../register-bson';
+import { Binary, EJSON, UUID } from '../register-bson';
 import { inspect } from 'util';
 import { validate as uuidStringValidate, version as uuidStringVersion } from 'uuid';
 import { BSON, BSONError } from '../register-bson';
 const BSON_DATA_BINARY = BSON.BSONType.binData;
 import { BSON_BINARY_SUBTYPE_UUID_NEW } from '../../src/constants';
 import { expect } from 'chai';
+import { bufferFromHexArray, int32LEToHex } from './tools/utils';
 
 // Test values
 const UPPERCASE_DASH_SEPARATED_UUID_STRING = 'AAAAAAAA-AAAA-4AAA-AAAA-AAAAAAAAAAAA';
@@ -13,9 +14,6 @@ const LOWERCASE_DASH_SEPARATED_UUID_STRING = 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaa
 const LOWERCASE_VALUES_ONLY_UUID_STRING = 'aaaaaaaaaaaa4aaaaaaaaaaaaaaaaaaa';
 
 describe('UUID', () => {
-  /**
-   * @ignore
-   */
   it('should correctly generate a valid UUID v4 from empty constructor', () => {
     const uuid = new UUID();
     const uuidHexStr = uuid.toHexString();
@@ -23,9 +21,6 @@ describe('UUID', () => {
     expect(uuidStringVersion(uuidHexStr)).to.equal(Binary.SUBTYPE_UUID);
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly create UUIDs from UPPERCASE & lowercase 36 char dash-separated hex string', () => {
     const uuid1 = new UUID(UPPERCASE_DASH_SEPARATED_UUID_STRING);
     expect(uuid1.equals(UPPERCASE_DASH_SEPARATED_UUID_STRING)).to.be.true;
@@ -36,9 +31,6 @@ describe('UUID', () => {
     expect(uuid2.toString()).to.equal(LOWERCASE_DASH_SEPARATED_UUID_STRING);
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly create UUIDs from UPPERCASE & lowercase 32 char hex string (no dash separators)', () => {
     const uuid1 = new UUID(UPPERCASE_VALUES_ONLY_UUID_STRING);
     expect(uuid1.equals(UPPERCASE_VALUES_ONLY_UUID_STRING)).to.be.true;
@@ -49,9 +41,6 @@ describe('UUID', () => {
     expect(uuid2.toHexString(false)).to.equal(LOWERCASE_VALUES_ONLY_UUID_STRING);
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly create UUID from Buffer', () => {
     const uuid1 = new UUID(Buffer.from(UPPERCASE_VALUES_ONLY_UUID_STRING, 'hex'));
     expect(uuid1.equals(UPPERCASE_DASH_SEPARATED_UUID_STRING)).to.be.true;
@@ -62,9 +51,6 @@ describe('UUID', () => {
     expect(uuid2.toString()).to.equal(LOWERCASE_DASH_SEPARATED_UUID_STRING);
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly create UUID from UUID (copying existing buffer)', () => {
     const org = new UUID();
     const copy = new UUID(org);
@@ -72,41 +58,49 @@ describe('UUID', () => {
     expect(org.id).to.deep.equal(copy.id);
   });
 
-  /**
-   * @ignore
-   */
-  it('should throw if passed invalid 36-char uuid hex string', () => {
-    expect(() => new UUID(LOWERCASE_DASH_SEPARATED_UUID_STRING)).to.not.throw();
-    expect(() => new UUID('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')).to.throw(BSONError);
-    // Note: The version is missing here ^
-  });
-
-  /**
-   * @ignore
-   */
   it('should throw if passed unsupported argument', () => {
     expect(() => new UUID(LOWERCASE_DASH_SEPARATED_UUID_STRING)).to.not.throw();
     expect(() => new UUID({})).to.throw(BSONError);
   });
 
-  /**
-   * @ignore
-   */
-  it('should correctly check if a buffer isValid', () => {
-    const validBuffer = Buffer.from(UPPERCASE_VALUES_ONLY_UUID_STRING, 'hex');
-    const invalidBuffer1 = Buffer.from('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 'hex');
-    const invalidBuffer2 = Buffer.alloc(16);
+  context('isValid()', () => {
+    it('returns true for hex string with dashes', () => {
+      expect(UUID.isValid(UPPERCASE_VALUES_ONLY_UUID_STRING)).to.be.true;
+    });
 
-    expect(validBuffer.length).to.equal(invalidBuffer1.length);
-    expect(validBuffer.length).to.equal(invalidBuffer2.length);
-    expect(UUID.isValid(invalidBuffer1)).to.be.false;
-    expect(UUID.isValid(invalidBuffer2)).to.be.false;
-    expect(UUID.isValid(validBuffer)).to.be.true;
+    it('returns true for hex string without dashes', () => {
+      expect(UUID.isValid(LOWERCASE_VALUES_ONLY_UUID_STRING)).to.be.true;
+    });
+
+    it('returns true for hex string that is not uuid v4', () => {
+      expect(UUID.isValid('00'.repeat(16))).to.be.true;
+    });
+
+    it('returns true for buffer of length 16', () => {
+      expect(UUID.isValid(Buffer.alloc(16))).to.be.true;
+    });
+
+    it('returns false for buffer not of length 16', () => {
+      expect(UUID.isValid(Buffer.alloc(10))).to.be.false;
+    });
+
+    it('returns false for falsy inputs', () => {
+      expect(UUID.isValid()).to.be.false;
+      expect(UUID.isValid(null)).to.be.false;
+      expect(UUID.isValid(false)).to.be.false;
+      expect(UUID.isValid('')).to.be.false;
+    });
+
+    it('returns true for Binary instances of UUID', () => {
+      expect(UUID.isValid(new UUID())).to.be.true;
+      expect(UUID.isValid(Binary.createFromHexString('00'.repeat(16), 4))).to.be.true;
+    });
+
+    it('returns false for Binary instance of the wrong length', () => {
+      expect(UUID.isValid(Binary.createFromHexString('00', 4))).to.be.false;
+    });
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly convert to and from a Binary instance', () => {
     const uuid = new UUID(LOWERCASE_DASH_SEPARATED_UUID_STRING);
     expect(UUID.isValid(uuid)).to.be.true;
@@ -118,9 +112,6 @@ describe('UUID', () => {
     expect(uuid2.toHexString()).to.equal(LOWERCASE_DASH_SEPARATED_UUID_STRING);
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly convert to and from a Binary instance', () => {
     const uuid = new UUID(LOWERCASE_DASH_SEPARATED_UUID_STRING);
     expect(UUID.isValid(uuid)).to.be.true;
@@ -132,9 +123,6 @@ describe('UUID', () => {
     expect(uuid.equals(uuid2)).to.be.true;
   });
 
-  /**
-   * @ignore
-   */
   it('should throw when converted from an incompatible Binary instance', () => {
     const validRandomBuffer = Buffer.from('Hello World!');
     const binRand = new Binary(validRandomBuffer);
@@ -154,9 +142,6 @@ describe('UUID', () => {
     expect(() => binV4.toUUID()).to.not.throw();
   });
 
-  /**
-   * @ignore
-   */
   it('should correctly allow for node.js inspect to work with UUID', () => {
     const uuid = new UUID(UPPERCASE_DASH_SEPARATED_UUID_STRING);
     expect(inspect(uuid)).to.equal(`new UUID("${LOWERCASE_DASH_SEPARATED_UUID_STRING}")`);
@@ -199,6 +184,41 @@ describe('UUID', () => {
       };
       expect(deserializedUUID).to.deep.equal(expectedResult);
     });
+
+    it('returns Binary when value is subtype 4 but invalid UUID', () => {
+      const exampleUUID = Binary.createFromHexString('aaaaaaaa', 4);
+      const serializedUUID = BSON.serialize({ uuid: exampleUUID });
+      const deserializedUUID = BSON.deserialize(serializedUUID);
+      const expectedResult = {
+        uuid: Binary.createFromHexString('aaaaaaaa', 4)
+      };
+      expect(deserializedUUID).to.deep.equal(expectedResult);
+    });
+
+    context('when UUID bytes are not in v4 format', () => {
+      it('returns UUID instance', () => {
+        const nullUUID = '00'.repeat(16);
+        const serializedUUID = bufferFromHexArray([
+          '05', // binData type
+          '6100', // 'a' & null
+          int32LEToHex(nullUUID.length / 2), // binary starts with int32 length
+          '04', // uuid subtype
+          nullUUID // uuid bytes
+        ]);
+        const deserializedUUID = BSON.deserialize(serializedUUID);
+        const expectedResult = { a: new UUID(nullUUID) };
+        expect(deserializedUUID).to.deep.equal(expectedResult);
+      });
+    });
+  });
+
+  context('fromExtendedJSON()', () => {
+    it('returns UUID instance', () => {
+      const nullUUID = '00'.repeat(16);
+      const deserializedUUID = EJSON.parse(`{ "a": { "$uuid": "${'00'.repeat(16)}" } }`);
+      const expectedResult = { a: new UUID(nullUUID) };
+      expect(deserializedUUID).to.deep.equal(expectedResult);
+    });
   });
 
   context('createFromHexString()', () => {
@@ -217,8 +237,8 @@ describe('UUID', () => {
     });
 
     context('when called with an incorrect length string', () => {
-      it('throws an error indicating the expected length of 32 or 36 characters', () => {
-        expect(() => UUID.createFromHexString('')).to.throw(/32 or 36 character/);
+      it('throws an error indicating the expected length', () => {
+        expect(() => UUID.createFromHexString('')).to.throw(/must be 32 hex digits/);
       });
     });
   });

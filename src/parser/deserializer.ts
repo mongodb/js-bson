@@ -1,5 +1,5 @@
 import { Binary } from '../binary';
-import type { Document } from '../bson';
+import { Document, UUID } from '../bson';
 import { Code } from '../code';
 import * as constants from '../constants';
 import { DBRef, DBRefLike, isDBRefLike } from '../db_ref';
@@ -404,7 +404,7 @@ function deserializeObject(
           value = ByteUtils.toLocalBufferType(buffer.slice(index, index + binarySize));
         } else {
           value = new Binary(buffer.slice(index, index + binarySize), subType);
-          if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW) {
+          if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW && UUID.isValid(value)) {
             value = value.toUUID();
           }
         }
@@ -432,10 +432,11 @@ function deserializeObject(
 
         if (promoteBuffers && promoteValues) {
           value = _buffer;
-        } else if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW) {
-          value = new Binary(buffer.slice(index, index + binarySize), subType).toUUID();
         } else {
           value = new Binary(buffer.slice(index, index + binarySize), subType);
+          if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW && UUID.isValid(value)) {
+            value = value.toUUID();
+          }
         }
       }
 
