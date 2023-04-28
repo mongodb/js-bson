@@ -129,6 +129,34 @@ const bufferFromHexArray = array => {
 exports.bufferFromHexArray = bufferFromHexArray;
 
 /**
+ * A companion helper to bufferFromHexArray to help with constructing bson bytes manually.
+ * When creating a BSON Binary you need a leading little endian int32 followed by a sequence of bytes
+ * of that length.
+ *
+ * @example
+ * ```js
+ * const binAsHex = '000000';
+ * const serializedUUID = bufferFromHexArray([
+ *   '05', // binData type
+ *   '6100', // 'a' & null
+ *   int32ToHex(binAsHex.length / 2), // binary starts with int32 length
+ *   '7F', // user subtype
+ *   binAsHex // uuid bytes
+ * ]);
+ * ```
+ *
+ * @param {number | Int32} int32 -
+ * @returns
+ */
+function int32LEToHex(int32) {
+  const buf = Buffer.alloc(4);
+  buf.writeInt32LE(+int32, 0);
+  return buf.toString('hex');
+}
+
+exports.int32LEToHex = int32LEToHex;
+
+/**
  * A helper to calculate the byte size of a string (including null)
  *
  * ```js

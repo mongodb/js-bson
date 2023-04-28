@@ -1,4 +1,3 @@
-import { bufferToUuidHexString, uuidHexStringToBuffer, uuidValidateString } from './uuid_utils';
 import { isUint8Array } from './parser/utils';
 import type { EJSONOptions } from './extended_json';
 import { BSONError } from './error';
@@ -288,7 +287,7 @@ export class Binary extends BSONValue {
       }
     } else if ('$uuid' in doc) {
       type = 4;
-      data = uuidHexStringToBuffer(doc.$uuid);
+      data = UUID.bytesFromString(doc.$uuid);
     }
     if (!data) {
       throw new BSONError(`Unexpected Binary Extended JSON format ${JSON.stringify(doc)}`);
@@ -311,42 +310,41 @@ export class Binary extends BSONValue {
 export type UUIDExtended = {
   $uuid: string;
 };
+
 const UUID_BYTE_LENGTH = 16;
+const UUID_WITHOUT_DASHES = /^[0-9A-F]{32}$/i;
+const UUID_WITH_DASHES = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
 
 /**
  * A class representation of the BSON UUID type.
  * @public
  */
 export class UUID extends Binary {
-  static cacheHexString: boolean;
-
-  /** UUID hexString cache @internal */
-  private __id?: string;
-
+  /** @deprecated Hex string is no longer cached, this control will be removed in a future major release */
+  static cacheHexString = false;
   /**
-   * Create an UUID type
+   * Create a UUID type
+   *
+   * When the argument to the constructor is omitted a random v4 UUID will be generated.
    *
    * @param input - Can be a 32 or 36 character hex string (dashes excluded/included) or a 16 byte binary Buffer.
    */
   constructor(input?: string | Uint8Array | UUID) {
     let bytes: Uint8Array;
-    let hexStr;
     if (input == null) {
       bytes = UUID.generate();
     } else if (input instanceof UUID) {
       bytes = ByteUtils.toLocalBufferType(new Uint8Array(input.buffer));
-      hexStr = input.__id;
     } else if (ArrayBuffer.isView(input) && input.byteLength === UUID_BYTE_LENGTH) {
       bytes = ByteUtils.toLocalBufferType(input);
     } else if (typeof input === 'string') {
-      bytes = uuidHexStringToBuffer(input);
+      bytes = UUID.bytesFromString(input);
     } else {
       throw new BSONError(
         'Argument passed in UUID constructor must be a UUID, a 16 byte Buffer or a 32/36 character hex string (dashes excluded/included, format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).'
       );
     }
     super(bytes, BSON_BINARY_SUBTYPE_UUID_NEW);
-    this.__id = hexStr;
   }
 
   /**
@@ -359,10 +357,6 @@ export class UUID extends Binary {
 
   set id(value: Uint8Array) {
     this.buffer = value;
-
-    if (UUID.cacheHexString) {
-      this.__id = bufferToUuidHexString(value);
-    }
   }
 
   /**
@@ -370,17 +364,16 @@ export class UUID extends Binary {
    * @param includeDashes - should the string exclude dash-separators.
    * */
   toHexString(includeDashes = true): string {
-    if (UUID.cacheHexString && this.__id) {
-      return this.__id;
+    if (includeDashes) {
+      return [
+        ByteUtils.toHex(this.buffer.subarray(0, 4)),
+        ByteUtils.toHex(this.buffer.subarray(4, 6)),
+        ByteUtils.toHex(this.buffer.subarray(6, 8)),
+        ByteUtils.toHex(this.buffer.subarray(8, 10)),
+        ByteUtils.toHex(this.buffer.subarray(10, 16))
+      ].join('-');
     }
-
-    const uuidHexString = bufferToUuidHexString(this.id, includeDashes);
-
-    if (UUID.cacheHexString) {
-      this.__id = uuidHexString;
-    }
-
-    return uuidHexString;
+    return ByteUtils.toHex(this.buffer);
   }
 
   /**
@@ -446,29 +439,24 @@ export class UUID extends Binary {
    * Checks if a value is a valid bson UUID
    * @param input - UUID, string or Buffer to validate.
    */
-  static isValid(input: string | Uint8Array | UUID): boolean {
+  static isValid(input: string | Uint8Array | UUID | Binary): boolean {
     if (!input) {
       return false;
     }
 
-    if (input instanceof UUID) {
-      return true;
-    }
-
     if (typeof input === 'string') {
-      return uuidValidateString(input);
+      return UUID.isValidUUIDString(input);
     }
 
     if (isUint8Array(input)) {
-      // check for length & uuid version (https://tools.ietf.org/html/rfc4122#section-4.1.3)
-      if (input.byteLength !== UUID_BYTE_LENGTH) {
-        return false;
-      }
-
-      return (input[6] & 0xf0) === 0x40 && (input[8] & 0x80) === 0x80;
+      return input.byteLength === UUID_BYTE_LENGTH;
     }
 
-    return false;
+    return (
+      input._bsontype === 'Binary' &&
+      input.sub_type === this.SUBTYPE_UUID &&
+      input.buffer.byteLength === 16
+    );
   }
 
   /**
@@ -476,13 +464,33 @@ export class UUID extends Binary {
    * @param hexString - 32 or 36 character hex string (dashes excluded/included).
    */
   static override createFromHexString(hexString: string): UUID {
-    const buffer = uuidHexStringToBuffer(hexString);
+    const buffer = UUID.bytesFromString(hexString);
     return new UUID(buffer);
   }
 
   /** Creates an UUID from a base64 string representation of an UUID. */
   static override createFromBase64(base64: string): UUID {
     return new UUID(ByteUtils.fromBase64(base64));
+  }
+
+  /** @internal */
+  static bytesFromString(representation: string) {
+    if (!UUID.isValidUUIDString(representation)) {
+      throw new BSONError(
+        'UUID string representation must be 32 hex digits or canonical hyphenated representation'
+      );
+    }
+    return ByteUtils.fromHex(representation.replace(/-/g, ''));
+  }
+
+  /**
+   * @internal
+   *
+   * Validates a string to be a hex digit sequence with or without dashes.
+   * The canonical hyphenated representation of a uuid is hex in 8-4-4-4-12 groups.
+   */
+  static isValidUUIDString(representation: string) {
+    return UUID_WITHOUT_DASHES.test(representation) || UUID_WITH_DASHES.test(representation);
   }
 
   /**
