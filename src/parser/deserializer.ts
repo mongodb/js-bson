@@ -19,19 +19,40 @@ import { validateUtf8 } from '../validate_utf8';
 
 /** @public */
 export interface DeserializeOptions {
-  /** when deserializing a Long will return as a BigInt. */
+  /**
+   * when deserializing a Long return as a BigInt.
+   * @defaultValue `false`
+   **/
   useBigInt64?: boolean;
-  /** when deserializing a Long will fit it into a Number if it's smaller than 53 bits. */
+  /**
+   * when deserializing a Long will fit it into a Number if it's smaller than 53 bits.
+   * @defaultValue `false`
+   **/
   promoteLongs?: boolean;
-  /** when deserializing a Binary will return it as a node.js Buffer instance. */
+  /**
+   * when deserializing a Binary will return it as a node.js Buffer instance.
+   * @defaultValue `false`
+   **/
   promoteBuffers?: boolean;
-  /** when deserializing will promote BSON values to their Node.js closest equivalent types. */
+  /**
+   * when deserializing will promote BSON values to their Node.js closest equivalent types.
+   * @defaultValue `true`
+   **/
   promoteValues?: boolean;
-  /** allow to specify if there what fields we wish to return as unserialized raw buffer. */
+  /**
+   * allow to specify if there what fields we wish to return as unserialized raw buffer.
+   * @defaultValue `null`
+   **/
   fieldsAsRaw?: Document;
-  /** return BSON regular expressions as BSONRegExp instances. */
+  /**
+   * return BSON regular expressions as BSONRegExp instances.
+   * @defaultValue `false`
+   **/
   bsonRegExp?: boolean;
-  /** allows the buffer to be larger than the parsed BSON object. */
+  /**
+   * allows the buffer to be larger than the parsed BSON object.
+   * @defaultValue `false`
+   * */
   allowObjectSmallerThanBufferSize?: boolean;
   /** Offset into buffer to begin reading document from */
   index?: number;

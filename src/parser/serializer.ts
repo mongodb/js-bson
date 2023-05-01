@@ -16,11 +16,20 @@ import { isAnyArrayBuffer, isDate, isMap, isRegExp, isUint8Array } from './utils
 
 /** @public */
 export interface SerializeOptions {
-  /** the serializer will check if keys are valid. */
+  /**
+   * the serializer will check if keys are valid.
+   * @defaultValue `false`
+   **/
   checkKeys?: boolean;
-  /** serialize the javascript functions **(default:false)**. */
+  /**
+   * serialize the javascript functions
+   * @defaultValue `false`
+   **/
   serializeFunctions?: boolean;
-  /** serialize will not emit undefined fields **(default:true)** */
+  /**
+   * serialize will not emit undefined fields
+   * @defaultValue `true`
+   **/
   ignoreUndefined?: boolean;
   /** @internal Resize internal buffer */
   minInternalBufferSize?: number;
