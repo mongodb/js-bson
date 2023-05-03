@@ -52,7 +52,7 @@ export interface DeserializeOptions {
   /**
    * allows the buffer to be larger than the parsed BSON object.
    * @defaultValue `false`
-   * */
+   */
   allowObjectSmallerThanBufferSize?: boolean;
   /** Offset into buffer to begin reading document from */
   index?: number;

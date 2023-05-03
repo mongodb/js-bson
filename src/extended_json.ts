@@ -27,7 +27,7 @@ export type EJSONOptions = {
   /**
    * Output using the Extended JSON v1 spec
    * @defaultValue `false`
-   * */
+   */
   legacy?: boolean;
   /**
    * Enable Extended JSON's `relaxed` mode, which attempts to return native JS types where possible, rather than BSON types
@@ -36,7 +36,7 @@ export type EJSONOptions = {
   /**
    * Enable native bigint support
    * @defaultValue `false`
-   * */
+   */
   useBigInt64?: boolean;
 };
 
