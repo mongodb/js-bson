@@ -362,7 +362,7 @@ export class UUID extends Binary {
   /**
    * Returns the UUID id as a 32 or 36 character hex string representation, excluding/including dashes (defaults to 36 character dash separated)
    * @param includeDashes - should the string exclude dash-separators.
-   * */
+   */
   toHexString(includeDashes = true): string {
     if (includeDashes) {
       return [

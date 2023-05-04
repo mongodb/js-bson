@@ -70,7 +70,7 @@ let buffer = ByteUtils.allocate(MAXSIZE);
 /**
  * Sets the size of the internal serialization buffer.
  *
- * @param size - The desired size for the internal serialization buffer
+ * @param size - The desired size for the internal serialization buffer in bytes
  * @public
  */
 export function setInternalBufferSize(size: number): void {
