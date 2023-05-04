@@ -35,9 +35,9 @@ export interface SerializeOptions {
   /** @internal Resize internal buffer */
   minInternalBufferSize?: number;
   /**
-    * the index in the buffer where we wish to start serializing into
-    * @defaultValue `0`
-    */
+   * the index in the buffer where we wish to start serializing into
+   * @defaultValue `0`
+   */
   index?: number;
 }
 
