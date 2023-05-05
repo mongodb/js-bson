@@ -6,7 +6,7 @@ source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
 set -o xtrace
 
 function get_current_ts_version {
-    node -e "console.log(require('./package-lock.json').dependencies.typescript.version)"
+    node -e "console.log(require('./package-lock.json').packages['node_modules/typescript'].version)"
 }
 
 CURRENT_TS_VERSION=$(get_current_ts_version)
