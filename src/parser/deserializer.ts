@@ -1,5 +1,5 @@
-import { Binary } from '../binary';
-import { Document, UUID } from '../bson';
+import { Binary, UUID } from '../binary';
+import type { Document } from '../bson';
 import { Code } from '../code';
 import * as constants from '../constants';
 import { DBRef, DBRefLike, isDBRefLike } from '../db_ref';
