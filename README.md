@@ -69,35 +69,9 @@ npm install bson
 
 ## Documentation
 
-### Objects
+### BSON 
 
-<dl>
-<dt><a href="#EJSON">EJSON</a> : <code>object</code></dt>
-<dd></dd>
-</dl>
-
-### Functions
-
-<dl>
-<dt><a href="#setInternalBufferSize">setInternalBufferSize(size)</a></dt>
-<dd><p>Sets the size of the internal serialization buffer.</p>
-</dd>
-<dt><a href="#serialize">serialize(object)</a> ⇒ <code>Buffer</code></dt>
-<dd><p>Serialize a Javascript object.</p>
-</dd>
-<dt><a href="#serializeWithBufferAndIndex">serializeWithBufferAndIndex(object, buffer)</a> ⇒ <code>Number</code></dt>
-<dd><p>Serialize a Javascript object using a predefined Buffer and index into the buffer, useful when pre-allocating the space for serialization.</p>
-</dd>
-<dt><a href="#deserialize">deserialize(buffer)</a> ⇒ <code>Object</code></dt>
-<dd><p>Deserialize data as BSON.</p>
-</dd>
-<dt><a href="#calculateObjectSize">calculateObjectSize(object)</a> ⇒ <code>Number</code></dt>
-<dd><p>Calculate the bson size for a passed in Javascript object.</p>
-</dd>
-<dt><a href="#deserializeStream">deserializeStream(data, startIndex, numberOfDocuments, documents, docStartIndex, [options])</a> ⇒ <code>Number</code></dt>
-<dd><p>Deserialize stream data as BSON documents.</p>
-</dd>
-</dl>
+[API documentation](https://mongodb.github.io/node-mongodb-native/Next/modules/BSON.html)
 
 <a name="EJSON"></a>
 
@@ -188,103 +162,6 @@ Serializes an object to an Extended JSON string, and reparse it as a JavaScript 
 | [options] | <code>object</code> | Optional settings passed to the parse method |
 
 Deserializes an Extended JSON object into a plain JavaScript object with native/BSON types
-
-<a name="setInternalBufferSize"></a>
-
-### setInternalBufferSize(size)
-
-| Param | Type | Description |
-| --- | --- | --- |
-| size | <code>number</code> | The desired size for the internal serialization buffer |
-
-Sets the size of the internal serialization buffer.
-
-<a name="serialize"></a>
-
-### serialize(object)
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| object | <code>Object</code> |  | the Javascript object to serialize. |
-| [options.checkKeys] | <code>Boolean</code> |  | the serializer will check if keys are valid. |
-| [options.serializeFunctions] | <code>Boolean</code> | <code>false</code> | serialize the javascript functions **(default:false)**. |
-| [options.ignoreUndefined] | <code>Boolean</code> | <code>true</code> | ignore undefined fields **(default:true)**. |
-
-Serialize a Javascript object.
-
-**Returns**: <code>Buffer</code> - returns the Buffer object containing the serialized object.
-<a name="serializeWithBufferAndIndex"></a>
-
-### serializeWithBufferAndIndex(object, buffer)
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| object | <code>Object</code> |  | the Javascript object to serialize. |
-| buffer | <code>Buffer</code> |  | the Buffer you pre-allocated to store the serialized BSON object. |
-| [options.checkKeys] | <code>Boolean</code> |  | the serializer will check if keys are valid. |
-| [options.serializeFunctions] | <code>Boolean</code> | <code>false</code> | serialize the javascript functions **(default:false)**. |
-| [options.ignoreUndefined] | <code>Boolean</code> | <code>true</code> | ignore undefined fields **(default:true)**. |
-| [options.index] | <code>Number</code> |  | the index in the buffer where we wish to start serializing into. |
-
-Serialize a Javascript object using a predefined Buffer and index into the buffer, useful when pre-allocating the space for serialization.
-
-**Returns**: <code>Number</code> - returns the index pointing to the last written byte in the buffer.
-<a name="deserialize"></a>
-
-### deserialize(buffer)
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| buffer | <code>Buffer</code> |  | the buffer containing the serialized set of BSON documents. |
-| [options.evalFunctions] | <code>Object</code> | <code>false</code> | evaluate functions in the BSON document scoped to the object deserialized. |
-| [options.cacheFunctions] | <code>Object</code> | <code>false</code> | cache evaluated functions for reuse. |
-| [options.useBigInt64] | <code>Object</code> | <code>false</code> | when deserializing a Long will return a BigInt. |
-| [options.promoteLongs] | <code>Object</code> | <code>true</code> | when deserializing a Long will fit it into a Number if it's smaller than 53 bits |
-| [options.promoteBuffers] | <code>Object</code> | <code>false</code> | when deserializing a Binary will return it as a node.js Buffer instance. |
-| [options.promoteValues] | <code>Object</code> | <code>true</code> | when deserializing will promote BSON values to their Node.js closest equivalent types. |
-| [options.fieldsAsRaw] | <code>Object</code> | <code></code> | allow to specify if there what fields we wish to return as unserialized raw buffer. |
-| [options.bsonRegExp] | <code>Object</code> | <code>false</code> | return BSON regular expressions as BSONRegExp instances. |
-| [options.allowObjectSmallerThanBufferSize] | <code>boolean</code> | <code>false</code> | allows the buffer to be larger than the parsed BSON object. |
-
-Deserialize data as BSON.
-
-**Returns**: <code>Object</code> - returns the deserialized Javascript Object.
-<a name="calculateObjectSize"></a>
-
-### calculateObjectSize(object)
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| object | <code>Object</code> |  | the Javascript object to calculate the BSON byte size for. |
-| [options.serializeFunctions] | <code>Boolean</code> | <code>false</code> | serialize the javascript functions **(default:false)**. |
-| [options.ignoreUndefined] | <code>Boolean</code> | <code>true</code> | ignore undefined fields **(default:true)**. |
-
-Calculate the bson size for a passed in Javascript object.
-
-**Returns**: <code>Number</code> - returns the number of bytes the BSON object will take up.
-<a name="deserializeStream"></a>
-
-### deserializeStream(data, startIndex, numberOfDocuments, documents, docStartIndex, [options])
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| data | <code>Buffer</code> |  | the buffer containing the serialized set of BSON documents. |
-| startIndex | <code>Number</code> |  | the start index in the data Buffer where the deserialization is to start. |
-| numberOfDocuments | <code>Number</code> |  | number of documents to deserialize. |
-| documents | <code>Array</code> |  | an array where to store the deserialized documents. |
-| docStartIndex | <code>Number</code> |  | the index in the documents array from where to start inserting documents. |
-| [options] | <code>Object</code> |  | additional options used for the deserialization. |
-| [options.evalFunctions] | <code>Object</code> | <code>false</code> | evaluate functions in the BSON document scoped to the object deserialized. |
-| [options.cacheFunctions] | <code>Object</code> | <code>false</code> | cache evaluated functions for reuse. |
-| [options.promoteLongs] | <code>Object</code> | <code>true</code> | when deserializing a Long will fit it into a Number if it's smaller than 53 bits |
-| [options.promoteBuffers] | <code>Object</code> | <code>false</code> | when deserializing a Binary will return it as a node.js Buffer instance. |
-| [options.promoteValues] | <code>Object</code> | <code>false</code> | when deserializing will promote BSON values to their Node.js closest equivalent types. |
-| [options.fieldsAsRaw] | <code>Object</code> | <code></code> | allow to specify if there what fields we wish to return as unserialized raw buffer. |
-| [options.bsonRegExp] | <code>Object</code> | <code>false</code> | return BSON regular expressions as BSONRegExp instances. |
-
-Deserialize stream data as BSON documents.
-
-**Returns**: <code>Number</code> - returns the next index in the buffer after deserialization **x** numbers of documents.
 
 ## Error Handling
 
