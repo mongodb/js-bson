@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.3.0](https://github.com/mongodb/js-bson/compare/v5.2.0...v5.3.0) (2023-05-10)
+
+
+### Features
+
+* **NODE-5224:** deprecate UUID hex string cache control ([#573](https://github.com/mongodb/js-bson/issues/573)) ([70aea75](https://github.com/mongodb/js-bson/commit/70aea7512265de4a6be2c04e2535e770208f321b))
+
+
+### Bug Fixes
+
+* **NODE-4960:** UUID validation too strict ([#572](https://github.com/mongodb/js-bson/issues/572)) ([d239cd1](https://github.com/mongodb/js-bson/commit/d239cd1c2ff6feabd10e00862f556015896c1e20))
+
 ## [5.2.0](https://github.com/mongodb/js-bson/compare/v5.1.0...v5.2.0) (2023-04-04)
 
 
