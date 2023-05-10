@@ -103,7 +103,7 @@
     "check:web": "WEB=true mocha test/node",
     "check:web-no-bigint": "WEB=true NO_BIGINT=true mocha test/node",
     "build:ts": "node ./node_modules/typescript/bin/tsc",
-    "build:dts": "npm run build:ts && api-extractor run --typescript-compiler-folder node_modules/typescript --local && rimraf 'lib/**/*.d.ts*' lib/parser lib/utils",
+    "build:dts": "npm run build:ts && api-extractor run --typescript-compiler-folder node_modules/typescript --local && node etc/clean_definition_files.cjs",
     "build:bundle": "rollup -c rollup.config.mjs",
     "build": "npm run build:dts && npm run build:bundle",
     "check:lint": "eslint -v && eslint --ext '.js,.ts' --max-warnings=0 src test && npm run build:dts && npm run check:tsd",
