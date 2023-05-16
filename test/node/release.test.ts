@@ -51,7 +51,7 @@ describe(`Release ${packFile}`, function () {
   let tarFileList;
   before(function () {
     this.timeout(120_000); // npm pack can be slow
-    expect(fs.existsSync(packFile)).to.equal(false);
+    expect(fs.existsSync(packFile), `expected ${packFile} to NOT exist`).to.equal(false);
     cp.execSync('npm pack', { stdio: 'ignore' });
     tarFileList = [];
     tar.list({
