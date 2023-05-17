@@ -100,7 +100,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_NAME: fermium
+          NODE_LTS_VERSION: 14
       - func: install dependencies
       - func: run tests
         vars:
@@ -110,7 +110,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_NAME: gallium
+          NODE_LTS_VERSION: 16
       - func: install dependencies
       - func: run tests
         vars:
@@ -120,17 +120,25 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_NAME: hydrogen
+          NODE_LTS_VERSION: 18
       - func: install dependencies
       - func: run tests
         vars:
           TEST_TARGET: node
+  - name: node-tests-v20
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_LTS_VERSION: 20
+      - func: install dependencies
+      - func: run tests
   - name: node-tests-latest
     tags: ["node"]
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_NAME: latest
+          NODE_LTS_VERSION: latest
       - func: install dependencies
       - func: run tests
         vars:
@@ -140,7 +148,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_NAME: hydrogen
+          NODE_LTS_VERSION: 20
       - func: install dependencies
       - func: run tests
         vars:
@@ -149,7 +157,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_NAME: hydrogen
+          NODE_LTS_VERSION: 20
       - func: install dependencies
       - func: run bundling
   - name: no-bigint-web-tests
@@ -157,7 +165,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_NAME: hydrogen
+          NODE_LTS_VERSION: 20
       - func: install dependencies
       - func: run tests
         vars:
@@ -169,14 +177,14 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_NAME: hydrogen
+          NODE_LTS_VERSION: 20
       - func: install dependencies
       - func: run checks
   - name: check-typescript-oldest
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_NAME: hydrogen
+          NODE_LTS_VERSION: 20
       - func: install dependencies
       - func: "run typescript"
         vars:
@@ -186,7 +194,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_NAME: hydrogen
+          NODE_LTS_VERSION: 20
       - func: install dependencies
       - func: "run typescript"
         vars:
@@ -196,7 +204,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_NAME: hydrogen
+          NODE_LTS_VERSION: 20
       - func: install dependencies
       - func: "run typescript"
         vars:
@@ -206,7 +214,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_NAME: hydrogen
+          NODE_LTS_VERSION: 20
       - func: install dependencies
       - func: run eslint plugin tests
 
