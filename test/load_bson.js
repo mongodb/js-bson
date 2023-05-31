@@ -25,7 +25,7 @@ const commonGlobals = {
 
 const rnGlobals = {
   require: require
-}
+};
 
 function loadReactNativeCJSModuleBSON(globals) {
   const filename = path.resolve(__dirname, `../lib/bson.rn.cjs`);

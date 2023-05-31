@@ -697,7 +697,6 @@ describe('ByteUtils', () => {
 
     describe('react native uses vendored serialization', function () {
       let bsonWithNoCryptoAndRNProductMod;
-      let consoleWarnSpy;
       before(function () {
         const fakeConsole = {
           warn: () => {
