@@ -1,11 +1,12 @@
 import { types, inspect } from 'node:util';
 import { expect } from 'chai';
 import { isBufferOrUint8Array } from './tools/utils';
+import { Binary } from '../../src';
 import { ByteUtils } from '../../src/utils/byte_utils';
 import { nodeJsByteUtils } from '../../src/utils/node_byte_utils';
 import { webByteUtils } from '../../src/utils/web_byte_utils';
 import * as sinon from 'sinon';
-import { loadCJSModuleBSON, loadESModuleBSON } from '../load_bson';
+import { loadCJSModuleBSON, loadReactNativeCJSModuleBSON, loadESModuleBSON } from '../load_bson';
 import * as crypto from 'node:crypto';
 
 type ByteUtilTest<K extends keyof ByteUtils> = {
@@ -658,7 +659,7 @@ describe('ByteUtils', () => {
           }
         };
         consoleWarnSpy = sinon.spy(fakeConsole, 'warn');
-        const { context, exports } = loadCJSModuleBSON({
+        const { context, exports } = loadReactNativeCJSModuleBSON({
           crypto: null,
           // if we don't add a copy of Math here then we cannot spy on it for the test
           Math: {
@@ -691,6 +692,42 @@ describe('ByteUtils', () => {
         new bsonWithNoCryptoAndRNProductMod.BSON.UUID();
         // 16 is the length of a UUID
         expect(randomSpy).to.have.callCount(16);
+      });
+    });
+
+    describe('react native uses vendored serialization', function () {
+      let bsonWithNoCryptoAndRNProductMod;
+      let consoleWarnSpy;
+      before(function () {
+        const fakeConsole = {
+          warn: () => {
+            // ignore
+          }
+        };
+        const { exports } = loadReactNativeCJSModuleBSON({
+          crypto: null,
+          // if we don't add a copy of Math here then we cannot spy on it for the test
+          Math: {
+            pow: Math.pow,
+            floor: Math.floor,
+            random: Math.random
+          },
+          console: fakeConsole,
+          navigator: { product: 'ReactNative' }
+        });
+
+        bsonWithNoCryptoAndRNProductMod = exports;
+      });
+
+      after(function () {
+        bsonWithNoCryptoAndRNProductMod = null;
+      });
+
+      it('successfully serializes UTF8 and Base 64', () => {
+        const serialize = bsonWithNoCryptoAndRNProductMod.BSON.serialize;
+        expect(() => {
+          serialize({ text: '😀', binary: new Binary('1234').toString('base64') });
+        }).to.not.throw;
       });
     });
   });

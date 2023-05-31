@@ -1,6 +1,7 @@
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
 import { RequireRewriter } from './etc/rollup/rollup-plugin-require-rewriter/require_rewriter.mjs';
+import { RequireVendor } from './etc/rollup/rollup-plugin-require-vendor/require_vendor.mjs';
 
 /** @type {typescript.RollupTypescriptOptions} */
 const tsConfig = {
@@ -60,6 +61,17 @@ const config = [
       format: 'esm',
       sourcemap: true
     }
+  },
+  {
+    input,
+    plugins: [typescript(tsConfig), new RequireVendor(), nodeResolve({ resolveOnly: [] })],
+    output: {
+      file: 'lib/bson.rn.cjs',
+      format: 'commonjs',
+      exports: 'named',
+      sourcemap: true
+    },
+    treeshake: false
   }
 ];
 

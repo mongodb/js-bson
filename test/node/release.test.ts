@@ -17,6 +17,8 @@ const REQUIRED_FILES = [
   'lib/bson.cjs.map',
   'lib/bson.mjs',
   'lib/bson.mjs.map',
+  'lib/bson.rn.cjs',
+  'lib/bson.rn.cjs.map',
   'package.json',
   'src/binary.ts',
   'src/bson_value.ts',
@@ -44,7 +46,17 @@ const REQUIRED_FILES = [
   'src/utils/byte_utils.ts',
   'src/utils/node_byte_utils.ts',
   'src/utils/web_byte_utils.ts',
-  'src/validate_utf8.ts'
+  'src/validate_utf8.ts',
+  'vendor/base64/base64.js',
+  'vendor/base64/package.json',
+  'vendor/base64/LICENSE-MIT.txt',
+  'vendor/base64/README.md',
+  'vendor/text-encoding/lib/encoding-indexes.js',
+  'vendor/text-encoding/lib/encoding.js',
+  'vendor/text-encoding/index.js',
+  'vendor/text-encoding/package.json',
+  'vendor/text-encoding/LICENSE.md',
+  'vendor/text-encoding/README.md'
 ].map(f => `package/${f}`);
 
 describe(`Release ${packFile}`, function () {

@@ -23,6 +23,23 @@ const commonGlobals = {
   }
 };
 
+const rnGlobals = {
+  require: require
+}
+
+function loadReactNativeCJSModuleBSON(globals) {
+  const filename = path.resolve(__dirname, `../lib/bson.rn.cjs`);
+  const code = fs.readFileSync(filename, { encoding: 'utf8' });
+  const context = vm.createContext({
+    exports: Object.create(null),
+    ...rnGlobals,
+    ...globals
+  });
+
+  vm.runInContext(code, context, { filename });
+  return { context, exports: context.exports };
+}
+
 function loadCJSModuleBSON(globals) {
   const filename = path.resolve(__dirname, `../lib/bson.cjs`);
   const code = fs.readFileSync(filename, { encoding: 'utf8' });
@@ -59,5 +76,6 @@ async function loadESModuleBSON(globals) {
 
 module.exports = {
   loadCJSModuleBSON,
+  loadReactNativeCJSModuleBSON,
   loadESModuleBSON
 };
