@@ -61,18 +61,18 @@ export class Timestamp extends LongWithoutOverridesClass {
       if (typeof low.i !== 'number' && (typeof low.i !== 'object' || low.i._bsontype !== 'Int32')) {
         throw new BSONError('Timestamp constructed from { t, i } must provide i as a number');
       }
-      if (low.t < 0) {
+      if (low.t.valueOf() < 0) {
         throw new BSONError('Timestamp constructed from { t, i } must provide a positive t');
       }
-      if (low.i < 0) {
+      if (low.i.valueOf() < 0) {
         throw new BSONError('Timestamp constructed from { t, i } must provide a positive i');
       }
-      if (low.t > 0xffff_ffff) {
+      if (low.t.valueOf() > 0xffff_ffff) {
         throw new BSONError(
           'Timestamp constructed from { t, i } must provide t equal or less than uint32 max'
         );
       }
-      if (low.i > 0xffff_ffff) {
+      if (low.i.valueOf() > 0xffff_ffff) {
         throw new BSONError(
           'Timestamp constructed from { t, i } must provide i equal or less than uint32 max'
         );

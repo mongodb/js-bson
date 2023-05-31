@@ -16,8 +16,6 @@
     "noEmitHelpers": false,
     "noEmitOnError": true,
     "emitDeclarationOnly": true,
-    // make use of import type where applicable
-    "importsNotUsedAsValues": "error",
     // Generate separate source maps files with sourceContent included
     "sourceMap": true,
     "inlineSourceMap": false,
