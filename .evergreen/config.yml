@@ -78,7 +78,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 6
+          NODE_LTS_VERSION: 6
       - func: install dependencies
       - func: run tests
         vars:
@@ -88,7 +88,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 8
+          NODE_LTS_VERSION: 8
       - func: install dependencies
       - func: run tests
         vars:
@@ -98,7 +98,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 10
+          NODE_LTS_VERSION: 10
       - func: install dependencies
       - func: run tests
         vars:
@@ -108,7 +108,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 12
+          NODE_LTS_VERSION: 12
       - func: install dependencies
       - func: run tests
         vars:
