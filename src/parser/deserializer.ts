@@ -1,5 +1,5 @@
-import { Binary } from '../binary';
 import { Buffer } from 'buffer';
+import { Binary } from '../binary';
 import type { Document } from '../bson';
 import { Code } from '../code';
 import * as constants from '../constants';
