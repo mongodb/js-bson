@@ -90,7 +90,7 @@ else
   mv "${NODE_ARTIFACTS_PATH}/${node_directory}" "${NODE_ARTIFACTS_PATH}/nodejs"
 fi
 
-if [[ -z "${npm_prefix_config}" ]]; then
+if [[ -z "${npm_global_prefix}" ]]; then
   echo "npm_prefix_config not set"
   exit 1
 fi
