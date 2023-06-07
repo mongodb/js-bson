@@ -2,7 +2,7 @@ import { Binary, UUID } from '../binary';
 import type { Document } from '../bson';
 import { Code } from '../code';
 import * as constants from '../constants';
-import { DBRef, DBRefLike, isDBRefLike } from '../db_ref';
+import { DBRef, type DBRefLike, isDBRefLike } from '../db_ref';
 import { Decimal128 } from '../decimal128';
 import { Double } from '../double';
 import { BSONError } from '../error';

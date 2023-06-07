@@ -10,8 +10,8 @@ import { MinKey } from './min_key';
 import { ObjectId } from './objectid';
 import { internalCalculateObjectSize } from './parser/calculate_size';
 // Parts of the parser
-import { internalDeserialize, DeserializeOptions } from './parser/deserializer';
-import { serializeInto, SerializeOptions } from './parser/serializer';
+import { internalDeserialize, type DeserializeOptions } from './parser/deserializer';
+import { serializeInto, type SerializeOptions } from './parser/serializer';
 import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
