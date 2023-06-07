@@ -1,6 +1,6 @@
 import MagicString from 'magic-string';
 
-const REQUIRE_TEXT_ENCODING =
+const REQUIRE_POLYFILLS =
   `const { TextEncoder, TextDecoder } = require('../vendor/text-encoding');
 const { encode: btoa, decode: atob } = require('../vendor/base64');\n`
 
@@ -20,7 +20,7 @@ export class RequireVendor {
 
     // MagicString lets us edit the source code and still generate an accurate source map
     const magicString = new MagicString(code);
-    magicString.prepend(REQUIRE_TEXT_ENCODING);
+    magicString.prepend(REQUIRE_POLYFILLS);
 
     return {
       code: magicString.toString(),

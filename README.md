@@ -188,8 +188,7 @@ try {
 
 ## React Native
 
-BSON vendors the required polyfills for `TextEncoder`, `TextDecoder`, `atob`, `btoa` when using React Native. One
-additional polyfill, `crypto.getRandomValues` is required and can be installed with the following command:
+BSON vendors the required polyfills for `TextEncoder`, `TextDecoder`, `atob`, `btoa` imported from React Native and therefore doesn't expect users to polyfill these. One additional polyfill, `crypto.getRandomValues` is recommended and can be installed with the following command:
 
 ```sh
 npm install --save react-native-get-random-values
