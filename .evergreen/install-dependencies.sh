@@ -2,8 +2,11 @@
 set -o errexit  # Exit the script with error if any of the commands fail
 
 NODE_LTS_VERSION=${NODE_LTS_VERSION:-14}
-NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY:-$(pwd)}/node-artifacts"
-if [[ "$OS" = "Windows_NT" ]]; then NODE_ARTIFACTS_PATH=$(cygpath --unix "$NODE_ARTIFACTS_PATH"); fi
+
+source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+
+if [[ -z "${npm_global_prefix}" ]]; then echo "npm_global_prefix is unset" && exit 1; fi
+if [[ -z "${NODE_ARTIFACTS_PATH}" ]]; then echo "NODE_ARTIFACTS_PATH is unset" && exit 1; fi
 
 CURL_FLAGS=(
   --fail          # Exit code 1 if request fails
@@ -90,20 +93,13 @@ else
   mv "${NODE_ARTIFACTS_PATH}/${node_directory}" "${NODE_ARTIFACTS_PATH}/nodejs"
 fi
 
-export PATH="$NODE_ARTIFACTS_PATH/npm_global/bin:$NODE_ARTIFACTS_PATH/nodejs/bin:$PATH"
-hash -r
-
-# Set npm -g prefix to our local artifacts directory
-cat <<EOT > .npmrc
-prefix=$NODE_ARTIFACTS_PATH/npm_global
-EOT
-
 if [[ $operating_system != "win" ]]; then
   # Update npm to latest when we can
   npm install --global npm@latest
   hash -r
 fi
 
+echo "npm location: $(which npm)"
 echo "npm version: $(npm -v)"
 
 npm install "${NPM_OPTIONS}"
