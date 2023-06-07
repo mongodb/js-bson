@@ -188,23 +188,16 @@ try {
 
 ## React Native
 
-BSON requires that `TextEncoder`, `TextDecoder`, `atob`, `btoa`, and `crypto.getRandomValues` are available globally.  These are present in most Javascript runtimes but require polyfilling in React Native.  Polyfills for the missing functionality can be installed with the following command:
+BSON vendors the required polyfills for `TextEncoder`, `TextDecoder`, `atob`, `btoa` imported from React Native and therefore doesn't expect users to polyfill these. One additional polyfill, `crypto.getRandomValues` is recommended and can be installed with the following command:
+
 ```sh
-npm install --save react-native-get-random-values text-encoding-polyfill base-64
+npm install --save react-native-get-random-values
 ```
 
 The following snippet should be placed at the top of the entrypoint (by default this is the root `index.js` file) for React Native projects using the BSON library.  These lines must be placed for any code that imports `BSON`.
 
 ```typescript
 // Required Polyfills For ReactNative
-import {encode, decode} from 'base-64';
-if (global.btoa == null) {
-  global.btoa = encode;
-}
-if (global.atob == null) {
-  global.atob = decode;
-}
-import 'text-encoding-polyfill';
 import 'react-native-get-random-values';
 ```
 
@@ -214,7 +207,7 @@ Finally, import the `BSON` library like so:
 import { BSON, EJSON } from 'bson';
 ```
 
-This will cause React Native to import the `node_modules/bson/lib/bson.cjs` bundle (see the `"react-native"` setting we have in the `"exports"` section of our [package.json](./package.json).)
+This will cause React Native to import the `node_modules/bson/lib/bson.rn.cjs` bundle (see the `"react-native"` setting we have in the `"exports"` section of our [package.json](./package.json).)
 
 ### Technical Note about React Native module import
 

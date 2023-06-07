@@ -18,7 +18,7 @@ bson.sublime-workspace
 
 .vscode
 
-lib
+/lib
 .nyc_output/
 coverage/
 *.d.ts
