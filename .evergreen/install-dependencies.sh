@@ -5,8 +5,8 @@ NODE_LTS_VERSION=${NODE_LTS_VERSION:-14}
 
 source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 
-if [ -z "${npm_global_prefix}" ]; then echo "npm_global_prefix is unset" && exit 1; fi
-if [ -z "${NODE_ARTIFACTS_PATH}" ]; then echo "NODE_ARTIFACTS_PATH is unset" && exit 1; fi
+if [[ -z "${npm_global_prefix}" ]]; then echo "npm_global_prefix is unset" && exit 1; fi
+if [[ -z "${NODE_ARTIFACTS_PATH}" ]]; then echo "NODE_ARTIFACTS_PATH is unset" && exit 1; fi
 
 CURL_FLAGS=(
   --fail          # Exit code 1 if request fails
