@@ -1,18 +1,29 @@
 #!/bin/bash
-usage='./convert_to_csv.sh <input> [<output>]'
+# This script is meant to be used on the output of benchmark runs to generate a csv file that can be
+# more easily ingested in google sheets or your spreadsheet/data anaylsis tool of choice
+# note that you will also see the output of the csv file printed in the terminal
+usage=$(/bin/cat <<EOM 
+Usage:
+  ./convert_to_csv.sh <input> [<output>]
+
+  Arguments:
+    input  - file to read from
+    output - file to output csv (if not provided defaults to 'results.csv')
+EOM
+)
 input=$1
 output=$2
 
-if [ -z $1 ]; then
-  echo "Usage: " $usage
+if [ -z $input ]; then
+  echo "$usage"
+  exit 1
 fi
 
 if [ -z $output ]; then
   output=results.csv
 fi
 
-script=$(tempfile)
-/bin/cat <<EOM > $script
+sed_script=$(cat <<EOM
   # delete first 7 lines
   1,7d
 
@@ -47,11 +58,10 @@ script=$(tempfile)
   s/---/,/
   P
 EOM
-lines=$(sed --quiet --regexp-extended -f $script < $input)
+)
+lines=$(sed --quiet --regexp-extended -e "$sed_script" < $input)
 
 echo 'version,test,max,min,mean,stddev,p90,p95,p99' | tee $output
 for line in $lines; do 
   echo $line | tee -a $output
 done
-
-rm -rf $script
