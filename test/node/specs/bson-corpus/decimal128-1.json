@@ -322,7 +322,7 @@
         {
             "description": "Clamped zeros with a large negative exponent",
             "canonical_bson": "180000001364000000000000000000000000000000000000",
-            "degenerate_extjson": "{\"d\" : {\"$numberDecimal\" : \"0E-2147483648\"}}",
+            "degenerate_extjson": "{\"d\" : {\"$numberDecimal\" : \"0E-2147483647\"}}",
             "canonical_extjson": "{\"d\" : {\"$numberDecimal\" : \"0E-6176\"}}"
         },
         {
@@ -334,7 +334,7 @@
         {
             "description": "Clamped negative zeros with a large negative exponent",
             "canonical_bson": "180000001364000000000000000000000000000000008000",
-            "degenerate_extjson": "{\"d\" : {\"$numberDecimal\" : \"-0E-2147483648\"}}",
+            "degenerate_extjson": "{\"d\" : {\"$numberDecimal\" : \"-0E-2147483647\"}}",
             "canonical_extjson": "{\"d\" : {\"$numberDecimal\" : \"-0E-6176\"}}"
         }
     ]
