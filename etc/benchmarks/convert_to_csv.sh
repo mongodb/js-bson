@@ -2,7 +2,7 @@
 # This script is meant to be used on the output of benchmark runs to generate a csv file that can be
 # more easily ingested in google sheets or your spreadsheet/data anaylsis tool of choice
 # note that you will also see the output of the csv file printed in the terminal
-usage=$(/bin/cat <<EOM 
+USAGE=$(/bin/cat <<EOM 
 Usage:
   ./convert_to_csv.sh <input> [<output>]
 
