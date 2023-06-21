@@ -735,7 +735,7 @@ function getValidatedString(
   end: number,
   shouldValidateUtf8: boolean
 ) {
-  const value = ByteUtils.toUTF8(buffer.subarray(start, end));
+  const value = ByteUtils.toUTF8(buffer, start, end);
   // if utf8 validation is on, do the check
   if (shouldValidateUtf8) {
     for (let i = 0; i < value.length; i++) {
