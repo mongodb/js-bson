@@ -11,30 +11,11 @@ Usage:
     output - file to output csv (if not provided defaults to 'results.csv')
 EOM
 )
-input=$1
-output=${2:-results.csv}
-
-if [ -z $input ]; then
-  echo "$usage"
-  exit 1
-fi
-
-
+INPUT=$1
+OUTPUT=${2:-results.csv}
 SED_SCRIPT=$(cat <<EOM
-  # delete first 7 lines
-  1,7d
-
-  # delete skipped tests
-  /skipped/D
-
-  # delete total time
-  /Total time taken to benchmark/D
-
-  # delete horizontal lines
-  /-------------/d
-
   # filter for lines that contain the max field
-  /^.*max.*\$/h
+  /^.*max.*\$/!d
 
   # remove spaces
   s/ //g
@@ -56,9 +37,16 @@ SED_SCRIPT=$(cat <<EOM
   P
 EOM
 )
-lines=$(sed --quiet --regexp-extended -e "$SED_SCRIPT" < $input)
 
-echo 'version,test,max,min,mean,stddev,p90,p95,p99' | tee $output
+if [ -z $INPUT ]; then
+  echo "$USAGE"
+  exit 1
+fi
+
+
+lines=$(sed --quiet --regexp-extended -e "$SED_SCRIPT" < $INPUT)
+
+echo 'version,test,max,min,mean,stddev,p90,p95,p99' | tee $OUTPUT
 for line in $lines; do 
-  echo $line | tee -a $output
+  echo $line | tee -a $OUTPUT
 done
