@@ -12,18 +12,15 @@ Usage:
 EOM
 )
 input=$1
-output=$2
+output=${2:-results.csv}
 
 if [ -z $input ]; then
   echo "$usage"
   exit 1
 fi
 
-if [ -z $output ]; then
-  output=results.csv
-fi
 
-sed_script=$(cat <<EOM
+SED_SCRIPT=$(cat <<EOM
   # delete first 7 lines
   1,7d
 
@@ -59,7 +56,7 @@ sed_script=$(cat <<EOM
   P
 EOM
 )
-lines=$(sed --quiet --regexp-extended -e "$sed_script" < $input)
+lines=$(sed --quiet --regexp-extended -e "$SED_SCRIPT" < $input)
 
 echo 'version,test,max,min,mean,stddev,p90,p95,p99' | tee $output
 for line in $lines; do 
