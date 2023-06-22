@@ -102,7 +102,7 @@ await runner({
 /// nextBatch simulate
 /// nextBatch: [ { string * 20 } * 1000 ] /// Garbage call
 await runner({
-  skip: false,
+  skip: true,
   name: 'deserialize a large batch of documents each with an array of many strings',
   iterations,
   setup(libs) {
@@ -129,6 +129,33 @@ await runner({
   }
 });
 
+await runner({
+  skip: false,
+  name: 'deserialize a large batch of documents each with an array of many Int32s',
+  iterations,
+  setup(libs) {
+    const bson = libs[0].lib;
+    return bson.serialize({
+      nextBatch: Array.from({ length: 1000 }, () => ({
+        _id: new bson.ObjectId(),
+        arrayField: Array.from({ length: 100 }, (_, i) => i)
+      }))
+    });
+  },
+  async run(i, bson, document) {
+    await Promise.all(
+      Array.from(
+        { length: 100 },
+        (_, i) =>
+          new Promise(resolve => {
+            setTimeout(() => {
+              resolve(bson.lib.deserialize(document, { validation: { utf8: false } }));
+            }, 20);
+          })
+      )
+    );
+  }
+});
 // End
 console.log(
   'Total time taken to benchmark:',
