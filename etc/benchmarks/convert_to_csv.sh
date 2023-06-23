@@ -2,7 +2,7 @@
 # This script is meant to be used on the output of benchmark runs to generate a csv file that can be
 # more easily ingested in google sheets or your spreadsheet/data anaylsis tool of choice
 # note that you will also see the output of the csv file printed in the terminal
-usage=$(/bin/cat <<EOM 
+USAGE=$(/bin/cat <<EOM 
 Usage:
   ./convert_to_csv.sh <input> [<output>]
 
@@ -11,33 +11,11 @@ Usage:
     output - file to output csv (if not provided defaults to 'results.csv')
 EOM
 )
-input=$1
-output=$2
-
-if [ -z $input ]; then
-  echo "$usage"
-  exit 1
-fi
-
-if [ -z $output ]; then
-  output=results.csv
-fi
-
-sed_script=$(cat <<EOM
-  # delete first 7 lines
-  1,7d
-
-  # delete skipped tests
-  /skipped/D
-
-  # delete total time
-  /Total time taken to benchmark/D
-
-  # delete horizontal lines
-  /-------------/d
-
+INPUT=$1
+OUTPUT=${2:-results.csv}
+SED_SCRIPT=$(cat <<EOM
   # filter for lines that contain the max field
-  /^.*max.*\$/h
+  /^.*max.*\$/!d
 
   # remove spaces
   s/ //g
@@ -59,9 +37,16 @@ sed_script=$(cat <<EOM
   P
 EOM
 )
-lines=$(sed --quiet --regexp-extended -e "$sed_script" < $input)
 
-echo 'version,test,max,min,mean,stddev,p90,p95,p99' | tee $output
+if [ -z $INPUT ]; then
+  echo "$USAGE"
+  exit 1
+fi
+
+
+lines=$(sed --quiet --regexp-extended -e "$SED_SCRIPT" < $INPUT)
+
+echo 'version,test,max,min,mean,stddev,p90,p95,p99' | tee $OUTPUT
 for line in $lines; do 
-  echo $line | tee -a $output
+  echo $line | tee -a $OUTPUT
 done
