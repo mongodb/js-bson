@@ -6,6 +6,7 @@ import { cpus, totalmem } from 'os';
 import { exec as execCb } from 'child_process';
 import { promisify, types } from 'util';
 import { writeFile } from 'fs/promises';
+import * as semver from 'semver';
 import v8Profiler from 'v8-profiler-next';
 import chalk from 'chalk';
 const exec = promisify(execCb);
@@ -53,67 +54,60 @@ export function getCurrentLocalBSON(libs) {
 }
 
 export async function getLibs() {
-  return await Promise.all([
-    (async () => {
-      const { stdout } = await exec('git rev-parse --short HEAD');
-      const hash = stdout.trim();
+  const bsonVersions = await readJSONFile('./bson_versions.json');
+  const entries = bsonVersions.versions.map(async (version) => {
+    const bsonPath = `../../node_modules/bson${version.replaceAll('.', '')}`;
+    const packageVersion = (await readJSONFile(`${bsonPath}/package.json`)).version;
+    if (semver.lte(semver.coerce(version), '3.0.0')) {
+      const legacy = (await import(`${bsonPath}/index.js`)).default;
       return {
-        name: 'local',
-        lib: await import('../../lib/index.js'),
-        version: hash
+        name: version,
+        lib: { ...legacy, ...legacy.prototype },
+        version: packageVersion
       };
-    })(),
-    (async () => ({
-      name: 'released',
-      lib: await import('../../node_modules/bson_latest/lib/bson.js'),
-      version: (await readJSONFile('../../node_modules/bson_latest/package.json')).version
-    }))(),
-    (async () => {
-      const legacyBSON = (await import('../../node_modules/bson_legacy/index.js')).default;
+    } else if (semver.gte(semver.coerce(version), '5.0.0')) {
       return {
-        name: 'previous major',
-        lib: { ...legacyBSON, ...legacyBSON.prototype },
-        version: (await readJSONFile('../../node_modules/bson_legacy/package.json')).version
+        name: version,
+        lib: await import(`${bsonPath}/lib/bson.cjs`),
+        version: packageVersion
       };
-    })()
-    // BSON-EXT is EOL so we do not need to keep testing it, and it has issues installing it
-    // in this no-save way on M1 currently that are not worth fixing.
-    // (async () => ({
-    //   name: 'bson-ext',
-    //   lib: await import('../../node_modules/bson_ext/lib/index.js'),
-    //   version: (await readJSONFile('../../node_modules/bson_ext/package.json')).version
-    // }))()
-  ]).catch(error => {
-    console.error(error);
-    console.error(
-      `Please run:\n${[
-        'npm run build',
-        'npm install --no-save bson_ext@npm:bson-ext@4 bson_legacy@npm:bson@1 bson_latest@npm:bson@latest'
-      ].join('\n')}`
-    );
+    } else {
+      return {
+        name: version,
+        lib: await import(`${bsonPath}/lib/bson.js`),
+        version: packageVersion
+      };
+    }
+  });
+
+  entries.unshift({
+    name: 'local',
+    lib: await import('../../lib/bson.cjs'),
+    version: (await readJSONFile('../../package.json')).version
+  });
+
+  return await Promise.all(entries).catch(e => {
+    console.error(e);
+    console.error('Run\n\tnpm run build\n\t,./etc/benchmarks/install_bson_versions.sh');
     process.exit(1);
   });
 }
 
 const printHistogram = (name, h) => {
   const makeReadableTime = nanoseconds => (nanoseconds / 1e6).toFixed(3).padStart(7, ' ');
-  console.log();
-  console.log(chalk.green(name));
-  console.log('-'.repeat(155));
-  process.stdout.write(`|  ${chalk.cyan('max')}:    ${chalk.red(makeReadableTime(h.max))} ms |`);
-  process.stdout.write(`  ${chalk.cyan('min')}:    ${chalk.red(makeReadableTime(h.min))} ms |`);
-  process.stdout.write(`  ${chalk.cyan('mean')}:   ${chalk.red(makeReadableTime(h.mean))} ms |`);
-  process.stdout.write(`  ${chalk.cyan('stddev')}: ${chalk.red(makeReadableTime(h.stddev))} ms |`);
-  process.stdout.write(
-    `  ${chalk.cyan('p90th')}:  ${chalk.red(makeReadableTime(h.percentile(90)))} ms |`
-  );
-  process.stdout.write(
-    `  ${chalk.cyan('p95th')}:  ${chalk.red(makeReadableTime(h.percentile(95)))} ms |`
-  );
-  process.stdout.write(
+  const line = [
+    `| ${chalk.green(name.replaceAll(' ', '-'))} | ${chalk.cyan('max')}:    ${chalk.red(makeReadableTime(h.max))} ms |`,
+    `  ${chalk.cyan('min')}:    ${chalk.red(makeReadableTime(h.min))} ms |`,
+    `  ${chalk.cyan('mean')}:   ${chalk.red(makeReadableTime(h.mean))} ms |`,
+    `  ${chalk.cyan('stddev')}: ${chalk.red(makeReadableTime(h.stddev))} ms |`,
+    `  ${chalk.cyan('p90th')}:  ${chalk.red(makeReadableTime(h.percentile(90)))} ms |`,
+    `  ${chalk.cyan('p95th')}:  ${chalk.red(makeReadableTime(h.percentile(95)))} ms |`,
     `  ${chalk.cyan('p99th')}:  ${chalk.red(makeReadableTime(h.percentile(99)))} ms |`
-  );
-  console.log('\n' + '-'.repeat(155));
+  ].join('');
+  console.log();
+  console.log('-'.repeat(235));
+  console.log(line);
+  console.log('-'.repeat(235));
 };
 
 /**
@@ -134,11 +128,12 @@ export async function runner({ iterations, setup, name, run, skip }) {
   const BSONLibs = await getLibs();
   const setupResult = setup?.(BSONLibs) ?? null;
 
-  console.log('-'.repeat(155));
+  console.log('-'.repeat(235));
 
   for (const bson of BSONLibs) {
-    const profileName = `${bson.name}_${name}`;
+    const profileName = `${bson.name}_${name.replaceAll(' ', '-')}`;
     v8Profiler.startProfiling(profileName, true);
+    v8Profiler.setGenerateType(1);
     const { histogram, thrownError } = await testPerformance(bson, [run, setupResult], iterations);
     if (thrownError != null) {
       console.log(
