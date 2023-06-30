@@ -125,8 +125,8 @@ export const nodeJsByteUtils = {
     return Buffer.from(text, 'utf8');
   },
 
-  toUTF8(buffer: Uint8Array, start?: number, end?: number): string {
-    return (buffer as NodeJsBuffer).toString('utf8', start, end);
+  toUTF8(buffer: Uint8Array, start: number, end: number): string {
+    return nodeJsByteUtils.toLocalBufferType(buffer).toString('utf8', start, end);
   },
 
   utf8ByteLength(input: string): number {
