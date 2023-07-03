@@ -172,8 +172,8 @@ export const webByteUtils = {
     return new TextEncoder().encode(text);
   },
 
-  toUTF8(uint8array: Uint8Array): string {
-    return new TextDecoder('utf8', { fatal: false }).decode(uint8array);
+  toUTF8(uint8array: Uint8Array, start: number, end: number): string {
+    return new TextDecoder('utf8', { fatal: false }).decode(uint8array.slice(start, end));
   },
 
   utf8ByteLength(input: string): number {

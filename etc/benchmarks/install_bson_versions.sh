@@ -1,5 +1,6 @@
 #!/bin/bash
-versions=$(jq '.versions' < bson_versions.json | sed -E 's/(\[|\]|,|")//g')
+# To be run from repo root
+versions=$(jq '.versions' < etc/benchmarks/bson_versions.json | sed -E 's/(\[|\]|,|")//g')
 installVersions=''
 for bson in $versions; do
   versionNoDot=$(echo $bson | tr -d '.')

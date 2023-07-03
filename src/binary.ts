@@ -223,8 +223,9 @@ export class Binary extends BSONValue {
   toString(encoding?: 'hex' | 'base64' | 'utf8' | 'utf-8'): string {
     if (encoding === 'hex') return ByteUtils.toHex(this.buffer);
     if (encoding === 'base64') return ByteUtils.toBase64(this.buffer);
-    if (encoding === 'utf8' || encoding === 'utf-8') return ByteUtils.toUTF8(this.buffer);
-    return ByteUtils.toUTF8(this.buffer);
+    if (encoding === 'utf8' || encoding === 'utf-8')
+      return ByteUtils.toUTF8(this.buffer, 0, this.buffer.byteLength);
+    return ByteUtils.toUTF8(this.buffer, 0, this.buffer.byteLength);
   }
 
   /** @internal */

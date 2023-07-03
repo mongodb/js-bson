@@ -129,6 +129,61 @@ await runner({
   }
 });
 
+await runner({
+  skip: true,
+  name: 'deserialize a large batch of documents each with an array of many Int32s',
+  iterations,
+  setup(libs) {
+    const bson = libs[0].lib;
+    return bson.serialize({
+      nextBatch: Array.from({ length: 1000 }, () => ({
+        _id: new bson.ObjectId(),
+        arrayField: Array.from({ length: 100 }, (_, i) => i)
+      }))
+    });
+  },
+  async run(i, bson, document) {
+    await Promise.all(
+      Array.from(
+        { length: 100 },
+        (_, i) =>
+          new Promise(resolve => {
+            setTimeout(() => {
+              resolve(bson.lib.deserialize(document, { validation: { utf8: false } }));
+            }, 20);
+          })
+      )
+    );
+  }
+});
+
+await runner({
+  skip: true,
+  name: 'deserialize a large batch of documents each with an array of many Int64s',
+  iterations,
+  setup(libs) {
+    const bson = libs[0].lib;
+    return bson.serialize({
+      nextBatch: Array.from({ length: 1000 }, () => ({
+        _id: new bson.ObjectId(),
+        arrayField: Array.from({ length: 100 }, (_, i) => bson.Long.fromInt(i))
+      }))
+    });
+  },
+  async run(i, bson, document) {
+    await Promise.all(
+      Array.from(
+        { length: 100 },
+        (_, i) =>
+          new Promise(resolve => {
+            setTimeout(() => {
+              resolve(bson.lib.deserialize(document, { validation: { utf8: false } }));
+            }, 20);
+          })
+      )
+    );
+  }
+});
 // End
 console.log(
   'Total time taken to benchmark:',

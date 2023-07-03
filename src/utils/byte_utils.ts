@@ -26,7 +26,7 @@ export type ByteUtils = {
   /** Create a Uint8Array containing utf8 code units from a string */
   fromUTF8: (text: string) => Uint8Array;
   /** Create a string from utf8 code units */
-  toUTF8: (buffer: Uint8Array) => string;
+  toUTF8: (buffer: Uint8Array, start: number, end: number) => string;
   /** Get the utf8 code unit count from a string if it were to be transformed to utf8 */
   utf8ByteLength: (input: string) => number;
   /** Encode UTF8 bytes generated from `source` string into `destination` at byteOffset. Returns the number of bytes encoded. */
