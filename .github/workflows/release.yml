@@ -17,7 +17,7 @@ jobs:
         uses: google-github-actions/release-please-action@v3
         with:
           release-type: node
-          package-name: mongodb
+          package-name: bson
           # Example: chore(main): release 5.7.0 [skip-ci]
           # ${scope} - parenthesis included, base branch name
           pull-request-title-pattern: 'chore${scope}: release ${version} [skip-ci]'
