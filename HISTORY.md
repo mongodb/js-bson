@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.4.0](https://github.com/mongodb/js-bson/compare/v5.3.0...v5.4.0) (2023-07-03)
+
+
+### Features
+
+* **NODE-4938:** improve react native bundle experience ([#578](https://github.com/mongodb/js-bson/issues/578)) ([7e16636](https://github.com/mongodb/js-bson/commit/7e16636dd1e6dcd8b478678ab164a8b5d2563052))
+
+
+### Bug Fixes
+
+* **NODE-5363:** defer byte slicing to utf8 decoding API in nodejs ([#585](https://github.com/mongodb/js-bson/issues/585)) ([e087042](https://github.com/mongodb/js-bson/commit/e087042720f7103e3b18fbc7cb370ac892456352))
+
 ## [5.3.0](https://github.com/mongodb/js-bson/compare/v5.2.0...v5.3.0) (2023-05-10)
 
 
