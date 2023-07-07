@@ -95,16 +95,6 @@ functions:
           - .evergreen/run-bundling-test.sh
 
 tasks:
-  - name: node-tests-v14
-    tags: ["node"]
-    commands:
-      - func: fetch source
-        vars:
-          NODE_LTS_VERSION: 14
-      - func: install dependencies
-      - func: run tests
-        vars:
-          TEST_TARGET: node
   - name: node-tests-v16
     tags: ["node"]
     commands:
