@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.0.0](https://github.com/mongodb/js-bson/compare/v5.4.0...v6.0.0) (2023-07-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* **NODE-4787:** bump minimum Node.js version to v16.20.1 ([#590](https://github.com/mongodb/js-bson/issues/590))
+
+### Features
+
+* **NODE-4787:** bump minimum Node.js version to v16.20.1 ([#590](https://github.com/mongodb/js-bson/issues/590)) ([1dcca92](https://github.com/mongodb/js-bson/commit/1dcca92b24e609a069ca7f4187e5b9521380b2f5))
+
 ## [5.4.0](https://github.com/mongodb/js-bson/compare/v5.3.0...v5.4.0) (2023-07-03)
 
 
