@@ -214,7 +214,7 @@ tasks:
       - func: fetch source
         vars:
           NODE_LTS_VERSION: 16.20.1
-      - func: install-dependencies
+      - func: install dependencies
       - func: run benchmarks
         vars:
           TEST_TARGET: node 
@@ -226,7 +226,7 @@ tasks:
       - func: fetch source
         vars:
           NODE_LTS_VERSION: 16.20.1
-      - func: install-dependencies
+      - func: install dependencies
       - func: run benchmarks
         vars:
           TEST_TARGET: web
@@ -255,10 +255,9 @@ buildvariants:
       - check-typescript-current
       - check-typescript-next
       - bundling-tests
-
-buildvariants:
   - name: perf
     display_name: RHEL 9.0 perf
     run_on: rhel90-dbx-perf-large
     tasks:
-      - run-benchmarks
+      - run-benchmarks-node
+      - run-benchmarks-web
