@@ -5,15 +5,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 
-// TODO(NODE-4787): Node.js 16 was when the atob and btoa globals were introduced, so we need replacements for testing on 14
-const shim_btoa = input => Buffer.prototype.toString.call(Buffer.from(input), 'base64');
-const shim_atob = input => Buffer.from(input, 'base64').toString('binary');
-
 const commonGlobals = {
   TextEncoder,
   TextDecoder,
-  btoa: typeof btoa !== 'undefined' ? btoa : shim_btoa,
-  atob: typeof atob !== 'undefined' ? atob : shim_atob,
+  btoa,
+  atob,
   crypto: {
     getRandomValues(buffer) {
       const random = crypto.randomBytes(buffer.byteLength);
