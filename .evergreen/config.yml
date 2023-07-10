@@ -93,7 +93,16 @@ functions:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
         args:
           - .evergreen/run-bundling-test.sh
-
+  run benchmarks:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        binary: bash
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        args:
+          - .evergreen/run-benchmarks.sh ${TEST_TARGET}
 tasks:
   - name: node-tests-v16
     tags: ["node"]
@@ -200,6 +209,30 @@ tasks:
         vars:
           TS_VERSION: "next"
           TRY_COMPILING_LIBRARY: "false"
+  - name: run-benchmarks-node
+    commands:
+      - func: fetch source
+        vars:
+          NODE_LTS_VERSION: 16.20.1
+      - func: install-dependencies
+      - func: run benchmarks
+        vars:
+          TEST_TARGET: node 
+      - command: perf.send
+        params:
+          file: src/benchmarks.json
+  - name: run-benchmarks-web
+    commands:
+      - func: fetch source
+        vars:
+          NODE_LTS_VERSION: 16.20.1
+      - func: install-dependencies
+      - func: run benchmarks
+        vars:
+          TEST_TARGET: web
+      - command: perf.send
+        params:
+          file: src/benchmarks.json
   - name: check-eslint-plugin
     commands:
       - func: fetch source
@@ -222,3 +255,10 @@ buildvariants:
       - check-typescript-current
       - check-typescript-next
       - bundling-tests
+
+buildvariants:
+  - name: perf
+    display_name: RHEL 9.0 perf
+    run_on: rhel90-dbx-perf-large
+    tasks:
+      - run-benchmarks
