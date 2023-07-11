@@ -13,12 +13,12 @@ export class Suite {
 
   task(opts: {
     name: string;
-    data: any;
-    fn: (data: any) => void;
+    data: unknown;
+    fn: (data: unknown) => void;
     iterations: number;
     resultUnit?: string;
     transform?: (x: number) => number;
-    args?: Record<string, any>;
+    args?: Record<string, string>;
   }) {
     this.tasks.push(
       new Task(

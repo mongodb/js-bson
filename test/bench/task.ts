@@ -5,22 +5,22 @@ import { performance } from 'perf_hooks';
 export class Task {
   name: string;
   parent: Suite;
-  data: any;
-  fn: (data: any) => void;
+  data: unknown;
+  fn: (data: unknown) => void;
   iterations: number;
   transform?: (x: number) => number;
   resultUnit: string;
-  args?: Record<string, any>;
+  args?: Record<string, string>;
 
   constructor(
     parent: Suite,
     name: string,
-    data: any,
-    fn: (data: any) => void,
+    data: unknown,
+    fn: (data: unknown) => void,
     iterations: number,
     resultUnit?: string,
     transform?: (x: number) => number,
-    args?: Record<string, any>
+    args?: Record<string, string>
   ) {
     this.parent = parent;
     this.name = name;
@@ -33,7 +33,7 @@ export class Task {
   }
 
   run() {
-    console.log(`\t ${this.name}`);
+    console.log(`\t ${this.name} - iters: ${this.iterations}`);
     // Warmup
     for (let i = 0; i < this.iterations; i++) {
       this.fn(this.data);

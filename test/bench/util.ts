@@ -2,7 +2,7 @@ export type PerfSendData = {
   info: {
     test_name: string;
     tags?: string[];
-    args?: Record<string, any>;
+    args?: Record<string, string>;
   };
   metrics: { name: string; value: number }[];
 };
@@ -13,7 +13,7 @@ export function convertToPerfSendFormat(
     name: string;
     results: number[];
   }[],
-  args?: Record<string, any>
+  args?: Record<string, string>
 ): PerfSendData {
   return {
     info: {
