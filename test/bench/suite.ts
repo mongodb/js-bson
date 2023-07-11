@@ -16,9 +16,22 @@ export class Suite {
     data: any;
     fn: (data: any) => void;
     iterations: number;
+    resultUnit?: string;
+    transform?: (x: number) => number;
     args?: Record<string, any>;
   }) {
-    this.tasks.push(new Task(this, opts.name, opts.data, opts.fn, opts.iterations, opts.args));
+    this.tasks.push(
+      new Task(
+        this,
+        opts.name,
+        opts.data,
+        opts.fn,
+        opts.iterations,
+        opts.resultUnit,
+        opts.transform,
+        opts.args
+      )
+    );
     return this;
   }
 

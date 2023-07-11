@@ -1,7 +1,7 @@
 import { Suite } from '../suite';
 
 export function getStringDeserializationSuite(BSON): Suite {
-  const DOC = BSON.serialize({
+  const DOC: Uint8Array = BSON.serialize({
     nextBatch: Array.from({ length: 1000 }, () => {
       return {
         _id: new BSON.ObjectId(),
@@ -18,7 +18,11 @@ export function getStringDeserializationSuite(BSON): Suite {
       data: DOC,
       fn: serializedDoc =>
         BSON.deserialize(serializedDoc, { validation: { utf8: utf8Validation } }),
-      iterations: 1000
+      iterations: 1000,
+      resultUnit: 'megabytes_per_second',
+      transform: (runtimeMS: number) => {
+        return DOC.byteLength / runtimeMS;
+      }
     });
   }
 

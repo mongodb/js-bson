@@ -94,15 +94,14 @@ functions:
         args:
           - .evergreen/run-bundling-test.sh
   run benchmarks:
-    - command: subprocess.exec
+    - command: shell.exec
       type: test
       params:
         working_dir: src
-        binary: bash
-        env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-        args:
-          - .evergreen/run-benchmarks.sh ${TEST_TARGET}
+        script: |
+          ${PREPARE_SHELL}
+          echo "TEST_TARGET=${TEST_TARGET}"
+          ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh ${TEST_TARGET}
 tasks:
   - name: node-tests-v16
     tags: ["node"]
@@ -213,7 +212,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_VERSION: 16.20.1
+          NODE_LTS_VERSION: 16
       - func: install dependencies
       - func: run benchmarks
         vars:
@@ -225,7 +224,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_VERSION: 16.20.1
+          NODE_LTS_VERSION: 16
       - func: install dependencies
       - func: run benchmarks
         vars:

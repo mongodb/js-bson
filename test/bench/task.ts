@@ -1,5 +1,6 @@
 import { Suite } from './suite';
 import { convertToPerfSendFormat } from './util';
+import { performance } from 'perf_hooks';
 
 export class Task {
   name: string;
@@ -7,6 +8,8 @@ export class Task {
   data: any;
   fn: (data: any) => void;
   iterations: number;
+  transform?: (x: number) => number;
+  resultUnit: string;
   args?: Record<string, any>;
 
   constructor(
@@ -15,6 +18,8 @@ export class Task {
     data: any,
     fn: (data: any) => void,
     iterations: number,
+    resultUnit?: string,
+    transform?: (x: number) => number,
     args?: Record<string, any>
   ) {
     this.parent = parent;
@@ -22,7 +27,9 @@ export class Task {
     this.iterations = iterations;
     this.data = data;
     this.fn = fn;
+    this.transform = transform;
     this.args = args;
+    this.resultUnit = resultUnit ? resultUnit : 'ms';
   }
 
   run() {
@@ -37,12 +44,19 @@ export class Task {
       const start = performance.now();
       this.fn(this.data);
       const end = performance.now();
-
-      const bytesPerSec = this.data.byteLength / ((end - start) / 1000);
-      results.push(bytesPerSec / 1024 ** 2); // MiB/s
+      results.push(end - start); // ms
     }
     this.parent.results.push(
-      convertToPerfSendFormat(this.name, [{ name: 'megabytes_per_second', results }], this.args)
+      convertToPerfSendFormat(
+        this.name,
+        [
+          {
+            name: this.resultUnit,
+            results: this.transform ? results.map(this.transform) : results
+          }
+        ],
+        this.args
+      )
     );
   }
 }
