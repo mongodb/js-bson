@@ -212,7 +212,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_VERSION: 16
+          NODE_LTS_VERSION: v16.20.1
       - func: install dependencies
       - func: run benchmarks
         vars:
@@ -224,7 +224,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_VERSION: 16
+          NODE_LTS_VERSION: v16.20.1
       - func: install dependencies
       - func: run benchmarks
         vars:
