@@ -21,7 +21,7 @@ export function getStringDeserializationSuite(BSON): Suite {
       iterations: 1000,
       resultUnit: 'megabytes_per_second',
       transform: (runtimeMS: number) => {
-        return DOC.byteLength / runtimeMS;
+        return DOC.byteLength / 1024 ** 2 / (runtimeMS / 1000);
       }
     });
   }
