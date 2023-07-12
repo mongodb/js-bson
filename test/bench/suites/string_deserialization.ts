@@ -18,7 +18,7 @@ export function getStringDeserializationSuite(BSON): Suite {
       data: DOC,
       fn: serializedDoc =>
         BSON.deserialize(serializedDoc, { validation: { utf8: utf8Validation } }),
-      iterations: 1000,
+      iterations: 100_000,
       resultUnit: 'megabytes_per_second',
       transform: (runtimeMS: number) => {
         return DOC.byteLength / 1024 ** 2 / (runtimeMS / 1000);
