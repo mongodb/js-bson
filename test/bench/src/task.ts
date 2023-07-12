@@ -33,6 +33,7 @@ export class Task {
     this.resultUnit = resultUnit ? resultUnit : 'ms';
   }
 
+  // TODO: Ensure that each task runs on a separate node process
   run() {
     console.log(`\t ${this.name} - iters: ${this.iterations}`);
     const data = this.data;
