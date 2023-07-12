@@ -321,8 +321,6 @@ const UUID_WITH_DASHES = /^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A
  * @public
  */
 export class UUID extends Binary {
-  /** @deprecated Hex string is no longer cached, this control will be removed in a future major release */
-  static cacheHexString = false;
   /**
    * Create a UUID type
    *
