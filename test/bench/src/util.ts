@@ -17,7 +17,7 @@ export function convertToPerfSendFormat(
 ): PerfSendData {
   return {
     info: {
-      test_name: benchmarkName.replace(' ', '_'),
+      test_name: benchmarkName.replaceAll(' ', '_'),
       tags: ['js-bson'],
       args: args
     },

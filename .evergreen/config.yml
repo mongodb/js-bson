@@ -46,7 +46,6 @@ functions:
       params:
         working_dir: src
         script: |
-          ${PREPARE_SHELL}
           echo "NO_BIGINT=${NO_BIGINT} TEST_TARGET=${TEST_TARGET}"
           NO_BIGINT=${NO_BIGINT} ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh ${TEST_TARGET}
 
@@ -56,7 +55,6 @@ functions:
       params:
         working_dir: src
         script: |
-          ${PREPARE_SHELL}
           echo "TEST_TARGET=${TEST_TARGET}"
           bash ${PROJECT_DIRECTORY}/.evergreen/run-checks.sh
   run typescript:
@@ -99,9 +97,7 @@ functions:
       params:
         working_dir: src
         script: |
-          ${PREPARE_SHELL}
-          echo "TEST_TARGET=${TEST_TARGET}"
-          ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh ${TEST_TARGET}
+          WEB=${WEB} ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
 tasks:
   - name: node-tests-v16
     tags: ["node"]
@@ -212,23 +208,11 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_VERSION: v16.20.1
+          NODE_LTS_VERSION: v18.16.0
       - func: install dependencies
       - func: run benchmarks
         vars:
-          TEST_TARGET: node 
-      - command: perf.send
-        params:
-          file: src/benchmarks.json
-  - name: run-benchmarks-web
-    commands:
-      - func: fetch source
-        vars:
-          NODE_LTS_VERSION: v16.20.1
-      - func: install dependencies
-      - func: run benchmarks
-        vars:
-          TEST_TARGET: web
+          WEB: false 
       - command: perf.send
         params:
           file: src/benchmarks.json
@@ -259,4 +243,3 @@ buildvariants:
     run_on: rhel90-dbx-perf-large
     tasks:
       - run-benchmarks-node
-      - run-benchmarks-web

@@ -35,15 +35,17 @@ export class Task {
 
   run() {
     console.log(`\t ${this.name} - iters: ${this.iterations}`);
+    const data = this.data;
+    const fn = this.fn;
     // Warmup
     for (let i = 0; i < this.iterations; i++) {
-      this.fn(this.data);
+      fn(data);
     }
     const results: number[] = [];
 
     for (let i = 0; i < this.iterations; i++) {
       const start = performance.now();
-      this.fn(this.data);
+      fn(data);
       const end = performance.now();
       results.push(end - start); // ms
     }

@@ -10,7 +10,7 @@ export function getStringDeserializationSuite(): Suite {
       };
     })
   });
-  const suite = new Suite('String Deserialization');
+  const suite = new Suite('string seserialization');
   for (const utf8Validation of [true, false]) {
     suite.task({
       name: `stringDeserializationUTF8${utf8Validation ? 'On' : 'Off'}-${
