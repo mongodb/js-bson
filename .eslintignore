@@ -3,4 +3,5 @@ node_modules/
 docs/
 types/
 lib/
+test/bench/
 *.d.ts

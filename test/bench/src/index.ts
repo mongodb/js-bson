@@ -1,6 +1,5 @@
-import * as BSON from '../register-bson.js';
 import { getStringDeserializationSuite } from './suites/string_deserialization';
-import { PerfSendData } from './util';
+import { type PerfSendData } from './util';
 import { writeFile } from 'fs';
 import { cpus, totalmem } from 'os';
 
@@ -18,7 +17,7 @@ console.log(
   ].join('\n')
 );
 
-for (const suite of [getStringDeserializationSuite(BSON)]) {
+for (const suite of [getStringDeserializationSuite()]) {
   suite.run();
   results.push(suite.results);
 }

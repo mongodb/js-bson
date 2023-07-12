@@ -103,7 +103,7 @@
     "check:tsd": "npm run build:dts && tsd",
     "check:web": "WEB=true mocha test/node",
     "check:web-no-bigint": "WEB=true NO_BIGINT=true mocha test/node",
-    "check:bench":"npx ts-node test/bench/index.ts",
+    "check:bench":"cd test/bench && npm install && npm run build && npm run main && mv benchmarks.json ../../.",
     "build:ts": "node ./node_modules/typescript/bin/tsc",
     "build:dts": "npm run build:ts && api-extractor run --typescript-compiler-folder node_modules/typescript --local && node etc/clean_definition_files.cjs",
     "build:bundle": "rollup -c rollup.config.mjs",

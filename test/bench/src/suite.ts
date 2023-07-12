@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Task } from './task';
-import { PerfSendData } from './util';
+import { type PerfSendData } from './util';
 
 export class Suite {
   name: string;
@@ -13,8 +14,8 @@ export class Suite {
 
   task(opts: {
     name: string;
-    data: unknown;
-    fn: (data: unknown) => void;
+    data: any;
+    fn: (data: any) => void;
     iterations: number;
     resultUnit?: string;
     transform?: (x: number) => number;

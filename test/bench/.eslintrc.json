@@ -1,0 +1,93 @@
+{
+  "root": true,
+  "extends": [
+    "eslint:recommended",
+    "plugin:prettier/recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+  ],
+  "env": {
+    "node": true
+  },
+  "globals": {
+    "Promise": true,
+    "Uint8Array": true,
+    "ArrayBuffer": true,
+    "Set": true,
+    "Map": false
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "project": [
+      "./tsconfig.json"
+    ]
+  },
+  "plugins": [
+    "prettier",
+    "eslint-plugin-tsdoc",
+    "no-bigint-usage"
+  ],
+  "reportUnusedDisableDirectives": true,
+  "rules": {
+    "prettier/prettier": "error",
+    "tsdoc/syntax": "warn",
+    "no-console": "off",
+    "eqeqeq": [
+      "error",
+      "always",
+      {
+        "null": "ignore"
+      }
+    ],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    "strict": [
+      "error",
+      "global"
+    ],
+    "@typescript-eslint/ban-types": [
+      "error",
+      {
+        "types": {
+          "Function": false
+        }
+      }
+    ],
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-return": "off",
+    "@typescript-eslint/no-unsafe-argument": "off",
+    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports",
+        "disallowTypeAnnotations": false,
+        "fixStyle": "inline-type-imports"
+      }
+    ],
+    "no-bigint-usage/no-bigint-literals": "error",
+    "no-restricted-globals": [
+      "error",
+      "BigInt"
+    ]
+  },
+  "overrides": [
+    {
+      "parser": "espree",
+      "files": [
+        "*.mjs"
+      ],
+      "parserOptions": {
+        "sourceType": "module",
+        "ecmaVersion": "latest"
+      }
+    }
+  ]
+}

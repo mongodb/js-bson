@@ -1,0 +1,25 @@
+{
+  "name": "bench",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "main": "node lib/index.js",
+    "build": "npx tsc",
+    "format": "npx eslint --ext '.ts' src --fix"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.4.1",
+    "typescript": "^5.1.6",
+    "eslint": "^8.39.0",
+    "prettier": "^2.8.8",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1"
+  },
+  "dependencies": {
+    "bson": "file:../.."
+  }
+}

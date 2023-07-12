@@ -1,11 +1,12 @@
 import { Suite } from '../suite';
+import * as BSON from 'bson';
 
-export function getStringDeserializationSuite(BSON): Suite {
+export function getStringDeserializationSuite(): Suite {
   const DOC: Uint8Array = BSON.serialize({
-    nextBatch: Array.from({ length: 1000 }, () => {
+    nextBatch: Array.from({ length: 100 }, () => {
       return {
         _id: new BSON.ObjectId(),
-        arrayField: Array.from({ length: 20 }, (_, i) => '5e99f3f5d3ab06936d36000' + i)
+        arrayField: Array.from({ length: 20 }, (_, i) => `5e99f3f5d3ab06936d36000${i}`)
       };
     })
   });
@@ -18,7 +19,7 @@ export function getStringDeserializationSuite(BSON): Suite {
       data: DOC,
       fn: serializedDoc =>
         BSON.deserialize(serializedDoc, { validation: { utf8: utf8Validation } }),
-      iterations: 100_000,
+      iterations: 10_000,
       resultUnit: 'megabytes_per_second',
       transform: (runtimeMS: number) => {
         return DOC.byteLength / 1024 ** 2 / (runtimeMS / 1000);

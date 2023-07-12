@@ -1,12 +1,13 @@
-import { Suite } from './suite';
+import { type Suite } from './suite';
 import { convertToPerfSendFormat } from './util';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { performance } from 'perf_hooks';
 
 export class Task {
   name: string;
   parent: Suite;
-  data: unknown;
-  fn: (data: unknown) => void;
+  data: any;
+  fn: (data: any) => void;
   iterations: number;
   transform?: (x: number) => number;
   resultUnit: string;
@@ -15,8 +16,8 @@ export class Task {
   constructor(
     parent: Suite,
     name: string,
-    data: unknown,
-    fn: (data: unknown) => void,
+    data: any,
+    fn: (data: any) => void,
     iterations: number,
     resultUnit?: string,
     transform?: (x: number) => number,
