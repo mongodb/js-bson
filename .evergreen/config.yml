@@ -41,22 +41,25 @@ functions:
           - .evergreen/install-dependencies.sh
 
   run tests:
-    - command: shell.exec
+    - command: subprocess.exec
       type: test
       params:
         working_dir: src
-        script: |
-          echo "NO_BIGINT=${NO_BIGINT} TEST_TARGET=${TEST_TARGET}"
-          NO_BIGINT=${NO_BIGINT} ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh ${TEST_TARGET}
+        add_expansions_to_env: true
+        binary: bash
+        args:
+          - .evergreen/run-tests.sh
 
   run checks:
-    - command: shell.exec
+    - command: subprocess.exec
       type: test
       params:
         working_dir: src
-        script: |
-          echo "TEST_TARGET=${TEST_TARGET}"
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-checks.sh
+        add_expansions_to_env: true
+        binary: bash
+        args:
+          - .evergreen/run-checks.sh
+
   run typescript:
     - command: subprocess.exec
       type: test
@@ -92,12 +95,6 @@ functions:
         args:
           - .evergreen/run-bundling-test.sh
   run benchmarks:
-    #- command: shell.exec
-    #type: test
-    #params:
-    #working_dir: src
-    #script: |
-    #WEB=${WEB} ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
     - command: subprocess.exec
       type: test
       params:
