@@ -16,13 +16,9 @@
     "noEmitHelpers": false,
     "noEmitOnError": true,
     "emitDeclarationOnly": false,
-    // Generate separate source maps files with sourceContent included
     "sourceMap": true,
     "inlineSourceMap": false,
     "inlineSources": false,
-    // API-extractor makes use of the declarations, npm script should be cleaning these up
-    //"declaration": true,
-    //"declarationMap": true,
     "types": ["node"]
   },
   "include": [

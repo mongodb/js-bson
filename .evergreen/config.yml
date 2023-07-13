@@ -92,12 +92,20 @@ functions:
         args:
           - .evergreen/run-bundling-test.sh
   run benchmarks:
-    - command: shell.exec
+    #- command: shell.exec
+    #type: test
+    #params:
+    #working_dir: src
+    #script: |
+    #WEB=${WEB} ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
+    - command: subprocess.exec
       type: test
       params:
         working_dir: src
-        script: |
-          WEB=${WEB} ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - .evergreen/run-benchmarks.sh
 tasks:
   - name: node-tests-v16
     tags: ["node"]

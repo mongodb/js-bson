@@ -1,5 +1,5 @@
 import { Suite } from '../suite';
-import * as BSON from 'bson';
+import * as BSON from '../../../../';
 
 export function getStringDeserializationSuite(): Suite {
   const DOC: Uint8Array = BSON.serialize({
