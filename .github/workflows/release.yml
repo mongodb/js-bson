@@ -26,6 +26,8 @@ jobs:
           pull-request-header: 'Please run the release_notes action before releasing to generate release highlights'
           changelog-path: HISTORY.md
           default-branch: main
+          release-search-depth: 3
+          commit-search-depth: 20
 
       # If release-please created a release, publish to npm
       - if: ${{ steps.release.outputs.release_created }}
@@ -34,6 +36,6 @@ jobs:
         name: actions/setup
         uses: ./.github/actions/setup
       - if: ${{ steps.release.outputs.release_created }}
-        run: npm publish --provenance
+        run: npm publish --provenance --dry-run
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ''
