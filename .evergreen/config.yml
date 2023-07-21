@@ -209,7 +209,7 @@ tasks:
         vars:
           TS_VERSION: "next"
           TRY_COMPILING_LIBRARY: "false"
-  - name: run-benchmarks-node
+  - name: run-benchmarks-node-18
     commands:
       - func: fetch source
         vars:
