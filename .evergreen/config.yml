@@ -247,4 +247,4 @@ buildvariants:
     display_name: RHEL 9.0 perf
     run_on: rhel90-dbx-perf-large
     tasks:
-      - run-benchmarks-node
+      - run-benchmarks-node-18
