@@ -6,7 +6,7 @@ describe('Constructing BSON types', function () {
     expect(() => new BSON.ObjectId()).to.not.throw();
     expect(() => new BSON.BSONRegExp('aaa')).to.not.throw();
     expect(() => new BSON.BSONSymbol('aaa')).to.not.throw();
-    expect(() => new BSON.Binary('aaa')).to.not.throw();
+    expect(() => new BSON.Binary(new Uint8Array())).to.not.throw();
     expect(() => new BSON.Code(function () {})).to.not.throw();
     expect(() => new BSON.Decimal128('123')).to.not.throw();
     expect(() => new BSON.Double(2.3)).to.not.throw();
