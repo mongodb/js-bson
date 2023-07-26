@@ -1,6 +1,5 @@
 import { BSONValue } from './bson_value';
 import { BSONError } from './error';
-import { isUint8Array } from './parser/utils';
 import { BSONDataView, ByteUtils } from './utils/byte_utils';
 
 // Regular expression that checks for hex value
@@ -74,19 +73,11 @@ export class ObjectId extends BSONValue {
       // If intstanceof matches we can escape calling ensure buffer in Node.js environments
       this[kId] = ByteUtils.toLocalBufferType(workingId);
     } else if (typeof workingId === 'string') {
-      if (workingId.length === 12) {
-        // TODO(NODE-4361): Remove string of length 12 support
-        const bytes = ByteUtils.fromUTF8(workingId);
-        if (bytes.byteLength === 12) {
-          this[kId] = bytes;
-        } else {
-          throw new BSONError('Argument passed in must be a string of 12 bytes');
-        }
-      } else if (workingId.length === 24 && checkForHexRegExp.test(workingId)) {
+      if (workingId.length === 24 && checkForHexRegExp.test(workingId)) {
         this[kId] = ByteUtils.fromHex(workingId);
       } else {
         throw new BSONError(
-          'Argument passed in must be a string of 12 bytes or a string of 24 hex characters or an integer'
+          'input must be a 24 character hex string, 12 byte Uint8Array, or an integer'
         );
       }
     } else {
@@ -113,7 +104,7 @@ export class ObjectId extends BSONValue {
     }
   }
 
-  /** Returns the ObjectId id as a 24 character hex string representation */
+  /** Returns the ObjectId id as a 24 lowercase character hex string representation */
   toHexString(): string {
     if (ObjectId.cacheHexString && this.__id) {
       return this.__id;
@@ -188,6 +179,16 @@ export class ObjectId extends BSONValue {
     return this.toHexString();
   }
 
+  /** @internal */
+  private static is(variable: unknown): variable is ObjectId {
+    return (
+      variable != null &&
+      typeof variable === 'object' &&
+      '_bsontype' in variable &&
+      variable._bsontype === 'ObjectId'
+    );
+  }
+
   /**
    * Compares the equality of this ObjectId with `otherID`.
    *
@@ -198,34 +199,17 @@ export class ObjectId extends BSONValue {
       return false;
     }
 
-    if (otherId instanceof ObjectId) {
+    if (ObjectId.is(otherId)) {
       return this[kId][11] === otherId[kId][11] && ByteUtils.equals(this[kId], otherId[kId]);
     }
 
-    if (
-      typeof otherId === 'string' &&
-      ObjectId.isValid(otherId) &&
-      otherId.length === 12 &&
-      isUint8Array(this.id)
-    ) {
-      return ByteUtils.equals(this.id, ByteUtils.fromISO88591(otherId));
-    }
-
-    if (typeof otherId === 'string' && ObjectId.isValid(otherId) && otherId.length === 24) {
+    if (typeof otherId === 'string') {
       return otherId.toLowerCase() === this.toHexString();
     }
 
-    if (typeof otherId === 'string' && ObjectId.isValid(otherId) && otherId.length === 12) {
-      return ByteUtils.equals(ByteUtils.fromUTF8(otherId), this.id);
-    }
-
-    if (
-      typeof otherId === 'object' &&
-      'toHexString' in otherId &&
-      typeof otherId.toHexString === 'function'
-    ) {
+    if (typeof otherId === 'object' && typeof otherId.toHexString === 'function') {
       const otherIdString = otherId.toHexString();
-      const thisIdString = this.toHexString().toLowerCase();
+      const thisIdString = this.toHexString();
       return typeof otherIdString === 'string' && otherIdString.toLowerCase() === thisIdString;
     }
 
@@ -281,9 +265,8 @@ export class ObjectId extends BSONValue {
   }
 
   /**
-   * Checks if a value is a valid bson ObjectId
-   *
-   * @param id - ObjectId instance to validate.
+   * Checks if a value can be used to create a valid bson ObjectId
+   * @param id - any JS value
    */
   static isValid(id: string | number | ObjectId | ObjectIdLike | Uint8Array): boolean {
     if (id == null) return false;
