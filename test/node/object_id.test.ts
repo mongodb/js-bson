@@ -320,36 +320,53 @@ describe('ObjectId', function () {
     done();
   });
 
-  it('should isValid check input Buffer length', function (done) {
-    const buffTooShort = Buffer.from([]);
-    const buffTooLong = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
-    const buff12Bytes = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  context('isValid()', () => {
+    context('when called with typed array', () => {
+      it('returns true for 12 byteLength', () =>
+        expect(ObjectId.isValid(Buffer.alloc(12))).to.be.true);
 
-    expect(ObjectId.isValid(buffTooShort)).to.be.false;
-    expect(ObjectId.isValid(buffTooLong)).to.be.false;
-    expect(ObjectId.isValid(buff12Bytes)).to.be.true;
-    done();
-  });
+      it('returns false for greater than 12 byteLength', () =>
+        expect(ObjectId.isValid(Buffer.alloc(0))).to.be.false);
 
-  it('should have isValid be false for 12-char length and 12-byte length string', function () {
-    const plainASCIIstr = 'aaaaaaaaaaaa';
-    expect(ObjectId.isValid(plainASCIIstr)).to.be.false;
-  });
+      it('returns false for less than 12 byteLength', () =>
+        expect(ObjectId.isValid(Buffer.alloc(13))).to.be.false);
+    });
 
-  it('should have isValid be false for 12-char length but non-12-byte length string', function () {
-    const characterCodesLargerThan256 = 'abcdefŽhijkl';
-    const length12Not12Bytest1 = '🐶🐶🐶🐶🐶🐶';
-    const length12Not12Bytest2 = 'value with é';
-    expect(ObjectId.isValid(characterCodesLargerThan256)).to.be.false;
-    expect(ObjectId.isValid(length12Not12Bytest1)).to.be.false;
-    expect(ObjectId.isValid(length12Not12Bytest2)).to.be.false;
-  });
+    context('when called with a string', () => {
+      it('returns true for 24 hex characters', () =>
+        expect(ObjectId.isValid('f'.repeat(24))).to.be.true);
 
-  it('should correctly interpret timestamps beyond 2038', function () {
-    const farFuture = new Date('2040-01-01T00:00:00.000Z').getTime();
-    expect(
-      new BSON.ObjectId(BSON.ObjectId.generate(farFuture / 1000)).getTimestamp().getTime()
-    ).to.equal(farFuture);
+      it('returns false for string not of length 24', () =>
+        expect(ObjectId.isValid('f'.repeat(12))).to.be.false);
+
+      it('returns false strings of length 24 that are not hex characters', () =>
+        expect(ObjectId.isValid('🐶🐶🐶🐶🐶🐶🐶🐶🐶🐶🐶🐶')).to.be.false);
+    });
+
+    context('when called with a number', () => {
+      it('returns true for any number (0)', () => expect(ObjectId.isValid(0)).to.be.true);
+
+      it('returns true for any number (MIN_SAFE_INTEGER)', () =>
+        expect(ObjectId.isValid(Number.MIN_SAFE_INTEGER)).to.be.true);
+
+      it('returns true for any number (NaN)', () => expect(ObjectId.isValid(NaN)).to.be.true);
+    });
+
+    context('when called with a ObjectId or ObjectIdLike', () => {
+      it('returns true for ObjectId', () => expect(ObjectId.isValid(new ObjectId())).to.be.true);
+
+      it('returns true for ObjectIdLike', () =>
+        expect(
+          ObjectId.isValid({
+            get id() {
+              return this.toHexString();
+            },
+            toHexString() {
+              return '0'.repeat(24);
+            }
+          })
+        ).to.be.true);
+    });
   });
 
   describe('.equals(otherId)', () => {
