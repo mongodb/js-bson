@@ -9,7 +9,7 @@ const Buffer = require('buffer').Buffer;
 
 describe('BSON - Node only', function () {
   it('Should Correctly Serialize and Deserialize a big Binary object', function (done) {
-    var data = fs.readFileSync(path.resolve(__dirname, './data/test_gs_weird_bug.png'), 'binary');
+    var data = fs.readFileSync(path.resolve(__dirname, './data/test_gs_weird_bug.png'));
     var bin = new Binary();
     bin.write(data);
     var doc = { doc: bin };
@@ -26,18 +26,17 @@ describe('BSON - Node only', function () {
 });
 
 describe('Full BSON - Node only', function () {
-  it('Should Correctly Serialize and Deserialize a big Binary object', function (done) {
-    var data = fs.readFileSync(path.resolve(__dirname, './data/test_gs_weird_bug.png'), 'binary');
+  it('Should Correctly Serialize and Deserialize a big Binary object', function () {
+    var data = fs.readFileSync(path.resolve(__dirname, './data/test_gs_weird_bug.png'));
     var bin = new Binary();
     bin.write(data);
     var doc = { doc: bin };
     var serialized_data = BSON.serialize(doc);
     var deserialized_data = BSON.deserialize(serialized_data);
-    expect(doc.doc.value()).to.equal(deserialized_data.doc.value());
-    done();
+    expect(doc.doc.value()).to.deep.equal(deserialized_data.doc.value());
   });
 
-  it('Should Correctly Deserialize bson file from mongodump', function (done) {
+  it('Should Correctly Deserialize bson file from mongodump', function () {
     var data = fs.readFileSync(path.resolve(__dirname, './data/test.bson'), { encoding: null });
     data = Buffer.from(data);
     var docs = [];
@@ -46,6 +45,5 @@ describe('Full BSON - Node only', function () {
       bsonIndex = BSON.deserializeStream(data, bsonIndex, 1, docs, docs.length, { isArray: true });
 
     expect(docs.length).to.equal(1);
-    done();
   });
 });

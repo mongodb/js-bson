@@ -184,7 +184,7 @@ describe('Extended JSON', function () {
 
   it('should serialize from BSON object to EJSON object', function () {
     const doc = {
-      binary: new Binary(''),
+      binary: new Binary(new Uint8Array([0, 0, 0]), 0xef),
       code: new Code('function() {}'),
       dbRef: new DBRef('tests', new Int32(1), 'test'),
       decimal128: new Decimal128('128'),
@@ -203,7 +203,7 @@ describe('Extended JSON', function () {
 
     const result = EJSON.serialize(doc, { relaxed: false });
     expect(result).to.deep.equal({
-      binary: { $binary: { base64: '', subType: '00' } },
+      binary: { $binary: { base64: 'AAAA', subType: 'ef' } },
       code: { $code: 'function() {}' },
       dbRef: { $ref: 'tests', $id: { $numberInt: '1' }, $db: 'test' },
       decimal128: { $numberDecimal: '128' },

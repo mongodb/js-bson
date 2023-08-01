@@ -260,17 +260,16 @@ describe('Full BSON', function () {
   /**
    * @ignore
    */
-  it('Should Correctly Serialize and Deserialize a Binary object', function (done) {
+  it('Should Correctly Serialize and Deserialize a Binary object', function () {
     var bin = new Binary();
     var string = 'binstring';
     for (var index = 0; index < string.length; index++) {
-      bin.put(string.charAt(index));
+      bin.put(string[index]);
     }
     var doc = { doc: bin };
     var serialized_data = BSON.serialize(doc);
     var deserialized_data = BSON.deserialize(serialized_data);
-    expect(doc.doc.value()).to.equal(deserialized_data.doc.value());
-    done();
+    expect(doc.doc.value()).to.deep.equal(deserialized_data.doc.value());
   });
 
   it('Should Correctly Serialize and Deserialize a ArrayBuffer object', function () {

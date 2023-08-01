@@ -1,4 +1,4 @@
-import { isUint8Array } from './parser/utils';
+import { isAnyArrayBuffer, isUint8Array } from './parser/utils';
 import type { EJSONOptions } from './extended_json';
 import { BSONError } from './error';
 import { BSON_BINARY_SUBTYPE_UUID_NEW } from './constants';
@@ -65,27 +65,19 @@ export class Binary extends BSONValue {
 
   /**
    * Create a new Binary instance.
-   *
-   * This constructor can accept a string as its first argument. In this case,
-   * this string will be encoded using ISO-8859-1, **not** using UTF-8.
-   * This is almost certainly not what you want. Use `new Binary(Buffer.from(string))`
-   * instead to convert the string to a Buffer using UTF-8 first.
-   *
    * @param buffer - a buffer object containing the binary data.
    * @param subType - the option binary type.
    */
-  constructor(buffer?: string | BinarySequence, subType?: number) {
+  constructor(buffer?: BinarySequence, subType?: number) {
     super();
     if (
       !(buffer == null) &&
-      !(typeof buffer === 'string') &&
+      typeof buffer === 'string' &&
       !ArrayBuffer.isView(buffer) &&
-      !(buffer instanceof ArrayBuffer) &&
+      !isAnyArrayBuffer(buffer) &&
       !Array.isArray(buffer)
     ) {
-      throw new BSONError(
-        'Binary can only be constructed from string, Buffer, TypedArray, or Array<number>'
-      );
+      throw new BSONError('Binary can only be constructed from Uint8Array or number[]');
     }
 
     this.sub_type = subType ?? Binary.BSON_BINARY_SUBTYPE_DEFAULT;
@@ -95,17 +87,9 @@ export class Binary extends BSONValue {
       this.buffer = ByteUtils.allocate(Binary.BUFFER_SIZE);
       this.position = 0;
     } else {
-      if (typeof buffer === 'string') {
-        // string
-        this.buffer = ByteUtils.fromISO88591(buffer);
-      } else if (Array.isArray(buffer)) {
-        // number[]
-        this.buffer = ByteUtils.fromNumberArray(buffer);
-      } else {
-        // Buffer | TypedArray | ArrayBuffer
-        this.buffer = ByteUtils.toLocalBufferType(buffer);
-      }
-
+      this.buffer = Array.isArray(buffer)
+        ? ByteUtils.fromNumberArray(buffer)
+        : ByteUtils.toLocalBufferType(buffer);
       this.position = this.buffer.byteLength;
     }
   }
@@ -147,12 +131,12 @@ export class Binary extends BSONValue {
   }
 
   /**
-   * Writes a buffer or string to the binary.
+   * Writes a buffer to the binary.
    *
    * @param sequence - a string or buffer to be written to the Binary BSON object.
    * @param offset - specify the binary of where to write the content.
    */
-  write(sequence: string | BinarySequence, offset: number): void {
+  write(sequence: BinarySequence, offset: number): void {
     offset = typeof offset === 'number' ? offset : this.position;
 
     // If the buffer is to small let's extend the buffer
@@ -169,10 +153,7 @@ export class Binary extends BSONValue {
       this.position =
         offset + sequence.byteLength > this.position ? offset + sequence.length : this.position;
     } else if (typeof sequence === 'string') {
-      const bytes = ByteUtils.fromISO88591(sequence);
-      this.buffer.set(bytes, offset);
-      this.position =
-        offset + sequence.length > this.position ? offset + sequence.length : this.position;
+      throw new BSONError('input cannot be string');
     }
   }
 
@@ -189,26 +170,12 @@ export class Binary extends BSONValue {
     return this.buffer.slice(position, position + length);
   }
 
-  /**
-   * Returns the value of this binary as a string.
-   * @param asRaw - Will skip converting to a string
-   * @remarks
-   * This is handy when calling this function conditionally for some key value pairs and not others
-   */
-  value(asRaw?: boolean): string | BinarySequence {
-    asRaw = !!asRaw;
-
+  /** returns a view of the binary value as a Uint8Array */
+  value(): Uint8Array {
     // Optimize to serialize for the situation where the data == size of buffer
-    if (asRaw && this.buffer.length === this.position) {
-      return this.buffer;
-    }
-
-    // If it's a node.js buffer object
-    if (asRaw) {
-      return this.buffer.slice(0, this.position);
-    }
-    // TODO(NODE-4361): remove binary string support, value(true) should be the default / only option here.
-    return ByteUtils.toISO88591(this.buffer.subarray(0, this.position));
+    return this.buffer.length === this.position
+      ? this.buffer
+      : this.buffer.subarray(0, this.position);
   }
 
   /** the length of the binary sequence */
