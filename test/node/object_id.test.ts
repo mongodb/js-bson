@@ -116,13 +116,8 @@ describe('ObjectId', function () {
     const objectValidString24Hex = {
       id: 'aaaaaaaaaaaaaaaaaaaaaaaa'
     };
-    const objectValidString12Bytes = {
-      id: 'abcdefghijkl'
-    };
     const buf24Hex = Buffer.from('aaaaaaaaaaaaaaaaaaaaaaaa', 'hex');
-    const buf12Bytes = Buffer.from('abcdefghijkl');
     expect(new ObjectId(objectValidString24Hex).id).to.deep.equal(buf24Hex);
-    expect(new ObjectId(objectValidString12Bytes).id).to.deep.equal(buf12Bytes);
   });
 
   it('should correctly create ObjectId from object with valid string id and toHexString method', function () {
@@ -277,9 +272,9 @@ describe('ObjectId', function () {
     expect(new ObjectId(validStr24Hex).id).to.deep.equal(Buffer.from(validStr24Hex, 'hex'));
   });
 
-  it('should correctly create ObjectId from 12 byte sequence', function () {
+  it('should fail to create ObjectId from 12 byte sequence', function () {
     const byteSequence12 = '111111111111';
-    expect(new ObjectId(byteSequence12).id).to.deep.equal(Buffer.from(byteSequence12, 'latin1'));
+    expect(() => new ObjectId(byteSequence12)).to.throw(BSONError);
   });
 
   it('should correctly create ObjectId from uppercase hexstring', function (done) {
@@ -325,49 +320,53 @@ describe('ObjectId', function () {
     done();
   });
 
-  it('should isValid check input Buffer length', function (done) {
-    const buffTooShort = Buffer.from([]);
-    const buffTooLong = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
-    const buff12Bytes = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  context('isValid()', () => {
+    context('when called with typed array', () => {
+      it('returns true for 12 byteLength', () =>
+        expect(ObjectId.isValid(Buffer.alloc(12))).to.be.true);
 
-    expect(ObjectId.isValid(buffTooShort)).to.be.false;
-    expect(ObjectId.isValid(buffTooLong)).to.be.false;
-    expect(ObjectId.isValid(buff12Bytes)).to.be.true;
-    done();
-  });
+      it('returns false for greater than 12 byteLength', () =>
+        expect(ObjectId.isValid(Buffer.alloc(0))).to.be.false);
 
-  it('should throw if a 12-char length but non-12 byte string is passed in', function () {
-    const characterCodesLargerThan256 = 'abcdefŽhijkl';
-    const length12Not12Bytes = '🐶🐶🐶🐶🐶🐶';
-    expect(() => new ObjectId(characterCodesLargerThan256).toHexString()).to.throw(
-      BSONError,
-      'Argument passed in must be a string of 12 bytes'
-    );
-    expect(() => new ObjectId(length12Not12Bytes).id).to.throw(
-      BSONError,
-      'Argument passed in must be a string of 12 bytes'
-    );
-  });
+      it('returns false for less than 12 byteLength', () =>
+        expect(ObjectId.isValid(Buffer.alloc(13))).to.be.false);
+    });
 
-  it('should have isValid be true for 12-char length and 12-byte length string', function () {
-    const plainASCIIstr = 'aaaaaaaaaaaa';
-    expect(ObjectId.isValid(plainASCIIstr)).to.be.true;
-  });
+    context('when called with a string', () => {
+      it('returns true for 24 hex characters', () =>
+        expect(ObjectId.isValid('f'.repeat(24))).to.be.true);
 
-  it('should have isValid be false for 12-char length but non-12-byte length string', function () {
-    const characterCodesLargerThan256 = 'abcdefŽhijkl';
-    const length12Not12Bytest1 = '🐶🐶🐶🐶🐶🐶';
-    const length12Not12Bytest2 = 'value with é';
-    expect(ObjectId.isValid(characterCodesLargerThan256)).to.be.false;
-    expect(ObjectId.isValid(length12Not12Bytest1)).to.be.false;
-    expect(ObjectId.isValid(length12Not12Bytest2)).to.be.false;
-  });
+      it('returns false for string not of length 24', () =>
+        expect(ObjectId.isValid('f'.repeat(12))).to.be.false);
 
-  it('should correctly interpret timestamps beyond 2038', function () {
-    const farFuture = new Date('2040-01-01T00:00:00.000Z').getTime();
-    expect(
-      new BSON.ObjectId(BSON.ObjectId.generate(farFuture / 1000)).getTimestamp().getTime()
-    ).to.equal(farFuture);
+      it('returns false strings of length 24 that are not hex characters', () =>
+        expect(ObjectId.isValid('🐶🐶🐶🐶🐶🐶🐶🐶🐶🐶🐶🐶')).to.be.false);
+    });
+
+    context('when called with a number', () => {
+      it('returns true for any number (0)', () => expect(ObjectId.isValid(0)).to.be.true);
+
+      it('returns true for any number (MIN_SAFE_INTEGER)', () =>
+        expect(ObjectId.isValid(Number.MIN_SAFE_INTEGER)).to.be.true);
+
+      it('returns true for any number (NaN)', () => expect(ObjectId.isValid(NaN)).to.be.true);
+    });
+
+    context('when called with a ObjectId or ObjectIdLike', () => {
+      it('returns true for ObjectId', () => expect(ObjectId.isValid(new ObjectId())).to.be.true);
+
+      it('returns true for ObjectIdLike', () =>
+        expect(
+          ObjectId.isValid({
+            get id() {
+              return this.toHexString();
+            },
+            toHexString() {
+              return '0'.repeat(24);
+            }
+          })
+        ).to.be.true);
+    });
   });
 
   describe('.equals(otherId)', () => {
@@ -375,7 +374,6 @@ describe('ObjectId', function () {
      * ObjectId.equals() covers many varieties of cases passed into it In an attempt to handle ObjectId-like objects
      * Each test covers a corresponding if stmt in the equals method.
      */
-    const oidBytesInAString = 'kaffeeklatch';
     const oidString = '6b61666665656b6c61746368';
     const oid = new ObjectId(oidString);
     const oidKId = getSymbolFrom(oid, 'id');
@@ -395,26 +393,6 @@ describe('ObjectId', function () {
     it('should return true if otherId is a valid 24 char hex string', () => {
       // typeof otherId === 'string' && ObjectId.isValid(otherId) && otherId.length === 24
       const equalOid = oidString;
-      expect(oid.equals(equalOid)).to.be.true;
-    });
-
-    it('should return true if otherId is a valid 12 byte string', () => {
-      /*
-      typeof otherId === 'string' &&
-      ObjectId.isValid(otherId) &&
-      otherId.length === 12 &&
-      isUint8Array(this.id)
-      */
-      const equalOid = oidBytesInAString;
-      expect(oid.equals(equalOid)).to.be.true;
-    });
-
-    it.skip('should return true if otherId is a valid 12 byte string and oid.id is not Uint8Array', () => {
-      // typeof otherId === 'string' && ObjectId.isValid(otherId) && otherId.length === 12
-      // Skipped because the check inside of this if statement is incorrect, it will never return true
-      // But it is also unreachable because of the other 12 len case checked before it
-      const equalOid = oidBytesInAString;
-      Object.defineProperty(oid, 'id', { value: oid.toHexString() });
       expect(oid.equals(equalOid)).to.be.true;
     });
 
@@ -444,14 +422,15 @@ describe('ObjectId', function () {
       expect(oid.equals(equalId)).to.be.true;
     });
 
-    it('should use otherId[kId] Buffer for equality when otherId is instanceof ObjectId', () => {
-      let equalId = { [oidKId]: oid.id };
-      Object.setPrototypeOf(equalId, ObjectId.prototype);
+    it('should use otherId[kId] Buffer for equality when otherId has _bsontype === ObjectId', () => {
+      let equalId = { _bsontype: 'ObjectId', [oidKId]: oid.id };
 
-      const propAccessRecord = [];
+      const propAccessRecord: string[] = [];
       equalId = new Proxy(equalId, {
-        get(target, prop, recv) {
-          propAccessRecord.push(prop);
+        get(target, prop: string, recv) {
+          if (prop !== '_bsontype') {
+            propAccessRecord.push(prop);
+          }
           return Reflect.get(target, prop, recv);
         }
       });

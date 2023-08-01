@@ -21,7 +21,7 @@ export type ByteUtils = {
   toISO88591: (buffer: Uint8Array) => string;
   /** Create a Uint8Array from a hex string */
   fromHex: (hex: string) => Uint8Array;
-  /** Create a hex string from bytes */
+  /** Create a lowercase hex string from bytes */
   toHex: (buffer: Uint8Array) => string;
   /** Create a Uint8Array containing utf8 code units from a string */
   fromUTF8: (text: string) => Uint8Array;
