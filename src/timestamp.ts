@@ -23,8 +23,14 @@ export class Timestamp extends BSONValue {
     return 'Timestamp';
   }
 
-  static readonly MAX_VALUE = Long.MAX_UNSIGNED_VALUE;
+  static readonly MAX_VALUE = new Timestamp(Long.MAX_UNSIGNED_VALUE);
+  /**
+   * Upper 4 bytes representing the timestamp value
+   */
   readonly t: number;
+  /**
+   * Lower 4 bytes representing the increment value
+   */
   readonly i: number;
 
   /**
@@ -106,10 +112,10 @@ export class Timestamp extends BSONValue {
   }
 
   /**
-   * Returns a Timestamp for the given high and low bits. Each is assumed to use 32 bits.
+   * Returns a Timestamp for the given increment and numeric timestamp. Each is assumed to use 32 bits.
    *
-   * @param i - the low 32-bits.
-   * @param t - the high 32-bits.
+   * @param i - the increment
+   * @param t - the timestamp
    */
   static fromBits(i: number, t: number): Timestamp {
     return new Timestamp({ i: i, t: t });
@@ -120,8 +126,9 @@ export class Timestamp extends BSONValue {
    *
    * @param str - the textual representation of the Timestamp.
    * @param optRadix - the radix in which the text is written.
+   * @returns The corresponding Timestamp value
    */
-  static fromString(str: string, optRadix: number): Timestamp {
+  static fromString(str: string, optRadix?: number): Timestamp {
     return new Timestamp(Long.fromString(str, true, optRadix));
   }
 
@@ -151,11 +158,14 @@ export class Timestamp extends BSONValue {
     return `new Timestamp({ t: ${this.t}, i: ${this.i} })`;
   }
 
+  /** @internal */
   toString(): string {
     return this.toLong().toString();
   }
 
+  /** @returns Long representation of timestamp where low 4 bytes are increment and high 4 bytes are
+   * timestamp*/
   toLong(): Long {
-    return new Long(this.t, this.i, true);
+    return new Long(this.i, this.t, true);
   }
 }

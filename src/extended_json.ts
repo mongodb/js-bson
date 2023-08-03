@@ -324,7 +324,7 @@ const BSON_TYPE_MAPPINGS = {
   ObjectId: (o: ObjectId) => new ObjectId(o),
   BSONRegExp: (o: BSONRegExp) => new BSONRegExp(o.pattern, o.options),
   BSONSymbol: (o: BSONSymbol) => new BSONSymbol(o.value),
-  Timestamp: (o: Timestamp) => Timestamp.fromBits(o.i, o.t)
+  Timestamp: (o: Timestamp) => new Timestamp(o)
 } as const;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

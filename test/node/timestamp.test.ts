@@ -5,7 +5,7 @@ import { Timestamp } from '../register-bson';
 describe('Timestamp', () => {
   describe('static MAX_VALUE', () => {
     it('equals Long.MAX_UNSIGNED_VALUE', () => {
-      expect(BSON.Timestamp.MAX_VALUE).to.equal(BSON.Long.MAX_UNSIGNED_VALUE);
+      expect(BSON.Timestamp.MAX_VALUE).to.deep.equal(new Timestamp(BSON.Long.MAX_UNSIGNED_VALUE));
     });
   });
 
@@ -30,12 +30,6 @@ describe('Timestamp', () => {
 
   context('output formats', () => {
     const timestamp = new BSON.Timestamp(0xffffffffffffffffn);
-
-    context('when converting toString', () => {
-      it('exports an unsigned number', () => {
-        expect(timestamp.toString()).to.equal('18446744073709551615');
-      });
-    });
 
     context('when converting toJSON', () => {
       it('exports an unsigned number', () => {
@@ -67,6 +61,12 @@ describe('Timestamp', () => {
       const timestamp = new BSON.Timestamp(input);
       // @ts-expect-error toExtendedJSON is an internal method
       expect(timestamp.toExtendedJSON()).to.deep.equal({ $timestamp: { t: 89, i: 144 } });
+    });
+
+    it('accepts a Timestamp object as input and returns a deep copy', function () {
+      const timestamp = new BSON.Timestamp({ t: 10000, i: 12455 });
+      const clone = new BSON.Timestamp(timestamp);
+      expect(clone).to.deep.equal(timestamp);
     });
 
     describe('validation cases', () => {
@@ -154,6 +154,44 @@ describe('Timestamp', () => {
           expect(test).to.throw(message);
         });
       }
+    });
+  });
+
+  describe('toLong()', function () {
+    const timestamp = new Timestamp({ t: 19324, i: 15 });
+    it('sets Long.low to Timestamp.i', function () {
+      expect(timestamp.toLong().low).to.equal(timestamp.i);
+    });
+    it('sets Long.high to Timestamp.t', function () {
+      expect(timestamp.toLong().high).to.equal(timestamp.t);
+    });
+    it('round trips correctly', function () {
+      expect(new Timestamp(timestamp.toLong())).to.deep.equal(timestamp);
+    });
+  });
+
+  describe('fromBits()', function () {
+    it('sets i and t correctly', function () {
+      const ts = Timestamp.fromBits(0, 1);
+      expect(ts.i).to.equal(0);
+      expect(ts.t).to.equal(1);
+    });
+  });
+
+  describe('static fromNumber()', function () {
+    describe('accepts', function () {});
+    describe('rejects', function () {});
+  });
+
+  describe('static fromString()', function () {
+    it('accepts strings', function () {
+      expect(Timestamp.fromString('0').toString()).to.equal('0');
+      expect(Timestamp.fromString('00').toString()).to.equal('0');
+      expect(Timestamp.fromString('-1').toString()).to.equal('18446744073709551615');
+      expect(Timestamp.fromString('123456789123456789').toString()).to.equal('123456789123456789');
+      expect(Timestamp.fromString('13835058055282163712').toString()).to.equal(
+        '13835058055282163712'
+      );
     });
   });
 });
