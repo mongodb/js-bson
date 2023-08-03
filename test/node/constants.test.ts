@@ -3,6 +3,12 @@ import { Binary } from '../register-bson';
 import * as constants from '../../src/constants';
 
 describe('BSON Constants', () => {
+  describe('.BSON_MAJOR_VERSION', () => {
+    it('returns the current major version', () => {
+      expect(constants.BSON_MAJOR_VERSION).to.equal(6);
+    });
+  });
+
   context('Binary Subtype', () => {
     /*
      subtype	::=
