@@ -80,8 +80,8 @@ describe('BSON Type classes common interfaces', () => {
           ));
       }
 
-      it(`defines a Symbol.for('@@mdb.bson.version') property equal to 5`, () =>
-        expect(TypeClass.prototype).to.have.property(Symbol.for('@@mdb.bson.version'), 5));
+      it(`defines a Symbol.for('@@mdb.bson.version') property equal to 6`, () =>
+        expect(TypeClass.prototype).to.have.property(Symbol.for('@@mdb.bson.version'), 6));
 
       it(`defines a static fromExtendedJSON() method`, () =>
         expect(TypeClass).to.have.property('fromExtendedJSON').that.is.a('function'));
