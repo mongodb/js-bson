@@ -813,7 +813,7 @@ describe('BSON', function () {
     expect(long instanceof Long).to.be.ok;
     expect(!(long instanceof Timestamp)).to.be.ok;
     expect(timestamp instanceof Timestamp).to.be.ok;
-    expect(timestamp instanceof Long).to.be.ok;
+    expect(timestamp instanceof Long).to.be.false;
 
     var test_int = { doc: long, doc2: timestamp };
     var serialized_data = BSON.serialize(test_int);

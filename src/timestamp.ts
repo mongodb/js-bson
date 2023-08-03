@@ -1,20 +1,10 @@
+import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import type { Int32 } from './int_32';
 import { Long } from './long';
 
 /** @public */
 export type TimestampOverrides = '_bsontype' | 'toExtendedJSON' | 'fromExtendedJSON' | 'inspect';
-/** @public */
-export type LongWithoutOverrides = new (
-  low: unknown,
-  high?: number | boolean,
-  unsigned?: boolean
-) => {
-  [P in Exclude<keyof Long, TimestampOverrides>]: Long[P];
-};
-/** @public */
-export const LongWithoutOverridesClass: LongWithoutOverrides =
-  Long as unknown as LongWithoutOverrides;
 
 /** @public */
 export interface TimestampExtended {
@@ -28,12 +18,14 @@ export interface TimestampExtended {
  * @public
  * @category BSONType
  */
-export class Timestamp extends LongWithoutOverridesClass {
+export class Timestamp extends BSONValue {
   get _bsontype(): 'Timestamp' {
     return 'Timestamp';
   }
 
   static readonly MAX_VALUE = Long.MAX_UNSIGNED_VALUE;
+  readonly t: number;
+  readonly i: number;
 
   /**
    * @param int - A 64-bit bigint representing the Timestamp.
@@ -48,12 +40,21 @@ export class Timestamp extends LongWithoutOverridesClass {
    */
   constructor(value: { t: number; i: number });
   constructor(low?: bigint | Long | { t: number | Int32; i: number | Int32 }) {
+    // Note we use the unsigned right shift to ensure that the t and i fields are interpreted as
+    // unsigned int32 values
+    super();
     if (low == null) {
-      super(0, 0, true);
+      this.t = 0;
+      this.i = 0;
     } else if (typeof low === 'bigint') {
-      super(low, true);
+      const asLong = new Long(low);
+      // high bytes are secs
+      this.t = asLong.high >>> 0;
+      // low bytes are increment
+      this.i = asLong.low >>> 0;
     } else if (Long.isLong(low)) {
-      super(low.low, low.high, true);
+      this.t = low.high >>> 0;
+      this.i = low.low >>> 0;
     } else if (typeof low === 'object' && 't' in low && 'i' in low) {
       if (typeof low.t !== 'number' && (typeof low.t !== 'object' || low.t._bsontype !== 'Int32')) {
         throw new BSONError('Timestamp constructed from { t, i } must provide t as a number');
@@ -79,8 +80,8 @@ export class Timestamp extends LongWithoutOverridesClass {
           'Timestamp constructed from { t, i } must provide i equal or less than uint32 max'
         );
       }
-
-      super(i, t, true);
+      this.t = t >>> 0;
+      this.i = i >>> 0;
     } else {
       throw new BSONError(
         'A Timestamp can only be constructed with: bigint, Long, or { t: number; i: number }'
@@ -107,11 +108,11 @@ export class Timestamp extends LongWithoutOverridesClass {
   /**
    * Returns a Timestamp for the given high and low bits. Each is assumed to use 32 bits.
    *
-   * @param lowBits - the low 32-bits.
-   * @param highBits - the high 32-bits.
+   * @param i - the low 32-bits.
+   * @param t - the high 32-bits.
    */
-  static fromBits(lowBits: number, highBits: number): Timestamp {
-    return new Timestamp({ i: lowBits, t: highBits });
+  static fromBits(i: number, t: number): Timestamp {
+    return new Timestamp({ i: i, t: t });
   }
 
   /**
@@ -126,7 +127,7 @@ export class Timestamp extends LongWithoutOverridesClass {
 
   /** @internal */
   toExtendedJSON(): TimestampExtended {
-    return { $timestamp: { t: this.high >>> 0, i: this.low >>> 0 } };
+    return { $timestamp: { t: this.t >>> 0, i: this.i >>> 0 } };
   }
 
   /** @internal */
@@ -147,6 +148,14 @@ export class Timestamp extends LongWithoutOverridesClass {
   }
 
   inspect(): string {
-    return `new Timestamp({ t: ${this.getHighBits()}, i: ${this.getLowBits()} })`;
+    return `new Timestamp({ t: ${this.t}, i: ${this.i} })`;
+  }
+
+  toString(): string {
+    return this.toLong().toString();
+  }
+
+  toLong(): Long {
+    return new Long(this.t, this.i, true);
   }
 }

@@ -29,8 +29,7 @@ export type { MinKeyExtended } from './min_key';
 export type { ObjectIdExtended, ObjectIdLike } from './objectid';
 export type { BSONRegExpExtended, BSONRegExpExtendedLegacy } from './regexp';
 export type { BSONSymbolExtended } from './symbol';
-export type { LongWithoutOverrides, TimestampExtended, TimestampOverrides } from './timestamp';
-export type { LongWithoutOverridesClass } from './timestamp';
+export type { TimestampExtended, TimestampOverrides } from './timestamp';
 export type { SerializeOptions, DeserializeOptions };
 
 export {

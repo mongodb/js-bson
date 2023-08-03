@@ -55,7 +55,6 @@ expectError(BSONRegExp.prototype.toJSON);
 // We hack TS to say that the prototype has _bsontype='Timestamp'
 // but it actually is _bsontype='Long', inside the Timestamp constructor
 // we override the property on the instance
-// TODO(NODE-2624): Make Timestamp hold its long value on a property rather than be a subclass
 expectType<'Timestamp'>(Timestamp.prototype._bsontype)
 
 expectType<'ObjectId'>(ObjectId.prototype._bsontype)

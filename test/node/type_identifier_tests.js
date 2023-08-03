@@ -25,11 +25,8 @@ describe('_bsontype identifier', () => {
     expect(BSONSymbol.prototype._bsontype).to.equal('BSONSymbol');
   });
   it('should be equal to Timestamp for Timestamp', () => {
-    // TODO(NODE-2624): Make Timestamp hold its long value on a property rather than be a subclass
-    // Timestamp overrides the value in its constructor
     const timestamp = new Timestamp({ i: 0, t: 0 });
     expect(timestamp._bsontype).to.equal('Timestamp');
-    expect(Object.getPrototypeOf(Object.getPrototypeOf(timestamp))._bsontype).to.equal('Long');
   });
 
   // All equal to their constructor names

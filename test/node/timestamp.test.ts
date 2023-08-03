@@ -22,9 +22,9 @@ describe('Timestamp', () => {
       // We do expect it to work so that round tripping the Int32 instance inside a Timestamp works
       new BSON.Timestamp({ t: new BSON.Int32(0x7fff_ffff), i: new BSON.Int32(0x7fff_ffff) })
     ];
-
     for (const timestamp of table) {
-      expect(timestamp).to.have.property('unsigned', true);
+      expect(timestamp.t).to.be.gte(0);
+      expect(timestamp.i).to.be.gte(0);
     }
   });
 
@@ -45,6 +45,7 @@ describe('Timestamp', () => {
 
     context('when converting toExtendedJSON', () => {
       it('exports an unsigned number', () => {
+        // @ts-expect-error toExtendedJSON is an internal method
         expect(timestamp.toExtendedJSON()).to.deep.equal({
           $timestamp: { t: 4294967295, i: 4294967295 }
         });
@@ -56,6 +57,7 @@ describe('Timestamp', () => {
     it('accepts { t, i } object as input', () => {
       const input = { t: 89, i: 144 };
       const timestamp = new BSON.Timestamp(input);
+      // @ts-expect-error toExtendedJSON is an internal method
       expect(timestamp.toExtendedJSON()).to.deep.equal({ $timestamp: input });
     });
 
@@ -63,6 +65,7 @@ describe('Timestamp', () => {
       const input = { t: new BSON.Int32(89), i: new BSON.Int32(144) };
       // @ts-expect-error We do not advertise support for Int32 in the constructor of Timestamp
       const timestamp = new BSON.Timestamp(input);
+      // @ts-expect-error toExtendedJSON is an internal method
       expect(timestamp.toExtendedJSON()).to.deep.equal({ $timestamp: { t: 89, i: 144 } });
     });
 

@@ -1,7 +1,6 @@
 import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
-import type { Timestamp } from './timestamp';
 
 interface LongWASMHelpers {
   /** Gets the high bits of the last operation performed */
@@ -360,7 +359,7 @@ export class Long extends BSONValue {
   }
 
   /** Returns the sum of this and the specified Long. */
-  add(addend: string | number | Long | Timestamp): Long {
+  add(addend: string | number | Long): Long {
     if (!Long.isLong(addend)) addend = Long.fromValue(addend);
 
     // Divide each number into 4 chunks of 16 bits, and then sum the chunks.
@@ -397,7 +396,7 @@ export class Long extends BSONValue {
    * Returns the sum of this and the specified Long.
    * @returns Sum
    */
-  and(other: string | number | Long | Timestamp): Long {
+  and(other: string | number | Long): Long {
     if (!Long.isLong(other)) other = Long.fromValue(other);
     return Long.fromBits(this.low & other.low, this.high & other.high, this.unsigned);
   }
@@ -406,7 +405,7 @@ export class Long extends BSONValue {
    * Compares this Long's value with the specified's.
    * @returns 0 if they are the same, 1 if the this is greater and -1 if the given one is greater
    */
-  compare(other: string | number | Long | Timestamp): 0 | 1 | -1 {
+  compare(other: string | number | Long): 0 | 1 | -1 {
     if (!Long.isLong(other)) other = Long.fromValue(other);
     if (this.eq(other)) return 0;
     const thisNeg = this.isNegative(),
@@ -423,7 +422,7 @@ export class Long extends BSONValue {
   }
 
   /** This is an alias of {@link Long.compare} */
-  comp(other: string | number | Long | Timestamp): 0 | 1 | -1 {
+  comp(other: string | number | Long): 0 | 1 | -1 {
     return this.compare(other);
   }
 
@@ -431,7 +430,7 @@ export class Long extends BSONValue {
    * Returns this Long divided by the specified. The result is signed if this Long is signed or unsigned if this Long is unsigned.
    * @returns Quotient
    */
-  divide(divisor: string | number | Long | Timestamp): Long {
+  divide(divisor: string | number | Long): Long {
     if (!Long.isLong(divisor)) divisor = Long.fromValue(divisor);
     if (divisor.isZero()) throw new BSONError('division by zero');
 
@@ -533,7 +532,7 @@ export class Long extends BSONValue {
   }
 
   /**This is an alias of {@link Long.divide} */
-  div(divisor: string | number | Long | Timestamp): Long {
+  div(divisor: string | number | Long): Long {
     return this.divide(divisor);
   }
 
@@ -541,7 +540,7 @@ export class Long extends BSONValue {
    * Tests if this Long's value equals the specified's.
    * @param other - Other value
    */
-  equals(other: string | number | Long | Timestamp): boolean {
+  equals(other: string | number | Long): boolean {
     if (!Long.isLong(other)) other = Long.fromValue(other);
     if (this.unsigned !== other.unsigned && this.high >>> 31 === 1 && other.high >>> 31 === 1)
       return false;
@@ -549,7 +548,7 @@ export class Long extends BSONValue {
   }
 
   /** This is an alias of {@link Long.equals} */
-  eq(other: string | number | Long | Timestamp): boolean {
+  eq(other: string | number | Long): boolean {
     return this.equals(other);
   }
 
@@ -586,26 +585,26 @@ export class Long extends BSONValue {
   }
 
   /** Tests if this Long's value is greater than the specified's. */
-  greaterThan(other: string | number | Long | Timestamp): boolean {
+  greaterThan(other: string | number | Long): boolean {
     return this.comp(other) > 0;
   }
 
   /** This is an alias of {@link Long.greaterThan} */
-  gt(other: string | number | Long | Timestamp): boolean {
+  gt(other: string | number | Long): boolean {
     return this.greaterThan(other);
   }
 
   /** Tests if this Long's value is greater than or equal the specified's. */
-  greaterThanOrEqual(other: string | number | Long | Timestamp): boolean {
+  greaterThanOrEqual(other: string | number | Long): boolean {
     return this.comp(other) >= 0;
   }
 
   /** This is an alias of {@link Long.greaterThanOrEqual} */
-  gte(other: string | number | Long | Timestamp): boolean {
+  gte(other: string | number | Long): boolean {
     return this.greaterThanOrEqual(other);
   }
   /** This is an alias of {@link Long.greaterThanOrEqual} */
-  ge(other: string | number | Long | Timestamp): boolean {
+  ge(other: string | number | Long): boolean {
     return this.greaterThanOrEqual(other);
   }
 
@@ -635,27 +634,27 @@ export class Long extends BSONValue {
   }
 
   /** Tests if this Long's value is less than the specified's. */
-  lessThan(other: string | number | Long | Timestamp): boolean {
+  lessThan(other: string | number | Long): boolean {
     return this.comp(other) < 0;
   }
 
   /** This is an alias of {@link Long#lessThan}. */
-  lt(other: string | number | Long | Timestamp): boolean {
+  lt(other: string | number | Long): boolean {
     return this.lessThan(other);
   }
 
   /** Tests if this Long's value is less than or equal the specified's. */
-  lessThanOrEqual(other: string | number | Long | Timestamp): boolean {
+  lessThanOrEqual(other: string | number | Long): boolean {
     return this.comp(other) <= 0;
   }
 
   /** This is an alias of {@link Long.lessThanOrEqual} */
-  lte(other: string | number | Long | Timestamp): boolean {
+  lte(other: string | number | Long): boolean {
     return this.lessThanOrEqual(other);
   }
 
   /** Returns this Long modulo the specified. */
-  modulo(divisor: string | number | Long | Timestamp): Long {
+  modulo(divisor: string | number | Long): Long {
     if (!Long.isLong(divisor)) divisor = Long.fromValue(divisor);
 
     // use wasm support if present
@@ -673,11 +672,11 @@ export class Long extends BSONValue {
   }
 
   /** This is an alias of {@link Long.modulo} */
-  mod(divisor: string | number | Long | Timestamp): Long {
+  mod(divisor: string | number | Long): Long {
     return this.modulo(divisor);
   }
   /** This is an alias of {@link Long.modulo} */
-  rem(divisor: string | number | Long | Timestamp): Long {
+  rem(divisor: string | number | Long): Long {
     return this.modulo(divisor);
   }
 
@@ -686,7 +685,7 @@ export class Long extends BSONValue {
    * @param multiplier - Multiplier
    * @returns Product
    */
-  multiply(multiplier: string | number | Long | Timestamp): Long {
+  multiply(multiplier: string | number | Long): Long {
     if (this.isZero()) return Long.ZERO;
     if (!Long.isLong(multiplier)) multiplier = Long.fromValue(multiplier);
 
@@ -750,7 +749,7 @@ export class Long extends BSONValue {
   }
 
   /** This is an alias of {@link Long.multiply} */
-  mul(multiplier: string | number | Long | Timestamp): Long {
+  mul(multiplier: string | number | Long): Long {
     return this.multiply(multiplier);
   }
 
@@ -771,16 +770,16 @@ export class Long extends BSONValue {
   }
 
   /** Tests if this Long's value differs from the specified's. */
-  notEquals(other: string | number | Long | Timestamp): boolean {
+  notEquals(other: string | number | Long): boolean {
     return !this.equals(other);
   }
 
   /** This is an alias of {@link Long.notEquals} */
-  neq(other: string | number | Long | Timestamp): boolean {
+  neq(other: string | number | Long): boolean {
     return this.notEquals(other);
   }
   /** This is an alias of {@link Long.notEquals} */
-  ne(other: string | number | Long | Timestamp): boolean {
+  ne(other: string | number | Long): boolean {
     return this.notEquals(other);
   }
 
@@ -873,13 +872,13 @@ export class Long extends BSONValue {
    * @param subtrahend - Subtrahend
    * @returns Difference
    */
-  subtract(subtrahend: string | number | Long | Timestamp): Long {
+  subtract(subtrahend: string | number | Long): Long {
     if (!Long.isLong(subtrahend)) subtrahend = Long.fromValue(subtrahend);
     return this.add(subtrahend.neg());
   }
 
   /** This is an alias of {@link Long.subtract} */
-  sub(subtrahend: string | number | Long | Timestamp): Long {
+  sub(subtrahend: string | number | Long): Long {
     return this.subtract(subtrahend);
   }
 
@@ -1015,7 +1014,7 @@ export class Long extends BSONValue {
   }
 
   /** This is an alias of {@link Long.lessThanOrEqual} */
-  le(other: string | number | Long | Timestamp): boolean {
+  le(other: string | number | Long): boolean {
     return this.lessThanOrEqual(other);
   }
 

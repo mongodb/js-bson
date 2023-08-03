@@ -1,5 +1,5 @@
 import { Binary } from '../binary';
-import type { BSONSymbol, DBRef, Document, MaxKey } from '../bson';
+import type { BSONSymbol, DBRef, Document, MaxKey, Timestamp } from '../bson';
 import type { Code } from '../code';
 import * as constants from '../constants';
 import type { DBRefLike } from '../db_ref';
@@ -345,8 +345,7 @@ function serializeDecimal128(buffer: Uint8Array, key: string, value: Decimal128,
 
 function serializeLong(buffer: Uint8Array, key: string, value: Long, index: number) {
   // Write the type
-  buffer[index++] =
-    value._bsontype === 'Long' ? constants.BSON_DATA_LONG : constants.BSON_DATA_TIMESTAMP;
+  buffer[index++] = constants.BSON_DATA_LONG;
   // Number of written bytes
   const numberOfWrittenBytes = ByteUtils.encodeUTF8Into(buffer, key, index);
   // Encode the name
@@ -355,6 +354,30 @@ function serializeLong(buffer: Uint8Array, key: string, value: Long, index: numb
   // Write the date
   const lowBits = value.getLowBits();
   const highBits = value.getHighBits();
+  // Encode low bits
+  buffer[index++] = lowBits & 0xff;
+  buffer[index++] = (lowBits >> 8) & 0xff;
+  buffer[index++] = (lowBits >> 16) & 0xff;
+  buffer[index++] = (lowBits >> 24) & 0xff;
+  // Encode high bits
+  buffer[index++] = highBits & 0xff;
+  buffer[index++] = (highBits >> 8) & 0xff;
+  buffer[index++] = (highBits >> 16) & 0xff;
+  buffer[index++] = (highBits >> 24) & 0xff;
+  return index;
+}
+
+function serializeTimestamp(buffer: Uint8Array, key: string, value: Timestamp, index: number) {
+  // Write the type
+  buffer[index++] = constants.BSON_DATA_TIMESTAMP;
+  // Number of written bytes
+  const numberOfWrittenBytes = ByteUtils.encodeUTF8Into(buffer, key, index);
+  // Encode the name
+  index = index + numberOfWrittenBytes;
+  buffer[index++] = 0;
+  // Write the date
+  const lowBits = value.i;
+  const highBits = value.t;
   // Encode low bits
   buffer[index++] = lowBits & 0xff;
   buffer[index++] = (lowBits >> 8) & 0xff;
@@ -728,8 +751,10 @@ export function serializeInto(
         index = serializeObjectId(buffer, key, value, index);
       } else if (value._bsontype === 'Decimal128') {
         index = serializeDecimal128(buffer, key, value, index);
-      } else if (value._bsontype === 'Long' || value._bsontype === 'Timestamp') {
+      } else if (value._bsontype === 'Long') {
         index = serializeLong(buffer, key, value, index);
+      } else if (value._bsontype === 'Timestamp') {
+        index = serializeTimestamp(buffer, key, value, index);
       } else if (value._bsontype === 'Double') {
         index = serializeDouble(buffer, key, value, index);
       } else if (typeof value === 'function' && serializeFunctions) {
@@ -838,8 +863,10 @@ export function serializeInto(
         index = serializeObjectId(buffer, key, value, index);
       } else if (type === 'object' && value._bsontype === 'Decimal128') {
         index = serializeDecimal128(buffer, key, value, index);
-      } else if (value._bsontype === 'Long' || value._bsontype === 'Timestamp') {
+      } else if (value._bsontype === 'Long') {
         index = serializeLong(buffer, key, value, index);
+      } else if (value._bsontype === 'Timestamp') {
+        index = serializeTimestamp(buffer, key, value, index);
       } else if (value._bsontype === 'Double') {
         index = serializeDouble(buffer, key, value, index);
       } else if (value._bsontype === 'Code') {
@@ -948,8 +975,10 @@ export function serializeInto(
         index = serializeObjectId(buffer, key, value, index);
       } else if (type === 'object' && value._bsontype === 'Decimal128') {
         index = serializeDecimal128(buffer, key, value, index);
-      } else if (value._bsontype === 'Long' || value._bsontype === 'Timestamp') {
+      } else if (value._bsontype === 'Long') {
         index = serializeLong(buffer, key, value, index);
+      } else if (value._bsontype === 'Timestamp') {
+        index = serializeTimestamp(buffer, key, value, index);
       } else if (value._bsontype === 'Double') {
         index = serializeDouble(buffer, key, value, index);
       } else if (value._bsontype === 'Code') {
