@@ -194,7 +194,7 @@ export class ObjectId extends BSONValue {
    *
    * @param otherId - ObjectId instance to compare against.
    */
-  equals(otherId: string | ObjectId | ObjectIdLike): boolean {
+  equals(otherId: string | ObjectId | ObjectIdLike | undefined | null): boolean {
     if (otherId === undefined || otherId === null) {
       return false;
     }
