@@ -67,9 +67,20 @@ If you are working directly in the browser without a bundler please use the `.mj
 npm install bson
 ```
 
+### MongoDB Node.js Driver Version Compatibility
+
+Only the following version combinations with the [MongoDB Node.js Driver](https://github.com/mongodb/node-mongodb-native) are considered stable.
+
+|               | `bson@1.x` | `bson@4.x` | `bson@5.x` | `bson@6.x` |
+| ------------- | ---------- | ---------- | ---------- | ---------- |
+| `mongodb@6.x` | N/A        | N/A        | N/A        | ✓          |
+| `mongodb@5.x` | N/A        | N/A        | ✓          | N/A        |
+| `mongodb@4.x` | N/A        | ✓          | N/A        | N/A        |
+| `mongodb@3.x` | ✓          | N/A        | N/A        | N/A        |
+
 ## Documentation
 
-### BSON 
+### BSON
 
 [API documentation](https://mongodb.github.io/node-mongodb-native/Next/modules/BSON.html)
 
