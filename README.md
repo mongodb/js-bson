@@ -4,6 +4,7 @@ BSON is short for "Binary JSON," and is the binary-encoded serialization of JSON
 You can learn more about it in [the specification](http://bsonspec.org).
 
 ### Table of Contents
+
 - [Usage](#usage)
 - [Bugs/Feature Requests](#bugs--feature-requests)
 - [Installation](#installation)
@@ -18,7 +19,7 @@ Think you've found a bug? Want to see a new feature in `bson`? Please open a cas
 2. Navigate to the NODE project: [jira.mongodb.org/browse/NODE](https://jira.mongodb.org/browse/NODE)
 3. Click **Create Issue** - Please provide as much information as possible about the issue and how to reproduce it.
 
-Bug reports in JIRA for all driver projects (i.e. NODE, PYTHON, CSHARP, JAVA) and the Core Server (i.e. SERVER) project are **public**.
+Bug reports in JIRA for the NODE driver project are **public**.
 
 ## Usage
 
@@ -67,9 +68,20 @@ If you are working directly in the browser without a bundler please use the `.mj
 npm install bson
 ```
 
+### MongoDB Node.js Driver Version Compatibility
+
+Only the following version combinations with the [MongoDB Node.js Driver](https://github.com/mongodb/node-mongodb-native) are considered stable.
+
+|               | `bson@1.x` | `bson@4.x` | `bson@5.x` | `bson@6.x` |
+| ------------- | ---------- | ---------- | ---------- | ---------- |
+| `mongodb@6.x` | N/A        | N/A        | N/A        | ✓          |
+| `mongodb@5.x` | N/A        | N/A        | ✓          | N/A        |
+| `mongodb@4.x` | N/A        | ✓          | N/A        | N/A        |
+| `mongodb@3.x` | ✓          | N/A        | N/A        | N/A        |
+
 ## Documentation
 
-### BSON 
+### BSON
 
 [API documentation](https://mongodb.github.io/node-mongodb-native/Next/modules/BSON.html)
 
@@ -77,31 +89,31 @@ npm install bson
 
 ### EJSON
 
-* [EJSON](#EJSON)
+- [EJSON](#EJSON)
 
-    * [.parse(text, [options])](#EJSON.parse)
+  - [.parse(text, [options])](#EJSON.parse)
 
-    * [.stringify(value, [replacer], [space], [options])](#EJSON.stringify)
+  - [.stringify(value, [replacer], [space], [options])](#EJSON.stringify)
 
-    * [.serialize(bson, [options])](#EJSON.serialize)
+  - [.serialize(bson, [options])](#EJSON.serialize)
 
-    * [.deserialize(ejson, [options])](#EJSON.deserialize)
-
+  - [.deserialize(ejson, [options])](#EJSON.deserialize)
 
 <a name="EJSON.parse"></a>
 
-#### *EJSON*.parse(text, [options])
+#### _EJSON_.parse(text, [options])
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| text | <code>string</code> |  |  |
-| [options] | <code>object</code> |  | Optional settings |
+| Param             | Type                 | Default           | Description                                                                        |
+| ----------------- | -------------------- | ----------------- | ---------------------------------------------------------------------------------- |
+| text              | <code>string</code>  |                   |                                                                                    |
+| [options]         | <code>object</code>  |                   | Optional settings                                                                  |
 | [options.relaxed] | <code>boolean</code> | <code>true</code> | Attempt to return native JS types where possible, rather than BSON types (if true) |
 
 Parse an Extended JSON string, constructing the JavaScript value or object described by that
 string.
 
 **Example**
+
 ```js
 const { EJSON } = require('bson');
 const text = '{ "int32": { "$numberInt": "10" } }';
@@ -112,24 +124,26 @@ console.log(EJSON.parse(text, { relaxed: false }));
 // prints { int32: 10 }
 console.log(EJSON.parse(text));
 ```
+
 <a name="EJSON.stringify"></a>
 
-#### *EJSON*.stringify(value, [replacer], [space], [options])
+#### _EJSON_.stringify(value, [replacer], [space], [options])
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| value | <code>object</code> |  | The value to convert to extended JSON |
-| [replacer] | <code>function</code> \| <code>array</code> |  | A function that alters the behavior of the stringification process, or an array of String and Number objects that serve as a whitelist for selecting/filtering the properties of the value object to be included in the JSON string. If this value is null or not provided, all properties of the object are included in the resulting JSON string |
-| [space] | <code>string</code> \| <code>number</code> |  | A String or Number object that's used to insert white space into the output JSON string for readability purposes. |
-| [options] | <code>object</code> |  | Optional settings |
-| [options.relaxed] | <code>boolean</code> | <code>true</code> | Enabled Extended JSON's `relaxed` mode |
-| [options.legacy] | <code>boolean</code> | <code>true</code> | Output in Extended JSON v1 |
+| Param             | Type                                        | Default           | Description                                                                                                                                                                                                                                                                                                                                        |
+| ----------------- | ------------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| value             | <code>object</code>                         |                   | The value to convert to extended JSON                                                                                                                                                                                                                                                                                                              |
+| [replacer]        | <code>function</code> \| <code>array</code> |                   | A function that alters the behavior of the stringification process, or an array of String and Number objects that serve as a whitelist for selecting/filtering the properties of the value object to be included in the JSON string. If this value is null or not provided, all properties of the object are included in the resulting JSON string |
+| [space]           | <code>string</code> \| <code>number</code>  |                   | A String or Number object that's used to insert white space into the output JSON string for readability purposes.                                                                                                                                                                                                                                  |
+| [options]         | <code>object</code>                         |                   | Optional settings                                                                                                                                                                                                                                                                                                                                  |
+| [options.relaxed] | <code>boolean</code>                        | <code>true</code> | Enabled Extended JSON's `relaxed` mode                                                                                                                                                                                                                                                                                                             |
+| [options.legacy]  | <code>boolean</code>                        | <code>true</code> | Output in Extended JSON v1                                                                                                                                                                                                                                                                                                                         |
 
 Converts a BSON document to an Extended JSON string, optionally replacing values if a replacer
 function is specified or optionally including only the specified properties if a replacer array
 is specified.
 
 **Example**
+
 ```js
 const { EJSON } = require('bson');
 const Int32 = require('mongodb').Int32;
@@ -141,24 +155,25 @@ console.log(EJSON.stringify(doc, { relaxed: false }));
 // prints '{"int32":10}'
 console.log(EJSON.stringify(doc));
 ```
+
 <a name="EJSON.serialize"></a>
 
-#### *EJSON*.serialize(bson, [options])
+#### _EJSON_.serialize(bson, [options])
 
-| Param | Type | Description |
-| --- | --- | --- |
-| bson | <code>object</code> | The object to serialize |
+| Param     | Type                | Description                                          |
+| --------- | ------------------- | ---------------------------------------------------- |
+| bson      | <code>object</code> | The object to serialize                              |
 | [options] | <code>object</code> | Optional settings passed to the `stringify` function |
 
 Serializes an object to an Extended JSON string, and reparse it as a JavaScript object.
 
 <a name="EJSON.deserialize"></a>
 
-#### *EJSON*.deserialize(ejson, [options])
+#### _EJSON_.deserialize(ejson, [options])
 
-| Param | Type | Description |
-| --- | --- | --- |
-| ejson | <code>object</code> | The Extended JSON object to deserialize |
+| Param     | Type                | Description                                  |
+| --------- | ------------------- | -------------------------------------------- |
+| ejson     | <code>object</code> | The Extended JSON object to deserialize      |
 | [options] | <code>object</code> | Optional settings passed to the parse method |
 
 Deserializes an Extended JSON object into a plain JavaScript object with native/BSON types
@@ -194,7 +209,7 @@ BSON vendors the required polyfills for `TextEncoder`, `TextDecoder`, `atob`, `b
 npm install --save react-native-get-random-values
 ```
 
-The following snippet should be placed at the top of the entrypoint (by default this is the root `index.js` file) for React Native projects using the BSON library.  These lines must be placed for any code that imports `BSON`.
+The following snippet should be placed at the top of the entrypoint (by default this is the root `index.js` file) for React Native projects using the BSON library. These lines must be placed for any code that imports `BSON`.
 
 ```typescript
 // Required Polyfills For ReactNative
@@ -211,7 +226,7 @@ This will cause React Native to import the `node_modules/bson/lib/bson.rn.cjs` b
 
 ### Technical Note about React Native module import
 
-The `"exports"` definition in our `package.json` will result in BSON's CommonJS bundle being imported in a React Native project instead of the ES module bundle.  Importing the CommonJS bundle is necessary because BSON's ES module bundle of BSON uses top-level await, which is not supported syntax in [React Native's runtime hermes](https://hermesengine.dev/).
+The `"exports"` definition in our `package.json` will result in BSON's CommonJS bundle being imported in a React Native project instead of the ES module bundle. Importing the CommonJS bundle is necessary because BSON's ES module bundle of BSON uses top-level await, which is not supported syntax in [React Native's runtime hermes](https://hermesengine.dev/).
 
 ## FAQ
 
