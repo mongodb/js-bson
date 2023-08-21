@@ -34,7 +34,7 @@ export class BSONSymbol extends BSONValue {
   }
 
   inspect(): string {
-    return `new BSONSymbol("${this.value}")`;
+    return `new BSONSymbol(${JSON.stringify(this.value)})`;
   }
 
   toJSON(): string {
