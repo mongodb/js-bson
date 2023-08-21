@@ -62,7 +62,7 @@ export class Code extends BSONValue {
 
   inspect(): string {
     const codeJson = this.toJSON();
-    return `new Code("${String(codeJson.code)}"${
+    return `new Code(${JSON.stringify(String(codeJson.code))}${
       codeJson.scope != null ? `, ${JSON.stringify(codeJson.scope)}` : ''
     })`;
   }
