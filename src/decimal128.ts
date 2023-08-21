@@ -402,7 +402,7 @@ export class Decimal128 extends BSONValue {
         endOfString = endOfString + 1;
       }
 
-      const roundDigit = parseInt(representation[firstNonZero + lastDigit + 1], 10);
+      const roundDigit = parseInt(representation[firstNonZero + endOfString + 1], 10);
       let roundBit = 0;
 
       if (roundDigit >= 5) {
