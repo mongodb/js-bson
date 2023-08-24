@@ -269,9 +269,7 @@ function deserializeObject(
       value = getValidatedString(buffer, index, index + stringSize - 1, shouldValidateKey);
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_OID) {
-      const oid = ByteUtils.allocate(12);
-      oid.set(buffer.subarray(index, index + 12));
-      value = new ObjectId(oid);
+      value = new ObjectId(buffer.subarray(index, index + 12));
       index = index + 12;
     } else if (elementType === constants.BSON_DATA_INT && promoteValues === false) {
       value = new Int32(

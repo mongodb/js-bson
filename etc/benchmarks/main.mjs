@@ -25,6 +25,26 @@ await runner({
     bson.lib.deserialize(documents[i], { validation: { utf8: false } });
   }
 });
+
+await runner({
+  skip: false,
+  name: 'deserialize a document with lots of objectId',
+  iterations,
+  setup(libs) {
+    const bson = getCurrentLocalBSON(libs);
+    const entries = Array.from({ length: 100000 }, (_, i) => [
+      `${i}_${'a'.repeat(10)}`,
+      new bson.lib.ObjectId()
+    ]);
+    const document = Object.fromEntries(entries);
+    const bytes = bson.lib.serialize(document);
+    return bytes;
+  },
+  run(i, bson, largeDocument) {
+    new bson.lib.deserialize(largeDocument);
+  }
+});
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 await runner({
   skip: true,
@@ -102,7 +122,7 @@ await runner({
 /// nextBatch simulate
 /// nextBatch: [ { string * 20 } * 1000 ] /// Garbage call
 await runner({
-  skip: false,
+  skip: true,
   name: 'deserialize a large batch of documents each with an array of many strings',
   iterations,
   setup(libs) {
