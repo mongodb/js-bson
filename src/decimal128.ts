@@ -181,8 +181,6 @@ export class Decimal128 extends BSONValue {
     let nDigitsStored = 0;
     // Insertion pointer for digits
     let digitsInsert = 0;
-    // The index of the first non-zero digit
-    let firstDigit = 0;
     // The index of the last digit
     let lastDigit = 0;
 
@@ -307,11 +305,7 @@ export class Decimal128 extends BSONValue {
 
     // Done reading input
     // Find first non-zero digit in digits
-    firstDigit = 0;
-
     if (!nDigitsStored) {
-      firstDigit = 0;
-      lastDigit = 0;
       digits[0] = 0;
       nDigits = 1;
       nDigitsStored = 1;
@@ -345,8 +339,7 @@ export class Decimal128 extends BSONValue {
     while (exponent > EXPONENT_MAX) {
       // Shift exponent to significand and decrease
       lastDigit = lastDigit + 1;
-
-      if (lastDigit - firstDigit >= MAX_DIGITS) {
+      if (lastDigit >= MAX_DIGITS) {
         // Check if we have a zero then just hard clamp, otherwise fail
         if (significantDigits === 0) {
           exponent = EXPONENT_MAX;
@@ -374,13 +367,13 @@ export class Decimal128 extends BSONValue {
           representation[nDigits - 1 + Number(sawSign) + Number(sawRadix)] !== '0' &&
           significantDigits !== 0
         ) {
-          invalidErr(representation, 'inexact rounding not allowed');
+          invalidErr(representation, 'inexact rounding');
         }
         // adjust to match digits not stored
         nDigits = nDigits - 1;
       } else {
         if (digits[lastDigit] !== 0) {
-          invalidErr(representation, 'inexact rounding not allowed');
+          invalidErr(representation, 'inexact rounding');
         }
         // adjust to round
         lastDigit = lastDigit - 1;
@@ -395,7 +388,7 @@ export class Decimal128 extends BSONValue {
 
     // Round
     // We've normalized the exponent, but might still need to round.
-    if (lastDigit - firstDigit + 1 < significantDigits) {
+    if (lastDigit + 1 < significantDigits) {
       // If we have seen a radix point, 'string' is 1 longer than we have
       // documented with ndigits_read, so inc the position of the first nonzero
       // digit and the position that digits are read to.
@@ -410,7 +403,7 @@ export class Decimal128 extends BSONValue {
       const roundDigit = parseInt(representation[firstNonZero + lastDigit + 1], 10);
 
       if (roundDigit !== 0) {
-        invalidErr(representation, 'inexact rounding not allowed');
+        invalidErr(representation, 'inexact rounding');
       }
     }
 
@@ -424,8 +417,8 @@ export class Decimal128 extends BSONValue {
     if (significantDigits === 0) {
       significandHigh = Long.fromNumber(0);
       significandLow = Long.fromNumber(0);
-    } else if (lastDigit - firstDigit < 17) {
-      let dIdx = firstDigit;
+    } else if (lastDigit < 17) {
+      let dIdx = 0;
       significandLow = Long.fromNumber(digits[dIdx++]);
       significandHigh = new Long(0, 0);
 
@@ -434,7 +427,7 @@ export class Decimal128 extends BSONValue {
         significandLow = significandLow.add(Long.fromNumber(digits[dIdx]));
       }
     } else {
-      let dIdx = firstDigit;
+      let dIdx = 0;
       significandHigh = Long.fromNumber(digits[dIdx++]);
 
       for (; dIdx <= lastDigit - 17; dIdx++) {
