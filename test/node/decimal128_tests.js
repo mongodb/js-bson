@@ -1211,4 +1211,26 @@ describe('Decimal128', function () {
     expect(() => new Decimal128(Buffer.alloc(16))).to.not.throw();
     expect(() => new Decimal128(new Uint8Array(16))).to.not.throw();
   });
+
+  context('fromString()', function () {
+    context("when input has leading '+' and has more than 34 significant digits", function () {
+      it('throws BSON error on inexact rounding', function () {
+        expect(() =>
+          Decimal128.fromString('+100000000000000000000000000000000000000000000001')
+        ).to.throw(BSON.BSONError, /inexact rounding/);
+      });
+    });
+
+    context(
+      'when input has 1 significant digits, 34 total digits and an exponent greater than exponent_max',
+      function () {
+        it('throws BSON error reporting overflow', function () {
+          expect(() => Decimal128.fromString('1000000000000000000000000000000000e6112')).to.throw(
+            BSON.BSONError,
+            /overflow/
+          );
+        });
+      }
+    );
+  });
 });
