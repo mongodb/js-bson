@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.0.0](https://github.com/mongodb/js-bson/compare/v5.4.0...v6.0.0) (2023-08-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* **NODE-5504:** bump bson major version ([#605](https://github.com/mongodb/js-bson/issues/605))
+* **NODE-4770:** remove 12 length string support from ObjectId constructor ([#601](https://github.com/mongodb/js-bson/issues/601))
+* **NODE-4769:** remove ISO-8859-1 string support from Binary ([#602](https://github.com/mongodb/js-bson/issues/602))
+* **NODE-5223:** remove deprecated cacheHexString ([#595](https://github.com/mongodb/js-bson/issues/595))
+* **NODE-4787:** bump minimum Node.js version to v16.20.1 ([#590](https://github.com/mongodb/js-bson/issues/590))
+
+### Features
+
+* **NODE-4769:** remove ISO-8859-1 string support from Binary ([#602](https://github.com/mongodb/js-bson/issues/602)) ([74f7f8a](https://github.com/mongodb/js-bson/commit/74f7f8a447fa0b0b1557cba14e75ff052df54d13))
+* **NODE-4770:** remove 12 length string support from ObjectId constructor ([#601](https://github.com/mongodb/js-bson/issues/601)) ([409c592](https://github.com/mongodb/js-bson/commit/409c592524a6eec6a89eb96dee4b51e4f8adf5ae))
+* **NODE-4787:** bump minimum Node.js version to v16.20.1 ([#590](https://github.com/mongodb/js-bson/issues/590)) ([1dcca92](https://github.com/mongodb/js-bson/commit/1dcca92b24e609a069ca7f4187e5b9521380b2f5))
+* **NODE-5223:** remove deprecated cacheHexString ([#595](https://github.com/mongodb/js-bson/issues/595)) ([76eca2b](https://github.com/mongodb/js-bson/commit/76eca2b44c5fd0a4f4d5037346a29c2f9a5350b5))
+* **NODE-5504:** bump bson major version ([#605](https://github.com/mongodb/js-bson/issues/605)) ([9615902](https://github.com/mongodb/js-bson/commit/9615902943927646562c145604fc477cd42e9ce6))
+
+
+### Bug Fixes
+
+* **NODE-5509:** Allow undefined or null params in ObjectId.equals ([#607](https://github.com/mongodb/js-bson/issues/607)) ([e2674c6](https://github.com/mongodb/js-bson/commit/e2674c6c2940d81e5de5b6c9500391ce5b1a2649))
+* **NODE-5546:** decimal 128 fromString performs inexact rounding ([#613](https://github.com/mongodb/js-bson/issues/613)) ([1384cee](https://github.com/mongodb/js-bson/commit/1384cee024df7596e355de40acad6096b931f364))
+* **NODE-5559:** account for quotes when inspecting Code and BSONSymbol ([#612](https://github.com/mongodb/js-bson/issues/612)) ([0664840](https://github.com/mongodb/js-bson/commit/06648405f33eb2a7dfb27943acd832c37180f1ed))
+
 ## [6.0.0-alpha.0](https://github.com/mongodb/js-bson/compare/v5.4.0...v6.0.0-alpha.0) (2023-08-15)
 
 
