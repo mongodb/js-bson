@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import * as corpus from './tools/bson_corpus_test_loader';
 
 const Decimal128 = BSON.Decimal128;
+const BSONError = BSON.BSONError;
 
 const NAN = Buffer.from(
   [
@@ -1292,8 +1293,8 @@ describe('Decimal128', function () {
                       Decimal128.fromStringWithRounding(parseErrorTest.string)
                     );
 
-                    expect(fromStringError).to.be.instanceOf(Error);
-                    expect(fromStringWithRoundingError).to.be.instanceOf(Error);
+                    expect(fromStringError).to.be.instanceOf(BSONError);
+                    expect(fromStringWithRoundingError).to.be.instanceOf(BSONError);
 
                     expect(fromStringWithRoundingError).to.deep.equal(fromStringError);
                   });
@@ -1339,4 +1340,3 @@ describe('Decimal128', function () {
     });
   });
 });
-
