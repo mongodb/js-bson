@@ -507,7 +507,356 @@ export class Decimal128 extends BSONValue {
     // Return the new Decimal128
     return new Decimal128(buffer);
   }
+  static fromStringCopy(representation: string): Decimal128 {
+    // Parse state tracking
+    let isNegative = false;
+    let sawSign = false;
+    let sawRadix = false;
+    let foundNonZero = false;
 
+    // Total number of significant digits (no leading or trailing zero)
+    let significantDigits = 0;
+    // Total number of significand digits read
+    let nDigitsRead = 0;
+    // Total number of digits (no leading zeros)
+    let nDigits = 0;
+    // The number of the digits after radix
+    let radixPosition = 0;
+    // The index of the first non-zero in *str*
+    let firstNonZero = 0;
+
+    // Digits Array
+    const digits = [0];
+    // The number of digits in digits
+    let nDigitsStored = 0;
+    // Insertion pointer for digits
+    let digitsInsert = 0;
+    // The index of the last digit
+    let lastDigit = 0;
+
+    // Exponent
+    let exponent = 0;
+    // The high 17 digits of the significand
+    let significandHigh = new Long(0, 0);
+    // The low 17 digits of the significand
+    let significandLow = new Long(0, 0);
+    // The biased exponent
+    let biasedExponent = 0;
+
+    // Read index
+    let index = 0;
+
+    // Naively prevent against REDOS attacks.
+    // TODO: implementing a custom parsing for this, or refactoring the regex would yield
+    //       further gains.
+    if (representation.length >= 7000) {
+      throw new BSONError('' + representation + ' not a valid Decimal128 string');
+    }
+
+    // Results
+    const stringMatch = representation.match(PARSE_STRING_REGEXP);
+    const infMatch = representation.match(PARSE_INF_REGEXP);
+    const nanMatch = representation.match(PARSE_NAN_REGEXP);
+
+    // Validate the string
+    if ((!stringMatch && !infMatch && !nanMatch) || representation.length === 0) {
+      throw new BSONError('' + representation + ' not a valid Decimal128 string');
+    }
+
+    if (stringMatch) {
+      // full_match = stringMatch[0]
+      // sign = stringMatch[1]
+
+      const unsignedNumber = stringMatch[2];
+      // stringMatch[3] is undefined if a whole number (ex "1", 12")
+      // but defined if a number w/ decimal in it (ex "1.0, 12.2")
+
+      const e = stringMatch[4];
+      const expSign = stringMatch[5];
+      const expNumber = stringMatch[6];
+
+      // they provided e, but didn't give an exponent number. for ex "1e"
+      if (e && expNumber === undefined) invalidErr(representation, 'missing exponent power');
+
+      // they provided e, but didn't give a number before it. for ex "e1"
+      if (e && unsignedNumber === undefined) invalidErr(representation, 'missing exponent base');
+
+      if (e === undefined && (expSign || expNumber)) {
+        invalidErr(representation, 'missing e before exponent');
+      }
+    }
+
+    // Get the negative or positive sign
+    if (representation[index] === '+' || representation[index] === '-') {
+      sawSign = true;
+      isNegative = representation[index++] === '-';
+    }
+
+    // Check if user passed Infinity or NaN
+    if (!isDigit(representation[index]) && representation[index] !== '.') {
+      if (representation[index] === 'i' || representation[index] === 'I') {
+        return new Decimal128(isNegative ? INF_NEGATIVE_BUFFER : INF_POSITIVE_BUFFER);
+      } else if (representation[index] === 'N') {
+        return new Decimal128(NAN_BUFFER);
+      }
+    }
+
+    // Read all the digits
+    while (isDigit(representation[index]) || representation[index] === '.') {
+      if (representation[index] === '.') {
+        if (sawRadix) invalidErr(representation, 'contains multiple periods');
+
+        sawRadix = true;
+        index = index + 1;
+        continue;
+      }
+
+      if (nDigitsStored < MAX_DIGITS) {
+        if (representation[index] !== '0' || foundNonZero) {
+          if (!foundNonZero) {
+            firstNonZero = nDigitsRead;
+          }
+
+          foundNonZero = true;
+
+          // Only store 34 digits
+          digits[digitsInsert++] = parseInt(representation[index], 10);
+          nDigitsStored = nDigitsStored + 1;
+        }
+      }
+
+      if (foundNonZero) nDigits = nDigits + 1;
+      if (sawRadix) radixPosition = radixPosition + 1;
+
+      nDigitsRead = nDigitsRead + 1;
+      index = index + 1;
+    }
+
+    if (sawRadix && !nDigitsRead)
+      throw new BSONError('' + representation + ' not a valid Decimal128 string');
+
+    // Read exponent if exists
+    if (representation[index] === 'e' || representation[index] === 'E') {
+      // Read exponent digits
+      const match = representation.substr(++index).match(EXPONENT_REGEX);
+
+      // No digits read
+      if (!match || !match[2]) return new Decimal128(NAN_BUFFER);
+
+      // Get exponent
+      exponent = parseInt(match[0], 10);
+
+      // Adjust the index
+      index = index + match[0].length;
+    }
+
+    // Return not a number
+    if (representation[index]) return new Decimal128(NAN_BUFFER);
+
+    // Done reading input
+    // Find first non-zero digit in digits
+    if (!nDigitsStored) {
+      digits[0] = 0;
+      nDigits = 1;
+      nDigitsStored = 1;
+      significantDigits = 0;
+    } else {
+      lastDigit = nDigitsStored - 1;
+      significantDigits = nDigits;
+      if (significantDigits !== 1) {
+        while (
+          representation[
+            firstNonZero + significantDigits - 1 + Number(sawSign) + Number(sawRadix)
+          ] === '0'
+        ) {
+          significantDigits = significantDigits - 1;
+        }
+      }
+    }
+
+    // Normalization of exponent
+    // Correct exponent based on radix position, and shift significand as needed
+    // to represent user input
+
+    // Overflow prevention
+    if (exponent <= radixPosition && radixPosition > exponent + (1 << 14)) {
+      exponent = EXPONENT_MIN;
+    } else {
+      exponent = exponent - radixPosition;
+    }
+
+    // Attempt to normalize the exponent
+    while (exponent > EXPONENT_MAX) {
+      // Shift exponent to significand and decrease
+      lastDigit = lastDigit + 1;
+      if (lastDigit >= MAX_DIGITS) {
+        // Check if we have a zero then just hard clamp, otherwise fail
+        if (significantDigits === 0) {
+          exponent = EXPONENT_MAX;
+          break;
+        }
+
+        invalidErr(representation, 'overflow');
+      }
+      exponent = exponent - 1;
+    }
+
+    while (exponent < EXPONENT_MIN || nDigitsStored < nDigits) {
+      // Shift last digit. can only do this if < significant digits than # stored.
+      if (lastDigit === 0) {
+        if (significantDigits === 0) {
+          exponent = EXPONENT_MIN;
+          break;
+        }
+
+        invalidErr(representation, 'exponent underflow');
+      }
+
+      if (nDigitsStored < nDigits) {
+        if (
+          representation[nDigits - 1 + Number(sawSign) + Number(sawRadix)] !== '0' &&
+          significantDigits !== 0
+        ) {
+          invalidErr(representation, 'inexact rounding');
+        }
+        // adjust to match digits not stored
+        nDigits = nDigits - 1;
+      } else {
+        if (digits[lastDigit] !== 0) {
+          invalidErr(representation, 'inexact rounding');
+        }
+        // adjust to round
+        lastDigit = lastDigit - 1;
+      }
+
+      if (exponent < EXPONENT_MAX) {
+        exponent = exponent + 1;
+      } else {
+        invalidErr(representation, 'overflow');
+      }
+    }
+
+    // Round
+    // We've normalized the exponent, but might still need to round.
+    if (lastDigit + 1 < significantDigits) {
+      // If we have seen a radix point, 'string' is 1 longer than we have
+      // documented with ndigits_read, so inc the position of the first nonzero
+      // digit and the position that digits are read to.
+      if (sawRadix) {
+        firstNonZero = firstNonZero + 1;
+      }
+      // if saw sign, we need to increment again to account for - or + sign at start.
+      if (sawSign) {
+        firstNonZero = firstNonZero + 1;
+      }
+
+      const roundDigit = parseInt(representation[firstNonZero + lastDigit + 1], 10);
+
+      if (roundDigit !== 0) {
+        invalidErr(representation, 'inexact rounding');
+      }
+    }
+
+    // Encode significand
+    // The high 17 digits of the significand
+    significandHigh = Long.fromNumber(0);
+    // The low 17 digits of the significand
+    significandLow = Long.fromNumber(0);
+
+    // read a zero
+    if (significantDigits === 0) {
+      significandHigh = Long.fromNumber(0);
+      significandLow = Long.fromNumber(0);
+    } else if (lastDigit < 17) {
+      let dIdx = 0;
+      significandLow = Long.fromNumber(digits[dIdx++]);
+      significandHigh = new Long(0, 0);
+
+      for (; dIdx <= lastDigit; dIdx++) {
+        significandLow = significandLow.multiply(Long.fromNumber(10));
+        significandLow = significandLow.add(Long.fromNumber(digits[dIdx]));
+      }
+    } else {
+      let dIdx = 0;
+      significandHigh = Long.fromNumber(digits[dIdx++]);
+
+      for (; dIdx <= lastDigit - 17; dIdx++) {
+        significandHigh = significandHigh.multiply(Long.fromNumber(10));
+        significandHigh = significandHigh.add(Long.fromNumber(digits[dIdx]));
+      }
+
+      significandLow = Long.fromNumber(digits[dIdx++]);
+
+      for (; dIdx <= lastDigit; dIdx++) {
+        significandLow = significandLow.multiply(Long.fromNumber(10));
+        significandLow = significandLow.add(Long.fromNumber(digits[dIdx]));
+      }
+    }
+
+    const significand = multiply64x2(significandHigh, Long.fromString('100000000000000000'));
+    significand.low = significand.low.add(significandLow);
+
+    if (lessThan(significand.low, significandLow)) {
+      significand.high = significand.high.add(Long.fromNumber(1));
+    }
+
+    // Biased exponent
+    biasedExponent = exponent + EXPONENT_BIAS;
+    const dec = { low: Long.fromNumber(0), high: Long.fromNumber(0) };
+
+    // Encode combination, exponent, and significand.
+    if (
+      significand.high.shiftRightUnsigned(49).and(Long.fromNumber(1)).equals(Long.fromNumber(1))
+    ) {
+      // Encode '11' into bits 1 to 3
+      dec.high = dec.high.or(Long.fromNumber(0x3).shiftLeft(61));
+      dec.high = dec.high.or(
+        Long.fromNumber(biasedExponent).and(Long.fromNumber(0x3fff).shiftLeft(47))
+      );
+      dec.high = dec.high.or(significand.high.and(Long.fromNumber(0x7fffffffffff)));
+    } else {
+      dec.high = dec.high.or(Long.fromNumber(biasedExponent & 0x3fff).shiftLeft(49));
+      dec.high = dec.high.or(significand.high.and(Long.fromNumber(0x1ffffffffffff)));
+    }
+
+    dec.low = significand.low;
+
+    // Encode sign
+    if (isNegative) {
+      dec.high = dec.high.or(Long.fromString('9223372036854775808'));
+    }
+
+    // Encode into a buffer
+    const buffer = ByteUtils.allocate(16);
+    index = 0;
+
+    // Encode the low 64 bits of the decimal
+    // Encode low bits
+    buffer[index++] = dec.low.low & 0xff;
+    buffer[index++] = (dec.low.low >> 8) & 0xff;
+    buffer[index++] = (dec.low.low >> 16) & 0xff;
+    buffer[index++] = (dec.low.low >> 24) & 0xff;
+    // Encode high bits
+    buffer[index++] = dec.low.high & 0xff;
+    buffer[index++] = (dec.low.high >> 8) & 0xff;
+    buffer[index++] = (dec.low.high >> 16) & 0xff;
+    buffer[index++] = (dec.low.high >> 24) & 0xff;
+
+    // Encode the high 64 bits of the decimal
+    // Encode low bits
+    buffer[index++] = dec.high.low & 0xff;
+    buffer[index++] = (dec.high.low >> 8) & 0xff;
+    buffer[index++] = (dec.high.low >> 16) & 0xff;
+    buffer[index++] = (dec.high.low >> 24) & 0xff;
+    // Encode high bits
+    buffer[index++] = dec.high.high & 0xff;
+    buffer[index++] = (dec.high.high >> 8) & 0xff;
+    buffer[index++] = (dec.high.high >> 16) & 0xff;
+    buffer[index++] = (dec.high.high >> 24) & 0xff;
+
+    // Return the new Decimal128
+    return new Decimal128(buffer);
+  }
   /** Create a string representation of the raw Decimal128 value */
   toString(): string {
     // Note: bits in this routine are referred to starting at 0,
