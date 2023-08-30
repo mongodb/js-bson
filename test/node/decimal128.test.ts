@@ -1,19 +1,20 @@
-'use strict';
+import { BSON } from '../register-bson';
+import { expect } from 'chai';
+import * as corpus from './tools/bson_corpus_test_loader';
 
-const BSON = require('../register-bson');
 const Decimal128 = BSON.Decimal128;
 
-var NAN = Buffer.from(
+const NAN = Buffer.from(
   [
     0x7c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
   ].reverse()
 );
-var INF_NEGATIVE_BUFFER = Buffer.from(
+const INF_NEGATIVE_BUFFER = Buffer.from(
   [
     0xf8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
   ].reverse()
 );
-var INF_POSITIVE_BUFFER = Buffer.from(
+const INF_POSITIVE_BUFFER = Buffer.from(
   [
     0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
   ].reverse()
@@ -70,7 +71,7 @@ describe('Decimal128', function () {
   });
 
   it('fromString NaN input', function (done) {
-    var result = Decimal128.fromString('NaN');
+    let result = Decimal128.fromString('NaN');
     expect(NAN).to.deep.equal(result.bytes);
     result = Decimal128.fromString('+NaN');
     expect(NAN).to.deep.equal(result.bytes);
@@ -92,7 +93,7 @@ describe('Decimal128', function () {
   });
 
   it('fromString infinity input', function (done) {
-    var result = Decimal128.fromString('Infinity');
+    let result = Decimal128.fromString('Infinity');
     expect(INF_POSITIVE_BUFFER).to.deep.equal(result.bytes);
     result = Decimal128.fromString('+Infinity');
     expect(INF_POSITIVE_BUFFER).to.deep.equal(result.bytes);
@@ -107,8 +108,8 @@ describe('Decimal128', function () {
 
   it('fromString simple', function (done) {
     // Create decimal from string value 1
-    var result = Decimal128.fromString('1');
-    var bytes = Buffer.from(
+    let result = Decimal128.fromString('1');
+    let bytes = Buffer.from(
       [
         0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x01
@@ -210,8 +211,8 @@ describe('Decimal128', function () {
 
   it('fromString scientific format', function (done) {
     // Create decimal from string value 10e0
-    var result = Decimal128.fromString('10e0');
-    var bytes = Buffer.from(
+    let result = Decimal128.fromString('10e0');
+    let bytes = Buffer.from(
       [
         0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x0a
@@ -283,8 +284,8 @@ describe('Decimal128', function () {
 
   it('fromString large format', function (done) {
     // Create decimal from string value 12345689012345789012345
-    var result = Decimal128.fromString('12345689012345789012345');
-    var bytes = Buffer.from(
+    let result = Decimal128.fromString('12345689012345789012345');
+    let bytes = Buffer.from(
       [
         0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x02, 0x9d, 0x42, 0xda, 0x3a, 0x76, 0xf9, 0xe0, 0xd9,
         0x79
@@ -337,8 +338,8 @@ describe('Decimal128', function () {
   it('fromString exponent normalization', function (done) {
     // Create decimal from string value 1000000000000000000000000000000000000000
 
-    result = Decimal128.fromString('1000000000000000000000000000000000000000');
-    bytes = Buffer.from(
+    let result = Decimal128.fromString('1000000000000000000000000000000000000000');
+    let bytes = Buffer.from(
       [
         0x30, 0x4c, 0x31, 0x4d, 0xc6, 0x44, 0x8d, 0x93, 0x38, 0xc1, 0x5b, 0x0a, 0x00, 0x00, 0x00,
         0x00
@@ -366,7 +367,7 @@ describe('Decimal128', function () {
     );
     expect(bytes).to.deep.equal(result.bytes);
 
-    var str =
+    const str =
       '100000000000000000000000000000000000000000000000000000000000000000000' +
       '000000000000000000000000000000000000000000000000000000000000000000000' +
       '000000000000000000000000000000000000000000000000000000000000000000000' +
@@ -385,8 +386,8 @@ describe('Decimal128', function () {
 
     // Create decimal from string value str
 
-    var result = Decimal128.fromString(str);
-    var bytes = Buffer.from(
+    result = Decimal128.fromString(str);
+    bytes = Buffer.from(
       [
         0x37, 0xcc, 0x31, 0x4d, 0xc6, 0x44, 0x8d, 0x93, 0x38, 0xc1, 0x5b, 0x0a, 0x00, 0x00, 0x00,
         0x00
@@ -424,8 +425,8 @@ describe('Decimal128', function () {
 
   it('fromString from string zeros', function (done) {
     // Create decimal from string value 0
-    var result = Decimal128.fromString('0');
-    var bytes = Buffer.from(
+    let result = Decimal128.fromString('0');
+    let bytes = Buffer.from(
       [
         0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00
@@ -467,8 +468,8 @@ describe('Decimal128', function () {
 
   it('fromString from string round', function (done) {
     // Create decimal from string value 10E-6177
-    var result = Decimal128.fromString('10E-6177');
-    var bytes = Buffer.from(
+    let result = Decimal128.fromString('10E-6177');
+    const bytes = Buffer.from(
       [
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x01
@@ -809,7 +810,7 @@ describe('Decimal128', function () {
   });
 
   it('toString infinity', function (done) {
-    var decimal = new Decimal128(
+    let decimal = new Decimal128(
       Buffer.from(
         [
           0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -832,7 +833,7 @@ describe('Decimal128', function () {
   });
 
   it('toString NaN', function (done) {
-    var decimal = new Decimal128(
+    let decimal = new Decimal128(
       Buffer.from(
         [
           0x7c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -885,7 +886,7 @@ describe('Decimal128', function () {
   });
 
   it('toString regular', function (done) {
-    var decimal = new Decimal128(
+    let decimal = new Decimal128(
       Buffer.from(
         [
           0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -988,7 +989,7 @@ describe('Decimal128', function () {
   });
 
   it('toString scientific', function (done) {
-    var decimal = new Decimal128(
+    let decimal = new Decimal128(
       Buffer.from(
         [
           0x5f, 0xfe, 0x31, 0x4d, 0xc6, 0x44, 0x8d, 0x93, 0x38, 0xc1, 0x5b, 0x0a, 0x00, 0x00, 0x00,
@@ -1111,7 +1112,7 @@ describe('Decimal128', function () {
   });
 
   it('toString zeros', function (done) {
-    var decimal = new Decimal128(
+    let decimal = new Decimal128(
       Buffer.from(
         [
           0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -1145,10 +1146,10 @@ describe('Decimal128', function () {
 
   it('Serialize and Deserialize tests', function (done) {
     // Test all methods around a simple serialization at object top level
-    var doc = { value: Decimal128.fromString('1') };
-    var buffer = BSON.serialize(doc);
-    var size = BSON.calculateObjectSize(doc);
-    var back = BSON.deserialize(buffer);
+    let doc = { value: Decimal128.fromString('1') };
+    let buffer = BSON.serialize(doc);
+    let size = BSON.calculateObjectSize(doc);
+    let back = BSON.deserialize(buffer);
 
     expect(buffer.length).to.equal(size);
     expect(doc).to.deep.equal(back);
@@ -1193,6 +1194,7 @@ describe('Decimal128', function () {
   it('throws correct error for invalid constructor argument type', () => {
     const constructorArgErrMsg = 'Decimal128 must take a Buffer or string';
 
+    // ts-ignore
     expect(() => new Decimal128(-0)).to.throw(constructorArgErrMsg);
     expect(() => new Decimal128(-1)).to.throw(constructorArgErrMsg);
     expect(() => new Decimal128(10)).to.throw(constructorArgErrMsg);
@@ -1235,5 +1237,75 @@ describe('Decimal128', function () {
         });
       }
     );
+
+    describe('fromStringWithRounding', function () {
+      context('Corpus tests', function () {
+        // Filter for only Decimal128 tests
+        for (const { description, valid, _filename, parseErrors } of corpus.filter(s =>
+          /Decimal128/.test(s.description)
+        )) {
+          const scenarioName = `${description} (${_filename})`;
+          describe(scenarioName, function () {
+            if (valid) {
+              // We only care about the extended json inputs because the bson inputs will not test the
+              // fromString or fromStringWithRounding code paths
+              const inputs = [
+                'canonical_extjson',
+                'degenerate_extjson',
+                'relaxed_extjson',
+                'converted_extjson'
+              ];
+              for (const validTest of valid) {
+                context(`Valid Test: ${validTest.description}`, function () {
+                  for (const input of inputs) {
+                    if (validTest[input]) {
+                      describe(`with ${input} input`, function () {
+                        it('has same output as fromString', function () {
+                          const extJSONString: string = JSON.parse(validTest[input]).d
+                            .$numberDecimal;
+                          expect(Decimal128.fromStringWithRounding(extJSONString)).to.deep.equal(
+                            Decimal128.fromString(extJSONString)
+                          );
+                        });
+                      });
+                    }
+                  }
+                });
+              }
+            }
+            if (parseErrors) {
+              // Filter out the inexact rounding tests
+              for (const parseErrorTest of parseErrors.filter(
+                p => !/Inexact/.test(p.description)
+              )) {
+                context(`ParseError - ${parseErrorTest.description}`, function () {
+                  it('emits the same error as fromString', function () {
+                    const errorOrNull = (f: () => void) => {
+                      try {
+                        f();
+                      } catch (err) {
+                        return err;
+                      }
+                      return null;
+                    };
+                    const fromStringError = errorOrNull(() =>
+                      Decimal128.fromString(parseErrorTest.string)
+                    );
+                    const fromStringWithRoundingError = errorOrNull(() =>
+                      Decimal128.fromStringWithRounding(parseErrorTest.string)
+                    );
+
+                    expect(fromStringError).to.be.instanceOf(Error);
+                    expect(fromStringWithRoundingError).to.be.instanceOf(Error);
+
+                    expect(fromStringWithRoundingError).to.deep.equal(fromStringError);
+                  });
+                });
+              }
+            }
+          });
+        }
+      });
+    });
   });
 });
