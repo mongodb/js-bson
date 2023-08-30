@@ -468,7 +468,7 @@ describe('Decimal128', function () {
 
   it('fromString from string round', function (done) {
     // Create decimal from string value 10E-6177
-    let result = Decimal128.fromString('10E-6177');
+    const result = Decimal128.fromString('10E-6177');
     const bytes = Buffer.from(
       [
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -477,9 +477,6 @@ describe('Decimal128', function () {
     );
 
     expect(bytes).to.deep.equal(result.bytes);
-
-    result = Decimal128.fromString('37.499999999999999196428571428571375');
-    expect(result.toString()).to.deep.equal('37.49999999999999919642857142857138');
 
     // // Create decimal from string value 15E-6177
     // result = Decimal128.fromString('15E-6177');
@@ -1306,6 +1303,40 @@ describe('Decimal128', function () {
           });
         }
       });
+
+      context('when the input has more than 34 significant digits', function () {
+        it('does not throw an error', function () {
+          expect(() =>
+            Decimal128.fromStringWithRounding('37.499999999999999196428571428571375')
+          ).to.not.throw();
+        });
+        context('when the digit to round is >= 5', function () {
+          it('rounds up correctly', function () {
+            const result = Decimal128.fromStringWithRounding(
+              '37.499999999999999196428571428571375'
+            );
+            expect(result.toString()).to.deep.equal('37.49999999999999919642857142857138');
+          });
+        });
+        context('when the digit to round is < 5', function () {
+          it('rounds down correctly', function () {
+            const result = Decimal128.fromStringWithRounding(
+              '37.499999999999999196428571428571374'
+            );
+            expect(result.toString()).to.deep.equal('37.49999999999999919642857142857137');
+          });
+        });
+
+        context('when the digit to round is 9', function () {
+          it('rounds up and carries correctly', function () {
+            const result = Decimal128.fromStringWithRounding(
+              '37.4999999999999999196428571428571399'
+            );
+            expect(result.toString()).to.deep.equal('37.49999999999999991964285714285714');
+          });
+        });
+      });
     });
   });
 });
+
