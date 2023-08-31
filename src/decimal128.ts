@@ -165,6 +165,18 @@ export class Decimal128 extends BSONValue {
    * Create a Decimal128 instance from a string representation, allowing for rounding to 34
    * significant digits
    *
+   * @example Example of a number that will be rounded
+   * ```ts
+   * > let d = Decimal128.fromString('37.499999999999999196428571428571375')
+   * Uncaught:
+   * BSONError: "37.499999999999999196428571428571375" is not a valid Decimal128 string - inexact rounding
+   * at invalidErr (/home/wajames/js-bson/lib/bson.cjs:1402:11)
+   * at Decimal128.fromStringInternal (/home/wajames/js-bson/lib/bson.cjs:1633:25)
+   * at Decimal128.fromString (/home/wajames/js-bson/lib/bson.cjs:1424:27)
+   *
+   * > d = Decimal128.fromStringWithRounding('37.499999999999999196428571428571375')
+   * new Decimal128("37.49999999999999919642857142857138")
+   * ```
    * @param representation - a numeric string representation.
    */
   static fromStringWithRounding(representation: string): Decimal128 {
