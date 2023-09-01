@@ -71,216 +71,215 @@ describe('Decimal128', function () {
     done();
   });
 
-  it('fromString NaN input', function (done) {
-    let result = Decimal128.fromString('NaN');
-    expect(NAN).to.deep.equal(result.bytes);
-    result = Decimal128.fromString('+NaN');
-    expect(NAN).to.deep.equal(result.bytes);
-    result = Decimal128.fromString('-NaN');
-    expect(NAN).to.deep.equal(result.bytes);
-    result = Decimal128.fromString('-nan');
-    expect(NAN).to.deep.equal(result.bytes);
-    result = Decimal128.fromString('+nan');
-    expect(NAN).to.deep.equal(result.bytes);
-    result = Decimal128.fromString('nan');
-    expect(NAN).to.deep.equal(result.bytes);
-    result = Decimal128.fromString('Nan');
-    expect(NAN).to.deep.equal(result.bytes);
-    result = Decimal128.fromString('+Nan');
-    expect(NAN).to.deep.equal(result.bytes);
-    result = Decimal128.fromString('-Nan');
-    expect(NAN).to.deep.equal(result.bytes);
-    done();
+  context('fromString NaN input', function () {
+    const inputs = ['NaN', '+NaN', '-NaN', '-nan', '+nan', 'nan', 'Nan', '+Nan', '-Nan'];
+    for (const input of inputs) {
+      it(`returns NAN when input is "${input}"`, function () {
+        const result = Decimal128.fromString(input);
+        expect(NAN).to.deep.equal(result.bytes);
+      });
+    }
   });
 
-  it('fromString infinity input', function (done) {
-    let result = Decimal128.fromString('Infinity');
-    expect(INF_POSITIVE_BUFFER).to.deep.equal(result.bytes);
-    result = Decimal128.fromString('+Infinity');
-    expect(INF_POSITIVE_BUFFER).to.deep.equal(result.bytes);
-    result = Decimal128.fromString('+Inf');
-    expect(INF_POSITIVE_BUFFER).to.deep.equal(result.bytes);
-    result = Decimal128.fromString('-Inf');
-    expect(INF_NEGATIVE_BUFFER).to.deep.equal(result.bytes);
-    result = Decimal128.fromString('-Infinity');
-    expect(INF_NEGATIVE_BUFFER).to.deep.equal(result.bytes);
-    done();
+  context('fromString inifity input', function () {
+    const positiveInputs = ['Infinity', '+Infinity', '+Inf'];
+    const negativeInputs = ['-Inf', '-Infinity'];
+
+    for (const input of positiveInputs) {
+      it(`returns positive infinity when input is "${input}"`, function () {
+        const result = Decimal128.fromString(input);
+        expect(INF_POSITIVE_BUFFER).to.deep.equal(result.bytes);
+      });
+    }
+
+    for (const input of negativeInputs) {
+      it(`returns negative infinity when input is "${input}"`, function () {
+        const result = Decimal128.fromString(input);
+        expect(INF_NEGATIVE_BUFFER).to.deep.equal(result.bytes);
+      });
+    }
   });
 
-  it('fromString simple', function (done) {
-    // Create decimal from string value 1
-    let result = Decimal128.fromString('1');
-    let bytes = Buffer.from(
-      [
-        0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x01
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
+  context('fromString simple', function () {
+    const tests: { input: string; result: Buffer }[] = [
+      {
+        input: '1',
+        result: Buffer.from(
+          [
+            0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x01
+          ].reverse()
+        )
+      },
+      {
+        input: '0',
+        result: Buffer.from(
+          [
+            0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00
+          ].reverse()
+        )
+      },
+      {
+        input: '-0',
+        result: Buffer.from(
+          [
+            0xb0, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00
+          ].reverse()
+        )
+      },
+      {
+        input: '-1',
+        result: Buffer.from(
+          [
+            0xb0, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x01
+          ].reverse()
+        )
+      },
+      {
+        input: '12345678901234567',
+        result: Buffer.from(
+          [
+            0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2b, 0xdc, 0x54, 0x5d, 0x6b,
+            0x4b, 0x87
+          ].reverse()
+        )
+      },
+      {
+        input: '989898983458',
+        result: Buffer.from(
+          [
+            0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe6, 0x7a, 0x93,
+            0xc8, 0x22
+          ].reverse()
+        )
+      },
+      {
+        input: '-12345678901234567',
+        result: Buffer.from(
+          [
+            0xb0, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2b, 0xdc, 0x54, 0x5d, 0x6b,
+            0x4b, 0x87
+          ].reverse()
+        )
+      },
+      {
+        input: '0.12345',
+        result: Buffer.from(
+          [
+            0x30, 0x36, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x30, 0x39
+          ].reverse()
+        )
+      },
+      {
+        input: '0.0012345',
+        result: Buffer.from(
+          [
+            0x30, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x30, 0x39
+          ].reverse()
+        )
+      },
+      {
+        input: '00012345678901234567',
+        result: Buffer.from(
+          [
+            0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2b, 0xdc, 0x54, 0x5d, 0x6b,
+            0x4b, 0x87
+          ].reverse()
+        )
+      }
+    ];
 
-    // Create decimal from string value 0
-    result = Decimal128.fromString('0');
-    bytes = Buffer.from(
-      [
-        0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
-
-    // Create decimal from string value -0
-    result = Decimal128.fromString('-0');
-    bytes = Buffer.from(
-      [
-        0xb0, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
-
-    // Create decimal from string value -1
-    result = Decimal128.fromString('-1');
-    bytes = Buffer.from(
-      [
-        0xb0, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x01
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
-
-    // Create decimal from string value 12345678901234567
-    result = Decimal128.fromString('12345678901234567');
-    bytes = Buffer.from(
-      [
-        0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2b, 0xdc, 0x54, 0x5d, 0x6b, 0x4b,
-        0x87
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
-
-    // Create decimal from string value 989898983458
-    result = Decimal128.fromString('989898983458');
-    bytes = Buffer.from(
-      [
-        0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe6, 0x7a, 0x93, 0xc8,
-        0x22
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
-
-    // Create decimal from string value -12345678901234567
-    result = Decimal128.fromString('-12345678901234567');
-    bytes = Buffer.from(
-      [
-        0xb0, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2b, 0xdc, 0x54, 0x5d, 0x6b, 0x4b,
-        0x87
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
-
-    // Create decimal from string value 0.12345
-    result = Decimal128.fromString('0.12345');
-    bytes = Buffer.from(
-      [
-        0x30, 0x36, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30,
-        0x39
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
-
-    // Create decimal from string value 0.0012345
-    result = Decimal128.fromString('0.0012345');
-    bytes = Buffer.from(
-      [
-        0x30, 0x32, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30,
-        0x39
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
-
-    // Create decimal from string value 00012345678901234567
-    result = Decimal128.fromString('00012345678901234567');
-    bytes = Buffer.from(
-      [
-        0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2b, 0xdc, 0x54, 0x5d, 0x6b, 0x4b,
-        0x87
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
-    done();
+    for (const test of tests) {
+      it(`returns Decimal128 with bytes content: '[${test.result.join(',')}]' with input "${
+        test.input
+      }"`, function () {
+        const result = Decimal128.fromString(test.input);
+        expect(result.bytes).to.deep.equal(test.result);
+      });
+    }
   });
 
-  it('fromString scientific format', function (done) {
-    // Create decimal from string value 10e0
-    let result = Decimal128.fromString('10e0');
-    let bytes = Buffer.from(
-      [
-        0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x0a
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
+  context('fromString scientific format', function () {
+    const tests: { input: string; result: Buffer }[] = [
+      {
+        input: '10e0',
+        result: Buffer.from(
+          [
+            0x30, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x0a
+          ].reverse()
+        )
+      },
 
-    // Create decimal from string value 1e1
-    result = Decimal128.fromString('1e1');
-    bytes = Buffer.from(
-      [
-        0x30, 0x42, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x01
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
+      {
+        input: '1e1',
+        result: Buffer.from(
+          [
+            0x30, 0x42, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x01
+          ].reverse()
+        )
+      },
+      {
+        input: '10e-1',
+        result: Buffer.from(
+          [
+            0x30, 0x3e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x0a
+          ].reverse()
+        )
+      },
+      {
+        input: '12345678901234567e6111',
+        result: Buffer.from(
+          [
+            0x5f, 0xfe, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2b, 0xdc, 0x54, 0x5d, 0x6b,
+            0x4b, 0x87
+          ].reverse()
+        )
+      },
+      {
+        input: '1e-6176',
+        result: Buffer.from(
+          [
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x01
+          ].reverse()
+        )
+      },
+      {
+        input: '-100E-10',
+        result: Buffer.from(
+          [
+            0xb0, 0x2c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x64
+          ].reverse()
+        )
+      },
+      {
+        input: '10.50E8',
+        result: Buffer.from(
+          [
+            0x30, 0x4c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x04, 0x1a
+          ].reverse()
+        )
+      }
+    ];
 
-    // Create decimal from string value 10e-1
-    result = Decimal128.fromString('10e-1');
-    bytes = Buffer.from(
-      [
-        0x30, 0x3e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x0a
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
-
-    // Create decimal from string value 12345678901234567e6111
-    result = Decimal128.fromString('12345678901234567e6111');
-    bytes = Buffer.from(
-      [
-        0x5f, 0xfe, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2b, 0xdc, 0x54, 0x5d, 0x6b, 0x4b,
-        0x87
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
-
-    // Create decimal from string value 1e-6176
-    result = Decimal128.fromString('1e-6176');
-    bytes = Buffer.from(
-      [
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x01
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
-
-    // Create decimal from string value "-100E-10
-    result = Decimal128.fromString('-100E-10');
-    bytes = Buffer.from(
-      [
-        0xb0, 0x2c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x64
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
-
-    // Create decimal from string value 10.50E8
-    result = Decimal128.fromString('10.50E8');
-    bytes = Buffer.from(
-      [
-        0x30, 0x4c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04,
-        0x1a
-      ].reverse()
-    );
-    expect(bytes).to.deep.equal(result.bytes);
-    done();
+    for (const test of tests) {
+      it(`returns Decimal128 with bytes content: '[${test.result.join(',')}]' with input "${
+        test.input
+      }"`, function () {
+        const result = Decimal128.fromString(test.input);
+        expect(result.bytes).to.deep.equal(test.result);
+      });
+    }
   });
 
   it('fromString large format', function (done) {
