@@ -158,7 +158,7 @@ export class Decimal128 extends BSONValue {
    * @param representation - a numeric string representation.
    */
   static fromString(representation: string): Decimal128 {
-    return Decimal128.fromStringInternal(representation, { allowRounding: false });
+    return Decimal128._fromString(representation, { allowRounding: false });
   }
 
   /**
@@ -180,10 +180,10 @@ export class Decimal128 extends BSONValue {
    * @param representation - a numeric string representation.
    */
   static fromStringWithRounding(representation: string): Decimal128 {
-    return Decimal128.fromStringInternal(representation, { allowRounding: true });
+    return Decimal128._fromString(representation, { allowRounding: true });
   }
 
-  private static fromStringInternal(representation: string, options: { allowRounding: boolean }) {
+  private static _fromString(representation: string, options: { allowRounding: boolean }) {
     // Parse state tracking
     let isNegative = false;
     let sawSign = false;
