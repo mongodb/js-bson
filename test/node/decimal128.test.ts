@@ -439,7 +439,7 @@ describe('Decimal128', function () {
       generateFromStringTests(tests);
     });
 
-    it('from string round', function (done) {
+    it('from string round', function () {
       // Create decimal from string value 10E-6177
       const result = Decimal128.fromString('10E-6177');
       const bytes = Buffer.from(
@@ -775,8 +775,6 @@ describe('Decimal128', function () {
       //   ].reverse()
       // );
       // expect(bytes).to.deep.equal(result.bytes);
-
-      done();
     });
 
     context("when input has leading '+' and has more than 34 significant digits", function () {
