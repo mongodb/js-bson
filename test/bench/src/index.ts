@@ -1,4 +1,5 @@
 import { getStringDeserializationSuite } from './suites/string_deserialization';
+import { getObjectIdSerializationSuite } from './suites/objectid_serialization';
 import { type PerfSendData } from './util';
 import { writeFile } from 'fs';
 import { cpus, totalmem } from 'os';
@@ -17,7 +18,7 @@ console.log(
   ].join('\n')
 );
 
-for (const suite of [getStringDeserializationSuite()]) {
+for (const suite of [getStringDeserializationSuite(), getObjectIdSerializationSuite()]) {
   suite.run();
   results.push(suite.results);
 }
