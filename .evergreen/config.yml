@@ -111,6 +111,8 @@ tasks:
         vars:
           NODE_LTS_VERSION: 16
       - func: install dependencies
+        vars:
+          NPM_VERSION: 9
       - func: run tests
         vars:
           TEST_TARGET: node
@@ -213,8 +215,11 @@ tasks:
     commands:
       - func: fetch source
         vars:
+          # This needs to stay pinned at Node v18.16.0 for consistency across perf runs.
           NODE_LTS_VERSION: v18.16.0
       - func: install dependencies
+        vars:
+          NPM_VERSION: 9
       - func: run benchmarks
         vars:
           WEB: false 
