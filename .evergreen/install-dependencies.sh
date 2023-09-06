@@ -2,6 +2,7 @@
 set -o errexit  # Exit the script with error if any of the commands fail
 
 NODE_LTS_VERSION=${NODE_LTS_VERSION:-16}
+# npm 10 does not work with Node < 18 so npm 9 will be installed on those versions.
 NODE_LOWEST_LTS=18
 
 source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
