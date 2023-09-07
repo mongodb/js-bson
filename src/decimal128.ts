@@ -158,8 +158,35 @@ export class Decimal128 extends BSONValue {
    * @param representation - a numeric string representation.
    */
   static fromString(representation: string): Decimal128 {
+    return Decimal128._fromString(representation, { allowRounding: false });
+  }
+
+  /**
+   * Create a Decimal128 instance from a string representation, allowing for rounding to 34
+   * significant digits
+   *
+   * @example Example of a number that will be rounded
+   * ```ts
+   * > let d = Decimal128.fromString('37.499999999999999196428571428571375')
+   * Uncaught:
+   * BSONError: "37.499999999999999196428571428571375" is not a valid Decimal128 string - inexact rounding
+   * at invalidErr (/home/wajames/js-bson/lib/bson.cjs:1402:11)
+   * at Decimal128.fromStringInternal (/home/wajames/js-bson/lib/bson.cjs:1633:25)
+   * at Decimal128.fromString (/home/wajames/js-bson/lib/bson.cjs:1424:27)
+   *
+   * > d = Decimal128.fromStringWithRounding('37.499999999999999196428571428571375')
+   * new Decimal128("37.49999999999999919642857142857138")
+   * ```
+   * @param representation - a numeric string representation.
+   */
+  static fromStringWithRounding(representation: string): Decimal128 {
+    return Decimal128._fromString(representation, { allowRounding: true });
+  }
+
+  private static _fromString(representation: string, options: { allowRounding: boolean }) {
     // Parse state tracking
     let isNegative = false;
+    let sawSign = false;
     let sawRadix = false;
     let foundNonZero = false;
 
@@ -180,15 +207,11 @@ export class Decimal128 extends BSONValue {
     let nDigitsStored = 0;
     // Insertion pointer for digits
     let digitsInsert = 0;
-    // The index of the first non-zero digit
-    let firstDigit = 0;
     // The index of the last digit
     let lastDigit = 0;
 
     // Exponent
     let exponent = 0;
-    // loop index over array
-    let i = 0;
     // The high 17 digits of the significand
     let significandHigh = new Long(0, 0);
     // The low 17 digits of the significand
@@ -241,6 +264,7 @@ export class Decimal128 extends BSONValue {
 
     // Get the negative or positive sign
     if (representation[index] === '+' || representation[index] === '-') {
+      sawSign = true;
       isNegative = representation[index++] === '-';
     }
 
@@ -263,7 +287,7 @@ export class Decimal128 extends BSONValue {
         continue;
       }
 
-      if (nDigitsStored < 34) {
+      if (nDigitsStored < MAX_DIGITS) {
         if (representation[index] !== '0' || foundNonZero) {
           if (!foundNonZero) {
             firstNonZero = nDigitsRead;
@@ -307,11 +331,7 @@ export class Decimal128 extends BSONValue {
 
     // Done reading input
     // Find first non-zero digit in digits
-    firstDigit = 0;
-
     if (!nDigitsStored) {
-      firstDigit = 0;
-      lastDigit = 0;
       digits[0] = 0;
       nDigits = 1;
       nDigitsStored = 1;
@@ -320,7 +340,11 @@ export class Decimal128 extends BSONValue {
       lastDigit = nDigitsStored - 1;
       significantDigits = nDigits;
       if (significantDigits !== 1) {
-        while (digits[firstNonZero + significantDigits - 1] === 0) {
+        while (
+          representation[
+            firstNonZero + significantDigits - 1 + Number(sawSign) + Number(sawRadix)
+          ] === '0'
+        ) {
           significantDigits = significantDigits - 1;
         }
       }
@@ -331,7 +355,7 @@ export class Decimal128 extends BSONValue {
     // to represent user input
 
     // Overflow prevention
-    if (exponent <= radixPosition && radixPosition - exponent > 1 << 14) {
+    if (exponent <= radixPosition && radixPosition > exponent + (1 << 14)) {
       exponent = EXPONENT_MIN;
     } else {
       exponent = exponent - radixPosition;
@@ -341,11 +365,9 @@ export class Decimal128 extends BSONValue {
     while (exponent > EXPONENT_MAX) {
       // Shift exponent to significand and decrease
       lastDigit = lastDigit + 1;
-
-      if (lastDigit - firstDigit > MAX_DIGITS) {
+      if (lastDigit >= MAX_DIGITS) {
         // Check if we have a zero then just hard clamp, otherwise fail
-        const digitsString = digits.join('');
-        if (digitsString.match(/^0+$/)) {
+        if (significantDigits === 0) {
           exponent = EXPONENT_MAX;
           break;
         }
@@ -355,86 +377,146 @@ export class Decimal128 extends BSONValue {
       exponent = exponent - 1;
     }
 
-    while (exponent < EXPONENT_MIN || nDigitsStored < nDigits) {
-      // Shift last digit. can only do this if < significant digits than # stored.
-      if (lastDigit === 0 && significantDigits < nDigitsStored) {
-        exponent = EXPONENT_MIN;
-        significantDigits = 0;
-        break;
-      }
-
-      if (nDigitsStored < nDigits) {
-        // adjust to match digits not stored
-        nDigits = nDigits - 1;
-      } else {
-        // adjust to round
-        lastDigit = lastDigit - 1;
-      }
-
-      if (exponent < EXPONENT_MAX) {
-        exponent = exponent + 1;
-      } else {
-        // Check if we have a zero then just hard clamp, otherwise fail
-        const digitsString = digits.join('');
-        if (digitsString.match(/^0+$/)) {
-          exponent = EXPONENT_MAX;
+    if (options.allowRounding) {
+      while (exponent < EXPONENT_MIN || nDigitsStored < nDigits) {
+        // Shift last digit. can only do this if < significant digits than # stored.
+        if (lastDigit === 0 && significantDigits < nDigitsStored) {
+          exponent = EXPONENT_MIN;
+          significantDigits = 0;
           break;
         }
-        invalidErr(representation, 'overflow');
+
+        if (nDigitsStored < nDigits) {
+          // adjust to match digits not stored
+          nDigits = nDigits - 1;
+        } else {
+          // adjust to round
+          lastDigit = lastDigit - 1;
+        }
+
+        if (exponent < EXPONENT_MAX) {
+          exponent = exponent + 1;
+        } else {
+          // Check if we have a zero then just hard clamp, otherwise fail
+          const digitsString = digits.join('');
+          if (digitsString.match(/^0+$/)) {
+            exponent = EXPONENT_MAX;
+            break;
+          }
+          invalidErr(representation, 'overflow');
+        }
       }
-    }
 
-    // Round
-    // We've normalized the exponent, but might still need to round.
-    if (lastDigit - firstDigit + 1 < significantDigits) {
-      let endOfString = nDigitsRead;
+      // Round
+      // We've normalized the exponent, but might still need to round.
+      if (lastDigit + 1 < significantDigits) {
+        let endOfString = nDigitsRead;
 
-      // If we have seen a radix point, 'string' is 1 longer than we have
-      // documented with ndigits_read, so inc the position of the first nonzero
-      // digit and the position that digits are read to.
-      if (sawRadix) {
-        firstNonZero = firstNonZero + 1;
-        endOfString = endOfString + 1;
-      }
-      // if negative, we need to increment again to account for - sign at start.
-      if (isNegative) {
-        firstNonZero = firstNonZero + 1;
-        endOfString = endOfString + 1;
-      }
+        // If we have seen a radix point, 'string' is 1 longer than we have
+        // documented with ndigits_read, so inc the position of the first nonzero
+        // digit and the position that digits are read to.
+        if (sawRadix) {
+          firstNonZero = firstNonZero + 1;
+          endOfString = endOfString + 1;
+        }
+        // if negative, we need to increment again to account for - sign at start.
+        if (sawSign) {
+          firstNonZero = firstNonZero + 1;
+          endOfString = endOfString + 1;
+        }
 
-      const roundDigit = parseInt(representation[firstNonZero + lastDigit + 1], 10);
-      let roundBit = 0;
+        const roundDigit = parseInt(representation[firstNonZero + lastDigit + 1], 10);
+        let roundBit = 0;
 
-      if (roundDigit >= 5) {
-        roundBit = 1;
-        if (roundDigit === 5) {
-          roundBit = digits[lastDigit] % 2 === 1 ? 1 : 0;
-          for (i = firstNonZero + lastDigit + 2; i < endOfString; i++) {
-            if (parseInt(representation[i], 10)) {
-              roundBit = 1;
+        if (roundDigit >= 5) {
+          roundBit = 1;
+          if (roundDigit === 5) {
+            roundBit = digits[lastDigit] % 2 === 1 ? 1 : 0;
+            for (let i = firstNonZero + lastDigit + 2; i < endOfString; i++) {
+              if (parseInt(representation[i], 10)) {
+                roundBit = 1;
+                break;
+              }
+            }
+          }
+        }
+
+        if (roundBit) {
+          let dIdx = lastDigit;
+
+          for (; dIdx >= 0; dIdx--) {
+            if (++digits[dIdx] > 9) {
+              digits[dIdx] = 0;
+
+              // overflowed most significant digit
+              if (dIdx === 0) {
+                if (exponent < EXPONENT_MAX) {
+                  exponent = exponent + 1;
+                  digits[dIdx] = 1;
+                } else {
+                  return new Decimal128(isNegative ? INF_NEGATIVE_BUFFER : INF_POSITIVE_BUFFER);
+                }
+              }
+            } else {
               break;
             }
           }
         }
       }
-
-      if (roundBit) {
-        let dIdx = lastDigit;
-
-        for (; dIdx >= 0; dIdx--) {
-          if (++digits[dIdx] > 9) {
-            digits[dIdx] = 0;
-
-            // overflowed most significant digit
-            if (dIdx === 0) {
-              if (exponent < EXPONENT_MAX) {
-                exponent = exponent + 1;
-                digits[dIdx] = 1;
-              } else {
-                return new Decimal128(isNegative ? INF_NEGATIVE_BUFFER : INF_POSITIVE_BUFFER);
-              }
-            }
+    } else {
+      while (exponent < EXPONENT_MIN || nDigitsStored < nDigits) {
+        // Shift last digit. can only do this if < significant digits than # stored.
+        if (lastDigit === 0) {
+          if (significantDigits === 0) {
+            exponent = EXPONENT_MIN;
+            break;
           }
+
+          invalidErr(representation, 'exponent underflow');
+        }
+
+        if (nDigitsStored < nDigits) {
+          if (
+            representation[nDigits - 1 + Number(sawSign) + Number(sawRadix)] !== '0' &&
+            significantDigits !== 0
+          ) {
+            invalidErr(representation, 'inexact rounding');
+          }
+          // adjust to match digits not stored
+          nDigits = nDigits - 1;
+        } else {
+          if (digits[lastDigit] !== 0) {
+            invalidErr(representation, 'inexact rounding');
+          }
+          // adjust to round
+          lastDigit = lastDigit - 1;
+        }
+
+        if (exponent < EXPONENT_MAX) {
+          exponent = exponent + 1;
+        } else {
+          invalidErr(representation, 'overflow');
+        }
+      }
+
+      // Round
+      // We've normalized the exponent, but might still need to round.
+      if (lastDigit + 1 < significantDigits) {
+        // If we have seen a radix point, 'string' is 1 longer than we have
+        // documented with ndigits_read, so inc the position of the first nonzero
+        // digit and the position that digits are read to.
+        if (sawRadix) {
+          firstNonZero = firstNonZero + 1;
+        }
+        // if saw sign, we need to increment again to account for - or + sign at start.
+        if (sawSign) {
+          firstNonZero = firstNonZero + 1;
+        }
+
+        const roundDigit = parseInt(representation[firstNonZero + lastDigit + 1], 10);
+
+        if (roundDigit !== 0) {
+          invalidErr(representation, 'inexact rounding');
         }
       }
     }
@@ -449,8 +531,8 @@ export class Decimal128 extends BSONValue {
     if (significantDigits === 0) {
       significandHigh = Long.fromNumber(0);
       significandLow = Long.fromNumber(0);
-    } else if (lastDigit - firstDigit < 17) {
-      let dIdx = firstDigit;
+    } else if (lastDigit < 17) {
+      let dIdx = 0;
       significandLow = Long.fromNumber(digits[dIdx++]);
       significandHigh = new Long(0, 0);
 
@@ -459,7 +541,7 @@ export class Decimal128 extends BSONValue {
         significandLow = significandLow.add(Long.fromNumber(digits[dIdx]));
       }
     } else {
-      let dIdx = firstDigit;
+      let dIdx = 0;
       significandHigh = Long.fromNumber(digits[dIdx++]);
 
       for (; dIdx <= lastDigit - 17; dIdx++) {
@@ -539,7 +621,6 @@ export class Decimal128 extends BSONValue {
     // Return the new Decimal128
     return new Decimal128(buffer);
   }
-
   /** Create a string representation of the raw Decimal128 value */
   toString(): string {
     // Note: bits in this routine are referred to starting at 0,
