@@ -101,6 +101,7 @@ tasks:
       - func: fetch source
         vars:
           NODE_LTS_VERSION: 14
+          NPM_VERSION: 9
       - func: install dependencies
       - func: run tests
         vars:
@@ -112,6 +113,8 @@ tasks:
         vars:
           NODE_LTS_VERSION: 16
       - func: install dependencies
+        vars:
+          NPM_VERSION: 9
       - func: run tests
         vars:
           TEST_TARGET: node
