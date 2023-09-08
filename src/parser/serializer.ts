@@ -257,14 +257,18 @@ function serializeObjectId(buffer: Uint8Array, key: string, value: ObjectId, ind
   buffer[index++] = 0;
 
   // Write the objectId into the shared buffer
-  if (isUint8Array(value.id)) {
-    buffer.set(value.id.subarray(0, 12), index);
+  const idValue = value.id;
+
+  if (isUint8Array(idValue)) {
+    for (let i = 0; i < 12; i++) {
+      buffer[index++] = idValue[i];
+    }
   } else {
     throw new BSONError('object [' + JSON.stringify(value) + '] is not a valid ObjectId');
   }
 
   // Adjust index
-  return index + 12;
+  return index;
 }
 
 function serializeBuffer(buffer: Uint8Array, key: string, value: Uint8Array, index: number) {
