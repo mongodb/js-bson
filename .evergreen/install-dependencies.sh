@@ -2,6 +2,7 @@
 set -o errexit  # Exit the script with error if any of the commands fail
 
 NODE_LTS_VERSION=${NODE_LTS_VERSION:-14}
+NPM_VERSION=${NPM_VERSION:-latest}
 
 source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 
@@ -94,8 +95,7 @@ else
 fi
 
 if [[ $operating_system != "win" ]]; then
-  # Update npm to latest when we can
-  npm install --global npm@latest
+  npm install --global npm@$NPM_VERSION
   hash -r
 fi
 
