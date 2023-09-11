@@ -55,13 +55,8 @@ function normalize(cEJ) {
 
 const parseErrorForDecimal128 = scenario => {
   // TODO(NODE-3637): remove regex of skipped tests and and add errors to d128 parsing
-  const skipRegex = /dqbsr|Inexact/;
   for (const parseError of scenario.parseErrors) {
     it(parseError.description, function () {
-      if (skipRegex.test(parseError.description)) {
-        this.skip();
-      }
-
       expect(
         () => BSON.Decimal128.fromString(parseError.string),
         `Decimal.fromString('${parseError.string}') should throw`
