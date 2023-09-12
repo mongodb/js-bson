@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.5.0](https://github.com/mongodb/js-bson/compare/v5.4.0...v5.5.0) (2023-09-12)
+
+
+### Features
+
+* **NODE-5579:** add Decimal128.fromStringWithRounding() static method ([#621](https://github.com/mongodb/js-bson/issues/621)) ([70ca4fc](https://github.com/mongodb/js-bson/commit/70ca4fc3618fba6d265b00a377996bb6f7c757e5))
+
+
+### Bug Fixes
+
+* **NODE-5586:** Decimal128 fromString performs inexact rounding ([#620](https://github.com/mongodb/js-bson/issues/620)) ([63fb316](https://github.com/mongodb/js-bson/commit/63fb31640589057d6f3197401ece35fd88996e25))
+
 ## [5.4.0](https://github.com/mongodb/js-bson/compare/v5.3.0...v5.4.0) (2023-07-03)
 
 
