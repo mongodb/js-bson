@@ -358,7 +358,7 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
     doc != null &&
     typeof doc === 'object' &&
     typeof doc._bsontype === 'string' &&
-    doc[Symbol.for('@@mdb.bson.version')] !== BSON_MAJOR_VERSION
+    doc[Symbol.for('@@mdb.bson.version')] < BSON_MAJOR_VERSION
   ) {
     throw new BSONVersionError();
   } else if (isBSONType(doc)) {
