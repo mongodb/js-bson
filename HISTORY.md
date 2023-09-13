@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.1.0](https://github.com/mongodb/js-bson/compare/v6.0.0...v6.1.0) (2023-09-12)
+
+
+### Features
+
+* **NODE-5594:** add Decimal128.fromStringWithRounding() static method ([#617](https://github.com/mongodb/js-bson/issues/617)) ([6fee2d5](https://github.com/mongodb/js-bson/commit/6fee2d5829ba55af265405b5cc99d16610077d1c))
+
+
+### Bug Fixes
+
+* **NODE-5577:** improve ObjectId serialization by around 10% ([#614](https://github.com/mongodb/js-bson/issues/614)) ([81c8fa1](https://github.com/mongodb/js-bson/commit/81c8fa1857304634ce7d0b61ca22d0335e3b1fb7))
+
 ## [6.0.0](https://github.com/mongodb/js-bson/compare/v5.4.0...v6.0.0) (2023-08-24)
 
 
