@@ -60,9 +60,7 @@ export class BSONVersionError extends BSONError {
   }
 
   constructor() {
-    super(
-      `Unsupported BSON version, bson types must be from bson ${BSON_MAJOR_VERSION}.0 or later`
-    );
+    super(`Unsupported BSON version, bson types must be from bson ${BSON_MAJOR_VERSION}.x.x`);
   }
 }
 
