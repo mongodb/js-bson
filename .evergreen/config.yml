@@ -19,64 +19,71 @@ functions:
     - command: git.get_project
       params:
         directory: src
-    - command: shell.exec
-      params:
-        working_dir: src
-        script: |
-          # Get the current unique version of this checkout
-          if [ "${is_patch}" = "true" ]; then
-             CURRENT_VERSION=$(git describe)-patch-${version_id}
-          else
-             CURRENT_VERSION=latest
-          fi
-          export PROJECT_DIRECTORY="$(pwd)"
-
-          # get the latest version of node for given major version
-          NODE_VERSION=$(curl -sL nodejs.org/download/release/latest-v${NODE_MAJOR_VERSION}.x/SHASUMS256.txt -o - | head -n 1 | tr -s ' ' | cut -d' ' -f2 | cut -d- -f2 | cut -dv -f2)
-          echo "LATEST NODE ${NODE_MAJOR_VERSION}.x = $NODE_VERSION"
-
-          cat <<EOT > expansion.yml
-          CURRENT_VERSION: "$CURRENT_VERSION"
-          PROJECT_DIRECTORY: "$PROJECT_DIRECTORY"
-          NODE_VERSION: "$NODE_VERSION"
-          PREPARE_SHELL: |
-             set -o errexit
-             set -o xtrace
-             export PROJECT_DIRECTORY="$PROJECT_DIRECTORY"
-             export NODE_VERSION="$NODE_VERSION"
-          EOT
-          # See what we've done
-          cat expansion.yml
     - command: expansions.update
       params:
-        file: src/expansion.yml
-  install dependencies:
-    - command: shell.exec
+        updates:
+          - key: NODE_LTS_VERSION
+            value: ${NODE_LTS_VERSION}
+          - key: NPM_VERSION
+            value: ${NPM_VERSION}
+          - key: PROJECT_DIRECTORY
+            value: ${workdir}/src
+
+  build typescript:
+    - command: subprocess.exec
       type: setup
       params:
         working_dir: src
-        script: |
-          ${PREPARE_SHELL}
-          echo "NODE_VERSION=${NODE_VERSION}"
-          NODE_VERSION=${NODE_VERSION} ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+        binary: bash
+        env:
+          NODE_LTS_VERSION: "16"
+          NPM_VERSION: "9"
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        args:
+          - .evergreen/install-dependencies.sh
+    - command: subprocess.exec
+      type: setup
+      params:
+        working_dir: src
+        binary: rm
+        args:
+          - -rf
+          - node-artifacts
+          - src/node-artifacts
+
+  install dependencies:
+    - command: subprocess.exec
+      type: setup
+      params:
+        working_dir: src
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - .evergreen/install-dependencies.sh
+
   run tests:
-    - command: shell.exec
+    - command: subprocess.exec
       type: test
       params:
+        params:
         working_dir: src
-        script: |
-          ${PREPARE_SHELL}
-          echo "NODE_VERSION=${NODE_VERSION} TEST_TARGET=${TEST_TARGET}"
-          NODE_VERSION=${NODE_VERSION} ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh ${TEST_TARGET}
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - .evergreen/run-tests.sh
+          - ${TEST_TARGET}
+
   run checks:
-    - command: shell.exec
+    - command: subprocess.exec
       type: test
       params:
+        params:
         working_dir: src
-        script: |
-          ${PREPARE_SHELL}
-          echo "NODE_VERSION=${NODE_VERSION} TEST_TARGET=${TEST_TARGET}"
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-checks.sh
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - .evergreen/run-checks.sh
+
   run typescript:
     - command: subprocess.exec
       type: test
@@ -97,7 +104,9 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 6
+          NODE_LTS_VERSION: 6
+          NPM_VERSION: 6
+      - func: build typescript
       - func: install dependencies
       - func: run tests
         vars:
@@ -107,7 +116,9 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_MAJOR_VERSION: 8
+          NODE_LTS_VERSION: 8
+          NPM_VERSION: 6
+      - func: build typescript
       - func: install dependencies
       - func: run tests
         vars:
@@ -118,6 +129,7 @@ tasks:
       - func: fetch source
         vars:
           NODE_MAJOR_VERSION: 10
+          NPM_VERSION: 7
       - func: install dependencies
       - func: run tests
         vars:
@@ -128,6 +140,7 @@ tasks:
       - func: fetch source
         vars:
           NODE_MAJOR_VERSION: 12
+          NPM_VERSION: 8
       - func: install dependencies
       - func: run tests
         vars:
@@ -138,6 +151,7 @@ tasks:
       - func: fetch source
         vars:
           NODE_MAJOR_VERSION: 14
+          NPM_VERSION: 9
       - func: install dependencies
       - func: run tests
         vars:
@@ -148,6 +162,7 @@ tasks:
       - func: fetch source
         vars:
           NODE_MAJOR_VERSION: 16
+          NPM_VERSION: 9
       - func: install dependencies
       - func: run tests
         vars:
@@ -158,6 +173,7 @@ tasks:
       - func: fetch source
         vars:
           NODE_MAJOR_VERSION: 16
+          NPM_VERSION: 9
       - func: install dependencies
       - func: run tests
         vars:
@@ -169,6 +185,7 @@ tasks:
       - func: fetch source
         vars:
           NODE_MAJOR_VERSION: 16
+          NPM_VERSION: 9
       - func: install dependencies
       - func: run checks
   - name: check-typescript-oldest
@@ -176,6 +193,7 @@ tasks:
       - func: fetch source
         vars:
           NODE_MAJOR_VERSION: 16
+          NPM_VERSION: 9
       - func: install dependencies
       - func: "run typescript"
         vars:
@@ -186,6 +204,7 @@ tasks:
       - func: fetch source
         vars:
           NODE_MAJOR_VERSION: 16
+          NPM_VERSION: 9
       - func: install dependencies
       - func: "run typescript"
         vars:
@@ -196,6 +215,7 @@ tasks:
       - func: fetch source
         vars:
           NODE_MAJOR_VERSION: 16
+          NPM_VERSION: 9
       - func: install dependencies
       - func: "run typescript"
         vars:
