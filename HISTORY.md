@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.5.1](https://github.com/mongodb/js-bson/compare/v5.5.0...v5.5.1) (2023-09-28)
+
+
+### Bug Fixes
+
+* **NODE-5641:** BsonVersionError improve message clarity ([#630](https://github.com/mongodb/js-bson/issues/630)) ([d1ca218](https://github.com/mongodb/js-bson/commit/d1ca218ab15583beaeea0a365f1ffe833996ce5c))
+
 ## [5.5.0](https://github.com/mongodb/js-bson/compare/v5.4.0...v5.5.0) (2023-09-13)
 
 
