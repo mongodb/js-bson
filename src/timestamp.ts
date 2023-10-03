@@ -1,6 +1,7 @@
 import { BSONError } from './error';
 import type { Int32 } from './int_32';
 import { Long } from './long';
+import { getStylizeFunction } from './parser/utils';
 
 /** @public */
 export type TimestampOverrides = '_bsontype' | 'toExtendedJSON' | 'fromExtendedJSON' | 'inspect';
@@ -142,11 +143,14 @@ export class Timestamp extends LongWithoutOverridesClass {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
+  [Symbol.for('nodejs.util.inspect.custom')](depth?: number, options?: unknown): string {
+    return this.inspect(depth, options);
   }
 
-  inspect(): string {
-    return `new Timestamp({ t: ${this.getHighBits()}, i: ${this.getLowBits()} })`;
+  inspect(depth?: number, options?: unknown): string {
+    const stylize = getStylizeFunction(options);
+    const t = stylize(`${this.getHighBits()}`, 'number');
+    const i = stylize(`${this.getLowBits()}`, 'number');
+    return `new Timestamp({ t: ${t}, i: ${i} })`;
   }
 }

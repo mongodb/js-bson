@@ -1,5 +1,6 @@
 import { BSONValue } from './bson_value';
 import { BSONError } from './error';
+import { getStylizeFunction } from './parser/utils';
 import { BSONDataView, ByteUtils } from './utils/byte_utils';
 
 // Regular expression that checks for hex value
@@ -296,11 +297,12 @@ export class ObjectId extends BSONValue {
    * @returns return the 24 character hex string representation.
    * @internal
    */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
+  [Symbol.for('nodejs.util.inspect.custom')](depth?: number, options?: unknown): string {
+    return this.inspect(depth, options);
   }
 
-  inspect(): string {
-    return `new ObjectId("${this.toHexString()}")`;
+  inspect(depth?: number, options?: unknown): string {
+    const stylize = getStylizeFunction(options);
+    return `new ObjectId(${stylize(`"${this.toHexString()}"`, 'string')})`;
   }
 }

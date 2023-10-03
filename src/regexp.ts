@@ -1,6 +1,7 @@
 import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
+import { getStylizeFunction } from './parser/utils';
 
 function alphabetize(str: string): string {
   return str.split('').sort().join('');
@@ -104,11 +105,14 @@ export class BSONRegExp extends BSONValue {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
+  [Symbol.for('nodejs.util.inspect.custom')](depth?: number, options?: unknown): string {
+    return this.inspect(depth, options);
   }
 
-  inspect(): string {
-    return `new BSONRegExp(${JSON.stringify(this.pattern)}, ${JSON.stringify(this.options)})`;
+  inspect(depth?: number, options?: unknown): string {
+    const stylize = getStylizeFunction(options);
+    const pattern = stylize(JSON.stringify(this.pattern), 'regexp');
+    const flags = stylize(JSON.stringify(this.options), 'regexp');
+    return `new BSONRegExp(${pattern}, ${flags})`;
   }
 }

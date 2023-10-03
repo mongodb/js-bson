@@ -1,5 +1,6 @@
 import { BSONValue } from './bson_value';
 import type { EJSONOptions } from './extended_json';
+import { getStylizeFunction } from './parser/utils';
 
 /** @public */
 export interface DoubleExtended {
@@ -72,12 +73,13 @@ export class Double extends BSONValue {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
+  [Symbol.for('nodejs.util.inspect.custom')](depth?: number, options?: unknown): string {
+    return this.inspect(depth, options);
   }
 
-  inspect(): string {
+  inspect(depth?: number, options?: unknown): string {
     const eJSON = this.toExtendedJSON() as DoubleExtended;
-    return `new Double(${eJSON.$numberDouble})`;
+    const stylize = getStylizeFunction(options);
+    return `new Double(${stylize(eJSON.$numberDouble, 'number')})`;
   }
 }

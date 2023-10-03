@@ -1,7 +1,7 @@
 import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import { Long } from './long';
-import { isUint8Array } from './parser/utils';
+import { getStylizeFunction, isUint8Array } from './parser/utils';
 import { ByteUtils } from './utils/byte_utils';
 
 const PARSE_STRING_REGEXP = /^(\+|-)?(\d+|(\d*\.\d*))?(E|e)?([-+])?(\d+)?$/;
@@ -848,11 +848,13 @@ export class Decimal128 extends BSONValue {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
+  [Symbol.for('nodejs.util.inspect.custom')](depth?: number, options?: unknown): string {
+    return this.inspect(depth, options);
   }
 
-  inspect(): string {
-    return `new Decimal128("${this.toString()}")`;
+  inspect(depth?: number, options?: unknown): string {
+    const stylize = getStylizeFunction(options);
+    const d128string = stylize(`"${this.toString()}"`, 'string');
+    return `new Decimal128(${d128string})`;
   }
 }

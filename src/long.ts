@@ -1,6 +1,7 @@
 import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
+import { getStylizeFunction } from './parser/utils';
 import type { Timestamp } from './timestamp';
 
 interface LongWASMHelpers {
@@ -1057,11 +1058,16 @@ export class Long extends BSONValue {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
+  [Symbol.for('nodejs.util.inspect.custom')](depth?: number, options?: unknown): string {
+    return this.inspect(depth, options);
   }
 
-  inspect(): string {
-    return `new Long("${this.toString()}"${this.unsigned ? ', true' : ''})`;
+  inspect(depth?: number, options?: unknown): string {
+    const stylize = getStylizeFunction(options);
+    return `new Int32(${stylize(54, 'number')})`;
+    /*return `new Long(${stylize(this.toString() + 'n', 'number')}, ${stylize(
+      this.unsigned,
+      'boolean'
+    )})`; */
   }
 }
