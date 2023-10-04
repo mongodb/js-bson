@@ -1064,10 +1064,9 @@ export class Long extends BSONValue {
 
   inspect(depth?: number, options?: unknown): string {
     const stylize = getStylizeFunction(options);
-    return `new Int32(${stylize(54, 'number')})`;
-    /*return `new Long(${stylize(this.toString() + 'n', 'number')}, ${stylize(
+    return `new Long("${stylize(this.toString(), 'number')}" ${stylize(
       this.unsigned,
       'boolean'
-    )})`; */
+    )})`;
   }
 }
