@@ -53,3 +53,6 @@ console.log({
   maxkey: new MaxKey(),
   minkey: new MinKey()
 });
+
+const oid = new ObjectId('00'.repeat(12));
+console.log(oid);

@@ -1070,6 +1070,6 @@ export class Long extends BSONValue {
     inspect ??= getBasicInspectParameterFn();
     const longVal = inspect(this.toString(), options);
     const unsignedVal = this.unsigned ? `', ' + ${inspect(this.unsigned, options)}` : '';
-    return `${longVal} + ${unsignedVal}`;
+    return `new Long(${longVal}${unsignedVal})`;
   }
 }
