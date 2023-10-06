@@ -1,4 +1,9 @@
-import { getStylizeFunction, isAnyArrayBuffer, isUint8Array } from './parser/utils';
+import {
+  type InspectParameterFn,
+  getBasicInspectParameterFn,
+  isAnyArrayBuffer,
+  isUint8Array
+} from './parser/utils';
 import type { EJSONOptions } from './extended_json';
 import { BSONError } from './error';
 import { BSON_BINARY_SUBTYPE_UUID_NEW } from './constants';
@@ -264,15 +269,20 @@ export class Binary extends BSONValue {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](depth?: number, options?: unknown): string {  
-    return this.inspect(depth, options);
+  [Symbol.for('nodejs.util.inspect.custom')](
+    depth?: number,
+    options?: unknown,
+    inspect?: InspectParameterFn
+  ): string {
+    return this.inspect(depth, options, inspect);
   }
 
-  inspect(depth?: number, options?: unknown): string {
-    const stylize = getStylizeFunction(options);
+  inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
+    inspect ??= getBasicInspectParameterFn();
     const base64 = ByteUtils.toBase64(this.buffer.subarray(0, this.position));
-    const base64Arg = stylize(`"${base64}"`, 'string');
-    return `Binary.createFromBase64(${base64Arg}, ${this.sub_type})`;
+    const base64Arg = inspect(base64, options);
+    const subTypeArg = inspect(this.sub_type, options);
+    return `Binary.createFromBase64(${base64Arg}, ${subTypeArg})`;
   }
 }
 
@@ -467,12 +477,16 @@ export class UUID extends Binary {
    * @returns return the 36 character hex string representation.
    * @internal
    */
-  [Symbol.for('nodejs.util.inspect.custom')](depth?: number, options?: unknown): string {
-    return this.inspect(depth, options);
+  [Symbol.for('nodejs.util.inspect.custom')](
+    depth?: number,
+    options?: unknown,
+    inspect?: InspectParameterFn
+  ): string {
+    return this.inspect(depth, options, inspect);
   }
 
-  inspect(depth?: number, options?: unknown): string {
-    const stylize = getStylizeFunction(options);
-    return `new UUID(${stylize(`"${this.toHexString()}"`, 'string')})`;
+  inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
+    inspect ??= getBasicInspectParameterFn();
+    return `new UUID(${inspect(this.toHexString(), options)})`;
   }
 }

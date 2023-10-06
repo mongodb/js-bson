@@ -32,18 +32,20 @@ export function isDate(d: unknown): d is Date {
 export type StylizeFunction = (x: unknown, style: string) => string;
 /** @internal */
 export type InspectParameterFn = (x: unknown, options: unknown) => string;
+export function getBasicInspectParameterFn(): InspectParameterFn {
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  return v => `${v}`;
+}
 export function getStylizeFunction(options?: unknown): StylizeFunction {
-  const stylizeExists = 
-    options != null && 
-    typeof options === 'object' && 
-    'stylize' in options && 
+  const stylizeExists =
+    options != null &&
+    typeof options === 'object' &&
+    'stylize' in options &&
     typeof options.stylize === 'function';
-  
+
   if (stylizeExists) {
-    return options.stylize as 
-    (x: unknown, style: string) => string; 
+    return options.stylize as (x: unknown, style: string) => string;
   } else {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    return v => `${v}`;
-  } 
+    return getBasicInspectParameterFn();
+  }
 }

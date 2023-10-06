@@ -111,8 +111,8 @@ export class BSONRegExp extends BSONValue {
 
   inspect(depth?: number, options?: unknown): string {
     const stylize = getStylizeFunction(options);
-    const pattern = stylize(JSON.stringify(this.pattern), 'regexp');
-    const flags = stylize(JSON.stringify(this.options), 'regexp');
+    const pattern = stylize(`'${this.pattern}'`, 'regexp');
+    const flags = stylize(`${this.options}'`, 'regexp');
     return `new BSONRegExp(${pattern}, ${flags})`;
   }
 }

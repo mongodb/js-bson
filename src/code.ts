@@ -1,6 +1,6 @@
-import { getStylizeFunction } from './parser/utils';
 import type { Document } from './bson';
 import { BSONValue } from './bson_value';
+import { type InspectParameterFn, getBasicInspectParameterFn } from './parser/utils';
 
 /** @public */
 export interface CodeExtended {
@@ -60,22 +60,19 @@ export class Code extends BSONValue {
   [Symbol.for('nodejs.util.inspect.custom')](
     depth?: number,
     options?: unknown,
-    inspect?: (value: unknown, options: unknown) => string
+    inspect?: InspectParameterFn
   ): string {
     return this.inspect(depth, options, inspect);
   }
 
-  inspect(
-    depth?: number,
-    options?: unknown,
-    inspect?: (value: unknown, options: unknown) => string
-  ): string {
-    inspect ??= v => JSON.stringify(v);
+  inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
+    inspect ??= getBasicInspectParameterFn();
     let parametersString = inspect(this.code, options);
     const multiLineFn = parametersString.includes('\n');
     if (this.scope != null) {
       parametersString += `,${multiLineFn ? '\n' : ' '}${inspect(this.scope, options)}`;
     }
-    return `new Code(${multiLineFn ? '\n' : ''}${parametersString}${multiLineFn ? '\n' : ''})`;
+    const endingNewline = multiLineFn && this.scope === null;
+    return `new Code(${multiLineFn ? '\n' : ''}${parametersString}${endingNewline ? '\n' : ''})`;
   }
 }

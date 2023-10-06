@@ -66,15 +66,22 @@ describe('BSON Type classes common interfaces', () => {
       it(`${name} inherits from BSONValue`, () => {
         expect(creator()).to.be.instanceOf(BSONValue);
       });
-      context.only(`${name}[Symbol.for('nodejs.util.inspect.custom')] ${(name === 'MinKey' || name === 'MaxKey') ? 'does not support' : 'supports'} color`, () => {
-        it(`returns string with ${(name === 'MinKey' || name === 'MaxKey') ? 'no ' : ''}ANSI colors`, () => {
-          if (name !== 'MinKey' && name !== 'MaxKey') {
-            const value = creator();
-            const string = inspect(value, { colors: true });
-            expect(string).include('\x1b');
-          }
-        });
-      });
+      context(
+        `${name}[Symbol.for('nodejs.util.inspect.custom')] ${
+          name === 'MinKey' || name === 'MaxKey' ? 'does not support' : 'supports'
+        } color`,
+        () => {
+          it(`returns string with ${
+            name === 'MinKey' || name === 'MaxKey' ? 'no ' : ''
+          }ANSI colors`, () => {
+            if (name !== 'MinKey' && name !== 'MaxKey') {
+              const value = creator();
+              const string = inspect(value, { colors: true });
+              expect(string).include('\x1b');
+            }
+          });
+        }
+      );
     }
   });
 

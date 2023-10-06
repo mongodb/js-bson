@@ -1,8 +1,8 @@
-import { getStylizeFunction, InspectParameterFn } from './parser/utils';
 import type { Document } from './bson';
 import { BSONValue } from './bson_value';
 import type { EJSONOptions } from './extended_json';
 import type { ObjectId } from './objectid';
+import { type InspectParameterFn, getBasicInspectParameterFn } from './parser/utils';
 
 /** @public */
 export interface DBRefLike {
@@ -122,13 +122,12 @@ export class DBRef extends BSONValue {
   }
 
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
-    const stylize = getStylizeFunction(options);
-    inspect ??= v => JSON.stringify(v);
+    inspect ??= getBasicInspectParameterFn();
 
-    const args = [stylize(`"${this.namespace}"`, 'string'), this.oid.inspect(depth, options)];
+    const args = [inspect(this.namespace, options), inspect(this.oid, options)];
 
     if (this.db) {
-      args.push(stylize(`"${this.db}"`, 'string'));
+      args.push(inspect(this.db, options));
     }
 
     if (Object.keys(this.fields).length > 0) {

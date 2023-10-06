@@ -1,5 +1,5 @@
 import { BSONValue } from './bson_value';
-import { getStylizeFunction } from './parser/utils';
+import { type InspectParameterFn, getBasicInspectParameterFn } from './parser/utils';
 
 /** @public */
 export interface BSONSymbolExtended {
@@ -49,12 +49,16 @@ export class BSONSymbol extends BSONValue {
   }
 
   /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](depth?: number, options?: unknown): string {
-    return this.inspect(depth, options);
+  [Symbol.for('nodejs.util.inspect.custom')](
+    depth?: number,
+    options?: unknown,
+    inspect?: InspectParameterFn
+  ): string {
+    return this.inspect(depth, options, inspect);
   }
 
-  inspect(depth?: number, options?: unknown): string {
-    const stylize = getStylizeFunction(options);
-    return `new BSONSymbol(${stylize(`"${this.value}"`, 'string')})`;
+  inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
+    inspect ??= getBasicInspectParameterFn();
+    return `new BSONSymbol(${inspect(this.value, options)})`;
   }
 }

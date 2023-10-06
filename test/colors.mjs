@@ -25,19 +25,25 @@ console.log({
       console.log('hello!');
     } while (Math.random() > 0.5);
   }),
-  code_w_scope: new Code(
+  c: new Code(
     function iLoveJavaScript() {
       do {
         console.log('hello!');
       } while (Math.random() > 0.5);
     },
-    { context: 'random looping!', reference: Long.fromString('2345') }
+    { context: 'random looping!', reference: Long.fromString('2345'), my_map: {a:1}}
+  ),
+  c2: new Code (
+    function iLoveJavaScript() { return `js`; },
+    { context: 'random looping!', reference: Long.fromString('2345'), my_map: {a:1}}
   ),
   dbref: new DBRef('collection', new ObjectId('00'.repeat(12))),
   dbref_db: new DBRef('collection', new ObjectId('00'.repeat(12)), 'db'),
   dbref_db_fields: new DBRef('collection', new ObjectId('00'.repeat(12)), 'db', { a: 1 }),
   decimal128: new Decimal128('1.353e34'),
   double: new Double(2.354),
+  double2: new Double(2),
+  double3: new Double(-0),
   int32: new Int32('4577'),
   long: new Long(-12442),
   objectid: new ObjectId('00'.repeat(12)),
