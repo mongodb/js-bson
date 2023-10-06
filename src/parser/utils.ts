@@ -30,7 +30,6 @@ export function isDate(d: unknown): d is Date {
 
 /** @internal */
 export type StylizeFunction = (x: unknown, style: string) => string;
-/** @internal */
 export type InspectParameterFn = (x: unknown, options: unknown) => string;
 export function getBasicInspectParameterFn(): InspectParameterFn {
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
