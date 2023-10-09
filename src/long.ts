@@ -1,7 +1,7 @@
 import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
-import { type InspectParameterFn, getBasicInspectParameterFn } from './parser/utils';
+import { type InspectParameterFn, basicInspectParameterFn } from './parser/utils';
 import type { Timestamp } from './timestamp';
 
 interface LongWASMHelpers {
@@ -1057,17 +1057,8 @@ export class Long extends BSONValue {
     return longResult;
   }
 
-  /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](
-    depth?: number,
-    options?: unknown,
-    inspect?: InspectParameterFn
-  ): string {
-    return this.inspect(depth, options, inspect);
-  }
-
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
-    inspect ??= getBasicInspectParameterFn();
+    inspect ??= basicInspectParameterFn;
     const longVal = inspect(this.toString(), options);
     const unsignedVal = this.unsigned ? `, ${inspect(this.unsigned, options)}` : '';
     return `new Long(${longVal}${unsignedVal})`;

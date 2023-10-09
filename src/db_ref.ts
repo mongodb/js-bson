@@ -2,7 +2,7 @@ import type { Document } from './bson';
 import { BSONValue } from './bson_value';
 import type { EJSONOptions } from './extended_json';
 import type { ObjectId } from './objectid';
-import { type InspectParameterFn, getBasicInspectParameterFn } from './parser/utils';
+import { type InspectParameterFn, basicInspectParameterFn } from './parser/utils';
 
 /** @public */
 export interface DBRefLike {
@@ -112,18 +112,9 @@ export class DBRef extends BSONValue {
     return new DBRef(doc.$ref, doc.$id, doc.$db, copy);
   }
 
-  /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](
-    depth?: number,
-    options?: unknown,
-    inspect?: InspectParameterFn
-  ): string {
-    return this.inspect(depth, options, inspect);
-  }
-
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
     const addQuotes = inspect ? false : true;
-    inspect ??= getBasicInspectParameterFn();
+    inspect ??= basicInspectParameterFn;
 
     const namespaceArg = addQuotes
       ? `'${inspect(this.namespace, options)}'`

@@ -1,6 +1,6 @@
 import { BSONValue } from './bson_value';
 import type { EJSONOptions } from './extended_json';
-import { type InspectParameterFn, getBasicInspectParameterFn } from './parser/utils';
+import { type InspectParameterFn, basicInspectParameterFn } from './parser/utils';
 
 /** @public */
 export interface Int32Extended {
@@ -60,17 +60,8 @@ export class Int32 extends BSONValue {
     return options && options.relaxed ? parseInt(doc.$numberInt, 10) : new Int32(doc.$numberInt);
   }
 
-  /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](
-    depth?: number,
-    options?: unknown,
-    inspect?: InspectParameterFn
-  ): string {
-    return this.inspect(depth, options, inspect);
-  }
-
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
-    inspect ??= getBasicInspectParameterFn();
+    inspect ??= basicInspectParameterFn;
     return `new Int32(${inspect(this.value, options)})`;
   }
 }

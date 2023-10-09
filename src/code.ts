@@ -1,6 +1,6 @@
 import type { Document } from './bson';
 import { BSONValue } from './bson_value';
-import { type InspectParameterFn, getBasicInspectParameterFn } from './parser/utils';
+import { type InspectParameterFn, basicInspectParameterFn } from './parser/utils';
 
 /** @public */
 export interface CodeExtended {
@@ -56,17 +56,8 @@ export class Code extends BSONValue {
     return new Code(doc.$code, doc.$scope);
   }
 
-  /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](
-    depth?: number,
-    options?: unknown,
-    inspect?: InspectParameterFn
-  ): string {
-    return this.inspect(depth, options, inspect);
-  }
-
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
-    inspect ??= getBasicInspectParameterFn();
+    inspect ??= basicInspectParameterFn;
     let parametersString = inspect(this.code, options);
     const multiLineFn = parametersString.includes('\n');
     if (this.scope != null) {

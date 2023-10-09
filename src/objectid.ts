@@ -1,6 +1,6 @@
 import { BSONValue } from './bson_value';
 import { BSONError } from './error';
-import { type InspectParameterFn, getBasicInspectParameterFn } from './parser/utils';
+import { type InspectParameterFn, basicInspectParameterFn } from './parser/utils';
 import { BSONDataView, ByteUtils } from './utils/byte_utils';
 
 // Regular expression that checks for hex value
@@ -295,19 +295,10 @@ export class ObjectId extends BSONValue {
    * Converts to a string representation of this Id.
    *
    * @returns return the 24 character hex string representation.
-   * @internal
    */
-  [Symbol.for('nodejs.util.inspect.custom')](
-    depth?: number,
-    options?: unknown,
-    inspect?: InspectParameterFn
-  ): string {
-    return this.inspect(depth, options, inspect);
-  }
-
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
     const addQuotes = inspect ? false : true;
-    inspect ??= getBasicInspectParameterFn();
+    inspect ??= basicInspectParameterFn;
     if (addQuotes) {
       return `new ObjectId('${inspect(this.toHexString(), options)}')`;
     }

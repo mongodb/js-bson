@@ -1,4 +1,5 @@
 import { BSON_MAJOR_VERSION } from './constants';
+import { type InspectParameterFn } from './parser/utils';
 
 /** @public */
 export abstract class BSONValue {
@@ -10,8 +11,16 @@ export abstract class BSONValue {
     return BSON_MAJOR_VERSION;
   }
 
+  [Symbol.for('nodejs.util.inspect.custom')](
+    depth?: number,
+    options?: unknown,
+    inspect?: InspectParameterFn
+  ): string {
+    return this.inspect(depth, options, inspect);
+  }
+
   /** @public */
-  public abstract inspect(): string;
+  public abstract inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string;
 
   /** @internal */
   abstract toExtendedJSON(): unknown;

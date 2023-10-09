@@ -1,5 +1,5 @@
 import { BSONValue } from './bson_value';
-import { type InspectParameterFn, getBasicInspectParameterFn } from './parser/utils';
+import { type InspectParameterFn, basicInspectParameterFn } from './parser/utils';
 
 /** @public */
 export interface BSONSymbolExtended {
@@ -59,7 +59,7 @@ export class BSONSymbol extends BSONValue {
 
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
     const addQuotes = inspect ? false : true;
-    inspect ??= getBasicInspectParameterFn();
+    inspect ??= basicInspectParameterFn;
     if (addQuotes) {
       return `new BSONSymbol('${inspect(this.value, options)}')`;
     }

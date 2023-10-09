@@ -25,11 +25,6 @@ export class MaxKey extends BSONValue {
     return new MaxKey();
   }
 
-  /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
-  }
-
   inspect(): string {
     return 'new MaxKey()';
   }

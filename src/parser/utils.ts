@@ -29,12 +29,11 @@ export function isDate(d: unknown): d is Date {
 }
 
 /** @internal */
-export type StylizeFunction = (x: unknown, style: string) => string;
+export type StylizeFunction = (x: string, style: string) => string;
 export type InspectParameterFn = (x: unknown, options: unknown) => string;
-export function getBasicInspectParameterFn(): InspectParameterFn {
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  return v => `${v}`;
-}
+// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+export const basicInspectParameterFn: InspectParameterFn = v => `${v}`;
+
 export function getStylizeFunction(options?: unknown): StylizeFunction {
   const stylizeExists =
     options != null &&
@@ -43,8 +42,8 @@ export function getStylizeFunction(options?: unknown): StylizeFunction {
     typeof options.stylize === 'function';
 
   if (stylizeExists) {
-    return options.stylize as (x: unknown, style: string) => string;
+    return options.stylize as StylizeFunction;
   } else {
-    return getBasicInspectParameterFn();
+    return basicInspectParameterFn;
   }
 }

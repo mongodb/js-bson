@@ -1,6 +1,6 @@
 import {
   type InspectParameterFn,
-  getBasicInspectParameterFn,
+  basicInspectParameterFn,
   isAnyArrayBuffer,
   isUint8Array
 } from './parser/utils';
@@ -268,18 +268,9 @@ export class Binary extends BSONValue {
     return type === BSON_BINARY_SUBTYPE_UUID_NEW ? new UUID(data) : new Binary(data, type);
   }
 
-  /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](
-    depth?: number,
-    options?: unknown,
-    inspect?: InspectParameterFn
-  ): string {
-    return this.inspect(depth, options, inspect);
-  }
-
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
     const addQuotes = inspect ? false : true;
-    inspect ??= getBasicInspectParameterFn();
+    inspect ??= basicInspectParameterFn;
     const base64 = ByteUtils.toBase64(this.buffer.subarray(0, this.position));
     const base64Arg = inspect(base64, options);
     const subTypeArg = inspect(this.sub_type, options);
@@ -479,19 +470,11 @@ export class UUID extends Binary {
    * Converts to a string representation of this Id.
    *
    * @returns return the 36 character hex string representation.
-   * @internal
+   *
    */
-  [Symbol.for('nodejs.util.inspect.custom')](
-    depth?: number,
-    options?: unknown,
-    inspect?: InspectParameterFn
-  ): string {
-    return this.inspect(depth, options, inspect);
-  }
-
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
     const addQuotes = inspect ? false : true;
-    inspect ??= getBasicInspectParameterFn();
+    inspect ??= basicInspectParameterFn;
     if (addQuotes) {
       return `new UUID('${inspect(this.toHexString(), options)}')`;
     }
