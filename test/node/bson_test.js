@@ -1827,7 +1827,7 @@ describe('BSON', function () {
      */
     it('Binary', function () {
       const binary = new Binary(Buffer.from('0123456789abcdef0123456789abcdef', 'hex'), 4);
-      expect(inspect(binary)).to.equal('Binary.createFromBase64("ASNFZ4mrze8BI0VniavN7w==", 4)');
+      expect(inspect(binary)).to.equal(`Binary.createFromBase64('ASNFZ4mrze8BI0VniavN7w==', 4)`);
     });
 
     /**
@@ -1835,7 +1835,7 @@ describe('BSON', function () {
      */
     it('BSONSymbol', function () {
       const symbol = new BSONSymbol('sym');
-      expect(inspect(symbol)).to.equal('new BSONSymbol("sym")');
+      expect(inspect(symbol)).to.equal(`new BSONSymbol('sym')`);
     });
 
     /**
@@ -1843,7 +1843,7 @@ describe('BSON', function () {
      */
     it('Code', function () {
       const code = new Code('this.a > i', { i: 1 });
-      expect(inspect(code)).to.equal('new Code("this.a > i", {"i":1})');
+      expect(inspect(code)).to.equal(`new Code('this.a > i', { i: 1 })`);
     });
 
     /**
@@ -1853,7 +1853,7 @@ describe('BSON', function () {
       const oid = new ObjectId('deadbeefdeadbeefdeadbeef');
       const dbref = new DBRef('namespace', oid, 'integration_tests_');
       expect(inspect(dbref)).to.equal(
-        'new DBRef("namespace", new ObjectId("deadbeefdeadbeefdeadbeef"), "integration_tests_")'
+        `new DBRef('namespace', new ObjectId('deadbeefdeadbeefdeadbeef'), 'integration_tests_')`
       );
     });
 
@@ -1862,7 +1862,7 @@ describe('BSON', function () {
      */
     it('Decimal128', function () {
       const dec = Decimal128.fromString('1.42');
-      expect(inspect(dec)).to.equal('new Decimal128("1.42")');
+      expect(inspect(dec)).to.equal(`new Decimal128('1.42')`);
     });
 
     /**
@@ -1886,10 +1886,10 @@ describe('BSON', function () {
      */
     it('Long', function () {
       const long = Long.fromString('42');
-      expect(inspect(long)).to.equal('new Long("42")');
+      expect(inspect(long)).to.equal(`new Long('42')`);
 
       const unsignedLong = Long.fromString('42', true);
-      expect(inspect(unsignedLong)).to.equal('new Long("42", true)');
+      expect(inspect(unsignedLong)).to.equal(`new Long('42', true)`);
     });
 
     /**

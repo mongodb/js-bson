@@ -44,7 +44,7 @@ describe('class BSONSymbol', () => {
   });
 
   it('prints re-evaluatable output for BSONSymbol that contains quotes', () => {
-    const input = new BSONSymbol('asdf"ghjk');
-    expect(inspect(input)).to.equal(String.raw`new BSONSymbol("asdf\"ghjk")`);
+    const input = new BSONSymbol(`asdf'ghjk`);
+    expect(inspect(input)).to.equal(String.raw`new BSONSymbol("asdf'ghjk")`);
   });
 });

@@ -857,8 +857,12 @@ export class Decimal128 extends BSONValue {
   }
 
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
+    const addQuotes = inspect ? false : true;
     inspect ??= getBasicInspectParameterFn();
     const d128string = inspect(this.toString(), options);
+    if (addQuotes) {
+      return `new Decimal128('${d128string}')`;
+    }
     return `new Decimal128(${d128string})`;
   }
 }

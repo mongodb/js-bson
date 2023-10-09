@@ -144,7 +144,7 @@ describe('UUID', () => {
 
   it('should correctly allow for node.js inspect to work with UUID', () => {
     const uuid = new UUID(UPPERCASE_DASH_SEPARATED_UUID_STRING);
-    expect(inspect(uuid)).to.equal(`new UUID("${LOWERCASE_DASH_SEPARATED_UUID_STRING}")`);
+    expect(inspect(uuid)).to.equal(`new UUID('${LOWERCASE_DASH_SEPARATED_UUID_STRING}')`);
   });
 
   describe('serialize', () => {

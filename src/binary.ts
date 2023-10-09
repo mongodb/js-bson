@@ -278,10 +278,14 @@ export class Binary extends BSONValue {
   }
 
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
+    const addQuotes = inspect ? false : true;
     inspect ??= getBasicInspectParameterFn();
     const base64 = ByteUtils.toBase64(this.buffer.subarray(0, this.position));
     const base64Arg = inspect(base64, options);
     const subTypeArg = inspect(this.sub_type, options);
+    if (addQuotes) {
+      return `Binary.createFromBase64('${base64Arg}', ${subTypeArg})`;
+    }
     return `Binary.createFromBase64(${base64Arg}, ${subTypeArg})`;
   }
 }
@@ -486,7 +490,11 @@ export class UUID extends Binary {
   }
 
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
+    const addQuotes = inspect ? false : true;
     inspect ??= getBasicInspectParameterFn();
+    if (addQuotes) {
+      return `new UUID('${inspect(this.toHexString(), options)}')`;
+    }
     return `new UUID(${inspect(this.toHexString(), options)})`;
   }
 }

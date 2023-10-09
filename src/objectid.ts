@@ -306,7 +306,11 @@ export class ObjectId extends BSONValue {
   }
 
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
+    const addQuotes = inspect ? false : true;
     inspect ??= getBasicInspectParameterFn();
+    if (addQuotes) {
+      return `new ObjectId('${inspect(this.toHexString(), options)}')`;
+    }
     return `new ObjectId(${inspect(this.toHexString(), options)})`;
   }
 }
