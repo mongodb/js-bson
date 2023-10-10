@@ -113,24 +113,17 @@ export class DBRef extends BSONValue {
   }
 
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
-    const addQuotes = inspect ? false : true;
+    const addQuotes = !inspect;
     inspect ??= basicInspectParameterFn;
 
-    const namespaceArg = addQuotes
-      ? `'${inspect(this.namespace, options)}'`
-      : inspect(this.namespace, options);
-    const objectIDArg = addQuotes
-      ? `new ObjectId('${inspect(this.oid, options)}')`
-      : inspect(this.oid, options);
-    const args = [namespaceArg, objectIDArg];
+    const args = [
+      inspect(this.namespace, options),
+      inspect(this.oid, options),
+      ...(this.db ? [inspect(this.db, options)] : []),
+      ...(Object.keys(this.fields).length > 0 ? [inspect(this.fields, options)] : [])
+     ].map(arg => addQuotes ? `'${arg}'` : arg);
 
-    if (this.db) {
-      args.push(addQuotes ? `'${inspect(this.db, options)}'` : inspect(this.db, options));
-    }
-
-    if (Object.keys(this.fields).length > 0) {
-      args.push(inspect(this.fields, options));
-    }
+     args[1] = addQuotes ? `new ObjectId(${args[1]})` : args[1];
 
     return `new DBRef(${args.join(', ')})`;
   }

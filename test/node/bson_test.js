@@ -1841,20 +1841,63 @@ describe('BSON', function () {
     /**
      * @ignore
      */
-    it('Code', function () {
-      const code = new Code('this.a > i', { i: 1 });
-      expect(inspect(code)).to.equal(`new Code('this.a > i', { i: 1 })`);
+    context('Code', function () {
+      it('when non-nested fields', function () {
+        const code = new Code('this.a > i', { i: 1 });
+        expect(inspect(code)).to.equal(`new Code('this.a > i', { i: 1 })`);
+      });
+      it('when non-nested fields', function () {
+        const code = new Code('this.a > i', { a: 1, b: { nest: 'mine' } });
+        expect(inspect(code)).to.equal(`new Code('this.a > i', { a: 1, b: { nest: 'mine' } })`);
+      });
+      it('when multiline code', function () {
+        const code = new Code(
+          function iLoveJavaScript() {
+            do {
+              console.log('hello!');
+            } while (Math.random() > 0.5);
+          },
+          { context: 'random looping!', reference: Long.fromString('2345'), my_map: { a: 1 } }
+        );
+        expect(inspect(code)).to.equal(
+          /* eslint-disable */
+`new Code(
+'function iLoveJavaScript() {\\n' +
+  '            do {\\n' +
+  "              console.log('hello!');\\n" +
+  '            } while (Math.random() > 0.5);\\n' +
+  '          }',
+{
+  context: 'random looping!',
+  reference: new Long('2345'),
+  my_map: { a: 1 }
+})`
+          /* eslint-enable */
+        );
+      });
     });
 
     /**
      * @ignore
      */
-    it('DBRef', function () {
-      const oid = new ObjectId('deadbeefdeadbeefdeadbeef');
-      const dbref = new DBRef('namespace', oid, 'integration_tests_');
-      expect(inspect(dbref)).to.equal(
-        `new DBRef('namespace', new ObjectId('deadbeefdeadbeefdeadbeef'), 'integration_tests_')`
-      );
+    context('DBRef', function () {
+      it('when non-nested fields', function () {
+        const oid = new ObjectId('deadbeefdeadbeefdeadbeef');
+        const dbref = new DBRef('namespace', oid, 'integration_tests_');
+        expect(inspect(dbref)).to.equal(
+          `new DBRef('namespace', new ObjectId('deadbeefdeadbeefdeadbeef'), 'integration_tests_')`
+        );
+      });
+      it('when nested fields', function () {
+        const oid = new ObjectId('deadbeefdeadbeefdeadbeef');
+        const dbref = new DBRef('namespace', oid, 'integration_tests_', {
+          a: 1,
+          b: { nest: 'mine' }
+        });
+        expect(inspect(dbref)).to.equal(
+          `new DBRef('namespace', new ObjectId('deadbeefdeadbeefdeadbeef'), 'integration_tests_', { a: 1, b: { nest: 'mine' } })`
+        );
+      });
     });
 
     /**

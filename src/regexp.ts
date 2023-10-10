@@ -104,11 +104,6 @@ export class BSONRegExp extends BSONValue {
     throw new BSONError(`Unexpected BSONRegExp EJSON object form: ${JSON.stringify(doc)}`);
   }
 
-   /** @internal */
-   [Symbol.for('nodejs.util.inspect.custom')](depth?: number, options?: unknown): string {
-    return this.inspect(depth, options);
-  }
-
   inspect(depth?: number, options?: unknown): string {
     const stylize = getStylizeFunction(options);
     const pattern = stylize(`'${this.pattern}'`, 'regexp');

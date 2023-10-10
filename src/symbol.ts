@@ -58,7 +58,7 @@ export class BSONSymbol extends BSONValue {
   }
 
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
-    const addQuotes = inspect ? false : true;
+    const addQuotes = !inspect;
     inspect ??= basicInspectParameterFn;
     if (addQuotes) {
       return `new BSONSymbol('${inspect(this.value, options)}')`;

@@ -269,7 +269,7 @@ export class Binary extends BSONValue {
   }
 
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
-    const addQuotes = inspect ? false : true;
+    const addQuotes = !inspect;
     inspect ??= basicInspectParameterFn;
     const base64 = ByteUtils.toBase64(this.buffer.subarray(0, this.position));
     const base64Arg = inspect(base64, options);
@@ -473,7 +473,7 @@ export class UUID extends Binary {
    *
    */
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
-    const addQuotes = inspect ? false : true;
+    const addQuotes = !inspect;
     inspect ??= basicInspectParameterFn;
     if (addQuotes) {
       return `new UUID('${inspect(this.toHexString(), options)}')`;

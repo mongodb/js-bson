@@ -297,7 +297,7 @@ export class ObjectId extends BSONValue {
    * @returns return the 24 character hex string representation.
    */
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
-    const addQuotes = inspect ? false : true;
+    const addQuotes = !inspect;
     inspect ??= basicInspectParameterFn;
     if (addQuotes) {
       return `new ObjectId('${inspect(this.toHexString(), options)}')`;
