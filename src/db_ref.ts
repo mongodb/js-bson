@@ -121,9 +121,9 @@ export class DBRef extends BSONValue {
       inspect(this.oid, options),
       ...(this.db ? [inspect(this.db, options)] : []),
       ...(Object.keys(this.fields).length > 0 ? [inspect(this.fields, options)] : [])
-     ].map(arg => addQuotes ? `'${arg}'` : arg);
+    ].map(arg => (addQuotes ? `'${arg}'` : arg));
 
-     args[1] = addQuotes ? `new ObjectId(${args[1]})` : args[1];
+    args[1] = addQuotes ? `new ObjectId(${args[1]})` : args[1];
 
     return `new DBRef(${args.join(', ')})`;
   }
