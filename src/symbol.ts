@@ -48,15 +48,6 @@ export class BSONSymbol extends BSONValue {
     return new BSONSymbol(doc.$symbol);
   }
 
-  /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](
-    depth?: number,
-    options?: unknown,
-    inspect?: InspectParameterFn
-  ): string {
-    return this.inspect(depth, options, inspect);
-  }
-
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
     const addQuotes = !inspect;
     inspect ??= defaultInspect;
