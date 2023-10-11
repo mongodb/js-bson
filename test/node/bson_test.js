@@ -1842,15 +1842,15 @@ describe('BSON', function () {
      * @ignore
      */
     context('Code', function () {
-      it('when non-nested fields', function () {
+      it('when it contains non-nested fields', function () {
         const code = new Code('this.a > i', { i: 1 });
         expect(inspect(code)).to.equal(`new Code('this.a > i', { i: 1 })`);
       });
-      it('when non-nested fields', function () {
+      it('when it contains nested fields', function () {
         const code = new Code('this.a > i', { a: 1, b: { nest: 'mine' } });
         expect(inspect(code)).to.equal(`new Code('this.a > i', { a: 1, b: { nest: 'mine' } })`);
       });
-      it('when multiline code', function () {
+      it('when it contains multiline code', function () {
         const code = new Code(
           function iLoveJavaScript() {
             do {
@@ -1881,14 +1881,14 @@ describe('BSON', function () {
      * @ignore
      */
     context('DBRef', function () {
-      it('when non-nested fields', function () {
+      it('when it contains non-nested fields', function () {
         const oid = new ObjectId('deadbeefdeadbeefdeadbeef');
         const dbref = new DBRef('namespace', oid, 'integration_tests_');
         expect(inspect(dbref)).to.equal(
           `new DBRef('namespace', new ObjectId('deadbeefdeadbeefdeadbeef'), 'integration_tests_')`
         );
       });
-      it('when nested fields', function () {
+      it('when it contains nested fields', function () {
         const oid = new ObjectId('deadbeefdeadbeefdeadbeef');
         const dbref = new DBRef('namespace', oid, 'integration_tests_', {
           a: 1,
