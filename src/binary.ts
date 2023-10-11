@@ -1,6 +1,6 @@
 import {
   type InspectParameterFn,
-  basicInspectParameterFn,
+  defaultInspect,
   isAnyArrayBuffer,
   isUint8Array
 } from './parser/utils';
@@ -270,7 +270,7 @@ export class Binary extends BSONValue {
 
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
     const addQuotes = !inspect;
-    inspect ??= basicInspectParameterFn;
+    inspect ??= defaultInspect;
     const base64 = ByteUtils.toBase64(this.buffer.subarray(0, this.position));
     const base64Arg = inspect(base64, options);
     const subTypeArg = inspect(this.sub_type, options);
@@ -474,7 +474,7 @@ export class UUID extends Binary {
    */
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
     const addQuotes = !inspect;
-    inspect ??= basicInspectParameterFn;
+    inspect ??= defaultInspect;
     if (addQuotes) {
       return `new UUID('${inspect(this.toHexString(), options)}')`;
     }

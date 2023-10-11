@@ -1,7 +1,7 @@
 import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
-import { getStylizeFunction } from './parser/utils';
+import { defaultInspect } from './parser/utils';
 
 function alphabetize(str: string): string {
   return str.split('').sort().join('');
@@ -109,5 +109,22 @@ export class BSONRegExp extends BSONValue {
     const pattern = stylize(`'${this.pattern}'`, 'regexp');
     const flags = stylize(`'${this.options}'`, 'regexp');
     return `new BSONRegExp(${pattern}, ${flags})`;
+  }
+}
+
+/** @internal */
+type StylizeFunction = (x: string, style: string) => string;
+/** @internal */
+function getStylizeFunction(options?: unknown): StylizeFunction {
+  const stylizeExists =
+    options != null &&
+    typeof options === 'object' &&
+    'stylize' in options &&
+    typeof options.stylize === 'function';
+
+  if (stylizeExists) {
+    return options.stylize as StylizeFunction;
+  } else {
+    return defaultInspect;
   }
 }

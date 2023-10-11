@@ -1,6 +1,6 @@
 import type { Document } from './bson';
 import { BSONValue } from './bson_value';
-import { type InspectParameterFn, basicInspectParameterFn } from './parser/utils';
+import { type InspectParameterFn, defaultInspect } from './parser/utils';
 
 /** @public */
 export interface CodeExtended {
@@ -57,7 +57,7 @@ export class Code extends BSONValue {
   }
 
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
-    inspect ??= basicInspectParameterFn;
+    inspect ??= defaultInspect;
     let parametersString = inspect(this.code, options);
     const multiLineFn = parametersString.includes('\n');
     if (this.scope != null) {

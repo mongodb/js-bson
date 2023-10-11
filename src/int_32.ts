@@ -1,6 +1,6 @@
 import { BSONValue } from './bson_value';
 import type { EJSONOptions } from './extended_json';
-import { type InspectParameterFn, basicInspectParameterFn } from './parser/utils';
+import { type InspectParameterFn, defaultInspect } from './parser/utils';
 
 /** @public */
 export interface Int32Extended {
@@ -61,7 +61,7 @@ export class Int32 extends BSONValue {
   }
 
   inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
-    inspect ??= basicInspectParameterFn;
+    inspect ??= defaultInspect;
     return `new Int32(${inspect(this.value, options)})`;
   }
 }

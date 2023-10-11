@@ -28,22 +28,6 @@ export function isDate(d: unknown): d is Date {
   return Object.prototype.toString.call(d) === '[object Date]';
 }
 
-/** @internal */
-export type StylizeFunction = (x: string, style: string) => string;
 export type InspectParameterFn = (x: unknown, options: unknown) => string;
 // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-export const basicInspectParameterFn: InspectParameterFn = v => `${v}`;
-
-export function getStylizeFunction(options?: unknown): StylizeFunction {
-  const stylizeExists =
-    options != null &&
-    typeof options === 'object' &&
-    'stylize' in options &&
-    typeof options.stylize === 'function';
-
-  if (stylizeExists) {
-    return options.stylize as StylizeFunction;
-  } else {
-    return basicInspectParameterFn;
-  }
-}
+export const defaultInspect: InspectParameterFn = v => `${v}`;
