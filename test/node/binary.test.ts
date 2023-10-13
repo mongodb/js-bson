@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import * as vm from 'node:vm';
 import { Binary, BSON } from '../register-bson';
+import * as util from 'node:util';
 
 describe('class Binary', () => {
   context('constructor()', () => {
@@ -82,25 +83,27 @@ describe('class Binary', () => {
 
   context('inspect()', () => {
     it(`when value is default returns "Binary.createFromBase64('', 0)"`, () => {
-      expect(new Binary().inspect()).to.equal(`Binary.createFromBase64('', 0)`);
+      expect(util.inspect(new Binary())).to.equal(`Binary.createFromBase64('', 0)`);
     });
 
     it(`when value is empty returns "Binary.createFromBase64('', 0)"`, () => {
-      expect(new Binary(new Uint8Array(0)).inspect()).to.equal(`Binary.createFromBase64('', 0)`);
+      expect(util.inspect(new Binary(new Uint8Array(0)))).to.equal(
+        `Binary.createFromBase64('', 0)`
+      );
     });
 
     it(`when value is default with a subtype returns "Binary.createFromBase64('', 35)"`, () => {
-      expect(new Binary(undefined, 0x23).inspect()).to.equal(`Binary.createFromBase64('', 35)`);
+      expect(util.inspect(new Binary(null, 0x23))).to.equal(`Binary.createFromBase64('', 35)`);
     });
 
     it(`when value is empty with a subtype returns "Binary.createFromBase64('', 35)"`, () => {
-      expect(new Binary(new Uint8Array(0), 0x23).inspect()).to.equal(
+      expect(util.inspect(new Binary(new Uint8Array(0), 0x23))).to.equal(
         `Binary.createFromBase64('', 35)`
       );
     });
 
-    it(`when value has utf8 "abcdef" encoded returns "Binary.createFromBase64('YWJjZGVm', 0)"`, () => {
-      expect(new Binary(Buffer.from('abcdef', 'utf8')).inspect()).to.equal(
+    it(`when value has utf8 "abcdef" encoded returns "Binary.createFromBase64("YWJjZGVm", 0)"`, () => {
+      expect(util.inspect(new Binary(Buffer.from('abcdef', 'utf8')))).to.equal(
         `Binary.createFromBase64('YWJjZGVm', 0)`
       );
     });

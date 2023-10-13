@@ -1,7 +1,7 @@
 import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
-import { defaultInspect } from './parser/utils';
+import { type InspectFn, defaultInspect, getStylizeFunction } from './parser/utils';
 
 function alphabetize(str: string): string {
   return str.split('').sort().join('');
@@ -104,27 +104,11 @@ export class BSONRegExp extends BSONValue {
     throw new BSONError(`Unexpected BSONRegExp EJSON object form: ${JSON.stringify(doc)}`);
   }
 
-  inspect(depth?: number, options?: unknown): string {
-    const stylize = getStylizeFunction(options);
-    const pattern = stylize(`'${this.pattern}'`, 'regexp');
-    const flags = stylize(`'${this.options}'`, 'regexp');
+  inspect(depth?: number, options?: unknown, inspect?: InspectFn): string {
+    const stylize = getStylizeFunction(options) ?? (v => v);
+    inspect ??= defaultInspect;
+    const pattern = stylize(inspect(this.pattern), 'regexp');
+    const flags = stylize(inspect(this.options), 'regexp');
     return `new BSONRegExp(${pattern}, ${flags})`;
-  }
-}
-
-/** @internal */
-type StylizeFunction = (x: string, style: string) => string;
-/** @internal */
-function getStylizeFunction(options?: unknown): StylizeFunction {
-  const stylizeExists =
-    options != null &&
-    typeof options === 'object' &&
-    'stylize' in options &&
-    typeof options.stylize === 'function';
-
-  if (stylizeExists) {
-    return options.stylize as StylizeFunction;
-  } else {
-    return defaultInspect;
   }
 }

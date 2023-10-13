@@ -2,7 +2,7 @@ import type { Document } from './bson';
 import { BSONValue } from './bson_value';
 import type { EJSONOptions } from './extended_json';
 import type { ObjectId } from './objectid';
-import { type InspectParameterFn, defaultInspect } from './parser/utils';
+import { type InspectFn, defaultInspect } from './parser/utils';
 
 /** @public */
 export interface DBRefLike {
@@ -112,8 +112,7 @@ export class DBRef extends BSONValue {
     return new DBRef(doc.$ref, doc.$id, doc.$db, copy);
   }
 
-  inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
-    const addQuotes = !inspect;
+  inspect(depth?: number, options?: unknown, inspect?: InspectFn): string {
     inspect ??= defaultInspect;
 
     const args = [
@@ -121,9 +120,9 @@ export class DBRef extends BSONValue {
       inspect(this.oid, options),
       ...(this.db ? [inspect(this.db, options)] : []),
       ...(Object.keys(this.fields).length > 0 ? [inspect(this.fields, options)] : [])
-    ].map(arg => (addQuotes ? `'${arg}'` : arg));
+    ];
 
-    args[1] = addQuotes ? `new ObjectId(${args[1]})` : args[1];
+    args[1] = inspect === defaultInspect ? `new ObjectId(${args[1]})` : args[1];
 
     return `new DBRef(${args.join(', ')})`;
   }

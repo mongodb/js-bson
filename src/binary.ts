@@ -1,9 +1,4 @@
-import {
-  type InspectParameterFn,
-  defaultInspect,
-  isAnyArrayBuffer,
-  isUint8Array
-} from './parser/utils';
+import { type InspectFn, defaultInspect, isAnyArrayBuffer, isUint8Array } from './parser/utils';
 import type { EJSONOptions } from './extended_json';
 import { BSONError } from './error';
 import { BSON_BINARY_SUBTYPE_UUID_NEW } from './constants';
@@ -268,15 +263,11 @@ export class Binary extends BSONValue {
     return type === BSON_BINARY_SUBTYPE_UUID_NEW ? new UUID(data) : new Binary(data, type);
   }
 
-  inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
-    const addQuotes = !inspect;
+  inspect(depth?: number, options?: unknown, inspect?: InspectFn): string {
     inspect ??= defaultInspect;
     const base64 = ByteUtils.toBase64(this.buffer.subarray(0, this.position));
     const base64Arg = inspect(base64, options);
     const subTypeArg = inspect(this.sub_type, options);
-    if (addQuotes) {
-      return `Binary.createFromBase64('${base64Arg}', ${subTypeArg})`;
-    }
     return `Binary.createFromBase64(${base64Arg}, ${subTypeArg})`;
   }
 }
@@ -472,12 +463,8 @@ export class UUID extends Binary {
    * @returns return the 36 character hex string representation.
    *
    */
-  inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
-    const addQuotes = !inspect;
+  inspect(depth?: number, options?: unknown, inspect?: InspectFn): string {
     inspect ??= defaultInspect;
-    if (addQuotes) {
-      return `new UUID('${inspect(this.toHexString(), options)}')`;
-    }
     return `new UUID(${inspect(this.toHexString(), options)})`;
   }
 }

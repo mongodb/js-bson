@@ -1,7 +1,7 @@
 import { BSONError } from './error';
 import type { Int32 } from './int_32';
 import { Long } from './long';
-import { type InspectParameterFn, defaultInspect } from './parser/utils';
+import { type InspectFn, defaultInspect } from './parser/utils';
 
 /** @public */
 export type TimestampOverrides = '_bsontype' | 'toExtendedJSON' | 'fromExtendedJSON' | 'inspect';
@@ -142,10 +142,10 @@ export class Timestamp extends LongWithoutOverridesClass {
     return new Timestamp({ t, i });
   }
 
-  inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
+  inspect(depth?: number, options?: unknown, inspect?: InspectFn): string {
     inspect ??= defaultInspect;
-    const t = inspect(this.getHighBits(), options);
-    const i = inspect(this.getLowBits(), options);
+    const t = inspect(this.high >>> 0, options);
+    const i = inspect(this.low >>> 0, options);
     return `new Timestamp({ t: ${t}, i: ${i} })`;
   }
 }

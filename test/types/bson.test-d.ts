@@ -19,7 +19,7 @@ import {
   Decimal128Extended,
   BSONValue
 } from '../../bson'; // import from generated bson.d.ts
-import type { InspectParameterFn } from '../../src/parser/utils';
+import type { InspectFn } from '../../src/parser/utils';
 
 expectType<() => UUID>(Binary.prototype.toUUID);
 expectType<() => Binary>(UUID.prototype.toBinary);
@@ -76,4 +76,4 @@ expectType<'Binary'>(UUID.prototype._bsontype)
 // Common BSONValue interface
 declare const bsonValue: BSONValue;
 expectType<string>(bsonValue._bsontype);
-expectType<(depth?: number | undefined, options?: unknown, inspect?: InspectParameterFn | undefined) => string>(bsonValue.inspect);
+expectType<(depth?: number | undefined, options?: unknown, inspect?: InspectFn | undefined) => string>(bsonValue.inspect);

@@ -1,6 +1,6 @@
 import { BSONValue } from './bson_value';
 import type { EJSONOptions } from './extended_json';
-import { type InspectParameterFn, defaultInspect } from './parser/utils';
+import { type InspectFn, defaultInspect } from './parser/utils';
 
 /** @public */
 export interface DoubleExtended {
@@ -72,8 +72,8 @@ export class Double extends BSONValue {
     return options && options.relaxed ? doubleValue : new Double(doubleValue);
   }
 
-  inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
+  inspect(depth?: number, options?: unknown, inspect?: InspectFn): string {
     inspect ??= defaultInspect;
-    return `new Double(${inspect(this.valueOf(), options)})`;
+    return `new Double(${inspect(this.value, options)})`;
   }
 }

@@ -1,6 +1,6 @@
 import { BSONValue } from './bson_value';
 import { BSONError } from './error';
-import { type InspectParameterFn, defaultInspect } from './parser/utils';
+import { type InspectFn, defaultInspect } from './parser/utils';
 import { BSONDataView, ByteUtils } from './utils/byte_utils';
 
 // Regular expression that checks for hex value
@@ -296,12 +296,8 @@ export class ObjectId extends BSONValue {
    *
    * @returns return the 24 character hex string representation.
    */
-  inspect(depth?: number, options?: unknown, inspect?: InspectParameterFn): string {
-    const addQuotes = !inspect;
+  inspect(depth?: number, options?: unknown, inspect?: InspectFn): string {
     inspect ??= defaultInspect;
-    if (addQuotes) {
-      return `new ObjectId('${inspect(this.toHexString(), options)}')`;
-    }
     return `new ObjectId(${inspect(this.toHexString(), options)})`;
   }
 }
