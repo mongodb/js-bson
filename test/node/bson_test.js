@@ -1827,7 +1827,7 @@ describe('BSON', function () {
      */
     it('Binary', function () {
       const binary = new Binary(Buffer.from('0123456789abcdef0123456789abcdef', 'hex'), 4);
-      expect(inspect(binary)).to.equal('Binary.createFromBase64("ASNFZ4mrze8BI0VniavN7w==", 4)');
+      expect(inspect(binary)).to.equal(`Binary.createFromBase64('ASNFZ4mrze8BI0VniavN7w==', 4)`);
     });
 
     /**
@@ -1835,26 +1835,69 @@ describe('BSON', function () {
      */
     it('BSONSymbol', function () {
       const symbol = new BSONSymbol('sym');
-      expect(inspect(symbol)).to.equal('new BSONSymbol("sym")');
+      expect(inspect(symbol)).to.equal(`new BSONSymbol('sym')`);
     });
 
     /**
      * @ignore
      */
-    it('Code', function () {
-      const code = new Code('this.a > i', { i: 1 });
-      expect(inspect(code)).to.equal('new Code("this.a > i", {"i":1})');
+    context('Code', function () {
+      it('when it contains non-nested fields', function () {
+        const code = new Code('this.a > i', { i: 1 });
+        expect(inspect(code)).to.equal(`new Code('this.a > i', { i: 1 })`);
+      });
+      it('when it contains nested fields', function () {
+        const code = new Code('this.a > i', { a: 1, b: { nest: 'mine' } });
+        expect(inspect(code)).to.equal(`new Code('this.a > i', { a: 1, b: { nest: 'mine' } })`);
+      });
+      it('when it contains multiline code', function () {
+        const code = new Code(
+          function iLoveJavaScript() {
+            do {
+              console.log('hello!');
+            } while (Math.random() > 0.5);
+          },
+          { context: 'random looping!', reference: Long.fromString('2345'), my_map: { a: 1 } }
+        );
+        expect(inspect(code)).to.equal(
+          /* eslint-disable */
+`new Code(
+'function iLoveJavaScript() {\\n' +
+  '            do {\\n' +
+  "              console.log('hello!');\\n" +
+  '            } while (Math.random() > 0.5);\\n' +
+  '          }',
+{
+  context: 'random looping!',
+  reference: new Long('2345'),
+  my_map: { a: 1 }
+})`
+          /* eslint-enable */
+        );
+      });
     });
 
     /**
      * @ignore
      */
-    it('DBRef', function () {
-      const oid = new ObjectId('deadbeefdeadbeefdeadbeef');
-      const dbref = new DBRef('namespace', oid, 'integration_tests_');
-      expect(inspect(dbref)).to.equal(
-        'new DBRef("namespace", new ObjectId("deadbeefdeadbeefdeadbeef"), "integration_tests_")'
-      );
+    context('DBRef', function () {
+      it('when it contains non-nested fields', function () {
+        const oid = new ObjectId('deadbeefdeadbeefdeadbeef');
+        const dbref = new DBRef('namespace', oid, 'integration_tests_');
+        expect(inspect(dbref)).to.equal(
+          `new DBRef('namespace', new ObjectId('deadbeefdeadbeefdeadbeef'), 'integration_tests_')`
+        );
+      });
+      it('when it contains nested fields', function () {
+        const oid = new ObjectId('deadbeefdeadbeefdeadbeef');
+        const dbref = new DBRef('namespace', oid, 'integration_tests_', {
+          a: 1,
+          b: { nest: 'mine' }
+        });
+        expect(inspect(dbref)).to.equal(
+          `new DBRef('namespace', new ObjectId('deadbeefdeadbeefdeadbeef'), 'integration_tests_', { a: 1, b: { nest: 'mine' } })`
+        );
+      });
     });
 
     /**
@@ -1862,7 +1905,7 @@ describe('BSON', function () {
      */
     it('Decimal128', function () {
       const dec = Decimal128.fromString('1.42');
-      expect(inspect(dec)).to.equal('new Decimal128("1.42")');
+      expect(inspect(dec)).to.equal(`new Decimal128('1.42')`);
     });
 
     /**
@@ -1886,10 +1929,10 @@ describe('BSON', function () {
      */
     it('Long', function () {
       const long = Long.fromString('42');
-      expect(inspect(long)).to.equal('new Long("42")');
+      expect(inspect(long)).to.equal(`new Long('42')`);
 
       const unsignedLong = Long.fromString('42', true);
-      expect(inspect(unsignedLong)).to.equal('new Long("42", true)');
+      expect(inspect(unsignedLong)).to.equal(`new Long('42', true)`);
     });
 
     /**

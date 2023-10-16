@@ -27,3 +27,30 @@ export function isMap(d: unknown): d is Map<unknown, unknown> {
 export function isDate(d: unknown): d is Date {
   return Object.prototype.toString.call(d) === '[object Date]';
 }
+
+export type InspectFn = (x: unknown, options?: unknown) => string;
+export function defaultInspect(x: unknown, _options?: unknown): string {
+  return JSON.stringify(x, (k: string, v: unknown) => {
+    if (typeof v === 'bigint') {
+      return { $numberLong: `${v}` };
+    } else if (isMap(v)) {
+      return Object.fromEntries(v);
+    }
+    return v;
+  });
+}
+
+/** @internal */
+type StylizeFunction = (x: string, style: string) => string;
+/** @internal */
+export function getStylizeFunction(options?: unknown): StylizeFunction | undefined {
+  const stylizeExists =
+    options != null &&
+    typeof options === 'object' &&
+    'stylize' in options &&
+    typeof options.stylize === 'function';
+
+  if (stylizeExists) {
+    return options.stylize as StylizeFunction;
+  }
+}

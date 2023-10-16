@@ -10,9 +10,9 @@ describe('class Code', () => {
   });
 
   it('prints re-evaluatable output for Code that contains quotes', () => {
-    const codeStringInput = new BSON.Code('function a(){ return "asdf"; }');
+    const codeStringInput = new BSON.Code(`function a(){ return 'asdf'; }`);
     expect(inspect(codeStringInput)).to.equal(
-      String.raw`new Code("function a(){ return \"asdf\"; }")`
+      String.raw`new Code("function a(){ return 'asdf'; }")`
     );
   });
 

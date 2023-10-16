@@ -2,6 +2,7 @@ import type { Document } from './bson';
 import { BSONValue } from './bson_value';
 import type { EJSONOptions } from './extended_json';
 import type { ObjectId } from './objectid';
+import { type InspectFn, defaultInspect } from './parser/utils';
 
 /** @public */
 export interface DBRefLike {
@@ -111,17 +112,18 @@ export class DBRef extends BSONValue {
     return new DBRef(doc.$ref, doc.$id, doc.$db, copy);
   }
 
-  /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
-  }
+  inspect(depth?: number, options?: unknown, inspect?: InspectFn): string {
+    inspect ??= defaultInspect;
 
-  inspect(): string {
-    // NOTE: if OID is an ObjectId class it will just print the oid string.
-    const oid =
-      this.oid === undefined || this.oid.toString === undefined ? this.oid : this.oid.toString();
-    return `new DBRef("${this.namespace}", new ObjectId("${String(oid)}")${
-      this.db ? `, "${this.db}"` : ''
-    })`;
+    const args = [
+      inspect(this.namespace, options),
+      inspect(this.oid, options),
+      ...(this.db ? [inspect(this.db, options)] : []),
+      ...(Object.keys(this.fields).length > 0 ? [inspect(this.fields, options)] : [])
+    ];
+
+    args[1] = inspect === defaultInspect ? `new ObjectId(${args[1]})` : args[1];
+
+    return `new DBRef(${args.join(', ')})`;
   }
 }

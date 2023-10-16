@@ -1,5 +1,6 @@
 import { BSONValue } from './bson_value';
 import type { EJSONOptions } from './extended_json';
+import { type InspectFn, defaultInspect } from './parser/utils';
 
 /** @public */
 export interface DoubleExtended {
@@ -71,13 +72,8 @@ export class Double extends BSONValue {
     return options && options.relaxed ? doubleValue : new Double(doubleValue);
   }
 
-  /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
-  }
-
-  inspect(): string {
-    const eJSON = this.toExtendedJSON() as DoubleExtended;
-    return `new Double(${eJSON.$numberDouble})`;
+  inspect(depth?: number, options?: unknown, inspect?: InspectFn): string {
+    inspect ??= defaultInspect;
+    return `new Double(${inspect(this.value, options)})`;
   }
 }

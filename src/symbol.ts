@@ -1,4 +1,5 @@
 import { BSONValue } from './bson_value';
+import { type InspectFn, defaultInspect } from './parser/utils';
 
 /** @public */
 export interface BSONSymbolExtended {
@@ -33,10 +34,6 @@ export class BSONSymbol extends BSONValue {
     return this.value;
   }
 
-  inspect(): string {
-    return `new BSONSymbol(${JSON.stringify(this.value)})`;
-  }
-
   toJSON(): string {
     return this.value;
   }
@@ -51,8 +48,8 @@ export class BSONSymbol extends BSONValue {
     return new BSONSymbol(doc.$symbol);
   }
 
-  /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
+  inspect(depth?: number, options?: unknown, inspect?: InspectFn): string {
+    inspect ??= defaultInspect;
+    return `new BSONSymbol(${inspect(this.value, options)})`;
   }
 }

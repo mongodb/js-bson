@@ -1,5 +1,6 @@
 import type { Document } from './bson';
 import { BSONValue } from './bson_value';
+import { type InspectFn, defaultInspect } from './parser/utils';
 
 /** @public */
 export interface CodeExtended {
@@ -55,15 +56,14 @@ export class Code extends BSONValue {
     return new Code(doc.$code, doc.$scope);
   }
 
-  /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
-  }
-
-  inspect(): string {
-    const codeJson = this.toJSON();
-    return `new Code(${JSON.stringify(String(codeJson.code))}${
-      codeJson.scope != null ? `, ${JSON.stringify(codeJson.scope)}` : ''
-    })`;
+  inspect(depth?: number, options?: unknown, inspect?: InspectFn): string {
+    inspect ??= defaultInspect;
+    let parametersString = inspect(this.code, options);
+    const multiLineFn = parametersString.includes('\n');
+    if (this.scope != null) {
+      parametersString += `,${multiLineFn ? '\n' : ' '}${inspect(this.scope, options)}`;
+    }
+    const endingNewline = multiLineFn && this.scope === null;
+    return `new Code(${multiLineFn ? '\n' : ''}${parametersString}${endingNewline ? '\n' : ''})`;
   }
 }

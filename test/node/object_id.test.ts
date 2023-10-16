@@ -315,7 +315,7 @@ describe('ObjectId', function () {
   it('should correctly allow for node.js inspect to work with ObjectId', function (done) {
     const a = 'AAAAAAAAAAAAAAAAAAAAAAAA';
     const b = new ObjectId(a);
-    expect(util.inspect(b)).to.equal('new ObjectId("aaaaaaaaaaaaaaaaaaaaaaaa")');
+    expect(util.inspect(b)).to.equal(`new ObjectId('aaaaaaaaaaaaaaaaaaaaaaaa')`);
 
     done();
   });
