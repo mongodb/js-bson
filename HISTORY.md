@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.2.0](https://github.com/mongodb/js-bson/compare/v6.1.0...v6.2.0) (2023-10-16)
+
+
+### Features
+
+* **NODE-5040:** add color to BSON inspect ([#635](https://github.com/mongodb/js-bson/issues/635)) ([7802c66](https://github.com/mongodb/js-bson/commit/7802c66b2617dcc3ea7c64d58e33f403533794b4))
+
+
+### Bug Fixes
+
+* **NODE-5640:** BsonVersionError improve message clarity ([#629](https://github.com/mongodb/js-bson/issues/629)) ([eb98b8c](https://github.com/mongodb/js-bson/commit/eb98b8c39d6d5ba4ce7231ab9e0f29495d74b994))
+
 ## [6.1.0](https://github.com/mongodb/js-bson/compare/v6.0.0...v6.1.0) (2023-09-12)
 
 
