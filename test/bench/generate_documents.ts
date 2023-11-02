@@ -71,7 +71,7 @@ generateSimpleTests('null', () => null);
 generateSimpleTests('string', () => randomBytes(30).toString('base64'));
 
 // binary
-generateSimpleTests('binary', () => randomBytes(30));
+generateSimpleTests('binary', () => new bson.Binary(randomBytes(30)));
 for (const { name, size } of [
   { name: 'small', size: 1024 },
   { name: 'medium', size: 1024 ** 2 }
