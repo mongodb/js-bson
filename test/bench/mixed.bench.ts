@@ -18,6 +18,7 @@ async function main() {
     'flat_bson.json',
     'full_bson.json'
   ].map(d => path.join(DOCUMENT_ROOT, d));
+  console.log(mixedDocuments);
   const suite = new Suite('Mixed Documents');
 
   for (const library of BSON_VERSIONS.concat(BSONEXT_VERSIONS)) {

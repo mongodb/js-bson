@@ -23,7 +23,7 @@ const JSBSONDeserializationOptions = [
     useBigInt64: true
   }
 ];
-const JSBSONSerializationOptions = [];
+const JSBSONSerializationOptions = [{}];
 
 const BSONEXTDeserializationOptions = [
   {
@@ -35,7 +35,7 @@ const BSONEXTDeserializationOptions = [
     promoteLongs: true
   }
 ];
-const BSONEXTSerializationOptions = [];
+const BSONEXTSerializationOptions = [{}];
 
 async function main() {
   const suite = new Suite('Long');
