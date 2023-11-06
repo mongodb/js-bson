@@ -2,32 +2,33 @@ import { Suite } from 'bson-bench';
 import {
   getTestDocs,
   runSuiteAndWriteResults,
-  BSON_VERSIONS,
-  BSONEXT_VERSIONS,
   OPERATIONS,
+  BOOL,
   ITERATIONS,
+  LIBRARY_SPEC,
   WARMUP
 } from './common';
 
 async function main() {
-  const suite = new Suite('Regex');
-
-  const testDocs = await getTestDocs('regex');
-
-  for (const library of BSON_VERSIONS.concat(BSONEXT_VERSIONS)) {
-    for (const operation of OPERATIONS) {
-      for (const documentPath of testDocs) {
+  const suite = new Suite('Binary');
+  const testDocs = await getTestDocs('binary');
+  for (const operation of OPERATIONS) {
+    for (const documentPath of testDocs) {
+      for (const promoteBuffers of BOOL) {
         suite.task({
           documentPath,
-          library,
+          library: LIBRARY_SPEC,
           iterations: ITERATIONS,
           warmup: WARMUP,
           operation,
-          options: {}
+          options: {
+            promoteBuffers
+          }
         });
       }
     }
   }
   await runSuiteAndWriteResults(suite);
 }
+
 main();

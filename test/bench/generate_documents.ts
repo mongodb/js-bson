@@ -125,6 +125,8 @@ generateSimpleTests('regex', () => /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[
 
 // Date
 generateSimpleTests('date', () => new Date());
+// Date
+generateSimpleTests('timestamp', () => bson.Timestamp.fromNumber(Date.now() / 1000));
 
 // Generate deeply nested docs
 function newTree(depth: number, tree: any = {}) {
