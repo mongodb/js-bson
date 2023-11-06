@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomInt } from 'node:crypto';
 
 import * as bson from '../../.';
 import * as fs from 'fs';
@@ -125,4 +125,59 @@ generateSimpleTests('regex', () => /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[
 
 // Date
 generateSimpleTests('date', () => new Date());
+
 // Generate deeply nested docs
+function newTree(depth: number, tree: any = {}) {
+  if (depth === 0) return tree;
+  if (depth === 1) {
+    tree.left = true;
+    tree.right = false;
+    return tree;
+  }
+
+  tree.left = newTree(depth - 1);
+  tree.right = newTree(depth - 1);
+
+  return tree;
+}
+
+for (const depth of [4, 8, 16]) {
+  const doc: Record<string, any> = newTree(depth);
+
+  fs.writeFileSync(
+    `./documents/nested_${depth}.json`,
+    bson.EJSON.stringify(doc, undefined, 2, { relaxed: false })
+  );
+}
+
+// Generate large flat mixed documents
+for (const { bytes, classification } of [
+  { bytes: 100, classification: 'small' },
+  { bytes: 1024, classification: 'medium' },
+  { bytes: 1024 ** 2, classification: 'large' }
+]) {
+  const getKey = () => randomBytes(30).toString('hex');
+
+  const doc: any = {};
+  let currentSize = bson.calculateObjectSize(doc);
+  while (currentSize < bytes) {
+    doc[getKey()] = randomBytes(30).toString('hex');
+    doc[getKey()] = new bson.Int32(randomInt(2 ** 31));
+    doc[getKey()] = bson.Long.fromNumber(randomInt(2 ** 32));
+    doc[getKey()] = bson.Decimal128.fromString(`${randomInt(2 ** 20)}.${randomInt(2 ** 20)}`);
+    doc[getKey()] = new bson.ObjectId();
+    doc[getKey()] = new Date();
+    doc[getKey()] = new bson.Timestamp(randomBytes(8).readBigInt64LE());
+    doc[getKey()] = /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/;
+    doc[getKey()] = randomInt(100) < 50;
+    doc[getKey()] = new bson.Double(randomInt(2 ** 32));
+
+    currentSize = bson.calculateObjectSize(doc);
+  }
+  console.log(currentSize);
+
+  fs.writeFileSync(
+    `./documents/mixed_${classification}.json`,
+    bson.EJSON.stringify(doc, { relaxed: false }, 2)
+  );
+}
