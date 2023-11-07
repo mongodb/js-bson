@@ -1,4 +1,4 @@
-import { Suite } from 'bson-bench';
+import { Suite } from 'dbx-js-tools/packages/bson-bench';
 import { getTestDocs, runSuiteAndWriteResults, ITERATIONS, LIBRARY_SPEC, WARMUP } from './common';
 
 const JSBSONDeserializationOptions = [

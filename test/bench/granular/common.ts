@@ -1,10 +1,8 @@
-import { Suite } from 'bson-bench';
+import { Suite } from 'dbx-js-tools/packages/bson-bench';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
 export const DOCUMENT_ROOT = `${__dirname}/../../documents`;
-export const BSON_VERSIONS = [`bson@6`, `bson@5`, 'bson@4'];
-export const BSONEXT_VERSIONS = ['bson-ext@4.0.0'];
 export const OPERATIONS: ('serialize' | 'deserialize')[] = ['serialize', 'deserialize'];
 export const BOOL = [true, false];
 
