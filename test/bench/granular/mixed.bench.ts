@@ -17,11 +17,13 @@ async function main() {
     'deep_bson.json',
     'flat_bson.json',
     'full_bson.json',
-    'mixed_large.json'
-  ]
-    .map(d => path.join(DOCUMENT_ROOT, d))
-    .concat(await getTestDocs('mixed'))
-    .concat(await getTestDocs('nested'));
+    'mixed_large.json',
+    'mixed_medium.json',
+    'mixed_small.json',
+    'nested_4.json',
+    'nested_8.json',
+    'nested_16.json'
+  ].map(d => path.join(DOCUMENT_ROOT, d));
 
   const suite = new Suite('Mixed Documents');
 
