@@ -235,14 +235,7 @@ tasks:
       - command: perf.send
         params:
           file: src/benchmarks.json
-  - name: check-eslint-plugin
-    commands:
-      - func: fetch source
-        vars:
-          NODE_LTS_VERSION: 20
-      - func: install dependencies
-      - func: run eslint plugin tests
-  - name: run-benchmarks-node-18
+  - name: run-granular-benchmarks-node-18
     commands:
       - func: fetch source
         vars:
