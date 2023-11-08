@@ -2,9 +2,23 @@
 
 const cp = require('child_process');
 const fs = require('fs/promises');
+const path = require('path');
+const { Task } = require('dbx-js-tools/packages/bson-bench');
 
 const BENCHMARK_REGEX = /(.*)\.bench\.js$/;
 (async () => {
+  // HACK : run one dummy task with the local bson to ensure it's available for subsequent suites
+  await new Task({
+    documentPath: path.resolve(`${__dirname}/../documents/binary_small.json`),
+    library: `bson:${path.resolve(`${__dirname}/../../../.`)}`,
+    iterations: 1,
+    warmup: 1,
+    operation: 'deserialize',
+    options: {}
+  })
+    .run()
+    .catch(() => null);
+
   // Run all benchmark files
   const lib = await fs.readdir('../lib/granular');
   for await (const dirent of lib) {
