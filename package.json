@@ -41,7 +41,7 @@
     "benchmark": "^2.1.4",
     "chai": "^4.3.7",
     "chalk": "^5.3.0",
-    "dbx-js-tools": "github:mongodb-js/dbx-js-tools#77285f9",
+    "dbx-js-tools": "github:mongodb-js/dbx-js-tools",
     "eslint": "^8.46.0",
     "eslint-config-prettier": "^8.10.0",
     "eslint-plugin-no-bigint-usage": "file:etc/eslint/no-bigint-usage",
