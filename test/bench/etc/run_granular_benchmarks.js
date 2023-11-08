@@ -38,7 +38,6 @@ const BENCHMARK_REGEX = /(.*)\.bench\.js$/;
   const resultPaths = [];
 
   for await (const dirent of await fs.opendir('./')) {
-    console.log(dirent.name);
     if (/Results.json$/.test(dirent.name)) {
       resultPaths.push(`./${dirent.name}`);
     }
@@ -63,4 +62,6 @@ const BENCHMARK_REGEX = /(.*)\.bench\.js$/;
 
   await collectedResults.write(']\n');
   await collectedResults.close();
+
+  console.log(`Collected results in ${__dirname}/resultsCollected.json`);
 })();

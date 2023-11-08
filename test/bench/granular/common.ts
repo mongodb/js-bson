@@ -36,10 +36,14 @@ export async function runSuiteAndWriteResults(suite: Suite) {
 export function readEnvVars(): { warmup: number; iterations: number } {
   const envWarmup = Number(process.env.WARMUP);
   const envIterations = Number(process.env.ITERATIONS);
-  return {
+  const rv = {
     warmup: Number.isSafeInteger(envWarmup) && envWarmup > 0 ? envWarmup : 100_000,
     iterations: Number.isSafeInteger(envIterations) && envIterations > 0 ? envIterations : 10_000
   };
+
+  console.log(`warmup iterations: ${rv.warmup}\nmeasured iterations: ${rv.iterations}`);
+
+  return rv;
 }
 
 const envVars = readEnvVars();
