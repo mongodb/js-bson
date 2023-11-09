@@ -25,7 +25,7 @@ process.stdin.on('end', () => {
       argColumns.add(key);
     }
   }
-  const columns = ['test_name', 'max', 'mean', 'median', 'min', 'stddev'].concat(
+  const columns = ['test_name', 'library', 'max', 'mean', 'median', 'min', 'stddev'].concat(
     Array.from(argColumns)
   );
 
@@ -34,24 +34,30 @@ process.stdin.on('end', () => {
   for (const res of document) {
     const line = Array.from({ length: columns.length }, () => '-');
     const { test_name, args } = res.info;
-    line[0] = test_name;
+    const parts = test_name.split('_');
+    const library = parts[parts.length - 1];
+    const name = parts.slice(0, parts.length - 1).join('_');
+    // last part is library
+    // previous parts joined are test name
+    line[0] = name;
+    line[1] = library;
     for (const metric of res.metrics) {
       const { type, value } = metric;
       switch (type) {
         case 'MEAN':
-          line[2] = String(value);
-          break;
-        case 'MEDIAN':
           line[3] = String(value);
           break;
-        case 'MAX':
-          line[1] = String(value);
-          break;
-        case 'MIN':
+        case 'MEDIAN':
           line[4] = String(value);
           break;
-        case 'STANDARD_DEVIATION':
+        case 'MAX':
+          line[2] = String(value);
+          break;
+        case 'MIN':
           line[5] = String(value);
+          break;
+        case 'STANDARD_DEVIATION':
+          line[6] = String(value);
       }
     }
 
