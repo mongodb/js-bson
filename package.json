@@ -104,7 +104,7 @@
     "check:tsd": "npm run build:dts && tsd",
     "check:web": "WEB=true mocha test/node",
     "check:web-no-bigint": "WEB=true NO_BIGINT=true mocha test/node",
-    "check:bench": "cd test/bench && npx tsc && node ./lib/index.js && mv benchmarks.json ../../.",
+    "check:bench": "cd test/bench && npx tsc && node ./lib/src/index.js && mv benchmarks.json ../../.",
     "check:bench-granular": "cd test/bench && npx tsc && cd etc && node run_granular_benchmarks.js",
     "build:ts": "node ./node_modules/typescript/bin/tsc",
     "build:dts": "npm run build:ts && api-extractor run --typescript-compiler-folder node_modules/typescript --local && node etc/clean_definition_files.cjs",

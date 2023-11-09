@@ -27,3 +27,6 @@ export function convertToPerfSendFormat(
     }))
   };
 }
+
+// @ts-expect-error using this to ensure that the suites
+export * as BSON from 'bson';
