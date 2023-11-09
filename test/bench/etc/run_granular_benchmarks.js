@@ -43,7 +43,24 @@ const BENCHMARK_REGEX = /(.*)\.bench\.js$/;
     }
   }
 
-  // Merge results into one file
+  // Ensure that there are no duplicate test-name/options pairs as this will prevent us from
+  // uploading with perf.send
+  const set = new Set();
+  for (const resultFile of resultPaths) {
+    const results = require(resultFile);
+    for (const entry of results) {
+      const name = entry.info.test_name;
+      const args = JSON.stringify(entry.info.args);
+      const key = `${name}:${args}`;
+
+      if (set.has(key)) throw new Error(`Found a duplicate testName:Option pair: ${key}`);
+      set.add(key);
+    }
+  }
+
+  console.log('No duplcate testName:Option pairs found. Now merging files...');
+
+  // Iterate over all result files and merge into one file
   const collectedResults = await fs.open('resultsCollected.json', 'w+');
   await collectedResults.write('[\n');
   for (let i = 0; i < resultPaths.length; i++) {
