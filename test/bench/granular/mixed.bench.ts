@@ -5,10 +5,17 @@ import {
   OPERATIONS,
   ITERATIONS,
   WARMUP,
-  getTestDocs,
   LIBRARY_SPEC
 } from './common';
 import * as path from 'path';
+
+const OPTIONS = {
+  serialize: { checkKeys: true, ignoreUndefined: false },
+  deserialize: {
+    promoteValues: true,
+    index: 0
+  }
+};
 
 async function main() {
   const mixedDocuments: string[] = [
@@ -35,7 +42,7 @@ async function main() {
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation,
-        options: {}
+        options: OPTIONS[operation]
       });
     }
   }

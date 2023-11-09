@@ -16,7 +16,12 @@ const JSBSONDeserializationOptions = [
     useBigInt64: true
   }
 ];
-const JSBSONSerializationOptions = [{}];
+const JSBSONSerializationOptions = [
+  {
+    checkKeys: true,
+    ignoreUndefined: false
+  }
+];
 
 async function main() {
   const suite = new Suite('Long');

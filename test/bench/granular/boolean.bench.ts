@@ -20,22 +20,30 @@ const OPTIONS = {
 async function main() {
   const suite = new Suite('Boolean');
   const testDocs = await getTestDocs('boolean');
-  for (const operation of OPERATIONS) {
-    for (const documentPath of testDocs) {
-      for (const promoteValues of BOOL) {
-        suite.task({
-          documentPath,
-          library: LIBRARY_SPEC,
-          iterations: ITERATIONS,
-          warmup: WARMUP,
-          operation,
-          options:
-            operation === 'deserialize'
-              ? { ...OPTIONS[operation], promoteValues }
-              : OPTIONS[operation]
-        });
-      }
+  // deserialize
+  for (const documentPath of testDocs) {
+    for (const promoteValues of BOOL) {
+      suite.task({
+        documentPath,
+        library: LIBRARY_SPEC,
+        iterations: ITERATIONS,
+        warmup: WARMUP,
+        operation: 'deserialize',
+        options: { ...OPTIONS['deserialize'], promoteValues }
+      });
     }
+  }
+
+  // serialize
+  for (const documentPath of testDocs) {
+    suite.task({
+      documentPath,
+      library: LIBRARY_SPEC,
+      iterations: ITERATIONS,
+      warmup: WARMUP,
+      operation: 'deserialize',
+      options: OPTIONS['serialize']
+    });
   }
   await runSuiteAndWriteResults(suite);
 }

@@ -8,6 +8,13 @@ import {
   WARMUP
 } from './common';
 
+const OPTIONS = {
+  serialize: { checkKeys: true, ignoreUndefined: false },
+  deserialize: {
+    index: 0
+  }
+};
+
 async function main() {
   const suite = new Suite('MinKey');
   const testDocs = await getTestDocs('minkey');
@@ -20,7 +27,7 @@ async function main() {
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation,
-        options: {}
+        options: OPTIONS[operation]
       });
     }
   }

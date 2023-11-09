@@ -3,39 +3,38 @@ import {
   getTestDocs,
   runSuiteAndWriteResults,
   LIBRARY_SPEC,
-  OPERATIONS,
   ITERATIONS,
   WARMUP,
-  BOOL,
-  isDeserialize
+  BOOL
 } from './common';
 
 async function main() {
-  const suite = new Suite('Regex');
+  const suite = new Suite('String');
 
-  const testDocs = await getTestDocs('regex');
+  const testDocs = await getTestDocs('string');
 
+  // deserialize
   for (const documentPath of testDocs) {
-    // deserialize
-    for (const bsonRegExp of BOOL) {
+    for (const utf8 of BOOL) {
       suite.task({
         documentPath,
         library: LIBRARY_SPEC,
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation: 'deserialize',
-        options: { bsonRegExp }
+        options: { validation: { utf8 } }
       });
     }
-
-    // serialize
+  }
+  // serialize
+  for (const documentPath of testDocs) {
     suite.task({
       documentPath,
       library: LIBRARY_SPEC,
       iterations: ITERATIONS,
       warmup: WARMUP,
       operation: 'serialize',
-      options: {}
+      options: { checkKeys: true, ignoreUndefined: false }
     });
   }
   await runSuiteAndWriteResults(suite);

@@ -8,6 +8,11 @@ import {
   WARMUP
 } from './common';
 
+const OPTIONS = {
+  serialize: { checkKeys: true, ignoreUndefined: false },
+  deserialize: {}
+};
+
 async function main() {
   const suite = new Suite('Date');
   const testDocs = await getTestDocs('date');
@@ -20,7 +25,7 @@ async function main() {
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation,
-        options: {}
+        options: OPTIONS[operation]
       });
     }
   }

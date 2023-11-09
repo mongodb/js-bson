@@ -12,21 +12,30 @@ import {
 async function main() {
   const suite = new Suite('Binary');
   const testDocs = await getTestDocs('binary');
-  for (const operation of OPERATIONS) {
-    for (const documentPath of testDocs) {
-      for (const promoteBuffers of BOOL) {
-        suite.task({
-          documentPath,
-          library: LIBRARY_SPEC,
-          iterations: ITERATIONS,
-          warmup: WARMUP,
-          operation,
-          options: {
-            promoteBuffers
-          }
-        });
-      }
+  // deserialize
+  for (const documentPath of testDocs) {
+    for (const promoteBuffers of BOOL) {
+      suite.task({
+        documentPath,
+        library: LIBRARY_SPEC,
+        iterations: ITERATIONS,
+        warmup: WARMUP,
+        operation: 'deserialize',
+        options: {
+          promoteBuffers
+        }
+      });
     }
+
+    // serialize
+    suite.task({
+      documentPath,
+      library: LIBRARY_SPEC,
+      iterations: ITERATIONS,
+      warmup: WARMUP,
+      operation: 'serialize',
+      options: { checkKeys: true, ignoreUndefined: false }
+    });
   }
   await runSuiteAndWriteResults(suite);
 }
