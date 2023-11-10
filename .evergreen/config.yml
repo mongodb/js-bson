@@ -94,15 +94,6 @@ functions:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
         args:
           - .evergreen/run-bundling-test.sh
-  run benchmarks:
-    - command: subprocess.exec
-      type: test
-      params:
-        working_dir: src
-        binary: bash
-        add_expansions_to_env: true
-        args:
-          - .evergreen/run-benchmarks.sh
   run granular benchmarks:
     - command: subprocess.exec
       type: test
@@ -220,21 +211,6 @@ tasks:
         vars:
           TS_VERSION: "next"
           TRY_COMPILING_LIBRARY: "false"
-  - name: run-benchmarks-node-18
-    commands:
-      - func: fetch source
-        vars:
-          # This needs to stay pinned at Node v18.16.0 for consistency across perf runs.
-          NODE_LTS_VERSION: v18.16.0
-      - func: install dependencies
-        vars:
-          NPM_VERSION: 9
-      - func: run benchmarks
-        vars:
-          WEB: false 
-      - command: perf.send
-        params:
-          file: src/benchmarks.json
   - name: run-granular-benchmarks-node-18
     commands:
       - func: fetch source
@@ -276,5 +252,4 @@ buildvariants:
     display_name: RHEL 9.0 perf
     run_on: rhel90-dbx-perf-large
     tasks:
-      - run-benchmarks-node-18
       - run-granular-benchmarks-node-18
