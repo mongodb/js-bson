@@ -103,6 +103,15 @@ functions:
         add_expansions_to_env: true
         args:
           - .evergreen/run-granular-benchmarks.sh
+  run spec benchmarks:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - .evergreen/run-spec-benchmarks.sh
 tasks:
   - name: node-tests-v16
     tags: ["node"]
@@ -222,10 +231,24 @@ tasks:
           NPM_VERSION: 9
       - func: run granular benchmarks
         vars:
-          WEB: false 
+          WARMUP: 1000
+          ITERATIONS: 1000
       - command: perf.send
         params:
-          file: src/test/bench/etc/resultsCollected.json
+          file: src/resultsCollected.json
+  - name: run-spec-benchmarks-node-18
+    commands:
+      - func: fetch source
+        vars:
+          # This needs to stay pinned at Node v18.16.0 for consistency across perf runs.
+          NODE_LTS_VERSION: v18.16.0
+      - func: install dependencies
+        vars:
+          NPM_VERSION: 9
+      - func: run spec benchmarks
+      - command: perf.send
+        params:
+          file: src/bsonBench.json
   - name: check-eslint-plugin
     commands:
       - func: fetch source
@@ -253,3 +276,4 @@ buildvariants:
     run_on: rhel90-dbx-perf-large
     tasks:
       - run-granular-benchmarks-node-18
+      - run-spec-benchmarks-node-18

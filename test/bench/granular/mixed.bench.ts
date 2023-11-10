@@ -21,9 +21,6 @@ async function main() {
   const mixedDocuments: string[] = [
     'tweet.json',
     'bestbuy_medium.json',
-    'deep_bson.json',
-    'flat_bson.json',
-    'full_bson.json',
     'mixed_large.json',
     'mixed_medium.json',
     'mixed_small.json',

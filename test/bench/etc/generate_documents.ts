@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { randomBytes, randomInt } from 'node:crypto';
 
-import * as bson from '../../.';
-import * as fs from 'fs';
+import * as bson from '../../../.';
+import { writeFileSync } from 'fs';
+import { resolve } from 'path';
 
 type numericConstructor =
   | typeof bson.Double
@@ -11,16 +12,18 @@ type numericConstructor =
   | typeof bson.Decimal128;
 type numericType = bson.Double | bson.Long | bson.Int32 | bson.Decimal128;
 
+const DOCUMENT_PATH = resolve(`${__dirname}/../documents`);
+
 function generateSimpleTests(typeName: string, newFn: (...arg: any) => any) {
   const singleField = { a: newFn(0) };
   const singleElementArray = { a: [newFn(0)] };
 
-  fs.writeFileSync(
-    `./documents/${typeName}_singleFieldDocument.json`,
+  writeFileSync(
+    `${DOCUMENT_PATH}/${typeName}_singleFieldDocument.json`,
     bson.EJSON.stringify(singleField, { relaxed: false }, 2)
   );
-  fs.writeFileSync(
-    `./documents/${typeName}_singleElementArray.json`,
+  writeFileSync(
+    `${DOCUMENT_PATH}/${typeName}_singleElementArray.json`,
     bson.EJSON.stringify(singleElementArray, { relaxed: false }, 2)
   );
 
@@ -29,8 +32,8 @@ function generateSimpleTests(typeName: string, newFn: (...arg: any) => any) {
     const homogeneousArray = {
       a: Array.from({ length }, () => newFn(counter++))
     };
-    fs.writeFileSync(
-      `./documents/${typeName}_array_${length}.json`,
+    writeFileSync(
+      `${DOCUMENT_PATH}/${typeName}_array_${length}.json`,
       bson.EJSON.stringify(homogeneousArray, { relaxed: false }, 2)
     );
   }
@@ -80,8 +83,8 @@ for (const { name, size } of [
 ]) {
   const binary = new bson.Binary(randomBytes(size));
   const doc = { b: binary };
-  fs.writeFileSync(
-    `./documents/binary_${name}.json`,
+  writeFileSync(
+    `${DOCUMENT_PATH}/binary_${name}.json`,
     bson.EJSON.stringify(doc, { relaxed: false }, 2)
   );
 }
@@ -147,8 +150,8 @@ function newTree(depth: number, tree: any = {}) {
 for (const depth of [4, 8, 16]) {
   const doc: Record<string, any> = newTree(depth);
 
-  fs.writeFileSync(
-    `./documents/nested_${depth}.json`,
+  writeFileSync(
+    `${DOCUMENT_PATH}/nested_${depth}.json`,
     bson.EJSON.stringify(doc, undefined, 2, { relaxed: false })
   );
 }
@@ -177,10 +180,9 @@ for (const { bytes, classification } of [
 
     currentSize = bson.calculateObjectSize(doc);
   }
-  console.log(currentSize);
 
-  fs.writeFileSync(
-    `./documents/mixed_${classification}.json`,
+  writeFileSync(
+    `${DOCUMENT_PATH}/mixed_${classification}.json`,
     bson.EJSON.stringify(doc, { relaxed: false }, 2)
   );
 }

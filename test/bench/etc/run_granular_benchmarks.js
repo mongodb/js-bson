@@ -6,11 +6,14 @@ const path = require('path');
 const { Task } = require('dbx-js-tools/packages/bson-bench');
 
 const BENCHMARK_REGEX = /(.*)\.bench\.js$/;
+const BENCHMARK_PATH = path.resolve(`${__dirname}/../lib/granular`);
+const DOCUMENT_ROOT = path.resolve(`${__dirname}/../documents`);
+const LIBRARY_PATH = path.resolve(`${__dirname}/../../../.`);
 (async () => {
   // HACK : run one dummy task with the local bson to ensure it's available for subsequent suites
   await new Task({
-    documentPath: path.resolve(`${__dirname}/../documents/binary_small.json`),
-    library: `bson:${path.resolve(`${__dirname}/../../../.`)}`,
+    documentPath: path.resolve(`${DOCUMENT_ROOT}/binary_small.json`),
+    library: `bson:${LIBRARY_PATH}`,
     iterations: 1,
     warmup: 1,
     operation: 'deserialize',
@@ -20,10 +23,10 @@ const BENCHMARK_REGEX = /(.*)\.bench\.js$/;
     .catch(() => null);
 
   // Run all benchmark files
-  const lib = await fs.readdir('../lib');
+  const lib = await fs.readdir(BENCHMARK_PATH);
   for await (const dirent of lib) {
     if (BENCHMARK_REGEX.test(dirent)) {
-      const child = cp.fork(`../lib/${dirent}`);
+      const child = cp.fork(`${BENCHMARK_PATH}/${dirent}`);
       if (child.stdout) child.stdout.pipe(process.stdout);
       if (child.stderr) child.stdout.pipe(process.stderr);
 
@@ -37,11 +40,13 @@ const BENCHMARK_REGEX = /(.*)\.bench\.js$/;
   }
   const resultPaths = [];
 
-  for await (const dirent of await fs.opendir('./')) {
+  for await (const dirent of await fs.opendir(__dirname)) {
     if (/Results.json$/.test(dirent.name)) {
       resultPaths.push(`./${dirent.name}`);
     }
   }
+
+  if (resultPaths.length === 0) throw new Error('Benchmarks did not run successfully');
 
   // Ensure that there are no duplicate test-name/options pairs as this will prevent us from
   // uploading with perf.send

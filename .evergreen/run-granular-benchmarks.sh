@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
+WARMUP=$WARMUP
+ITERATIONS=$ITERATIONS
 
-export WARMUP=1
-export ITERATIONS=100
-npm run check:bench-granular
+WARMUP=$WARMUP ITERATIONS=$ITERATIONS npm run check:granular-bench

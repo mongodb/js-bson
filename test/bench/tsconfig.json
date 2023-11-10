@@ -22,6 +22,7 @@
     "types": ["node"]
   },
   "include": [
-    "./granular/*.ts"
+    "./granular/*.ts",
+    "./spec/*.ts"
   ]
 }
