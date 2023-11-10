@@ -20,10 +20,10 @@ const BENCHMARK_REGEX = /(.*)\.bench\.js$/;
     .catch(() => null);
 
   // Run all benchmark files
-  const lib = await fs.readdir('../lib/granular');
+  const lib = await fs.readdir('../lib');
   for await (const dirent of lib) {
     if (BENCHMARK_REGEX.test(dirent)) {
-      const child = cp.fork(`../lib/granular/${dirent}`);
+      const child = cp.fork(`../lib/${dirent}`);
       if (child.stdout) child.stdout.pipe(process.stdout);
       if (child.stderr) child.stdout.pipe(process.stderr);
 

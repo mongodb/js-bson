@@ -1,10 +1,8 @@
 import { Suite } from 'dbx-js-tools/packages/bson-bench';
 import {
   getTestDocs,
-  isDeserialize,
   runSuiteAndWriteResults,
   LIBRARY_SPEC,
-  OPERATIONS,
   BOOL,
   ITERATIONS,
   WARMUP

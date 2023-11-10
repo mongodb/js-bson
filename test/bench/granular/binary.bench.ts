@@ -2,7 +2,6 @@ import { Suite } from 'dbx-js-tools/packages/bson-bench';
 import {
   getTestDocs,
   runSuiteAndWriteResults,
-  OPERATIONS,
   BOOL,
   ITERATIONS,
   LIBRARY_SPEC,

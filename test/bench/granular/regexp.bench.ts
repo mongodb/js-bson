@@ -3,11 +3,9 @@ import {
   getTestDocs,
   runSuiteAndWriteResults,
   LIBRARY_SPEC,
-  OPERATIONS,
   ITERATIONS,
   WARMUP,
-  BOOL,
-  isDeserialize
+  BOOL
 } from './common';
 
 async function main() {

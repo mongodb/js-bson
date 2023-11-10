@@ -2,11 +2,11 @@ import { Suite } from 'dbx-js-tools/packages/bson-bench';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
-export const DOCUMENT_ROOT = `${__dirname}/../../documents`;
+export const DOCUMENT_ROOT = `${__dirname}/../documents`;
 export const OPERATIONS: ('serialize' | 'deserialize')[] = ['serialize', 'deserialize'];
 export const BOOL = [true, false];
 
-export const LIBRARY = path.resolve(`${__dirname}/../../../../.`);
+export const LIBRARY = path.resolve(`${__dirname}/../../../.`);
 export const LIBRARY_SPEC = `bson:${LIBRARY}`;
 
 export const isDeserialize = (s: string) => s === 'deserialize';

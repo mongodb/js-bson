@@ -3,7 +3,6 @@ import {
   getTestDocs,
   runSuiteAndWriteResults,
   LIBRARY_SPEC,
-  OPERATIONS,
   BOOL,
   ITERATIONS,
   WARMUP
