@@ -1,5 +1,11 @@
 #!/bin/env node
 'use strict';
+
+/**
+ * This script reads data in perf.send format from stdin and converts it to csv, writing output to
+ * stdout
+ */
+
 /** @type {Buffer[]}*/
 const chunks = [];
 let totalSize = 0;

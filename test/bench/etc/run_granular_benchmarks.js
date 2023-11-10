@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * This script runs all benchmarks in test/bench/lib/granular and merges their output
+ */
+
 const cp = require('child_process');
 const fs = require('fs/promises');
 const path = require('path');

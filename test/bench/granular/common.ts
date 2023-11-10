@@ -29,8 +29,9 @@ export async function getTestDocs(type: string) {
 }
 
 export async function runSuiteAndWriteResults(suite: Suite) {
+  const targetDirectory = path.resolve(`${__dirname}/../../etc`);
   await suite.run();
-  await suite.writeResults(`${suite.name.toLowerCase()}Results.json`);
+  await suite.writeResults(`${targetDirectory}/${suite.name.toLowerCase()}Results.json`);
 }
 
 export function readEnvVars(): { warmup: number; iterations: number } {

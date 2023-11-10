@@ -1,3 +1,7 @@
+/**
+ * This script regenerates all benchmark test files
+ */
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { randomBytes, randomInt } from 'node:crypto';
 
