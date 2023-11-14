@@ -269,8 +269,10 @@ export class ObjectId extends BSONValue {
    * Checks if a value can be used to create a valid bson ObjectId
    * @param id - any JS value
    */
-  static isValid(id: string | number | ObjectId | ObjectIdLike | Uint8Array): boolean {
+  static isValid(id: string | ObjectId | ObjectIdLike | Uint8Array): boolean {
     if (id == null) return false;
+    // ObjectId constructor accepts a number (seconds) but a number is not a valid ObjectId
+    if (typeof id === 'number') return false;
 
     try {
       new ObjectId(id);

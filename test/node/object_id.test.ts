@@ -344,12 +344,12 @@ describe('ObjectId', function () {
     });
 
     context('when called with a number', () => {
-      it('returns true for any number (0)', () => expect(ObjectId.isValid(0)).to.be.true);
+      it('returns false for any number (0)', () => expect(ObjectId.isValid(0)).to.be.false);
 
-      it('returns true for any number (MIN_SAFE_INTEGER)', () =>
-        expect(ObjectId.isValid(Number.MIN_SAFE_INTEGER)).to.be.true);
+      it('returns false for any number (MIN_SAFE_INTEGER)', () =>
+        expect(ObjectId.isValid(Number.MIN_SAFE_INTEGER)).to.be.false);
 
-      it('returns true for any number (NaN)', () => expect(ObjectId.isValid(NaN)).to.be.true);
+      it('returns false for any number (NaN)', () => expect(ObjectId.isValid(NaN)).to.be.false);
     });
 
     context('when called with a ObjectId or ObjectIdLike', () => {
