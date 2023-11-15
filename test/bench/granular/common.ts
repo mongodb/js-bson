@@ -6,8 +6,7 @@ export const DOCUMENT_ROOT = `${__dirname}/../../documents`;
 export const OPERATIONS: ('serialize' | 'deserialize')[] = ['serialize', 'deserialize'];
 export const BOOL = [true, false];
 
-export const LIBRARY = path.resolve(`${__dirname}/../../../../.`);
-export const LIBRARY_SPEC = `bson:${LIBRARY}`;
+export const LIBRARY_SPEC = 'bson#main';
 
 export const isDeserialize = (s: string) => s === 'deserialize';
 export async function getTestDocs(type: string) {

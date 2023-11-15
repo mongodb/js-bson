@@ -6,7 +6,7 @@
 import { randomBytes, randomInt } from 'node:crypto';
 
 import * as bson from '../../../.';
-import { writeFileSync } from 'fs';
+import { writeFileSync, readFileSync } from 'fs';
 import { resolve } from 'path';
 
 type numericConstructor =
@@ -113,18 +113,16 @@ generateSimpleTests(
 generateSimpleTests(
   'code-with-scope',
   () =>
-    new bson.Code(
-      function () {
-        // @ts-expect-error nested
-        console.log(left);
-        // @ts-expect-error nested
-        console.log(right);
-      },
-      {
-        left: 100,
-        right: 10_000
+    new bson.Code(function (a: number, b: number) {
+      let t: number;
+      while (b !== 0) {
+        t = b;
+        b = a % b;
+        a = t;
       }
-    )
+
+      return a;
+    }, JSON.parse(readFileSync(`${__dirname}/../documents/bestbuy_medium.json`, 'utf8')))
 );
 
 // Regexp - uses phone number regex

@@ -7,17 +7,17 @@
 const cp = require('child_process');
 const fs = require('fs/promises');
 const path = require('path');
+const { once } = require('events');
 const { Task } = require('dbx-js-tools/packages/bson-bench');
 
 const BENCHMARK_REGEX = /(.*)\.bench\.js$/;
 const BENCHMARK_PATH = path.resolve(`${__dirname}/../lib/granular`);
 const DOCUMENT_ROOT = path.resolve(`${__dirname}/../documents`);
-const LIBRARY_PATH = path.resolve(`${__dirname}/../../../.`);
 (async () => {
   // HACK : run one dummy task with the local bson to ensure it's available for subsequent suites
   await new Task({
     documentPath: path.resolve(`${DOCUMENT_ROOT}/binary_small.json`),
-    library: `bson:${LIBRARY_PATH}`,
+    library: `bson#main`,
     iterations: 1,
     warmup: 1,
     operation: 'deserialize',
@@ -30,23 +30,17 @@ const LIBRARY_PATH = path.resolve(`${__dirname}/../../../.`);
   const lib = await fs.readdir(BENCHMARK_PATH);
   for await (const dirent of lib) {
     if (BENCHMARK_REGEX.test(dirent)) {
-      const child = cp.fork(`${BENCHMARK_PATH}/${dirent}`);
-      if (child.stdout) child.stdout.pipe(process.stdout);
-      if (child.stderr) child.stdout.pipe(process.stderr);
+      const child = cp.fork(`${BENCHMARK_PATH}/${dirent}`, { stdio: 'inherit' });
 
-      await new Promise((resolve, reject) =>
-        child.once('exit', code => {
-          if (code !== 0) return reject();
-          return resolve();
-        })
-      );
+      const [exitCode] = await once(child, 'exit');
+      if (exitCode !== 0) throw new Error('Failed to run benchmark');
     }
   }
   const resultPaths = [];
 
   for await (const dirent of await fs.opendir(__dirname)) {
     if (/Results.json$/.test(dirent.name)) {
-      resultPaths.push(`./${dirent.name}`);
+      resultPaths.push(`${__dirname}/${dirent.name}`);
     }
   }
 
@@ -69,25 +63,17 @@ const LIBRARY_PATH = path.resolve(`${__dirname}/../../../.`);
 
   console.log('No duplcate testName:Option pairs found. Now merging files...');
 
+  const resultFile = `${__dirname}/resultsCollected.json`;
   // Iterate over all result files and merge into one file
-  const collectedResults = await fs.open('resultsCollected.json', 'w+');
-  await collectedResults.write('[\n');
-  for (let i = 0; i < resultPaths.length; i++) {
-    const resultPath = resultPaths[i];
+  const collectedResults = [];
+  for (const resultPath of resultPaths) {
     const results = require(resultPath);
     if (Array.isArray(results)) {
-      for (let j = 0; j < results.length; j++) {
-        collectedResults.write(
-          `  ${JSON.stringify(results[j], undefined, 2)}${
-            j === results.length - 1 && i === resultPaths.length - 1 ? '' : ',\n'
-          }`
-        );
-      }
+      collectedResults.push(results);
     }
   }
 
-  await collectedResults.write(']\n');
-  await collectedResults.close();
+  await fs.writeFile(resultFile, JSON.stringify(collectedResults));
 
-  console.log(`Collected results in ${__dirname}/resultsCollected.json`);
+  console.log(`Collected results in ${resultFile}`);
 })();
