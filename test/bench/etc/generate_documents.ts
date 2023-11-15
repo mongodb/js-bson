@@ -83,7 +83,6 @@ generateSimpleTests('binary', () => new bson.Binary(randomBytes(30)));
 for (const { name, size } of [
   { name: 'small', size: 1024 },
   { name: 'medium', size: 1024 ** 2 }
-  //{ name: 'large', size: 1024 ** 3 }
 ]) {
   const binary = new bson.Binary(randomBytes(size));
   const doc = { b: binary };
