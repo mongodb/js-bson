@@ -3,8 +3,7 @@ import { join, resolve } from 'path';
 import { writeFile } from 'fs/promises';
 
 const suite = new Suite('bson micro benchmarks');
-const libraryPath = resolve(`${__dirname}/../../../..`);
-const LIBRARY = `bson:${libraryPath}`;
+const LIBRARY = `bson#main`;
 const DOCUMENT_ROOT = resolve(`${__dirname}/../../documents`);
 // Add flat bson encoding
 suite.task({

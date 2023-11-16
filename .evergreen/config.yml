@@ -235,7 +235,7 @@ tasks:
           ITERATIONS: 1000
       - command: perf.send
         params:
-          file: src/resultsCollected.json
+          file: src/test/bench/etc/resultsCollected.json
   - name: run-spec-benchmarks-node-18
     commands:
       - func: fetch source
