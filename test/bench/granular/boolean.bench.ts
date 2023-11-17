@@ -28,7 +28,7 @@ async function main() {
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation: 'deserialize',
-        options: { ...OPTIONS['deserialize'], promoteValues }
+        options: { ...OPTIONS.deserialize, promoteValues }
       });
     }
   }
@@ -41,7 +41,7 @@ async function main() {
       iterations: ITERATIONS,
       warmup: WARMUP,
       operation: 'deserialize',
-      options: OPTIONS['serialize']
+      options: OPTIONS.serialize
     });
   }
   await runSuiteAndWriteResults(suite);
