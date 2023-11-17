@@ -69,7 +69,7 @@ const DOCUMENT_ROOT = path.resolve(`${__dirname}/../documents`);
   for (const resultPath of resultPaths) {
     const results = require(resultPath);
     if (Array.isArray(results)) {
-      collectedResults.concat(results);
+      collectedResults.push(...results);
     }
   }
 
