@@ -15,6 +15,7 @@ const BENCHMARK_PATH = path.resolve(`${__dirname}/../lib/granular`);
 const DOCUMENT_ROOT = path.resolve(`${__dirname}/../documents`);
 (async () => {
   // HACK : run one dummy task with the local bson to ensure it's available for subsequent suites
+  // FIXME(NODE-5759): replace this with a call to Package.install()
   await new Task({
     documentPath: path.resolve(`${DOCUMENT_ROOT}/binary_small.json`),
     library: `bson#main`,
