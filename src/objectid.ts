@@ -44,9 +44,48 @@ export class ObjectId extends BSONValue {
   private __id?: string;
 
   /**
-   * Create an ObjectId type
+   * Create ObjectId from a number.
    *
-   * @param inputId - Can be a 24 character hex string, 12 byte binary Buffer, or a number.
+   * @param inputId - A number.
+   * @deprecated Instead, use `static createFromTime()` to set a numeric value for the new ObjectId.
+   */
+  constructor(inputId: number);
+  /**
+   * Create ObjectId from a 24 character hex string.
+   *
+   * @param inputId - A 24 character hex string.
+   */
+  constructor(inputId: string);
+  /**
+   * Create ObjectId from the BSON ObjectId type.
+   *
+   * @param inputId - The BSON ObjectId type.
+   */
+  constructor(inputId: ObjectId);
+  /**
+   * Create ObjectId from the object type that has the toHexString method.
+   *
+   * @param inputId - The ObjectIdLike type.
+   */
+  constructor(inputId: ObjectIdLike);
+  /**
+   * Create ObjectId from a 12 byte binary Buffer.
+   *
+   * @param inputId - A 12 byte binary Buffer.
+   */
+  constructor(inputId: Uint8Array);
+  /** To generate a new ObjectId, use ObjectId() with no argument. */
+  constructor();
+  /**
+   * Implementation overload.
+   *
+   * @param inputId - All input types that are used in the constructor implementation.
+   */
+  constructor(inputId?: string | number | ObjectId | ObjectIdLike | Uint8Array);
+  /**
+   * Create a new ObjectId.
+   *
+   * @param inputId - An input value to create a new ObjectId from.
    */
   constructor(inputId?: string | number | ObjectId | ObjectIdLike | Uint8Array) {
     super();
@@ -65,7 +104,7 @@ export class ObjectId extends BSONValue {
       workingId = inputId;
     }
 
-    // the following cases use workingId to construct an ObjectId
+    // The following cases use workingId to construct an ObjectId
     if (workingId == null || typeof workingId === 'number') {
       // The most common use case (blank id, new objectId instance)
       // Generate a new id
