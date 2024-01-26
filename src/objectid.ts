@@ -74,6 +74,8 @@ export class ObjectId extends BSONValue {
    * @param inputId - A 12 byte binary Buffer.
    */
   constructor(inputId: Uint8Array);
+  /** To generate a new ObjectId, use ObjectId() with no argument. */
+  constructor();
   /**
    * Implementation overload.
    *
