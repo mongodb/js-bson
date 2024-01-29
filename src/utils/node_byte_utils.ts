@@ -126,6 +126,33 @@ export const nodeJsByteUtils = {
   },
 
   toUTF8(buffer: Uint8Array, start: number, end: number): string {
+    if (buffer.length === 0) {
+      return '';
+    }
+
+    const stringByteLength = end - start;
+    if (stringByteLength === 0) {
+      return '';
+    }
+
+    if (stringByteLength < 200) {
+      let basicLatin = true;
+      const latinBytes = [];
+      for (let i = start; i < end; i++) {
+        const byte = buffer[i];
+        if (byte > 127) {
+          basicLatin = false;
+          break;
+        }
+        latinBytes.push(byte);
+      }
+
+      if (basicLatin) {
+        // eslint-disable-next-line prefer-spread
+        return String.fromCharCode.apply(String, latinBytes);
+      }
+    }
+
     return nodeJsByteUtils.toLocalBufferType(buffer).toString('utf8', start, end);
   },
 
