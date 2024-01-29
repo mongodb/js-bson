@@ -1,4 +1,5 @@
 import { BSONError } from '../error';
+import { validateUtf8 } from '../validate_utf8';
 
 type NodeJsEncoding = 'base64' | 'hex' | 'utf8' | 'binary';
 type NodeJsBuffer = ArrayBufferView &
@@ -125,7 +126,7 @@ export const nodeJsByteUtils = {
     return Buffer.from(text, 'utf8');
   },
 
-  toUTF8(buffer: Uint8Array, start: number, end: number): string {
+  toUTF8(buffer: Uint8Array, start: number, end: number, fatal: boolean): string {
     if (buffer.length === 0) {
       return '';
     }
@@ -153,7 +154,19 @@ export const nodeJsByteUtils = {
       }
     }
 
-    return nodeJsByteUtils.toLocalBufferType(buffer).toString('utf8', start, end);
+    const string = nodeJsByteUtils.toLocalBufferType(buffer).toString('utf8', start, end);
+    if (fatal) {
+      // TODO(NODE-4930): Insufficiently strict BSON UTF8 validation
+      for (let i = 0; i < string.length; i++) {
+        if (string.charCodeAt(i) === 0xfffd) {
+          if (!validateUtf8(buffer, start, end)) {
+            throw new BSONError('Invalid UTF-8 string in BSON document');
+          }
+          break;
+        }
+      }
+    }
+    return string;
   },
 
   utf8ByteLength(input: string): number {
