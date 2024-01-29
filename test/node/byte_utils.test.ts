@@ -8,7 +8,6 @@ import { webByteUtils } from '../../src/utils/web_byte_utils';
 import * as sinon from 'sinon';
 import { loadCJSModuleBSON, loadReactNativeCJSModuleBSON, loadESModuleBSON } from '../load_bson';
 import * as crypto from 'node:crypto';
-import { BSONError } from '../register-bson';
 
 type ByteUtilTest<K extends keyof ByteUtils> = {
   name: string;
