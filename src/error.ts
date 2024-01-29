@@ -23,7 +23,7 @@ export class BSONError extends Error {
     return 'BSONError';
   }
 
-  constructor(message: string, options?: ErrorOptions) {
+  constructor(message: string, options?: { cause?: unknown }) {
     super(message, options);
   }
 

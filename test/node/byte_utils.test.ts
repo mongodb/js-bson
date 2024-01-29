@@ -419,7 +419,7 @@ const toUTF8Tests: ByteUtilTest<'toUTF8'>[] = [
     name: 'should throw an error if fatal is set and string is invalid',
     inputs: [Buffer.from('616263f09fa4', 'hex'), 0, 7, true],
     expectation({ error }) {
-      expect(error).to.be.instanceOf(BSONError);
+      expect(error).to.match(/Invalid UTF-8 string in BSON document/i);
     }
   },
   {
