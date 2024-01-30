@@ -1,6 +1,6 @@
 /**
  * This function is an optimization for small basic latin strings.
- *
+ * @internal
  * @remarks
  * ### Important characteristics:
  * - If the uint8array or distance between start and end is 0 this function returns an empty string
