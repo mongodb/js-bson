@@ -46,6 +46,7 @@ const REQUIRED_FILES = [
   'src/utils/byte_utils.ts',
   'src/utils/node_byte_utils.ts',
   'src/utils/web_byte_utils.ts',
+  'src/utils/latin.ts',
   'src/validate_utf8.ts',
   'vendor/base64/base64.js',
   'vendor/base64/package.json',

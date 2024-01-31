@@ -13,7 +13,7 @@ const tsConfig = {
   module: 'esnext',
   moduleResolution: 'node',
   removeComments: true,
-  lib: ['es2021'],
+  lib: ['es2021', 'ES2022.Error'],
   importHelpers: false,
   noEmitHelpers: false,
   noEmitOnError: true,

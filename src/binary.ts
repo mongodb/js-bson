@@ -191,8 +191,8 @@ export class Binary extends BSONValue {
     if (encoding === 'hex') return ByteUtils.toHex(this.buffer);
     if (encoding === 'base64') return ByteUtils.toBase64(this.buffer);
     if (encoding === 'utf8' || encoding === 'utf-8')
-      return ByteUtils.toUTF8(this.buffer, 0, this.buffer.byteLength);
-    return ByteUtils.toUTF8(this.buffer, 0, this.buffer.byteLength);
+      return ByteUtils.toUTF8(this.buffer, 0, this.buffer.byteLength, false);
+    return ByteUtils.toUTF8(this.buffer, 0, this.buffer.byteLength, false);
   }
 
   /** @internal */
