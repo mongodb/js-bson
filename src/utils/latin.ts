@@ -1,5 +1,3 @@
-/* eslint-disable prefer-spread */
-
 /**
  * This function is an optimization for small basic latin strings.
  * @internal
@@ -59,7 +57,7 @@ export function tryLatin(uint8array: Uint8Array, start: number, end: number): st
     }
 
     if (basicLatin) {
-      return String.fromCharCode.apply(String, latinBytes);
+      return String.fromCharCode(...latinBytes);
     }
   }
 
