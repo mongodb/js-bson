@@ -23,6 +23,10 @@ export function tryLatin(uint8array: Uint8Array, start: number, end: number): st
     return '';
   }
 
+  if (stringByteLength > 20) {
+    return null;
+  }
+
   if (stringByteLength === 1 && uint8array[start] < 128) {
     return String.fromCharCode(uint8array[start]);
   }
@@ -44,22 +48,14 @@ export function tryLatin(uint8array: Uint8Array, start: number, end: number): st
     );
   }
 
-  if (stringByteLength <= 20) {
-    let basicLatin = true;
-    const latinBytes = [];
-    for (let i = start; i < end; i++) {
-      const byte = uint8array[i];
-      if (byte > 127) {
-        basicLatin = false;
-        break;
-      }
-      latinBytes.push(byte);
+  const latinBytes = [];
+  for (let i = start; i < end; i++) {
+    const byte = uint8array[i];
+    if (byte > 127) {
+      return null;
     }
-
-    if (basicLatin) {
-      return String.fromCharCode(...latinBytes);
-    }
+    latinBytes.push(byte);
   }
 
-  return null;
+  return String.fromCharCode(...latinBytes);
 }
