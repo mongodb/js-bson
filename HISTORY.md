@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.3.0](https://github.com/mongodb/js-bson/compare/v6.2.0...v6.3.0) (2024-01-31)
+
+
+### Features
+
+* **NODE-3034:** deprecate number as an input to ObjectId constructor ([#640](https://github.com/mongodb/js-bson/issues/640)) ([44bec19](https://github.com/mongodb/js-bson/commit/44bec1900b53bac9938c3f0b9dcf0f75eadcd95e))
+* **NODE-5861:** optimize parsing basic latin strings ([#642](https://github.com/mongodb/js-bson/issues/642)) ([cdb779b](https://github.com/mongodb/js-bson/commit/cdb779b3bab8192a830d141a010d3781d1ee8bae))
+
 ## [6.2.0](https://github.com/mongodb/js-bson/compare/v6.1.0...v6.2.0) (2023-10-16)
 
 
