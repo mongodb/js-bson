@@ -21,8 +21,6 @@ export interface ObjectIdExtended {
   $oid: string;
 }
 
-const kId = Symbol('id');
-
 /**
  * A class representation of the BSON ObjectId type.
  * @public
@@ -39,7 +37,7 @@ export class ObjectId extends BSONValue {
   static cacheHexString: boolean;
 
   /** ObjectId Bytes @internal */
-  private [kId]!: Uint8Array;
+  private buffer!: Uint8Array;
   /** ObjectId hexString cache @internal */
   private __id?: string;
 
@@ -108,13 +106,13 @@ export class ObjectId extends BSONValue {
     if (workingId == null || typeof workingId === 'number') {
       // The most common use case (blank id, new objectId instance)
       // Generate a new id
-      this[kId] = ObjectId.generate(typeof workingId === 'number' ? workingId : undefined);
+      this.buffer = ObjectId.generate(typeof workingId === 'number' ? workingId : undefined);
     } else if (ArrayBuffer.isView(workingId) && workingId.byteLength === 12) {
       // If intstanceof matches we can escape calling ensure buffer in Node.js environments
-      this[kId] = ByteUtils.toLocalBufferType(workingId);
+      this.buffer = ByteUtils.toLocalBufferType(workingId);
     } else if (typeof workingId === 'string') {
       if (workingId.length === 24 && checkForHexRegExp.test(workingId)) {
-        this[kId] = ByteUtils.fromHex(workingId);
+        this.buffer = ByteUtils.fromHex(workingId);
       } else {
         throw new BSONError(
           'input must be a 24 character hex string, 12 byte Uint8Array, or an integer'
@@ -134,11 +132,11 @@ export class ObjectId extends BSONValue {
    * @readonly
    */
   get id(): Uint8Array {
-    return this[kId];
+    return this.buffer;
   }
 
   set id(value: Uint8Array) {
-    this[kId] = value;
+    this.buffer = value;
     if (ObjectId.cacheHexString) {
       this.__id = ByteUtils.toHex(value);
     }
@@ -240,7 +238,9 @@ export class ObjectId extends BSONValue {
     }
 
     if (ObjectId.is(otherId)) {
-      return this[kId][11] === otherId[kId][11] && ByteUtils.equals(this[kId], otherId[kId]);
+      return (
+        this.buffer[11] === otherId.buffer[11] && ByteUtils.equals(this.buffer, otherId.buffer)
+      );
     }
 
     if (typeof otherId === 'string') {
