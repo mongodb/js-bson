@@ -123,10 +123,6 @@ export const nodeJsByteUtils = {
     return nodeJsByteUtils.toLocalBufferType(buffer).toString('hex');
   },
 
-  fromUTF8(text: string): NodeJsBuffer {
-    return Buffer.from(text, 'utf8');
-  },
-
   toUTF8(buffer: Uint8Array, start: number, end: number, fatal: boolean): string {
     const basicLatin = end - start <= 20 ? tryLatin(buffer, start, end) : null;
     if (basicLatin != null) {

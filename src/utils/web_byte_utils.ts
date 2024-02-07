@@ -169,10 +169,6 @@ export const webByteUtils = {
     return Array.from(uint8array, byte => byte.toString(16).padStart(2, '0')).join('');
   },
 
-  fromUTF8(text: string): Uint8Array {
-    return new TextEncoder().encode(text);
-  },
-
   toUTF8(uint8array: Uint8Array, start: number, end: number, fatal: boolean): string {
     const basicLatin = end - start <= 20 ? tryLatin(uint8array, start, end) : null;
     if (basicLatin != null) {
@@ -190,11 +186,11 @@ export const webByteUtils = {
   },
 
   utf8ByteLength(input: string): number {
-    return webByteUtils.fromUTF8(input).byteLength;
+    return new TextEncoder().encode(input).byteLength;
   },
 
   encodeUTF8Into(buffer: Uint8Array, source: string, byteOffset: number): number {
-    const bytes = webByteUtils.fromUTF8(source);
+    const bytes = new TextEncoder().encode(source);
     buffer.set(bytes, byteOffset);
     return bytes.byteLength;
   },
