@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { tryLatin } from '../../../src/utils/latin';
+import { tryLatin, tryWriteLatin } from '../../../src/utils/latin';
 import * as sinon from 'sinon';
 
 describe('tryLatin()', () => {
@@ -113,6 +113,65 @@ describe('tryLatin()', () => {
     it('returns null', () => {
       expect(tryLatin(new Uint8Array(21).fill(95), 0, 21)).be.null;
       expect(tryLatin(new Uint8Array(201).fill(95), 0, 201)).be.null;
+    });
+  });
+});
+
+describe('tryWriteLatin()', () => {
+  context('when given a string of length 0', () => {
+    it('returns 0 and does not modify the destination', () => {
+      const input = Uint8Array.from({ length: 10 }, () => 1);
+      expect(tryWriteLatin(input, '', 2)).to.equal(0);
+      expect(input).to.deep.equal(Uint8Array.from({ length: 10 }, () => 1));
+    });
+  });
+
+  context('when given a string with a length larger than the buffer', () => {
+    it('returns null', () => {
+      const input = Uint8Array.from({ length: 10 }, () => 1);
+      expect(tryWriteLatin(input, 'a'.repeat(11), 0)).to.be.null;
+      expect(tryWriteLatin(input, 'a'.repeat(13), 2)).to.be.null;
+    });
+  });
+
+  let charCodeAtSpy;
+
+  beforeEach(() => {
+    charCodeAtSpy = sinon.spy(String.prototype, 'charCodeAt');
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  for (let stringLength = 1; stringLength <= 25; stringLength++) {
+    context(`when there is ${stringLength} bytes`, () => {
+      context('that exceed 127', () => {
+        it('returns null', () => {
+          expect(
+            tryWriteLatin(
+              new Uint8Array(stringLength * 3),
+              'a'.repeat(stringLength - 1) + '\x80',
+              0
+            )
+          ).be.null;
+        });
+      });
+
+      it(`calls charCodeAt ${stringLength}`, () => {
+        tryWriteLatin(
+          new Uint8Array(stringLength * 3),
+          String.fromCharCode(127).repeat(stringLength),
+          stringLength
+        );
+        expect(charCodeAtSpy).to.have.callCount(stringLength);
+      });
+    });
+  }
+
+  context('when there is >25 characters', () => {
+    it('returns null', () => {
+      expect(tryWriteLatin(new Uint8Array(75), 'a'.repeat(26), 0)).be.null;
     });
   });
 });

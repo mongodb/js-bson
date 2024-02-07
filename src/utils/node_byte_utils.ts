@@ -1,6 +1,6 @@
 import { BSONError } from '../error';
 import { validateUtf8 } from '../validate_utf8';
-import { tryLatin } from './latin';
+import { tryLatin, tryWriteLatin } from './latin';
 
 type NodeJsEncoding = 'base64' | 'hex' | 'utf8' | 'binary';
 type NodeJsBuffer = ArrayBufferView &
@@ -149,6 +149,11 @@ export const nodeJsByteUtils = {
   },
 
   encodeUTF8Into(buffer: Uint8Array, source: string, byteOffset: number): number {
+    const latinBytesWritten = tryWriteLatin(buffer, source, byteOffset);
+    if (latinBytesWritten != null) {
+      return latinBytesWritten;
+    }
+
     return nodeJsByteUtils.toLocalBufferType(buffer).write(source, byteOffset, undefined, 'utf8');
   },
 
