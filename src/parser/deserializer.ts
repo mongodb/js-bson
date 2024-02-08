@@ -195,536 +195,599 @@ function deserializeObject(
     }
   }
 
-  // Set the start index
-  const startIndex = index;
-
   // Validate that we have at least 4 bytes of buffer
   if (buffer.length < 5) throw new BSONError('corrupt bson message < 5 bytes long');
 
   // Read the document size
-  const size =
-    buffer[index++] | (buffer[index++] << 8) | (buffer[index++] << 16) | (buffer[index++] << 24);
+  const root = isArray ? [] : {};
 
-  // Ensure buffer is valid size
-  if (size < 5 || size > buffer.length) throw new BSONError('corrupt bson message');
+  let ctx: {
+    size: number;
+    isArray: boolean;
+    options: DeserializeOptions;
+    object: any;
+    previous: any;
+  } = {
+    size:
+      buffer[index++] | (buffer[index++] << 8) | (buffer[index++] << 16) | (buffer[index++] << 24),
+    isArray: false,
+    options,
+    object: root,
+    previous: null
+  };
 
-  // Create holding object
-  const object: Document = isArray ? [] : {};
-  // Used for arrays to skip having to perform utf8 decoding
-  let arrayIndex = 0;
-  const done = false;
+  embedded: while (ctx != null) {
+    // Set the start index
+    const size: number = ctx.size;
 
-  let isPossibleDBRef = isArray ? false : null;
+    // Ensure buffer is valid size
+    if (size < 5 || size > buffer.length) throw new BSONError('corrupt bson message');
 
-  // While we have more left data left keep parsing
-  const dataview = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-  while (!done) {
-    // Read the type
-    const elementType = buffer[index++];
+    // if (buffer[index - 4 + size - 1] !== 0) throw new BSONError('invalid document terminator byte');
 
-    // If we get a zero it's the last byte, exit
-    if (elementType === 0) break;
+    // Create holding object
+    const isArray = ctx.isArray;
+    const object: Document = ctx.object;
+    const options = ctx.options;
+    // Used for arrays to skip having to perform utf8 decoding
+    let arrayIndex = 0;
+    const done = false;
 
-    // Get the start search index
-    let i = index;
-    // Locate the end of the c string
-    while (buffer[i] !== 0x00 && i < buffer.length) {
-      i++;
-    }
+    let isPossibleDBRef = isArray ? false : null;
 
-    // If are at the end of the buffer there is a problem with the document
-    if (i >= buffer.byteLength) throw new BSONError('Bad BSON Document: illegal CString');
+    // While we have more left data left keep parsing
+    const dataview = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+    while (!done) {
+      // Read the type
+      const elementType = buffer[index++];
 
-    // Represents the key
-    const name = isArray ? arrayIndex++ : ByteUtils.toUTF8(buffer, index, i, false);
+      // If we get a zero it's the last byte, exit
+      if (elementType === 0) break;
 
-    // shouldValidateKey is true if the key should be validated, false otherwise
-    let shouldValidateKey = true;
-    if (globalUTFValidation || utf8KeysSet.has(name)) {
-      shouldValidateKey = validationSetting;
-    } else {
-      shouldValidateKey = !validationSetting;
-    }
-
-    if (isPossibleDBRef !== false && (name as string)[0] === '$') {
-      isPossibleDBRef = allowedDBRefKeys.test(name as string);
-    }
-    let value;
-
-    index = i + 1;
-
-    if (elementType === constants.BSON_DATA_STRING) {
-      const stringSize =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
-      if (
-        stringSize <= 0 ||
-        stringSize > buffer.length - index ||
-        buffer[index + stringSize - 1] !== 0
-      ) {
-        throw new BSONError('bad string length in bson');
+      // Get the start search index
+      let i = index;
+      // Locate the end of the c string
+      while (buffer[i] !== 0x00 && i < buffer.length) {
+        i++;
       }
-      value = ByteUtils.toUTF8(buffer, index, index + stringSize - 1, shouldValidateKey);
-      index = index + stringSize;
-    } else if (elementType === constants.BSON_DATA_OID) {
-      const oid = ByteUtils.allocate(12);
-      oid.set(buffer.subarray(index, index + 12));
-      value = new ObjectId(oid);
-      index = index + 12;
-    } else if (elementType === constants.BSON_DATA_INT && promoteValues === false) {
-      value = new Int32(
-        buffer[index++] | (buffer[index++] << 8) | (buffer[index++] << 16) | (buffer[index++] << 24)
-      );
-    } else if (elementType === constants.BSON_DATA_INT) {
-      value =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
-    } else if (elementType === constants.BSON_DATA_NUMBER && promoteValues === false) {
-      value = new Double(dataview.getFloat64(index, true));
-      index = index + 8;
-    } else if (elementType === constants.BSON_DATA_NUMBER) {
-      value = dataview.getFloat64(index, true);
-      index = index + 8;
-    } else if (elementType === constants.BSON_DATA_DATE) {
-      const lowBits =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
-      const highBits =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
-      value = new Date(new Long(lowBits, highBits).toNumber());
-    } else if (elementType === constants.BSON_DATA_BOOLEAN) {
-      if (buffer[index] !== 0 && buffer[index] !== 1)
-        throw new BSONError('illegal boolean type value');
-      value = buffer[index++] === 1;
-    } else if (elementType === constants.BSON_DATA_OBJECT) {
-      const _index = index;
-      const objectSize =
-        buffer[index] |
-        (buffer[index + 1] << 8) |
-        (buffer[index + 2] << 16) |
-        (buffer[index + 3] << 24);
-      if (objectSize <= 0 || objectSize > buffer.length - index)
-        throw new BSONError('bad embedded document length in bson');
 
-      // We have a raw value
-      if (raw) {
-        value = buffer.slice(index, index + objectSize);
+      // If are at the end of the buffer there is a problem with the document
+      if (i >= buffer.byteLength) throw new BSONError('Bad BSON Document: illegal CString');
+
+      // Represents the key
+      const name = isArray ? arrayIndex++ : ByteUtils.toUTF8(buffer, index, i, false);
+
+      // shouldValidateKey is true if the key should be validated, false otherwise
+      let shouldValidateKey = true;
+      if (globalUTFValidation || utf8KeysSet.has(name)) {
+        shouldValidateKey = validationSetting;
       } else {
-        let objectOptions = options;
-        if (!globalUTFValidation) {
-          objectOptions = { ...options, validation: { utf8: shouldValidateKey } };
+        shouldValidateKey = !validationSetting;
+      }
+
+      if (isPossibleDBRef !== false && (name as string)[0] === '$') {
+        isPossibleDBRef = allowedDBRefKeys.test(name as string);
+      }
+      let value;
+
+      index = i + 1;
+
+      if (elementType === constants.BSON_DATA_STRING) {
+        const stringSize =
+          buffer[index++] |
+          (buffer[index++] << 8) |
+          (buffer[index++] << 16) |
+          (buffer[index++] << 24);
+        if (
+          stringSize <= 0 ||
+          stringSize > buffer.length - index ||
+          buffer[index + stringSize - 1] !== 0
+        ) {
+          throw new BSONError('bad string length in bson');
         }
-        value = deserializeObject(buffer, _index, objectOptions, false);
-      }
-
-      index = index + objectSize;
-    } else if (elementType === constants.BSON_DATA_ARRAY) {
-      const _index = index;
-      const objectSize =
-        buffer[index] |
-        (buffer[index + 1] << 8) |
-        (buffer[index + 2] << 16) |
-        (buffer[index + 3] << 24);
-      let arrayOptions: DeserializeOptions = options;
-
-      // Stop index
-      const stopIndex = index + objectSize;
-
-      // All elements of array to be returned as raw bson
-      if (fieldsAsRaw && fieldsAsRaw[name]) {
-        arrayOptions = { ...options, raw: true };
-      }
-
-      if (!globalUTFValidation) {
-        arrayOptions = { ...arrayOptions, validation: { utf8: shouldValidateKey } };
-      }
-      value = deserializeObject(buffer, _index, arrayOptions, true);
-      index = index + objectSize;
-
-      if (buffer[index - 1] !== 0) throw new BSONError('invalid array terminator byte');
-      if (index !== stopIndex) throw new BSONError('corrupted array bson');
-    } else if (elementType === constants.BSON_DATA_UNDEFINED) {
-      value = undefined;
-    } else if (elementType === constants.BSON_DATA_NULL) {
-      value = null;
-    } else if (elementType === constants.BSON_DATA_LONG) {
-      // Unpack the low and high bits
-      const dataview = BSONDataView.fromUint8Array(buffer.subarray(index, index + 8));
-
-      const lowBits =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
-      const highBits =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
-      const long = new Long(lowBits, highBits);
-      if (useBigInt64) {
-        value = dataview.getBigInt64(0, true);
-      } else if (promoteLongs && promoteValues === true) {
-        // Promote the long if possible
+        value = ByteUtils.toUTF8(buffer, index, index + stringSize - 1, shouldValidateKey);
+        index = index + stringSize;
+      } else if (elementType === constants.BSON_DATA_OID) {
+        const oid = ByteUtils.allocate(12);
+        oid.set(buffer.subarray(index, index + 12));
+        value = new ObjectId(oid);
+        index = index + 12;
+      } else if (elementType === constants.BSON_DATA_INT && promoteValues === false) {
+        value = new Int32(
+          buffer[index++] |
+            (buffer[index++] << 8) |
+            (buffer[index++] << 16) |
+            (buffer[index++] << 24)
+        );
+      } else if (elementType === constants.BSON_DATA_INT) {
         value =
-          long.lessThanOrEqual(JS_INT_MAX_LONG) && long.greaterThanOrEqual(JS_INT_MIN_LONG)
-            ? long.toNumber()
-            : long;
-      } else {
-        value = long;
-      }
-    } else if (elementType === constants.BSON_DATA_DECIMAL128) {
-      // Buffer to contain the decimal bytes
-      const bytes = ByteUtils.allocate(16);
-      // Copy the next 16 bytes into the bytes buffer
-      bytes.set(buffer.subarray(index, index + 16), 0);
-      // Update index
-      index = index + 16;
-      // Assign the new Decimal128 value
-      value = new Decimal128(bytes);
-    } else if (elementType === constants.BSON_DATA_BINARY) {
-      let binarySize =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
-      const totalBinarySize = binarySize;
-      const subType = buffer[index++];
+          buffer[index++] |
+          (buffer[index++] << 8) |
+          (buffer[index++] << 16) |
+          (buffer[index++] << 24);
+      } else if (elementType === constants.BSON_DATA_NUMBER && promoteValues === false) {
+        value = new Double(dataview.getFloat64(index, true));
+        index = index + 8;
+      } else if (elementType === constants.BSON_DATA_NUMBER) {
+        value = dataview.getFloat64(index, true);
+        index = index + 8;
+      } else if (elementType === constants.BSON_DATA_DATE) {
+        const lowBits =
+          buffer[index++] |
+          (buffer[index++] << 8) |
+          (buffer[index++] << 16) |
+          (buffer[index++] << 24);
+        const highBits =
+          buffer[index++] |
+          (buffer[index++] << 8) |
+          (buffer[index++] << 16) |
+          (buffer[index++] << 24);
+        value = new Date(new Long(lowBits, highBits).toNumber());
+      } else if (elementType === constants.BSON_DATA_BOOLEAN) {
+        if (buffer[index] !== 0 && buffer[index] !== 1)
+          throw new BSONError('illegal boolean type value');
+        value = buffer[index++] === 1;
+      } else if (elementType === constants.BSON_DATA_OBJECT) {
+        // const _index = index;
+        const objectSize =
+          buffer[index] |
+          (buffer[index + 1] << 8) |
+          (buffer[index + 2] << 16) |
+          (buffer[index + 3] << 24);
+        if (objectSize <= 0 || objectSize > buffer.length - index)
+          throw new BSONError('bad embedded document length in bson');
 
-      // Did we have a negative binary size, throw
-      if (binarySize < 0) throw new BSONError('Negative binary type element size found');
+        // We have a raw value
+        if (raw) {
+          value = buffer.slice(index, index + objectSize);
+          index = index + objectSize;
+        } else {
+          let objectOptions = options;
+          if (!globalUTFValidation) {
+            objectOptions = { ...options, validation: { utf8: shouldValidateKey } };
+          }
 
-      // Is the length longer than the document
-      if (binarySize > buffer.byteLength)
-        throw new BSONError('Binary type size larger than document size');
+          if (name === '__proto__') {
+            Object.defineProperty(object, name, {
+              value: {},
+              writable: true,
+              enumerable: true,
+              configurable: true
+            });
+          } else {
+            object[name] = {};
+          }
 
-      // Decode as raw Buffer object if options specifies it
-      if (buffer['slice'] != null) {
-        // If we have subtype 2 skip the 4 bytes for the size
-        if (subType === Binary.SUBTYPE_BYTE_ARRAY) {
-          binarySize =
+          ctx = {
+            size:
+              buffer[index++] |
+              (buffer[index++] << 8) |
+              (buffer[index++] << 16) |
+              (buffer[index++] << 24),
+            isArray: false,
+            options: objectOptions,
+            object: object[name],
+            previous: ctx
+          };
+
+          continue embedded;
+        }
+      } else if (elementType === constants.BSON_DATA_ARRAY) {
+        // const _index = index;
+        // const objectSize =
+        //   buffer[index] |
+        //   (buffer[index + 1] << 8) |
+        //   (buffer[index + 2] << 16) |
+        //   (buffer[index + 3] << 24);
+        let arrayOptions: DeserializeOptions = options;
+
+        // All elements of array to be returned as raw bson
+        if (fieldsAsRaw && fieldsAsRaw[name]) {
+          arrayOptions = { ...options, raw: true };
+        }
+
+        if (!globalUTFValidation) {
+          arrayOptions = { ...arrayOptions, validation: { utf8: shouldValidateKey } };
+        }
+
+        if (name === '__proto__') {
+          Object.defineProperty(object, name, {
+            value: [],
+            writable: true,
+            enumerable: true,
+            configurable: true
+          });
+        } else {
+          object[name] = [];
+        }
+
+        ctx = {
+          size:
             buffer[index++] |
             (buffer[index++] << 8) |
             (buffer[index++] << 16) |
-            (buffer[index++] << 24);
-          if (binarySize < 0)
-            throw new BSONError('Negative binary type element size found for subtype 0x02');
-          if (binarySize > totalBinarySize - 4)
-            throw new BSONError('Binary type with subtype 0x02 contains too long binary size');
-          if (binarySize < totalBinarySize - 4)
-            throw new BSONError('Binary type with subtype 0x02 contains too short binary size');
-        }
+            (buffer[index++] << 24),
+          isArray: true,
+          options: arrayOptions,
+          object: object[name],
+          previous: ctx
+        };
 
-        if (promoteBuffers && promoteValues) {
-          value = ByteUtils.toLocalBufferType(buffer.slice(index, index + binarySize));
+        continue embedded;
+      } else if (elementType === constants.BSON_DATA_UNDEFINED) {
+        value = undefined;
+      } else if (elementType === constants.BSON_DATA_NULL) {
+        value = null;
+      } else if (elementType === constants.BSON_DATA_LONG) {
+        // Unpack the low and high bits
+        const dataview = BSONDataView.fromUint8Array(buffer.subarray(index, index + 8));
+
+        const lowBits =
+          buffer[index++] |
+          (buffer[index++] << 8) |
+          (buffer[index++] << 16) |
+          (buffer[index++] << 24);
+        const highBits =
+          buffer[index++] |
+          (buffer[index++] << 8) |
+          (buffer[index++] << 16) |
+          (buffer[index++] << 24);
+        const long = new Long(lowBits, highBits);
+        if (useBigInt64) {
+          value = dataview.getBigInt64(0, true);
+        } else if (promoteLongs && promoteValues === true) {
+          // Promote the long if possible
+          value =
+            long.lessThanOrEqual(JS_INT_MAX_LONG) && long.greaterThanOrEqual(JS_INT_MIN_LONG)
+              ? long.toNumber()
+              : long;
         } else {
-          value = new Binary(buffer.slice(index, index + binarySize), subType);
-          if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW && UUID.isValid(value)) {
-            value = value.toUUID();
+          value = long;
+        }
+      } else if (elementType === constants.BSON_DATA_DECIMAL128) {
+        // Buffer to contain the decimal bytes
+        const bytes = ByteUtils.allocate(16);
+        // Copy the next 16 bytes into the bytes buffer
+        bytes.set(buffer.subarray(index, index + 16), 0);
+        // Update index
+        index = index + 16;
+        // Assign the new Decimal128 value
+        value = new Decimal128(bytes);
+      } else if (elementType === constants.BSON_DATA_BINARY) {
+        let binarySize =
+          buffer[index++] |
+          (buffer[index++] << 8) |
+          (buffer[index++] << 16) |
+          (buffer[index++] << 24);
+        const totalBinarySize = binarySize;
+        const subType = buffer[index++];
+
+        // Did we have a negative binary size, throw
+        if (binarySize < 0) throw new BSONError('Negative binary type element size found');
+
+        // Is the length longer than the document
+        if (binarySize > buffer.byteLength)
+          throw new BSONError('Binary type size larger than document size');
+
+        // Decode as raw Buffer object if options specifies it
+        if (buffer['slice'] != null) {
+          // If we have subtype 2 skip the 4 bytes for the size
+          if (subType === Binary.SUBTYPE_BYTE_ARRAY) {
+            binarySize =
+              buffer[index++] |
+              (buffer[index++] << 8) |
+              (buffer[index++] << 16) |
+              (buffer[index++] << 24);
+            if (binarySize < 0)
+              throw new BSONError('Negative binary type element size found for subtype 0x02');
+            if (binarySize > totalBinarySize - 4)
+              throw new BSONError('Binary type with subtype 0x02 contains too long binary size');
+            if (binarySize < totalBinarySize - 4)
+              throw new BSONError('Binary type with subtype 0x02 contains too short binary size');
+          }
+
+          if (promoteBuffers && promoteValues) {
+            value = ByteUtils.toLocalBufferType(buffer.slice(index, index + binarySize));
+          } else {
+            value = new Binary(buffer.slice(index, index + binarySize), subType);
+            if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW && UUID.isValid(value)) {
+              value = value.toUUID();
+            }
+          }
+        } else {
+          const _buffer = ByteUtils.allocate(binarySize);
+          // If we have subtype 2 skip the 4 bytes for the size
+          if (subType === Binary.SUBTYPE_BYTE_ARRAY) {
+            binarySize =
+              buffer[index++] |
+              (buffer[index++] << 8) |
+              (buffer[index++] << 16) |
+              (buffer[index++] << 24);
+            if (binarySize < 0)
+              throw new BSONError('Negative binary type element size found for subtype 0x02');
+            if (binarySize > totalBinarySize - 4)
+              throw new BSONError('Binary type with subtype 0x02 contains too long binary size');
+            if (binarySize < totalBinarySize - 4)
+              throw new BSONError('Binary type with subtype 0x02 contains too short binary size');
+          }
+
+          // Copy the data
+          for (i = 0; i < binarySize; i++) {
+            _buffer[i] = buffer[index + i];
+          }
+
+          if (promoteBuffers && promoteValues) {
+            value = _buffer;
+          } else {
+            value = new Binary(buffer.slice(index, index + binarySize), subType);
+            if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW && UUID.isValid(value)) {
+              value = value.toUUID();
+            }
           }
         }
+
+        // Update the index
+        index = index + binarySize;
+      } else if (elementType === constants.BSON_DATA_REGEXP && bsonRegExp === false) {
+        // Get the start search index
+        i = index;
+        // Locate the end of the c string
+        while (buffer[i] !== 0x00 && i < buffer.length) {
+          i++;
+        }
+        // If are at the end of the buffer there is a problem with the document
+        if (i >= buffer.length) throw new BSONError('Bad BSON Document: illegal CString');
+        // Return the C string
+        const source = ByteUtils.toUTF8(buffer, index, i, false);
+        // Create the regexp
+        index = i + 1;
+
+        // Get the start search index
+        i = index;
+        // Locate the end of the c string
+        while (buffer[i] !== 0x00 && i < buffer.length) {
+          i++;
+        }
+        // If are at the end of the buffer there is a problem with the document
+        if (i >= buffer.length) throw new BSONError('Bad BSON Document: illegal CString');
+        // Return the C string
+        const regExpOptions = ByteUtils.toUTF8(buffer, index, i, false);
+        index = i + 1;
+
+        // For each option add the corresponding one for javascript
+        const optionsArray = new Array(regExpOptions.length);
+
+        // Parse options
+        for (i = 0; i < regExpOptions.length; i++) {
+          switch (regExpOptions[i]) {
+            case 'm':
+              optionsArray[i] = 'm';
+              break;
+            case 's':
+              optionsArray[i] = 'g';
+              break;
+            case 'i':
+              optionsArray[i] = 'i';
+              break;
+          }
+        }
+
+        value = new RegExp(source, optionsArray.join(''));
+      } else if (elementType === constants.BSON_DATA_REGEXP && bsonRegExp === true) {
+        // Get the start search index
+        i = index;
+        // Locate the end of the c string
+        while (buffer[i] !== 0x00 && i < buffer.length) {
+          i++;
+        }
+        // If are at the end of the buffer there is a problem with the document
+        if (i >= buffer.length) throw new BSONError('Bad BSON Document: illegal CString');
+        // Return the C string
+        const source = ByteUtils.toUTF8(buffer, index, i, false);
+        index = i + 1;
+
+        // Get the start search index
+        i = index;
+        // Locate the end of the c string
+        while (buffer[i] !== 0x00 && i < buffer.length) {
+          i++;
+        }
+        // If are at the end of the buffer there is a problem with the document
+        if (i >= buffer.length) throw new BSONError('Bad BSON Document: illegal CString');
+        // Return the C string
+        const regExpOptions = ByteUtils.toUTF8(buffer, index, i, false);
+        index = i + 1;
+
+        // Set the object
+        value = new BSONRegExp(source, regExpOptions);
+      } else if (elementType === constants.BSON_DATA_SYMBOL) {
+        const stringSize =
+          buffer[index++] |
+          (buffer[index++] << 8) |
+          (buffer[index++] << 16) |
+          (buffer[index++] << 24);
+        if (
+          stringSize <= 0 ||
+          stringSize > buffer.length - index ||
+          buffer[index + stringSize - 1] !== 0
+        ) {
+          throw new BSONError('bad string length in bson');
+        }
+        const symbol = ByteUtils.toUTF8(buffer, index, index + stringSize - 1, shouldValidateKey);
+        value = promoteValues ? symbol : new BSONSymbol(symbol);
+        index = index + stringSize;
+      } else if (elementType === constants.BSON_DATA_TIMESTAMP) {
+        // We intentionally **do not** use bit shifting here
+        // Bit shifting in javascript coerces numbers to **signed** int32s
+        // We need to keep i, and t unsigned
+        const i =
+          buffer[index++] +
+          buffer[index++] * (1 << 8) +
+          buffer[index++] * (1 << 16) +
+          buffer[index++] * (1 << 24);
+        const t =
+          buffer[index++] +
+          buffer[index++] * (1 << 8) +
+          buffer[index++] * (1 << 16) +
+          buffer[index++] * (1 << 24);
+
+        value = new Timestamp({ i, t });
+      } else if (elementType === constants.BSON_DATA_MIN_KEY) {
+        value = new MinKey();
+      } else if (elementType === constants.BSON_DATA_MAX_KEY) {
+        value = new MaxKey();
+      } else if (elementType === constants.BSON_DATA_CODE) {
+        const stringSize =
+          buffer[index++] |
+          (buffer[index++] << 8) |
+          (buffer[index++] << 16) |
+          (buffer[index++] << 24);
+        if (
+          stringSize <= 0 ||
+          stringSize > buffer.length - index ||
+          buffer[index + stringSize - 1] !== 0
+        ) {
+          throw new BSONError('bad string length in bson');
+        }
+        const functionString = ByteUtils.toUTF8(
+          buffer,
+          index,
+          index + stringSize - 1,
+          shouldValidateKey
+        );
+
+        value = new Code(functionString);
+
+        // Update parse index position
+        index = index + stringSize;
+      } else if (elementType === constants.BSON_DATA_CODE_W_SCOPE) {
+        const totalSize =
+          buffer[index++] |
+          (buffer[index++] << 8) |
+          (buffer[index++] << 16) |
+          (buffer[index++] << 24);
+
+        // Element cannot be shorter than totalSize + stringSize + documentSize + terminator
+        if (totalSize < 4 + 4 + 4 + 1) {
+          throw new BSONError('code_w_scope total size shorter minimum expected length');
+        }
+
+        // Get the code string size
+        const stringSize =
+          buffer[index++] |
+          (buffer[index++] << 8) |
+          (buffer[index++] << 16) |
+          (buffer[index++] << 24);
+        // Check if we have a valid string
+        if (
+          stringSize <= 0 ||
+          stringSize > buffer.length - index ||
+          buffer[index + stringSize - 1] !== 0
+        ) {
+          throw new BSONError('bad string length in bson');
+        }
+
+        // Javascript function
+        const functionString = ByteUtils.toUTF8(
+          buffer,
+          index,
+          index + stringSize - 1,
+          shouldValidateKey
+        );
+        // Update parse index position
+        index = index + stringSize;
+        // Parse the element
+        const _index = index;
+        // Decode the size of the object document
+        const objectSize =
+          buffer[index] |
+          (buffer[index + 1] << 8) |
+          (buffer[index + 2] << 16) |
+          (buffer[index + 3] << 24);
+        // Decode the scope object
+        const scopeObject = deserializeObject(buffer, _index, options, false);
+        // Adjust the index
+        index = index + objectSize;
+
+        // Check if field length is too short
+        if (totalSize < 4 + 4 + objectSize + stringSize) {
+          throw new BSONError('code_w_scope total size is too short, truncating scope');
+        }
+
+        // Check if totalSize field is too long
+        if (totalSize > 4 + 4 + objectSize + stringSize) {
+          throw new BSONError('code_w_scope total size is too long, clips outer document');
+        }
+
+        value = new Code(functionString, scopeObject);
+      } else if (elementType === constants.BSON_DATA_DBPOINTER) {
+        // Get the code string size
+        const stringSize =
+          buffer[index++] |
+          (buffer[index++] << 8) |
+          (buffer[index++] << 16) |
+          (buffer[index++] << 24);
+        // Check if we have a valid string
+        if (
+          stringSize <= 0 ||
+          stringSize > buffer.length - index ||
+          buffer[index + stringSize - 1] !== 0
+        )
+          throw new BSONError('bad string length in bson');
+        // Namespace
+        if (validation != null && validation.utf8) {
+          if (!validateUtf8(buffer, index, index + stringSize - 1)) {
+            throw new BSONError('Invalid UTF-8 string in BSON document');
+          }
+        }
+        const namespace = ByteUtils.toUTF8(buffer, index, index + stringSize - 1, false);
+        // Update parse index position
+        index = index + stringSize;
+
+        // Read the oid
+        const oidBuffer = ByteUtils.allocate(12);
+        oidBuffer.set(buffer.subarray(index, index + 12), 0);
+        const oid = new ObjectId(oidBuffer);
+
+        // Update the index
+        index = index + 12;
+
+        // Upgrade to DBRef type
+        value = new DBRef(namespace, oid);
       } else {
-        const _buffer = ByteUtils.allocate(binarySize);
-        // If we have subtype 2 skip the 4 bytes for the size
-        if (subType === Binary.SUBTYPE_BYTE_ARRAY) {
-          binarySize =
-            buffer[index++] |
-            (buffer[index++] << 8) |
-            (buffer[index++] << 16) |
-            (buffer[index++] << 24);
-          if (binarySize < 0)
-            throw new BSONError('Negative binary type element size found for subtype 0x02');
-          if (binarySize > totalBinarySize - 4)
-            throw new BSONError('Binary type with subtype 0x02 contains too long binary size');
-          if (binarySize < totalBinarySize - 4)
-            throw new BSONError('Binary type with subtype 0x02 contains too short binary size');
-        }
-
-        // Copy the data
-        for (i = 0; i < binarySize; i++) {
-          _buffer[i] = buffer[index + i];
-        }
-
-        if (promoteBuffers && promoteValues) {
-          value = _buffer;
-        } else {
-          value = new Binary(buffer.slice(index, index + binarySize), subType);
-          if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW && UUID.isValid(value)) {
-            value = value.toUUID();
-          }
-        }
+        throw new BSONError(
+          `Detected unknown BSON type ${elementType.toString(16)} for fieldname "${name}"`
+        );
       }
-
-      // Update the index
-      index = index + binarySize;
-    } else if (elementType === constants.BSON_DATA_REGEXP && bsonRegExp === false) {
-      // Get the start search index
-      i = index;
-      // Locate the end of the c string
-      while (buffer[i] !== 0x00 && i < buffer.length) {
-        i++;
+      if (name === '__proto__') {
+        Object.defineProperty(object, name, {
+          value,
+          writable: true,
+          enumerable: true,
+          configurable: true
+        });
+      } else {
+        object[name] = value;
       }
-      // If are at the end of the buffer there is a problem with the document
-      if (i >= buffer.length) throw new BSONError('Bad BSON Document: illegal CString');
-      // Return the C string
-      const source = ByteUtils.toUTF8(buffer, index, i, false);
-      // Create the regexp
-      index = i + 1;
-
-      // Get the start search index
-      i = index;
-      // Locate the end of the c string
-      while (buffer[i] !== 0x00 && i < buffer.length) {
-        i++;
-      }
-      // If are at the end of the buffer there is a problem with the document
-      if (i >= buffer.length) throw new BSONError('Bad BSON Document: illegal CString');
-      // Return the C string
-      const regExpOptions = ByteUtils.toUTF8(buffer, index, i, false);
-      index = i + 1;
-
-      // For each option add the corresponding one for javascript
-      const optionsArray = new Array(regExpOptions.length);
-
-      // Parse options
-      for (i = 0; i < regExpOptions.length; i++) {
-        switch (regExpOptions[i]) {
-          case 'm':
-            optionsArray[i] = 'm';
-            break;
-          case 's':
-            optionsArray[i] = 'g';
-            break;
-          case 'i':
-            optionsArray[i] = 'i';
-            break;
-        }
-      }
-
-      value = new RegExp(source, optionsArray.join(''));
-    } else if (elementType === constants.BSON_DATA_REGEXP && bsonRegExp === true) {
-      // Get the start search index
-      i = index;
-      // Locate the end of the c string
-      while (buffer[i] !== 0x00 && i < buffer.length) {
-        i++;
-      }
-      // If are at the end of the buffer there is a problem with the document
-      if (i >= buffer.length) throw new BSONError('Bad BSON Document: illegal CString');
-      // Return the C string
-      const source = ByteUtils.toUTF8(buffer, index, i, false);
-      index = i + 1;
-
-      // Get the start search index
-      i = index;
-      // Locate the end of the c string
-      while (buffer[i] !== 0x00 && i < buffer.length) {
-        i++;
-      }
-      // If are at the end of the buffer there is a problem with the document
-      if (i >= buffer.length) throw new BSONError('Bad BSON Document: illegal CString');
-      // Return the C string
-      const regExpOptions = ByteUtils.toUTF8(buffer, index, i, false);
-      index = i + 1;
-
-      // Set the object
-      value = new BSONRegExp(source, regExpOptions);
-    } else if (elementType === constants.BSON_DATA_SYMBOL) {
-      const stringSize =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
-      if (
-        stringSize <= 0 ||
-        stringSize > buffer.length - index ||
-        buffer[index + stringSize - 1] !== 0
-      ) {
-        throw new BSONError('bad string length in bson');
-      }
-      const symbol = ByteUtils.toUTF8(buffer, index, index + stringSize - 1, shouldValidateKey);
-      value = promoteValues ? symbol : new BSONSymbol(symbol);
-      index = index + stringSize;
-    } else if (elementType === constants.BSON_DATA_TIMESTAMP) {
-      // We intentionally **do not** use bit shifting here
-      // Bit shifting in javascript coerces numbers to **signed** int32s
-      // We need to keep i, and t unsigned
-      const i =
-        buffer[index++] +
-        buffer[index++] * (1 << 8) +
-        buffer[index++] * (1 << 16) +
-        buffer[index++] * (1 << 24);
-      const t =
-        buffer[index++] +
-        buffer[index++] * (1 << 8) +
-        buffer[index++] * (1 << 16) +
-        buffer[index++] * (1 << 24);
-
-      value = new Timestamp({ i, t });
-    } else if (elementType === constants.BSON_DATA_MIN_KEY) {
-      value = new MinKey();
-    } else if (elementType === constants.BSON_DATA_MAX_KEY) {
-      value = new MaxKey();
-    } else if (elementType === constants.BSON_DATA_CODE) {
-      const stringSize =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
-      if (
-        stringSize <= 0 ||
-        stringSize > buffer.length - index ||
-        buffer[index + stringSize - 1] !== 0
-      ) {
-        throw new BSONError('bad string length in bson');
-      }
-      const functionString = ByteUtils.toUTF8(
-        buffer,
-        index,
-        index + stringSize - 1,
-        shouldValidateKey
-      );
-
-      value = new Code(functionString);
-
-      // Update parse index position
-      index = index + stringSize;
-    } else if (elementType === constants.BSON_DATA_CODE_W_SCOPE) {
-      const totalSize =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
-
-      // Element cannot be shorter than totalSize + stringSize + documentSize + terminator
-      if (totalSize < 4 + 4 + 4 + 1) {
-        throw new BSONError('code_w_scope total size shorter minimum expected length');
-      }
-
-      // Get the code string size
-      const stringSize =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
-      // Check if we have a valid string
-      if (
-        stringSize <= 0 ||
-        stringSize > buffer.length - index ||
-        buffer[index + stringSize - 1] !== 0
-      ) {
-        throw new BSONError('bad string length in bson');
-      }
-
-      // Javascript function
-      const functionString = ByteUtils.toUTF8(
-        buffer,
-        index,
-        index + stringSize - 1,
-        shouldValidateKey
-      );
-      // Update parse index position
-      index = index + stringSize;
-      // Parse the element
-      const _index = index;
-      // Decode the size of the object document
-      const objectSize =
-        buffer[index] |
-        (buffer[index + 1] << 8) |
-        (buffer[index + 2] << 16) |
-        (buffer[index + 3] << 24);
-      // Decode the scope object
-      const scopeObject = deserializeObject(buffer, _index, options, false);
-      // Adjust the index
-      index = index + objectSize;
-
-      // Check if field length is too short
-      if (totalSize < 4 + 4 + objectSize + stringSize) {
-        throw new BSONError('code_w_scope total size is too short, truncating scope');
-      }
-
-      // Check if totalSize field is too long
-      if (totalSize > 4 + 4 + objectSize + stringSize) {
-        throw new BSONError('code_w_scope total size is too long, clips outer document');
-      }
-
-      value = new Code(functionString, scopeObject);
-    } else if (elementType === constants.BSON_DATA_DBPOINTER) {
-      // Get the code string size
-      const stringSize =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
-      // Check if we have a valid string
-      if (
-        stringSize <= 0 ||
-        stringSize > buffer.length - index ||
-        buffer[index + stringSize - 1] !== 0
-      )
-        throw new BSONError('bad string length in bson');
-      // Namespace
-      if (validation != null && validation.utf8) {
-        if (!validateUtf8(buffer, index, index + stringSize - 1)) {
-          throw new BSONError('Invalid UTF-8 string in BSON document');
-        }
-      }
-      const namespace = ByteUtils.toUTF8(buffer, index, index + stringSize - 1, false);
-      // Update parse index position
-      index = index + stringSize;
-
-      // Read the oid
-      const oidBuffer = ByteUtils.allocate(12);
-      oidBuffer.set(buffer.subarray(index, index + 12), 0);
-      const oid = new ObjectId(oidBuffer);
-
-      // Update the index
-      index = index + 12;
-
-      // Upgrade to DBRef type
-      value = new DBRef(namespace, oid);
-    } else {
-      throw new BSONError(
-        `Detected unknown BSON type ${elementType.toString(16)} for fieldname "${name}"`
-      );
     }
-    if (name === '__proto__') {
-      Object.defineProperty(object, name, {
-        value,
-        writable: true,
-        enumerable: true,
-        configurable: true
-      });
-    } else {
-      object[name] = value;
+
+    // // Check if the deserialization was against a valid array/object
+    // if (size !== index - startIndex) {
+    //   if (isArray) throw new BSONError('corrupt array bson');
+    //   throw new BSONError('corrupt object bson');
+    // }
+
+    // if we did find "$ref", "$id", "$db", make a more expensive check
+    if (isPossibleDBRef && isDBRefLike(object)) {
+      const copy = Object.assign({}, object) as Partial<DBRefLike>;
+      delete copy.$ref;
+      delete copy.$id;
+      delete copy.$db;
+      ctx.object = new DBRef(object.$ref, object.$id, object.$db, copy);
     }
+
+    ctx = ctx.previous;
   }
 
-  // Check if the deserialization was against a valid array/object
-  if (size !== index - startIndex) {
-    if (isArray) throw new BSONError('corrupt array bson');
-    throw new BSONError('corrupt object bson');
-  }
-
-  // if we did not find "$ref", "$id", "$db", or found an extraneous $key, don't make a DBRef
-  if (!isPossibleDBRef) return object;
-
-  if (isDBRefLike(object)) {
-    const copy = Object.assign({}, object) as Partial<DBRefLike>;
-    delete copy.$ref;
-    delete copy.$id;
-    delete copy.$db;
-    return new DBRef(object.$ref, object.$id, object.$db, copy);
-  }
-
-  return object;
+  return root;
 }
