@@ -67,7 +67,11 @@ suite.task({
 
 suite.run().then(
   () => {
-    const results = suite.results;
+    const results = suite.results.map(result => {
+      const rv = { ...result };
+      rv.metrics = rv.metrics.filter(metric => metric.type === 'MEAN');
+      return rv;
+    });
     // calculte BSONBench composite score
     const bsonBenchComposite =
       results.reduce((prev, result) => {
