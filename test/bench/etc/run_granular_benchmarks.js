@@ -9,6 +9,7 @@ const fs = require('fs/promises');
 const path = require('path');
 const { once } = require('events');
 const { Task } = require('dbx-js-tools/packages/bson-bench');
+const { LIBRARY_SPEC } = require('../granular/common');
 
 const BENCHMARK_REGEX = /(.*)\.bench\.js$/;
 const BENCHMARK_PATH = path.resolve(`${__dirname}/../lib/granular`);
@@ -18,7 +19,7 @@ const DOCUMENT_ROOT = path.resolve(`${__dirname}/../documents`);
   // FIXME(NODE-5759): replace this with a call to Package.install()
   await new Task({
     documentPath: path.resolve(`${DOCUMENT_ROOT}/binary_small.json`),
-    library: `bson#main`,
+    library: LIBRARY_SPEC,
     iterations: 1,
     warmup: 1,
     operation: 'deserialize',
