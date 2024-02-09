@@ -64,7 +64,7 @@ const DOCUMENT_ROOT = path.resolve(`${__dirname}/../documents`);
 
   console.log('No duplcate testName:Option pairs found. Now merging files...');
 
-  const resultFile = `${__dirname}/resultsCollected.json`;
+  const meansFile = `${__dirname}/resultsCollectedMeans.json`;
   // Iterate over all result files and merge into one file
   const collectedResults = [];
   for (const resultPath of resultPaths) {
@@ -74,7 +74,13 @@ const DOCUMENT_ROOT = path.resolve(`${__dirname}/../documents`);
     }
   }
 
-  await fs.writeFile(resultFile, JSON.stringify(collectedResults));
+  const means = collectedResults.map(result => {
+    const rv = { ...result };
+    rv.metrics = rv.metrics.filter(metric => metric.type === 'MEAN');
+    return rv;
+  });
 
-  console.log(`Collected results in ${resultFile}`);
+  await fs.writeFile(meansFile, JSON.stringify(means));
+
+  console.log(`Means in ${meansFile}`);
 })();

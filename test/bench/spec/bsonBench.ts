@@ -1,14 +1,14 @@
 import { Suite } from 'dbx-js-tools/packages/bson-bench';
 import { join, resolve } from 'path';
 import { writeFile } from 'fs/promises';
+import { LIBRARY_SPEC } from '../granular/common';
 
 const suite = new Suite('bson micro benchmarks');
-const LIBRARY = `bson#main`;
 const DOCUMENT_ROOT = resolve(`${__dirname}/../../documents`);
 // Add flat bson encoding
 suite.task({
   documentPath: join(DOCUMENT_ROOT, 'flat_bson.json'),
-  library: LIBRARY,
+  library: LIBRARY_SPEC,
   warmup: 1000,
   iterations: 10_000,
   operation: 'serialize',
@@ -18,7 +18,7 @@ suite.task({
 // Add flat bson decoding
 suite.task({
   documentPath: join(DOCUMENT_ROOT, 'flat_bson.json'),
-  library: LIBRARY,
+  library: LIBRARY_SPEC,
   warmup: 1000,
   iterations: 10_000,
   operation: 'deserialize',
@@ -28,7 +28,7 @@ suite.task({
 // Add deep bson encoding
 suite.task({
   documentPath: join(DOCUMENT_ROOT, 'deep_bson.json'),
-  library: LIBRARY,
+  library: LIBRARY_SPEC,
   warmup: 1000,
   iterations: 10_000,
   operation: 'serialize',
@@ -38,7 +38,7 @@ suite.task({
 // Add deep bson decoding
 suite.task({
   documentPath: join(DOCUMENT_ROOT, 'deep_bson.json'),
-  library: LIBRARY,
+  library: LIBRARY_SPEC,
   warmup: 1000,
   iterations: 10_000,
   operation: 'deserialize',
@@ -48,7 +48,7 @@ suite.task({
 // Add full bson encoding
 suite.task({
   documentPath: join(DOCUMENT_ROOT, 'full_bson.json'),
-  library: LIBRARY,
+  library: LIBRARY_SPEC,
   warmup: 1000,
   iterations: 10_000,
   operation: 'serialize',
@@ -58,7 +58,7 @@ suite.task({
 // Add full bson decoding
 suite.task({
   documentPath: join(DOCUMENT_ROOT, 'full_bson.json'),
-  library: LIBRARY,
+  library: LIBRARY_SPEC,
   warmup: 1000,
   iterations: 10_000,
   operation: 'deserialize',
@@ -67,7 +67,11 @@ suite.task({
 
 suite.run().then(
   () => {
-    const results = suite.results;
+    const results = suite.results.map(result => {
+      const rv = { ...result };
+      rv.metrics = rv.metrics.filter(metric => metric.type === 'MEAN');
+      return rv;
+    });
     // calculte BSONBench composite score
     const bsonBenchComposite =
       results.reduce((prev, result) => {
