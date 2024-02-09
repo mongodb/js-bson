@@ -33,12 +33,12 @@ WARMUP=100 ITERATIONS=1000 LIBRARY=$(pwd) npm run check:granular-bench
 When the `LIBRARY` environment variable is unset, the benchmark clones and runs against the main
 branch of this repository.
 
-When the script is complete, results will be output to `test/bench/etc/resultsCollected.json`. These results will
+When the script is complete, results will be output to `test/bench/etc/resultsCollectedMeans.json`. These results will
 be in a format compatible with evergreen's perf.send command. To convert these results to CSV, run
 the following command from the repository root:
 
 ```bash
-./test/bench/etc/convertToCSV.js < test/bench/etc/resultsCollected.json > resultsCollected.csv
+./test/bench/etc/convertToCSV.js < test/bench/etc/resultsCollectedMeans.json > resultsCollected.csv
 ```
 
 Spec tests can be run from the repository root by running:
