@@ -9,7 +9,7 @@ const fs = require('fs/promises');
 const path = require('path');
 const { once } = require('events');
 const { Task } = require('dbx-js-tools/packages/bson-bench');
-const { LIBRARY_SPEC } = require('../granular/common');
+const { LIBRARY_SPEC } = require('../lib/granular/common');
 
 const BENCHMARK_REGEX = /(.*)\.bench\.js$/;
 const BENCHMARK_PATH = path.resolve(`${__dirname}/../lib/granular`);
