@@ -13,7 +13,11 @@
  * @param end - The index to stop searching the uint8array
  * @returns string if all bytes are within the basic latin range, otherwise null
  */
-export function tryLatin(uint8array: Uint8Array, start: number, end: number): string | null {
+export function tryReadBasicLatin(
+  uint8array: Uint8Array,
+  start: number,
+  end: number
+): string | null {
   if (uint8array.length === 0) {
     return '';
   }
@@ -74,7 +78,7 @@ export function tryLatin(uint8array: Uint8Array, start: number, end: number): st
  * @param offset - The position in the destination to begin writing bytes to
  * @returns the number of bytes written to destination if all code units are below 128, otherwise null
  */
-export function tryWriteLatin(
+export function tryWriteBasicLatin(
   destination: Uint8Array,
   source: string,
   offset: number

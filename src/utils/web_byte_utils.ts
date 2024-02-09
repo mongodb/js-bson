@@ -1,5 +1,5 @@
 import { BSONError } from '../error';
-import { tryLatin } from './latin';
+import { tryReadBasicLatin } from './latin';
 
 type TextDecoder = {
   readonly encoding: string;
@@ -170,7 +170,7 @@ export const webByteUtils = {
   },
 
   toUTF8(uint8array: Uint8Array, start: number, end: number, fatal: boolean): string {
-    const basicLatin = end - start <= 20 ? tryLatin(uint8array, start, end) : null;
+    const basicLatin = end - start <= 20 ? tryReadBasicLatin(uint8array, start, end) : null;
     if (basicLatin != null) {
       return basicLatin;
     }
