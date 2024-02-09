@@ -4,7 +4,7 @@ import { BSON_MAJOR_VERSION } from './constants';
  * @public
  * @category Error
  *
- * `BSONError` objects are thrown when BSON ecounters an error.
+ * `BSONError` objects are thrown when BSON encounters an error.
  *
  * This is the parent class for all the other errors thrown by this library.
  */
@@ -23,8 +23,8 @@ export class BSONError extends Error {
     return 'BSONError';
   }
 
-  constructor(message: string) {
-    super(message);
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
   }
 
   /**
