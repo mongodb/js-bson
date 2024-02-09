@@ -23,7 +23,7 @@ WARMUP=<warmup iterations> ITERATIONS=<measured iterations> npm run check:granul
 This will build the granular tests and run them with `test/bench/etc/run_granular_benchmarks.js`. The `WARMUP` and `ITERATIONS` environment variables can be optionally provided to configure how these granular benchmarks
 are run. `WARMUP` changes the number of iterations run before results are collected to give v8's
 optimizing compiler time to reach steady state. `ITERATIONS` changes the number of iterations that
-are measured and use to calculate summary statistics. Note also that the test can be configured to
+are measured and used to calculate summary statistics. Note also that the test can be configured to
 make use of the local copy of bson when testing performance changes locally by setting the `LIBRARY`
 variable to the root directory of the bson library to be tested.
 
