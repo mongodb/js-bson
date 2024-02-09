@@ -37,13 +37,13 @@ When the script is complete, results will be output to `test/bench/etc/resultsCo
 be in a format compatible with evergreen's perf.send command. To convert these results to CSV, run
 the following command from the repository root:
 
-```
+```bash
 ./test/bench/etc/convertToCSV.js < test/bench/etc/resultsCollected.json > resultsCollected.csv
 ```
 
 Spec tests can be run from the repository root by running:
 
-```
+``` bash
 npm run check:spec-bench
 ```
 
