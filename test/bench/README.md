@@ -31,7 +31,7 @@ variable to the root directory of the bson library to be tested.
 WARMUP=100 ITERATIONS=1000 LIBRARY=$(pwd) npm run check:granular-bench
 ```
 When the `LIBRARY` environment variable is unset, the benchmark clones and runs against the main
-branch of this repository. e.g.
+branch of this repository.
 
 When the script is complete, results will be output to `test/bench/etc/resultsCollected.json`. These results will
 be in a format compatible with evergreen's perf.send command. To convert these results to CSV, run
