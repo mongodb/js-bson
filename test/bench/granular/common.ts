@@ -6,8 +6,6 @@ export const DOCUMENT_ROOT = `${__dirname}/../../documents`;
 export const OPERATIONS: ('serialize' | 'deserialize')[] = ['serialize', 'deserialize'];
 export const BOOL = [true, false];
 
-export const LIBRARY_SPEC = 'bson#main';
-
 export const isDeserialize = (s: string) => s === 'deserialize';
 export async function getTestDocs(type: string) {
   const docs = ['singleFieldDocument', 'singleElementArray'].map(testType =>
@@ -33,15 +31,19 @@ export async function runSuiteAndWriteResults(suite: Suite) {
   await suite.writeResults(`${targetDirectory}/${suite.name.toLowerCase()}Results.json`);
 }
 
-export function readEnvVars(): { warmup: number; iterations: number } {
+export function readEnvVars(): { warmup: number; iterations: number; library: string } {
   const envWarmup = Number(process.env.WARMUP);
   const envIterations = Number(process.env.ITERATIONS);
+  const libraryPath = process.env.LIBRARY;
   const rv = {
     warmup: Number.isSafeInteger(envWarmup) && envWarmup > 0 ? envWarmup : 100_000,
-    iterations: Number.isSafeInteger(envIterations) && envIterations > 0 ? envIterations : 10_000
+    iterations: Number.isSafeInteger(envIterations) && envIterations > 0 ? envIterations : 10_000,
+    library: libraryPath ? `bson:${libraryPath}` : 'bson#main'
   };
 
-  console.log(`warmup iterations: ${rv.warmup}\nmeasured iterations: ${rv.iterations}`);
+  console.log(
+    `warmup iterations: ${rv.warmup}\nmeasured iterations: ${rv.iterations}\nlibrary: ${rv.library}`
+  );
 
   return rv;
 }
@@ -49,3 +51,4 @@ export function readEnvVars(): { warmup: number; iterations: number } {
 const envVars = readEnvVars();
 export const ITERATIONS = envVars.iterations;
 export const WARMUP = envVars.warmup;
+export const LIBRARY_SPEC = envVars.library;
