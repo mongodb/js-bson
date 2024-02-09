@@ -10,6 +10,7 @@
     "skipLibCheck": true,
     "lib": [
       "es2021",
+      "ES2022.Error"
     ],
     "outDir": "lib",
     "importHelpers": false,

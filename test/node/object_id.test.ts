@@ -3,7 +3,6 @@ import { BSON, BSONError, EJSON, ObjectId } from '../register-bson';
 import * as util from 'util';
 import { expect } from 'chai';
 import { bufferFromHexArray } from './tools/utils';
-import { getSymbolFrom } from './tools/utils';
 import { isBufferOrUint8Array } from './tools/utils';
 
 describe('ObjectId', function () {
@@ -376,7 +375,7 @@ describe('ObjectId', function () {
      */
     const oidString = '6b61666665656b6c61746368';
     const oid = new ObjectId(oidString);
-    const oidKId = getSymbolFrom(oid, 'id');
+    const oidKId = 'buffer';
     it('should return false for an undefined otherId', () => {
       // otherId === undefined || otherId === null
       expect(oid.equals(null)).to.be.false;
