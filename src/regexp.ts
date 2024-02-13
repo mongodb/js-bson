@@ -1,6 +1,7 @@
 import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
+import { type InspectFn, defaultInspect, getStylizeFunction } from './parser/utils';
 
 function alphabetize(str: string): string {
   return str.split('').sort().join('');
@@ -103,12 +104,11 @@ export class BSONRegExp extends BSONValue {
     throw new BSONError(`Unexpected BSONRegExp EJSON object form: ${JSON.stringify(doc)}`);
   }
 
-  /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
-  }
-
-  inspect(): string {
-    return `new BSONRegExp(${JSON.stringify(this.pattern)}, ${JSON.stringify(this.options)})`;
+  inspect(depth?: number, options?: unknown, inspect?: InspectFn): string {
+    const stylize = getStylizeFunction(options) ?? (v => v);
+    inspect ??= defaultInspect;
+    const pattern = stylize(inspect(this.pattern), 'regexp');
+    const flags = stylize(inspect(this.options), 'regexp');
+    return `new BSONRegExp(${pattern}, ${flags})`;
   }
 }

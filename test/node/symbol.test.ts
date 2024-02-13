@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { BSONSymbol, BSON } from '../register-bson';
 import { bufferFromHexArray } from './tools/utils';
+import { inspect } from 'util';
 
 describe('class BSONSymbol', () => {
   it('get _bsontype returns BSONSymbol', () => {
@@ -40,5 +41,10 @@ describe('class BSONSymbol', () => {
 
     const result = BSON.deserialize(bytes, { promoteValues: false });
     expect(result).to.have.nested.property('sym._bsontype', 'BSONSymbol');
+  });
+
+  it('prints re-evaluatable output for BSONSymbol that contains quotes', () => {
+    const input = new BSONSymbol(`asdf'ghjk`);
+    expect(inspect(input)).to.equal(String.raw`new BSONSymbol("asdf'ghjk")`);
   });
 });

@@ -25,11 +25,6 @@ export class MinKey extends BSONValue {
     return new MinKey();
   }
 
-  /** @internal */
-  [Symbol.for('nodejs.util.inspect.custom')](): string {
-    return this.inspect();
-  }
-
   inspect(): string {
     return 'new MinKey()';
   }

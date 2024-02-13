@@ -1,11 +1,19 @@
 import { expect } from 'chai';
 import * as BSON from '../register-bson';
+import { inspect } from 'util';
 
 describe('class Code', () => {
   it('defines a nodejs inspect method', () => {
     expect(BSON.Code.prototype)
       .to.have.property(Symbol.for('nodejs.util.inspect.custom'))
       .that.is.a('function');
+  });
+
+  it('prints re-evaluatable output for Code that contains quotes', () => {
+    const codeStringInput = new BSON.Code(`function a(){ return 'asdf'; }`);
+    expect(inspect(codeStringInput)).to.equal(
+      String.raw`new Code("function a(){ return 'asdf'; }")`
+    );
   });
 
   describe('new Code()', () => {

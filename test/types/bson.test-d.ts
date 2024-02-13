@@ -1,4 +1,4 @@
-import { expectType, expectError } from 'tsd';
+import { expectType, expectError , expectDeprecated, expectNotDeprecated } from 'tsd';
 import {
   Binary,
   Code,
@@ -10,6 +10,7 @@ import {
   MaxKey,
   MinKey,
   ObjectId,
+  ObjectIdLike,
   BSONRegExp,
   BSONSymbol,
   Timestamp,
@@ -19,6 +20,7 @@ import {
   Decimal128Extended,
   BSONValue
 } from '../../bson'; // import from generated bson.d.ts
+import type { InspectFn } from '../../src/parser/utils';
 
 expectType<() => UUID>(Binary.prototype.toUUID);
 expectType<() => Binary>(UUID.prototype.toBinary);
@@ -75,4 +77,8 @@ expectType<'Binary'>(UUID.prototype._bsontype)
 // Common BSONValue interface
 declare const bsonValue: BSONValue;
 expectType<string>(bsonValue._bsontype);
-expectType<() => string>(bsonValue.inspect);
+expectType<(depth?: number | undefined, options?: unknown, inspect?: InspectFn | undefined) => string>(bsonValue.inspect);
+
+expectNotDeprecated(new ObjectId('foo'));
+expectDeprecated(new ObjectId(42));
+expectNotDeprecated(new ObjectId(42 as string | number));

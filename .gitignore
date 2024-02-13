@@ -31,3 +31,5 @@ docs/public
 *.heapprofile
 
 .nvmrc
+
+benchmarks.json

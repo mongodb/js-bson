@@ -1,4 +1,6 @@
 import { BSONError } from '../error';
+import { validateUtf8 } from '../validate_utf8';
+import { tryReadBasicLatin, tryWriteBasicLatin } from './latin';
 
 type NodeJsEncoding = 'base64' | 'hex' | 'utf8' | 'binary';
 type NodeJsBuffer = ArrayBufferView &
@@ -121,12 +123,25 @@ export const nodeJsByteUtils = {
     return nodeJsByteUtils.toLocalBufferType(buffer).toString('hex');
   },
 
-  fromUTF8(text: string): NodeJsBuffer {
-    return Buffer.from(text, 'utf8');
-  },
+  toUTF8(buffer: Uint8Array, start: number, end: number, fatal: boolean): string {
+    const basicLatin = end - start <= 20 ? tryReadBasicLatin(buffer, start, end) : null;
+    if (basicLatin != null) {
+      return basicLatin;
+    }
 
-  toUTF8(buffer: Uint8Array, start: number, end: number): string {
-    return nodeJsByteUtils.toLocalBufferType(buffer).toString('utf8', start, end);
+    const string = nodeJsByteUtils.toLocalBufferType(buffer).toString('utf8', start, end);
+    if (fatal) {
+      // TODO(NODE-4930): Insufficiently strict BSON UTF8 validation
+      for (let i = 0; i < string.length; i++) {
+        if (string.charCodeAt(i) === 0xfffd) {
+          if (!validateUtf8(buffer, start, end)) {
+            throw new BSONError('Invalid UTF-8 string in BSON document');
+          }
+          break;
+        }
+      }
+    }
+    return string;
   },
 
   utf8ByteLength(input: string): number {
@@ -134,6 +149,11 @@ export const nodeJsByteUtils = {
   },
 
   encodeUTF8Into(buffer: Uint8Array, source: string, byteOffset: number): number {
+    const latinBytesWritten = tryWriteBasicLatin(buffer, source, byteOffset);
+    if (latinBytesWritten != null) {
+      return latinBytesWritten;
+    }
+
     return nodeJsByteUtils.toLocalBufferType(buffer).write(source, byteOffset, undefined, 'utf8');
   },
 

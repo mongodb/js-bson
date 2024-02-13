@@ -1,4 +1,5 @@
 import { BSONError } from '../error';
+import { tryReadBasicLatin } from './latin';
 
 type TextDecoder = {
   readonly encoding: string;
@@ -168,20 +169,28 @@ export const webByteUtils = {
     return Array.from(uint8array, byte => byte.toString(16).padStart(2, '0')).join('');
   },
 
-  fromUTF8(text: string): Uint8Array {
-    return new TextEncoder().encode(text);
-  },
+  toUTF8(uint8array: Uint8Array, start: number, end: number, fatal: boolean): string {
+    const basicLatin = end - start <= 20 ? tryReadBasicLatin(uint8array, start, end) : null;
+    if (basicLatin != null) {
+      return basicLatin;
+    }
 
-  toUTF8(uint8array: Uint8Array, start: number, end: number): string {
-    return new TextDecoder('utf8', { fatal: false }).decode(uint8array.slice(start, end));
+    if (fatal) {
+      try {
+        return new TextDecoder('utf8', { fatal }).decode(uint8array.slice(start, end));
+      } catch (cause) {
+        throw new BSONError('Invalid UTF-8 string in BSON document', { cause });
+      }
+    }
+    return new TextDecoder('utf8', { fatal }).decode(uint8array.slice(start, end));
   },
 
   utf8ByteLength(input: string): number {
-    return webByteUtils.fromUTF8(input).byteLength;
+    return new TextEncoder().encode(input).byteLength;
   },
 
   encodeUTF8Into(buffer: Uint8Array, source: string, byteOffset: number): number {
-    const bytes = webByteUtils.fromUTF8(source);
+    const bytes = new TextEncoder().encode(source);
     buffer.set(bytes, byteOffset);
     return bytes.byteLength;
   },
