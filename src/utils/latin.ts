@@ -13,7 +13,11 @@
  * @param end - The index to stop searching the uint8array
  * @returns string if all bytes are within the basic latin range, otherwise null
  */
-export function tryLatin(uint8array: Uint8Array, start: number, end: number): string | null {
+export function tryReadBasicLatin(
+  uint8array: Uint8Array,
+  start: number,
+  end: number
+): string | null {
   if (uint8array.length === 0) {
     return '';
   }
@@ -58,4 +62,43 @@ export function tryLatin(uint8array: Uint8Array, start: number, end: number): st
   }
 
   return String.fromCharCode(...latinBytes);
+}
+
+/**
+ * This function is an optimization for writing small basic latin strings.
+ * @internal
+ * @remarks
+ * ### Important characteristics:
+ * - If the string length is 0 return 0, do not perform any work
+ * - If a string is longer than 25 code units return null
+ * - If any code unit exceeds 128 this function returns null
+ *
+ * @param destination - The uint8array to serialize the string to
+ * @param source - The string to turn into UTF-8 bytes if it fits in the basic latin range
+ * @param offset - The position in the destination to begin writing bytes to
+ * @returns the number of bytes written to destination if all code units are below 128, otherwise null
+ */
+export function tryWriteBasicLatin(
+  destination: Uint8Array,
+  source: string,
+  offset: number
+): number | null {
+  if (source.length === 0) return 0;
+
+  if (source.length > 25) return null;
+
+  if (destination.length - offset < source.length) return null;
+
+  for (
+    let charOffset = 0, destinationOffset = offset;
+    charOffset < source.length;
+    charOffset++, destinationOffset++
+  ) {
+    const char = source.charCodeAt(charOffset);
+    if (char > 127) return null;
+
+    destination[destinationOffset] = char;
+  }
+
+  return source.length;
 }
