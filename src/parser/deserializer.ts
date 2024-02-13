@@ -164,7 +164,7 @@ function deserializeObject(
   // Reflects utf-8 validation setting regardless of global or specific key validation
   let validationSetting: boolean;
   // Set of keys either to enable or disable validation on
-  const utf8KeysSet = new Set();
+  let utf8KeysSet;
 
   // Check for boolean uniformity and empty validation option
   const utf8ValidatedKeys = validation.utf8;
@@ -190,6 +190,8 @@ function deserializeObject(
 
   // Add keys to set that will either be validated or not based on validationSetting
   if (!globalUTFValidation) {
+    utf8KeysSet = new Set();
+
     for (const key of Object.keys(utf8ValidatedKeys)) {
       utf8KeysSet.add(key);
     }
@@ -216,8 +218,9 @@ function deserializeObject(
 
   let isPossibleDBRef = isArray ? false : null;
 
+  let dataView;
+
   // While we have more left data left keep parsing
-  const dataview = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
   while (!done) {
     // Read the type
     const elementType = buffer[index++];
@@ -240,7 +243,7 @@ function deserializeObject(
 
     // shouldValidateKey is true if the key should be validated, false otherwise
     let shouldValidateKey = true;
-    if (globalUTFValidation || utf8KeysSet.has(name)) {
+    if (globalUTFValidation || utf8KeysSet?.has(name)) {
       shouldValidateKey = validationSetting;
     } else {
       shouldValidateKey = !validationSetting;
@@ -284,10 +287,12 @@ function deserializeObject(
         (buffer[index++] << 16) |
         (buffer[index++] << 24);
     } else if (elementType === constants.BSON_DATA_NUMBER && promoteValues === false) {
-      value = new Double(dataview.getFloat64(index, true));
+      dataView ??= new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+      value = new Double(dataView.getFloat64(index, true));
       index = index + 8;
     } else if (elementType === constants.BSON_DATA_NUMBER) {
-      value = dataview.getFloat64(index, true);
+      dataView ??= new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+      value = dataView.getFloat64(index, true);
       index = index + 8;
     } else if (elementType === constants.BSON_DATA_DATE) {
       const lowBits =
@@ -300,6 +305,7 @@ function deserializeObject(
         (buffer[index++] << 8) |
         (buffer[index++] << 16) |
         (buffer[index++] << 24);
+
       value = new Date(new Long(lowBits, highBits).toNumber());
     } else if (elementType === constants.BSON_DATA_BOOLEAN) {
       if (buffer[index] !== 0 && buffer[index] !== 1)
