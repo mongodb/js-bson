@@ -343,8 +343,8 @@ describe('BSON BigInt support', function () {
               useBigInt64IsSet
                 ? { a: 23n }
                 : relaxedIsSet
-                ? { a: 23 }
-                : { a: BSON.Long.fromNumber(23) }
+                  ? { a: 23 }
+                  : { a: BSON.Long.fromNumber(23) }
           );
         });
       });
@@ -366,8 +366,8 @@ describe('BSON BigInt support', function () {
               relaxedIsSet
                 ? { a: 4294967296 }
                 : useBigInt64IsSet
-                ? { a: 4294967296n }
-                : { a: BSON.Long.fromNumber(4294967296) }
+                  ? { a: 4294967296n }
+                  : { a: BSON.Long.fromNumber(4294967296) }
           );
         });
       });
