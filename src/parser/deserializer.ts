@@ -14,7 +14,7 @@ import { ObjectId } from '../objectid';
 import { BSONRegExp } from '../regexp';
 import { BSONSymbol } from '../symbol';
 import { Timestamp } from '../timestamp';
-import { BSONDataView, ByteUtils } from '../utils/byte_utils';
+import { ByteUtils } from '../utils/byte_utils';
 import { validateUtf8 } from '../validate_utf8';
 
 /** @public */
@@ -128,6 +128,9 @@ export function internalDeserialize(
 
 const allowedDBRefKeys = /^\$ref$|^\$id$|^\$db$/;
 
+const FLOAT_READ = new Float64Array(1);
+const FLOAT_WRITE_BYTES = new Uint8Array(FLOAT_READ.buffer, 0, 8);
+
 function deserializeObject(
   buffer: Uint8Array,
   index: number,
@@ -218,8 +221,6 @@ function deserializeObject(
 
   let isPossibleDBRef = isArray ? false : null;
 
-  let dataView;
-
   // While we have more left data left keep parsing
   while (!done) {
     // Read the type
@@ -286,14 +287,17 @@ function deserializeObject(
         (buffer[index++] << 8) |
         (buffer[index++] << 16) |
         (buffer[index++] << 24);
-    } else if (elementType === constants.BSON_DATA_NUMBER && promoteValues === false) {
-      dataView ??= new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-      value = new Double(dataView.getFloat64(index, true));
-      index = index + 8;
     } else if (elementType === constants.BSON_DATA_NUMBER) {
-      dataView ??= new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-      value = dataView.getFloat64(index, true);
-      index = index + 8;
+      FLOAT_WRITE_BYTES[0] = buffer[index++];
+      FLOAT_WRITE_BYTES[1] = buffer[index++];
+      FLOAT_WRITE_BYTES[2] = buffer[index++];
+      FLOAT_WRITE_BYTES[3] = buffer[index++];
+      FLOAT_WRITE_BYTES[4] = buffer[index++];
+      FLOAT_WRITE_BYTES[5] = buffer[index++];
+      FLOAT_WRITE_BYTES[6] = buffer[index++];
+      FLOAT_WRITE_BYTES[7] = buffer[index++];
+      value = FLOAT_READ[0];
+      if (promoteValues === false) value = new Double(value);
     } else if (elementType === constants.BSON_DATA_DATE) {
       const lowBits =
         buffer[index++] |
@@ -363,30 +367,43 @@ function deserializeObject(
     } else if (elementType === constants.BSON_DATA_NULL) {
       value = null;
     } else if (elementType === constants.BSON_DATA_LONG) {
-      // Unpack the low and high bits
-      const dataview = BSONDataView.fromUint8Array(buffer.subarray(index, index + 8));
-
-      const lowBits =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
-      const highBits =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
-      const long = new Long(lowBits, highBits);
       if (useBigInt64) {
-        value = dataview.getBigInt64(0, true);
-      } else if (promoteLongs && promoteValues === true) {
-        // Promote the long if possible
-        value =
-          long.lessThanOrEqual(JS_INT_MAX_LONG) && long.greaterThanOrEqual(JS_INT_MIN_LONG)
-            ? long.toNumber()
-            : long;
+        const lo =
+          buffer[index] +
+          buffer[index + 1] * 2 ** 8 +
+          buffer[index + 2] * 2 ** 16 +
+          buffer[index + 3] * 2 ** 24;
+        const hi =
+          buffer[index + 4] +
+          buffer[index + 5] * 2 ** 8 +
+          buffer[index + 6] * 2 ** 16 +
+          (buffer[index + 7] << 24); // Overflow
+
+        /* eslint-disable-next-line no-restricted-globals -- This is allowed here as useBigInt64=true */
+        value = (BigInt(hi) << BigInt(32)) + BigInt(lo);
+        index += 8;
       } else {
-        value = long;
+        // Unpack the low and high bits
+        const lowBits =
+          buffer[index++] |
+          (buffer[index++] << 8) |
+          (buffer[index++] << 16) |
+          (buffer[index++] << 24);
+        const highBits =
+          buffer[index++] |
+          (buffer[index++] << 8) |
+          (buffer[index++] << 16) |
+          (buffer[index++] << 24);
+        const long = new Long(lowBits, highBits);
+        // Promote the long if possible
+        if (promoteLongs && promoteValues === true) {
+          value =
+            long.lessThanOrEqual(JS_INT_MAX_LONG) && long.greaterThanOrEqual(JS_INT_MIN_LONG)
+              ? long.toNumber()
+              : long;
+        } else {
+          value = long;
+        }
       }
     } else if (elementType === constants.BSON_DATA_DECIMAL128) {
       // Buffer to contain the decimal bytes

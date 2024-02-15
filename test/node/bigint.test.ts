@@ -2,7 +2,6 @@ import { BSON, BSONError, EJSON, __noBigInt__ } from '../register-bson';
 import { bufferFromHexArray } from './tools/utils';
 import { expect } from 'chai';
 import { BSON_DATA_LONG } from '../../src/constants';
-import { BSONDataView } from '../../src/utils/byte_utils';
 
 describe('BSON BigInt support', function () {
   beforeEach(function () {
@@ -126,7 +125,11 @@ describe('BSON BigInt support', function () {
       const DATA_TYPE_OFFSET = 4;
       const KEY_OFFSET = 5;
 
-      const dataView = BSONDataView.fromUint8Array(serializedDoc);
+      const dataView = new DataView(
+        serializedDoc.buffer,
+        serializedDoc.byteOffset,
+        serializedDoc.byteLength
+      );
       const keySlice = serializedDoc.slice(KEY_OFFSET);
 
       let keyLength = 0;
@@ -407,7 +410,11 @@ describe('BSON BigInt support', function () {
         const serialized = BSON.serialize(number);
 
         const VALUE_OFFSET = 7;
-        const dataView = BSONDataView.fromUint8Array(serialized);
+        const dataView = new DataView(
+          serialized.buffer,
+          serialized.byteOffset,
+          serialized.byteLength
+        );
         const serializedValue = dataView.getBigInt64(VALUE_OFFSET, true);
         const parsed = JSON.parse(stringified);
 
@@ -431,7 +438,11 @@ describe('BSON BigInt support', function () {
         const serializedDoc = BSON.serialize(number);
 
         const VALUE_OFFSET = 7;
-        const dataView = BSONDataView.fromUint8Array(serializedDoc);
+        const dataView = new DataView(
+          serializedDoc.buffer,
+          serializedDoc.byteOffset,
+          serializedDoc.byteLength
+        );
         const parsed = JSON.parse(stringified);
 
         expect(parsed).to.have.property('a');

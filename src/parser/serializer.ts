@@ -72,9 +72,8 @@ function serializeString(buffer: Uint8Array, key: string, value: string, index: 
   return index;
 }
 
-const NUMBER_SPACE = new DataView(new ArrayBuffer(8), 0, 8);
-const FOUR_BYTE_VIEW_ON_NUMBER = new Uint8Array(NUMBER_SPACE.buffer, 0, 4);
-const EIGHT_BYTE_VIEW_ON_NUMBER = new Uint8Array(NUMBER_SPACE.buffer, 0, 8);
+const FLOAT_WRITE = new Float64Array(1);
+const FLOAT_READ_BYTES = new Uint8Array(FLOAT_WRITE.buffer, 0, 8);
 
 function serializeNumber(buffer: Uint8Array, key: string, value: number, index: number) {
   const isNegativeZero = Object.is(value, -0);
@@ -87,23 +86,32 @@ function serializeNumber(buffer: Uint8Array, key: string, value: number, index: 
       ? constants.BSON_DATA_INT
       : constants.BSON_DATA_NUMBER;
 
-  if (type === constants.BSON_DATA_INT) {
-    NUMBER_SPACE.setInt32(0, value, true);
-  } else {
-    NUMBER_SPACE.setFloat64(0, value, true);
-  }
-
-  const bytes =
-    type === constants.BSON_DATA_INT ? FOUR_BYTE_VIEW_ON_NUMBER : EIGHT_BYTE_VIEW_ON_NUMBER;
-
   buffer[index++] = type;
 
   const numberOfWrittenBytes = ByteUtils.encodeUTF8Into(buffer, key, index);
   index = index + numberOfWrittenBytes;
   buffer[index++] = 0x00;
 
-  buffer.set(bytes, index);
-  index += bytes.byteLength;
+  if (type === constants.BSON_DATA_INT) {
+    let int32 = value;
+    buffer[index++] = int32;
+    int32 = int32 >>> 8;
+    buffer[index++] = int32;
+    int32 = int32 >>> 8;
+    buffer[index++] = int32;
+    int32 = int32 >>> 8;
+    buffer[index++] = int32;
+  } else {
+    FLOAT_WRITE[0] = value;
+    buffer[index++] = FLOAT_READ_BYTES[0];
+    buffer[index++] = FLOAT_READ_BYTES[1];
+    buffer[index++] = FLOAT_READ_BYTES[2];
+    buffer[index++] = FLOAT_READ_BYTES[3];
+    buffer[index++] = FLOAT_READ_BYTES[4];
+    buffer[index++] = FLOAT_READ_BYTES[5];
+    buffer[index++] = FLOAT_READ_BYTES[6];
+    buffer[index++] = FLOAT_READ_BYTES[7];
+  }
 
   return index;
 }
@@ -115,10 +123,29 @@ function serializeBigInt(buffer: Uint8Array, key: string, value: bigint, index: 
   // Encode the name
   index += numberOfWrittenBytes;
   buffer[index++] = 0;
-  NUMBER_SPACE.setBigInt64(0, value, true);
-  // Write BigInt value
-  buffer.set(EIGHT_BYTE_VIEW_ON_NUMBER, index);
-  index += EIGHT_BYTE_VIEW_ON_NUMBER.byteLength;
+
+  /* eslint-disable-next-line no-restricted-globals -- This is allowed here as useBigInt64=true */
+  const mask32bits = BigInt(0xffff_ffff);
+
+  let lo = Number(value & mask32bits);
+  buffer[index++] = lo;
+  lo = lo >> 8;
+  buffer[index++] = lo;
+  lo = lo >> 8;
+  buffer[index++] = lo;
+  lo = lo >> 8;
+  buffer[index++] = lo;
+
+  /* eslint-disable-next-line no-restricted-globals -- This is allowed here as useBigInt64=true */
+  let hi = Number((value >> BigInt(32)) & mask32bits);
+  buffer[index++] = hi;
+  hi = hi >> 8;
+  buffer[index++] = hi;
+  hi = hi >> 8;
+  buffer[index++] = hi;
+  hi = hi >> 8;
+  buffer[index++] = hi;
+
   return index;
 }
 
@@ -401,11 +428,16 @@ function serializeDouble(buffer: Uint8Array, key: string, value: Double, index: 
   buffer[index++] = 0;
 
   // Write float
-  NUMBER_SPACE.setFloat64(0, value.value, true);
-  buffer.set(EIGHT_BYTE_VIEW_ON_NUMBER, index);
+  FLOAT_WRITE[0] = value.value;
+  buffer[index++] = FLOAT_READ_BYTES[0];
+  buffer[index++] = FLOAT_READ_BYTES[1];
+  buffer[index++] = FLOAT_READ_BYTES[2];
+  buffer[index++] = FLOAT_READ_BYTES[3];
+  buffer[index++] = FLOAT_READ_BYTES[4];
+  buffer[index++] = FLOAT_READ_BYTES[5];
+  buffer[index++] = FLOAT_READ_BYTES[6];
+  buffer[index++] = FLOAT_READ_BYTES[7];
 
-  // Adjust index
-  index = index + 8;
   return index;
 }
 
