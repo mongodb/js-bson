@@ -51,9 +51,3 @@ const hasGlobalBuffer = typeof Buffer === 'function' && Buffer.prototype?._isBuf
  * @internal
  */
 export const ByteUtils: ByteUtils = hasGlobalBuffer ? nodeJsByteUtils : webByteUtils;
-
-export class BSONDataView extends DataView {
-  static fromUint8Array(input: Uint8Array) {
-    return new DataView(input.buffer, input.byteOffset, input.byteLength);
-  }
-}

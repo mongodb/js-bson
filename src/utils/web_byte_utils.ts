@@ -189,9 +189,9 @@ export const webByteUtils = {
     return new TextEncoder().encode(input).byteLength;
   },
 
-  encodeUTF8Into(buffer: Uint8Array, source: string, byteOffset: number): number {
+  encodeUTF8Into(uint8array: Uint8Array, source: string, byteOffset: number): number {
     const bytes = new TextEncoder().encode(source);
-    buffer.set(bytes, byteOffset);
+    uint8array.set(bytes, byteOffset);
     return bytes.byteLength;
   },
 
