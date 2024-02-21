@@ -51,7 +51,6 @@ export class DBRef extends BSONValue {
     const parts = collection.split('.');
     if (parts.length === 2) {
       db = parts.shift();
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       collection = parts.shift()!;
     }
 

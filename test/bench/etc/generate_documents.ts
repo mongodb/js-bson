@@ -113,16 +113,18 @@ generateSimpleTests(
 generateSimpleTests(
   'code-with-scope',
   () =>
-    new bson.Code(function (a: number, b: number) {
-      let t: number;
-      while (b !== 0) {
-        t = b;
-        b = a % b;
-        a = t;
-      }
-
-      return a;
-    }, JSON.parse(readFileSync(`${__dirname}/../documents/bestbuy_medium.json`, 'utf8')))
+    new bson.Code(
+      function (a: number, b: number) {
+        let t: number;
+        while (b !== 0) {
+          t = b;
+          b = a % b;
+          a = t;
+        }
+        return a;
+      },
+      JSON.parse(readFileSync(`${__dirname}/../documents/bestbuy_medium.json`, 'utf8'))
+    )
 );
 
 // Regexp - uses phone number regex
