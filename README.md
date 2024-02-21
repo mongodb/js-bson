@@ -251,3 +251,4 @@ const obj = { answer: new CustomSerialize() };
 // "{ answer: 42 }"
 console.log(BSON.deserialize(BSON.serialize(obj)));
 ```
+
