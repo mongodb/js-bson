@@ -180,11 +180,11 @@ export class ObjectId extends BSONValue {
 
     // 4-byte timestamp
     buffer[3] = time;
-    time = time >>> 8;
+    time >>>= 8;
     buffer[2] = time;
-    time = time >>> 8;
+    time >>>= 8;
     buffer[1] = time;
-    time = time >>> 8;
+    time >>>= 8;
     buffer[0] = time;
 
     // set PROCESS_UNIQUE if yet not initialized
@@ -306,11 +306,11 @@ export class ObjectId extends BSONValue {
     for (let i = 11; i >= 4; i--) buffer[i] = 0;
     // Encode time into first 4 bytes
     buffer[3] = time;
-    time = time >>> 8;
+    time >>>= 8;
     buffer[2] = time;
-    time = time >>> 8;
+    time >>>= 8;
     buffer[1] = time;
-    time = time >>> 8;
+    time >>>= 8;
     buffer[0] = time;
     // Return the new objectId
     return new ObjectId(buffer);

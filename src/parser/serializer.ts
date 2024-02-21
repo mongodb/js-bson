@@ -95,11 +95,11 @@ function serializeNumber(buffer: Uint8Array, key: string, value: number, index: 
   if (type === constants.BSON_DATA_INT) {
     let int32 = value;
     buffer[index++] = int32;
-    int32 = int32 >>> 8;
+    int32 >>>= 8;
     buffer[index++] = int32;
-    int32 = int32 >>> 8;
+    int32 >>>= 8;
     buffer[index++] = int32;
-    int32 = int32 >>> 8;
+    int32 >>>= 8;
     buffer[index++] = int32;
   } else {
     FLOAT_WRITE[0] = value;
@@ -129,21 +129,21 @@ function serializeBigInt(buffer: Uint8Array, key: string, value: bigint, index: 
 
   let lo = Number(value & mask32bits);
   buffer[index++] = lo;
-  lo = lo >> 8;
+  lo >>= 8;
   buffer[index++] = lo;
-  lo = lo >> 8;
+  lo >>= 8;
   buffer[index++] = lo;
-  lo = lo >> 8;
+  lo >>= 8;
   buffer[index++] = lo;
 
   /* eslint-disable-next-line no-restricted-globals -- This is allowed here as useBigInt64=true */
   let hi = Number((value >> BigInt(32)) & mask32bits);
   buffer[index++] = hi;
-  hi = hi >> 8;
+  hi >>= 8;
   buffer[index++] = hi;
-  hi = hi >> 8;
+  hi >>= 8;
   buffer[index++] = hi;
-  hi = hi >> 8;
+  hi >>= 8;
   buffer[index++] = hi;
 
   return index;
