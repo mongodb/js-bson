@@ -485,4 +485,43 @@ describe('ObjectId', function () {
       });
     });
   });
+
+  context('serializeInto()', () => {
+    it('writes oid bytes to input buffer', () => {
+      const oid = new ObjectId('61'.repeat(12));
+      const buffer = new Uint8Array(20);
+      // @ts-expect-error: internal method
+      oid.serializeInto(buffer, 0);
+      expect(buffer.subarray(0, 12)).to.deep.equal(Buffer.from('61'.repeat(12), 'hex'));
+    });
+
+    it('writes oid bytes to input buffer at offset', () => {
+      const oid = new ObjectId('61'.repeat(12));
+      const buffer = new Uint8Array(20);
+      // @ts-expect-error: internal method
+      oid.serializeInto(buffer, 5);
+      expect(buffer.subarray(5, 5 + 12)).to.deep.equal(Buffer.from('61'.repeat(12), 'hex'));
+    });
+
+    it('does not validate input types', () => {
+      const oid = new ObjectId('61'.repeat(12));
+      const object = {};
+      // @ts-expect-error: internal method
+      oid.serializeInto(object, 'b');
+      expect(object).to.deep.equal({
+        b: 0x61,
+        b1: 0x61,
+        b2: 0x61,
+        b3: 0x61,
+        b4: 0x61,
+        b5: 0x61,
+        b6: 0x61,
+        b7: 0x61,
+        b8: 0x61,
+        b9: 0x61,
+        b10: 0x61,
+        b11: 0x61
+      });
+    });
+  });
 });
