@@ -12,6 +12,7 @@ import type { MinKey } from '../min_key';
 import type { ObjectId } from '../objectid';
 import type { BSONRegExp } from '../regexp';
 import { ByteUtils } from '../utils/byte_utils';
+import { NumberUtils } from '../utils/number_utils';
 import { isAnyArrayBuffer, isDate, isMap, isRegExp, isUint8Array } from './utils';
 
 /** @public */
@@ -61,19 +62,13 @@ function serializeString(buffer: Uint8Array, key: string, value: string, index: 
   // Write the string
   const size = ByteUtils.encodeUTF8Into(buffer, value, index + 4);
   // Write the size of the string to buffer
-  buffer[index + 3] = ((size + 1) >> 24) & 0xff;
-  buffer[index + 2] = ((size + 1) >> 16) & 0xff;
-  buffer[index + 1] = ((size + 1) >> 8) & 0xff;
-  buffer[index] = (size + 1) & 0xff;
+  NumberUtils.setInt32LE(buffer, index, size + 1);
   // Update index
   index = index + 4 + size;
   // Write zero
   buffer[index++] = 0;
   return index;
 }
-
-const FLOAT_WRITE = new Float64Array(1);
-const FLOAT_READ_BYTES = new Uint8Array(FLOAT_WRITE.buffer, 0, 8);
 
 function serializeNumber(buffer: Uint8Array, key: string, value: number, index: number) {
   const isNegativeZero = Object.is(value, -0);
@@ -93,24 +88,9 @@ function serializeNumber(buffer: Uint8Array, key: string, value: number, index: 
   buffer[index++] = 0x00;
 
   if (type === constants.BSON_DATA_INT) {
-    let int32 = value;
-    buffer[index++] = int32;
-    int32 >>>= 8;
-    buffer[index++] = int32;
-    int32 >>>= 8;
-    buffer[index++] = int32;
-    int32 >>>= 8;
-    buffer[index++] = int32;
+    index += NumberUtils.setInt32LE(buffer, index, value);
   } else {
-    FLOAT_WRITE[0] = value;
-    buffer[index++] = FLOAT_READ_BYTES[0];
-    buffer[index++] = FLOAT_READ_BYTES[1];
-    buffer[index++] = FLOAT_READ_BYTES[2];
-    buffer[index++] = FLOAT_READ_BYTES[3];
-    buffer[index++] = FLOAT_READ_BYTES[4];
-    buffer[index++] = FLOAT_READ_BYTES[5];
-    buffer[index++] = FLOAT_READ_BYTES[6];
-    buffer[index++] = FLOAT_READ_BYTES[7];
+    index += NumberUtils.setFloat64LE(buffer, index, value);
   }
 
   return index;
@@ -124,27 +104,7 @@ function serializeBigInt(buffer: Uint8Array, key: string, value: bigint, index: 
   index += numberOfWrittenBytes;
   buffer[index++] = 0;
 
-  /* eslint-disable-next-line no-restricted-globals -- This is allowed here as useBigInt64=true */
-  const mask32bits = BigInt(0xffff_ffff);
-
-  let lo = Number(value & mask32bits);
-  buffer[index++] = lo;
-  lo >>= 8;
-  buffer[index++] = lo;
-  lo >>= 8;
-  buffer[index++] = lo;
-  lo >>= 8;
-  buffer[index++] = lo;
-
-  /* eslint-disable-next-line no-restricted-globals -- This is allowed here as useBigInt64=true */
-  let hi = Number((value >> BigInt(32)) & mask32bits);
-  buffer[index++] = hi;
-  hi >>= 8;
-  buffer[index++] = hi;
-  hi >>= 8;
-  buffer[index++] = hi;
-  hi >>= 8;
-  buffer[index++] = hi;
+  index += NumberUtils.setBigInt64LE(buffer, index, value);
 
   return index;
 }
@@ -189,15 +149,9 @@ function serializeDate(buffer: Uint8Array, key: string, value: Date, index: numb
   const lowBits = dateInMilis.getLowBits();
   const highBits = dateInMilis.getHighBits();
   // Encode low bits
-  buffer[index++] = lowBits & 0xff;
-  buffer[index++] = (lowBits >> 8) & 0xff;
-  buffer[index++] = (lowBits >> 16) & 0xff;
-  buffer[index++] = (lowBits >> 24) & 0xff;
+  index += NumberUtils.setInt32LE(buffer, index, lowBits);
   // Encode high bits
-  buffer[index++] = highBits & 0xff;
-  buffer[index++] = (highBits >> 8) & 0xff;
-  buffer[index++] = (highBits >> 16) & 0xff;
-  buffer[index++] = (highBits >> 24) & 0xff;
+  index += NumberUtils.setInt32LE(buffer, index, highBits);
   return index;
 }
 
@@ -309,10 +263,7 @@ function serializeBuffer(buffer: Uint8Array, key: string, value: Uint8Array, ind
   // Get size of the buffer (current write point)
   const size = value.length;
   // Write the size of the string to buffer
-  buffer[index++] = size & 0xff;
-  buffer[index++] = (size >> 8) & 0xff;
-  buffer[index++] = (size >> 16) & 0xff;
-  buffer[index++] = (size >> 24) & 0xff;
+  index += NumberUtils.setInt32LE(buffer, index, size);
   // Write the default subtype
   buffer[index++] = constants.BSON_BINARY_SUBTYPE_DEFAULT;
   // Copy the content form the binary field to the buffer
@@ -387,15 +338,9 @@ function serializeLong(buffer: Uint8Array, key: string, value: Long, index: numb
   const lowBits = value.getLowBits();
   const highBits = value.getHighBits();
   // Encode low bits
-  buffer[index++] = lowBits & 0xff;
-  buffer[index++] = (lowBits >> 8) & 0xff;
-  buffer[index++] = (lowBits >> 16) & 0xff;
-  buffer[index++] = (lowBits >> 24) & 0xff;
+  index += NumberUtils.setInt32LE(buffer, index, lowBits);
   // Encode high bits
-  buffer[index++] = highBits & 0xff;
-  buffer[index++] = (highBits >> 8) & 0xff;
-  buffer[index++] = (highBits >> 16) & 0xff;
-  buffer[index++] = (highBits >> 24) & 0xff;
+  index += NumberUtils.setInt32LE(buffer, index, highBits);
   return index;
 }
 
@@ -409,10 +354,7 @@ function serializeInt32(buffer: Uint8Array, key: string, value: Int32 | number, 
   index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   // Write the int value
-  buffer[index++] = value & 0xff;
-  buffer[index++] = (value >> 8) & 0xff;
-  buffer[index++] = (value >> 16) & 0xff;
-  buffer[index++] = (value >> 24) & 0xff;
+  index += NumberUtils.setInt32LE(buffer, index, value);
   return index;
 }
 
@@ -428,15 +370,7 @@ function serializeDouble(buffer: Uint8Array, key: string, value: Double, index: 
   buffer[index++] = 0;
 
   // Write float
-  FLOAT_WRITE[0] = value.value;
-  buffer[index++] = FLOAT_READ_BYTES[0];
-  buffer[index++] = FLOAT_READ_BYTES[1];
-  buffer[index++] = FLOAT_READ_BYTES[2];
-  buffer[index++] = FLOAT_READ_BYTES[3];
-  buffer[index++] = FLOAT_READ_BYTES[4];
-  buffer[index++] = FLOAT_READ_BYTES[5];
-  buffer[index++] = FLOAT_READ_BYTES[6];
-  buffer[index++] = FLOAT_READ_BYTES[7];
+  index += NumberUtils.setFloat64LE(buffer, index, value.value);
 
   return index;
 }
@@ -454,10 +388,7 @@ function serializeFunction(buffer: Uint8Array, key: string, value: Function, ind
   // Write the string
   const size = ByteUtils.encodeUTF8Into(buffer, functionString, index + 4) + 1;
   // Write the size of the string to buffer
-  buffer[index] = size & 0xff;
-  buffer[index + 1] = (size >> 8) & 0xff;
-  buffer[index + 2] = (size >> 16) & 0xff;
-  buffer[index + 3] = (size >> 24) & 0xff;
+  NumberUtils.setInt32LE(buffer, index, size);
   // Update index
   index = index + 4 + size - 1;
   // Write zero
@@ -496,10 +427,7 @@ function serializeCode(
     // Write string into buffer
     const codeSize = ByteUtils.encodeUTF8Into(buffer, functionString, index + 4) + 1;
     // Write the size of the string to buffer
-    buffer[index] = codeSize & 0xff;
-    buffer[index + 1] = (codeSize >> 8) & 0xff;
-    buffer[index + 2] = (codeSize >> 16) & 0xff;
-    buffer[index + 3] = (codeSize >> 24) & 0xff;
+    NumberUtils.setInt32LE(buffer, index, codeSize);
     // Write end 0
     buffer[index + 4 + codeSize - 1] = 0;
     // Write the
@@ -522,10 +450,7 @@ function serializeCode(
     const totalSize = endIndex - startIndex;
 
     // Write the total size of the object
-    buffer[startIndex++] = totalSize & 0xff;
-    buffer[startIndex++] = (totalSize >> 8) & 0xff;
-    buffer[startIndex++] = (totalSize >> 16) & 0xff;
-    buffer[startIndex++] = (totalSize >> 24) & 0xff;
+    startIndex += NumberUtils.setInt32LE(buffer, startIndex, totalSize);
     // Write trailing zero
     buffer[index++] = 0;
   } else {
@@ -540,10 +465,7 @@ function serializeCode(
     // Write the string
     const size = ByteUtils.encodeUTF8Into(buffer, functionString, index + 4) + 1;
     // Write the size of the string to buffer
-    buffer[index] = size & 0xff;
-    buffer[index + 1] = (size >> 8) & 0xff;
-    buffer[index + 2] = (size >> 16) & 0xff;
-    buffer[index + 3] = (size >> 24) & 0xff;
+    NumberUtils.setInt32LE(buffer, index, size);
     // Update index
     index = index + 4 + size - 1;
     // Write zero
@@ -568,20 +490,14 @@ function serializeBinary(buffer: Uint8Array, key: string, value: Binary, index: 
   // Add the deprecated 02 type 4 bytes of size to total
   if (value.sub_type === Binary.SUBTYPE_BYTE_ARRAY) size = size + 4;
   // Write the size of the string to buffer
-  buffer[index++] = size & 0xff;
-  buffer[index++] = (size >> 8) & 0xff;
-  buffer[index++] = (size >> 16) & 0xff;
-  buffer[index++] = (size >> 24) & 0xff;
+  index += NumberUtils.setInt32LE(buffer, index, size);
   // Write the subtype to the buffer
   buffer[index++] = value.sub_type;
 
   // If we have binary type 2 the 4 first bytes are the size
   if (value.sub_type === Binary.SUBTYPE_BYTE_ARRAY) {
     size = size - 4;
-    buffer[index++] = size & 0xff;
-    buffer[index++] = (size >> 8) & 0xff;
-    buffer[index++] = (size >> 16) & 0xff;
-    buffer[index++] = (size >> 24) & 0xff;
+    index += NumberUtils.setInt32LE(buffer, index, size);
   }
 
   // Write the data to the object
@@ -602,14 +518,11 @@ function serializeSymbol(buffer: Uint8Array, key: string, value: BSONSymbol, ind
   // Write the string
   const size = ByteUtils.encodeUTF8Into(buffer, value.value, index + 4) + 1;
   // Write the size of the string to buffer
-  buffer[index] = size & 0xff;
-  buffer[index + 1] = (size >> 8) & 0xff;
-  buffer[index + 2] = (size >> 16) & 0xff;
-  buffer[index + 3] = (size >> 24) & 0xff;
+  NumberUtils.setInt32LE(buffer, index, size);
   // Update index
   index = index + 4 + size - 1;
   // Write zero
-  buffer[index++] = 0x00;
+  buffer[index++] = 0;
   return index;
 }
 
@@ -656,10 +569,7 @@ function serializeDBRef(
   // Calculate object size
   const size = endIndex - startIndex;
   // Write the size
-  buffer[startIndex++] = size & 0xff;
-  buffer[startIndex++] = (size >> 8) & 0xff;
-  buffer[startIndex++] = (size >> 16) & 0xff;
-  buffer[startIndex++] = (size >> 24) & 0xff;
+  startIndex += NumberUtils.setInt32LE(buffer, index, size);
   // Set index
   return endIndex;
 }
@@ -831,7 +741,7 @@ export function serializeInto(
         if (checkKeys) {
           if ('$' === key[0]) {
             throw new BSONError('key ' + key + " must not start with '$'");
-          } else if (~key.indexOf('.')) {
+          } else if (key.includes('.')) {
             throw new BSONError('key ' + key + " must not contain '.'");
           }
         }
@@ -939,7 +849,7 @@ export function serializeInto(
         if (checkKeys) {
           if ('$' === key[0]) {
             throw new BSONError('key ' + key + " must not start with '$'");
-          } else if (~key.indexOf('.')) {
+          } else if (key.includes('.')) {
             throw new BSONError('key ' + key + " must not contain '.'");
           }
         }
@@ -1029,9 +939,6 @@ export function serializeInto(
   // Final size
   const size = index - startingIndex;
   // Write the size of the object
-  buffer[startingIndex++] = size & 0xff;
-  buffer[startingIndex++] = (size >> 8) & 0xff;
-  buffer[startingIndex++] = (size >> 16) & 0xff;
-  buffer[startingIndex++] = (size >> 24) & 0xff;
+  startingIndex += NumberUtils.setInt32LE(buffer, startingIndex, size);
   return index;
 }
