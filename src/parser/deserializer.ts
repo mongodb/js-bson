@@ -280,9 +280,8 @@ function deserializeObject(
       if (promoteValues === false) value = new Double(value);
     } else if (elementType === constants.BSON_DATA_DATE) {
       const lowBits = NumberUtils.getInt32LE(buffer, index);
-      index += 4;
-      const highBits = NumberUtils.getInt32LE(buffer, index);
-      index += 4;
+      const highBits = NumberUtils.getInt32LE(buffer, index + 4);
+      index += 8;
 
       value = new Date(new Long(lowBits, highBits).toNumber());
     } else if (elementType === constants.BSON_DATA_BOOLEAN) {
@@ -340,9 +339,8 @@ function deserializeObject(
       } else {
         // Unpack the low and high bits
         const lowBits = NumberUtils.getInt32LE(buffer, index);
-        index += 4;
-        const highBits = NumberUtils.getInt32LE(buffer, index);
-        index += 4;
+        const highBits = NumberUtils.getInt32LE(buffer, index + 4);
+        index += 8;
 
         const long = new Long(lowBits, highBits);
         // Promote the long if possible
@@ -516,15 +514,11 @@ function deserializeObject(
       value = promoteValues ? symbol : new BSONSymbol(symbol);
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_TIMESTAMP) {
-      // We intentionally **do not** use bit shifting here
-      // Bit shifting in javascript coerces numbers to **signed** int32s
-      // We need to keep i, and t unsigned
-      const i = NumberUtils.getUInt32LE(buffer, index);
-      index += 4;
-      const t = NumberUtils.getUInt32LE(buffer, index);
-      index += 4;
-
-      value = new Timestamp({ i, t });
+      value = new Timestamp({
+        i: NumberUtils.getUint32LE(buffer, index),
+        t: NumberUtils.getUint32LE(buffer, index + 4)
+      });
+      index += 8;
     } else if (elementType === constants.BSON_DATA_MIN_KEY) {
       value = new MinKey();
     } else if (elementType === constants.BSON_DATA_MAX_KEY) {

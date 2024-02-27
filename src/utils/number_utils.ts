@@ -18,7 +18,7 @@ export const NumberUtils = {
   },
 
   /** Reads a little-endian 32-bit unsigned integer from source */
-  getUInt32LE(source: Uint8Array, offset: number): number {
+  getUint32LE(source: Uint8Array, offset: number): number {
     return (
       source[offset] +
       source[offset + 1] * 256 +
@@ -39,8 +39,8 @@ export const NumberUtils = {
 
   /** Reads a little-endian 64-bit integer from source */
   getBigInt64LE(source: Uint8Array, offset: number): bigint {
-    const lo = NumberUtils.getUInt32LE(source, offset);
-    const hi = NumberUtils.getUInt32LE(source, offset + 4);
+    const lo = NumberUtils.getUint32LE(source, offset);
+    const hi = NumberUtils.getUint32LE(source, offset + 4);
 
     /*
       eslint-disable-next-line no-restricted-globals
