@@ -7,6 +7,8 @@ export type ByteUtils = {
   toLocalBufferType(buffer: Uint8Array | ArrayBufferView | ArrayBuffer): Uint8Array;
   /** Create empty space of size */
   allocate: (size: number) => Uint8Array;
+  /** Create empty space of size, use pooled memory when available */
+  allocateUnsafe: (size: number) => Uint8Array;
   /** Check if two Uint8Arrays are deep equal */
   equals: (a: Uint8Array, b: Uint8Array) => boolean;
   /** Check if two Uint8Arrays are deep equal */

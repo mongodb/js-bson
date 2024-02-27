@@ -264,8 +264,8 @@ function deserializeObject(
       value = ByteUtils.toUTF8(buffer, index, index + stringSize - 1, shouldValidateKey);
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_OID) {
-      const oid = ByteUtils.allocate(12);
-      oid.set(buffer.subarray(index, index + 12));
+      const oid = ByteUtils.allocateUnsafe(12);
+      for (let i = 0; i < 12; i++) oid[i] = buffer[index + i];
       value = new ObjectId(oid);
       index = index + 12;
     } else if (elementType === constants.BSON_DATA_INT && promoteValues === false) {
@@ -355,9 +355,9 @@ function deserializeObject(
       }
     } else if (elementType === constants.BSON_DATA_DECIMAL128) {
       // Buffer to contain the decimal bytes
-      const bytes = ByteUtils.allocate(16);
+      const bytes = ByteUtils.allocateUnsafe(16);
       // Copy the next 16 bytes into the bytes buffer
-      bytes.set(buffer.subarray(index, index + 16), 0);
+      for (let i = 0; i < 16; i++) bytes[i] = buffer[index + i];
       // Update index
       index = index + 16;
       // Assign the new Decimal128 value
@@ -398,7 +398,6 @@ function deserializeObject(
           }
         }
       } else {
-        const _buffer = ByteUtils.allocate(binarySize);
         // If we have subtype 2 skip the 4 bytes for the size
         if (subType === Binary.SUBTYPE_BYTE_ARRAY) {
           binarySize = NumberUtils.getInt32LE(buffer, index);
@@ -411,13 +410,12 @@ function deserializeObject(
             throw new BSONError('Binary type with subtype 0x02 contains too short binary size');
         }
 
-        // Copy the data
-        for (i = 0; i < binarySize; i++) {
-          _buffer[i] = buffer[index + i];
-        }
-
         if (promoteBuffers && promoteValues) {
-          value = _buffer;
+          value = ByteUtils.allocateUnsafe(binarySize);
+          // Copy the data
+          for (i = 0; i < binarySize; i++) {
+            value[i] = buffer[index + i];
+          }
         } else {
           value = new Binary(buffer.slice(index, index + binarySize), subType);
           if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW && UUID.isValid(value)) {
@@ -616,8 +614,8 @@ function deserializeObject(
       index = index + stringSize;
 
       // Read the oid
-      const oidBuffer = ByteUtils.allocate(12);
-      oidBuffer.set(buffer.subarray(index, index + 12), 0);
+      const oidBuffer = ByteUtils.allocateUnsafe(12);
+      for (let i = 0; i < 12; i++) oidBuffer[i] = buffer[index + i];
       const oid = new ObjectId(oidBuffer);
 
       // Update the index
