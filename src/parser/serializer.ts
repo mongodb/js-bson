@@ -256,16 +256,7 @@ function serializeObjectId(buffer: Uint8Array, key: string, value: ObjectId, ind
   index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
 
-  // Write the objectId into the shared buffer
-  const idValue = value.id;
-
-  if (isUint8Array(idValue)) {
-    for (let i = 0; i < 12; i++) {
-      buffer[index++] = idValue[i];
-    }
-  } else {
-    throw new BSONError('object [' + JSON.stringify(value) + '] is not a valid ObjectId');
-  }
+  index += value.serializeInto(buffer, index);
 
   // Adjust index
   return index;
@@ -289,7 +280,11 @@ function serializeBuffer(buffer: Uint8Array, key: string, value: Uint8Array, ind
   // Write the default subtype
   buffer[index++] = constants.BSON_BINARY_SUBTYPE_DEFAULT;
   // Copy the content form the binary field to the buffer
-  buffer.set(value, index);
+  if (size <= 16) {
+    for (let i = 0; i < size; i++) buffer[index + i] = value[i];
+  } else {
+    buffer.set(value, index);
+  }
   // Adjust the index
   index = index + size;
   return index;
@@ -343,7 +338,7 @@ function serializeDecimal128(buffer: Uint8Array, key: string, value: Decimal128,
   index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
   // Write the data from the value
-  buffer.set(value.bytes.subarray(0, 16), index);
+  for (let i = 0; i < 16; i++) buffer[index + i] = value.bytes[i];
   return index + 16;
 }
 
@@ -552,8 +547,11 @@ function serializeBinary(buffer: Uint8Array, key: string, value: Binary, index: 
     buffer[index++] = (size >> 24) & 0xff;
   }
 
-  // Write the data to the object
-  buffer.set(data, index);
+  if (size <= 16) {
+    for (let i = 0; i < size; i++) buffer[index + i] = data[i];
+  } else {
+    buffer.set(data, index);
+  }
   // Adjust the index
   index = index + value.position;
   return index;

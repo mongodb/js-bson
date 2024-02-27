@@ -269,6 +269,23 @@ export class ObjectId extends BSONValue {
     return new ObjectId();
   }
 
+  /** @internal */
+  serializeInto(uint8array: Uint8Array, index: number): 12 {
+    uint8array[index] = this.buffer[0];
+    uint8array[index + 1] = this.buffer[1];
+    uint8array[index + 2] = this.buffer[2];
+    uint8array[index + 3] = this.buffer[3];
+    uint8array[index + 4] = this.buffer[4];
+    uint8array[index + 5] = this.buffer[5];
+    uint8array[index + 6] = this.buffer[6];
+    uint8array[index + 7] = this.buffer[7];
+    uint8array[index + 8] = this.buffer[8];
+    uint8array[index + 9] = this.buffer[9];
+    uint8array[index + 10] = this.buffer[10];
+    uint8array[index + 11] = this.buffer[11];
+    return 12;
+  }
+
   /**
    * Creates an ObjectId from a second based number, with the rest of the ObjectId zeroed out. Used for comparisons or sorting the ObjectId.
    *
