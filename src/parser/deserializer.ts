@@ -15,6 +15,7 @@ import { BSONRegExp } from '../regexp';
 import { BSONSymbol } from '../symbol';
 import { Timestamp } from '../timestamp';
 import { ByteUtils } from '../utils/byte_utils';
+import { NumberUtils } from '../utils/number_utils';
 import { validateUtf8 } from '../validate_utf8';
 
 /** @public */
@@ -91,11 +92,7 @@ export function internalDeserialize(
   options = options == null ? {} : options;
   const index = options && options.index ? options.index : 0;
   // Read the document size
-  const size =
-    buffer[index] |
-    (buffer[index + 1] << 8) |
-    (buffer[index + 2] << 16) |
-    (buffer[index + 3] << 24);
+  const size = NumberUtils.getInt32LE(buffer, index);
 
   if (size < 5) {
     throw new BSONError(`bson size must be >= 5, is ${size}`);
@@ -127,9 +124,6 @@ export function internalDeserialize(
 }
 
 const allowedDBRefKeys = /^\$ref$|^\$id$|^\$db$/;
-
-const FLOAT_READ = new Float64Array(1);
-const FLOAT_WRITE_BYTES = new Uint8Array(FLOAT_READ.buffer, 0, 8);
 
 function deserializeObject(
   buffer: Uint8Array,
@@ -207,8 +201,8 @@ function deserializeObject(
   if (buffer.length < 5) throw new BSONError('corrupt bson message < 5 bytes long');
 
   // Read the document size
-  const size =
-    buffer[index++] | (buffer[index++] << 8) | (buffer[index++] << 16) | (buffer[index++] << 24);
+  const size = NumberUtils.getInt32LE(buffer, index);
+  index += 4;
 
   // Ensure buffer is valid size
   if (size < 5 || size > buffer.length) throw new BSONError('corrupt bson message');
@@ -258,11 +252,8 @@ function deserializeObject(
     index = i + 1;
 
     if (elementType === constants.BSON_DATA_STRING) {
-      const stringSize =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
+      const stringSize = NumberUtils.getInt32LE(buffer, index);
+      index += 4;
       if (
         stringSize <= 0 ||
         stringSize > buffer.length - index ||
@@ -278,37 +269,19 @@ function deserializeObject(
       value = new ObjectId(oid);
       index = index + 12;
     } else if (elementType === constants.BSON_DATA_INT && promoteValues === false) {
-      value = new Int32(
-        buffer[index++] | (buffer[index++] << 8) | (buffer[index++] << 16) | (buffer[index++] << 24)
-      );
+      value = new Int32(NumberUtils.getInt32LE(buffer, index));
+      index += 4;
     } else if (elementType === constants.BSON_DATA_INT) {
-      value =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
+      value = NumberUtils.getInt32LE(buffer, index);
+      index += 4;
     } else if (elementType === constants.BSON_DATA_NUMBER) {
-      FLOAT_WRITE_BYTES[0] = buffer[index++];
-      FLOAT_WRITE_BYTES[1] = buffer[index++];
-      FLOAT_WRITE_BYTES[2] = buffer[index++];
-      FLOAT_WRITE_BYTES[3] = buffer[index++];
-      FLOAT_WRITE_BYTES[4] = buffer[index++];
-      FLOAT_WRITE_BYTES[5] = buffer[index++];
-      FLOAT_WRITE_BYTES[6] = buffer[index++];
-      FLOAT_WRITE_BYTES[7] = buffer[index++];
-      value = FLOAT_READ[0];
+      value = NumberUtils.getFloat64LE(buffer, index);
+      index += 8;
       if (promoteValues === false) value = new Double(value);
     } else if (elementType === constants.BSON_DATA_DATE) {
-      const lowBits =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
-      const highBits =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
+      const lowBits = NumberUtils.getInt32LE(buffer, index);
+      const highBits = NumberUtils.getInt32LE(buffer, index + 4);
+      index += 8;
 
       value = new Date(new Long(lowBits, highBits).toNumber());
     } else if (elementType === constants.BSON_DATA_BOOLEAN) {
@@ -317,11 +290,8 @@ function deserializeObject(
       value = buffer[index++] === 1;
     } else if (elementType === constants.BSON_DATA_OBJECT) {
       const _index = index;
-      const objectSize =
-        buffer[index] |
-        (buffer[index + 1] << 8) |
-        (buffer[index + 2] << 16) |
-        (buffer[index + 3] << 24);
+      const objectSize = NumberUtils.getInt32LE(buffer, index);
+
       if (objectSize <= 0 || objectSize > buffer.length - index)
         throw new BSONError('bad embedded document length in bson');
 
@@ -339,11 +309,7 @@ function deserializeObject(
       index = index + objectSize;
     } else if (elementType === constants.BSON_DATA_ARRAY) {
       const _index = index;
-      const objectSize =
-        buffer[index] |
-        (buffer[index + 1] << 8) |
-        (buffer[index + 2] << 16) |
-        (buffer[index + 3] << 24);
+      const objectSize = NumberUtils.getInt32LE(buffer, index);
       let arrayOptions: DeserializeOptions = options;
 
       // Stop index
@@ -368,32 +334,14 @@ function deserializeObject(
       value = null;
     } else if (elementType === constants.BSON_DATA_LONG) {
       if (useBigInt64) {
-        const lo =
-          buffer[index] +
-          buffer[index + 1] * 2 ** 8 +
-          buffer[index + 2] * 2 ** 16 +
-          buffer[index + 3] * 2 ** 24;
-        const hi =
-          buffer[index + 4] +
-          buffer[index + 5] * 2 ** 8 +
-          buffer[index + 6] * 2 ** 16 +
-          (buffer[index + 7] << 24); // Overflow
-
-        /* eslint-disable-next-line no-restricted-globals -- This is allowed here as useBigInt64=true */
-        value = (BigInt(hi) << BigInt(32)) + BigInt(lo);
+        value = NumberUtils.getBigInt64LE(buffer, index);
         index += 8;
       } else {
         // Unpack the low and high bits
-        const lowBits =
-          buffer[index++] |
-          (buffer[index++] << 8) |
-          (buffer[index++] << 16) |
-          (buffer[index++] << 24);
-        const highBits =
-          buffer[index++] |
-          (buffer[index++] << 8) |
-          (buffer[index++] << 16) |
-          (buffer[index++] << 24);
+        const lowBits = NumberUtils.getInt32LE(buffer, index);
+        const highBits = NumberUtils.getInt32LE(buffer, index + 4);
+        index += 8;
+
         const long = new Long(lowBits, highBits);
         // Promote the long if possible
         if (promoteLongs && promoteValues === true) {
@@ -415,11 +363,8 @@ function deserializeObject(
       // Assign the new Decimal128 value
       value = new Decimal128(bytes);
     } else if (elementType === constants.BSON_DATA_BINARY) {
-      let binarySize =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
+      let binarySize = NumberUtils.getInt32LE(buffer, index);
+      index += 4;
       const totalBinarySize = binarySize;
       const subType = buffer[index++];
 
@@ -434,11 +379,8 @@ function deserializeObject(
       if (buffer['slice'] != null) {
         // If we have subtype 2 skip the 4 bytes for the size
         if (subType === Binary.SUBTYPE_BYTE_ARRAY) {
-          binarySize =
-            buffer[index++] |
-            (buffer[index++] << 8) |
-            (buffer[index++] << 16) |
-            (buffer[index++] << 24);
+          binarySize = NumberUtils.getInt32LE(buffer, index);
+          index += 4;
           if (binarySize < 0)
             throw new BSONError('Negative binary type element size found for subtype 0x02');
           if (binarySize > totalBinarySize - 4)
@@ -459,11 +401,8 @@ function deserializeObject(
         const _buffer = ByteUtils.allocate(binarySize);
         // If we have subtype 2 skip the 4 bytes for the size
         if (subType === Binary.SUBTYPE_BYTE_ARRAY) {
-          binarySize =
-            buffer[index++] |
-            (buffer[index++] << 8) |
-            (buffer[index++] << 16) |
-            (buffer[index++] << 24);
+          binarySize = NumberUtils.getInt32LE(buffer, index);
+          index += 4;
           if (binarySize < 0)
             throw new BSONError('Negative binary type element size found for subtype 0x02');
           if (binarySize > totalBinarySize - 4)
@@ -562,11 +501,8 @@ function deserializeObject(
       // Set the object
       value = new BSONRegExp(source, regExpOptions);
     } else if (elementType === constants.BSON_DATA_SYMBOL) {
-      const stringSize =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
+      const stringSize = NumberUtils.getInt32LE(buffer, index);
+      index += 4;
       if (
         stringSize <= 0 ||
         stringSize > buffer.length - index ||
@@ -578,31 +514,18 @@ function deserializeObject(
       value = promoteValues ? symbol : new BSONSymbol(symbol);
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_TIMESTAMP) {
-      // We intentionally **do not** use bit shifting here
-      // Bit shifting in javascript coerces numbers to **signed** int32s
-      // We need to keep i, and t unsigned
-      const i =
-        buffer[index++] +
-        buffer[index++] * (1 << 8) +
-        buffer[index++] * (1 << 16) +
-        buffer[index++] * (1 << 24);
-      const t =
-        buffer[index++] +
-        buffer[index++] * (1 << 8) +
-        buffer[index++] * (1 << 16) +
-        buffer[index++] * (1 << 24);
-
-      value = new Timestamp({ i, t });
+      value = new Timestamp({
+        i: NumberUtils.getUint32LE(buffer, index),
+        t: NumberUtils.getUint32LE(buffer, index + 4)
+      });
+      index += 8;
     } else if (elementType === constants.BSON_DATA_MIN_KEY) {
       value = new MinKey();
     } else if (elementType === constants.BSON_DATA_MAX_KEY) {
       value = new MaxKey();
     } else if (elementType === constants.BSON_DATA_CODE) {
-      const stringSize =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
+      const stringSize = NumberUtils.getInt32LE(buffer, index);
+      index += 4;
       if (
         stringSize <= 0 ||
         stringSize > buffer.length - index ||
@@ -622,11 +545,8 @@ function deserializeObject(
       // Update parse index position
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_CODE_W_SCOPE) {
-      const totalSize =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
+      const totalSize = NumberUtils.getInt32LE(buffer, index);
+      index += 4;
 
       // Element cannot be shorter than totalSize + stringSize + documentSize + terminator
       if (totalSize < 4 + 4 + 4 + 1) {
@@ -634,11 +554,8 @@ function deserializeObject(
       }
 
       // Get the code string size
-      const stringSize =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
+      const stringSize = NumberUtils.getInt32LE(buffer, index);
+      index += 4;
       // Check if we have a valid string
       if (
         stringSize <= 0 ||
@@ -660,11 +577,7 @@ function deserializeObject(
       // Parse the element
       const _index = index;
       // Decode the size of the object document
-      const objectSize =
-        buffer[index] |
-        (buffer[index + 1] << 8) |
-        (buffer[index + 2] << 16) |
-        (buffer[index + 3] << 24);
+      const objectSize = NumberUtils.getInt32LE(buffer, index);
       // Decode the scope object
       const scopeObject = deserializeObject(buffer, _index, options, false);
       // Adjust the index
@@ -683,11 +596,8 @@ function deserializeObject(
       value = new Code(functionString, scopeObject);
     } else if (elementType === constants.BSON_DATA_DBPOINTER) {
       // Get the code string size
-      const stringSize =
-        buffer[index++] |
-        (buffer[index++] << 8) |
-        (buffer[index++] << 16) |
-        (buffer[index++] << 24);
+      const stringSize = NumberUtils.getInt32LE(buffer, index);
+      index += 4;
       // Check if we have a valid string
       if (
         stringSize <= 0 ||

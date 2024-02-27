@@ -2,6 +2,7 @@ import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import { type InspectFn, defaultInspect } from './parser/utils';
 import { ByteUtils } from './utils/byte_utils';
+import { NumberUtils } from './utils/number_utils';
 
 // Regular expression that checks for hex value
 const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
@@ -179,13 +180,7 @@ export class ObjectId extends BSONValue {
     const buffer = ByteUtils.allocate(12);
 
     // 4-byte timestamp
-    buffer[3] = time;
-    time >>>= 8;
-    buffer[2] = time;
-    time >>>= 8;
-    buffer[1] = time;
-    time >>>= 8;
-    buffer[0] = time;
+    NumberUtils.setInt32BE(buffer, 0, time);
 
     // set PROCESS_UNIQUE if yet not initialized
     if (PROCESS_UNIQUE === null) {
@@ -265,11 +260,7 @@ export class ObjectId extends BSONValue {
   /** Returns the generation date (accurate up to the second) that this ID was generated. */
   getTimestamp(): Date {
     const timestamp = new Date();
-    const time =
-      this.buffer[3] +
-      this.buffer[2] * (1 << 8) +
-      this.buffer[1] * (1 << 16) +
-      this.buffer[0] * (1 << 24);
+    const time = NumberUtils.getUint32BE(this.buffer, 0);
     timestamp.setTime(Math.floor(time) * 1000);
     return timestamp;
   }
@@ -305,13 +296,7 @@ export class ObjectId extends BSONValue {
     const buffer = ByteUtils.allocate(12);
     for (let i = 11; i >= 4; i--) buffer[i] = 0;
     // Encode time into first 4 bytes
-    buffer[3] = time;
-    time >>>= 8;
-    buffer[2] = time;
-    time >>>= 8;
-    buffer[1] = time;
-    time >>>= 8;
-    buffer[0] = time;
+    NumberUtils.setInt32BE(buffer, 0, time);
     // Return the new objectId
     return new ObjectId(buffer);
   }
