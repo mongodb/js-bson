@@ -16,6 +16,7 @@ import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
 import { ByteUtils } from './utils/byte_utils';
+import { NumberUtils } from './utils/number_utils';
 export type { UUIDExtended, BinaryExtended, BinaryExtendedLegacy, BinarySequence } from './binary';
 export type { CodeExtended } from './code';
 export type { DBRefLike } from './db_ref';
@@ -232,11 +233,7 @@ export function deserializeStream(
   // Loop over all documents
   for (let i = 0; i < numberOfDocuments; i++) {
     // Find size of the document
-    const size =
-      bufferData[index] |
-      (bufferData[index + 1] << 8) |
-      (bufferData[index + 2] << 16) |
-      (bufferData[index + 3] << 24);
+    const size = NumberUtils.getInt32LE(bufferData, index);
     // Update options with index
     internalOptions.index = index;
     // Parse the document at this point
