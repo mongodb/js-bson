@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { NumberUtils } from '../../../src/utils/number_utils';
 
-describe.only('NumberUtils', () => {
+describe('NumberUtils', () => {
   /** Make a Uint8Array in a less verbose way */
   const b = (...values) => new Uint8Array(values);
 
