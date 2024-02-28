@@ -279,11 +279,10 @@ function deserializeObject(
       index += 8;
       if (promoteValues === false) value = new Double(value);
     } else if (elementType === constants.BSON_DATA_DATE) {
-      const lowBits = NumberUtils.getInt32LE(buffer, index);
-      const highBits = NumberUtils.getInt32LE(buffer, index + 4);
+      const lowBits = NumberUtils.getInt32LE(buffer, index) >>> 0;
+      const highBits = NumberUtils.getInt32LE(buffer, index + 4) * 2 ** 32;
       index += 8;
-
-      value = new Date(new Long(lowBits, highBits).toNumber());
+      value = new Date(highBits + lowBits);
     } else if (elementType === constants.BSON_DATA_BOOLEAN) {
       if (buffer[index] !== 0 && buffer[index] !== 1)
         throw new BSONError('illegal boolean type value');

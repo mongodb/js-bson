@@ -145,13 +145,20 @@ function serializeDate(buffer: Uint8Array, key: string, value: Date, index: numb
   buffer[index++] = 0;
 
   // Write the date
-  const dateInMilis = Long.fromNumber(value.getTime());
-  const lowBits = dateInMilis.getLowBits();
-  const highBits = dateInMilis.getHighBits();
-  // Encode low bits
-  index += NumberUtils.setInt32LE(buffer, index, lowBits);
-  // Encode high bits
-  index += NumberUtils.setInt32LE(buffer, index, highBits);
+  const ms = value.getTime();
+  let lo = ms % 0x100000000 | 0;
+  let hi = (ms / 0x100000000) | 0;
+  if (ms < 0) {
+    const l = Long.fromNumber(ms);
+    lo = l.getLowBits();
+    hi = l.getHighBits();
+  }
+
+  // // Encode low bits
+  index += NumberUtils.setInt32LE(buffer, index, lo);
+  // // Encode high bits
+  index += NumberUtils.setInt32LE(buffer, index, hi);
+  // index += NumberUtils.setBigInt64LE(buffer, index, ms);
   return index;
 }
 
