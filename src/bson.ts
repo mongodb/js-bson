@@ -116,7 +116,7 @@ export function serialize(object: Document, options: SerializeOptions = {}): Uin
   );
 
   // Create the final buffer
-  const finishedBuffer = ByteUtils.allocate(serializationIndex);
+  const finishedBuffer = ByteUtils.allocateUnsafe(serializationIndex);
 
   // Copy into the finished buffer
   finishedBuffer.set(buffer.subarray(0, serializationIndex), 0);

@@ -109,6 +109,10 @@ export const webByteUtils = {
     return new Uint8Array(size);
   },
 
+  allocateUnsafe(size: number): Uint8Array {
+    return webByteUtils.allocate(size);
+  },
+
   equals(a: Uint8Array, b: Uint8Array): boolean {
     if (a.byteLength !== b.byteLength) {
       return false;

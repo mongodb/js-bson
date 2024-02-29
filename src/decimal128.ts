@@ -591,7 +591,7 @@ export class Decimal128 extends BSONValue {
     }
 
     // Encode into a buffer
-    const buffer = ByteUtils.allocate(16);
+    const buffer = ByteUtils.allocateUnsafe(16);
     index = 0;
 
     // Encode the low 64 bits of the decimal
