@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.4.0](https://github.com/mongodb/js-bson/compare/v6.3.0...v6.4.0) (2024-02-29)
+
+
+### Features
+
+* **NODE-5909:** optimize writing basic latin strings ([#645](https://github.com/mongodb/js-bson/issues/645)) ([ec51256](https://github.com/mongodb/js-bson/commit/ec512568c567fc83bc8f2a715664f81534609bb9))
+
+
+### Bug Fixes
+
+* **NODE-5873:** objectId symbol property not defined on instances from cross cjs and mjs ([#643](https://github.com/mongodb/js-bson/issues/643)) ([4d9884d](https://github.com/mongodb/js-bson/commit/4d9884d301d80d90040393c7d91ac3195c113a5c))
+
+
+### Performance Improvements
+
+* **NODE-5557:** move DataView and Set allocation used for double parsing and utf8 validation to nested path ([#611](https://github.com/mongodb/js-bson/issues/611)) ([9a150e1](https://github.com/mongodb/js-bson/commit/9a150e171a20b591b77f501518b74355a7db0cd3))
+* **NODE-5910:** optimize small byte copies ([#651](https://github.com/mongodb/js-bson/issues/651)) ([24d035e](https://github.com/mongodb/js-bson/commit/24d035eb31d942cfbc02bfa6fe242ccc576aad24))
+* **NODE-5934:** replace DataView uses with bit math ([#649](https://github.com/mongodb/js-bson/issues/649)) ([6d343ab](https://github.com/mongodb/js-bson/commit/6d343ab9141d7e0c577e3eb236d42364007f1925))
+* **NODE-5955:** use pooled memory when possible ([#653](https://github.com/mongodb/js-bson/issues/653)) ([78c4264](https://github.com/mongodb/js-bson/commit/78c426428f2ebab24d798238411a6e6b33a4b694))
+
 ## [6.3.0](https://github.com/mongodb/js-bson/compare/v6.2.0...v6.3.0) (2024-01-31)
 
 
