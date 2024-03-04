@@ -1,3 +1,5 @@
+import { BSONOffsetError } from '../error';
+
 const FLOAT = new Float64Array(1);
 const FLOAT_BYTES = new Uint8Array(FLOAT.buffer, 0, 8);
 
@@ -7,6 +9,13 @@ const FLOAT_BYTES = new Uint8Array(FLOAT.buffer, 0, 8);
  * @internal
  */
 export const NumberUtils = {
+  getSize(source: Uint8Array, offset: number): number {
+    if (source[offset + 3] > 127) {
+      throw new BSONOffsetError('BSON size cannot be negative', offset);
+    }
+    return NumberUtils.getInt32LE(source, offset);
+  },
+
   /** Reads a little-endian 32-bit integer from source */
   getInt32LE(source: Uint8Array, offset: number): number {
     return (

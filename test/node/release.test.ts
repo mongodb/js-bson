@@ -40,6 +40,8 @@ const REQUIRED_FILES = [
   'src/parser/deserializer.ts',
   'src/parser/serializer.ts',
   'src/parser/utils.ts',
+  'src/parser/on_demand/index.ts',
+  'src/parser/on_demand/parse_to_elements.ts',
   'src/regexp.ts',
   'src/symbol.ts',
   'src/timestamp.ts',

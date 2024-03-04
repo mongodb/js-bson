@@ -5,6 +5,30 @@ describe('NumberUtils', () => {
   /** Make a Uint8Array in a less verbose way */
   const b = (...values) => new Uint8Array(values);
 
+  context('getSize()', () => {
+    it('parses an int32 little endian', () => {
+      expect(NumberUtils.getSize(b(0, 0, 0, 1), 0)).to.equal(1 << 24);
+    });
+
+    it('throws on a signed int32 little endian that is negative', () => {
+      let thrownError: Error | undefined;
+      try {
+        NumberUtils.getSize(b(255, 255, 255, 255), 0);
+      } catch (error) {
+        thrownError = error;
+      }
+      expect(thrownError).to.match(/BSON size cannot be negative/i);
+    });
+
+    it('parses an int32 little endian at offset', () => {
+      expect(NumberUtils.getSize(b(0, 0, 0, 0, 0, 1), 2)).to.equal(1 << 24);
+    });
+
+    it('does not check bounds of offset', () => {
+      expect(NumberUtils.getSize(b(0, 0, 0, 1), 4)).to.equal(0);
+    });
+  });
+
   context('getInt32LE()', () => {
     it('parses an int32 little endian', () => {
       expect(NumberUtils.getInt32LE(b(0, 0, 0, 1), 0)).to.equal(1 << 24);

@@ -1,7 +1,13 @@
 import { expect } from 'chai';
 import { loadESModuleBSON } from '../load_bson';
 
-import { __isWeb__, BSONError, BSONVersionError, BSONRuntimeError } from '../register-bson';
+import {
+  __isWeb__,
+  BSONError,
+  BSONVersionError,
+  BSONRuntimeError,
+  onDemand
+} from '../register-bson';
 
 const instanceOfChecksWork = !__isWeb__;
 
@@ -100,6 +106,26 @@ describe('BSONError', function () {
 
     it('has a name property equal to "BSONRuntimeError"', function () {
       expect(new BSONRuntimeError('Woops!')).to.have.property('name', 'BSONRuntimeError');
+    });
+  });
+
+  describe('class BSONOffsetError', () => {
+    it('is a BSONError instance', function () {
+      expect(BSONError.isBSONError(new onDemand.BSONOffsetError('Oopsie', 3))).to.be.true;
+    });
+
+    it('has a name property equal to "BSONOffsetError"', function () {
+      expect(new onDemand.BSONOffsetError('Woops!', 3)).to.have.property('name', 'BSONOffsetError');
+    });
+
+    it('sets the offset property', function () {
+      expect(new onDemand.BSONOffsetError('Woops!', 3)).to.have.property('offset', 3);
+    });
+
+    it('includes the offset in the message', function () {
+      expect(new onDemand.BSONOffsetError('Woops!', 3))
+        .to.have.property('message')
+        .that.matches(/offset: 3/i);
     });
   });
 });

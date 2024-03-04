@@ -18,6 +18,7 @@ const EXPECTED_EXPORTS = [
   'DBRef',
   'Binary',
   'ObjectId',
+  'onDemand',
   'UUID',
   'Long',
   'Timestamp',

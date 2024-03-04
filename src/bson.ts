@@ -54,6 +54,7 @@ export { BSONValue } from './bson_value';
 export { BSONError, BSONVersionError, BSONRuntimeError } from './error';
 export { BSONType } from './constants';
 export { EJSON } from './extended_json';
+export { onDemand } from './parser/on_demand/index';
 
 /** @public */
 export interface Document {
