@@ -74,6 +74,7 @@ describe('parseToElements()', () => {
     });
 
     const sizedTypes = [
+      // The array is in order of [TypeByte, ElementName, Int32Size, ElementValue]
       { type: 'string', input: ['02', '6100', '00000080', '6100'] },
       { type: 'binary', input: ['05', '6100', '00000080', '01'] },
       { type: 'dbpointer', input: ['05', '6100', '00000080', '6100', '00'.repeat(12)] },
@@ -97,6 +98,7 @@ describe('parseToElements()', () => {
 
   context('when an sized element reports a size larger than document', () => {
     const sizedTypes = [
+      // The array is in order of [TypeByte, ElementName, Int32Size, ElementValue]
       { type: 'string', input: ['02', '6100', '00000070', '6100'] },
       { type: 'binary', input: ['05', '6100', '00000070', '01'] },
       { type: 'dbpointer', input: ['05', '6100', '00000070', '6100', '00'.repeat(12)] },
@@ -132,7 +134,7 @@ describe('parseToElements()', () => {
     });
   });
 
-  context('when given an regexp', () => {
+  context('when given a regexp', () => {
     context('with no null terminator for the pattern', () => {
       it('throws an error', () => {
         const regexp = [
@@ -147,7 +149,7 @@ describe('parseToElements()', () => {
       });
     });
 
-    context('with no null terminator for the pattern', () => {
+    context('with no null terminator for the flags', () => {
       it('throws an error', () => {
         const regexp = [
           Buffer.from('abc').toString('hex'),
