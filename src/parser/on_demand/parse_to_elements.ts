@@ -13,8 +13,16 @@ export type BSONElement = [
   length: number
 ];
 
+/** Parses a int32 little-endian at offset, throws if it is negative */
+function getSize(source: Uint8Array, offset: number): number {
+  if (source[offset + 3] > 127) {
+    throw new BSONOffsetError('BSON size cannot be negative', offset);
+  }
+  return NumberUtils.getInt32LE(source, offset);
+}
+
 /**
- * Searches for null terminator.
+ * Searches for null terminator of a BSON element's value (Never the document null terminator)
  * **Does not** bounds check since this should **ONLY** be used within parseToElements which has asserted that `bytes` ends with a `0x00`.
  * So this will at most iterate to the document's terminator and error if that is the offset reached.
  */
@@ -24,6 +32,7 @@ function findNull(bytes: Uint8Array, offset: number): number {
   for (; bytes[nullTerminatorOffset] !== 0x00; nullTerminatorOffset++);
 
   if (nullTerminatorOffset === bytes.length - 1) {
+    // We reached the null terminator of the document, not a value's
     throw new BSONOffsetError('Null terminator not found', offset);
   }
 
@@ -42,7 +51,7 @@ export function parseToElements(bytes: Uint8Array, startOffset = 0): Iterable<BS
     );
   }
 
-  const documentSize = NumberUtils.getSize(bytes, startOffset);
+  const documentSize = getSize(bytes, startOffset);
 
   if (documentSize > bytes.length - startOffset) {
     throw new BSONOffsetError(
@@ -75,6 +84,7 @@ export function parseToElements(bytes: Uint8Array, startOffset = 0): Iterable<BS
 
     let length: number;
 
+    // The following values are left as literals intentionally
     if (type === 1 || type === 18 || type === 9 || type === 17) {
       // double, long, date, timestamp
       length = 8;
@@ -100,10 +110,10 @@ export function parseToElements(bytes: Uint8Array, startOffset = 0): Iterable<BS
       length = findNull(bytes, findNull(bytes, offset) + 1) + 1 - offset;
     } else if (type === 3 || type === 4 || type === 15) {
       // object, array, code_w_scope
-      length = NumberUtils.getSize(bytes, offset);
+      length = getSize(bytes, offset);
     } else if (type === 2 || type === 5 || type === 12 || type === 13 || type === 14) {
       // string, binary, dbpointer, code, symbol
-      length = NumberUtils.getSize(bytes, offset) + 4;
+      length = getSize(bytes, offset) + 4;
       if (type === 5) {
         // binary subtype
         length += 1;
