@@ -147,11 +147,11 @@ export function parseToElements(bytes: Uint8Array, startOffset = 0): Iterable<BS
       type === t.symbol
     ) {
       length = getSize(bytes, offset) + 4;
-      if (type === 5) {
+      if (type === t.binData) {
         // binary subtype
         length += 1;
       }
-      if (type === 12) {
+      if (type === t.dbPointer) {
         // dbPointer's objectId
         length += 12;
       }
