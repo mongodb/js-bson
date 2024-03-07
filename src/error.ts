@@ -81,3 +81,25 @@ export class BSONRuntimeError extends BSONError {
     super(message);
   }
 }
+
+/**
+ * @public
+ * @category Error
+ *
+ * @experimental
+ *
+ * An error generated when BSON bytes are invalid.
+ * Reports the offset the parser was able to reach before encountering the error.
+ */
+export class BSONOffsetError extends BSONError {
+  public get name(): 'BSONOffsetError' {
+    return 'BSONOffsetError';
+  }
+
+  public offset: number;
+
+  constructor(message: string, offset: number) {
+    super(`${message}. offset: ${offset}`);
+    this.offset = offset;
+  }
+}
