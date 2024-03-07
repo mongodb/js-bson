@@ -1,5 +1,37 @@
+/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 import { BSONOffsetError } from '../../error';
-import { NumberUtils } from '../../utils/number_utils';
+
+/**
+ * @internal
+ *
+ * @remarks
+ * - This enum is const so the code we produce will inline the numbers
+ * - `minKey` is set to 255 so unsigned comparisons succeed
+ * - Modify with caution, double check the bundle contains literals
+ */
+const enum t {
+  double = 1,
+  string = 2,
+  object = 3,
+  array = 4,
+  binData = 5,
+  undefined = 6,
+  objectId = 7,
+  bool = 8,
+  date = 9,
+  null = 10,
+  regex = 11,
+  dbPointer = 12,
+  javascript = 13,
+  symbol = 14,
+  javascriptWithScope = 15,
+  int = 16,
+  timestamp = 17,
+  long = 18,
+  decimal = 19,
+  minKey = 255,
+  maxKey = 127
+}
 
 /**
  * @public
@@ -18,7 +50,12 @@ function getSize(source: Uint8Array, offset: number): number {
   if (source[offset + 3] > 127) {
     throw new BSONOffsetError('BSON size cannot be negative', offset);
   }
-  return NumberUtils.getInt32LE(source, offset);
+  return (
+    source[offset] |
+    (source[offset + 1] << 8) |
+    (source[offset + 2] << 16) |
+    (source[offset + 3] << 24)
+  );
 }
 
 /**
@@ -84,35 +121,31 @@ export function parseToElements(bytes: Uint8Array, startOffset = 0): Iterable<BS
 
     let length: number;
 
-    // The following values are left as literals intentionally
-    if (type === 1 || type === 18 || type === 9 || type === 17) {
-      // double, long, date, timestamp
+    if (type === t.double || type === t.long || type === t.date || type === t.timestamp) {
       length = 8;
-    } else if (type === 16) {
-      // int
+    } else if (type === t.int) {
       length = 4;
-    } else if (type === 7) {
-      // objectId
+    } else if (type === t.objectId) {
       length = 12;
-    } else if (type === 19) {
-      // decimal128
+    } else if (type === t.decimal) {
       length = 16;
-    } else if (type === 8) {
-      // boolean
+    } else if (type === t.bool) {
       length = 1;
-    } else if (type === 10 || type === 6 || type === 127 || type === 255) {
-      // null, undefined, maxKey, minKey
+    } else if (type === t.null || type === t.undefined || type === t.maxKey || type === t.minKey) {
       length = 0;
     }
     // Needs a size calculation
-    else if (type === 11) {
-      // regex
+    else if (type === t.regex) {
       length = findNull(bytes, findNull(bytes, offset) + 1) + 1 - offset;
-    } else if (type === 3 || type === 4 || type === 15) {
-      // object, array, code_w_scope
+    } else if (type === t.object || type === t.array || type === t.javascriptWithScope) {
       length = getSize(bytes, offset);
-    } else if (type === 2 || type === 5 || type === 12 || type === 13 || type === 14) {
-      // string, binary, dbpointer, code, symbol
+    } else if (
+      type === t.string ||
+      type === t.binData ||
+      type === t.dbPointer ||
+      type === t.javascript ||
+      type === t.symbol
+    ) {
       length = getSize(bytes, offset) + 4;
       if (type === 5) {
         // binary subtype
