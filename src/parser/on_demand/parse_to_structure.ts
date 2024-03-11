@@ -1,35 +1,13 @@
 import { type Code } from '../../code';
-import { type BSONElement, getSize, parseToElements as p } from './parse_to_elements';
+import { type BSONElement, getSize, parseToElements } from './parse_to_elements';
 
 /** @internal TODO */
 const DEFAULT_REVIVER = () => null;
 
 /** @internal */
-function parseToElements(...args: Parameters<typeof p>): BSONElement[] {
-  const res = p(...args);
+function parseToElementsToArray(bytes: Uint8Array, offset?: number): BSONElement[] {
+  const res = parseToElements(bytes, offset);
   return Array.isArray(res) ? res : [...res];
-}
-
-/**
- * @internal
- * BSONElement offsets
- */
-const enum e {
-  type = 0,
-  nameOffset = 1,
-  nameLength = 2,
-  offset = 3,
-  length = 4
-}
-
-/**
- * @internal
- * Embedded bson types
- */
-const enum t {
-  object = 3,
-  array = 4,
-  javascriptWithScope = 15
 }
 
 /** @internal */
@@ -106,10 +84,26 @@ export function parseToStructure<
 
   let ctx: ParseContext | null = {
     elementOffset: 0,
-    elements: parseToElements(bytes, startOffset),
+    elements: parseToElementsToArray(bytes, startOffset),
     container: root,
     previous: null
   };
+
+  /** BSONElement offsets */
+  const enum e {
+    type = 0,
+    nameOffset = 1,
+    nameLength = 2,
+    offset = 3,
+    length = 4
+  }
+
+  /** BSON Embedded types */
+  const enum t {
+    object = 3,
+    array = 4,
+    javascriptWithScope = 15
+  }
 
   embedded: while (ctx !== null) {
     for (
@@ -130,7 +124,7 @@ export function parseToStructure<
 
         ctx = {
           elementOffset: 0,
-          elements: parseToElements(bytes, docOffset),
+          elements: parseToElementsToArray(bytes, docOffset),
           container: maybeNewContainer,
           previous: ctx
         };
