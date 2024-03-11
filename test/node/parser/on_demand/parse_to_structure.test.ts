@@ -208,7 +208,7 @@ describe('parseToStructure()', () => {
     ];
 
     context('when reviver returns null', () => {
-      it('does not iterated the embedded documents', () => {
+      it('does not iterate the embedded documents', () => {
         const embedded = bufferFromHexArray([
           '03', // object
           '6200', // 'b'
