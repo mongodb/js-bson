@@ -57,7 +57,7 @@ export class Binary extends BSONValue {
   /** Column BSON type */
   static readonly SUBTYPE_COLUMN = 7;
   /** Sensitive BSON type */
-  static readonly SENSITIVE_COLUMN = 8;
+  static readonly SUBTYPE_SENSITIVE = 8;
   /** User BSON type */
   static readonly SUBTYPE_USER_DEFINED = 128;
 
