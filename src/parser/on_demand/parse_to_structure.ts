@@ -67,6 +67,8 @@ export type Container =
   | {
       kind: 'custom';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      dest: any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       [key: string]: any;
     };
 
@@ -84,15 +86,20 @@ export type BSONReviver = (
  * @experimental
  * @public
  */
-export function parseToStructure<TRoot = Record<string, unknown>>(
+export function parseToStructure<
+  TRoot extends Container = {
+    dest: Record<string, unknown>;
+    kind: 'object';
+  }
+>(
   bytes: Uint8Array,
   startOffset?: number,
-  root?: Container,
+  providedRoot?: TRoot,
   reviver?: BSONReviver
-): TRoot {
-  root ??= {
+): TRoot extends undefined ? Record<string, unknown> : TRoot['dest'] {
+  const root = providedRoot ?? {
     kind: 'object',
-    dest: Object.create(null)
+    dest: Object.create(null) as Record<string, unknown>
   };
 
   reviver ??= DEFAULT_REVIVER;
@@ -134,5 +141,5 @@ export function parseToStructure<TRoot = Record<string, unknown>>(
     ctx = ctx.previous;
   }
 
-  return root.dest as unknown as TRoot;
+  return root.dest;
 }

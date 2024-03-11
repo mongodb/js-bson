@@ -13,13 +13,17 @@ export type OnDemand = {
     isBSONError(value: unknown): value is BSONError;
   };
   parseToElements: (this: void, bytes: Uint8Array, startOffset?: number) => Iterable<BSONElement>;
-  parseToStructure: <TRoot = Record<string, unknown>>(
-    this: void,
+  parseToStructure: <
+    TRoot extends Container = {
+      dest: Record<string, unknown>;
+      kind: 'object';
+    }
+  >(
     bytes: Uint8Array,
-    offset?: number,
-    root?: Container,
+    startOffset?: number,
+    root?: TRoot,
     reviver?: BSONReviver
-  ) => TRoot;
+  ) => TRoot extends undefined ? Record<string, unknown> : TRoot['dest'];
 };
 
 /**
