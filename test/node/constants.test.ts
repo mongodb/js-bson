@@ -19,6 +19,8 @@ describe('BSON Constants', () => {
      |  "\x04"  UUID
      |  "\x05"  MD5
      |  "\x06"  Encrypted BSON value
+     |  "\x07"  Column BSON value
+     |  "\x08"  Sensitive BSON value
      |  "\x80"  User defined
     */
     it('Default should be 0', () => {
@@ -54,6 +56,11 @@ describe('BSON Constants', () => {
     it('Column should be 7', () => {
       expect(constants.BSON_BINARY_SUBTYPE_COLUMN).to.equal(7);
       expect(Binary.SUBTYPE_COLUMN).to.equal(7);
+    });
+
+    it('Sensitive should be 7', () => {
+      expect(constants.BSON_BINARY_SUBTYPE_SENSITIVE).to.equal(8);
+      expect(Binary.SUBTYPE_SENSITIVE).to.equal(8);
     });
   });
   context('BSON Type indicators', () => {
