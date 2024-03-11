@@ -109,6 +109,8 @@ export const BSON_BINARY_SUBTYPE_ENCRYPTED = 6;
 /** Column BSON type @internal */
 export const BSON_BINARY_SUBTYPE_COLUMN = 7;
 
+export const BSON_BINARY_SUBTYPE_SENSITIVE = 8;
+
 /** Binary User Defined Type @internal */
 export const BSON_BINARY_SUBTYPE_USER_DEFINED = 128;
 
