@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 import { BSONOffsetError } from '../../error';
 
 /**
@@ -45,8 +44,8 @@ export type BSONElement = [
   length: number
 ];
 
-/** Parses a int32 little-endian at offset, throws if it is negative */
-function getSize(source: Uint8Array, offset: number): number {
+/** @internal Parses a int32 little-endian at offset, throws if it is negative */
+export function getSize(source: Uint8Array, offset: number): number {
   if (source[offset + 3] > 127) {
     throw new BSONOffsetError('BSON size cannot be negative', offset);
   }
