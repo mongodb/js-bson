@@ -44,7 +44,10 @@ export type BSONElement = [
   length: number
 ];
 
-/** @internal Parses a int32 little-endian at offset, throws if it is negative */
+/**
+ * @internal
+ * Parses a int32 little-endian at offset, throws if it is negative
+ */
 export function getSize(source: Uint8Array, offset: number): number {
   if (source[offset + 3] > 127) {
     throw new BSONOffsetError('BSON size cannot be negative', offset);
