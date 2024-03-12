@@ -1,6 +1,11 @@
 const FLOAT = new Float64Array(1);
 const FLOAT_BYTES = new Uint8Array(FLOAT.buffer, 0, 8);
 
+FLOAT[0] = -1;
+// Little endian [0, 0, 0, 0, 0, 0,  240, 191]
+// Big endian    [191, 240, 0, 0, 0, 0, 0, 0]
+const isBigEndian = FLOAT_BYTES[7] === 0;
+
 /**
  * Number parsing and serializing utilities.
  *
@@ -50,17 +55,29 @@ export const NumberUtils = {
   },
 
   /** Reads a little-endian 64-bit float from source */
-  getFloat64LE(source: Uint8Array, offset: number): number {
-    FLOAT_BYTES[0] = source[offset];
-    FLOAT_BYTES[1] = source[offset + 1];
-    FLOAT_BYTES[2] = source[offset + 2];
-    FLOAT_BYTES[3] = source[offset + 3];
-    FLOAT_BYTES[4] = source[offset + 4];
-    FLOAT_BYTES[5] = source[offset + 5];
-    FLOAT_BYTES[6] = source[offset + 6];
-    FLOAT_BYTES[7] = source[offset + 7];
-    return FLOAT[0];
-  },
+  getFloat64LE: isBigEndian
+    ? (source: Uint8Array, offset: number) => {
+        FLOAT_BYTES[7] = source[offset];
+        FLOAT_BYTES[6] = source[offset + 1];
+        FLOAT_BYTES[5] = source[offset + 2];
+        FLOAT_BYTES[4] = source[offset + 3];
+        FLOAT_BYTES[3] = source[offset + 4];
+        FLOAT_BYTES[2] = source[offset + 5];
+        FLOAT_BYTES[1] = source[offset + 6];
+        FLOAT_BYTES[0] = source[offset + 7];
+        return FLOAT[0];
+      }
+    : (source: Uint8Array, offset: number) => {
+        FLOAT_BYTES[0] = source[offset];
+        FLOAT_BYTES[1] = source[offset + 1];
+        FLOAT_BYTES[2] = source[offset + 2];
+        FLOAT_BYTES[3] = source[offset + 3];
+        FLOAT_BYTES[4] = source[offset + 4];
+        FLOAT_BYTES[5] = source[offset + 5];
+        FLOAT_BYTES[6] = source[offset + 6];
+        FLOAT_BYTES[7] = source[offset + 7];
+        return FLOAT[0];
+      },
 
   /** Writes a big-endian 32-bit integer to destination, can be signed or unsigned */
   setInt32BE(destination: Uint8Array, offset: number, value: number): 4 {
@@ -120,16 +137,29 @@ export const NumberUtils = {
   },
 
   /** Writes a little-endian 64-bit float to destination */
-  setFloat64LE(destination: Uint8Array, offset: number, value: number): 8 {
-    FLOAT[0] = value;
-    destination[offset] = FLOAT_BYTES[0];
-    destination[offset + 1] = FLOAT_BYTES[1];
-    destination[offset + 2] = FLOAT_BYTES[2];
-    destination[offset + 3] = FLOAT_BYTES[3];
-    destination[offset + 4] = FLOAT_BYTES[4];
-    destination[offset + 5] = FLOAT_BYTES[5];
-    destination[offset + 6] = FLOAT_BYTES[6];
-    destination[offset + 7] = FLOAT_BYTES[7];
-    return 8;
-  }
+  setFloat64LE: isBigEndian
+    ? (destination: Uint8Array, offset: number, value: number) => {
+        FLOAT[0] = value;
+        destination[offset] = FLOAT_BYTES[7];
+        destination[offset + 1] = FLOAT_BYTES[6];
+        destination[offset + 2] = FLOAT_BYTES[5];
+        destination[offset + 3] = FLOAT_BYTES[4];
+        destination[offset + 4] = FLOAT_BYTES[3];
+        destination[offset + 5] = FLOAT_BYTES[2];
+        destination[offset + 6] = FLOAT_BYTES[1];
+        destination[offset + 7] = FLOAT_BYTES[0];
+        return 8;
+      }
+    : (destination: Uint8Array, offset: number, value: number) => {
+        FLOAT[0] = value;
+        destination[offset] = FLOAT_BYTES[0];
+        destination[offset + 1] = FLOAT_BYTES[1];
+        destination[offset + 2] = FLOAT_BYTES[2];
+        destination[offset + 3] = FLOAT_BYTES[3];
+        destination[offset + 4] = FLOAT_BYTES[4];
+        destination[offset + 5] = FLOAT_BYTES[5];
+        destination[offset + 6] = FLOAT_BYTES[6];
+        destination[offset + 7] = FLOAT_BYTES[7];
+        return 8;
+      }
 };
