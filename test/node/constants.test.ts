@@ -58,7 +58,7 @@ describe('BSON Constants', () => {
       expect(Binary.SUBTYPE_COLUMN).to.equal(7);
     });
 
-    it('Sensitive should be 7', () => {
+    it('Sensitive should be 8', () => {
       expect(constants.BSON_BINARY_SUBTYPE_SENSITIVE).to.equal(8);
       expect(Binary.SUBTYPE_SENSITIVE).to.equal(8);
     });
