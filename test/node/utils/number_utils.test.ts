@@ -1,7 +1,32 @@
 import { expect } from 'chai';
 import { NumberUtils } from '../../../src/utils/number_utils';
 
+const FLOAT = new Float64Array(1);
+const FLOAT_BYTES = new Uint8Array(FLOAT.buffer, 0, 8);
+
+FLOAT[0] = -1;
+// Little endian [0, 0, 0, 0, 0, 0,  240, 191]
+// Big endian    [240, 191, 0, 0, 0, 0, 0, 0]
+const isBigEndian = FLOAT_BYTES[7] === 0;
+
 describe('NumberUtils', () => {
+  context(`handles ${isBigEndian ? 'big' : 'little'} endianness correctly`, () => {
+    context('getFloat64LE()', () => {
+      it('should return -1', () => {
+        const res = NumberUtils.getFloat64LE(new Uint8Array([0, 0, 0, 0, 0, 0, 240, 191]), 0);
+        expect(res).to.equal(-1);
+      });
+    });
+
+    context('setFloat64LE()', () => {
+      it('should return -1 as little endian bytes', () => {
+        const buf = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]);
+        NumberUtils.setFloat64LE(buf, 0, -1);
+        expect(buf).to.deep.equal(new Uint8Array([0, 0, 0, 0, 0, 0, 240, 191]));
+      });
+    });
+  });
+
   /** Make a Uint8Array in a less verbose way */
   const b = (...values) => new Uint8Array(values);
 
