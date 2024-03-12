@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.5.0](https://github.com/mongodb/js-bson/compare/v6.4.0...v6.5.0) (2024-03-12)
+
+
+### Features
+
+* **NODE-5506:** add Binary subtype sensitive ([#657](https://github.com/mongodb/js-bson/issues/657)) ([748ca60](https://github.com/mongodb/js-bson/commit/748ca6073c44c778f6a3f872ce009566b6e8601f))
+* **NODE-5957:** add BSON indexing API ([#654](https://github.com/mongodb/js-bson/issues/654)) ([2ac17ec](https://github.com/mongodb/js-bson/commit/2ac17ec1e3c53b280efa298d137d96b2176bf046))
+
+
+### Bug Fixes
+
+* **NODE-6016:** flip byte order depending on system endianness ([#659](https://github.com/mongodb/js-bson/issues/659)) ([6a7ef5d](https://github.com/mongodb/js-bson/commit/6a7ef5da26b2f852711be23eb6dc84801d0a3ecf))
+
 ## [6.4.0](https://github.com/mongodb/js-bson/compare/v6.3.0...v6.4.0) (2024-02-29)
 
 
