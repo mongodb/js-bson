@@ -6,7 +6,7 @@ const FLOAT_BYTES = new Uint8Array(FLOAT.buffer, 0, 8);
 
 FLOAT[0] = -1;
 // Little endian [0, 0, 0, 0, 0, 0,  240, 191]
-// Big endian    [240, 191, 0, 0, 0, 0, 0, 0]
+// Big endian    [191, 240, 0, 0, 0, 0, 0, 0]
 const isBigEndian = FLOAT_BYTES[7] === 0;
 
 describe('NumberUtils', () => {
