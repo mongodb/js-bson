@@ -307,7 +307,7 @@ describe('BSON Double Precision', function () {
     });
   });
 
-  context.only(`handles ${isBigEndian ? 'big' : 'little'} endianness correctly`, () => {
+  context(`handles ${isBigEndian ? 'big' : 'little'} endianness correctly`, () => {
     const bsonWithFloat = bufferFromHexArray([
       '01', // double
       '6100', // 'a'
