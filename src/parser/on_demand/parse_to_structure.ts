@@ -1,11 +1,15 @@
 import { type Code } from '../../code';
 import { type BSONElement, getSize, parseToElements } from './parse_to_elements';
 
-/** @internal TODO */
-const DEFAULT_REVIVER = () => null;
+/** @internal */
+const DEFAULT_REVIVER: BSONReviver = (
+  _bytes: Uint8Array,
+  _container: Container,
+  _element: BSONElement
+) => null;
 
 /** @internal */
-function parseToElementsToArray(bytes: Uint8Array, offset?: number): BSONElement[] {
+function parseToElementsToArray(bytes: Uint8Array, offset?: number | null): BSONElement[] {
   const res = parseToElements(bytes, offset);
   return Array.isArray(res) ? res : [...res];
 }
@@ -71,16 +75,16 @@ export function parseToStructure<
   }
 >(
   bytes: Uint8Array,
-  startOffset?: number,
-  providedRoot?: TRoot,
-  reviver?: BSONReviver
+  startOffset?: number | null,
+  pRoot?: TRoot | null,
+  pReviver?: BSONReviver | null
 ): TRoot extends undefined ? Record<string, unknown> : TRoot['dest'] {
-  const root = providedRoot ?? {
+  const root = pRoot ?? {
     kind: 'object',
     dest: Object.create(null) as Record<string, unknown>
   };
 
-  reviver ??= DEFAULT_REVIVER;
+  const reviver = pReviver ?? DEFAULT_REVIVER;
 
   let ctx: ParseContext | null = {
     elementOffset: 0,
@@ -89,13 +93,10 @@ export function parseToStructure<
     previous: null
   };
 
-  /** BSONElement offsets */
+  /** BSONElement offsets: type indicator and value offset */
   const enum e {
     type = 0,
-    nameOffset = 1,
-    nameLength = 2,
-    offset = 3,
-    length = 4
+    offset = 3
   }
 
   /** BSON Embedded types */
@@ -111,21 +112,24 @@ export function parseToStructure<
       it != null;
       it = ctx.elements[ctx.elementOffset++]
     ) {
-      const maybeNewContainer = reviver(bytes, ctx.container, it);
-      const isEmbeddedType =
-        it[e.type] === t.object || it[e.type] === t.array || it[e.type] === t.javascriptWithScope;
-      const iterateEmbedded = maybeNewContainer != null && isEmbeddedType;
+      const type = it[e.type];
+      const offset = it[e.offset];
 
-      if (iterateEmbedded) {
+      const container = reviver(bytes, ctx.container, it);
+      const isEmbeddedType =
+        type === t.object || type === t.array || type === t.javascriptWithScope;
+
+      if (container != null && isEmbeddedType) {
         const docOffset: number =
-          it[e.type] !== t.javascriptWithScope
-            ? it[e.offset]
-            : it[e.offset] + getSize(bytes, it[e.offset] + 4) + 4 + 4; // value offset + codeSize + value int + code int
+          type !== t.javascriptWithScope
+            ? offset
+            : // value offset + codeSize + value int + code int
+              offset + getSize(bytes, offset + 4) + 4 + 4;
 
         ctx = {
           elementOffset: 0,
           elements: parseToElementsToArray(bytes, docOffset),
-          container: maybeNewContainer,
+          container,
           previous: ctx
         };
 

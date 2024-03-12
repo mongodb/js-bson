@@ -24,6 +24,10 @@ export type OnDemand = {
     root?: TRoot,
     reviver?: BSONReviver
   ) => TRoot extends undefined ? Record<string, unknown> : TRoot['dest'];
+  // Types
+  BSONElement: BSONElement;
+  Container: Container;
+  BSONReviver: BSONReviver;
 };
 
 /**

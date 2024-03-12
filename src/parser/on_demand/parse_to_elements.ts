@@ -82,7 +82,9 @@ function findNull(bytes: Uint8Array, offset: number): number {
  * @public
  * @experimental
  */
-export function parseToElements(bytes: Uint8Array, startOffset = 0): Iterable<BSONElement> {
+export function parseToElements(bytes: Uint8Array, pOffset?: number | null): Iterable<BSONElement> {
+  const startOffset = pOffset ?? 0;
+
   if (bytes.length < 5) {
     throw new BSONOffsetError(
       `Input must be at least 5 bytes, got ${bytes.length} bytes`,
