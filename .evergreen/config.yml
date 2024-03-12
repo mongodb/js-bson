@@ -50,6 +50,16 @@ functions:
         args:
           - .evergreen/run-tests.sh
 
+  run big endian tests:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        add_expansions_to_env: true
+        binary: bash
+        args:
+          - .evergreen/run-big-endian-test.sh
+
   run checks:
     - command: subprocess.exec
       type: test
@@ -236,7 +246,6 @@ tasks:
       - command: perf.send
         params:
           file: src/test/bench/etc/resultsCollectedMeans.json
-
   - name: run-spec-benchmarks-node-18
     commands:
       - func: fetch source
@@ -257,12 +266,25 @@ tasks:
           NODE_LTS_VERSION: 20
       - func: install dependencies
       - func: run eslint plugin tests
+  - name: node-tests-big-endian
+    commands:
+      - func: fetch source
+        vars:
+          NODE_LTS_VERSION: 20
+      - func: install dependencies
+        vars:
+          NPM_OPTIONS: "--ignore-scripts"
+      - func: run big endian tests
 
 buildvariants:
   - name: linux
     display_name: RHEL 8.0
     run_on: rhel80-small
     tasks: [".node", ".web", "check-eslint-plugin"]
+  - name: linux-zseries
+    display_name: RHEL 8.3 zSeries
+    run_on: rhel83-zseries-small
+    tasks: ["node-tests-big-endian"]
   - name: lint
     display_name: lint
     run_on: rhel80-small
