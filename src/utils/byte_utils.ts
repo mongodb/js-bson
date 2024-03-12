@@ -1,7 +1,10 @@
 import { nodeJsByteUtils } from './node_byte_utils';
 import { webByteUtils } from './web_byte_utils';
 
-/** @internal */
+/**
+ * @experimental
+ * @public
+ */
 export type ByteUtils = {
   /** Transforms the input to an instance of Buffer if running on node, otherwise Uint8Array */
   toLocalBufferType(buffer: Uint8Array | ArrayBufferView | ArrayBuffer): Uint8Array;
@@ -50,6 +53,7 @@ const hasGlobalBuffer = typeof Buffer === 'function' && Buffer.prototype?._isBuf
  * The type annotation is important here, it asserts that each of the platform specific
  * utils implementations are compatible with the common one.
  *
- * @internal
+ * @experimental
+ * @public
  */
 export const ByteUtils: ByteUtils = hasGlobalBuffer ? nodeJsByteUtils : webByteUtils;

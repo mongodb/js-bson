@@ -1,5 +1,7 @@
 import { type BSONError, BSONOffsetError } from '../../error';
-import { type BSONElement, parseToElements } from './parse_to_elements';
+import { ByteUtils } from '../../utils/byte_utils';
+import { NumberUtils } from '../../utils/number_utils';
+import { type BSONElement, parseToElements, getSize } from './parse_to_elements';
 import { type BSONReviver, type Container, parseToStructure } from './parse_to_structure';
 /**
  * @experimental
@@ -24,10 +26,16 @@ export type OnDemand = {
     root?: TRoot,
     reviver?: BSONReviver
   ) => TRoot extends undefined ? Record<string, unknown> : TRoot['dest'];
+
   // Types
   BSONElement: BSONElement;
   Container: Container;
   BSONReviver: BSONReviver;
+
+  // Handy tools for implementing a reviver
+  ByteUtils: ByteUtils;
+  NumberUtils: NumberUtils;
+  getSize: (source: Uint8Array, offset: number) => number;
 };
 
 /**
@@ -39,6 +47,9 @@ const onDemand: OnDemand = Object.create(null);
 onDemand.parseToElements = parseToElements;
 onDemand.parseToStructure = parseToStructure;
 onDemand.BSONOffsetError = BSONOffsetError;
+onDemand.ByteUtils = ByteUtils;
+onDemand.NumberUtils = NumberUtils;
+onDemand.getSize = getSize;
 
 Object.freeze(onDemand);
 
