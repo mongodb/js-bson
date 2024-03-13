@@ -94,13 +94,13 @@ export function parseToStructure<
   };
 
   /** BSONElement offsets: type indicator and value offset */
-  const enum e {
+  const enum BSONElementOffset {
     type = 0,
     offset = 3
   }
 
   /** BSON Embedded types */
-  const enum t {
+  const enum BSONElementType {
     object = 3,
     array = 4,
     javascriptWithScope = 15
@@ -108,20 +108,22 @@ export function parseToStructure<
 
   embedded: while (ctx !== null) {
     for (
-      let it: BSONElement | undefined = ctx.elements[ctx.elementOffset++];
-      it != null;
-      it = ctx.elements[ctx.elementOffset++]
+      let bsonElement: BSONElement | undefined = ctx.elements[ctx.elementOffset++];
+      bsonElement != null;
+      bsonElement = ctx.elements[ctx.elementOffset++]
     ) {
-      const type = it[e.type];
-      const offset = it[e.offset];
+      const type = bsonElement[BSONElementOffset.type];
+      const offset = bsonElement[BSONElementOffset.offset];
 
-      const container = reviver(bytes, ctx.container, it);
+      const container = reviver(bytes, ctx.container, bsonElement);
       const isEmbeddedType =
-        type === t.object || type === t.array || type === t.javascriptWithScope;
+        type === BSONElementType.object ||
+        type === BSONElementType.array ||
+        type === BSONElementType.javascriptWithScope;
 
       if (container != null && isEmbeddedType) {
         const docOffset: number =
-          type !== t.javascriptWithScope
+          type !== BSONElementType.javascriptWithScope
             ? offset
             : // value offset + codeSize + value int + code int
               offset + getSize(bytes, offset + 4) + 4 + 4;
