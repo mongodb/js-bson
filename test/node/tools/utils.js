@@ -166,12 +166,12 @@ exports.int32LEToHex = int32LEToHex;
  * @returns BSON string with byte size encoded
  */
 const stringToUTF8HexBytes = str => {
-  var b = Buffer.from(str, 'utf8');
-  var len = b.byteLength;
-  var out = Buffer.alloc(len + 4 + 1);
+  const b = Buffer.from(str, 'utf8');
+  const len = b.byteLength;
+  const out = Buffer.alloc(len + 4 + 1);
   out.writeInt32LE(len + 1, 0);
   out.set(b, 4);
-  out[len + 1] = 0x00;
+  out[len + 4 + 1] = 0x00;
   return out.toString('hex');
 };
 

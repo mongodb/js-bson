@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 import { BSONOffsetError } from '../../error';
 
 /**
@@ -9,7 +8,7 @@ import { BSONOffsetError } from '../../error';
  * - `minKey` is set to 255 so unsigned comparisons succeed
  * - Modify with caution, double check the bundle contains literals
  */
-const enum t {
+const enum BSONElementType {
   double = 1,
   string = 2,
   object = 3,
@@ -45,8 +44,11 @@ export type BSONElement = [
   length: number
 ];
 
-/** Parses a int32 little-endian at offset, throws if it is negative */
-function getSize(source: Uint8Array, offset: number): number {
+/**
+ * @internal
+ * Parses a int32 little-endian at offset, throws if it is negative
+ */
+export function getSize(source: Uint8Array, offset: number): number {
   if (source[offset + 3] > 127) {
     throw new BSONOffsetError('BSON size cannot be negative', offset);
   }
@@ -80,7 +82,12 @@ function findNull(bytes: Uint8Array, offset: number): number {
  * @public
  * @experimental
  */
-export function parseToElements(bytes: Uint8Array, startOffset = 0): Iterable<BSONElement> {
+export function parseToElements(
+  bytes: Uint8Array,
+  startOffset: number | null = 0
+): Iterable<BSONElement> {
+  startOffset ??= 0;
+
   if (bytes.length < 5) {
     throw new BSONOffsetError(
       `Input must be at least 5 bytes, got ${bytes.length} bytes`,
@@ -121,37 +128,51 @@ export function parseToElements(bytes: Uint8Array, startOffset = 0): Iterable<BS
 
     let length: number;
 
-    if (type === t.double || type === t.long || type === t.date || type === t.timestamp) {
+    if (
+      type === BSONElementType.double ||
+      type === BSONElementType.long ||
+      type === BSONElementType.date ||
+      type === BSONElementType.timestamp
+    ) {
       length = 8;
-    } else if (type === t.int) {
+    } else if (type === BSONElementType.int) {
       length = 4;
-    } else if (type === t.objectId) {
+    } else if (type === BSONElementType.objectId) {
       length = 12;
-    } else if (type === t.decimal) {
+    } else if (type === BSONElementType.decimal) {
       length = 16;
-    } else if (type === t.bool) {
+    } else if (type === BSONElementType.bool) {
       length = 1;
-    } else if (type === t.null || type === t.undefined || type === t.maxKey || type === t.minKey) {
+    } else if (
+      type === BSONElementType.null ||
+      type === BSONElementType.undefined ||
+      type === BSONElementType.maxKey ||
+      type === BSONElementType.minKey
+    ) {
       length = 0;
     }
     // Needs a size calculation
-    else if (type === t.regex) {
+    else if (type === BSONElementType.regex) {
       length = findNull(bytes, findNull(bytes, offset) + 1) + 1 - offset;
-    } else if (type === t.object || type === t.array || type === t.javascriptWithScope) {
+    } else if (
+      type === BSONElementType.object ||
+      type === BSONElementType.array ||
+      type === BSONElementType.javascriptWithScope
+    ) {
       length = getSize(bytes, offset);
     } else if (
-      type === t.string ||
-      type === t.binData ||
-      type === t.dbPointer ||
-      type === t.javascript ||
-      type === t.symbol
+      type === BSONElementType.string ||
+      type === BSONElementType.binData ||
+      type === BSONElementType.dbPointer ||
+      type === BSONElementType.javascript ||
+      type === BSONElementType.symbol
     ) {
       length = getSize(bytes, offset) + 4;
-      if (type === t.binData) {
+      if (type === BSONElementType.binData) {
         // binary subtype
         length += 1;
       }
-      if (type === t.dbPointer) {
+      if (type === BSONElementType.dbPointer) {
         // dbPointer's objectId
         length += 12;
       }
