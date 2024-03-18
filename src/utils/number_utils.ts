@@ -9,6 +9,8 @@ const isBigEndian = FLOAT_BYTES[7] === 0;
 /**
  * @experimental
  * @public
+ *
+ * A collection of functions that get or set various numeric types and bit widths from a Uint8Array.
  */
 export type NumberUtils = {
   getInt32LE(source: Uint8Array, offset: number): number;
