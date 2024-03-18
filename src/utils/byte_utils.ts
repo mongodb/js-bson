@@ -1,7 +1,10 @@
 import { nodeJsByteUtils } from './node_byte_utils';
 import { webByteUtils } from './web_byte_utils';
 
-/** @internal */
+/**
+ * @public
+ * @experimental
+ */
 export type ByteUtils = {
   /** Transforms the input to an instance of Buffer if running on node, otherwise Uint8Array */
   toLocalBufferType(buffer: Uint8Array | ArrayBufferView | ArrayBuffer): Uint8Array;
