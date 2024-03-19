@@ -1,7 +1,13 @@
 import { nodeJsByteUtils } from './node_byte_utils';
 import { webByteUtils } from './web_byte_utils';
 
-/** @internal */
+/**
+ * @public
+ * @experimental
+ *
+ * A collection of functions that help work with data in a Uint8Array.
+ * ByteUtils is configured at load time to use Node.js or Web based APIs for the internal implementations.
+ */
 export type ByteUtils = {
   /** Transforms the input to an instance of Buffer if running on node, otherwise Uint8Array */
   toLocalBufferType(buffer: Uint8Array | ArrayBufferView | ArrayBuffer): Uint8Array;

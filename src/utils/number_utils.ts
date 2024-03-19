@@ -7,11 +7,30 @@ FLOAT[0] = -1;
 const isBigEndian = FLOAT_BYTES[7] === 0;
 
 /**
+ * @experimental
+ * @public
+ *
+ * A collection of functions that get or set various numeric types and bit widths from a Uint8Array.
+ */
+export type NumberUtils = {
+  getInt32LE(source: Uint8Array, offset: number): number;
+  getUint32LE(source: Uint8Array, offset: number): number;
+  getUint32BE(source: Uint8Array, offset: number): number;
+  getBigInt64LE(source: Uint8Array, offset: number): bigint;
+  getFloat64LE(source: Uint8Array, offset: number): number;
+  setInt32BE(destination: Uint8Array, offset: number, value: number): 4;
+  setInt32LE(destination: Uint8Array, offset: number, value: number): 4;
+  setBigInt64LE(destination: Uint8Array, offset: number, value: bigint): 8;
+  setFloat64LE(destination: Uint8Array, offset: number, value: number): 8;
+};
+
+/**
  * Number parsing and serializing utilities.
  *
- * @internal
+ * @experimental
+ * @public
  */
-export const NumberUtils = {
+export const NumberUtils: NumberUtils = {
   /** Reads a little-endian 32-bit integer from source */
   getInt32LE(source: Uint8Array, offset: number): number {
     return (
