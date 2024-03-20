@@ -144,4 +144,20 @@ describe('class Binary', () => {
       });
     });
   });
+
+  context('toString()', () => {
+    it('should respect position when converting toUTF8 (default)', () => {
+      const bin = new Binary();
+      expect(bin.toString()).to.equal('');
+      bin.put(1);
+      expect(bin.toString()).to.equal('\u0001');
+    });
+    it('should remain same after round trip', () => {
+      const bin = new BSON.Binary();
+      bin.toString()
+      const serializedBin = BSON.serialize({ bin });
+      const roundTrippedBin = BSON.deserialize(serializedBin);
+      expect(roundTrippedBin.bin.toString()).to.equal(bin.toString());
+    });
+  });
 });
