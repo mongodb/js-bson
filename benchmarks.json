@@ -1,0 +1,1 @@
+[{"info":{"test_name":"stringDeserializationUTF8On-node","tags":["js-bson"]},"metrics":[{"name":"megabytes_per_second","value":152.83104849866388}]},{"info":{"test_name":"stringDeserializationUTF8Off-node","tags":["js-bson"]},"metrics":[{"name":"megabytes_per_second","value":194.19899506362555}]}]
