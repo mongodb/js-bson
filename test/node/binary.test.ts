@@ -141,20 +141,54 @@ describe('class Binary', () => {
       });
     });
   });
-  context('toString()', () => {
-    context('when called with default / UTF8 case ', ()  => {
+
+  context.only('toString()', () => {
+    context(`when called with default / UTF8 case `, ()  => {
       it('should only print until this.position', () => {
         const bin = new Binary();
         expect(bin.toString()).to.equal('');
         bin.put(1);
         expect(bin.toString()).to.equal('\u0001');
       });
+
+      it('should remain same after round trip', () => {
+        const bin = new BSON.Binary();
+        const serializedBin = BSON.serialize({ bin });
+        const roundTrippedBin = BSON.deserialize(serializedBin);
+        expect(roundTrippedBin.bin.toString()).to.equal(bin.toString());
+      });
+    });
+
+    context(`when called with 'hex' case `, ()  => {
+      it('should only print until this.position', () => {
+        const bin = new Binary();
+        expect(bin.toString('hex')).to.equal('');
+        bin.put(1);
+        expect(bin.toString('hex')).to.equal('\u0001');
+      });
+
+      it('should remain same after round trip', () => {
+        const bin = new BSON.Binary();
+        const serializedBin = BSON.serialize({ bin });
+        const roundTrippedBin = BSON.deserialize(serializedBin);
+        expect(roundTrippedBin.bin.toString('hex')).to.equal(bin.toString('hex'));
+      });
+    });
+
+    context(`when called with 'base64' case`, ()  => {
+      it('should only print until this.position', () => {
+        const bin = new Binary();
+        expect(bin.toString('base64')).to.equal('');
+        bin.put(1);
+        expect(bin.toString('base64')).to.equal('\u0001');
+      });
+
       it('should remain same after round trip', () => {
         const bin = new BSON.Binary();
         bin.toString();
         const serializedBin = BSON.serialize({ bin });
         const roundTrippedBin = BSON.deserialize(serializedBin);
-        expect(roundTrippedBin.bin.toString()).to.equal(bin.toString());
+        expect(roundTrippedBin.bin.toString('base64')).to.equal(bin.toString());
       });
     });
   });
