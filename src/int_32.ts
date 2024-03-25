@@ -28,6 +28,10 @@ export class Int32 extends BSONValue {
       value = value.valueOf();
     }
 
+    const valuePre = +value;
+    if (valuePre === NaN) {
+      
+    }
     this.value = +value | 0;
   }
 
