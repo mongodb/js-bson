@@ -145,7 +145,7 @@ describe('class Binary', () => {
     });
   });
 
-  context.only('toString()', () => {
+  context('toString()', () => {
     context('when case is UTF8 (default)', () => {
       it('should respect position when converting to string', () => {
         const bin = new Binary();
@@ -192,7 +192,7 @@ describe('class Binary', () => {
     });
   });
 
-  context.only('toJSON()', () => {
+  context('toJSON()', () => {
     it('should respect position when converting to JSON', () => {
       const bin = new Binary();
       expect(bin.toJSON()).to.equal('');
