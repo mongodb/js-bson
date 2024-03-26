@@ -144,4 +144,68 @@ describe('class Binary', () => {
       });
     });
   });
+
+  context('toString()', () => {
+    context('when case is UTF8 (default)', () => {
+      it('should respect position when converting to string', () => {
+        const bin = new Binary();
+        expect(bin.toString()).to.equal('');
+        bin.put(1);
+        expect(bin.toString()).to.equal('\u0001');
+      });
+      it('should remain same after round trip', () => {
+        const bin = new BSON.Binary();
+        const serializedBin = BSON.serialize({ bin });
+        const roundTrippedBin = BSON.deserialize(serializedBin);
+        expect(roundTrippedBin.bin.toString()).to.equal(bin.toString());
+      });
+    });
+
+    context('when case is hex', () => {
+      it('should respect position when converting to string', () => {
+        const bin = new Binary();
+        expect(bin.toString('hex')).to.equal('');
+        bin.put(1);
+        expect(bin.toString('hex')).to.equal('01');
+      });
+      it('should remain same after round trip', () => {
+        const bin = new BSON.Binary();
+        const serializedBin = BSON.serialize({ bin });
+        const roundTrippedBin = BSON.deserialize(serializedBin);
+        expect(roundTrippedBin.bin.toString('hex')).to.equal(bin.toString('hex'));
+      });
+    });
+
+    context('when case is base64', () => {
+      it('should respect position when converting to string', () => {
+        const bin = new Binary();
+        expect(bin.toString('base64')).to.equal('');
+        bin.put(1);
+        expect(bin.toString('base64')).to.equal('AQ==');
+      });
+      it('should remain same after round trip', () => {
+        const bin = new BSON.Binary();
+        const serializedBin = BSON.serialize({ bin });
+        const roundTrippedBin = BSON.deserialize(serializedBin);
+        expect(roundTrippedBin.bin.toString('base64')).to.equal(bin.toString());
+      });
+    });
+  });
+
+  context('toJSON()', () => {
+    it('should respect position when converting to JSON', () => {
+      const bin = new Binary();
+      expect(bin.toJSON()).to.equal('');
+      bin.put(1);
+      // toJSON uses base64
+      expect(bin.toJSON()).to.equal('AQ==');
+    });
+
+    it('should remain same after round trip', () => {
+      const bin = new BSON.Binary();
+      const serializedBin = BSON.serialize({ bin });
+      const roundTrippedBin = BSON.deserialize(serializedBin);
+      expect(roundTrippedBin.bin.toJSON()).to.equal(bin.toJSON());
+    });
+  });
 });

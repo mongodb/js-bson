@@ -186,15 +186,15 @@ export class Binary extends BSONValue {
   }
 
   toJSON(): string {
-    return ByteUtils.toBase64(this.buffer);
+    return ByteUtils.toBase64(this.buffer.subarray(0, this.position));
   }
 
   toString(encoding?: 'hex' | 'base64' | 'utf8' | 'utf-8'): string {
-    if (encoding === 'hex') return ByteUtils.toHex(this.buffer);
-    if (encoding === 'base64') return ByteUtils.toBase64(this.buffer);
+    if (encoding === 'hex') return ByteUtils.toHex(this.buffer.subarray(0, this.position));
+    if (encoding === 'base64') return ByteUtils.toBase64(this.buffer.subarray(0, this.position));
     if (encoding === 'utf8' || encoding === 'utf-8')
-      return ByteUtils.toUTF8(this.buffer, 0, this.buffer.byteLength, false);
-    return ByteUtils.toUTF8(this.buffer, 0, this.buffer.byteLength, false);
+      return ByteUtils.toUTF8(this.buffer, 0, this.position, false);
+    return ByteUtils.toUTF8(this.buffer, 0, this.position, false);
   }
 
   /** @internal */
