@@ -1,4 +1,5 @@
 import { BSONOffsetError } from '../../error';
+import { NumberUtils } from '../../utils/number_utils';
 
 /**
  * @internal
@@ -45,24 +46,6 @@ export type BSONElement = [
 ];
 
 /**
- * @experimental
- * @public
- *
- * Parses a int32 little-endian at offset, throws if it is negative
- */
-export function getSize(source: Uint8Array, offset: number): number {
-  if (source[offset + 3] > 127) {
-    throw new BSONOffsetError('BSON size cannot be negative', offset);
-  }
-  return (
-    source[offset] |
-    (source[offset + 1] << 8) |
-    (source[offset + 2] << 16) |
-    (source[offset + 3] << 24)
-  );
-}
-
-/**
  * Searches for null terminator of a BSON element's value (Never the document null terminator)
  * **Does not** bounds check since this should **ONLY** be used within parseToElements which has asserted that `bytes` ends with a `0x00`.
  * So this will at most iterate to the document's terminator and error if that is the offset reached.
@@ -97,7 +80,7 @@ export function parseToElements(
     );
   }
 
-  const documentSize = getSize(bytes, startOffset);
+  const documentSize = NumberUtils.getSize(bytes, startOffset);
 
   if (documentSize > bytes.length - startOffset) {
     throw new BSONOffsetError(
@@ -161,7 +144,7 @@ export function parseToElements(
       type === BSONElementType.array ||
       type === BSONElementType.javascriptWithScope
     ) {
-      length = getSize(bytes, offset);
+      length = NumberUtils.getSize(bytes, offset);
     } else if (
       type === BSONElementType.string ||
       type === BSONElementType.binData ||
@@ -169,7 +152,7 @@ export function parseToElements(
       type === BSONElementType.javascript ||
       type === BSONElementType.symbol
     ) {
-      length = getSize(bytes, offset) + 4;
+      length = NumberUtils.getSize(bytes, offset) + 4;
       if (type === BSONElementType.binData) {
         // binary subtype
         length += 1;

@@ -30,6 +30,7 @@ const EXPECTED_EXPORTS = [
   'Decimal128',
   'BSONError',
   'BSONRuntimeError',
+  'BSONOffsetError',
   'setInternalBufferSize',
   'serialize',
   'serializeWithBufferAndIndex',

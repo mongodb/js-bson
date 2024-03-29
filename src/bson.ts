@@ -51,7 +51,7 @@ export {
   Decimal128
 };
 export { BSONValue } from './bson_value';
-export { BSONError, BSONVersionError, BSONRuntimeError } from './error';
+export { BSONError, BSONVersionError, BSONRuntimeError, BSONOffsetError } from './error';
 export { BSONType } from './constants';
 export { EJSON } from './extended_json';
 export { onDemand, type OnDemand } from './parser/on_demand/index';
