@@ -1,5 +1,3 @@
-import { BSONOffsetError } from '../error';
-
 const FLOAT = new Float64Array(1);
 const FLOAT_BYTES = new Uint8Array(FLOAT.buffer, 0, 8);
 
@@ -40,7 +38,7 @@ export type NumberUtils = {
 export const NumberUtils: NumberUtils = {
   getSize(source: Uint8Array, offset: number): number {
     if (source[offset + 3] > 127) {
-      throw new BSONOffsetError('BSON size cannot be negative', offset);
+      throw new RangeError(`Size cannot be negative at offset: ${offset}`);
     }
     return (
       source[offset] |
