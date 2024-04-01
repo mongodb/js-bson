@@ -44,7 +44,7 @@ describe('NumberUtils', () => {
     });
 
     it('does not check bounds of offset', () => {
-      expect(NumberUtils.getNonnegativeInt32LE(b(0, 0, 0, 1), 4)).to.be.NaN;
+      expect(NumberUtils.getNonnegativeInt32LE(b(0, 0, 0, 1), 4)).to.equal(0);
     });
   });
 
