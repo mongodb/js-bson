@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.6.0](https://github.com/mongodb/js-bson/compare/v6.5.0...v6.6.0) (2024-04-01)
+
+
+### Features
+
+* **NODE-5958:** add BSON iterating API ([#656](https://github.com/mongodb/js-bson/issues/656)) ([269df91](https://github.com/mongodb/js-bson/commit/269df91f9d17831cc2010d0ed7641841be36d221))
+* **NODE-5959:** make byte parsing utils available on onDemand library ([#662](https://github.com/mongodb/js-bson/issues/662)) ([efab49a](https://github.com/mongodb/js-bson/commit/efab49af8081f33e30878f4e48b3733c62457593))
+
+
+### Bug Fixes
+
+* **NODE-6042:** Binary.toString output with respect to position ([#663](https://github.com/mongodb/js-bson/issues/663)) ([d7898f9](https://github.com/mongodb/js-bson/commit/d7898f9907d389e5bb40d5b52664a1ff341b49b5))
+* **NODE-6059:** clean up experimental APIs ([#665](https://github.com/mongodb/js-bson/issues/665)) ([3289184](https://github.com/mongodb/js-bson/commit/3289184ea6d42ccd67fc450393dc7594e9250418))
+
 ## [6.5.0](https://github.com/mongodb/js-bson/compare/v6.4.0...v6.5.0) (2024-03-12)
 
 
