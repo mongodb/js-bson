@@ -45,13 +45,13 @@ export type BSONElement = [
   length: number
 ];
 
-const getSize = (source: Uint8Array, offset: number) => {
+function getSize(source: Uint8Array, offset: number) {
   try {
-    return NumberUtils.getSize(source, offset);
+    return NumberUtils.getNonnegativeInt32LE(source, offset);
   } catch (cause) {
     throw new BSONOffsetError('BSON size cannot be negative', offset, { cause });
   }
-};
+}
 
 /**
  * Searches for null terminator of a BSON element's value (Never the document null terminator)

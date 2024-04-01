@@ -14,10 +14,9 @@ const isBigEndian = FLOAT_BYTES[7] === 0;
  */
 export type NumberUtils = {
   /**
-   * Parses a int32 little-endian at offset, throws if it is negative.
-   * - size as in `size_t`
+   * Parses a signed int32 at offset. Throws a `RangeError` if value is negative.
    */
-  getSize: (source: Uint8Array, offset: number) => number;
+  getNonnegativeInt32LE: (source: Uint8Array, offset: number) => number;
   getInt32LE: (source: Uint8Array, offset: number) => number;
   getUint32LE: (source: Uint8Array, offset: number) => number;
   getUint32BE: (source: Uint8Array, offset: number) => number;
@@ -36,7 +35,7 @@ export type NumberUtils = {
  * @public
  */
 export const NumberUtils: NumberUtils = {
-  getSize(source: Uint8Array, offset: number): number {
+  getNonnegativeInt32LE(source: Uint8Array, offset: number): number {
     if (source[offset + 3] > 127) {
       throw new RangeError(`Size cannot be negative at offset: ${offset}`);
     }
