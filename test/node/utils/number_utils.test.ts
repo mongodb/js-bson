@@ -30,6 +30,24 @@ describe('NumberUtils', () => {
   /** Make a Uint8Array in a less verbose way */
   const b = (...values) => new Uint8Array(values);
 
+  context('getNonnegativeInt32LE()', () => {
+    it('parses an int32 little endian', () => {
+      expect(NumberUtils.getNonnegativeInt32LE(b(0, 0, 0, 1), 0)).to.equal(1 << 24);
+    });
+
+    it('throws if int32 is negative', () => {
+      expect(() => NumberUtils.getNonnegativeInt32LE(b(0, 0, 0, 128), 0)).to.throw(RangeError);
+    });
+
+    it('parses an int32 little endian at offset', () => {
+      expect(NumberUtils.getNonnegativeInt32LE(b(0, 0, 0, 0, 0, 1), 2)).to.equal(1 << 24);
+    });
+
+    it('does not check bounds of offset', () => {
+      expect(NumberUtils.getNonnegativeInt32LE(b(0, 0, 0, 1), 4)).to.equal(0);
+    });
+  });
+
   context('getInt32LE()', () => {
     it('parses an int32 little endian', () => {
       expect(NumberUtils.getInt32LE(b(0, 0, 0, 1), 0)).to.equal(1 << 24);

@@ -6,7 +6,7 @@ import {
   BSONError,
   BSONVersionError,
   BSONRuntimeError,
-  onDemand
+  BSONOffsetError
 } from '../register-bson';
 
 const instanceOfChecksWork = !__isWeb__;
@@ -111,19 +111,19 @@ describe('BSONError', function () {
 
   describe('class BSONOffsetError', () => {
     it('is a BSONError instance', function () {
-      expect(BSONError.isBSONError(new onDemand.BSONOffsetError('Oopsie', 3))).to.be.true;
+      expect(BSONError.isBSONError(new BSONOffsetError('Oopsie', 3))).to.be.true;
     });
 
     it('has a name property equal to "BSONOffsetError"', function () {
-      expect(new onDemand.BSONOffsetError('Woops!', 3)).to.have.property('name', 'BSONOffsetError');
+      expect(new BSONOffsetError('Woops!', 3)).to.have.property('name', 'BSONOffsetError');
     });
 
     it('sets the offset property', function () {
-      expect(new onDemand.BSONOffsetError('Woops!', 3)).to.have.property('offset', 3);
+      expect(new BSONOffsetError('Woops!', 3)).to.have.property('offset', 3);
     });
 
     it('includes the offset in the message', function () {
-      expect(new onDemand.BSONOffsetError('Woops!', 3))
+      expect(new BSONOffsetError('Woops!', 3))
         .to.have.property('message')
         .that.matches(/offset: 3/i);
     });

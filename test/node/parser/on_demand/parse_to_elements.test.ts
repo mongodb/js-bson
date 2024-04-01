@@ -5,7 +5,7 @@ import * as BSON from '../../../register-bson';
 import { bufferFromHexArray, stringToUTF8HexBytes, int32LEToHex } from '../../tools/utils';
 
 const parseToElements = BSON.onDemand.parseToElements;
-const BSONOffsetError = BSON.onDemand.BSONOffsetError;
+const BSONOffsetError = BSON.BSONOffsetError;
 
 describe('parseToElements()', () => {
   context('when given less than 5 bytes', () => {

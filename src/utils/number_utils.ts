@@ -13,15 +13,19 @@ const isBigEndian = FLOAT_BYTES[7] === 0;
  * A collection of functions that get or set various numeric types and bit widths from a Uint8Array.
  */
 export type NumberUtils = {
-  getInt32LE(source: Uint8Array, offset: number): number;
-  getUint32LE(source: Uint8Array, offset: number): number;
-  getUint32BE(source: Uint8Array, offset: number): number;
-  getBigInt64LE(source: Uint8Array, offset: number): bigint;
-  getFloat64LE(source: Uint8Array, offset: number): number;
-  setInt32BE(destination: Uint8Array, offset: number, value: number): 4;
-  setInt32LE(destination: Uint8Array, offset: number, value: number): 4;
-  setBigInt64LE(destination: Uint8Array, offset: number, value: bigint): 8;
-  setFloat64LE(destination: Uint8Array, offset: number, value: number): 8;
+  /**
+   * Parses a signed int32 at offset. Throws a `RangeError` if value is negative.
+   */
+  getNonnegativeInt32LE: (source: Uint8Array, offset: number) => number;
+  getInt32LE: (source: Uint8Array, offset: number) => number;
+  getUint32LE: (source: Uint8Array, offset: number) => number;
+  getUint32BE: (source: Uint8Array, offset: number) => number;
+  getBigInt64LE: (source: Uint8Array, offset: number) => bigint;
+  getFloat64LE: (source: Uint8Array, offset: number) => number;
+  setInt32BE: (destination: Uint8Array, offset: number, value: number) => 4;
+  setInt32LE: (destination: Uint8Array, offset: number, value: number) => 4;
+  setBigInt64LE: (destination: Uint8Array, offset: number, value: bigint) => 8;
+  setFloat64LE: (destination: Uint8Array, offset: number, value: number) => 8;
 };
 
 /**
@@ -31,6 +35,18 @@ export type NumberUtils = {
  * @public
  */
 export const NumberUtils: NumberUtils = {
+  getNonnegativeInt32LE(source: Uint8Array, offset: number): number {
+    if (source[offset + 3] > 127) {
+      throw new RangeError(`Size cannot be negative at offset: ${offset}`);
+    }
+    return (
+      source[offset] |
+      (source[offset + 1] << 8) |
+      (source[offset + 2] << 16) |
+      (source[offset + 3] << 24)
+    );
+  },
+
   /** Reads a little-endian 32-bit integer from source */
   getInt32LE(source: Uint8Array, offset: number): number {
     return (

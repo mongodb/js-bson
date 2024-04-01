@@ -10,7 +10,7 @@ import { webByteUtils } from './web_byte_utils';
  */
 export type ByteUtils = {
   /** Transforms the input to an instance of Buffer if running on node, otherwise Uint8Array */
-  toLocalBufferType(buffer: Uint8Array | ArrayBufferView | ArrayBuffer): Uint8Array;
+  toLocalBufferType: (buffer: Uint8Array | ArrayBufferView | ArrayBuffer) => Uint8Array;
   /** Create empty space of size */
   allocate: (size: number) => Uint8Array;
   /** Create empty space of size, use pooled memory when available */
@@ -36,9 +36,9 @@ export type ByteUtils = {
   /** Get the utf8 code unit count from a string if it were to be transformed to utf8 */
   utf8ByteLength: (input: string) => number;
   /** Encode UTF8 bytes generated from `source` string into `destination` at byteOffset. Returns the number of bytes encoded. */
-  encodeUTF8Into(destination: Uint8Array, source: string, byteOffset: number): number;
+  encodeUTF8Into: (destination: Uint8Array, source: string, byteOffset: number) => number;
   /** Generate a Uint8Array filled with random bytes with byteLength */
-  randomBytes(byteLength: number): Uint8Array;
+  randomBytes: (byteLength: number) => Uint8Array;
 };
 
 declare const Buffer: { new (): unknown; prototype?: { _isBuffer?: boolean } } | undefined;

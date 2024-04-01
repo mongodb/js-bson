@@ -98,8 +98,8 @@ export class BSONOffsetError extends BSONError {
 
   public offset: number;
 
-  constructor(message: string, offset: number) {
-    super(`${message}. offset: ${offset}`);
+  constructor(message: string, offset: number, options?: { cause?: unknown }) {
+    super(`${message}. offset: ${offset}`, options);
     this.offset = offset;
   }
 }

@@ -1,4 +1,5 @@
 import { BSONOffsetError } from '../../error';
+import { NumberUtils } from '../../utils/number_utils';
 
 /**
  * @internal
@@ -44,22 +45,12 @@ export type BSONElement = [
   length: number
 ];
 
-/**
- * @experimental
- * @public
- *
- * Parses a int32 little-endian at offset, throws if it is negative
- */
-export function getSize(source: Uint8Array, offset: number): number {
-  if (source[offset + 3] > 127) {
-    throw new BSONOffsetError('BSON size cannot be negative', offset);
+function getSize(source: Uint8Array, offset: number) {
+  try {
+    return NumberUtils.getNonnegativeInt32LE(source, offset);
+  } catch (cause) {
+    throw new BSONOffsetError('BSON size cannot be negative', offset, { cause });
   }
-  return (
-    source[offset] |
-    (source[offset + 1] << 8) |
-    (source[offset + 2] << 16) |
-    (source[offset + 3] << 24)
-  );
 }
 
 /**
