@@ -60,8 +60,7 @@
     "tsd": "^0.28.1",
     "typescript": "^5.0.4",
     "typescript-cached-transpile": "0.0.6",
-    "uuid": "^9.0.0",
-    "v8-profiler-next": "^1.9.0"
+    "uuid": "^9.0.0"
   },
   "tsd": {
     "directory": "test/types",
