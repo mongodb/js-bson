@@ -81,10 +81,12 @@
   "exports": {
     "import": {
       "types": "./bson.d.ts",
+      "node": "./lib/bson.node.mjs",
       "default": "./lib/bson.mjs"
     },
     "require": {
       "types": "./bson.d.ts",
+      "node": "./lib/bson.node.cjs",
       "default": "./lib/bson.cjs"
     },
     "react-native": "./lib/bson.rn.cjs",

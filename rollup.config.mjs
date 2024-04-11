@@ -27,8 +27,17 @@ const tsConfig = {
   declaration: false,
   types: [],
   tsconfig: false,
-  include: ['src/**/*']
+  include: ['src/**/*'],
+  exclude: ['src/node.ts'],
 };
+
+/** @type {typescript.RollupTypescriptOptions} */
+const nodeTsConfig = {
+  ...tsConfig,
+  exclude: [],
+  types: ['node']
+};
+
 const input = 'src/index.ts';
 
 /** @type {import('rollup').RollupOptions} */
@@ -44,6 +53,11 @@ const config = [
         sourcemap: true
       },
       {
+        file: 'lib/bson.mjs',
+        format: 'esm',
+        sourcemap: true
+      },
+      {
         file: 'lib/bson.bundle.js',
         format: 'iife',
         name: 'BSON',
@@ -54,13 +68,18 @@ const config = [
     ]
   },
   {
-    input,
-    plugins: [typescript(tsConfig), new RequireRewriter(), nodeResolve({ resolveOnly: [] })],
-    output: {
-      file: 'lib/bson.mjs',
+    input: 'src/node.ts',
+    plugins: [typescript(nodeTsConfig), nodeResolve({ resolveOnly: ['node:crypto'] })],
+    output: [{
+      file: 'lib/bson.node.mjs',
       format: 'esm',
       sourcemap: true
-    }
+    }, {
+      file: 'lib/bson.node.cjs',
+      format: 'commonjs',
+      exports: 'named',
+      sourcemap: true
+    }]
   },
   {
     input,
