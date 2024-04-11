@@ -33,3 +33,5 @@ docs/public
 .nvmrc
 
 benchmarks.json
+
+*.tsbuildinfo
