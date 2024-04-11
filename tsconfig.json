@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "composite": true,
     "allowJs": false,
     "checkJs": false,
     "strict": true,
