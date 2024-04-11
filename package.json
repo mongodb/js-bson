@@ -109,7 +109,7 @@
     "check:granular-bench": "npm run build:bench && node ./test/bench/etc/run_granular_benchmarks.js",
     "check:spec-bench": "npm run build:bench && node ./test/bench/lib/spec/bsonBench.js",
     "build:bench": "cd test/bench && npx tsc",
-    "build:ts": "node ./node_modules/typescript/bin/tsc",
+    "build:ts": "node ./node_modules/typescript/bin/tsc --build --force",
     "build:dts": "npm run build:ts && api-extractor run --typescript-compiler-folder node_modules/typescript --local && node etc/clean_definition_files.cjs",
     "build:bundle": "rollup -c rollup.config.mjs",
     "build": "npm run build:dts && npm run build:bundle",

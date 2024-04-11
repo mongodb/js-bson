@@ -1,7 +1,6 @@
 {
-    "extends": "./tsconfig.json",
+    "extends": "./tsconfig.common.json",
     "compilerOptions": {
-        "composite": true,
         "types": ["node"]
     },
     "include": [],
@@ -9,6 +8,6 @@
         "src/node.ts"
     ],
     "references": [
-      { "path": "./tsconfig.json" }
+      { "path": "./tsconfig.common.json" }
     ]
 }
