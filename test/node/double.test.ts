@@ -226,7 +226,7 @@ describe('BSON Double Precision', function () {
       });
     });
 
-    describe('fromString', () => {
+    describe.only('fromString', () => {
       const acceptedInputs = [
         ['zero', '0', 0],
         ['non-leading zeros', '45000000', 45000000],
@@ -238,7 +238,8 @@ describe('BSON Double Precision', function () {
         ['Infinity', 'Infinity', Infinity],
         ['-Infinity', '-Infinity', -Infinity],
         ['NaN', 'NaN', NaN],
-        ['basic floating point', '-4.556000', -4.556]
+        ['basic floating point', '-4.556000', -4.556],
+        ['negative zero', '-0', -0]
       ];
 
       const errorInputs = [

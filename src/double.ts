@@ -39,7 +39,7 @@ export class Double extends BSONValue {
    * This method will throw a BSONError on any string input that is not representable as a IEEE-754 64-bit double.
    * Notably, this method will also throw on the following string formats:
    * - Strings in non-decimal formats (exponent notation, binary, hex, or octal digits)
-   * - Strings with non-numeric, floating point, or slash characters; however, 'Infinity', '-Infinity', and 'NaN' input strings are allowed
+   * - Strings with characters other than sign, numeric, floating point, or slash characters (Note: 'Infinity', '-Infinity', and 'NaN' input strings are still allowed)
    * - Strings with leading and/or trailing whitespace
    *
    * Strings with leading zeros, however, are also allowed
