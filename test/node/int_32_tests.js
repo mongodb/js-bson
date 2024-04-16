@@ -97,4 +97,45 @@ describe('Int32', function () {
       });
     }
   });
+
+  describe('fromString', () => {
+    const acceptedInputs = [
+      ['Int32.max', '2147483647', 2147483647],
+      ['Int32.min', '-2147483648', -2147483648],
+      ['zero', '0', 0],
+      ['leading and trailing whitespace', '    89   ', 89]
+    ];
+    const errorInputs = [
+      ['Int32.max + 1', '2147483648'],
+      ['Int32.min - 1', '-2147483649'],
+      ['positive integer with decimal', '2.0'],
+      ['zero with decimal', '0.0'],
+      ['negative zero', '-0'],
+      ['Infinity', 'Infinity'],
+      ['-Infinity', '-Infinity'],
+      ['NaN', 'NaN'],
+      ['fraction', '2/3'],
+      ['leading zeros', '-00007'],
+      ['commas', '34,450']
+    ];
+
+    for (const [testName, value, expectedInt32] of acceptedInputs) {
+      context(`when case is ${testName}`, () => {
+        it(`should return Int32 that matches expected value`, () => {
+          expect(Int32.fromString(value)).to.equal(expectedInt32);
+        });
+      });
+    }
+    for (const [testName, value] of errorInputs) {
+      context(`when case is ${testName}`, () => {
+        it(`should throw error`, () => {
+          try {
+            Int32.fromString(value);
+          } catch (error) {
+            expect(error.message).to.equal(`Input: '${value}' is not a valid Int32 string`);
+          }
+        });
+      });
+    }
+  });
 });

@@ -1,4 +1,5 @@
 import { BSONValue } from './bson_value';
+import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
 import { type InspectFn, defaultInspect } from './parser/utils';
 
@@ -30,6 +31,15 @@ export class Int32 extends BSONValue {
     }
 
     this.value = +value | 0;
+  }
+
+  static fromString(value: string): number {
+    const trimmedValue = value.trim();
+    const coercedValue = Number(trimmedValue);
+    if (coercedValue.toString() !== trimmedValue) {
+      throw new BSONError(`Input: '${value}' is not a valid Int32 string`);
+    }
+    return coercedValue;
   }
 
   /**
