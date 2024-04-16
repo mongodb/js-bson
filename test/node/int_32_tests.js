@@ -116,7 +116,11 @@ describe('Int32', function () {
       ['NaN', 'NaN'],
       ['fraction', '2/3'],
       ['leading zeros', '-00007'],
-      ['commas', '34,450']
+      ['commas', '34,450'],
+      ['exponentiation notation', '1e1'],
+      ['octal', '0o1'],
+      ['binary', '0b1'],
+      ['hex', '0x1']
     ];
 
     for (const [testName, value, expectedInt32] of acceptedInputs) {

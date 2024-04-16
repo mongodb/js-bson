@@ -33,6 +33,19 @@ export class Int32 extends BSONValue {
     this.value = +value | 0;
   }
 
+  /**
+   * Attempt to create an Int32 type from string.
+   *
+   * This method will throw a BSONError on any string input that is not representable as an Int32.
+   * Notably, this method will also throw on the following string formats:
+   * - Strings in non-decimal formats (exponent notation, binary, hex, or octal digits)
+   * - Strings with leading zeros
+   * - Strings with decimal points (ex: '2.0')
+   *
+   * Strings with whitespace, however, are allowed.
+   *
+   * @param value - the string we want to represent as an int32.
+   */
   static fromString(value: string): number {
     const trimmedValue = value.trim();
     const coercedValue = Number(trimmedValue);
