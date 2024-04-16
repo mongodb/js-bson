@@ -40,7 +40,7 @@ export class Int32 extends BSONValue {
    * This method will throw a BSONError on any string input that is not representable as an Int32.
    * Notably, this method will also throw on the following string formats:
    * - Strings in non-decimal formats (exponent notation, binary, hex, or octal digits)
-   * - Strings with characters other than sign or numeric characters (ex: '2.0', '24,000')
+   * - Strings non-numeric and non-leading sign characters (ex: '2.0', '24,000')
    * - Strings with leading and/or trailing whitespace
    *
    * Strings with leading zeros, however, are also allowed
