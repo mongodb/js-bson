@@ -107,6 +107,7 @@ describe('Int32', function () {
       ['non-leading zeros', '45000000', new Int32(45000000)],
       ['zero with leading zeros', '000000', new Int32(0)],
       ['positive leading zeros', '000000867', new Int32(867)],
+      ['explicity positive leading zeros', '+000000867', new Int32(867)],
       ['negative leading zeros', '-00007', new Int32(-7)]
     ];
     const errorInputs = [

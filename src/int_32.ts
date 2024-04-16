@@ -40,7 +40,7 @@ export class Int32 extends BSONValue {
    * This method will throw a BSONError on any string input that is not representable as an Int32.
    * Notably, this method will also throw on the following string formats:
    * - Strings in non-decimal formats (exponent notation, binary, hex, or octal digits)
-   * - Strings with non-numeric characters (ex: '2.0', '24,000')
+   * - Strings with non-numeric or sign characters (ex: '2.0', '24,000')
    * - Strings with leading and/or trailing whitespace
    *
    * Strings with leading zeros, however, are also allowed
@@ -52,7 +52,7 @@ export class Int32 extends BSONValue {
       ? value.replace(/^0+/, '0') // all zeros case
       : value[0] === '-'
         ? value.replace(/^-0+/, '-') // negative number with leading zeros
-        : value.replace(/^0+/, ''); // positive number with leading zeros
+        : value.replace(/^\+?0+/, ''); // positive number with leading zeros
 
     const coercedValue = Number(value);
     if (
