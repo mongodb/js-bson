@@ -225,6 +225,58 @@ describe('BSON Double Precision', function () {
         });
       });
     });
+
+    describe('fromString', () => {
+      const acceptedInputs = [
+        ['zero', '0', 0],
+        ['non-leading zeros', '45000000', 45000000],
+        ['zero with leading zeros', '000000.0000', 0],
+        ['positive leading zeros', '000000867.1', 867.1],
+        ['negative leading zeros', '-00007.980', -7.98],
+        ['positive integer with decimal', '2.0', 2],
+        ['zero with decimal', '0.0', 0.0],
+        ['Infinity', 'Infinity', Infinity],
+        ['-Infinity', '-Infinity', -Infinity],
+        ['NaN', 'NaN', NaN],
+        ['basic floating point', '-4.556000', -4.556]
+      ];
+
+      const errorInputs = [
+        ['commas', '34,450'],
+        ['exponentiation notation', '1.34e16'],
+        ['octal', '0o1'],
+        ['binary', '0b1'],
+        ['hex', '0x1'],
+        ['empty string', ''],
+        ['leading and trailing whitespace', '    89   ', 89],
+        ['fake positive infinity', '2e308'],
+        ['fake negative infinity', '-2e308'],
+        ['fraction', '3/4'],
+        ['foo', 'foo']
+      ];
+
+      for (const [testName, value, expectedDouble] of acceptedInputs) {
+        context(`when case is ${testName}`, () => {
+          it(`should return Double that matches expected value`, () => {
+            if (value === 'NaN') {
+              expect(isNaN(Double.fromString(value))).to.be.true;
+            } else {
+              expect(Double.fromString(value)).to.equal(expectedDouble);
+            }
+          });
+        });
+      }
+      for (const [testName, value] of errorInputs) {
+        context(`when case is ${testName}`, () => {
+          it(`should throw correct error`, () => {
+            expect(() => Double.fromString(value)).to.throw(
+              BSON.BSONError,
+              /not a valid Double string/
+            );
+          });
+        });
+      }
+    });
   });
 
   function serializeThenDeserialize(value) {
