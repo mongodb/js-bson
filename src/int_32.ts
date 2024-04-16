@@ -1,4 +1,5 @@
 import { BSONValue } from './bson_value';
+import { BSON_INT32_MAX, BSON_INT32_MIN } from './constants';
 import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
 import { type InspectFn, defaultInspect } from './parser/utils';
@@ -40,20 +41,26 @@ export class Int32 extends BSONValue {
    * Notably, this method will also throw on the following string formats:
    * - Strings in non-decimal formats (exponent notation, binary, hex, or octal digits)
    * - Strings with non-numeric characters (ex: '2.0', '24,000')
+   * - Strings with leading and/or trailing whitespace
    *
-   * Strings with whitespace and/or leading zeros, however, are allowed.
+   * Strings with leading zeros, however, are also allowed
    *
    * @param value - the string we want to represent as an int32.
    */
   static fromString(value: string): number {
-    const trimmedValue = value.trim();
-    const cleanedValue = !/[^0]+/.test(trimmedValue)
-      ? trimmedValue.replace(/^0+/, '0') // all zeros case
-      : trimmedValue.includes('-')
-        ? trimmedValue.replace(/^-0+/, '-') // negative number with leading zeros
-        : trimmedValue.replace(/^0+/, ''); // positive number with leading zeros
-    const coercedValue = Number(cleanedValue);
-    if (coercedValue.toString() !== cleanedValue) {
+    const cleanedValue = !/[^0]+/.test(value)
+      ? value.replace(/^0+/, '0') // all zeros case
+      : value.includes('-')
+        ? value.replace(/^-0+/, '-') // negative number with leading zeros
+        : value.replace(/^0+/, ''); // positive number with leading zeros
+
+    const coercedValue = Number(value);
+    if (
+      coercedValue.toString() !== cleanedValue ||
+      !Number.isSafeInteger(coercedValue) ||
+      BSON_INT32_MAX < coercedValue ||
+      BSON_INT32_MIN > coercedValue
+    ) {
       throw new BSONError(`Input: '${value}' is not a valid Int32 string`);
     }
     return coercedValue;

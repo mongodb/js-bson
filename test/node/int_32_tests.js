@@ -2,6 +2,7 @@
 
 const BSON = require('../register-bson');
 const Int32 = BSON.Int32;
+const BSONError = BSON.BSONError;
 
 describe('Int32', function () {
   context('Constructor', function () {
@@ -103,9 +104,8 @@ describe('Int32', function () {
       ['Int32.max', '2147483647', 2147483647],
       ['Int32.min', '-2147483648', -2147483648],
       ['zero', '0', 0],
-      ['zero with leading zeros', '000000', 0],
       ['non-leading zeros', '45000000', 45000000],
-      ['leading and trailing whitespace', '    89   ', 89],
+      ['zero with leading zeros', '000000', 0],
       ['positive leading zeros', '000000867', 867],
       ['negative leading zeros', '-00007', -7]
     ];
@@ -124,7 +124,8 @@ describe('Int32', function () {
       ['octal', '0o1'],
       ['binary', '0b1'],
       ['hex', '0x1'],
-      ['empty string', '']
+      ['empty string', ''],
+      ['leading and trailing whitespace', '    89   ', 89]
     ];
 
     for (const [testName, value, expectedInt32] of acceptedInputs) {
@@ -136,12 +137,8 @@ describe('Int32', function () {
     }
     for (const [testName, value] of errorInputs) {
       context(`when case is ${testName}`, () => {
-        it(`should throw error`, () => {
-          try {
-            Int32.fromString(value);
-          } catch (error) {
-            expect(error.message).to.equal(`Input: '${value}' is not a valid Int32 string`);
-          }
+        it(`should throw correct error`, () => {
+          expect(() => Int32.fromString(value)).to.throw(BSONError, /not a valid Int32 string/);
         });
       });
     }
