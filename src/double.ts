@@ -46,7 +46,7 @@ export class Double extends BSONValue {
    *
    * @param value - the string we want to represent as an double.
    */
-  static fromString(value: string): number {
+  static fromString(value: string): Double {
     const coercedValue = Number(value);
     const nonFiniteValidInputs = ['Infinity', '-Infinity', 'NaN'];
     if (
@@ -58,7 +58,7 @@ export class Double extends BSONValue {
     ) {
       throw new BSONError(`Input: '${value}' is not a valid Double string`);
     }
-    return coercedValue;
+    return new Double(coercedValue);
   }
 
   /**

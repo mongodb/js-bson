@@ -226,7 +226,7 @@ describe('BSON Double Precision', function () {
       });
     });
 
-    describe.only('fromString', () => {
+    describe('fromString', () => {
       const acceptedInputs = [
         ['zero', '0', 0],
         ['non-leading zeros', '45000000', 45000000],
@@ -262,7 +262,7 @@ describe('BSON Double Precision', function () {
             if (value === 'NaN') {
               expect(isNaN(Double.fromString(value))).to.be.true;
             } else {
-              expect(Double.fromString(value)).to.equal(expectedDouble);
+              expect(Double.fromString(value).value).to.equal(expectedDouble);
             }
           });
         });
