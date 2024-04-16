@@ -103,7 +103,11 @@ describe('Int32', function () {
       ['Int32.max', '2147483647', 2147483647],
       ['Int32.min', '-2147483648', -2147483648],
       ['zero', '0', 0],
-      ['leading and trailing whitespace', '    89   ', 89]
+      ['zero with leading zeros', '000000', 0],
+      ['non-leading zeros', '45000000', 45000000],
+      ['leading and trailing whitespace', '    89   ', 89],
+      ['positive leading zeros', '000000867', 867],
+      ['negative leading zeros', '-00007', -7]
     ];
     const errorInputs = [
       ['Int32.max + 1', '2147483648'],
@@ -115,12 +119,12 @@ describe('Int32', function () {
       ['-Infinity', '-Infinity'],
       ['NaN', 'NaN'],
       ['fraction', '2/3'],
-      ['leading zeros', '-00007'],
       ['commas', '34,450'],
       ['exponentiation notation', '1e1'],
       ['octal', '0o1'],
       ['binary', '0b1'],
-      ['hex', '0x1']
+      ['hex', '0x1'],
+      ['empty string', '']
     ];
 
     for (const [testName, value, expectedInt32] of acceptedInputs) {

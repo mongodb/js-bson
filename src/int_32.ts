@@ -39,17 +39,21 @@ export class Int32 extends BSONValue {
    * This method will throw a BSONError on any string input that is not representable as an Int32.
    * Notably, this method will also throw on the following string formats:
    * - Strings in non-decimal formats (exponent notation, binary, hex, or octal digits)
-   * - Strings with leading zeros
-   * - Strings with decimal points (ex: '2.0')
+   * - Strings with non-numeric characters (ex: '2.0', '24,000')
    *
-   * Strings with whitespace, however, are allowed.
+   * Strings with whitespace and/or leading zeros, however, are allowed.
    *
    * @param value - the string we want to represent as an int32.
    */
   static fromString(value: string): number {
     const trimmedValue = value.trim();
-    const coercedValue = Number(trimmedValue);
-    if (coercedValue.toString() !== trimmedValue) {
+    const cleanedValue = !/[^0]+/.test(trimmedValue)
+      ? trimmedValue.replace(/^0+/, '0') // all zeros case
+      : trimmedValue.includes('-')
+        ? trimmedValue.replace(/^-0+/, '-') // negative number with leading zeros
+        : trimmedValue.replace(/^0+/, ''); // positive number with leading zeros
+    const coercedValue = Number(cleanedValue);
+    if (coercedValue.toString() !== cleanedValue) {
       throw new BSONError(`Input: '${value}' is not a valid Int32 string`);
     }
     return coercedValue;
