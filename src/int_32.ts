@@ -47,10 +47,10 @@ export class Int32 extends BSONValue {
    *
    * @param value - the string we want to represent as an int32.
    */
-  static fromString(value: string): number {
+  static fromString(value: string): Int32 {
     const cleanedValue = !/[^0]+/.test(value)
       ? value.replace(/^0+/, '0') // all zeros case
-      : value.includes('-')
+      : value[0] === '-'
         ? value.replace(/^-0+/, '-') // negative number with leading zeros
         : value.replace(/^0+/, ''); // positive number with leading zeros
 
@@ -63,7 +63,7 @@ export class Int32 extends BSONValue {
     ) {
       throw new BSONError(`Input: '${value}' is not a valid Int32 string`);
     }
-    return coercedValue;
+    return new Int32(coercedValue);
   }
 
   /**
