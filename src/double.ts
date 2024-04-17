@@ -49,14 +49,18 @@ export class Double extends BSONValue {
   static fromString(value: string): Double {
     const coercedValue = Number(value);
     const nonFiniteValidInputs = ['Infinity', '-Infinity', 'NaN'];
-    if (
+
+    if (value.trim() !== value) {
+      throw new BSONError(`Input: '${value}' contains whitespace`);
+    } else if (value === '') {
+      throw new BSONError(`Input is an empty string`);
+    } else if (/[^-0-9.]/.test(value) && !nonFiniteValidInputs.includes(value)) {
+      throw new BSONError(`Input: '${value}' contains invalid characters`);
+    } else if (
       (!Number.isFinite(coercedValue) && !nonFiniteValidInputs.includes(value)) ||
-      (Number.isNaN(coercedValue) && value !== 'NaN') ||
-      value === '' ||
-      (/[^-0-9.]/.test(value) && !nonFiniteValidInputs.includes(value)) ||
-      value.trim() !== value
+      (Number.isNaN(coercedValue) && value !== 'NaN')
     ) {
-      throw new BSONError(`Input: '${value}' is not a valid Double string`);
+      throw new BSONError(`Input: ${value} is not representable as a Double`); // generic case
     }
     return new Double(coercedValue);
   }

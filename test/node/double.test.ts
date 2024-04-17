@@ -243,22 +243,22 @@ describe('BSON Double Precision', function () {
       ];
 
       const errorInputs = [
-        ['commas', '34,450'],
-        ['exponentiation notation', '1.34e16'],
-        ['octal', '0o1'],
-        ['binary', '0b1'],
-        ['hex', '0x1'],
-        ['empty string', ''],
-        ['leading and trailing whitespace', '    89   ', 89],
-        ['fake positive infinity', '2e308'],
-        ['fake negative infinity', '-2e308'],
-        ['fraction', '3/4'],
-        ['foo', 'foo']
+        ['commas', '34,450', 'contains invalid characters'],
+        ['exponentiation notation', '1.34e16', 'contains invalid characters'],
+        ['octal', '0o1', 'contains invalid characters'],
+        ['binary', '0b1', 'contains invalid characters'],
+        ['hex', '0x1', 'contains invalid characters'],
+        ['empty string', '', 'is an empty string'],
+        ['leading and trailing whitespace', '    89   ', 'contains whitespace'],
+        ['fake positive infinity', '2e308', 'contains invalid characters'],
+        ['fake negative infinity', '-2e308', 'contains invalid characters'],
+        ['fraction', '3/4', 'contains invalid characters'],
+        ['foo', 'foo', 'contains invalid characters']
       ];
 
       for (const [testName, value, expectedDouble] of acceptedInputs) {
-        context(`when case is ${testName}`, () => {
-          it(`should return Double that matches expected value`, () => {
+        context(`when the input is ${testName}`, () => {
+          it(`should successfully return a Double representation`, () => {
             if (value === 'NaN') {
               expect(isNaN(Double.fromString(value))).to.be.true;
             } else {
@@ -267,13 +267,10 @@ describe('BSON Double Precision', function () {
           });
         });
       }
-      for (const [testName, value] of errorInputs) {
-        context(`when case is ${testName}`, () => {
-          it(`should throw correct error`, () => {
-            expect(() => Double.fromString(value)).to.throw(
-              BSON.BSONError,
-              /not a valid Double string/
-            );
+      for (const [testName, value, expectedErrMsg] of errorInputs) {
+        context(`when the input is ${testName}`, () => {
+          it(`should throw an error containing '${expectedErrMsg}'`, () => {
+            expect(() => Double.fromString(value)).to.throw(BSON.BSONError, expectedErrMsg);
           });
         });
       }
