@@ -60,7 +60,7 @@
     "tar": "^7.0.1",
     "ts-node": "^10.9.2",
     "tsd": "^0.31.0",
-    "typescript": "^5.0.4",
+    "typescript": "5.3",
     "typescript-cached-transpile": "0.0.6",
     "uuid": "^9.0.1"
   },
