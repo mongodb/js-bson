@@ -104,42 +104,42 @@ describe('Int32', function () {
       ['Int32.max', '2147483647', 2147483647],
       ['Int32.min', '-2147483648', -2147483648],
       ['zero', '0', 0],
-      ['non-leading zeros', '45000000', 45000000],
-      ['zero with leading zeros', '000000', 0],
-      ['positive leading zeros', '000000867', 867],
-      ['explicity positive leading zeros', '+000000867', 867],
-      ['negative leading zeros', '-00007', -7]
+      ['a string with non-leading consecutive zeros', '45000000', 45000000],
+      ['a string with zero with leading zeros', '000000', 0],
+      ['a string with positive leading zeros', '000000867', 867],
+      ['a string with explicity positive leading zeros', '+000000867', 867],
+      ['a string with negative leading zeros', '-00007', -7]
     ];
     const errorInputs = [
-      ['Int32.max + 1', '2147483648'],
-      ['Int32.min - 1', '-2147483649'],
-      ['positive integer with decimal', '2.0'],
-      ['zero with decimal', '0.0'],
-      ['negative zero', '-0'],
-      ['Infinity', 'Infinity'],
-      ['-Infinity', '-Infinity'],
-      ['NaN', 'NaN'],
-      ['fraction', '2/3'],
-      ['commas', '34,450'],
-      ['exponentiation notation', '1e1'],
-      ['octal', '0o1'],
-      ['binary', '0b1'],
-      ['hex', '0x1'],
-      ['empty string', ''],
-      ['leading and trailing whitespace', '    89   ', 89]
+      ['Int32.max + 1', '2147483648', 'larger than the maximum value for Int32'],
+      ['Int32.min - 1', '-2147483649', 'smaller than the minimum value for Int32'],
+      ['positive integer with decimal', '2.0', 'not a valid Int32 string'],
+      ['zero with decimals', '0.0', 'not a valid Int32 string'],
+      ['negative zero', '-0', 'not a valid Int32 string'],
+      ['Infinity', 'Infinity', 'larger than the maximum value for Int32'],
+      ['-Infinity', '-Infinity', 'smaller than the minimum value for Int32'],
+      ['NaN', 'NaN', 'not a safe integer'],
+      ['a fraction', '2/3', 'not a safe integer'],
+      ['a string containing commas', '34,450', 'not a safe integer'],
+      ['a string in exponentiation notation', '1e1', 'not a valid Int32 string'],
+      ['a octal string', '0o1', 'not a valid Int32 string'],
+      ['a binary string', '0b1', 'not a valid Int32 string'],
+      ['a hexadecimal string', '0x1', 'not a valid Int32 string'],
+      ['a empty string', '', 'not a valid Int32 string'],
+      ['a leading and trailing whitespace', '    89   ', 'not a valid Int32 string']
     ];
 
     for (const [testName, value, expectedInt32] of acceptedInputs) {
-      context(`when case is ${testName}`, () => {
-        it(`should return Int32 that matches expected value`, () => {
+      context(`when the input is ${testName}`, () => {
+        it(`should successfully return an Int32 representation`, () => {
           expect(Int32.fromString(value).value).to.equal(expectedInt32);
         });
       });
     }
-    for (const [testName, value] of errorInputs) {
-      context(`when case is ${testName}`, () => {
-        it(`should throw correct error`, () => {
-          expect(() => Int32.fromString(value)).to.throw(BSONError, /not a valid Int32 string/);
+    for (const [testName, value, expectedErrMsg] of errorInputs) {
+      context(`when the input is ${testName}`, () => {
+        it(`should throw an error containing '${expectedErrMsg}'`, () => {
+          expect(() => Int32.fromString(value)).to.throw(BSONError, expectedErrMsg);
         });
       });
     }

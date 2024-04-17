@@ -55,12 +55,15 @@ export class Int32 extends BSONValue {
         : value.replace(/^\+?0+/, ''); // positive number with leading zeros
 
     const coercedValue = Number(value);
-    if (
-      coercedValue.toString() !== cleanedValue ||
-      !Number.isSafeInteger(coercedValue) ||
-      BSON_INT32_MAX < coercedValue ||
-      BSON_INT32_MIN > coercedValue
-    ) {
+
+    if (BSON_INT32_MAX < coercedValue) {
+      throw new BSONError(`Input: '${value}' is larger than the maximum value for Int32`);
+    } else if (BSON_INT32_MIN > coercedValue) {
+      throw new BSONError(`Input: '${value}' is smaller than the minimum value for Int32`);
+    } else if (!Number.isSafeInteger(coercedValue)) {
+      throw new BSONError(`Input: '${value}' is not a safe integer`);
+    } else if (coercedValue.toString() !== cleanedValue) {
+      // catch all case
       throw new BSONError(`Input: '${value}' is not a valid Int32 string`);
     }
     return new Int32(coercedValue);
