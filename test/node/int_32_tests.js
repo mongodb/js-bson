@@ -101,14 +101,14 @@ describe('Int32', function () {
 
   describe('fromString', () => {
     const acceptedInputs = [
-      ['Int32.max', '2147483647', new Int32(2147483647)],
-      ['Int32.min', '-2147483648', new Int32(-2147483648)],
-      ['zero', '0', new Int32(0)],
-      ['non-leading zeros', '45000000', new Int32(45000000)],
-      ['zero with leading zeros', '000000', new Int32(0)],
-      ['positive leading zeros', '000000867', new Int32(867)],
-      ['explicity positive leading zeros', '+000000867', new Int32(867)],
-      ['negative leading zeros', '-00007', new Int32(-7)]
+      ['Int32.max', '2147483647', 2147483647],
+      ['Int32.min', '-2147483648', -2147483648],
+      ['zero', '0', 0],
+      ['non-leading zeros', '45000000', 45000000],
+      ['zero with leading zeros', '000000', 0],
+      ['positive leading zeros', '000000867', 867],
+      ['explicity positive leading zeros', '+000000867', 867],
+      ['negative leading zeros', '-00007', -7]
     ];
     const errorInputs = [
       ['Int32.max + 1', '2147483648'],
@@ -132,7 +132,7 @@ describe('Int32', function () {
     for (const [testName, value, expectedInt32] of acceptedInputs) {
       context(`when case is ${testName}`, () => {
         it(`should return Int32 that matches expected value`, () => {
-          expect(Int32.fromString(value).value).to.equal(expectedInt32.value);
+          expect(Int32.fromString(value).value).to.equal(expectedInt32);
         });
       });
     }

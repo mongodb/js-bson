@@ -43,7 +43,7 @@ export class Int32 extends BSONValue {
    * - Strings non-numeric and non-leading sign characters (ex: '2.0', '24,000')
    * - Strings with leading and/or trailing whitespace
    *
-   * Strings with leading zeros, however, are also allowed
+   * Strings with leading zeros, however, are allowed.
    *
    * @param value - the string we want to represent as an int32.
    */
