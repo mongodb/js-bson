@@ -2,6 +2,7 @@
 
 const BSON = require('../register-bson');
 const Int32 = BSON.Int32;
+const BSONError = BSON.BSONError;
 
 describe('Int32', function () {
   context('Constructor', function () {
@@ -94,6 +95,52 @@ describe('Int32', function () {
         const testNumber = 0x7fffffff;
         const int32 = new Int32(testNumber);
         expect(int32.toString(radix)).to.equal(testNumber.toString(radix));
+      });
+    }
+  });
+
+  describe('fromString', () => {
+    const acceptedInputs = [
+      ['Int32.max', '2147483647', 2147483647],
+      ['Int32.min', '-2147483648', -2147483648],
+      ['zero', '0', 0],
+      ['a string with non-leading consecutive zeros', '45000000', 45000000],
+      ['a string with zero with leading zeros', '000000', 0],
+      ['a string with positive leading zeros', '000000867', 867],
+      ['a string with explicity positive leading zeros', '+000000867', 867],
+      ['a string with negative leading zeros', '-00007', -7]
+    ];
+    const errorInputs = [
+      ['Int32.max + 1', '2147483648', 'larger than the maximum value for Int32'],
+      ['Int32.min - 1', '-2147483649', 'smaller than the minimum value for Int32'],
+      ['positive integer with decimal', '2.0', 'not a valid Int32 string'],
+      ['zero with decimals', '0.0', 'not a valid Int32 string'],
+      ['negative zero', '-0', 'not a valid Int32 string'],
+      ['Infinity', 'Infinity', 'larger than the maximum value for Int32'],
+      ['-Infinity', '-Infinity', 'smaller than the minimum value for Int32'],
+      ['NaN', 'NaN', 'not a safe integer'],
+      ['a fraction', '2/3', 'not a safe integer'],
+      ['a string containing commas', '34,450', 'not a safe integer'],
+      ['a string in exponentiation notation', '1e1', 'not a valid Int32 string'],
+      ['a octal string', '0o1', 'not a valid Int32 string'],
+      ['a binary string', '0b1', 'not a valid Int32 string'],
+      ['a hexadecimal string', '0x1', 'not a valid Int32 string'],
+      ['a empty string', '', 'not a valid Int32 string'],
+      ['a leading and trailing whitespace', '    89   ', 'not a valid Int32 string']
+    ];
+
+    for (const [testName, value, expectedInt32] of acceptedInputs) {
+      context(`when the input is ${testName}`, () => {
+        it(`should successfully return an Int32 representation`, () => {
+          expect(Int32.fromString(value).value).to.equal(expectedInt32);
+        });
+      });
+    }
+    for (const [testName, value, expectedErrMsg] of errorInputs) {
+      context(`when the input is ${testName}`, () => {
+        it(`should throw an error containing '${expectedErrMsg}'`, () => {
+          expect(() => Int32.fromString(value)).to.throw(BSONError, expectedErrMsg);
+        });
       });
     }
   });
