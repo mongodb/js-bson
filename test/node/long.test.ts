@@ -163,4 +163,66 @@ describe('Long', function () {
       });
     });
   });
+
+  describe.only('static fromStringStrict()', function () {
+    const successInputs = [
+      ['basic no alphabet low radix', '1236', 8],
+      ['radix does allow given alphabet letter', 'eEe', 15],
+      ['hexadecimal letters', '126073efbcdADEF', 16],
+      ['negative hexadecimal letters', '-126073efbcdADEF', 16]
+    ];
+
+    const failureInputs = [
+      ['empty string','', 2],
+      ['non a-z or numeric string', '~~', 36],
+      ['alphabet in radix < 10', 'a', 4],
+      ['radix does not allow all alphabet letters', 'eee', 14]
+    ];
+
+    for (const [testName, str, radix] of successInputs) {
+      context(`when the input is ${testName}`, () => {
+        it(`should return a input string`, () => {
+          expect(Long.fromStringStrict(str, true, radix).toString(radix)).to.equal(str.toLowerCase());
+        });
+      });
+    }
+    for (const [testName, str, radix] of failureInputs) {
+      context(`when the input is ${testName}`, () => {
+        it(`should return false`, () => {
+          expect(() => Long.fromStringStrict(str, true, radix)).to.throw(BSONError);
+        });
+      });
+    }
+  });
+
+  describe('static validateStringCharacters()', function () {
+    const successInputs = [
+      ['multiple decimal points', '..', 30],
+      ['radix does not allow given alphabet letter', 'eEe', 15],
+      ['empty string','', 2], 
+      ['all possible hexadecimal characters', '12efabc689873dADCDEF', 16]
+    ];
+
+    const failureInputs = [
+      ['non a-z or numeric string', '~~', 36],
+      ['alphabet in radix < 10', 'a', 4],
+      ['radix does not allow all alphabet letters', 'eee', 14]
+    ];
+
+    for (const [testName, str, radix] of successInputs) {
+      context(`when the input is ${testName}`, () => {
+        it(`should return a input string`, () => {
+          expect(Long.validateStringCharacters(str, radix)).to.equal(str);
+        });
+      });
+    }
+
+    for (const [testName, str, radix] of failureInputs) {
+      context(`when the input is ${testName}`, () => {
+        it(`should return false`, () => {
+          expect(Long.validateStringCharacters(str, radix)).to.equal(false);
+        });
+      });
+    }
+  });
 });
