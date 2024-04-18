@@ -226,7 +226,7 @@ describe('BSON Double Precision', function () {
       });
     });
 
-    describe.only('fromString', () => {
+    describe('fromString', () => {
       const acceptedInputs = [
         ['zero', '0', 0],
         ['non-leading zeros', '45000000', 45000000],
