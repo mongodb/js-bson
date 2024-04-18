@@ -226,7 +226,7 @@ describe('BSON Double Precision', function () {
       });
     });
 
-    describe.only('fromString', () => {
+    describe('fromString', () => {
       const acceptedInputs = [
         ['zero', '0', 0],
         ['non-leading zeros', '45000000', 45000000],
@@ -257,7 +257,11 @@ describe('BSON Double Precision', function () {
         ['fake negative infinity', '-2e308', 'is not representable as a Double'],
         ['fraction', '3/4', 'contains invalid characters'],
         ['foo', 'foo', 'contains invalid characters'],
-        ['malformed number without invalid characters', '9.0.+76', 'is not representable as a Double']
+        [
+          'malformed number without invalid characters',
+          '9.0.+76',
+          'is not representable as a Double'
+        ]
       ];
 
       for (const [testName, value, expectedDouble] of acceptedInputs) {
