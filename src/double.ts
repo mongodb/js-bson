@@ -59,13 +59,13 @@ export class Double extends BSONValue {
 
     if (value.trim() !== value) {
       throw new BSONError(`Input: '${value}' contains whitespace`);
+    } else if (!Number.isFinite(coercedValue) && !Number.isNaN(coercedValue)) {
+      throw new BSONError(`Input: ${value} is not representable as a Double`); // generic case
     } else if (value === '') {
       throw new BSONError(`Input is an empty string`);
-    } else if (/[^+-0-9.]/.test(value)) {
+    } else if (/[^-0-9.+]/.test(value)) {
       throw new BSONError(`Input: '${value}' contains invalid characters`);
     } else if (Number.isNaN(coercedValue)) {
-      throw new BSONError(`Input: ${value} is not representable as a Double`); // generic case
-    } else if (!Number.isFinite(coercedValue)) {
       throw new BSONError(`Input: ${value} is not representable as a Double`); // generic case
     }
     return new Double(coercedValue);
