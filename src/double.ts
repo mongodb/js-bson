@@ -38,35 +38,32 @@ export class Double extends BSONValue {
    *
    * This method will throw a BSONError on any string input that is not representable as a IEEE-754 64-bit double.
    * Notably, this method will also throw on the following string formats:
-   * - Strings in non-decimal formats (exponent notation, binary, hex, or octal digits)
+   * - Strings in non-decimal and non-exponential formats (binary, hex, or octal digits)
    * - Strings with characters other than numeric, floating point, or leading sign characters (Note: 'Infinity', '-Infinity', and 'NaN' input strings are still allowed)
    * - Strings with leading and/or trailing whitespace
    *
    * Strings with leading zeros, however, are also allowed
    *
-   * @param value - the string we want to represent as an double.
+   * @param value - the string we want to represent as a double.
    */
   static fromString(value: string): Double {
     const coercedValue = Number(value);
 
-    if (value === 'NaN') {
-      return new Double(NaN);
-    } else if (value === 'Infinity') {
-      return new Double(Infinity);
-    } else if (value === '-Infinity') {
-      return new Double(-Infinity);
-    }
+    if (value === 'NaN') return new Double(NaN);
+    if (value === 'Infinity') return new Double(Infinity);
+    if (value === '-Infinity') return new Double(-Infinity);
 
+    if (!Number.isFinite(coercedValue)) {
+      throw new BSONError(`Input: ${value} is not representable as a Double`);
+    }
     if (value.trim() !== value) {
       throw new BSONError(`Input: '${value}' contains whitespace`);
-    } else if (!Number.isFinite(coercedValue) && !Number.isNaN(coercedValue)) {
-      throw new BSONError(`Input: ${value} is not representable as a Double`); // generic case
-    } else if (value === '') {
+    }
+    if (value === '') {
       throw new BSONError(`Input is an empty string`);
-    } else if (/[^-0-9.+]/.test(value)) {
-      throw new BSONError(`Input: '${value}' contains invalid characters`);
-    } else if (Number.isNaN(coercedValue)) {
-      throw new BSONError(`Input: ${value} is not representable as a Double`); // generic case
+    }
+    if (/[^-0-9.+e]/.test(value)) {
+      throw new BSONError(`Input: '${value}' is not in decimal or exponential notation`);
     }
     return new Double(coercedValue);
   }

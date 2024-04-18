@@ -242,21 +242,24 @@ describe('BSON Double Precision', function () {
         ['negative zero', '-0', -0],
         ['explicit plus zero', '+0', 0],
         ['explicit plus decimal', '+78.23456', 78.23456],
-        ['explicit plus leading zeros', '+00000000000001.11', 1.11]
+        ['explicit plus leading zeros', '+00000000000001.11', 1.11],
+        ['exponentiation notation', '1.34e16', 1.34e16],
+        ['exponentiation notation with negative exponent', '1.34e-16', 1.34e-16],
+        ['exponentiation notation with explicit positive exponent', '1.34e+16', 1.34e16],
+        ['exponentiation notation with negative base', '-1.34e16', -1.34e16]
       ];
 
       const errorInputs = [
-        ['commas', '34,450', 'contains invalid characters'],
-        ['exponentiation notation', '1.34e16', 'contains invalid characters'],
-        ['octal', '0o1', 'contains invalid characters'],
-        ['binary', '0b1', 'contains invalid characters'],
-        ['hex', '0x1', 'contains invalid characters'],
+        ['commas', '34,450', 'is not representable as a Double'],
+        ['octal', '0o1', 'is not in decimal or exponential notation'],
+        ['binary', '0b1', 'is not in decimal or exponential notation'],
+        ['hex', '0x1', 'is not in decimal or exponential notation'],
         ['empty string', '', 'is an empty string'],
         ['leading and trailing whitespace', '    89   ', 'contains whitespace'],
         ['fake positive infinity', '2e308', 'is not representable as a Double'],
         ['fake negative infinity', '-2e308', 'is not representable as a Double'],
-        ['fraction', '3/4', 'contains invalid characters'],
-        ['foo', 'foo', 'contains invalid characters'],
+        ['fraction', '3/4', 'is not representable as a Double'],
+        ['foo', 'foo', 'is not representable as a Double'],
         [
           'malformed number without invalid characters',
           '9.0.+76',
