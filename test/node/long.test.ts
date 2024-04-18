@@ -163,4 +163,13 @@ describe('Long', function () {
       });
     });
   });
+
+  describe.only('static validateString()', function() {
+    it('does not accept non-numeric inputs', () => {
+      console.log(Long.fromString('foo'));
+      console.log(Long.fromString("1234xxx5"));
+      console.log(Long.fromString("1234xxxx5"))
+      console.log(Long.fromString("1234xxxxx5"));
+    });
+  });
 });
