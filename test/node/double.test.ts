@@ -225,6 +225,56 @@ describe('BSON Double Precision', function () {
         });
       });
     });
+
+    describe('fromString', () => {
+      const acceptedInputs = [
+        ['zero', '0', 0],
+        ['non-leading zeros', '45000000', 45000000],
+        ['zero with leading zeros', '000000.0000', 0],
+        ['positive leading zeros', '000000867.1', 867.1],
+        ['negative leading zeros', '-00007.980', -7.98],
+        ['positive integer with decimal', '2.0', 2],
+        ['zero with decimal', '0.0', 0.0],
+        ['Infinity', 'Infinity', Infinity],
+        ['-Infinity', '-Infinity', -Infinity],
+        ['NaN', 'NaN', NaN],
+        ['basic floating point', '-4.556000', -4.556],
+        ['negative zero', '-0', -0]
+      ];
+
+      const errorInputs = [
+        ['commas', '34,450', 'contains invalid characters'],
+        ['exponentiation notation', '1.34e16', 'contains invalid characters'],
+        ['octal', '0o1', 'contains invalid characters'],
+        ['binary', '0b1', 'contains invalid characters'],
+        ['hex', '0x1', 'contains invalid characters'],
+        ['empty string', '', 'is an empty string'],
+        ['leading and trailing whitespace', '    89   ', 'contains whitespace'],
+        ['fake positive infinity', '2e308', 'contains invalid characters'],
+        ['fake negative infinity', '-2e308', 'contains invalid characters'],
+        ['fraction', '3/4', 'contains invalid characters'],
+        ['foo', 'foo', 'contains invalid characters']
+      ];
+
+      for (const [testName, value, expectedDouble] of acceptedInputs) {
+        context(`when the input is ${testName}`, () => {
+          it(`should successfully return a Double representation`, () => {
+            if (value === 'NaN') {
+              expect(isNaN(Double.fromString(value))).to.be.true;
+            } else {
+              expect(Double.fromString(value).value).to.equal(expectedDouble);
+            }
+          });
+        });
+      }
+      for (const [testName, value, expectedErrMsg] of errorInputs) {
+        context(`when the input is ${testName}`, () => {
+          it(`should throw an error containing '${expectedErrMsg}'`, () => {
+            expect(() => Double.fromString(value)).to.throw(BSON.BSONError, expectedErrMsg);
+          });
+        });
+      }
+    });
   });
 
   function serializeThenDeserialize(value) {

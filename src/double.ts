@@ -1,4 +1,5 @@
 import { BSONValue } from './bson_value';
+import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
 import { type InspectFn, defaultInspect } from './parser/utils';
 
@@ -30,6 +31,38 @@ export class Double extends BSONValue {
     }
 
     this.value = +value;
+  }
+
+  /**
+   * Attempt to create an double type from string.
+   *
+   * This method will throw a BSONError on any string input that is not representable as a IEEE-754 64-bit double.
+   * Notably, this method will also throw on the following string formats:
+   * - Strings in non-decimal formats (exponent notation, binary, hex, or octal digits)
+   * - Strings with characters other than numeric, floating point, or leading sign characters (Note: 'Infinity', '-Infinity', and 'NaN' input strings are still allowed)
+   * - Strings with leading and/or trailing whitespace
+   *
+   * Strings with leading zeros, however, are also allowed
+   *
+   * @param value - the string we want to represent as an double.
+   */
+  static fromString(value: string): Double {
+    const coercedValue = Number(value);
+    const nonFiniteValidInputs = ['Infinity', '-Infinity', 'NaN'];
+
+    if (value.trim() !== value) {
+      throw new BSONError(`Input: '${value}' contains whitespace`);
+    } else if (value === '') {
+      throw new BSONError(`Input is an empty string`);
+    } else if (/[^-0-9.]/.test(value) && !nonFiniteValidInputs.includes(value)) {
+      throw new BSONError(`Input: '${value}' contains invalid characters`);
+    } else if (
+      (!Number.isFinite(coercedValue) && !nonFiniteValidInputs.includes(value)) ||
+      (Number.isNaN(coercedValue) && value !== 'NaN')
+    ) {
+      throw new BSONError(`Input: ${value} is not representable as a Double`); // generic case
+    }
+    return new Double(coercedValue);
   }
 
   /**
