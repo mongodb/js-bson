@@ -247,12 +247,11 @@ export class Long extends BSONValue {
 
   static validateStringCharacters(str: string, radix?: number): false | string {
       radix = radix ?? 10;
-      let regexInputString;
+      let regexInputString = `[^-0-9.+]`
       if (radix - 10 > 0) {
-        validCharRangeEnd = String.fromCharCode('a'.charCodeAt(0) + (radix-10));
-      } else {
-        regexInputString = `[^-0-9.+]`
-      }
+        const validCharRangeEnd = String.fromCharCode('a'.charCodeAt(0) + (radix - 11));
+        regexInputString = `[^-0-9.+a-${validCharRangeEnd }]`;
+      } 
       const regex = new RegExp(regexInputString);
       return regex.test(str) ? str : false;
   }
@@ -268,6 +267,10 @@ export class Long extends BSONValue {
       unsigned = !!unsigned;
     }
     radix = radix || 10;
+
+    if (throwsError && !Long.validateStringCharacters(str, radix)) {
+      throw new BSONError(`Input: ${str} contains invalid characters for radix: ${radix}`);
+    }
     if (radix < 2 || 36 < radix) throw new BSONError('radix');
 
     let p;
@@ -293,6 +296,7 @@ export class Long extends BSONValue {
       }
     }
     result.unsigned = unsigned;
+    
     return result;
   }
 
