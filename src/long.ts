@@ -245,13 +245,19 @@ export class Long extends BSONValue {
     return Long.fromString(value.toString(), unsigned);
   }
 
-  static validateStringCharacter(str: string, radix?: number): false | string {
+  static validateStringCharacters(str: string, radix?: number): false | string {
       radix = radix ?? 10;
-      
-      return false;
+      let regexInputString;
+      if (radix - 10 > 0) {
+        validCharRangeEnd = String.fromCharCode('a'.charCodeAt(0) + (radix-10));
+      } else {
+        regexInputString = `[^-0-9.+]`
+      }
+      const regex = new RegExp(regexInputString);
+      return regex.test(str) ? str : false;
   }
 
-  static fromStringHelper(str: string, unsigned?: boolean, radix?: number, throwsError?: boolean): Long {
+  static fromStringHelper(str: string, throwsError?: boolean, unsigned?: boolean, radix?: number): Long {
     if (str.length === 0) throw new BSONError('empty string');
     if (str === 'NaN' || str === 'Infinity' || str === '+Infinity' || str === '-Infinity')
       return Long.ZERO;
@@ -299,42 +305,7 @@ export class Long extends BSONValue {
    * @returns The corresponding Long value
    */
   static fromString(str: string, unsigned?: boolean, radix?: number): Long {
-    if (str.length === 0) throw new BSONError('empty string');
-    if (str === 'NaN' || str === 'Infinity' || str === '+Infinity' || str === '-Infinity')
-      return Long.ZERO;
-    if (typeof unsigned === 'number') {
-      // For goog.math.long compatibility
-      (radix = unsigned), (unsigned = false);
-    } else {
-      unsigned = !!unsigned;
-    }
-    radix = radix || 10;
-    if (radix < 2 || 36 < radix) throw new BSONError('radix');
-
-    let p;
-    if ((p = str.indexOf('-')) > 0) throw new BSONError('interior hyphen');
-    else if (p === 0) {
-      return Long.fromString(str.substring(1), unsigned, radix).neg();
-    }
-
-    // Do several (8) digits each time through the loop, so as to
-    // minimize the calls to the very expensive emulated div.
-    const radixToPower = Long.fromNumber(Math.pow(radix, 8));
-
-    let result = Long.ZERO;
-    for (let i = 0; i < str.length; i += 8) {
-      const size = Math.min(8, str.length - i),
-        value = parseInt(str.substring(i, i + size), radix);
-      if (size < 8) {
-        const power = Long.fromNumber(Math.pow(radix, size));
-        result = result.mul(power).add(Long.fromNumber(value));
-      } else {
-        result = result.mul(radixToPower);
-        result = result.add(Long.fromNumber(value));
-      }
-    }
-    result.unsigned = unsigned;
-    return result;
+    return Long.fromStringHelper(str, false, unsigned, radix);
   }
 
   /**
