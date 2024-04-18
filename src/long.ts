@@ -245,18 +245,40 @@ export class Long extends BSONValue {
     return Long.fromString(value.toString(), unsigned);
   }
 
+  /**
+   * @internal
+   * Returns false for an string that contains invalid characters for its radix, else returns the original string.
+   * @param str - The textual representation of the Long
+   * @param radix - The radix in which the text is written (2-36), defaults to 10
+   */
   static validateStringCharacters(str: string, radix?: number): false | string {
-      radix = radix ?? 10;
-      let regexInputString = `[^-0-9.+]`
-      if (radix - 10 > 0) {
-        const validCharRangeEnd = String.fromCharCode('a'.charCodeAt(0) + (radix - 11));
-        regexInputString = `[^-0-9.+a-${validCharRangeEnd }]`;
-      } 
-      const regex = new RegExp(regexInputString);
-      return regex.test(str) ? str : false;
+    radix = radix ?? 10;
+    let regexInputString = `[^-0-9.+]`;
+    if (radix - 10 > 0) {
+      const validCharRangeEnd = String.fromCharCode('a'.charCodeAt(0) + (radix - 11));
+      regexInputString = `[^-0-9.+a-${validCharRangeEnd}]`;
+    }
+    const regex = new RegExp(regexInputString);
+    return regex.test(str) ? str : false;
   }
 
-  static fromStringHelper(str: string, throwsError?: boolean, unsigned?: boolean, radix?: number): Long {
+  /**
+   * @internal
+   * Returns a Long representation of the given string, written using the specified radix.
+   * This method throws an error, if the following both of the conditions are true:
+   *  - the string contains invalid characters for the given radix
+   *  - throwsError is true
+   * @param str - The textual representation of the Long
+   * @param unsigned - Whether unsigned or not, defaults to signed
+   * @param radix - The radix in which the text is written (2-36), defaults to 10
+   * @returns The corresponding Long value
+   */
+  static fromStringHelper(
+    str: string,
+    unsigned?: boolean,
+    radix?: number,
+    throwsError?: boolean
+  ): Long {
     if (str.length === 0) throw new BSONError('empty string');
     if (str === 'NaN' || str === 'Infinity' || str === '+Infinity' || str === '-Infinity')
       return Long.ZERO;
@@ -267,7 +289,6 @@ export class Long extends BSONValue {
       unsigned = !!unsigned;
     }
     radix = radix || 10;
-
     if (throwsError && !Long.validateStringCharacters(str, radix)) {
       throw new BSONError(`Input: ${str} contains invalid characters for radix: ${radix}`);
     }
@@ -276,7 +297,7 @@ export class Long extends BSONValue {
     let p;
     if ((p = str.indexOf('-')) > 0) throw new BSONError('interior hyphen');
     else if (p === 0) {
-      return Long.fromString(str.substring(1), unsigned, radix).neg();
+      return Long.fromStringHelper(str.substring(1), unsigned, radix).neg();
     }
 
     // Do several (8) digits each time through the loop, so as to
@@ -296,10 +317,20 @@ export class Long extends BSONValue {
       }
     }
     result.unsigned = unsigned;
-    
     return result;
   }
 
+  /**
+   * Returns a Long representation of the given string, written using the specified radix.
+   * If the string contains invalid characters for the given radix, this function will throw an error.
+   * @param str - The textual representation of the Long
+   * @param unsigned - Whether unsigned or not, defaults to signed
+   * @param radix - The radix in which the text is written (2-36), defaults to 10
+   * @returns The corresponding Long value
+   */
+  static fromStringStrict(str: string, unsigned?: boolean, radix?: number): Long {
+    return Long.fromStringHelper(str, unsigned, radix, true);
+  }
 
   /**
    * Returns a Long representation of the given string, written using the specified radix.
@@ -309,7 +340,7 @@ export class Long extends BSONValue {
    * @returns The corresponding Long value
    */
   static fromString(str: string, unsigned?: boolean, radix?: number): Long {
-    return Long.fromStringHelper(str, false, unsigned, radix);
+    return Long.fromStringHelper(str, false, radix, unsigned);
   }
 
   /**
