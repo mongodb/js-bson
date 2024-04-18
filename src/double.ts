@@ -62,7 +62,7 @@ export class Double extends BSONValue {
     if (value === '') {
       throw new BSONError(`Input is an empty string`);
     }
-    if (/[^-0-9.+e]/.test(value)) {
+    if (/[^-0-9.+eE]/.test(value)) {
       throw new BSONError(`Input: '${value}' is not in decimal or exponential notation`);
     }
     return new Double(coercedValue);

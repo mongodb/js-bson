@@ -226,7 +226,7 @@ describe('BSON Double Precision', function () {
       });
     });
 
-    describe('fromString', () => {
+    describe.only('fromString', () => {
       const acceptedInputs = [
         ['zero', '0', 0],
         ['non-leading zeros', '45000000', 45000000],
@@ -246,7 +246,8 @@ describe('BSON Double Precision', function () {
         ['exponentiation notation', '1.34e16', 1.34e16],
         ['exponentiation notation with negative exponent', '1.34e-16', 1.34e-16],
         ['exponentiation notation with explicit positive exponent', '1.34e+16', 1.34e16],
-        ['exponentiation notation with negative base', '-1.34e16', -1.34e16]
+        ['exponentiation notation with negative base', '-1.34e16', -1.34e16],
+        ['exponentiation notation with capital E', '-1.34E16', -1.34e16]
       ];
 
       const errorInputs = [
@@ -273,7 +274,7 @@ describe('BSON Double Precision', function () {
             if (value === 'NaN') {
               expect(isNaN(Double.fromString(value))).to.be.true;
             } else {
-              expect(Double.fromString(value).value).to.equal(expectedDouble);
+              expect(Double.fromString(value).value).to.deep.equal(expectedDouble);
             }
           });
         });
