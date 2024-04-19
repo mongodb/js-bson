@@ -3,6 +3,7 @@ import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
 import { type InspectFn, defaultInspect } from './parser/utils';
 import type { Timestamp } from './timestamp';
+import { removeLeadingZeros } from './utils/string_utils';
 
 interface LongWASMHelpers {
   /** Gets the high bits of the last operation performed */
@@ -261,16 +262,16 @@ export class Long extends BSONValue {
       const validCharRangeEnd = String.fromCharCode('a'.charCodeAt(0) + (radix - 11));
       regexInputString = `[^-0-9+(a-${validCharRangeEnd})]`;
     }
-    const regex = new RegExp(regexInputString, '\i');
+    const regex = new RegExp(regexInputString, 'i');
     return regex.test(str) ? false : str;
   }
 
   /**
    * @internal
    * Returns a Long representation of the given string, written using the specified radix.
-   * This method throws an error, if the following both of the conditions are true:
+   * Throws an error if `throwsError` is set to true and any of the following conditions are true:
    *  - the string contains invalid characters for the given radix
-   *  - throwsError is true
+   *  - the string contains whitespace
    * @param str - The textual representation of the Long
    * @param unsigned - Whether unsigned or not, defaults to signed
    * @param radix - The radix in which the text is written (2-36), defaults to 10
@@ -293,15 +294,20 @@ export class Long extends BSONValue {
       unsigned = !!unsigned;
     }
     radix = radix || 10;
-    if (throwsError && !Long.validateStringCharacters(str, radix)) {
-      throw new BSONError(`Input: ${str} contains invalid characters for radix: ${radix}`);
-    }
+
     if (radix < 2 || 36 < radix) throw new BSONError('radix');
+
+    if (throwsError && !Long.validateStringCharacters(str, radix)) {
+      throw new BSONError(`Input: '${str}' contains invalid characters for radix: ${radix}`);
+    }
+    if (throwsError && str.trim() !== str) {
+      throw new BSONError(`Input: '${str}' contains whitespace.`);
+    }
 
     let p;
     if ((p = str.indexOf('-')) > 0) throw new BSONError('interior hyphen');
     else if (p === 0) {
-      return Long.fromStringHelper(str.substring(1), unsigned, radix).neg();
+      return Long.fromStringHelper(str.substring(1), unsigned, radix, throwsError).neg();
     }
 
     // Do several (8) digits each time through the loop, so as to
@@ -325,16 +331,25 @@ export class Long extends BSONValue {
   }
 
   /**
-   * @internal - TODO(NODE-XXXX): fromStrictString throws on overflow
    * Returns a Long representation of the given string, written using the specified radix.
-   * If the string contains invalid characters for the given radix, this function will throw an error.
+   * Throws an error if any of the following conditions are true:
+   * - the string contains invalid characters for the given radix
+   * - the string contains whitespace
+   * - the value the string represents is too large or too small to be a Long
    * @param str - The textual representation of the Long
    * @param unsigned - Whether unsigned or not, defaults to signed
    * @param radix - The radix in which the text is written (2-36), defaults to 10
    * @returns The corresponding Long value
    */
   static fromStringStrict(str: string, unsigned?: boolean, radix?: number): Long {
-    return Long.fromStringHelper(str, unsigned, radix, true);
+    // remove leading zeros (for later string comparison and to make math faster)
+    const cleanedStr = removeLeadingZeros(str);
+    // doing this check outside of recursive function so cleanedStr value is consistent
+    const result = Long.fromStringHelper(cleanedStr, unsigned, radix, true);
+    if (result.toString(radix).toLowerCase() !== cleanedStr.toLowerCase()) {
+      throw new BSONError(`Input: ${str} is not representable as a Long`);
+    }
+    return result;
   }
 
   /**

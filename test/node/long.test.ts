@@ -164,32 +164,59 @@ describe('Long', function () {
     });
   });
 
-  describe.only('static fromStringStrict()', function () {
+  describe('static fromStringStrict()', function () {
     const successInputs = [
-      ['basic no alphabet low radix', '1236', 8],
-      ['radix does allow given alphabet letter', 'eEe', 15],
-      ['hexadecimal letters', '126073efbcdADEF', 16],
-      ['negative hexadecimal letters', '-126073efbcdADEF', 16]
+      ['basic no alphabet low radix', '1236', true, 8],
+      ['negative basic no alphabet low radix', '-1236', false, 8],
+      ['valid upper and lower case letters in string with radix > 10', 'eEe', true, 15],
+      ['hexadecimal letters', '126073efbcdADEF', true, 16],
+      ['negative hexadecimal letters', '-1267efbcdDEF', false, 16],
+      ['negative leading zeros', '-00000032', false, 15, '-32'],
+      ['leading zeros', '00000032', false, 15, '32'],
+      ['explicit positive leading zeros', '+00000032', false, 15, '32'],
+      ['max unsigned binary input', Long.MAX_UNSIGNED_VALUE.toString(2), true, 2],
+      ['max unsigned decimal input', Long.MAX_UNSIGNED_VALUE.toString(10), true, 10],
+      ['max unsigned hex input', Long.MAX_UNSIGNED_VALUE.toString(16), true, 16],
+      ['max signed binary input', Long.MAX_VALUE.toString(2), false, 2],
+      ['max signed decimal input', Long.MAX_VALUE.toString(10), false, 10],
+      ['max signed hex input', Long.MAX_VALUE.toString(16), false, 16],
+      ['min signed binary input', Long.MIN_VALUE.toString(2), false, 2],
+      ['min signed decimal input', Long.MIN_VALUE.toString(10), false, 10],
+      ['min signed hex input', Long.MIN_VALUE.toString(16), false, 16],
+      ['signed zero', '0', false, 10],
+      ['unsigned zero', '0', true, 10]
     ];
 
     const failureInputs = [
-      ['empty string','', 2],
-      ['non a-z or numeric string', '~~', 36],
-      ['alphabet in radix < 10', 'a', 4],
-      ['radix does not allow all alphabet letters', 'eee', 14]
+      ['empty string', '', true, 2],
+      ['invalid numbers in binary string', '234', true, 2],
+      ['non a-z or numeric string', '~~', true, 36],
+      ['alphabet in radix < 10', 'a', true, 9],
+      ['radix does not allow all alphabet letters', 'eee', 14],
+      ['over max unsigned binary input', Long.MAX_UNSIGNED_VALUE.toString(2) + '1', true, 2],
+      ['over max unsigned decimal input', Long.MAX_UNSIGNED_VALUE.toString(10) + '1', true, 10],
+      ['over max unsigned hex input', Long.MAX_UNSIGNED_VALUE.toString(16) + '1', true, 16],
+      ['over max signed binary input', Long.MAX_VALUE.toString(2) + '1', false, 2],
+      ['over max signed decimal input', Long.MAX_VALUE.toString(10) + '1', false, 10],
+      ['over max signed hex input', Long.MAX_VALUE.toString(16) + '1', false, 16],
+      ['under min signed binary input', Long.MIN_VALUE.toString(2) + '1', false, 2],
+      ['under min signed decimal input', Long.MIN_VALUE.toString(10) + '1', false, 10],
+      ['under min signed hex input', Long.MIN_VALUE.toString(16) + '1', false, 16]
     ];
 
-    for (const [testName, str, radix] of successInputs) {
+    for (const [testName, str, unsigned, radix, expectedStr] of successInputs) {
       context(`when the input is ${testName}`, () => {
         it(`should return a input string`, () => {
-          expect(Long.fromStringStrict(str, true, radix).toString(radix)).to.equal(str.toLowerCase());
+          expect(Long.fromStringStrict(str, unsigned, radix).toString(radix)).to.equal(
+            expectedStr ?? str.toLowerCase()
+          );
         });
       });
     }
-    for (const [testName, str, radix] of failureInputs) {
+    for (const [testName, str, unsigned, radix] of failureInputs) {
       context(`when the input is ${testName}`, () => {
-        it(`should return false`, () => {
-          expect(() => Long.fromStringStrict(str, true, radix)).to.throw(BSONError);
+        it(`should throw BSONError`, () => {
+          expect(() => Long.fromStringStrict(str, unsigned, radix)).to.throw(BSONError);
         });
       });
     }
@@ -197,13 +224,13 @@ describe('Long', function () {
 
   describe('static validateStringCharacters()', function () {
     const successInputs = [
-      ['multiple decimal points', '..', 30],
-      ['radix does not allow given alphabet letter', 'eEe', 15],
-      ['empty string','', 2], 
+      ['radix does allows given alphabet letter', 'eEe', 15],
+      ['empty string', '', 2],
       ['all possible hexadecimal characters', '12efabc689873dADCDEF', 16]
     ];
 
     const failureInputs = [
+      ['multiple decimal points', '..', 30],
       ['non a-z or numeric string', '~~', 36],
       ['alphabet in radix < 10', 'a', 4],
       ['radix does not allow all alphabet letters', 'eee', 14]
