@@ -347,7 +347,9 @@ export class Long extends BSONValue {
     // doing this check outside of recursive function so cleanedStr value is consistent
     const result = Long.fromStringHelper(cleanedStr, unsigned, radix, true);
     if (result.toString(radix).toLowerCase() !== cleanedStr.toLowerCase()) {
-      throw new BSONError(`Input: ${str} is not representable as a Long`);
+      throw new BSONError(
+        `Input: ${str} is not representable as ${result.unsigned ? 'an unsigned' : 'a signed'} 64-bit Long with radix: ${radix}`
+      );
     }
     return result;
   }
