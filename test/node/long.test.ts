@@ -201,7 +201,8 @@ describe('Long', function () {
       ['over max signed hex input', Long.MAX_VALUE.toString(16) + '1', false, 16],
       ['under min signed binary input', Long.MIN_VALUE.toString(2) + '1', false, 2],
       ['under min signed decimal input', Long.MIN_VALUE.toString(10) + '1', false, 10],
-      ['under min signed hex input', Long.MIN_VALUE.toString(16) + '1', false, 16]
+      ['under min signed hex input', Long.MIN_VALUE.toString(16) + '1', false, 16],
+      ['string with whitespace', '      3503a  ', false, 11]
     ];
 
     for (const [testName, str, unsigned, radix, expectedStr] of successInputs) {
