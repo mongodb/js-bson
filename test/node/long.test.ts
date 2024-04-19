@@ -207,7 +207,7 @@ describe('Long', function () {
 
     for (const [testName, str, unsigned, radix, expectedStr] of successInputs) {
       context(`when the input is ${testName}`, () => {
-        it(`should return a input string`, () => {
+        it(`should return a Long represenation of the input`, () => {
           expect(Long.fromStringStrict(str, unsigned, radix).toString(radix)).to.equal(
             expectedStr ?? str.toLowerCase()
           );
