@@ -276,7 +276,7 @@ export class Long extends BSONValue {
     str: string,
     validateStringCharacters: boolean,
     unsigned?: boolean,
-    radix?: number,
+    radix?: number
   ): Long {
     if (str.length === 0) throw new BSONError('empty string');
     if (str === 'NaN' || str === 'Infinity' || str === '+Infinity' || str === '-Infinity')
