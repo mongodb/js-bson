@@ -139,7 +139,7 @@ export const nodeJsByteUtils = {
       // TODO(NODE-4930): Insufficiently strict BSON UTF8 validation
       for (let i = 0; i < string.length; i++) {
         if (string.charCodeAt(i) === 0xfffd) {
-          if (!validateUtf8(buffer, start, end)) {
+          if (!validateUtf8(buffer, start, end, fatal)) {
             throw new BSONError('Invalid UTF-8 string in BSON document');
           }
           break;

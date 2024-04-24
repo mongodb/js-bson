@@ -14,7 +14,7 @@ export class RequireVendor {
    * @returns {{ code: string; map: import('magic-string').SourceMap }}
    */
   transform(code, id) {
-    if (!id.includes('web_byte_utils')) {
+    if (!id.includes('validate_utf8')) {
       return;
     }
 

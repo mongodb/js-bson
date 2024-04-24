@@ -1,13 +1,26 @@
-const FIRST_BIT = 0x80;
-const FIRST_TWO_BITS = 0xc0;
-const FIRST_THREE_BITS = 0xe0;
-const FIRST_FOUR_BITS = 0xf0;
-const FIRST_FIVE_BITS = 0xf8;
+import { BSONError } from './error';
 
-const TWO_BIT_CHAR = 0xc0;
-const THREE_BIT_CHAR = 0xe0;
-const FOUR_BIT_CHAR = 0xf0;
-const CONTINUING_CHAR = 0x80;
+type TextDecoder = {
+  readonly encoding: string;
+  readonly fatal: boolean;
+  readonly ignoreBOM: boolean;
+  decode(input?: Uint8Array): string;
+};
+type TextDecoderConstructor = {
+  new (label: 'utf8', options: { fatal: boolean; ignoreBOM?: boolean }): TextDecoder;
+};
+
+type TextEncoder = {
+  readonly encoding: string;
+  encode(input?: string): Uint8Array;
+};
+type TextEncoderConstructor = {
+  new (): TextEncoder;
+};
+
+// Node byte utils global
+declare const TextDecoder: TextDecoderConstructor;
+declare const TextEncoder: TextEncoderConstructor;
 
 /**
  * Determines if the passed in bytes are valid utf8
@@ -16,32 +29,17 @@ const CONTINUING_CHAR = 0x80;
  * @param end - The index to end validating
  */
 export function validateUtf8(
-  bytes: { [index: number]: number },
+  buffer: Uint8Array,
   start: number,
-  end: number
-): boolean {
-  let continuation = 0;
-
-  for (let i = start; i < end; i += 1) {
-    const byte = bytes[i];
-
-    if (continuation) {
-      if ((byte & FIRST_TWO_BITS) !== CONTINUING_CHAR) {
-        return false;
-      }
-      continuation -= 1;
-    } else if (byte & FIRST_BIT) {
-      if ((byte & FIRST_THREE_BITS) === TWO_BIT_CHAR) {
-        continuation = 1;
-      } else if ((byte & FIRST_FOUR_BITS) === THREE_BIT_CHAR) {
-        continuation = 2;
-      } else if ((byte & FIRST_FIVE_BITS) === FOUR_BIT_CHAR) {
-        continuation = 3;
-      } else {
-        return false;
-      }
+  end: number,
+  fatal: boolean
+): string {
+  if (fatal) {
+    try {
+      return new TextDecoder('utf8', { fatal }).decode(buffer.slice(start, end));
+    } catch (cause) {
+      throw new BSONError('Invalid UTF-8 string in BSON document', { cause });
     }
   }
-
-  return !continuation;
+  return new TextDecoder('utf8', { fatal }).decode(buffer.slice(start, end));
 }
