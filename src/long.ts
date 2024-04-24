@@ -258,36 +258,17 @@ export class Long extends BSONValue {
    * @param radix - The radix in which the text is written (2-36), defaults to 10
    * @returns The corresponding Long value
    */
-  private static _fromString(
-    str: string,
-    validateStringCharacters: boolean,
-    unsigned?: boolean,
-    radix?: number
-  ): Long {
+  private static _fromString(str: string, unsigned: boolean, radix: number): Long {
     if (str.length === 0) throw new BSONError('empty string');
     if (str === 'NaN' || str === 'Infinity' || str === '+Infinity' || str === '-Infinity')
       return Long.ZERO;
-    if (typeof unsigned === 'number') {
-      // For goog.math.long compatibility
-      (radix = unsigned), (unsigned = false);
-    } else {
-      unsigned = !!unsigned;
-    }
-    radix = radix || 10;
 
     if (radix < 2 || 36 < radix) throw new BSONError('radix');
 
     let p;
     if ((p = str.indexOf('-')) > 0) throw new BSONError('interior hyphen');
     else if (p === 0) {
-      return Long._fromString(str.substring(1), validateStringCharacters, unsigned, radix).neg();
-    }
-
-    if (str.trim() !== str) {
-      throw new BSONError(`Input: '${str}' contains leading and/or trailing whitespace`);
-    }
-    if (!StringUtils.validateStringCharacters(str, radix)) {
-      throw new BSONError(`Input: '${str}' contains invalid characters for radix: ${radix}`);
+      return Long._fromString(str.substring(1), unsigned, radix).neg();
     }
 
     // Do several (8) digits each time through the loop, so as to
@@ -331,12 +312,20 @@ export class Long extends BSONValue {
     } else {
       unsigned = !!unsigned;
     }
+    radix = radix || 10;
+
+    if (str.trim() !== str) {
+      throw new BSONError(`Input: '${str}' contains leading and/or trailing whitespace`);
+    }
+    if (!StringUtils.validateStringCharacters(str, radix)) {
+      throw new BSONError(`Input: '${str}' contains invalid characters for radix: ${radix}`);
+    }
 
     // remove leading zeros (for later string comparison and to make math faster)
     const cleanedStr = StringUtils.removeLeadingZerosandExplicitPlus(str);
 
     // check roundtrip result
-    const result = Long._fromString(cleanedStr, true, unsigned, radix);
+    const result = Long._fromString(cleanedStr, unsigned, radix);
     if (result.toString(radix).toLowerCase() !== cleanedStr.toLowerCase()) {
       throw new BSONError(
         `Input: ${str} is not representable as ${result.unsigned ? 'an unsigned' : 'a signed'} 64-bit Long ${radix != null ? `with radix: ${radix}` : ''}`
@@ -353,7 +342,14 @@ export class Long extends BSONValue {
    * @returns The corresponding Long value
    */
   static fromString(str: string, unsigned?: boolean, radix?: number): Long {
-    return Long._fromString(str, true, unsigned, radix);
+    if (typeof unsigned === 'number') {
+      // For goog.math.long compatibility
+      (radix = unsigned), (unsigned = false);
+    } else {
+      unsigned = !!unsigned;
+    }
+    radix = radix || 10;
+    return Long._fromString(str, unsigned, radix);
   }
 
   /**
