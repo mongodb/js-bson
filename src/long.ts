@@ -3,7 +3,7 @@ import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
 import { type InspectFn, defaultInspect } from './parser/utils';
 import type { Timestamp } from './timestamp';
-import { removeLeadingZeros } from './utils/string_utils';
+import * as StringUtils from './utils/string_utils';
 
 interface LongWASMHelpers {
   /** Gets the high bits of the last operation performed */
@@ -248,20 +248,6 @@ export class Long extends BSONValue {
 
   /**
    * @internal
-   * Returns false for an string that contains invalid characters for its radix, else returns the original string.
-   * @param str - The textual representation of the Long
-   * @param radix - The radix in which the text is written (2-36), defaults to 10
-   */
-  private static validateStringCharacters(str: string, radix?: number): false | string {
-    radix = radix ?? 10;
-    const validCharacters = '0123456789abcdefghijklmnopqrstuvwxyz'.slice(0, radix);
-    // regex is case insensitive and checks that each character within the string is one of the validCharacters
-    const regex = new RegExp(`[^-+${validCharacters}]`, 'i');
-    return regex.test(str) ? false : str;
-  }
-
-  /**
-   * @internal
    * Returns a Long representation of the given string, written using the specified radix.
    * Throws an error if `throwsError` is set to true and any of the following conditions are true:
    *  - the string contains invalid characters for the given radix
@@ -291,17 +277,17 @@ export class Long extends BSONValue {
 
     if (radix < 2 || 36 < radix) throw new BSONError('radix');
 
-    if (validateStringCharacters && !Long.validateStringCharacters(str, radix)) {
-      throw new BSONError(`Input: '${str}' contains invalid characters for radix: ${radix}`);
-    }
-    if (validateStringCharacters && str.trim() !== str) {
-      throw new BSONError(`Input: '${str}' contains leading and/or trailing whitespace.`);
-    }
-
     let p;
     if ((p = str.indexOf('-')) > 0) throw new BSONError('interior hyphen');
     else if (p === 0) {
       return Long._fromString(str.substring(1), validateStringCharacters, unsigned, radix).neg();
+    }
+
+    if (str.trim() !== str) {
+      throw new BSONError(`Input: '${str}' contains leading and/or trailing whitespace`);
+    }
+    if (!StringUtils.validateStringCharacters(str, radix)) {
+      throw new BSONError(`Input: '${str}' contains invalid characters for radix: ${radix}`);
     }
 
     // Do several (8) digits each time through the loop, so as to
@@ -336,13 +322,17 @@ export class Long extends BSONValue {
    * @returns The corresponding Long value
    */
   static fromStringStrict(str: string, unsigned?: boolean, radix?: number): Long {
+    if (str === 'NaN' || str === 'Infinity' || str === '+Infinity' || str === '-Infinity')
+      return Long.ZERO;
+
     // remove leading zeros (for later string comparison and to make math faster)
-    const cleanedStr = removeLeadingZeros(str);
-    // doing this check outside of recursive function so cleanedStr value is consistent
+    const cleanedStr = StringUtils.removeLeadingZerosandExplicitPlus(str);
+
+    // check roundtrip result
     const result = Long._fromString(cleanedStr, true, unsigned, radix);
     if (result.toString(radix).toLowerCase() !== cleanedStr.toLowerCase()) {
       throw new BSONError(
-        `Input: ${str} is not representable as ${result.unsigned ? 'an unsigned' : 'a signed'} 64-bit Long with radix: ${radix}`
+        `Input: ${str} is not representable as ${result.unsigned ? 'an unsigned' : 'a signed'} 64-bit Long ${radix != null ? `with radix: ${radix}` : ''}`
       );
     }
     return result;
@@ -356,7 +346,7 @@ export class Long extends BSONValue {
    * @returns The corresponding Long value
    */
   static fromString(str: string, unsigned?: boolean, radix?: number): Long {
-    return Long._fromString(str, false, unsigned, radix);
+    return Long._fromString(str, true, unsigned, radix);
   }
 
   /**

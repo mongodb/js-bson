@@ -3,7 +3,7 @@ import { BSON_INT32_MAX, BSON_INT32_MIN } from './constants';
 import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
 import { type InspectFn, defaultInspect } from './parser/utils';
-import { removeLeadingZeros } from './utils/string_utils';
+import { removeLeadingZerosandExplicitPlus } from './utils/string_utils';
 
 /** @public */
 export interface Int32Extended {
@@ -49,7 +49,7 @@ export class Int32 extends BSONValue {
    * @param value - the string we want to represent as an int32.
    */
   static fromString(value: string): Int32 {
-    const cleanedValue = removeLeadingZeros(value);
+    const cleanedValue = removeLeadingZerosandExplicitPlus(value);
 
     const coercedValue = Number(value);
 

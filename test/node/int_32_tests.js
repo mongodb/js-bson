@@ -108,7 +108,9 @@ describe('Int32', function () {
       ['a string with zero with leading zeros', '000000', 0],
       ['a string with positive leading zeros', '000000867', 867],
       ['a string with explicity positive leading zeros', '+000000867', 867],
-      ['a string with negative leading zeros', '-00007', -7]
+      ['a string with negative leading zeros', '-00007', -7],
+      ['a string with explicit positive zeros', '+000000', 0],
+      ['a string explicit positive no leading zeros', '+32', 32]
     ];
     const errorInputs = [
       ['Int32.max + 1', '2147483648', 'larger than the maximum value for Int32'],

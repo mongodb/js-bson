@@ -189,8 +189,13 @@ describe('Long', function () {
       ['min signed binary input', Long.MIN_VALUE.toString(2), false, 2],
       ['min signed decimal input', Long.MIN_VALUE.toString(10), false, 10],
       ['min signed hex input', Long.MIN_VALUE.toString(16), false, 16],
-      ['signed zero', '0', false, 10],
-      ['unsigned zero', '0', true, 10]
+      ['signed zeros', '+000000', false, 10, '0'],
+      ['unsigned zero', '0', true, 10],
+      ['explicit positive no leading zeros', '+32', true, 10, '32'],
+      ['Infinity', 'Infinity', false, 21, '0'],
+      ['-Infinity', '-Infinity', false, 13, '0'],
+      ['+Infinity', '+Infinity', false, 13, '0'],
+      ['NaN', 'NaN', false, 11, '0']
     ];
 
     const failureInputs: [name: string, input: string, unsigned: boolean, radix: number][] = [
@@ -208,12 +213,17 @@ describe('Long', function () {
       ['under min signed binary input', Long.MIN_VALUE.toString(2) + '1', false, 2],
       ['under min signed decimal input', Long.MIN_VALUE.toString(10) + '1', false, 10],
       ['under min signed hex input', Long.MIN_VALUE.toString(16) + '1', false, 16],
-      ['string with whitespace', '      3503a  ', false, 11]
+      ['string with whitespace', '      3503a  ', false, 11],
+      ['negative zero unsigned', '-0', true, 9],
+      ['negative zero signed', '-0', false, 13],
+      ['radix 1', '12', false, 1],
+      ['negative radix', '12', false, -4],
+      ['radix over 36', '12', false, 37]
     ];
 
     for (const [testName, str, unsigned, radix, expectedStr] of successInputs) {
       context(`when the input is ${testName}`, () => {
-        it(`should return a Long represenation of the input`, () => {
+        it(`should return a Long representation of the input`, () => {
           expect(Long.fromStringStrict(str, unsigned, radix).toString(radix)).to.equal(
             expectedStr ?? str.toLowerCase()
           );
@@ -224,38 +234,6 @@ describe('Long', function () {
       context(`when the input is ${testName}`, () => {
         it(`should throw BSONError`, () => {
           expect(() => Long.fromStringStrict(str, unsigned, radix)).to.throw(BSONError);
-        });
-      });
-    }
-  });
-
-  describe('static validateStringCharacters()', function () {
-    const successInputs = [
-      ['radix does allows given alphabet letter', 'eEe', 15],
-      ['empty string', '', 2],
-      ['all possible hexadecimal characters', '12efabc689873dADCDEF', 16],
-      ['leading zeros', '0000000004567e', 16]
-    ];
-
-    const failureInputs = [
-      ['multiple decimal points', '..', 30],
-      ['non a-z or numeric string', '~~', 36],
-      ['alphabet in radix < 10', 'a', 4],
-      ['radix does not allow all alphabet letters', 'eee', 14]
-    ];
-
-    for (const [testName, str, radix] of successInputs) {
-      context(`when the input is ${testName}`, () => {
-        it(`should return a input string`, () => {
-          expect(Long.validateStringCharacters(str, radix)).to.equal(str);
-        });
-      });
-    }
-
-    for (const [testName, str, radix] of failureInputs) {
-      context(`when the input is ${testName}`, () => {
-        it(`should return false`, () => {
-          expect(Long.validateStringCharacters(str, radix)).to.equal(false);
         });
       });
     }
