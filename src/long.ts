@@ -325,6 +325,13 @@ export class Long extends BSONValue {
     if (str === 'NaN' || str === 'Infinity' || str === '+Infinity' || str === '-Infinity')
       return Long.ZERO;
 
+    if (typeof unsigned === 'number') {
+      // For goog.math.long compatibility
+      (radix = unsigned), (unsigned = false);
+    } else {
+      unsigned = !!unsigned;
+    }
+
     // remove leading zeros (for later string comparison and to make math faster)
     const cleanedStr = StringUtils.removeLeadingZerosandExplicitPlus(str);
 
