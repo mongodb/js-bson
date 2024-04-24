@@ -253,7 +253,6 @@ export class Long extends BSONValue {
    *  - the string contains invalid characters for the given radix
    *  - the string contains whitespace
    * @param str - The textual representation of the Long
-   * @param validateStringCharacters - Whether or not invalid characters should throw an error
    * @param unsigned - Whether unsigned or not, defaults to signed
    * @param radix - The radix in which the text is written (2-36), defaults to 10
    * @returns The corresponding Long value
