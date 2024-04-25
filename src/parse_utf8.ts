@@ -10,18 +10,8 @@ type TextDecoderConstructor = {
   new (label: 'utf8', options: { fatal: boolean; ignoreBOM?: boolean }): TextDecoder;
 };
 
-type TextEncoder = {
-  readonly encoding: string;
-  encode(input?: string): Uint8Array;
-};
-type TextEncoderConstructor = {
-  new (): TextEncoder;
-};
-
-// validate utf8 globals
+// parse utf8 globals
 declare const TextDecoder: TextDecoderConstructor;
-declare const TextEncoder: TextEncoderConstructor;
-
 let TextDecoderFatal: TextDecoder;
 let TextDecoderNonFatal: TextDecoder;
 
@@ -31,20 +21,15 @@ let TextDecoderNonFatal: TextDecoder;
  * @param start - The index to start validating
  * @param end - The index to end validating
  */
-export function validateUtf8(
-  buffer: Uint8Array,
-  start: number,
-  end: number,
-  fatal: boolean
-): string {
+export function parseUtf8(buffer: Uint8Array, start: number, end: number, fatal: boolean): string {
   if (fatal) {
     try {
       TextDecoderFatal ??= new TextDecoder('utf8', { fatal: true });
-      return TextDecoderFatal.decode(buffer.slice(start, end));
+      return TextDecoderFatal.decode(buffer.subarray(start, end));
     } catch (cause) {
       throw new BSONError('Invalid UTF-8 string in BSON document', { cause });
     }
   }
   TextDecoderNonFatal ??= new TextDecoder('utf8', { fatal: false });
-  return TextDecoderNonFatal.decode(buffer.slice(start, end));
+  return TextDecoderNonFatal.decode(buffer.subarray(start, end));
 }

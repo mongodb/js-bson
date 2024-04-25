@@ -4,8 +4,8 @@ const REQUIRE_WEB_UTILS_POLYFILLS =
   `const { TextEncoder } = require('../vendor/text-encoding');
 const { encode: btoa, decode: atob } = require('../vendor/base64');\n`
 
-const REQUIRE_VALIDATE_UTF8_POLYFILLS = 
-  `const { TextDecoder } = require('../vendor/text-encoding');`;
+const REQUIRE_PARSE_UTF8_POLYFILLS = 
+  `const { TextDecoder } = require('../vendor/text-encoding');\n`;
 
 export class RequireVendor {
   /**
@@ -17,10 +17,10 @@ export class RequireVendor {
    * @returns {{ code: string; map: import('magic-string').SourceMap }}
    */
   transform(code, id) {
-    if (id.includes('validate_utf8')) {
+    if (id.includes('parse_utf8')) {
       // MagicString lets us edit the source code and still generate an accurate source map
       const magicString = new MagicString(code);
-      magicString.prepend(REQUIRE_VALIDATE_UTF8_POLYFILLS);
+      magicString.prepend(REQUIRE_PARSE_UTF8_POLYFILLS);
 
       return {
         code: magicString.toString(),

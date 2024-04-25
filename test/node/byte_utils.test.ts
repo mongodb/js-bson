@@ -531,49 +531,70 @@ const randomBytesTests: ByteUtilTest<'randomBytes'>[] = [
   }
 ];
 
-// extra error cases copied from Web platform specs
-const toUTF8ErrorCaseTests = [
-  { input: [0xff], name: 'invalid code' },
-  { input: [0xc0], name: 'ends early' },
-  { input: [0xe0], name: 'ends early 2' },
-  { input: [0xc0, 0x00], name: 'invalid trail' },
-  { input: [0xc0, 0xc0], name: 'invalid trail 2' },
-  { input: [0xe0, 0x00], name: 'invalid trail 3' },
-  { input: [0xe0, 0xc0], name: 'invalid trail 4' },
-  { input: [0xe0, 0x80, 0x00], name: 'invalid trail 5' },
-  { input: [0xe0, 0x80, 0xc0], name: 'invalid trail 6' },
-  { input: [0xfc, 0x80, 0x80, 0x80, 0x80, 0x80], name: '> 0x10ffff' },
-  { input: [0xfe, 0x80, 0x80, 0x80, 0x80, 0x80], name: 'obsolete lead byte' },
+// extra error cases copied from wpt/encoding/textdecoder-fatal.any.js
+// commit sha: 7c9f867
+const toUTF8WebPlatformSpecTests = [
+  { encoding: 'utf-8', input: [0xff], name: 'invalid code' },
+  { encoding: 'utf-8', input: [0xc0], name: 'ends early' },
+  { encoding: 'utf-8', input: [0xe0], name: 'ends early 2' },
+  { encoding: 'utf-8', input: [0xc0, 0x00], name: 'invalid trail' },
+  { encoding: 'utf-8', input: [0xc0, 0xc0], name: 'invalid trail 2' },
+  { encoding: 'utf-8', input: [0xe0, 0x00], name: 'invalid trail 3' },
+  { encoding: 'utf-8', input: [0xe0, 0xc0], name: 'invalid trail 4' },
+  { encoding: 'utf-8', input: [0xe0, 0x80, 0x00], name: 'invalid trail 5' },
+  { encoding: 'utf-8', input: [0xe0, 0x80, 0xc0], name: 'invalid trail 6' },
+  { encoding: 'utf-8', input: [0xfc, 0x80, 0x80, 0x80, 0x80, 0x80], name: '> 0x10ffff' },
+  { encoding: 'utf-8', input: [0xfe, 0x80, 0x80, 0x80, 0x80, 0x80], name: 'obsolete lead byte' },
 
   // Overlong encodings
-  { input: [0xc0, 0x80], name: 'overlong U+0000 - 2 bytes' },
-  { input: [0xe0, 0x80, 0x80], name: 'overlong U+0000 - 3 bytes' },
-  { input: [0xf0, 0x80, 0x80, 0x80], name: 'overlong U+0000 - 4 bytes' },
-  { input: [0xf8, 0x80, 0x80, 0x80, 0x80], name: 'overlong U+0000 - 5 bytes' },
-  { input: [0xfc, 0x80, 0x80, 0x80, 0x80, 0x80], name: 'overlong U+0000 - 6 bytes' },
+  { encoding: 'utf-8', input: [0xc0, 0x80], name: 'overlong U+0000 - 2 bytes' },
+  { encoding: 'utf-8', input: [0xe0, 0x80, 0x80], name: 'overlong U+0000 - 3 bytes' },
+  { encoding: 'utf-8', input: [0xf0, 0x80, 0x80, 0x80], name: 'overlong U+0000 - 4 bytes' },
+  { encoding: 'utf-8', input: [0xf8, 0x80, 0x80, 0x80, 0x80], name: 'overlong U+0000 - 5 bytes' },
+  {
+    encoding: 'utf-8',
+    input: [0xfc, 0x80, 0x80, 0x80, 0x80, 0x80],
+    name: 'overlong U+0000 - 6 bytes'
+  },
 
-  { input: [0xc1, 0xbf], name: 'overlong U+007f - 2 bytes' },
-  { input: [0xe0, 0x81, 0xbf], name: 'overlong U+007f - 3 bytes' },
-  { input: [0xf0, 0x80, 0x81, 0xbf], name: 'overlong U+007f - 4 bytes' },
-  { input: [0xf8, 0x80, 0x80, 0x81, 0xbf], name: 'overlong U+007f - 5 bytes' },
-  { input: [0xfc, 0x80, 0x80, 0x80, 0x81, 0xbf], name: 'overlong U+007f - 6 bytes' },
+  { encoding: 'utf-8', input: [0xc1, 0xbf], name: 'overlong U+007f - 2 bytes' },
+  { encoding: 'utf-8', input: [0xe0, 0x81, 0xbf], name: 'overlong U+007f - 3 bytes' },
+  { encoding: 'utf-8', input: [0xf0, 0x80, 0x81, 0xbf], name: 'overlong U+007f - 4 bytes' },
+  { encoding: 'utf-8', input: [0xf8, 0x80, 0x80, 0x81, 0xbf], name: 'overlong U+007f - 5 bytes' },
+  {
+    encoding: 'utf-8',
+    input: [0xfc, 0x80, 0x80, 0x80, 0x81, 0xbf],
+    name: 'overlong U+007f - 6 bytes'
+  },
 
-  { input: [0xe0, 0x9f, 0xbf], name: 'overlong U+07ff - 3 bytes' },
-  { input: [0xf0, 0x80, 0x9f, 0xbf], name: 'overlong U+07ff - 4 bytes' },
-  { input: [0xf8, 0x80, 0x80, 0x9f, 0xbf], name: 'overlong U+07ff - 5 bytes' },
-  { input: [0xfc, 0x80, 0x80, 0x80, 0x9f, 0xbf], name: 'overlong U+07ff - 6 bytes' },
+  { encoding: 'utf-8', input: [0xe0, 0x9f, 0xbf], name: 'overlong U+07ff - 3 bytes' },
+  { encoding: 'utf-8', input: [0xf0, 0x80, 0x9f, 0xbf], name: 'overlong U+07ff - 4 bytes' },
+  { encoding: 'utf-8', input: [0xf8, 0x80, 0x80, 0x9f, 0xbf], name: 'overlong U+07ff - 5 bytes' },
+  {
+    encoding: 'utf-8',
+    input: [0xfc, 0x80, 0x80, 0x80, 0x9f, 0xbf],
+    name: 'overlong U+07ff - 6 bytes'
+  },
 
-  { input: [0xf0, 0x8f, 0xbf, 0xbf], name: 'overlong U+ffff - 4 bytes' },
-  { input: [0xf8, 0x80, 0x8f, 0xbf, 0xbf], name: 'overlong U+ffff - 5 bytes' },
-  { input: [0xfc, 0x80, 0x80, 0x8f, 0xbf, 0xbf], name: 'overlong U+ffff - 6 bytes' },
+  { encoding: 'utf-8', input: [0xf0, 0x8f, 0xbf, 0xbf], name: 'overlong U+ffff - 4 bytes' },
+  { encoding: 'utf-8', input: [0xf8, 0x80, 0x8f, 0xbf, 0xbf], name: 'overlong U+ffff - 5 bytes' },
+  {
+    encoding: 'utf-8',
+    input: [0xfc, 0x80, 0x80, 0x8f, 0xbf, 0xbf],
+    name: 'overlong U+ffff - 6 bytes'
+  },
 
-  { input: [0xf8, 0x84, 0x8f, 0xbf, 0xbf], name: 'overlong U+10ffff - 5 bytes' },
-  { input: [0xfc, 0x80, 0x84, 0x8f, 0xbf, 0xbf], name: 'overlong U+10ffff - 6 bytes' },
+  { encoding: 'utf-8', input: [0xf8, 0x84, 0x8f, 0xbf, 0xbf], name: 'overlong U+10ffff - 5 bytes' },
+  {
+    encoding: 'utf-8',
+    input: [0xfc, 0x80, 0x84, 0x8f, 0xbf, 0xbf],
+    name: 'overlong U+10ffff - 6 bytes'
+  },
 
   // UTf-16 surrogates encoded as code points in UTf-8
-  { input: [0xed, 0xa0, 0x80], name: 'lead surrogate' },
-  { input: [0xed, 0xb0, 0x80], name: 'trail surrogate' },
-  { input: [0xed, 0xa0, 0x80, 0xed, 0xb0, 0x80], name: 'surrogate pair' }
+  { encoding: 'utf-8', input: [0xed, 0xa0, 0x80], name: 'lead surrogate' },
+  { encoding: 'utf-8', input: [0xed, 0xb0, 0x80], name: 'trail surrogate' },
+  { encoding: 'utf-8', input: [0xed, 0xa0, 0x80, 0xed, 0xb0, 0x80], name: 'surrogate pair' }
 ];
 
 const utils = new Map([
@@ -882,7 +903,7 @@ describe('ByteUtils', () => {
           });
         }
         if (utility === 'toUTF8')
-          for (const test of toUTF8ErrorCaseTests) {
+          for (const test of toUTF8WebPlatformSpecTests) {
             it(`throws error when fatal is set and provided ${test.name} as input`, () => {
               expect(() =>
                 byteUtils[utility](Uint8Array.from(test.input), 0, test.input.length, true)

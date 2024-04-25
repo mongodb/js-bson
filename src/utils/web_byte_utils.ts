@@ -1,6 +1,6 @@
 import { BSONError } from '../error';
 import { tryReadBasicLatin } from './latin';
-import { validateUtf8 } from '../validate_utf8';
+import { parseUtf8 } from '../parse_utf8';
 
 type TextDecoder = {
   readonly encoding: string;
@@ -180,7 +180,7 @@ export const webByteUtils = {
       return basicLatin;
     }
 
-    return validateUtf8(uint8array, start, end, fatal);
+    return parseUtf8(uint8array, start, end, fatal);
   },
 
   utf8ByteLength(input: string): number {

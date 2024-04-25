@@ -603,12 +603,7 @@ function deserializeObject(
       )
         throw new BSONError('bad string length in bson');
       // Namespace
-      const namespace = ByteUtils.toUTF8(
-        buffer,
-        index,
-        index + stringSize - 1,
-        validation != null && (validation.utf8 as boolean)
-      );
+      const namespace = ByteUtils.toUTF8(buffer, index, index + stringSize - 1, shouldValidateKey);
       // Update parse index position
       index = index + stringSize;
 
