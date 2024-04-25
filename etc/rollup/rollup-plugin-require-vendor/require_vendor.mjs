@@ -5,7 +5,7 @@ const REQUIRE_WEB_UTILS_POLYFILLS =
 const { encode: btoa, decode: atob } = require('../vendor/base64');\n`
 
 const REQUIRE_VALIDATE_UTF8_POLYFILLS = 
-  `const { TextEncoder } = require('../vendor/text-encoding');`;
+  `const { TextDecoder } = require('../vendor/text-encoding');`;
 
 export class RequireVendor {
   /**
