@@ -22,8 +22,8 @@ type TextEncoderConstructor = {
 declare const TextDecoder: TextDecoderConstructor;
 declare const TextEncoder: TextEncoderConstructor;
 
-const TextDecoderFatal: TextDecoder = new TextDecoder('utf8', { fatal: true });
-const TextDecoderNonFatal: TextDecoder = new TextDecoder('utf8', { fatal: false });
+let TextDecoderFatal: TextDecoder;
+let TextDecoderNonFatal: TextDecoder;
 
 /**
  * Determines if the passed in bytes are valid utf8
@@ -39,10 +39,12 @@ export function validateUtf8(
 ): string {
   if (fatal) {
     try {
+      TextDecoderFatal ??= new TextDecoder('utf8', { fatal: true });
       return TextDecoderFatal.decode(buffer.slice(start, end));
     } catch (cause) {
       throw new BSONError('Invalid UTF-8 string in BSON document', { cause });
     }
   }
+  TextDecoderNonFatal ??= new TextDecoder('utf8', { fatal: false });
   return TextDecoderNonFatal.decode(buffer.slice(start, end));
 }
