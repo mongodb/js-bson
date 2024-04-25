@@ -164,12 +164,41 @@ describe('Long', function () {
     });
   });
 
+  describe('static fromString()', function () {
+    const successInputs: [
+      name: string,
+      input: string,
+      unsigned: boolean | undefined,
+      radix: number | undefined,
+      expectedStr?: string
+    ][] = [
+      ['radix 36 Infinity', 'Infinity', false, 36],
+      ['radix 36 -Infinity', '-Infinity', false, 36],
+      ['radix 36 +Infinity', '+Infinity', false, 36, 'infinity'],
+      ['radix < 35 Infinity', 'Infinity', false, 34, '0'],
+      ['radix < 35 -Infinity', '-Infinity', false, 23, '0'],
+      ['radix < 35 +Infinity', '+Infinity', false, 12, '0'],
+      ['radix < 24 NaN', 'NaN', false, 16, '0'],
+      ['radix > 24 NaN', 'NaN', false, 25]
+    ];
+
+    for (const [testName, str, unsigned, radix, expectedStr] of successInputs) {
+      context(`when the input is ${testName}`, () => {
+        it(`should return a Long representation of the input`, () => {
+          expect(Long.fromString(str, unsigned, radix).toString(radix)).to.equal(
+            expectedStr ?? str.toLowerCase()
+          );
+        });
+      });
+    }
+  });
+
   describe('static fromStringStrict()', function () {
     const successInputs: [
       name: string,
       input: string,
-      unsigned: boolean,
-      radix: number,
+      unsigned: boolean | undefined,
+      radix: number | undefined,
       expectedStr?: string
     ][] = [
       ['basic no alphabet low radix', '1236', true, 8],
@@ -192,13 +221,22 @@ describe('Long', function () {
       ['signed zeros', '+000000', false, 10, '0'],
       ['unsigned zero', '0', true, 10],
       ['explicit positive no leading zeros', '+32', true, 10, '32'],
-      ['Infinity', 'Infinity', false, 21, '0'],
-      ['-Infinity', '-Infinity', false, 13, '0'],
-      ['+Infinity', '+Infinity', false, 13, '0'],
-      ['NaN', 'NaN', false, 11, '0']
+      // the following inputs are valid radix 36 inputs, but will not represent NaN or +/- Infinity
+      ['radix 36 Infinity', 'Infinity', false, 36],
+      ['radix 36 -Infinity', '-Infinity', false, 36],
+      ['radix 36 +Infinity', '+Infinity', false, 36, 'infinity'],
+      ['radix 36 NaN', 'NaN', false, 36],
+      ['overload no unsigned and no radix parameter', '-32', undefined, undefined],
+      ['overload no unsigned parameter', '-32', undefined, 12],
+      ['overload no radix parameter', '32', true, undefined]
     ];
 
-    const failureInputs: [name: string, input: string, unsigned: boolean, radix: number][] = [
+    const failureInputs: [
+      name: string,
+      input: string,
+      unsigned: boolean | undefined,
+      radix: number | undefined
+    ][] = [
       ['empty string', '', true, 2],
       ['invalid numbers in binary string', '234', true, 2],
       ['non a-z or numeric string', '~~', true, 36],
@@ -218,7 +256,14 @@ describe('Long', function () {
       ['negative zero signed', '-0', false, 13],
       ['radix 1', '12', false, 1],
       ['negative radix', '12', false, -4],
-      ['radix over 36', '12', false, 37]
+      ['radix over 36', '12', false, 37],
+      // the following inputs are invalid radix 16 inputs
+      // this is because of the characters, not because of the values they commonly represent
+      ['radix 10 Infinity', 'Infinity', false, 10],
+      ['radix 10 -Infinity', '-Infinity', false, 10],
+      ['radix 10 +Infinity', '+Infinity', false, 10],
+      ['radix 10 NaN', 'NaN', false, 10],
+      ['overload no radix parameter and invalid sign', '-32', true, undefined]
     ];
 
     for (const [testName, str, unsigned, radix, expectedStr] of successInputs) {

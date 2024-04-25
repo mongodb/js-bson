@@ -259,9 +259,6 @@ export class Long extends BSONValue {
    */
   private static _fromString(str: string, unsigned: boolean, radix: number): Long {
     if (str.length === 0) throw new BSONError('empty string');
-    if (str === 'NaN' || str === 'Infinity' || str === '+Infinity' || str === '-Infinity')
-      return Long.ZERO;
-
     if (radix < 2 || 36 < radix) throw new BSONError('radix');
 
     let p;
@@ -291,27 +288,66 @@ export class Long extends BSONValue {
   }
 
   /**
-   * Returns a Long representation of the given string, written using the specified radix.
+   * Returns a signed Long representation of the given string, written using radix 10.
+   * Will throw an error if the given text is not exactly representable as a Long.
+   * Throws an error if any of the following conditions are true:
+   * - the string contains invalid characters for the radix 10
+   * - the string contains whitespace
+   * - the value the string represents is too large or too small to be a Long
+   * Unlike Long.fromString, this method does not coerce '+/-Infinity' and 'NaN' to Long.Zero
+   * @param str - The textual representation of the Long
+   * @returns The corresponding Long value
+   */
+  static fromStringStrict(str: string): Long;
+  /**
+   * Returns a Long representation of the given string, written using the radix 10.
+   * Will throw an error if the given parameters are not exactly representable as a Long.
    * Throws an error if any of the following conditions are true:
    * - the string contains invalid characters for the given radix
    * - the string contains whitespace
    * - the value the string represents is too large or too small to be a Long
+   * Unlike Long.fromString, this method does not coerce '+/-Infinity' and 'NaN' to Long.Zero
+   * @param str - The textual representation of the Long
+   * @param unsigned - Whether unsigned or not, defaults to signed
+   * @returns The corresponding Long value
+   */
+  static fromStringStrict(str: string, unsigned?: boolean): Long;
+  /**
+   * Returns a signed Long representation of the given string, written using the specified radix.
+   * Will throw an error if the given parameters are not exactly representable as a Long.
+   * Throws an error if any of the following conditions are true:
+   * - the string contains invalid characters for the given radix
+   * - the string contains whitespace
+   * - the value the string represents is too large or too small to be a Long
+   * Unlike Long.fromString, this method does not coerce '+/-Infinity' and 'NaN' to Long.Zero
+   * @param str - The textual representation of the Long
+   * @param radix - The radix in which the text is written (2-36), defaults to 10
+   * @returns The corresponding Long value
+   */
+  static fromStringStrict(str: string, radix?: boolean): Long;
+  /**
+   * Returns a Long representation of the given string, written using the specified radix.
+   * Will throw an error if the given parameters are not exactly representable as a Long.
+   * Throws an error if any of the following conditions are true:
+   * - the string contains invalid characters for the given radix
+   * - the string contains whitespace
+   * - the value the string represents is too large or too small to be a Long
+   * Unlike Long.fromString, this method does not coerce '+/-Infinity' and 'NaN' to Long.Zero
    * @param str - The textual representation of the Long
    * @param unsigned - Whether unsigned or not, defaults to signed
    * @param radix - The radix in which the text is written (2-36), defaults to 10
    * @returns The corresponding Long value
    */
-  static fromStringStrict(str: string, unsigned?: boolean, radix?: number): Long {
-    if (str === 'NaN' || str === 'Infinity' || str === '+Infinity' || str === '-Infinity')
-      return Long.ZERO;
-
-    if (typeof unsigned === 'number') {
+  static fromStringStrict(str: string, unsigned?: boolean, radix?: number): Long;
+  static fromStringStrict(str: string, unsignedOrRadix?: boolean | number, radix?: number): Long {
+    let unsigned = false;
+    if (typeof unsignedOrRadix === 'number') {
       // For goog.math.long compatibility
-      (radix = unsigned), (unsigned = false);
+      (radix = unsignedOrRadix), (unsignedOrRadix = false);
     } else {
-      unsigned = !!unsigned;
+      unsigned = !!unsignedOrRadix;
     }
-    radix = radix || 10;
+    radix ??= 10;
 
     if (str.trim() !== str) {
       throw new BSONError(`Input: '${str}' contains leading and/or trailing whitespace`);
@@ -334,20 +370,49 @@ export class Long extends BSONValue {
   }
 
   /**
+   * Returns a signed Long representation of the given string, written using radix 10.
+   * @param str - The textual representation of the Long
+   * @returns The corresponding Long value
+   */
+  static fromString(str: string): Long;
+  /**
+   * Returns a signed Long representation of the given string, written using radix 10.
+   * @param str - The textual representation of the Long
+   * @param radix - The radix in which the text is written (2-36), defaults to 10
+   * @returns The corresponding Long value
+   */
+  static fromString(str: string, radix?: number): Long;
+  /**
+   * Returns a Long representation of the given string, written using radix 10.
+   * @param str - The textual representation of the Long
+   * @param unsigned - Whether unsigned or not, defaults to signed
+   * @returns The corresponding Long value
+   */
+  static fromString(str: string, unsigned?: boolean): Long;
+  /**
    * Returns a Long representation of the given string, written using the specified radix.
    * @param str - The textual representation of the Long
    * @param unsigned - Whether unsigned or not, defaults to signed
    * @param radix - The radix in which the text is written (2-36), defaults to 10
    * @returns The corresponding Long value
    */
-  static fromString(str: string, unsigned?: boolean, radix?: number): Long {
-    if (typeof unsigned === 'number') {
+  static fromString(str: string, unsigned?: boolean, radix?: number): Long;
+  static fromString(str: string, unsignedOrRadix?: boolean | number, radix?: number): Long {
+    let unsigned = false;
+    if (typeof unsignedOrRadix === 'number') {
       // For goog.math.long compatibility
-      (radix = unsigned), (unsigned = false);
+      (radix = unsignedOrRadix), (unsignedOrRadix = false);
     } else {
-      unsigned = !!unsigned;
+      unsigned = !!unsignedOrRadix;
     }
-    radix = radix || 10;
+    radix ??= 10;
+    if (str === 'NaN' && radix < 24) {
+      // radix does not support n, so coerce to zero
+      return Long.ZERO;
+    } else if ((str === 'Infinity' || str === '+Infinity' || str === '-Infinity') && radix < 35) {
+      // radix does not support y, so coerce to zero
+      return Long.ZERO;
+    }
     return Long._fromString(str, unsigned, radix);
   }
 
