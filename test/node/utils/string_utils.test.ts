@@ -1,6 +1,7 @@
+import { expect } from 'chai';
 import * as StringUtils from '../../../src/utils/string_utils';
 
-describe('removeLeadingZerosandExplicitPlus()', function () {
+describe('removeLeadingZerosAndExplicitPlus()', function () {
   const inputs: [testName: string, str: string, expectedStr: string][] = [
     ['a string with zero with leading zeros', '000000', '0'],
     ['a string with positive leading zeros', '000000867', '867'],
@@ -14,7 +15,7 @@ describe('removeLeadingZerosandExplicitPlus()', function () {
   for (const [testName, str, expectedStr] of inputs) {
     context(`when the input is ${testName}`, () => {
       it(`should return a input string`, () => {
-        expect(StringUtils.removeLeadingZerosandExplicitPlus(str)).to.equal(expectedStr);
+        expect(StringUtils.removeLeadingZerosAndExplicitPlus(str)).to.equal(expectedStr);
       });
     });
   }

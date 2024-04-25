@@ -2,12 +2,32 @@
  * @internal
  * Removes leading zeros and explicit plus from textual representation of a number.
  */
-export function removeLeadingZerosandExplicitPlus(str: string): string {
-  return !/[^+?0]+/.test(str)
-    ? str.replace(/^\+?0+/, '0') // all zeros case (remove explicit plus if it exists)
-    : str[0] === '-'
-      ? str.replace(/^-0+/, '-') // negative number with leading zeros
-      : str.replace(/^\+?0*/, ''); // remove explicit plus
+export function removeLeadingZerosAndExplicitPlus(str: string): string {
+  if (str === '') {
+    return str;
+  }
+
+  let startIndex = 0;
+
+  const isNegative = str[startIndex] === '-';
+  const isExplicitlyPositive = str[startIndex] === '+';
+
+  if (isExplicitlyPositive || isNegative) {
+    startIndex += 1;
+  }
+
+  let foundInsignificantZero = false;
+
+  while (str[startIndex] === '0') {
+    foundInsignificantZero = true;
+    startIndex += 1;
+  }
+
+  if (!foundInsignificantZero) {
+    return isExplicitlyPositive ? str.slice(1) : str;
+  }
+
+  return `${isNegative ? '-' : ''}${str.length === startIndex ? '0' : str.slice(startIndex)}`;
 }
 
 /**

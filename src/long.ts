@@ -357,7 +357,7 @@ export class Long extends BSONValue {
     }
 
     // remove leading zeros (for later string comparison and to make math faster)
-    const cleanedStr = StringUtils.removeLeadingZerosandExplicitPlus(str);
+    const cleanedStr = StringUtils.removeLeadingZerosAndExplicitPlus(str);
 
     // check roundtrip result
     const result = Long._fromString(cleanedStr, unsigned, radix);
