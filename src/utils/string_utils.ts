@@ -18,9 +18,8 @@ export function removeLeadingZerosAndExplicitPlus(str: string): string {
 
   let foundInsignificantZero = false;
 
-  while (str[startIndex] === '0') {
+  for (; startIndex < str.length && str[startIndex] === '0'; ++startIndex) {
     foundInsignificantZero = true;
-    startIndex += 1;
   }
 
   if (!foundInsignificantZero) {
