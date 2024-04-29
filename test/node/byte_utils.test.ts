@@ -533,6 +533,7 @@ const randomBytesTests: ByteUtilTest<'randomBytes'>[] = [
 
 // extra error cases copied from wpt/encoding/textdecoder-fatal.any.js
 // commit sha: 7c9f867
+// link: https://github.com/web-platform-tests/wpt/commit/7c9f8674d9809731e8919073d957d6233f6e0544
 const toUTF8WebPlatformSpecTests = [
   { encoding: 'utf-8', input: [0xff], name: 'invalid code' },
   { encoding: 'utf-8', input: [0xc0], name: 'ends early' },

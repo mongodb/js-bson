@@ -23,8 +23,8 @@ let TextDecoderNonFatal: TextDecoder;
  */
 export function parseUtf8(buffer: Uint8Array, start: number, end: number, fatal: boolean): string {
   if (fatal) {
+    TextDecoderFatal ??= new TextDecoder('utf8', { fatal: true });
     try {
-      TextDecoderFatal ??= new TextDecoder('utf8', { fatal: true });
       return TextDecoderFatal.decode(buffer.subarray(start, end));
     } catch (cause) {
       throw new BSONError('Invalid UTF-8 string in BSON document', { cause });
