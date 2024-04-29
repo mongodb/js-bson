@@ -175,7 +175,7 @@ describe('Long', function () {
       ['Infinity', 'Infinity', false, 34, '0'],
       ['-Infinity', '-Infinity', false, 23, '0'],
       ['+Infinity', '+Infinity', false, 12, '0'],
-      ['NaN', 'NaN', false, 16, '0'],
+      ['NaN', 'NaN', false, 16, '0']
     ];
 
     for (const [testName, str, unsigned, radix, expectedStr] of successInputs) {
