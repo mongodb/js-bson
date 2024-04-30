@@ -48,6 +48,7 @@ const REQUIRED_FILES = [
   'src/utils/byte_utils.ts',
   'src/utils/node_byte_utils.ts',
   'src/utils/number_utils.ts',
+  'src/utils/string_utils.ts',
   'src/utils/web_byte_utils.ts',
   'src/utils/latin.ts',
   'src/parse_utf8.ts',

@@ -3,6 +3,7 @@ import { BSONError } from './error';
 import type { EJSONOptions } from './extended_json';
 import { type InspectFn, defaultInspect } from './parser/utils';
 import type { Timestamp } from './timestamp';
+import * as StringUtils from './utils/string_utils';
 
 interface LongWASMHelpers {
   /** Gets the high bits of the last operation performed */
@@ -246,29 +247,24 @@ export class Long extends BSONValue {
   }
 
   /**
+   * @internal
    * Returns a Long representation of the given string, written using the specified radix.
+   * Throws an error if `throwsError` is set to true and any of the following conditions are true:
+   *  - the string contains invalid characters for the given radix
+   *  - the string contains whitespace
    * @param str - The textual representation of the Long
    * @param unsigned - Whether unsigned or not, defaults to signed
    * @param radix - The radix in which the text is written (2-36), defaults to 10
    * @returns The corresponding Long value
    */
-  static fromString(str: string, unsigned?: boolean, radix?: number): Long {
+  private static _fromString(str: string, unsigned: boolean, radix: number): Long {
     if (str.length === 0) throw new BSONError('empty string');
-    if (str === 'NaN' || str === 'Infinity' || str === '+Infinity' || str === '-Infinity')
-      return Long.ZERO;
-    if (typeof unsigned === 'number') {
-      // For goog.math.long compatibility
-      (radix = unsigned), (unsigned = false);
-    } else {
-      unsigned = !!unsigned;
-    }
-    radix = radix || 10;
     if (radix < 2 || 36 < radix) throw new BSONError('radix');
 
     let p;
     if ((p = str.indexOf('-')) > 0) throw new BSONError('interior hyphen');
     else if (p === 0) {
-      return Long.fromString(str.substring(1), unsigned, radix).neg();
+      return Long._fromString(str.substring(1), unsigned, radix).neg();
     }
 
     // Do several (8) digits each time through the loop, so as to
@@ -289,6 +285,131 @@ export class Long extends BSONValue {
     }
     result.unsigned = unsigned;
     return result;
+  }
+
+  /**
+   * Returns a signed Long representation of the given string, written using radix 10.
+   * Will throw an error if the given text is not exactly representable as a Long.
+   * Throws an error if any of the following conditions are true:
+   * - the string contains invalid characters for the radix 10
+   * - the string contains whitespace
+   * - the value the string represents is too large or too small to be a Long
+   * Unlike Long.fromString, this method does not coerce '+/-Infinity' and 'NaN' to Long.Zero
+   * @param str - The textual representation of the Long
+   * @returns The corresponding Long value
+   */
+  static fromStringStrict(str: string): Long;
+  /**
+   * Returns a Long representation of the given string, written using the radix 10.
+   * Will throw an error if the given parameters are not exactly representable as a Long.
+   * Throws an error if any of the following conditions are true:
+   * - the string contains invalid characters for the given radix
+   * - the string contains whitespace
+   * - the value the string represents is too large or too small to be a Long
+   * Unlike Long.fromString, this method does not coerce '+/-Infinity' and 'NaN' to Long.Zero
+   * @param str - The textual representation of the Long
+   * @param unsigned - Whether unsigned or not, defaults to signed
+   * @returns The corresponding Long value
+   */
+  static fromStringStrict(str: string, unsigned?: boolean): Long;
+  /**
+   * Returns a signed Long representation of the given string, written using the specified radix.
+   * Will throw an error if the given parameters are not exactly representable as a Long.
+   * Throws an error if any of the following conditions are true:
+   * - the string contains invalid characters for the given radix
+   * - the string contains whitespace
+   * - the value the string represents is too large or too small to be a Long
+   * Unlike Long.fromString, this method does not coerce '+/-Infinity' and 'NaN' to Long.Zero
+   * @param str - The textual representation of the Long
+   * @param radix - The radix in which the text is written (2-36), defaults to 10
+   * @returns The corresponding Long value
+   */
+  static fromStringStrict(str: string, radix?: boolean): Long;
+  /**
+   * Returns a Long representation of the given string, written using the specified radix.
+   * Will throw an error if the given parameters are not exactly representable as a Long.
+   * Throws an error if any of the following conditions are true:
+   * - the string contains invalid characters for the given radix
+   * - the string contains whitespace
+   * - the value the string represents is too large or too small to be a Long
+   * Unlike Long.fromString, this method does not coerce '+/-Infinity' and 'NaN' to Long.Zero
+   * @param str - The textual representation of the Long
+   * @param unsigned - Whether unsigned or not, defaults to signed
+   * @param radix - The radix in which the text is written (2-36), defaults to 10
+   * @returns The corresponding Long value
+   */
+  static fromStringStrict(str: string, unsigned?: boolean, radix?: number): Long;
+  static fromStringStrict(str: string, unsignedOrRadix?: boolean | number, radix?: number): Long {
+    let unsigned = false;
+    if (typeof unsignedOrRadix === 'number') {
+      // For goog.math.long compatibility
+      (radix = unsignedOrRadix), (unsignedOrRadix = false);
+    } else {
+      unsigned = !!unsignedOrRadix;
+    }
+    radix ??= 10;
+
+    if (str.trim() !== str) {
+      throw new BSONError(`Input: '${str}' contains leading and/or trailing whitespace`);
+    }
+    if (!StringUtils.validateStringCharacters(str, radix)) {
+      throw new BSONError(`Input: '${str}' contains invalid characters for radix: ${radix}`);
+    }
+
+    // remove leading zeros (for later string comparison and to make math faster)
+    const cleanedStr = StringUtils.removeLeadingZerosAndExplicitPlus(str);
+
+    // check roundtrip result
+    const result = Long._fromString(cleanedStr, unsigned, radix);
+    if (result.toString(radix).toLowerCase() !== cleanedStr.toLowerCase()) {
+      throw new BSONError(
+        `Input: ${str} is not representable as ${result.unsigned ? 'an unsigned' : 'a signed'} 64-bit Long ${radix != null ? `with radix: ${radix}` : ''}`
+      );
+    }
+    return result;
+  }
+
+  /**
+   * Returns a signed Long representation of the given string, written using radix 10.
+   * @param str - The textual representation of the Long
+   * @returns The corresponding Long value
+   */
+  static fromString(str: string): Long;
+  /**
+   * Returns a signed Long representation of the given string, written using radix 10.
+   * @param str - The textual representation of the Long
+   * @param radix - The radix in which the text is written (2-36), defaults to 10
+   * @returns The corresponding Long value
+   */
+  static fromString(str: string, radix?: number): Long;
+  /**
+   * Returns a Long representation of the given string, written using radix 10.
+   * @param str - The textual representation of the Long
+   * @param unsigned - Whether unsigned or not, defaults to signed
+   * @returns The corresponding Long value
+   */
+  static fromString(str: string, unsigned?: boolean): Long;
+  /**
+   * Returns a Long representation of the given string, written using the specified radix.
+   * @param str - The textual representation of the Long
+   * @param unsigned - Whether unsigned or not, defaults to signed
+   * @param radix - The radix in which the text is written (2-36), defaults to 10
+   * @returns The corresponding Long value
+   */
+  static fromString(str: string, unsigned?: boolean, radix?: number): Long;
+  static fromString(str: string, unsignedOrRadix?: boolean | number, radix?: number): Long {
+    let unsigned = false;
+    if (typeof unsignedOrRadix === 'number') {
+      // For goog.math.long compatibility
+      (radix = unsignedOrRadix), (unsignedOrRadix = false);
+    } else {
+      unsigned = !!unsignedOrRadix;
+    }
+    radix ??= 10;
+    if (str === 'NaN' || str === 'Infinity' || str === '+Infinity' || str === '-Infinity') {
+      return Long.ZERO;
+    }
+    return Long._fromString(str, unsigned, radix);
   }
 
   /**
