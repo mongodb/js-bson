@@ -406,7 +406,11 @@ export class Long extends BSONValue {
       unsigned = !!unsignedOrRadix;
     }
     radix ??= 10;
-    if (str === 'NaN' || str === 'Infinity' || str === '+Infinity' || str === '-Infinity') {
+    if (str === 'NaN' && radix < 24) {
+      // radix does not support n, so coerce to zero
+      return Long.ZERO;
+    } else if ((str === 'Infinity' || str === '+Infinity' || str === '-Infinity') && radix < 35) {
+      // radix does not support y, so coerce to zero
       return Long.ZERO;
     }
     return Long._fromString(str, unsigned, radix);
