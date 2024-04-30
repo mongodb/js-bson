@@ -16,7 +16,6 @@ import { BSONSymbol } from '../symbol';
 import { Timestamp } from '../timestamp';
 import { ByteUtils } from '../utils/byte_utils';
 import { NumberUtils } from '../utils/number_utils';
-import { validateUtf8 } from '../validate_utf8';
 
 /** @public */
 export interface DeserializeOptions {
@@ -604,12 +603,7 @@ function deserializeObject(
       )
         throw new BSONError('bad string length in bson');
       // Namespace
-      if (validation != null && validation.utf8) {
-        if (!validateUtf8(buffer, index, index + stringSize - 1)) {
-          throw new BSONError('Invalid UTF-8 string in BSON document');
-        }
-      }
-      const namespace = ByteUtils.toUTF8(buffer, index, index + stringSize - 1, false);
+      const namespace = ByteUtils.toUTF8(buffer, index, index + stringSize - 1, shouldValidateKey);
       // Update parse index position
       index = index + stringSize;
 

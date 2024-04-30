@@ -8,6 +8,7 @@ import { webByteUtils } from '../../src/utils/web_byte_utils';
 import * as sinon from 'sinon';
 import { loadCJSModuleBSON, loadReactNativeCJSModuleBSON, loadESModuleBSON } from '../load_bson';
 import * as crypto from 'node:crypto';
+import { utf8WebPlatformSpecTests } from './data/utf8_wpt_error_cases';
 
 type ByteUtilTest<K extends keyof ByteUtils> = {
   name: string;
@@ -399,6 +400,7 @@ const fromUTF8Tests: ByteUtilTest<'encodeUTF8Into'>[] = [
     }
   }
 ];
+
 const toUTF8Tests: ByteUtilTest<'toUTF8'>[] = [
   {
     name: 'should create utf8 string from buffer input',
@@ -417,21 +419,27 @@ const toUTF8Tests: ByteUtilTest<'toUTF8'>[] = [
     }
   },
   {
-    name: 'should throw an error if fatal is set and string is invalid',
-    inputs: [Buffer.from('616263f09fa4', 'hex'), 0, 7, true],
-    expectation({ error }) {
-      expect(error).to.match(/Invalid UTF-8 string in BSON document/i);
-    }
-  },
-  {
     name: 'should insert replacement character fatal is false and string is invalid',
     inputs: [Buffer.from('616263f09fa4', 'hex'), 0, 7, false],
     expectation({ error, output }) {
       expect(error).to.not.exist;
       expect(output).to.equal('abc\uFFFD');
     }
-  }
+  },
+  ...utf8WebPlatformSpecTests.map(t => ({
+    name: t.name,
+    inputs: [Uint8Array.from(t.input), 0, t.input.length, true] as [
+      buffer: Uint8Array,
+      start: number,
+      end: number,
+      fatal: boolean
+    ],
+    expectation({ error }) {
+      expect(error).to.match(/Invalid UTF-8 string in BSON document/i);
+    }
+  }))
 ];
+
 const utf8ByteLengthTests: ByteUtilTest<'utf8ByteLength'>[] = [
   {
     name: 'should return zero for empty string',

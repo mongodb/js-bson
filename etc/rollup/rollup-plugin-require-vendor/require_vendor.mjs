@@ -1,8 +1,11 @@
 import MagicString from 'magic-string';
 
-const REQUIRE_POLYFILLS =
-  `const { TextEncoder, TextDecoder } = require('../vendor/text-encoding');
+const REQUIRE_WEB_UTILS_POLYFILLS =
+  `const { TextEncoder } = require('../vendor/text-encoding');
 const { encode: btoa, decode: atob } = require('../vendor/base64');\n`
+
+const REQUIRE_PARSE_UTF8_POLYFILLS = 
+  `const { TextDecoder } = require('../vendor/text-encoding');\n`;
 
 export class RequireVendor {
   /**
@@ -14,17 +17,24 @@ export class RequireVendor {
    * @returns {{ code: string; map: import('magic-string').SourceMap }}
    */
   transform(code, id) {
-    if (!id.includes('web_byte_utils')) {
-      return;
+    if (id.includes('parse_utf8')) {
+      // MagicString lets us edit the source code and still generate an accurate source map
+      const magicString = new MagicString(code);
+      magicString.prepend(REQUIRE_PARSE_UTF8_POLYFILLS);
+
+      return {
+        code: magicString.toString(),
+        map: magicString.generateMap({ hires: true })
+      };
+    } else if (id.includes('web_byte_utils')) {
+      // MagicString lets us edit the source code and still generate an accurate source map
+      const magicString = new MagicString(code);
+      magicString.prepend(REQUIRE_WEB_UTILS_POLYFILLS);
+
+      return {
+        code: magicString.toString(),
+        map: magicString.generateMap({ hires: true })
+      };
     }
-
-    // MagicString lets us edit the source code and still generate an accurate source map
-    const magicString = new MagicString(code);
-    magicString.prepend(REQUIRE_POLYFILLS);
-
-    return {
-      code: magicString.toString(),
-      map: magicString.generateMap({ hires: true })
-    };
   }
 }
