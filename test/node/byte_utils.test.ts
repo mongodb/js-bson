@@ -8,7 +8,7 @@ import { webByteUtils } from '../../src/utils/web_byte_utils';
 import * as sinon from 'sinon';
 import { loadCJSModuleBSON, loadReactNativeCJSModuleBSON, loadESModuleBSON } from '../load_bson';
 import * as crypto from 'node:crypto';
-import { BSONError } from '../../src/error';
+import { utf8WebPlatformSpecTests } from './data/utf8_wpt_error_cases';
 
 type ByteUtilTest<K extends keyof ByteUtils> = {
   name: string;
@@ -426,48 +426,18 @@ const toUTF8Tests: ByteUtilTest<'toUTF8'>[] = [
       expect(output).to.equal('abc\uFFFD');
     }
   },
-  {
-    name: 'should throw an error if fatal is set and string is a sequence that decodes to an invalid code point',
-    inputs: [Buffer.from('616263f09fa4', 'hex'), 0, 7, true],
+  ...utf8WebPlatformSpecTests.map(t => ({
+    name: t.name,
+    inputs: [Uint8Array.from(t.input), 0, t.input.length, true] as [
+      buffer: Uint8Array,
+      start: number,
+      end: number,
+      fatal: boolean
+    ],
     expectation({ error }) {
       expect(error).to.match(/Invalid UTF-8 string in BSON document/i);
     }
-  },
-  {
-    name: 'throw an error if fatal is set and string contains overlong encoding',
-    inputs: [Buffer.from('11000000025f0005000000f08282ac0000', 'hex'), 0, 18, true],
-    expectation({ error }) {
-      expect(error).to.match(/Invalid UTF-8 string in BSON document/i);
-    }
-  },
-  {
-    name: 'throw an error if fatal is set and string contains invalid bytes',
-    inputs: [Buffer.from('abcff', 'hex'), 0, 2, true],
-    expectation({ error }) {
-      expect(error).to.match(/Invalid UTF-8 string in BSON document/i);
-    }
-  },
-  {
-    name: 'throw an error if fatal is set and string contains an unexpected continuation byte',
-    inputs: [Buffer.from('7F80', 'hex'), 0, 2, true],
-    expectation({ error }) {
-      expect(error).to.match(/Invalid UTF-8 string in BSON document/i);
-    }
-  },
-  {
-    name: 'throw an error if fatal is set and string contains a non-continuation byte before the end of the character',
-    inputs: [Buffer.from('c000', 'hex'), 0, 2, true],
-    expectation({ error }) {
-      expect(error).to.match(/Invalid UTF-8 string in BSON document/i);
-    }
-  },
-  {
-    name: 'throw an error if fatal is set and string ends before the end of the character',
-    inputs: [Buffer.from('c0', 'hex'), 0, 1, true],
-    expectation({ error }) {
-      expect(error).to.match(/Invalid UTF-8 string in BSON document/i);
-    }
-  }
+  }))
 ];
 
 const utf8ByteLengthTests: ByteUtilTest<'utf8ByteLength'>[] = [
@@ -529,73 +499,6 @@ const randomBytesTests: ByteUtilTest<'randomBytes'>[] = [
       expect(output).to.not.exist;
     }
   }
-];
-
-// extra error cases copied from wpt/encoding/textdecoder-fatal.any.js
-// commit sha: 7c9f867
-// link: https://github.com/web-platform-tests/wpt/commit/7c9f8674d9809731e8919073d957d6233f6e0544
-const toUTF8WebPlatformSpecTests = [
-  { encoding: 'utf-8', input: [0xff], name: 'invalid code' },
-  { encoding: 'utf-8', input: [0xc0], name: 'ends early' },
-  { encoding: 'utf-8', input: [0xe0], name: 'ends early 2' },
-  { encoding: 'utf-8', input: [0xc0, 0x00], name: 'invalid trail' },
-  { encoding: 'utf-8', input: [0xc0, 0xc0], name: 'invalid trail 2' },
-  { encoding: 'utf-8', input: [0xe0, 0x00], name: 'invalid trail 3' },
-  { encoding: 'utf-8', input: [0xe0, 0xc0], name: 'invalid trail 4' },
-  { encoding: 'utf-8', input: [0xe0, 0x80, 0x00], name: 'invalid trail 5' },
-  { encoding: 'utf-8', input: [0xe0, 0x80, 0xc0], name: 'invalid trail 6' },
-  { encoding: 'utf-8', input: [0xfc, 0x80, 0x80, 0x80, 0x80, 0x80], name: '> 0x10ffff' },
-  { encoding: 'utf-8', input: [0xfe, 0x80, 0x80, 0x80, 0x80, 0x80], name: 'obsolete lead byte' },
-
-  // Overlong encodings
-  { encoding: 'utf-8', input: [0xc0, 0x80], name: 'overlong U+0000 - 2 bytes' },
-  { encoding: 'utf-8', input: [0xe0, 0x80, 0x80], name: 'overlong U+0000 - 3 bytes' },
-  { encoding: 'utf-8', input: [0xf0, 0x80, 0x80, 0x80], name: 'overlong U+0000 - 4 bytes' },
-  { encoding: 'utf-8', input: [0xf8, 0x80, 0x80, 0x80, 0x80], name: 'overlong U+0000 - 5 bytes' },
-  {
-    encoding: 'utf-8',
-    input: [0xfc, 0x80, 0x80, 0x80, 0x80, 0x80],
-    name: 'overlong U+0000 - 6 bytes'
-  },
-
-  { encoding: 'utf-8', input: [0xc1, 0xbf], name: 'overlong U+007f - 2 bytes' },
-  { encoding: 'utf-8', input: [0xe0, 0x81, 0xbf], name: 'overlong U+007f - 3 bytes' },
-  { encoding: 'utf-8', input: [0xf0, 0x80, 0x81, 0xbf], name: 'overlong U+007f - 4 bytes' },
-  { encoding: 'utf-8', input: [0xf8, 0x80, 0x80, 0x81, 0xbf], name: 'overlong U+007f - 5 bytes' },
-  {
-    encoding: 'utf-8',
-    input: [0xfc, 0x80, 0x80, 0x80, 0x81, 0xbf],
-    name: 'overlong U+007f - 6 bytes'
-  },
-
-  { encoding: 'utf-8', input: [0xe0, 0x9f, 0xbf], name: 'overlong U+07ff - 3 bytes' },
-  { encoding: 'utf-8', input: [0xf0, 0x80, 0x9f, 0xbf], name: 'overlong U+07ff - 4 bytes' },
-  { encoding: 'utf-8', input: [0xf8, 0x80, 0x80, 0x9f, 0xbf], name: 'overlong U+07ff - 5 bytes' },
-  {
-    encoding: 'utf-8',
-    input: [0xfc, 0x80, 0x80, 0x80, 0x9f, 0xbf],
-    name: 'overlong U+07ff - 6 bytes'
-  },
-
-  { encoding: 'utf-8', input: [0xf0, 0x8f, 0xbf, 0xbf], name: 'overlong U+ffff - 4 bytes' },
-  { encoding: 'utf-8', input: [0xf8, 0x80, 0x8f, 0xbf, 0xbf], name: 'overlong U+ffff - 5 bytes' },
-  {
-    encoding: 'utf-8',
-    input: [0xfc, 0x80, 0x80, 0x8f, 0xbf, 0xbf],
-    name: 'overlong U+ffff - 6 bytes'
-  },
-
-  { encoding: 'utf-8', input: [0xf8, 0x84, 0x8f, 0xbf, 0xbf], name: 'overlong U+10ffff - 5 bytes' },
-  {
-    encoding: 'utf-8',
-    input: [0xfc, 0x80, 0x84, 0x8f, 0xbf, 0xbf],
-    name: 'overlong U+10ffff - 6 bytes'
-  },
-
-  // UTf-16 surrogates encoded as code points in UTf-8
-  { encoding: 'utf-8', input: [0xed, 0xa0, 0x80], name: 'lead surrogate' },
-  { encoding: 'utf-8', input: [0xed, 0xb0, 0x80], name: 'trail surrogate' },
-  { encoding: 'utf-8', input: [0xed, 0xa0, 0x80, 0xed, 0xb0, 0x80], name: 'surrogate pair' }
 ];
 
 const utils = new Map([
@@ -903,14 +806,6 @@ describe('ByteUtils', () => {
             test.expectation({ web: byteUtilsName === 'webByteUtils', output, error });
           });
         }
-        if (utility === 'toUTF8')
-          for (const test of toUTF8WebPlatformSpecTests) {
-            it(`throws error when fatal is set and provided ${test.name} as input`, () => {
-              expect(() =>
-                byteUtils[utility](Uint8Array.from(test.input), 0, test.input.length, true)
-              ).to.throw(BSONError, /Invalid UTF-8 string in BSON document/i);
-            });
-          }
       });
     }
   }
