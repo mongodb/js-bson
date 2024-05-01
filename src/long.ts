@@ -371,12 +371,28 @@ export class Long extends BSONValue {
 
   /**
    * Returns a signed Long representation of the given string, written using radix 10.
+   *
+   * If the input string is empty, this function will throw a BSONError.
+   *
+   * If input string does not have valid signed 64-bit Long representation, this method will return a coerced value:
+   * - inputs that overflow 64-bit signed long will be coerced to Long.MAX_VALUE and Long.MIN_VALUE respectively
+   * - 'NaN' or '+/-Infinity' are coerced to Long.ZERO
+   * - other invalid characters sequences have variable behavior
+   *
    * @param str - The textual representation of the Long
    * @returns The corresponding Long value
    */
   static fromString(str: string): Long;
   /**
-   * Returns a signed Long representation of the given string, written using radix 10.
+   * Returns a signed Long representation of the given string, written using the provided radix.
+   *
+   * If the input string is empty or a provided radix is not within (2-36), this function will throw a BSONError.
+   *
+   * If input parameters do not have valid signed 64-bit Long representation, this method will return a coerced value:
+   * - inputs that overflow 64-bit signed long will be coerced to Long.MAX_VALUE and Long.MIN_VALUE respectively
+   * - if the radix is less than 24, 'NaN' is coerced to Long.ZERO
+   * - if the radix is less than 35, '+/-Infinity' inputs are coerced to Long.ZERO
+   * - other invalid characters sequences have variable behavior
    * @param str - The textual representation of the Long
    * @param radix - The radix in which the text is written (2-36), defaults to 10
    * @returns The corresponding Long value
@@ -384,6 +400,14 @@ export class Long extends BSONValue {
   static fromString(str: string, radix?: number): Long;
   /**
    * Returns a Long representation of the given string, written using radix 10.
+   *
+   * If the input string is empty, this function will throw a BSONError.
+   *
+   * If input parameters do not have a valid 64-bit Long representation, this method will return a coerced value:
+   * - inputs that overflow 64-bit long will be coerced to max or min (if signed) values
+   * - if the radix is less than 24, 'NaN' is coerced to Long.ZERO
+   * - if the radix is less than 35, '+/-Infinity' inputs are coerced to Long.ZERO
+   * - other invalid characters sequences have variable behavior
    * @param str - The textual representation of the Long
    * @param unsigned - Whether unsigned or not, defaults to signed
    * @returns The corresponding Long value
@@ -391,6 +415,14 @@ export class Long extends BSONValue {
   static fromString(str: string, unsigned?: boolean): Long;
   /**
    * Returns a Long representation of the given string, written using the specified radix.
+   *
+   * If the input string is empty or a provided radix is not within (2-36), this function will throw a BSONError.
+   *
+   * If input parameters do not have a valid 64-bit Long representation, this method will return a coerced value:
+   * - inputs that overflow 64-bit long will be coerced to max or min (if signed) values
+   * - if the radix is less than 24, 'NaN' is coerced to Long.ZERO
+   * - if the radix is less than 35, '+/-Infinity' inputs are coerced to Long.ZERO
+   * - other invalid characters sequences have variable behavior
    * @param str - The textual representation of the Long
    * @param unsigned - Whether unsigned or not, defaults to signed
    * @param radix - The radix in which the text is written (2-36), defaults to 10
