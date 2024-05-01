@@ -59,6 +59,7 @@ describe('deserializer()', () => {
       expect(resultCodeWithScope).to.have.deep.nested.property('a.scope', { b: true });
     });
   });
+
   describe('utf8 validation', () => {
     for (const test of utf8WebPlatformSpecTests) {
       const inputStringSize = int32LEToHex(test.input.length + 1); // int32 size of string
