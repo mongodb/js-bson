@@ -172,10 +172,14 @@ describe('Long', function () {
       radix: number | undefined,
       expectedStr?: string
     ][] = [
-      ['Infinity', 'Infinity', false, 34, '0'],
-      ['-Infinity', '-Infinity', false, 23, '0'],
-      ['+Infinity', '+Infinity', false, 12, '0'],
-      ['NaN', 'NaN', false, 16, '0']
+      ['radix 36 Infinity', 'Infinity', false, 36],
+      ['radix 36 -Infinity', '-Infinity', false, 36],
+      ['radix 36 +Infinity', '+Infinity', false, 36, 'infinity'],
+      ['radix < 35 Infinity', 'Infinity', false, 34, '0'],
+      ['radix < 35 -Infinity', '-Infinity', false, 23, '0'],
+      ['radix < 35 +Infinity', '+Infinity', false, 12, '0'],
+      ['radix < 24 NaN', 'NaN', false, 16, '0'],
+      ['radix > 24 NaN', 'NaN', false, 25]
     ];
 
     for (const [testName, str, unsigned, radix, expectedStr] of successInputs) {
