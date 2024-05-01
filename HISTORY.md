@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.7.0](https://github.com/mongodb/js-bson/compare/v6.6.0...v6.7.0) (2024-05-01)
+
+
+### Features
+
+* **NODE-5648:** add Long.fromStringStrict() ([#675](https://github.com/mongodb/js-bson/issues/675)) ([9d5a5df](https://github.com/mongodb/js-bson/commit/9d5a5dfe59aa6f46e4d5d844564b065bdd037154))
+* **NODE-6086:** add Double.fromString() method ([#671](https://github.com/mongodb/js-bson/issues/671)) ([e943cdb](https://github.com/mongodb/js-bson/commit/e943cdb2bc69413dc2b57855c7780d6ab65dc366))
+* **NODE-6087:** add Int32.fromString method ([#670](https://github.com/mongodb/js-bson/issues/670)) ([5a21889](https://github.com/mongodb/js-bson/commit/5a2188961b87d006eaf64a3e7062fd2f108fd1bc))
+
+
+### Bug Fixes
+
+* **NODE-6102:** Double.fromString prohibiting '+' character and prohibiting exponential notation ([#674](https://github.com/mongodb/js-bson/issues/674)) ([c58d1e2](https://github.com/mongodb/js-bson/commit/c58d1e213714c99bbb09d0f91a3c9199e43710dd))
+* **NODE-6123:** utf8 validation is insufficiently strict ([#676](https://github.com/mongodb/js-bson/issues/676)) ([ae8bac7](https://github.com/mongodb/js-bson/commit/ae8bac7cf0653c87a06b61ac97ff02caf78707a2))
+* **NODE-6144:** Long.fromString incorrectly coerces valid inputs to Long.ZERO in special cases ([#677](https://github.com/mongodb/js-bson/issues/677)) ([208f7e8](https://github.com/mongodb/js-bson/commit/208f7e82740d7f5cdbdafcd4fe1e1eae2cd463ca))
+
 ## [6.6.0](https://github.com/mongodb/js-bson/compare/v6.5.0...v6.6.0) (2024-04-01)
 
 
