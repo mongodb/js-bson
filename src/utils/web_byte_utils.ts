@@ -1,14 +1,5 @@
 import { BSONError } from '../error';
-
-type TextDecoder = {
-  readonly encoding: string;
-  readonly fatal: boolean;
-  readonly ignoreBOM: boolean;
-  decode(input?: Uint8Array): string;
-};
-type TextDecoderConstructor = {
-  new (label: 'utf8', options: { fatal: boolean; ignoreBOM?: boolean }): TextDecoder;
-};
+import { parseUtf8 } from '../parse_utf8';
 
 type TextEncoder = {
   readonly encoding: string;
@@ -19,7 +10,6 @@ type TextEncoderConstructor = {
 };
 
 // Web global
-declare const TextDecoder: TextDecoderConstructor;
 declare const TextEncoder: TextEncoderConstructor;
 declare const atob: (base64: string) => string;
 declare const btoa: (binary: string) => string;
@@ -172,8 +162,8 @@ export const webByteUtils = {
     return new TextEncoder().encode(text);
   },
 
-  toUTF8(uint8array: Uint8Array, start: number, end: number): string {
-    return new TextDecoder('utf8', { fatal: false }).decode(uint8array.slice(start, end));
+  toUTF8(uint8array: Uint8Array, start: number, end: number, fatal: boolean): string {
+    return parseUtf8(uint8array, start, end, fatal);
   },
 
   utf8ByteLength(input: string): number {
