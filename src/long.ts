@@ -243,7 +243,20 @@ export class Long extends BSONValue {
    * @returns The corresponding Long value
    */
   static fromBigInt(value: bigint, unsigned?: boolean): Long {
-    return Long.fromString(value.toString(), unsigned);
+    const byteStr = value.toString(16);
+    const isNeg = byteStr[0] === '-';
+    const startIndex = isNeg ? 1 : 0;
+    const lowByteString =
+      byteStr.length - startIndex > 8
+        ? byteStr.substring(byteStr.length - 8, byteStr.length)
+        : isNeg
+          ? byteStr.slice(1)
+          : byteStr;
+    const highByteString =
+      byteStr.length - startIndex > 8 ? byteStr.substring(startIndex, byteStr.length - 8) : 0;
+    return isNeg
+      ? new Long(Number('0x' + lowByteString), Number('0x' + highByteString), unsigned).neg()
+      : new Long(Number('0x' + lowByteString), Number('0x' + highByteString), unsigned);
   }
 
   /**

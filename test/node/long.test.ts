@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { Long, BSONError, __noBigInt__ } from '../register-bson';
+import { BSON_INT32_MAX, BSON_INT32_MIN } from '../../src/constants';
 
 describe('Long', function () {
   it('accepts strings in the constructor', function () {
@@ -162,6 +163,41 @@ describe('Long', function () {
         });
       });
     });
+  });
+
+  describe('static fromBigInt()', function () {
+    const inputs: [
+      name: string,
+      input: bigint,
+      unsigned: boolean | undefined,
+      expectedStr?: string
+    ][] = [
+      ['0', BigInt('0'), false, '0'],
+      ['-0 (bigint coerces this to 0)', BigInt('-0'), false, '0'],
+      [
+        'max unsigned input',
+        BigInt(Long.MAX_UNSIGNED_VALUE.toString(10)),
+        true,
+        Long.MAX_UNSIGNED_VALUE.toString(10)
+      ],
+      ['max signed input', BigInt(Long.MAX_VALUE.toString(10)), false, Long.MAX_VALUE.toString(10)],
+      ['min signed input', BigInt(Long.MIN_VALUE.toString(10)), false, Long.MIN_VALUE.toString(10)],
+      ['negative greater than 32 bits', BigInt(-9228915101), false, '-9228915101'],
+      ['less than 32 bits', BigInt(245666), false, '245666'],
+      ['unsigned less than 32 bits', BigInt(245666), true, '245666'],
+      ['negative less than 32 bits', BigInt(-245666), false, '-245666'],
+      ['max int32', BigInt(BSON_INT32_MAX), false, BSON_INT32_MAX.toString(10)],
+      ['max int32 unsigned', BigInt(BSON_INT32_MAX), true, BSON_INT32_MAX.toString(10)],
+      ['min int32', BigInt(BSON_INT32_MIN), false, BSON_INT32_MIN.toString(10)]
+    ];
+
+    for (const [testName, num, unsigned, expectedStr] of inputs) {
+      context(`when the input is ${testName}`, () => {
+        it(`should return a Long representation of the input`, () => {
+          expect(Long.fromBigInt(num, unsigned).toString(10)).to.equal(expectedStr);
+        });
+      });
+    }
   });
 
   describe('static fromString()', function () {
