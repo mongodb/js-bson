@@ -1,4 +1,5 @@
 import { BSONError } from '../error';
+import { parseUtf8 } from '../parse_utf8';
 
 type NodeJsEncoding = 'base64' | 'hex' | 'utf8' | 'binary';
 type NodeJsBuffer = ArrayBufferView &
@@ -125,8 +126,16 @@ export const nodeJsByteUtils = {
     return Buffer.from(text, 'utf8');
   },
 
-  toUTF8(buffer: Uint8Array, start: number, end: number): string {
-    return nodeJsByteUtils.toLocalBufferType(buffer).toString('utf8', start, end);
+  toUTF8(buffer: Uint8Array, start: number, end: number, fatal: boolean): string {
+    const value = nodeJsByteUtils.toLocalBufferType(buffer).toString('utf8', start, end);
+    if (fatal) {
+      for (let i = 0; i < value.length; i++) {
+        if (value.charCodeAt(i) === 0xfffd) {
+          parseUtf8(buffer, start, end, fatal);
+        }
+      }
+    }
+    return value;
   },
 
   utf8ByteLength(input: string): number {

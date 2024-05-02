@@ -1,6 +1,7 @@
 import * as BSON from '../../register-bson';
 import { expect } from 'chai';
-import { bufferFromHexArray } from '../tools/utils';
+import { bufferFromHexArray, int32LEToHex } from '../tools/utils';
+import { utf8WebPlatformSpecTests } from '../data/utf8_wpt_error_cases';
 
 describe('deserializer()', () => {
   describe('when the fieldsAsRaw options is present and has a value that corresponds to a key in the object', () => {
@@ -57,5 +58,48 @@ describe('deserializer()', () => {
       );
       expect(resultCodeWithScope).to.have.deep.nested.property('a.scope', { b: true });
     });
+  });
+
+  describe('utf8 validation', () => {
+    for (const test of utf8WebPlatformSpecTests) {
+      const inputStringSize = int32LEToHex(test.input.length + 1); // int32 size of string
+      const inputHexString = Buffer.from(test.input).toString('hex');
+      const buffer = bufferFromHexArray([
+        '02', // string
+        '6100', // 'a' key with null terminator
+        inputStringSize,
+        inputHexString,
+        '00'
+      ]);
+      context(`when utf8 validation is on and input is ${test.name}`, () => {
+        it(`throws error containing 'Invalid UTF-8'`, () => {
+          // global case
+          expect(() => BSON.deserialize(buffer, { validation: { utf8: true } })).to.throw(
+            BSON.BSONError,
+            /Invalid UTF-8 string in BSON document/i
+          );
+
+          // specific case
+          expect(() => BSON.deserialize(buffer, { validation: { utf8: { a: true } } })).to.throw(
+            BSON.BSONError,
+            /Invalid UTF-8 string in BSON document/i
+          );
+        });
+      });
+
+      context(`when utf8 validation is off and input is ${test.name}`, () => {
+        it('returns a string containing at least 1 replacement character', () => {
+          // global case
+          expect(BSON.deserialize(buffer, { validation: { utf8: false } }))
+            .to.have.property('a')
+            .that.includes('\uFFFD');
+
+          // specific case
+          expect(BSON.deserialize(buffer, { validation: { utf8: { a: false } } }))
+            .to.have.property('a')
+            .that.includes('\uFFFD');
+        });
+      });
+    }
   });
 });
