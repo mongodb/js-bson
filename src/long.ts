@@ -243,13 +243,8 @@ export class Long extends BSONValue {
    * @returns The corresponding Long value
    */
   static fromBigInt(value: bigint, unsigned?: boolean): Long {
-    /* eslint-disable no-bigint-usage/no-bigint-literals */
-    const bit32Mask = 0xffffffffn;
-
-    const lowBits = value & bit32Mask;
-    const highBits = (value >> 32n) & bit32Mask;
-    /* eslint-enable no-bigint-usage/no-bigint-literals */
-    return new Long(Number(lowBits), Number(highBits), unsigned);
+    // eslint-disable-next-line no-bigint-usage/no-bigint-literals
+    return new Long(Number(value & 0xffffffffn), Number((value >> 32n) & 0xffffffffn), unsigned);
   }
 
   /**
