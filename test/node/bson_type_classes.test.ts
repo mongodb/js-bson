@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { inspect } from 'node:util';
-import { __isWeb__ } from '../register-bson';
+import { __isWeb__, __noBigInt__ } from '../register-bson';
 import {
   Binary,
   BSONRegExp,
@@ -44,7 +44,7 @@ const BSONTypeClassCtors = new Map<string, () => BSONValue>([
   ['Decimal128', () => new Decimal128('1.23')],
   ['Double', () => new Double(1.23)],
   ['Int32', () => new Int32(1)],
-  ['Long', () => new Long(1n)],
+  ['Long', () => (__noBigInt__ ? new Long(1) : new Long(1n))],
   ['MinKey', () => new MinKey()],
   ['MaxKey', () => new MaxKey()],
   ['ObjectId', () => new ObjectId('00'.repeat(12))],

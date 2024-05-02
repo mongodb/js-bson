@@ -177,6 +177,17 @@ export class Long extends BSONValue {
   static MIN_VALUE = Long.fromBits(0, 0x80000000 | 0, false);
 
   /**
+   * @internal
+   * bit mask used for fromBigInt method, lazy loaded
+   */
+  static FROM_BIGINT_BIT_MASK: bigint;
+
+  /**
+   * @internal
+   * bit shift used for fromBigInt method, lazy loaded */
+  static FROM_BIGINT_BIT_SHIFT: bigint;
+
+  /**
    * Returns a Long representing the 64 bit integer that comes by concatenating the given low and high bits.
    * Each is assumed to use 32 bits.
    * @param lowBits - The low 32 bits
@@ -243,8 +254,15 @@ export class Long extends BSONValue {
    * @returns The corresponding Long value
    */
   static fromBigInt(value: bigint, unsigned?: boolean): Long {
-    // eslint-disable-next-line no-bigint-usage/no-bigint-literals
-    return new Long(Number(value & 0xffffffffn), Number((value >> 32n) & 0xffffffffn), unsigned);
+    // eslint-disable-next-line no-restricted-globals
+    Long.FROM_BIGINT_BIT_MASK ??= BigInt(0xffffffff);
+    // eslint-disable-next-line no-restricted-globals
+    Long.FROM_BIGINT_BIT_SHIFT ??= BigInt(32);
+    return new Long(
+      Number(value & Long.FROM_BIGINT_BIT_MASK),
+      Number((value >> Long.FROM_BIGINT_BIT_SHIFT) & Long.FROM_BIGINT_BIT_MASK),
+      unsigned
+    );
   }
 
   /**

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import * as BSON from '../register-bson';
-import { Timestamp } from '../register-bson';
+import { Timestamp, __noBigInt__ } from '../register-bson';
 
 describe('Timestamp', () => {
   describe('static MAX_VALUE', () => {
@@ -10,11 +10,14 @@ describe('Timestamp', () => {
   });
 
   it('should always be an unsigned value', () => {
+    let bigIntInputs: Timestamp[] = [];
+    if (!__noBigInt__) {
+      bigIntInputs = [new BSON.Timestamp(0xffffffffffn), new BSON.Timestamp(0xffffffffffffffffn)];
+    }
     const table = [
       // @ts-expect-error: Not advertized by the types, but constructs a 0 timestamp
       new BSON.Timestamp(),
-      new BSON.Timestamp(0xffffffffffn),
-      new BSON.Timestamp(0xffffffffffffffffn),
+      ...bigIntInputs,
       new BSON.Timestamp(new BSON.Long(0xffff_ffff, 0xffff_ffff, false)),
       new BSON.Timestamp(new BSON.Long(0xffff_ffff, 0xffff_ffff, true)),
       new BSON.Timestamp({ t: 0xffff_ffff, i: 0xffff_ffff }),
@@ -29,22 +32,29 @@ describe('Timestamp', () => {
   });
 
   context('output formats', () => {
-    const timestamp = new BSON.Timestamp(0xffffffffffffffffn);
+    beforeEach(function () {
+      if (__noBigInt__) {
+        this.currentTest?.skip();
+      }
+    });
 
     context('when converting toString', () => {
       it('exports an unsigned number', () => {
+        const timestamp = new BSON.Timestamp(0xffffffffffffffffn);
         expect(timestamp.toString()).to.equal('18446744073709551615');
       });
     });
 
     context('when converting toJSON', () => {
       it('exports an unsigned number', () => {
+        const timestamp = new BSON.Timestamp(0xffffffffffffffffn);
         expect(timestamp.toJSON()).to.deep.equal({ $timestamp: '18446744073709551615' });
       });
     });
 
     context('when converting toExtendedJSON', () => {
       it('exports an unsigned number', () => {
+        const timestamp = new BSON.Timestamp(0xffffffffffffffffn);
         expect(timestamp.toExtendedJSON()).to.deep.equal({
           $timestamp: { t: 4294967295, i: 4294967295 }
         });
