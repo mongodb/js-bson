@@ -133,26 +133,51 @@ export class Long extends BSONValue {
 
   /**
    * Constructs a 64 bit two's-complement integer, given its low and high 32 bit values as *signed* integers.
-   *  See the from* functions below for more convenient ways of constructing Longs.
-   *
-   * Acceptable signatures are:
-   * - Long(low, high, unsigned?)
-   * - Long(bigint, unsigned?)
-   * - Long(string, unsigned?)
    *
    * @param low - The low (signed) 32 bits of the long
    * @param high - The high (signed) 32 bits of the long
    * @param unsigned - Whether unsigned or not, defaults to signed
    */
-  constructor(low: number | bigint | string = 0, high?: number | boolean, unsigned?: boolean) {
+  constructor(low: number, high?: number, unsigned?: boolean);
+  /**
+   * Constructs a 64 bit two's-complement integer, given a bigint representation.
+   *
+   * @param value - BigInt representation of the long value
+   * @param unsigned - Whether unsigned or not, defaults to signed
+   */
+  constructor(value: bigint, unsigned?: boolean);
+  /**
+   * Constructs a 64 bit two's-complement integer, given a string representation.
+   *
+   * @param value - 32 bit number representation of the Long
+   * @param unsigned - Whether unsigned or not, defaults to signed
+   */
+  constructor(value: number, unsigned?: boolean);
+  /**
+   * Constructs a 64 bit two's-complement integer, given a string representation.
+   *
+   * @param value - String representation of the long value
+   * @param unsigned - Whether unsigned or not, defaults to signed
+   */
+  constructor(value: string, unsigned?: boolean);
+  constructor(
+    lowOrValue: number | bigint | string = 0,
+    highOrUnsigned?: number | boolean,
+    unsigned?: boolean
+  ) {
     super();
-    if (typeof low === 'bigint') {
-      Object.assign(this, Long.fromBigInt(low, !!high));
-    } else if (typeof low === 'string') {
-      Object.assign(this, Long.fromString(low, !!high));
+    unsigned = typeof highOrUnsigned === 'boolean' ? highOrUnsigned : !!unsigned;
+    const high = typeof highOrUnsigned === 'number' ? highOrUnsigned : 0;
+    if (typeof lowOrValue === 'bigint') {
+      const longFromBigInt = Long.fromBigInt(lowOrValue, unsigned);
+      this.low = longFromBigInt.low;
+      this.high = longFromBigInt.high;
+      this.unsigned = longFromBigInt.unsigned;
+    } else if (typeof lowOrValue === 'string') {
+      Object.assign(this, Long.fromString(lowOrValue, unsigned));
     } else {
-      this.low = low | 0;
-      this.high = (high as number) | 0;
+      this.low = lowOrValue | 0;
+      this.high = high | 0;
       this.unsigned = !!unsigned;
     }
   }
@@ -175,17 +200,6 @@ export class Long extends BSONValue {
   static MAX_VALUE = Long.fromBits(0xffffffff | 0, 0x7fffffff | 0, false);
   /** Minimum signed value. */
   static MIN_VALUE = Long.fromBits(0, 0x80000000 | 0, false);
-
-  /**
-   * @internal
-   * bit mask used for fromBigInt method, lazy loaded
-   */
-  static FROM_BIGINT_BIT_MASK: bigint;
-
-  /**
-   * @internal
-   * bit shift used for fromBigInt method, lazy loaded */
-  static FROM_BIGINT_BIT_SHIFT: bigint;
 
   /**
    * Returns a Long representing the 64 bit integer that comes by concatenating the given low and high bits.
@@ -255,12 +269,12 @@ export class Long extends BSONValue {
    */
   static fromBigInt(value: bigint, unsigned?: boolean): Long {
     // eslint-disable-next-line no-restricted-globals
-    Long.FROM_BIGINT_BIT_MASK ??= BigInt(0xffffffff);
+    const FROM_BIGINT_BIT_MASK = BigInt(0xffffffff);
     // eslint-disable-next-line no-restricted-globals
-    Long.FROM_BIGINT_BIT_SHIFT ??= BigInt(32);
+    const FROM_BIGINT_BIT_SHIFT = BigInt(32);
     return new Long(
-      Number(value & Long.FROM_BIGINT_BIT_MASK),
-      Number((value >> Long.FROM_BIGINT_BIT_SHIFT) & Long.FROM_BIGINT_BIT_MASK),
+      Number(value & FROM_BIGINT_BIT_MASK),
+      Number((value >> FROM_BIGINT_BIT_SHIFT) & FROM_BIGINT_BIT_MASK),
       unsigned
     );
   }

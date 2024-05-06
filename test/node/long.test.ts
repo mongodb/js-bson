@@ -171,25 +171,30 @@ describe('Long', function () {
       name: string,
       input: bigint,
       unsigned: boolean | undefined,
-      expectedStr?: string
+      expectedLong?: Long
     ][] = [
-      ['0', BigInt('0'), false, '0'],
-      ['-0 (bigint coerces this to 0)', BigInt('-0'), false, '0'],
+      ['0', BigInt('0'), false, Long.ZERO],
+      ['-0 (bigint coerces this to 0)', BigInt('-0'), false, Long.ZERO],
       [
         'max unsigned input',
         BigInt(Long.MAX_UNSIGNED_VALUE.toString(10)),
         true,
-        Long.MAX_UNSIGNED_VALUE.toString(10)
+        Long.MAX_UNSIGNED_VALUE
       ],
-      ['max signed input', BigInt(Long.MAX_VALUE.toString(10)), false, Long.MAX_VALUE.toString(10)],
-      ['min signed input', BigInt(Long.MIN_VALUE.toString(10)), false, Long.MIN_VALUE.toString(10)],
-      ['negative greater than 32 bits', BigInt(-9228915101), false, '-9228915101'],
-      ['less than 32 bits', BigInt(245666), false, '245666'],
-      ['unsigned less than 32 bits', BigInt(245666), true, '245666'],
-      ['negative less than 32 bits', BigInt(-245666), false, '-245666'],
-      ['max int32', BigInt(BSON_INT32_MAX), false, BSON_INT32_MAX.toString(10)],
-      ['max int32 unsigned', BigInt(BSON_INT32_MAX), true, BSON_INT32_MAX.toString(10)],
-      ['min int32', BigInt(BSON_INT32_MIN), false, BSON_INT32_MIN.toString(10)]
+      ['max signed input', BigInt(Long.MAX_VALUE.toString(10)), false, Long.MAX_VALUE],
+      ['min signed input', BigInt(Long.MIN_VALUE.toString(10)), false, Long.MIN_VALUE],
+      [
+        'negative greater than 32 bits',
+        BigInt(-9228915101),
+        false,
+        Long.fromBits(0xd9e9ee63, 0xfffffffd)
+      ],
+      ['less than 32 bits', BigInt(245666), false, new Long(245666)],
+      ['unsigned less than 32 bits', BigInt(245666), true, new Long(245666, true)],
+      ['negative less than 32 bits', BigInt(-245666), false, new Long(-245666, -1)],
+      ['max int32', BigInt(BSON_INT32_MAX), false, new Long(BSON_INT32_MAX)],
+      ['max int32 unsigned', BigInt(BSON_INT32_MAX), true, new Long(BSON_INT32_MAX, 0, true)],
+      ['min int32', BigInt(BSON_INT32_MIN), false, new Long(BSON_INT32_MIN, -1)]
     ];
 
     beforeEach(function () {
@@ -198,10 +203,10 @@ describe('Long', function () {
       }
     });
 
-    for (const [testName, num, unsigned, expectedStr] of inputs) {
+    for (const [testName, num, unsigned, expectedLong] of inputs) {
       context(`when the input is ${testName}`, () => {
         it(`should return a Long representation of the input`, () => {
-          expect(Long.fromBigInt(num, unsigned).toString(10)).to.equal(expectedStr);
+          expect(Long.fromBigInt(num, unsigned)).to.deep.equal(expectedLong);
         });
       });
     }
