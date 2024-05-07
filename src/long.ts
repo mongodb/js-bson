@@ -1078,7 +1078,6 @@ export class Long extends BSONValue {
   /** Converts the Long to a BigInt (arbitrary precision). */
   toBigInt(): bigint {
     // eslint-disable-next-line no-restricted-globals -- This is allowed here as it is explicitly requesting a bigint
-
     return BigInt(this.toString());
   }
 
