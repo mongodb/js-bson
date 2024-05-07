@@ -32,7 +32,7 @@ jobs:
       - if: ${{ steps.release.outputs.release_created }}
         name: actions/setup
         uses: ./.github/actions/setup
-      -  if: ${{ steps.release.outputs.release_created }}
+      - if: ${{ steps.release.outputs.release_created }}
         name: Create, sign, and commit signed tarball
         uses: drivers-github-tools/garasign/git-sign/action.yml
         with: 
@@ -42,6 +42,7 @@ jobs:
           artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
           artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}  
       - if: ${{ steps.release.outputs.release_created }}
-        run: npm publish --provenance
+        run: echo 'done'
+        #run: npm publish --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
