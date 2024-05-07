@@ -119,17 +119,17 @@ export class Long extends BSONValue {
   /**
    * The high 32 bits as a signed value.
    */
-  high!: number;
+  high: number;
 
   /**
    * The low 32 bits as a signed value.
    */
-  low!: number;
+  low: number;
 
   /**
    * Whether unsigned or not.
    */
-  unsigned!: boolean;
+  unsigned: boolean;
 
   /**
    * Constructs a 64 bit two's-complement integer, given its low and high 32 bit values as *signed* integers.
@@ -149,13 +149,6 @@ export class Long extends BSONValue {
   /**
    * Constructs a 64 bit two's-complement integer, given a string representation.
    *
-   * @param value - 32 bit number representation of the Long
-   * @param unsigned - Whether unsigned or not, defaults to signed
-   */
-  constructor(value: number, unsigned?: boolean);
-  /**
-   * Constructs a 64 bit two's-complement integer, given a string representation.
-   *
    * @param value - String representation of the long value
    * @param unsigned - Whether unsigned or not, defaults to signed
    */
@@ -166,14 +159,14 @@ export class Long extends BSONValue {
     unsigned?: boolean
   ) {
     super();
-    unsigned = typeof highOrUnsigned === 'boolean' ? highOrUnsigned : Boolean(unsigned);
+    const unsignedBool = typeof highOrUnsigned === 'boolean' ? highOrUnsigned : Boolean(unsigned);
     const high = typeof highOrUnsigned === 'number' ? highOrUnsigned : 0;
     const res =
       typeof lowOrValue === 'string'
-        ? Long.fromString(lowOrValue, unsigned)
+        ? Long.fromString(lowOrValue, unsignedBool)
         : typeof lowOrValue === 'bigint'
-          ? Long.fromBigInt(lowOrValue, unsigned)
-          : { low: lowOrValue | 0, high: high | 0, unsigned };
+          ? Long.fromBigInt(lowOrValue, unsignedBool)
+          : { low: lowOrValue | 0, high: high | 0, unsigned: unsignedBool };
     this.low = res.low;
     this.high = res.high;
     this.unsigned = res.unsigned;
@@ -1085,6 +1078,7 @@ export class Long extends BSONValue {
   /** Converts the Long to a BigInt (arbitrary precision). */
   toBigInt(): bigint {
     // eslint-disable-next-line no-restricted-globals -- This is allowed here as it is explicitly requesting a bigint
+
     return BigInt(this.toString());
   }
 
