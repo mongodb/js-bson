@@ -24,15 +24,7 @@ jobs:
           pull-request-title-pattern: 'chore${scope}: release ${version} [skip-ci]'
           pull-request-header: 'Please run the release_notes action before releasing to generate release highlights'
           changelog-path: HISTORY.md
-          default-branch: main
-
-      - id: prepare-garasign
-        uses: drivers-github-tools/garasign/setup/action.yml
-        with: 
-          garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
-          garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
-          artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
-          artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}       
+          default-branch: main     
 
       # If release-please created a release, publish to npm
       - if: ${{ steps.release.outputs.release_created }}
