@@ -26,12 +26,29 @@ jobs:
           changelog-path: HISTORY.md
           default-branch: main
 
+      - id: prepare-garasign
+        uses: drivers-github-tools/garasign/setup/action.yml
+        with: 
+          garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
+          garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
+          artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
+          artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}       
+
       # If release-please created a release, publish to npm
       - if: ${{ steps.release.outputs.release_created }}
         uses: actions/checkout@v3
       - if: ${{ steps.release.outputs.release_created }}
         name: actions/setup
         uses: ./.github/actions/setup
+      -  if: ${{ steps.release.outputs.release_created }}
+        name: Create, sign, and commit signed tarball
+        uses: drivers-github-tools/garasign/git-sign/action.yml
+        with: 
+          command: "$(pwd)/.github/workflows/create-sign-and-commit-tarball.sh ${{ env.PACKAGE_VERSION }} ${{ vars.GPG_KEY_ID }}"
+          garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
+          garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
+          artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
+          artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}  
       - if: ${{ steps.release.outputs.release_created }}
         run: npm publish --provenance
         env:

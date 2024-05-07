@@ -13,3 +13,9 @@ runs:
       shell: bash
     - run: npm clean-install
       shell: bash
+    - uses: drivers-github-tools/garasign/setup/action.yml
+      with: 
+        garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
+        garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
+        artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
+        artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
