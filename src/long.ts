@@ -166,20 +166,17 @@ export class Long extends BSONValue {
     unsigned?: boolean
   ) {
     super();
-    unsigned = typeof highOrUnsigned === 'boolean' ? highOrUnsigned : !!unsigned;
+    unsigned = typeof highOrUnsigned === 'boolean' ? highOrUnsigned : Boolean(unsigned);
     const high = typeof highOrUnsigned === 'number' ? highOrUnsigned : 0;
-    if (typeof lowOrValue === 'bigint') {
-      const longFromBigInt = Long.fromBigInt(lowOrValue, unsigned);
-      this.low = longFromBigInt.low;
-      this.high = longFromBigInt.high;
-      this.unsigned = longFromBigInt.unsigned;
-    } else if (typeof lowOrValue === 'string') {
-      Object.assign(this, Long.fromString(lowOrValue, unsigned));
-    } else {
-      this.low = lowOrValue | 0;
-      this.high = high | 0;
-      this.unsigned = !!unsigned;
-    }
+    const res =
+      typeof lowOrValue === 'string'
+        ? Long.fromString(lowOrValue, unsigned)
+        : typeof lowOrValue === 'bigint'
+          ? Long.fromBigInt(lowOrValue, unsigned)
+          : { low: lowOrValue | 0, high: high | 0, unsigned };
+    this.low = res.low;
+    this.high = res.high;
+    this.unsigned = res.unsigned;
   }
 
   static TWO_PWR_24 = Long.fromInt(TWO_PWR_24_DBL);
