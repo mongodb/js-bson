@@ -27,12 +27,9 @@ jobs:
           default-branch: main     
 
       # If release-please created a release, publish to npm
-      - if: ${{ steps.release.outputs.release_created }}
         uses: actions/checkout@v3
-      - if: ${{ steps.release.outputs.release_created }}
         name: actions/setup
         uses: ./.github/actions/setup
-      - if: ${{ steps.release.outputs.release_created }}
         name: Create, sign, and commit signed tarball
         uses: mongodb-labs/drivers-github-tools/garasign/git-sign@main
         with: 
@@ -41,7 +38,6 @@ jobs:
           garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
           artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
           artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}  
-      - if: ${{ steps.release.outputs.release_created }}
         run: echo 'done'
         #run: npm publish --provenance
         #env:
