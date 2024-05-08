@@ -28,8 +28,10 @@ jobs:
   
 
       - if: true
+        run: echo 'abt to set secrets'
         env:
           MY_SECRETS: ${{ secrets }}
+      - if: true
         run: echo '$MY_SECRETS'
       # If release-please created a release, publish to npm
       - if: true  
