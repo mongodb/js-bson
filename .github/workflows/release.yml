@@ -27,8 +27,6 @@ jobs:
           default-branch: main     
 
       # If release-please created a release, publish to npm
-      - if: true
-        run: echo 'secrets printing nowwww  ${{ secrets.NPM_TOKEN }}'
       - if: true  
         uses: actions/checkout@v3
       - if: true
@@ -39,12 +37,12 @@ jobs:
         uses: mongodb-labs/drivers-github-tools/garasign/git-sign@main
         with: 
           command: "$(pwd)/.github/workflows/create-sign-and-commit-tarball.sh ${{ env.PACKAGE_VERSION }} ${{ vars.GPG_KEY_ID }}"
-          garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
-          garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
-          artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
-          artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}  
+          garasign_username: 'aditi.khare' #${{ secrets.GRS_CONFIG_USER1_USERNAME }}
+          garasign_password: 'passwordabc' #${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
+          artifactory_username: 'username' #${{ secrets.ARTIFACTORY_USER }}
+          artifactory_password: 'password123' #${{ secrets.ARTIFACTORY_PASSWORD }}  
       - if: true
-        run: echo 'done'
-        #run: npm publish --provenance
-        #env:
+        run: echo 'done!!!!!!!!!!!'
+        # run: npm publish --provenance
+        # env:
           #NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
