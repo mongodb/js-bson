@@ -13,11 +13,6 @@ name: release
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    env:
-        garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
-        garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
-        artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
-        artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
     steps:
       - id: release
         uses: google-github-actions/release-please-action@v3
@@ -30,10 +25,10 @@ jobs:
           pull-request-header: 'Please run the release_notes action before releasing to generate release highlights'
           changelog-path: HISTORY.md
           default-branch: main     
-  
 
       - if: true
-        run: echo $garasign_username
+        # prints nothing atm :(
+        run: echo $secrets.GRS_CONFIG_USER1_USERNAME
       # If release-please created a release, publish to npm
       - if: true  
         uses: actions/checkout@v3
