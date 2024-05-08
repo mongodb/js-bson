@@ -33,7 +33,7 @@ jobs:
   
 
       - if: true
-        run: echo '$MY_SECRETS'
+        run: echo '$garasign_username'
       # If release-please created a release, publish to npm
       - if: true  
         uses: actions/checkout@v3
