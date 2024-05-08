@@ -4,7 +4,7 @@ description: 'Installs node, driver dependencies, and builds source'
 runs:
   using: composite
   steps:
-    - uses: actions/setup-node@v3
+    - uses: actions/setup-node@v4
       with:
         node-version: 'lts/*'
         cache: 'npm'
@@ -13,8 +13,3 @@ runs:
       shell: bash
     - run: npm clean-install
       shell: bash
-      with: 
-        garasign_username: 'aditi.khare' #${{ secrets.GRS_CONFIG_USER1_USERNAME }}
-        garasign_password: 'passwordabc' #${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
-        artifactory_username: 'username' #${{ secrets.ARTIFACTORY_USER }}
-        artifactory_password: 'password123' #${{ secrets.ARTIFACTORY_PASSWORD }}  
