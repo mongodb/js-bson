@@ -26,6 +26,8 @@ jobs:
           changelog-path: HISTORY.md
           default-branch: main     
 
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       # If release-please created a release, publish to npm
       - if: true  
         uses: actions/checkout@v3
@@ -44,5 +46,3 @@ jobs:
       - if: true
         run: echo 'done!!!!!!!!!!!'
         # run: npm publish --provenance
-        # env:
-          #NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
