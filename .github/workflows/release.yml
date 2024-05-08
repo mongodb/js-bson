@@ -45,10 +45,10 @@ jobs:
         uses: mongodb-labs/drivers-github-tools/garasign/git-sign@main
         with: 
           command: "$(pwd)/.github/workflows/create-sign-and-commit-tarball.sh ${{ env.PACKAGE_VERSION }} ${{ vars.GPG_KEY_ID }}"
-          garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
-          garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
-          artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
-          artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          garasign_username: ${{ garasign_username }}
+          garasign_password: ${{ garasign_password }}
+          artifactory_username: ${{ artifactory_username }}
+          artifactory_password: ${{ artifactory_password }}
       - if: true
         run: echo 'done!!!!!!!!!!!'
         # run: npm publish --provenance
