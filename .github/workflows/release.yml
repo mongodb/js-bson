@@ -30,7 +30,7 @@ jobs:
       - if: true
         env:
           MY_SECRETS: ${{ secrets }}
-        run: echo MY_SECRETS
+        run: echo '$MY_SECRETS'
       # If release-please created a release, publish to npm
       - if: true  
         uses: actions/checkout@v3
