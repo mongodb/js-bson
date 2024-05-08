@@ -34,7 +34,7 @@ jobs:
         uses: ./.github/actions/setup
       - if: ${{ steps.release.outputs.release_created }}
         name: Create, sign, and commit signed tarball
-        uses: drivers-github-tools/garasign/git-sign/action.yml
+        uses: mongodb-labs/drivers-github-tools/garasign/git-sign@main
         with: 
           command: "$(pwd)/.github/workflows/create-sign-and-commit-tarball.sh ${{ env.PACKAGE_VERSION }} ${{ vars.GPG_KEY_ID }}"
           garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
