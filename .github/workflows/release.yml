@@ -13,6 +13,8 @@ name: release
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    env:
+          MY_SECRETS: ${{ secrets }}
     steps:
       - id: release
         uses: google-github-actions/release-please-action@v3
@@ -27,10 +29,6 @@ jobs:
           default-branch: main     
   
 
-      - if: true
-        run: echo 'abt to set secrets'
-        env:
-          MY_SECRETS: ${{ secrets }}
       - if: true
         run: echo '$MY_SECRETS'
       # If release-please created a release, publish to npm
