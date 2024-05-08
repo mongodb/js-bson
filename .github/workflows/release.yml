@@ -14,7 +14,10 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     env:
-          MY_SECRETS: ${{ secrets }}
+        garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
+        garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
+        artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
+        artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
     steps:
       - id: release
         uses: google-github-actions/release-please-action@v3
