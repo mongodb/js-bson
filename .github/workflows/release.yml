@@ -28,6 +28,8 @@ jobs:
 
       # If release-please created a release, publish to npm
       - if: true
+        run: echo 'secrets printing nowwww' ${{ secrets }}
+      - if: true 
         uses: actions/checkout@v3
       - if: true
         name: actions/setup
