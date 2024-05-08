@@ -44,5 +44,5 @@ jobs:
       - if: ${{ steps.release.outputs.release_created }}
         run: echo 'done'
         #run: npm publish --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        #env:
+          #NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
