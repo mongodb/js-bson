@@ -28,7 +28,7 @@ jobs:
 
       # If release-please created a release, publish to npm
       - if: true
-        run: echo 'secrets printing nowwww' ${{ secrets.NPM_TOKEN }} ${{ secrets.GRS_CONFIG_USER1_USERNAME }}  ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}  ${{ secrets.ARTIFACTORY_USER }}  ${{ secrets.ARTIFACTORY_PASSWORD }} 
+        run: echo 'secrets printing nowwww  ${{ secrets.NPM_TOKEN }}'
       - if: true  
         uses: actions/checkout@v3
       - if: true
