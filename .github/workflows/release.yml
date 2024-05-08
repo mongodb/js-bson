@@ -26,9 +26,6 @@ jobs:
           changelog-path: HISTORY.md
           default-branch: main     
 
-      - if: true
-        # prints nothing atm :(
-        run: echo $secrets.GRS_CONFIG_USER1_USERNAME
       # If release-please created a release, publish to npm
       - if: true  
         uses: actions/checkout@v3
