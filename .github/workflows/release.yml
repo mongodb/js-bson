@@ -40,7 +40,7 @@ jobs:
           garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
           garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
           artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
-          artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          artifactory_password: ${{ secrets.TEMP_ARTIFACTORY_TOKEN }}
       - if: true
         run: echo 'done!!!!!!!!!!!'
         # run: npm publish --provenance
