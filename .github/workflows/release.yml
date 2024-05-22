@@ -42,15 +42,9 @@ jobs:
           garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
           artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
           artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
-      - if: steps.release.outputs.release_created
-        name: "Upload artifacts"
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.PACKAGE_FILE }}
-          path: |
-            ${{ env.PACKAGE_FILE }}
-            ${{ env.PACKAGE_FILE }}.sig
-          retention-days: 3
+      - if: ${{ steps.release.outputs.release_created }}
+        name: "Upload release artifacts"
+        run: gh release upload v${{ env.PACKAGE_VERSION }} ${{ env.PACKAGE_FILE }}.sig
       - if: steps.release.outputs.release_created
         run: npm publish --provenance
         env:
