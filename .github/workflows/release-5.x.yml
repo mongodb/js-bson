@@ -53,6 +53,9 @@ jobs:
             ${{ env.PACKAGE_FILE }}.sig
           retention-days: 3
       - if: ${{ steps.release.outputs.release_created }}
+        name: "Upload release artifacts"
+        run: gh release upload ${{ github.ref_name }} ${{ env.PACKAGE_FILE }} ${{ env.PACKAGE_FILE }}.sig
+      - if: ${{ steps.release.outputs.release_created }}
         run: npm publish --provenance --tag=5x
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
