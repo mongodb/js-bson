@@ -25,6 +25,33 @@ jobs:
       - if: ${{ steps.release.outputs.release_created }}
         name: actions/setup
         uses: ./.github/actions/setup
+      - if: steps.release.outputs.release_created
+        run: npm pack
+        shell: bash
+      - if: steps.release.outputs.release_created
+        name: Get release version and release package file name
+        run: |
+          PACKAGE_VERSION=$(jq '.version' package.json | tr -d '"')
+          echo "PACKAGE_VERSION=${PACKAGE_VERSION}" >> "$GITHUB_ENV"
+          echo "PACKAGE_FILE=bson-${PACKAGE_VERSION}.tgz" >> "$GITHUB_ENV"
+      - if: steps.release.outputs.release_created
+        name: Create detached signature
+        uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@main
+        with:
+          filenames: ${{ env.PACKAGE_FILE }}
+          garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
+          garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
+          artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
+          artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+      - if: steps.release.outputs.release_created
+        name: "Upload artifacts"
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PACKAGE_FILE }}
+          path: |
+            ${{ env.PACKAGE_FILE }}
+            ${{ env.PACKAGE_FILE }}.sig
+          retention-days: 3
       - if: ${{ steps.release.outputs.release_created }}
         run: npm publish --provenance --tag=5x
         env:
