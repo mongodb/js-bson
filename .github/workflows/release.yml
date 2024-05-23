@@ -27,24 +27,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: actions/setup
         uses: ./.github/actions/setup
-      - run: npm pack
-        shell: bash
-      - name: Get release version and release package file name
-        run: |
-          PACKAGE_VERSION=$(jq --raw-output '.version' package.json)
-          echo "PACKAGE_VERSION=${PACKAGE_VERSION}" >> "$GITHUB_OUTPUT"
-          echo "PACKAGE_FILE=bson-${PACKAGE_VERSION}.tgz" >> "$GITHUB_OUTPUT"
-      - name: Create detached signature
-        uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@v1
-        with:
-          filenames: ${{ env.PACKAGE_FILE }}
-          garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
-          garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
-          artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
-          artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
-      - if: false
-        name: "Upload release artifacts"
-        run: gh release upload v${{ env.PACKAGE_VERSION }} ${{ env.PACKAGE_FILE }}.sig
+      - name: actions/compress_and_sign
+        uses: ./.github/actions/compress_and_sign
       - if: false
         run: npm publish --provenance
         env:

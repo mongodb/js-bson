@@ -1,0 +1,29 @@
+name: Compress and Sign
+description: 'Compresses package and signs with garasign'
+
+outputs:
+  random-number:
+    description: "Random number"
+    value: ${{ steps.random-number-generator.outputs.random-number }}
+runs:
+  using: composite
+  output: 
+  steps:
+    - run: npm pack
+      shell: bash
+    - name: Get release version and release package file name
+      id: vars
+      run: |
+        package_version=$(jq --raw-output '.version' package.json)
+        echo "package_version=${package_version}" >> "$GITHUB_OUTPUT"
+        echo "package_file=bson-${package_version}.tgz" >> "$GITHUB_OUTPUT"
+    - name: Create detached signature
+      uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@v1
+      with:
+        filenames: ${{ steps.vars.package_version }}
+        garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
+        garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
+        artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
+        artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+    - name: "Upload release artifacts"
+      run: gh release upload v${{ steps.vars.PACKAGE_VERSION }} ${{ steps.vars.PACKAGE_FILE }}.sig
