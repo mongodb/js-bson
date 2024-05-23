@@ -15,14 +15,14 @@ runs:
   using: composite
   steps:
     - run: npm pack
-      shell: ubuntu-latest
+      shell: bash
     - name: Get release version and release package file name
       id: vars
       run: |
         package_version=$(jq --raw-output '.version' package.json)
         echo "package_version=${package_version}" >> "$GITHUB_OUTPUT"
         echo "package_file=bson-${package_version}.tgz" >> "$GITHUB_OUTPUT"
-      shell: ubuntu-latest
+      shell: bash
     - name: Create detached signature
       uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@v1
       with:
@@ -31,8 +31,8 @@ runs:
         garasign_password: ${{ inputs.garasign_password }}
         artifactory_username: ${{ inputs.artifactory_username }}
         artifactory_password: ${{ inputs.artifactory_password }}
-      shell: ubuntu-latest
+      shell: bash
     - if: false
       name: "Upload release artifacts"
       run: gh release upload v${{ steps.vars.package_version }} ${{ steps.vars.package_file }}.sig
-      shell: ubuntu-latest
+      shell: bash
