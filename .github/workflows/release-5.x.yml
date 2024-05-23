@@ -23,6 +23,7 @@ jobs:
   
   compress-sign-and-upload:
     needs: [release_please]
+    if: ${{ needs.release_please.outputs.release_created }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,10 +44,8 @@ jobs:
           garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
           artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
           artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
-      - if: false
-        name: "Upload release artifacts"
+      - name: "Upload release artifacts"
         run: gh release upload v${{ env.PACKAGE_VERSION }} ${{ env.PACKAGE_FILE }}.sig
-      - if: false
-        run: npm publish --provenance --tag=5x
+      - run: npm publish --provenance --tag=5x
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
