@@ -37,7 +37,7 @@ jobs:
       - name: Create detached signature
         uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@v1
         with:
-          filenames: $PACKAGE_FILE
+          filenames: ${{ env.PACKAGE_FILE }}
           garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
           garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
           artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
