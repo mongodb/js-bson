@@ -29,13 +29,13 @@ runs:
       shell: bash
     - name: Create detached signature
       uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@v1
+      shell: bash
       with:
         filenames: ${{ steps.vars.package_file }}
         garasign_username: ${{ inputs.garasign_username }}
         garasign_password: ${{ inputs.garasign_password }}
         artifactory_username: ${{ inputs.artifactory_username }}
         artifactory_password: ${{ inputs.artifactory_password }}
-      shell: bash
     - if: false
       name: "Upload release artifacts"
       run: gh release upload v${{ steps.vars.package_version }} ${{ steps.vars.package_file }}.sig
