@@ -13,9 +13,9 @@ inputs:
 
 runs:
   using: composite
+  runs-on: ubuntu-latest
   steps:
     - run: npm pack
-      shell: bash
     - name: Get release version and release package file name
       id: vars
       run: |
