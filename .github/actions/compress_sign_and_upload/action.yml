@@ -3,12 +3,16 @@ description: 'Compresses package and signs with garasign'
 
 inputs: 
     garasign_username:
+      description: 'Garasign username input for drivers-github-tools/garasign/gpg-sign'
       required: true
     garasign_password:
+      description: 'Garasign password input for drivers-github-tools/garasign/gpg-sign'
       required: true
     artifactory_username:
+      description: 'Artifactory username input for drivers-github-tools/garasign/gpg-sign'
       required: true
     artifactory_password:
+      description: 'Artifactory password input for drivers-github-tools/garasign/gpg-sign'
       required: true
 
 runs:

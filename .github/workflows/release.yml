@@ -26,8 +26,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: actions/setup
         uses: ./.github/actions/setup
-      - name: actions/compress_and_sign
-        uses: ./.github/actions/compress_and_sign
+      - name: actions/compress_sign_and_upload
+        uses: ./.github/actions/compress_sign_and_upload
         with: 
           garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
           garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
