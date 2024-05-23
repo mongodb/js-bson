@@ -1,9 +1,7 @@
 name: Compress and Sign
 description: 'Compresses package and signs with garasign'
 
-runs:
-  using: composite
-  inputs: 
+inputs: 
     garasign_username:
       required: true
     garasign_password:
@@ -12,6 +10,9 @@ runs:
       required: true
     artifactory_password:
       required: true
+
+runs:
+  using: composite
   steps:
     - run: npm pack
       shell: bash
