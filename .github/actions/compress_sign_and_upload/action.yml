@@ -3,7 +3,15 @@ description: 'Compresses package and signs with garasign'
 
 runs:
   using: composite
-  output: 
+  inputs: 
+    garasign_username:
+      required: true
+    garasign_password:
+      required: true
+    artifactory_username:
+      required: true
+    artifactory_password:
+      required: true
   steps:
     - run: npm pack
       shell: bash
@@ -17,10 +25,10 @@ runs:
       uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@v1
       with:
         filenames: ${{ steps.vars.package_file }}
-        garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
-        garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
-        artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
-        artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+        garasign_username: ${{ inputs.garasign_username }}
+        garasign_password: ${{ inputs.garasign_password }}
+        artifactory_username: ${{ inputs.artifactory_username }}
+        artifactory_password: ${{ inputs.artifactory_password }}
     - if: false
       name: "Upload release artifacts"
       run: gh release upload v${{ steps.vars.package_version }} ${{ steps.vars.package_file }}.sig

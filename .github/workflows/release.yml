@@ -28,6 +28,11 @@ jobs:
         uses: ./.github/actions/setup
       - name: actions/compress_and_sign
         uses: ./.github/actions/compress_and_sign
+        with: 
+          garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
+          garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
+          artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
+          artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
       - if: false
         run: npm publish --provenance
         env:
