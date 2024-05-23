@@ -36,8 +36,6 @@ jobs:
           PACKAGE_VERSION=$(jq --raw-output '.version' package.json)
           echo "PACKAGE_VERSION=${PACKAGE_VERSION}" >> "$GITHUB_OUTPUT"
           echo "PACKAGE_FILE=bson-${PACKAGE_VERSION}.tgz" >> "$GITHUB_OUTPUT"
-        with:
-          target-branch: 5.x
       - name: Create detached signature
         uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@v1
         with:
