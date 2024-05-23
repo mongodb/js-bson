@@ -17,8 +17,14 @@ You can learn more about it in [the specification](http://bsonspec.org).
 The GitHub release contains a detached signature file for the NPM package (named
 `mongodb-X.Y.Z.tgz.sig`).
 
-To verify the integrity of the downloaded package, run the following command:
+The following command returns the link npm package. 
+```shell
+npm view bson@vX.Y.Z dist.tarball 
+```
 
+Using the result of the above command, a `curl` command can return the official npm package for the release.
+
+To verify the integrity of the downloaded package, run the following command:
 ```shell
 gpg --verify bson-X.Y.Z.tgz.sig bson-X.Y.Z.tgz
 ```

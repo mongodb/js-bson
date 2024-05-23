@@ -11,42 +11,45 @@ permissions:
 name: release-5x
 
 jobs:
-  release-please:
+  release_please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
     steps:
       - id: release
         uses: google-github-actions/release-please-action@v4
         with:
           target-branch: 5.x
-
-      # If release-please created a release, publish to npm
-      - if: ${{ steps.release.outputs.release_created }}
-        uses: actions/checkout@v4
-      - if: ${{ steps.release.outputs.release_created }}
-        name: actions/setup
+  
+  compress-sign-and-upload:
+    needs: [release_please]
+    if: ${{ needs.release_please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: actions/setup
         uses: ./.github/actions/setup
-      - if: steps.release.outputs.release_created
-        run: npm pack
+      - run: npm pack
         shell: bash
-      - if: steps.release.outputs.release_created
-        name: Get release version and release package file name
+      - name: Get release version and release package file name
         run: |
-          PACKAGE_VERSION=$(jq '.version' package.json | tr -d '"')
-          echo "PACKAGE_VERSION=${PACKAGE_VERSION}" >> "$GITHUB_ENV"
-          echo "PACKAGE_FILE=bson-${PACKAGE_VERSION}.tgz" >> "$GITHUB_ENV"
-      - if: steps.release.outputs.release_created
-        name: Create detached signature
-        uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@main
+          PACKAGE_VERSION=$(jq --raw-output '.version' package.json)
+          echo "PACKAGE_VERSION=${PACKAGE_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "PACKAGE_FILE=bson-${PACKAGE_VERSION}.tgz" >> "$GITHUB_OUTPUT"
+        with:
+          target-branch: 5.x
+      - name: Create detached signature
+        uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@v1
         with:
           filenames: ${{ env.PACKAGE_FILE }}
           garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
           garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
           artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
           artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
-      - if: ${{ steps.release.outputs.release_created }}
+      - if: false
         name: "Upload release artifacts"
         run: gh release upload v${{ env.PACKAGE_VERSION }} ${{ env.PACKAGE_FILE }}.sig
-      - if: ${{ steps.release.outputs.release_created }}
+      - if: false
         run: npm publish --provenance --tag=5x
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
