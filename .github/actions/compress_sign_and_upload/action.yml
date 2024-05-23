@@ -29,7 +29,6 @@ runs:
       shell: bash
     - name: Create detached signature
       uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@v1
-      shell: bash
       with:
         filenames: ${{ steps.vars.package_file }}
         garasign_username: ${{ inputs.garasign_username }}
