@@ -15,7 +15,7 @@ You can learn more about it in [the specification](http://bsonspec.org).
 ### Release Integrity
 
 The GitHub release contains a detached signature file for the NPM package (named
-`mongodb-X.Y.Z.tgz.sig`).
+`bson-X.Y.Z.tgz.sig`).
 
 The following command returns the link npm package. 
 ```shell
