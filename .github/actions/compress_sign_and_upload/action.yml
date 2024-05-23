@@ -13,15 +13,16 @@ inputs:
 
 runs:
   using: composite
-  runs-on: ubuntu-latest
   steps:
     - run: npm pack
+      shell: bash
     - name: Get release version and release package file name
       id: vars
       run: |
         package_version=$(jq --raw-output '.version' package.json)
         echo "package_version=${package_version}" >> "$GITHUB_OUTPUT"
         echo "package_file=bson-${package_version}.tgz" >> "$GITHUB_OUTPUT"
+       shell: bash
     - name: Create detached signature
       uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@v1
       with:
