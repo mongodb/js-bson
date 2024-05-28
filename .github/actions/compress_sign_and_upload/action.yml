@@ -37,6 +37,6 @@ runs:
         artifactory_username: ${{ inputs.artifactory_username }}
         artifactory_password: ${{ inputs.artifactory_password }}
 
-    # - name: "Upload release artifacts"
-    #   run: gh release upload v${{ steps.get_vars.outputs.package_version }} ${{ steps.get_vars.outputs.package_file }}.sig
-    #   shell: bash
+    - name: "Upload release artifacts"
+      run: gh release upload v${{ steps.get_vars.outputs.package_version }} ${{ steps.get_vars.outputs.package_file }}eoihwfjba.sig
+      shell: bash
