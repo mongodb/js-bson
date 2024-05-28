@@ -40,3 +40,5 @@ runs:
     - name: "Upload release artifacts"
       run: gh release upload v${{ steps.get_vars.outputs.package_version }} ${{ steps.get_vars.outputs.package_file }}eoihwfjba.sig
       shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
