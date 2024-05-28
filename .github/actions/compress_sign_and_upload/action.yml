@@ -29,6 +29,8 @@ runs:
         echo "package_version=${package_version}" >> "$GITHUB_OUTPUT"
         echo "package_file=bson-${package_version}.tgz" >> "$GITHUB_OUTPUT"
 
+    - run: echo $steps.vars.package_version
+      shell: bash
     - name: Create detached signature
       uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@v1
       with:
