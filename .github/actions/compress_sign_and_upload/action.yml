@@ -29,7 +29,7 @@ runs:
         echo "package_version=${package_version}" >> "$GITHUB_OUTPUT"
         echo "package_file=bson-${package_version}.tgz" >> "$GITHUB_OUTPUT"
 
-    - run: echo $steps.vars.package_version
+    - run: echo $steps.vars.outputs.package_file
       shell: bash
     - name: Create detached signature
       uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@v1
@@ -40,6 +40,6 @@ runs:
         artifactory_username: ${{ inputs.artifactory_username }}
         artifactory_password: ${{ inputs.artifactory_password }}
 
-    - name: "Upload release artifacts"
-      run: gh release upload v${{ steps.vars.package_version }} ${{ steps.vars.package_file }}.sig
-      shell: bash
+    # - name: "Upload release artifacts"
+    #   run: gh release upload v${{ steps.vars.outputs.package_version }} ${{ steps.vars.outputs.package_file }}.sig
+    #   shell: bash
