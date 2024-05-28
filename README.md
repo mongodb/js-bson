@@ -11,6 +11,25 @@ You can learn more about it in [the specification](http://bsonspec.org).
 - [Documentation](#documentation)
 - [FAQ](#faq)
 
+
+### Release Integrity
+
+The GitHub release contains a detached signature file for the NPM package (named
+`bson-X.Y.Z.tgz.sig`).
+
+The following command returns the link npm package. 
+```shell
+npm view bson@vX.Y.Z dist.tarball 
+```
+
+Using the result of the above command, a `curl` command can return the official npm package for the release.
+
+To verify the integrity of the downloaded package, run the following command:
+```shell
+gpg --verify bson-X.Y.Z.tgz.sig bson-X.Y.Z.tgz
+```
+
+
 ## Bugs / Feature Requests
 
 Think you've found a bug? Want to see a new feature in `bson`? Please open a case in our issue management tool, JIRA:
