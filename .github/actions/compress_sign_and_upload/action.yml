@@ -38,7 +38,7 @@ runs:
         artifactory_password: ${{ inputs.artifactory_password }}
 
     - name: "Upload release artifacts"
-      run: gh release upload v${{ steps.get_vars.outputs.package_version }} ${{ steps.get_vars.outputs.package_file }}eoihwfjba.sig
+      run: gh release upload v${{ steps.get_vars.outputs.package_version }} ${{ steps.get_vars.outputs.package_file }}.sig
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
