@@ -29,15 +29,24 @@ runs:
         echo "package_version=${package_version}" >> "$GITHUB_OUTPUT"
         echo "package_file=bson-${package_version}.tgz" >> "$GITHUB_OUTPUT"
 
+    - name: Set up drivers-github-tools
+      uses: mongodb-labs/drivers-github-tools/setup@v2
+      with: 
+        aws_role_arn: ${{ inputs.aws_role_arn }}
+        aws_region_name: ${{ inputs.aws_region_name }}
+        aws_secret_id: ${{ inputs.aws_secret_id }}
     - name: Create detached signature
-      uses: mongodb-labs/drivers-github-tools/garasign/gpg-sign@v1
+      uses: mongodb-labs/drivers-github-tools/gpg-sign@v2
+    - name: "Temporary: check that signature exists"
+      uses: actions/upload-artifact@v4
       with:
-        filenames: ${{ steps.vars.package_file }}
-        garasign_username: ${{ inputs.garasign_username }}
-        garasign_password: ${{ inputs.garasign_password }}
-        artifactory_username: ${{ inputs.artifactory_username }}
-        artifactory_password: ${{ inputs.artifactory_password }}
-
-    - name: "Upload release artifacts"
-      run: gh release upload v${{ steps.vars.package_version }} ${{ steps.vars.package_file }}.sig
-      shell: bash
+        name: ${{ steps.vars.outputs.package_version }}
+        path: |
+          ${{ steps.vars.outputs.package_file }}
+          ${{ steps.vars.outputs.package_filen }}.sig
+        retention-days: 3
+    # - name: "Upload release artifacts"
+    #   run: gh release upload v${{ steps.vars.outputs.package_version }} ${{ steps.vars.outputs.package_file }}.sig
+    #   shell: bash
+    #   env:
+    #     GH_TOKEN: ${{ github.token }}
