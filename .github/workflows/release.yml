@@ -19,20 +19,57 @@ jobs:
       - id: release
         uses: google-github-actions/release-please-action@v4
 
-  compress_sign_and_upload:
-    needs: [release_please]
+  # compress_sign_and_upload:
+  #   needs: [release_please]
+  #   if: ${{ needs.release_please.outputs.release_created }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: actions/setup
+  #       uses: ./.github/actions/setup
+  #     - name: actions/compress_sign_and_upload
+  #       uses: ./.github/actions/compress_sign_and_upload
+  #       with: 
+  #         garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
+  #         garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
+  #         artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
+  #         artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+  #     - run: npm publish --provenance
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  generate_sarif_report:
+    environment: release
     runs-on: ubuntu-latest
+    permissions:
+      # required for all workflows
+      security-events: write
+      id-token: write
+      contents: write
+
     steps:
       - uses: actions/checkout@v4
       - name: actions/setup
         uses: ./.github/actions/setup
-      - name: actions/compress_sign_and_upload
-        uses: ./.github/actions/compress_sign_and_upload
+      - name: Set up drivers-github-tools
+        uses: mongodb-labs/drivers-github-tools/setup@v2
         with: 
-          garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
-          garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
-          artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
-          artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
-      - run: npm publish --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          aws_region_name: us-east-1
+          aws_role_arn: ${{ secrets.aws_role_arn }}
+          aws_secret_id: ${{ secrets.aws_secret_id }}
+
+      - name: "Generate Sarif Report"
+        uses: "alcaeus/drivers-github-tools/code-scanning-export@export-code-scanning-report"
+        with:
+          ref: main
+          output-file: sarif-report.json
+    
+      - name: "Move sarif report to output file"
+        shell: bash
+        run: cp sarif-report.json ${{ env.S3_ASSETS }}/sarif-report.json
+
+      - name: 'Print (TODO - upload to s3 instead)'
+        shell: bash
+        run: |
+          ls ${{ env.S3_ASSETS }}
+          cat ${{ env.S3_ASSETS }}/sarif-report.json

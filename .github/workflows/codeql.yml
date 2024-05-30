@@ -9,11 +9,6 @@ on:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }} - ${{ matrix.identifier }})
-    # Runner size impacts CodeQL analysis time. To learn more, please see:
-    #   - https://gh.io/recommended-hardware-resources-for-running-codeql
-    #   - https://gh.io/supported-runners-and-hardware-resources
-    #   - https://gh.io/using-larger-runners (GitHub.com only)
-    # Consider using larger runners or machines with greater resources for possible analysis time improvements.
     runs-on: 'ubuntu-latest'
     timeout-minutes: 360
     permissions:
