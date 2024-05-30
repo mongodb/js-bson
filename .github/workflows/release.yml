@@ -68,5 +68,5 @@ jobs:
         with:
           version: v6.5.0
           product_name: js-bson-development
-          files: sarif-report.json
+          file: sarif-report.json
           dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
