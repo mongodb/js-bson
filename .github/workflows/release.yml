@@ -19,24 +19,24 @@ jobs:
       - id: release
         uses: google-github-actions/release-please-action@v4
 
-  # compress_sign_and_upload:
-  #   needs: [release_please]
-  #   if: ${{ needs.release_please.outputs.release_created }}
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: actions/setup
-  #       uses: ./.github/actions/setup
-  #     - name: actions/compress_sign_and_upload
-  #       uses: ./.github/actions/compress_sign_and_upload
-  #       with: 
-  #         garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
-  #         garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
-  #         artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
-  #         artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
-  #     - run: npm publish --provenance
-  #       env:
-  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  compress_sign_and_upload:
+    needs: [release_please]
+    if: ${{ needs.release_please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: actions/setup
+        uses: ./.github/actions/setup
+      - name: actions/compress_sign_and_upload
+        uses: ./.github/actions/compress_sign_and_upload
+        with: 
+          garasign_username: ${{ secrets.GRS_CONFIG_USER1_USERNAME }}
+          garasign_password: ${{ secrets.GRS_CONFIG_USER1_PASSWORD }}
+          artifactory_username: ${{ secrets.ARTIFACTORY_USER }}
+          artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+      - run: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   generate_sarif_report:
     environment: release
@@ -63,10 +63,18 @@ jobs:
           ref: main
           output-file: sarif-report.json
 
+      - name: Get release version and release package file name
+        id: get_version
+        shell: bash
+        run: |
+          package_version=$(jq --raw-output '.version' package.json)
+          echo "package_version=${package_version}" >> "$GITHUB_OUTPUT"
+
       - name: actions/publish_asset_to_s3
         uses: baileympearson/drivers-github-tools/node/publish_asset_to_s3@add-upload-s3-action
         with:
-          version: v6.5.0
-          product_name: js-bson-development # TODO - adjust this
+          version: ${{ steps.get_version.outputs.package_version }}
+          product_name: js-bson
           file: sarif-report.json
-          dry_run:  ${{ needs.release_please.outputs.release_created != '' }}
+          dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
+
