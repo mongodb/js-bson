@@ -50,8 +50,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: actions/setup
-        uses: ./.github/actions/setup
       - name: Set up drivers-github-tools
         uses: mongodb-labs/drivers-github-tools/setup@v2
         with: 
@@ -71,4 +69,4 @@ jobs:
           version: v6.5.0
           product_name: js-bson-development
           files: sarif-report.json
-          dry_run:  ${{ needs.release_please.outputs.release_created }}
+          dry_run:  ${{ needs.release_please.outputs.release_created != '' }}
