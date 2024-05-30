@@ -67,6 +67,6 @@ jobs:
         uses: baileympearson/drivers-github-tools/node/publish_asset_to_s3@add-upload-s3-action
         with:
           version: v6.5.0
-          product_name: js-bson-development
+          product_name: js-bson-development # TODO - adjust this
           file: sarif-report.json
-          dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
+          dry_run:  ${{ needs.release_please.outputs.release_created != '' }}
