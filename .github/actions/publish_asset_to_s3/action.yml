@@ -14,8 +14,7 @@ inputs:
   dry_run:
     description: "Whether this is a dry run"
     required: false
-    type:  boolean
-    default: false
+    default: 'false'
 
 runs:
   using: composite
@@ -31,6 +30,7 @@ runs:
         else
             echo "Dry run, not uploading to S3 or creating GitHub Release"
             echo "Would upload $FILES"
+            cat $FILES
         fi
       env:
         VERSION: ${{ inputs.version }}
