@@ -64,9 +64,9 @@ jobs:
           output-file: sarif-report.json
 
       - name: actions/publish_asset_to_s3
-        uses: ./.github/actions/publish_asset_to_s3
+        uses: baileympearson/drivers-github-tools/node/publish_asset_to_s3@add-upload-s3-action
         with:
           version: v6.5.0
           product_name: js-bson-development
           files: sarif-report.json
-          dry_run:  ${{ needs.release_please.outputs.release_created != '' }}
+          dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
