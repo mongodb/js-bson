@@ -24,7 +24,7 @@ runs:
         set -eux
         if [ "$DRY_RUN" == "false" ]; then
             echo "Uploading Release Reports"
-            TARGET=s3://${AWS_BUCKET}/${PRODUCT_NAME}/${VERSION}
+            TARGET=s3://${AWS_BUCKET}/${PRODUCT_NAME}/${VERSION}/${FILES}
             aws s3 cp $FILES $TARGET
         else
             echo "Dry run, not uploading to S3 or creating GitHub Release"
