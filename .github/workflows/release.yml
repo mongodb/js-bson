@@ -73,11 +73,11 @@ jobs:
         run: |
           ls ${{ env.S3_ASSETS }}
           cat ${{ env.S3_ASSETS }}/sarif-report.json
-          
+
       - name: actions/publish_asset_to_s3
         uses: ./.github/actions/publish_asset_to_s3
         with:
           version: v6.5.0
           product_name: js-bson-development
           files: sarif-report.json
-          dry_run: false
+          dry_run: true

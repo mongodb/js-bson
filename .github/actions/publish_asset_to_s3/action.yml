@@ -1,6 +1,6 @@
 
-name: Publish Python
-description: "Publish Assets and Report"
+name: Publish Release Asset to S3
+description: "Publish Asset to S3"
 inputs:
   version:
     description: "The published version"
@@ -13,7 +13,9 @@ inputs:
     required: true
   dry_run:
     description: "Whether this is a dry run"
-    required: true
+    required: false
+    type:  boolean
+    default: false
 
 runs:
   using: composite
