@@ -58,7 +58,7 @@ jobs:
           aws_secret_id: ${{ secrets.aws_secret_id }}
 
       - name: "Generate Sarif Report"
-        uses: "alcaeus/drivers-github-tools/code-scanning-export@export-code-scanning-report"
+        uses: mongodb-labs/drivers-github-tools/node/code-scanning-export@main
         with:
           ref: main
           output-file: sarif-report.json
