@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.5.2](https://github.com/mongodb/js-bson/compare/v5.5.1...v5.5.2) (2024-06-12)
+
+
+### Bug Fixes
+
+* **NODE-6043:** Binary.toString and Binary.toJSON output with respect to position ([#666](https://github.com/mongodb/js-bson/issues/666)) ([d6b15f8](https://github.com/mongodb/js-bson/commit/d6b15f8d47dd571c2322b865fe5a4bd4cb848a77))
+* **NODE-6124:** utf8 validation is insufficiently strict ([#680](https://github.com/mongodb/js-bson/issues/680)) ([6460989](https://github.com/mongodb/js-bson/commit/6460989165dcebf79e4f28982ce25cacc17582ad))
+
 ## [5.5.1](https://github.com/mongodb/js-bson/compare/v5.5.0...v5.5.1) (2023-09-28)
 
 
