@@ -1,70 +1,6 @@
 {
-  "components": [
-    {
-      "bom-ref": "pkg:npm/base-64@1.0.0",
-      "copyright": "Copyright Mathias Bynens <https://mathiasbynens.be/>",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "http://registry.npmjs.org/base-64/-/base-64-1.0.0.tgz"
-        },
-        {
-          "type": "website",
-          "url": "https://www.npmjs.com/package/base-64/v/1.0.0"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "name": "MIT"
-          }
-        }
-      ],
-      "name": "base-64",
-      "purl": "pkg:npm/base-64@1.0.0",
-      "type": "library",
-      "version": "1.0.0"
-    },
-    {
-      "bom-ref": "pkg:npm/text-encoding@0.7.0",
-      "externalReferences": [
-        {
-          "type": "distribution",
-          "url": "http://registry.npmjs.org/text-encoding/-/text-encoding-0.7.0.tgz"
-        },
-        {
-          "type": "website",
-          "url": "https://www.npmjs.com/package/text-encoding/v/0.7.0"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "name": "Apache-2.0"
-          }
-        },
-        {
-          "license": {
-            "name": "Unlicense"
-          }
-        }
-      ],
-      "name": "text-encoding",
-      "purl": "pkg:npm/text-encoding@0.7.0",
-      "type": "library",
-      "version": "0.7.0"
-    }
-  ],
-  "dependencies": [
-    {
-      "ref": "pkg:npm/base-64@1.0.0"
-    },
-    {
-      "ref": "pkg:npm/text-encoding@0.7.0"
-    }
-  ],
   "metadata": {
-    "timestamp": "2024-05-31T17:23:34.403291+00:00",
+    "timestamp": "2024-05-01T20:45:06.517939+00:00",
     "tools": [
       {
         "externalReferences": [
@@ -107,7 +43,7 @@
       }
     ]
   },
-  "serialNumber": "urn:uuid:892711d3-1b64-403b-91be-f545a6f0c206",
+  "serialNumber": "urn:uuid:d959b957-3bd1-4d79-9655-1e05249f993c",
   "version": 1,
   "$schema": "http://cyclonedx.org/schema/bom-1.5.schema.json",
   "bomFormat": "CycloneDX",
