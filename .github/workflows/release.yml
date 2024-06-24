@@ -58,7 +58,7 @@ jobs:
           sarif_report_target_ref: main
           third_party_dependency_tool: n/a
           # <package> and <package>.sig
-          dist_filenames: ${{ env.package_version.package_file }}*
+          dist_filenames: ${{ env.package_file }}*
           token:  ${{ github.token }}
           sbom_file_name: sbom.json
 
