@@ -64,7 +64,7 @@ jobs:
 
       - uses: mongodb-labs/drivers-github-tools/upload-s3-assets@v2
         with:
-          version: ${{ env.package_version.package_version }}
+          version: ${{ env.package_version }}
           product_name: bson
           dry_run: ${{ needs.release_please.outputs.release_created == '' }}
 
