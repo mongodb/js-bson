@@ -8,7 +8,7 @@ permissions:
   pull-requests: write
   id-token: write
 
-name: release-5x
+name: release-5.x
 
 jobs:
   release_please:
@@ -33,15 +33,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: actions/setup
-        uses: ./.github/actions/setup
+      - name: Install Node and dependencies
+        uses: baileympearson/drivers-github-tools/node/setup@add-signing-env-action-for-node
 
       - name: Load version and package info
         uses: baileympearson/drivers-github-tools/node/get_version_info@add-signing-env-action-for-node
 
       - name: actions/compress_sign_and_upload
         uses: baileympearson/drivers-github-tools/node/sign_js_only_package@add-signing-env-action-for-node
-        with: 
+        with:
           aws_role_arn: ${{ secrets.AWS_ROLE_ARN }}
           aws_region_name: us-east-1
           aws_secret_id: ${{ secrets.AWS_SECRET_ID }}
@@ -55,7 +55,7 @@ jobs:
       - name: Generate authorized pub report
         uses: mongodb-labs/drivers-github-tools/full-report@v2
         with:
-          release_version: ${{ env.package_version.package_version }}
+          release_version: ${{ env.package_version }}
           product_name: bson
           sarif_report_target_ref: 5.x
           third_party_dependency_tool: n/a
@@ -63,11 +63,14 @@ jobs:
           dist_filenames: ${{ env.package_file }}*
           token:  ${{ github.token }}
           sbom_file_name: sbom.json
+          evergreen_project: js-bson
+          evergreen_commit: ${{ env.commit }}
+
       - uses: mongodb-labs/drivers-github-tools/upload-s3-assets@v2
         with:
           version: ${{ env.package_version }}
           product_name: bson
-          dry_run:  ${{ needs.release_please.outputs.release_created == '' }}
+          dry_run: ${{ needs.release_please.outputs.release_created == '' }}
 
   publish:
     needs: [release_please, ssdlc]
@@ -75,8 +78,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: actions/setup
-        uses: ./.github/actions/setup
+
+      - name: Install Node and dependencies
+        uses: baileympearson/drivers-github-tools/node/setup@add-signing-env-action-for-node
 
       - run: npm publish --provenance --tag=5.x
         if: ${{ needs.release_please.outputs.release_created }}
