@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.8.0](https://github.com/mongodb/js-bson/compare/v6.7.0...v6.8.0) (2024-06-27)
+
+
+### Features
+
+* **NODE-6156:** add signature to github releases ([#692](https://github.com/mongodb/js-bson/issues/692)) ([f0fbe91](https://github.com/mongodb/js-bson/commit/f0fbe9159b6df9b2af58e029ee57fdb4b71de0c3))
+
+
+### Performance Improvements
+
+* **NODE-6126:** improve Long.fromBigInt performance ([#681](https://github.com/mongodb/js-bson/issues/681)) ([63eafcb](https://github.com/mongodb/js-bson/commit/63eafcba392956674ebfecc6d8df6ff1719839ed))
+
 ## [6.7.0](https://github.com/mongodb/js-bson/compare/v6.6.0...v6.7.0) (2024-05-01)
 
 
