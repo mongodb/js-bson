@@ -5,10 +5,12 @@ import { ByteUtils } from './utils/byte_utils';
 import { NumberUtils } from './utils/number_utils';
 
 // Regular expression that checks for hex value
-const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
+const checkForHexRegExp = new RegExp('^[0-9a-f]{24}$');
 
 // Unique sequence for the current process (initialized on first use)
 let PROCESS_UNIQUE: Uint8Array | null = null;
+
+const OID_SKIP_VALIDATE = Symbol();
 
 /** @public */
 export interface ObjectIdLike {
@@ -35,12 +37,16 @@ export class ObjectId extends BSONValue {
   /** @internal */
   private static index = Math.floor(Math.random() * 0xffffff);
 
+  /** @deprecated Hex string is always cached */
   static cacheHexString: boolean;
 
+  /** Cache buffer internally, Uses much more memory but can speed up performance of some operations like getTimestamp */
+  static cacheBuffer: boolean;
+
   /** ObjectId Bytes @internal */
-  private buffer!: Uint8Array;
+  private buffer?: Uint8Array;
   /** ObjectId hexString cache @internal */
-  private __id?: string;
+  private __id!: string;
 
   /**
    * Create ObjectId from a number.
@@ -55,6 +61,8 @@ export class ObjectId extends BSONValue {
    * @param inputId - A 24 character hex string.
    */
   constructor(inputId: string);
+  /** @internal */
+  constructor(inputId: string, _internalFlag?: symbol);
   /**
    * Create ObjectId from the BSON ObjectId type.
    *
@@ -86,7 +94,11 @@ export class ObjectId extends BSONValue {
    *
    * @param inputId - An input value to create a new ObjectId from.
    */
-  constructor(inputId?: string | number | ObjectId | ObjectIdLike | Uint8Array) {
+  constructor(
+    inputId?: string | number | ObjectId | ObjectIdLike | Uint8Array,
+    _internalFlag?: symbol
+  ) {
+    let bufferCache: Uint8Array | undefined;
     super();
     // workingId is set based on type of input and whether valid id exists for the input
     let workingId;
@@ -95,7 +107,7 @@ export class ObjectId extends BSONValue {
         throw new BSONError('Argument passed in must have an id that is of type string or Buffer');
       }
       if ('toHexString' in inputId && typeof inputId.toHexString === 'function') {
-        workingId = ByteUtils.fromHex(inputId.toHexString());
+        workingId = inputId.toHexString();
       } else {
         workingId = inputId.id;
       }
@@ -104,27 +116,34 @@ export class ObjectId extends BSONValue {
     }
 
     // The following cases use workingId to construct an ObjectId
-    if (workingId == null || typeof workingId === 'number') {
+    if (typeof workingId === 'string') {
+      if (_internalFlag === OID_SKIP_VALIDATE) {
+        this.__id = workingId;
+      } else {
+        const validString = ObjectId.validateHexString(workingId);
+        if (validString) {
+          this.__id = validString;
+        } else {
+          throw new BSONError(
+            'input must be a 24 character hex string, 12 byte Uint8Array, or an integer'
+          );
+        }
+      }
+    } else if (workingId == null || typeof workingId === 'number') {
       // The most common use case (blank id, new objectId instance)
       // Generate a new id
-      this.buffer = ObjectId.generate(typeof workingId === 'number' ? workingId : undefined);
+      bufferCache = ObjectId.generate(typeof workingId === 'number' ? workingId : undefined);
+      this.__id = ByteUtils.toHex(bufferCache);
     } else if (ArrayBuffer.isView(workingId) && workingId.byteLength === 12) {
       // If intstanceof matches we can escape calling ensure buffer in Node.js environments
-      this.buffer = ByteUtils.toLocalBufferType(workingId);
-    } else if (typeof workingId === 'string') {
-      if (workingId.length === 24 && checkForHexRegExp.test(workingId)) {
-        this.buffer = ByteUtils.fromHex(workingId);
-      } else {
-        throw new BSONError(
-          'input must be a 24 character hex string, 12 byte Uint8Array, or an integer'
-        );
-      }
+      bufferCache = ByteUtils.toLocalBufferType(workingId);
+      this.__id = ByteUtils.toHex(bufferCache);
     } else {
       throw new BSONError('Argument passed in does not match the accepted types');
     }
-    // If we are caching the hex string
-    if (ObjectId.cacheHexString) {
-      this.__id = ByteUtils.toHex(this.id);
+    // If we are caching the buffer
+    if (ObjectId.cacheBuffer) {
+      this.buffer = bufferCache || ByteUtils.fromHex(this.__id);
     }
   }
 
@@ -133,29 +152,31 @@ export class ObjectId extends BSONValue {
    * @readonly
    */
   get id(): Uint8Array {
-    return this.buffer;
+    return this.buffer || ByteUtils.fromHex(this.__id);
   }
 
   set id(value: Uint8Array) {
-    this.buffer = value;
-    if (ObjectId.cacheHexString) {
-      this.__id = ByteUtils.toHex(value);
-    }
+    this.__id = ByteUtils.toHex(value);
   }
 
   /** Returns the ObjectId id as a 24 lowercase character hex string representation */
   toHexString(): string {
-    if (ObjectId.cacheHexString && this.__id) {
-      return this.__id;
-    }
+    return this.__id;
+  }
 
-    const hexString = ByteUtils.toHex(this.id);
-
-    if (ObjectId.cacheHexString && !this.__id) {
-      this.__id = hexString;
-    }
-
-    return hexString;
+  /**
+   * @internal
+   * Validates the input string is a valid hex representation of an ObjectId.
+   * If valid, returns the input string. Otherwise, returns false.
+   * Returned string is lowercase.
+   */
+  private static validateHexString(input: string): false | string {
+    if (input == null) return false;
+    if (input.length !== 24) return false;
+    if (checkForHexRegExp.test(input)) return input;
+    const inputLower = input.toLowerCase();
+    if (checkForHexRegExp.test(inputLower)) return inputLower;
+    return false;
   }
 
   /**
@@ -209,13 +230,13 @@ export class ObjectId extends BSONValue {
   toString(encoding?: 'hex' | 'base64'): string {
     // Is the id a buffer then use the buffer toString method to return the format
     if (encoding === 'base64') return ByteUtils.toBase64(this.id);
-    if (encoding === 'hex') return this.toHexString();
-    return this.toHexString();
+    if (encoding === 'hex') return this.__id;
+    return this.__id;
   }
 
   /** Converts to its JSON the 24 character hex string representation. */
   toJSON(): string {
-    return this.toHexString();
+    return this.__id;
   }
 
   /** @internal */
@@ -239,18 +260,16 @@ export class ObjectId extends BSONValue {
     }
 
     if (ObjectId.is(otherId)) {
-      return (
-        this.buffer[11] === otherId.buffer[11] && ByteUtils.equals(this.buffer, otherId.buffer)
-      );
+      return this.__id === otherId.__id;
     }
 
     if (typeof otherId === 'string') {
-      return otherId.toLowerCase() === this.toHexString();
+      return otherId === this.__id || otherId.toLowerCase() === this.__id;
     }
 
     if (typeof otherId === 'object' && typeof otherId.toHexString === 'function') {
       const otherIdString = otherId.toHexString();
-      const thisIdString = this.toHexString();
+      const thisIdString = this.__id;
       return typeof otherIdString === 'string' && otherIdString.toLowerCase() === thisIdString;
     }
 
@@ -259,8 +278,9 @@ export class ObjectId extends BSONValue {
 
   /** Returns the generation date (accurate up to the second) that this ID was generated. */
   getTimestamp(): Date {
+    const buffer = this.buffer || ByteUtils.fromHex(this.__id);
     const timestamp = new Date();
-    const time = NumberUtils.getUint32BE(this.buffer, 0);
+    const time = NumberUtils.getUint32BE(buffer, 0);
     timestamp.setTime(Math.floor(time) * 1000);
     return timestamp;
   }
@@ -272,18 +292,19 @@ export class ObjectId extends BSONValue {
 
   /** @internal */
   serializeInto(uint8array: Uint8Array, index: number): 12 {
-    uint8array[index] = this.buffer[0];
-    uint8array[index + 1] = this.buffer[1];
-    uint8array[index + 2] = this.buffer[2];
-    uint8array[index + 3] = this.buffer[3];
-    uint8array[index + 4] = this.buffer[4];
-    uint8array[index + 5] = this.buffer[5];
-    uint8array[index + 6] = this.buffer[6];
-    uint8array[index + 7] = this.buffer[7];
-    uint8array[index + 8] = this.buffer[8];
-    uint8array[index + 9] = this.buffer[9];
-    uint8array[index + 10] = this.buffer[10];
-    uint8array[index + 11] = this.buffer[11];
+    const buffer = this.buffer || ByteUtils.fromHex(this.__id);
+    uint8array[index] = buffer[0];
+    uint8array[index + 1] = buffer[1];
+    uint8array[index + 2] = buffer[2];
+    uint8array[index + 3] = buffer[3];
+    uint8array[index + 4] = buffer[4];
+    uint8array[index + 5] = buffer[5];
+    uint8array[index + 6] = buffer[6];
+    uint8array[index + 7] = buffer[7];
+    uint8array[index + 8] = buffer[8];
+    uint8array[index + 9] = buffer[9];
+    uint8array[index + 10] = buffer[10];
+    uint8array[index + 11] = buffer[11];
     return 12;
   }
 
@@ -293,7 +314,7 @@ export class ObjectId extends BSONValue {
    * @param time - an integer number representing a number of seconds.
    */
   static createFromTime(time: number): ObjectId {
-    const buffer = ByteUtils.allocate(12);
+    const buffer = ByteUtils.allocateUnsafe(12);
     for (let i = 11; i >= 4; i--) buffer[i] = 0;
     // Encode time into first 4 bytes
     NumberUtils.setInt32BE(buffer, 0, time);
@@ -311,7 +332,7 @@ export class ObjectId extends BSONValue {
       throw new BSONError('hex string must be 24 characters');
     }
 
-    return new ObjectId(ByteUtils.fromHex(hexString));
+    return new ObjectId(hexString);
   }
 
   /** Creates an ObjectId instance from a base64 string */
@@ -329,6 +350,7 @@ export class ObjectId extends BSONValue {
    */
   static isValid(id: string | number | ObjectId | ObjectIdLike | Uint8Array): boolean {
     if (id == null) return false;
+    if (typeof id === 'string') return !!ObjectId.validateHexString(id);
 
     try {
       new ObjectId(id);
@@ -340,13 +362,12 @@ export class ObjectId extends BSONValue {
 
   /** @internal */
   toExtendedJSON(): ObjectIdExtended {
-    if (this.toHexString) return { $oid: this.toHexString() };
-    return { $oid: this.toString('hex') };
+    return { $oid: this.__id };
   }
 
   /** @internal */
   static fromExtendedJSON(doc: ObjectIdExtended): ObjectId {
-    return new ObjectId(doc.$oid);
+    return new ObjectId(doc.$oid, OID_SKIP_VALIDATE);
   }
 
   /**
@@ -356,6 +377,6 @@ export class ObjectId extends BSONValue {
    */
   inspect(depth?: number, options?: unknown, inspect?: InspectFn): string {
     inspect ??= defaultInspect;
-    return `new ObjectId(${inspect(this.toHexString(), options)})`;
+    return `new ObjectId(${inspect(this.__id, options)})`;
   }
 }
