@@ -8,7 +8,7 @@ import { NumberUtils } from './utils/number_utils';
 const checkForHexRegExp = new RegExp('^[0-9a-f]{24}$');
 
 // Unique sequence for the current process (initialized on first use)
-let PROCESS_UNIQUE: Uint8Array | null = null;
+let PROCESS_UNIQUE: string | null = null;
 
 const OID_SKIP_VALIDATE = Symbol();
 
@@ -111,6 +111,7 @@ export class ObjectId extends BSONValue {
       }
       if ('toHexString' in inputId && typeof inputId.toHexString === 'function') {
         workingId = inputId.toHexString();
+        _internalFlag = OID_SKIP_VALIDATE;
       } else {
         workingId = inputId.id;
       }
@@ -135,8 +136,7 @@ export class ObjectId extends BSONValue {
     } else if (workingId == null || typeof workingId === 'number') {
       // The most common use case (blank id, new objectId instance)
       // Generate a new id
-      bufferCache = ObjectId.generate(typeof workingId === 'number' ? workingId : undefined);
-      this.__id = ByteUtils.toHex(bufferCache);
+      this.__id = ObjectId.generate(typeof workingId === 'number' ? workingId : undefined);
     } else if (ArrayBuffer.isView(workingId) && workingId.byteLength === 12) {
       // If intstanceof matches we can escape calling ensure buffer in Node.js environments
       bufferCache = ByteUtils.toLocalBufferType(workingId);
@@ -195,35 +195,28 @@ export class ObjectId extends BSONValue {
    *
    * @param time - pass in a second based timestamp.
    */
-  static generate(time?: number): Uint8Array {
+  static generate(time?: number): string {
     if ('number' !== typeof time) {
       time = Math.floor(Date.now() / 1000);
+    } else {
+      time = time % 0xffffffff;
     }
 
     const inc = ObjectId.getInc();
-    const buffer = ByteUtils.allocateUnsafe(12);
 
     // 4-byte timestamp
-    NumberUtils.setInt32BE(buffer, 0, time);
+    // Dates before 1978-07-05T00:00:00.000Z can be represented in less than 8 hex digits so we need to padStart
+    const timeString = time.toString(16).padStart(8, '0');
 
     // set PROCESS_UNIQUE if yet not initialized
     if (PROCESS_UNIQUE === null) {
-      PROCESS_UNIQUE = ByteUtils.randomBytes(5);
+      PROCESS_UNIQUE = ByteUtils.toHex(ByteUtils.randomBytes(5));
     }
 
-    // 5-byte process unique
-    buffer[4] = PROCESS_UNIQUE[0];
-    buffer[5] = PROCESS_UNIQUE[1];
-    buffer[6] = PROCESS_UNIQUE[2];
-    buffer[7] = PROCESS_UNIQUE[3];
-    buffer[8] = PROCESS_UNIQUE[4];
-
     // 3-byte counter
-    buffer[11] = inc & 0xff;
-    buffer[10] = (inc >> 8) & 0xff;
-    buffer[9] = (inc >> 16) & 0xff;
+    const incString = inc.toString(16).padStart(6, '0');
 
-    return buffer;
+    return timeString + PROCESS_UNIQUE + incString;
   }
 
   /**
