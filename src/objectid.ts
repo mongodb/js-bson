@@ -40,7 +40,10 @@ export class ObjectId extends BSONValue {
   /** @deprecated Hex string is always cached */
   static cacheHexString: boolean;
 
-  /** Cache buffer internally, Uses much more memory but can speed up performance of some operations like getTimestamp */
+  /**
+   * Cache buffer internally
+   * Uses much more memory but can speed up performance if performing lots of buffer specific tasks
+   */
   static cacheBuffer: boolean;
 
   /** ObjectId Bytes @internal */
@@ -278,11 +281,7 @@ export class ObjectId extends BSONValue {
 
   /** Returns the generation date (accurate up to the second) that this ID was generated. */
   getTimestamp(): Date {
-    const buffer = this.buffer || ByteUtils.fromHex(this.__id);
-    const timestamp = new Date();
-    const time = NumberUtils.getUint32BE(buffer, 0);
-    timestamp.setTime(Math.floor(time) * 1000);
-    return timestamp;
+    return new Date(parseInt(this.__id.substring(0, 8), 16) * 1000);
   }
 
   /** @internal */
