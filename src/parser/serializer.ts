@@ -231,10 +231,9 @@ function serializeObjectId(buffer: Uint8Array, key: string, value: ObjectId, ind
   // Write the type
   buffer[index++] = constants.BSON_DATA_OID;
   // Number of written bytes
-  const numberOfWrittenBytes = ByteUtils.encodeUTF8Into(buffer, key, index);
+  index += ByteUtils.encodeUTF8Into(buffer, key, index);
 
   // Encode the name
-  index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
 
   index += value.serializeInto(buffer, index);
@@ -647,6 +646,8 @@ export function serializeInto(
         index = serializeNull(buffer, key, value, index);
       } else if (value === null) {
         index = serializeNull(buffer, key, value, index);
+      } else if (value._bsontype === 'ObjectId') {
+        index = serializeObjectId(buffer, key, value, index);
       } else if (isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index);
       } else if (value instanceof RegExp || isRegExp(value)) {
@@ -668,8 +669,6 @@ export function serializeInto(
         value[Symbol.for('@@mdb.bson.version')] !== constants.BSON_MAJOR_VERSION
       ) {
         throw new BSONVersionError();
-      } else if (value._bsontype === 'ObjectId') {
-        index = serializeObjectId(buffer, key, value, index);
       } else if (value._bsontype === 'Decimal128') {
         index = serializeDecimal128(buffer, key, value, index);
       } else if (value._bsontype === 'Long' || value._bsontype === 'Timestamp') {
@@ -757,6 +756,8 @@ export function serializeInto(
         index = serializeDate(buffer, key, value, index);
       } else if (value === null || (value === undefined && ignoreUndefined === false)) {
         index = serializeNull(buffer, key, value, index);
+      } else if (value._bsontype === 'ObjectId') {
+        index = serializeObjectId(buffer, key, value, index);
       } else if (isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index);
       } else if (value instanceof RegExp || isRegExp(value)) {
@@ -778,8 +779,6 @@ export function serializeInto(
         value[Symbol.for('@@mdb.bson.version')] !== constants.BSON_MAJOR_VERSION
       ) {
         throw new BSONVersionError();
-      } else if (value._bsontype === 'ObjectId') {
-        index = serializeObjectId(buffer, key, value, index);
       } else if (type === 'object' && value._bsontype === 'Decimal128') {
         index = serializeDecimal128(buffer, key, value, index);
       } else if (value._bsontype === 'Long' || value._bsontype === 'Timestamp') {
@@ -867,6 +866,8 @@ export function serializeInto(
         if (ignoreUndefined === false) index = serializeNull(buffer, key, value, index);
       } else if (value === null) {
         index = serializeNull(buffer, key, value, index);
+      } else if (value._bsontype === 'ObjectId') {
+        index = serializeObjectId(buffer, key, value, index);
       } else if (isUint8Array(value)) {
         index = serializeBuffer(buffer, key, value, index);
       } else if (value instanceof RegExp || isRegExp(value)) {
@@ -888,8 +889,6 @@ export function serializeInto(
         value[Symbol.for('@@mdb.bson.version')] !== constants.BSON_MAJOR_VERSION
       ) {
         throw new BSONVersionError();
-      } else if (value._bsontype === 'ObjectId') {
-        index = serializeObjectId(buffer, key, value, index);
       } else if (type === 'object' && value._bsontype === 'Decimal128') {
         index = serializeDecimal128(buffer, key, value, index);
       } else if (value._bsontype === 'Long' || value._bsontype === 'Timestamp') {
