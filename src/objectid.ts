@@ -83,7 +83,7 @@ export class ObjectId extends BSONValue {
    *
    * @param inputId - A 12 byte binary Buffer.
    */
-  constructor(inputId: Uint8Array);
+  constructor(inputId: Uint8Array, offset?: number);
   /** To generate a new ObjectId, use ObjectId() with no argument. */
   constructor();
   /**
@@ -99,7 +99,7 @@ export class ObjectId extends BSONValue {
    */
   constructor(
     inputId?: string | number | ObjectId | ObjectIdLike | Uint8Array,
-    _internalFlag?: symbol
+    option?: symbol | number
   ) {
     let bufferCache: Uint8Array | undefined;
     super();
@@ -111,7 +111,7 @@ export class ObjectId extends BSONValue {
       }
       if ('toHexString' in inputId && typeof inputId.toHexString === 'function') {
         workingId = inputId.toHexString();
-        _internalFlag = OID_SKIP_VALIDATE;
+        option = OID_SKIP_VALIDATE;
       } else {
         workingId = inputId.id;
       }
@@ -121,7 +121,7 @@ export class ObjectId extends BSONValue {
 
     // The following cases use workingId to construct an ObjectId
     if (typeof workingId === 'string') {
-      if (_internalFlag === OID_SKIP_VALIDATE) {
+      if (option === OID_SKIP_VALIDATE) {
         this.__id = workingId;
       } else {
         const validString = ObjectId.validateHexString(workingId);
@@ -137,10 +137,11 @@ export class ObjectId extends BSONValue {
       // The most common use case (blank id, new objectId instance)
       // Generate a new id
       this.__id = ObjectId.generate(typeof workingId === 'number' ? workingId : undefined);
-    } else if (ArrayBuffer.isView(workingId) && workingId.byteLength === 12) {
+    } else if (ArrayBuffer.isView(workingId)) {
       // If intstanceof matches we can escape calling ensure buffer in Node.js environments
       bufferCache = ByteUtils.toLocalBufferType(workingId);
-      this.__id = ByteUtils.toHex(bufferCache);
+      const offset = (option as number) || 0;
+      this.__id = ByteUtils.toHex(bufferCache, offset, offset + 12);
     } else {
       throw new BSONError('Argument passed in does not match the accepted types');
     }

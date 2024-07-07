@@ -263,9 +263,7 @@ function deserializeObject(
       value = ByteUtils.toUTF8(buffer, index, index + stringSize - 1, shouldValidateKey);
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_OID) {
-      const oid = ByteUtils.allocateUnsafe(12);
-      for (let i = 0; i < 12; i++) oid[i] = buffer[index + i];
-      value = new ObjectId(oid);
+      value = new ObjectId(buffer, index);
       index = index + 12;
     } else if (elementType === constants.BSON_DATA_INT && promoteValues === false) {
       value = new Int32(NumberUtils.getInt32LE(buffer, index));
@@ -608,9 +606,7 @@ function deserializeObject(
       index = index + stringSize;
 
       // Read the oid
-      const oidBuffer = ByteUtils.allocateUnsafe(12);
-      for (let i = 0; i < 12; i++) oidBuffer[i] = buffer[index + i];
-      const oid = new ObjectId(oidBuffer);
+      const oid = new ObjectId(buffer, index);
 
       // Update the index
       index = index + 12;
