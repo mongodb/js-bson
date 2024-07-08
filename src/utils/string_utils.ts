@@ -42,3 +42,17 @@ export function validateStringCharacters(str: string, radix?: number): false | s
   const regex = new RegExp(`[^-+${validCharacters}]`, 'i');
   return regex.test(str) ? false : str;
 }
+
+/**
+ * @internal
+ * "flattens" a string that was created through concatenation of multiple strings.
+ * Most engines will try to optimize concatenation of strings using a "rope" graph of the substrings,
+ * This can lead to increased memory usage with extra pointers and performance issues when operating on these strings.
+ * `string.charAt(0)` forces the engine to flatten the string before performing the operation.
+ * See https://en.wikipedia.org/wiki/Rope_(data_structure)
+ * See https://docs.google.com/document/d/1o-MJPAddpfBfDZCkIHNKbMiM86iDFld7idGbNQLuKIQ
+ */
+export function flattenString(str: string): string {
+  str.charAt(0);
+  return str;
+}

@@ -3,6 +3,7 @@ import { BSONError } from './error';
 import { type InspectFn, defaultInspect } from './parser/utils';
 import { ByteUtils } from './utils/byte_utils';
 import { NumberUtils } from './utils/number_utils';
+import { flattenString } from './utils/string_utils';
 
 // Regular expression that checks for hex value
 const checkForHexRegExp = new RegExp('^[0-9a-f]{24}$');
@@ -36,6 +37,10 @@ export class ObjectId extends BSONValue {
 
   /** @internal */
   private static index = Math.floor(Math.random() * 0xffffff);
+  /** @internal */
+  private static lastTimeGenerate?: number;
+  /** @internal */
+  private static timeHexCache?: string;
 
   /** @deprecated Hex string is always cached */
   static cacheHexString: boolean;
@@ -192,22 +197,38 @@ export class ObjectId extends BSONValue {
   }
 
   /**
-   * Generate a 12 byte id buffer used in ObjectId's
-   *
-   * @param time - pass in a second based timestamp.
+   * Generates the hex timestamp from a second based number or the current time.
+   * @internal
    */
-  static generate(time?: number): string {
+  private static getTimeHex(time?: number): string {
     if ('number' !== typeof time) {
       time = Math.floor(Date.now() / 1000);
     } else {
       time = time % 0xffffffff;
     }
 
+    if (!ObjectId.timeHexCache || time !== ObjectId.lastTimeGenerate) {
+      ObjectId.lastTimeGenerate = time;
+      // This is moderatly expensive so we can cache this for repetitive calls
+      ObjectId.timeHexCache = time.toString(16);
+      // Dates before 1978-07-05T00:00:00.000Z can be represented in less than 8 hex digits so we need to padStart
+      if (ObjectId.timeHexCache.length < 8) {
+        ObjectId.timeHexCache = ObjectId.timeHexCache.padStart(8, '0');
+      }
+    }
+    return ObjectId.timeHexCache;
+  }
+
+  /**
+   * Generate a 12 byte id buffer used in ObjectId's
+   *
+   * @param time - pass in a second based timestamp.
+   */
+  static generate(time?: number): string {
     const inc = ObjectId.getInc();
 
     // 4-byte timestamp
-    // Dates before 1978-07-05T00:00:00.000Z can be represented in less than 8 hex digits so we need to padStart
-    const timeString = time.toString(16).padStart(8, '0');
+    const timeString = ObjectId.getTimeHex(time);
 
     // set PROCESS_UNIQUE if yet not initialized
     if (PROCESS_UNIQUE === null) {
@@ -217,7 +238,8 @@ export class ObjectId extends BSONValue {
     // 3-byte counter
     const incString = inc.toString(16).padStart(6, '0');
 
-    return timeString + PROCESS_UNIQUE + incString;
+    // Flatten concatenated string to save memory
+    return flattenString(timeString + PROCESS_UNIQUE + incString);
   }
 
   /**
