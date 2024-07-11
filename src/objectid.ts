@@ -329,12 +329,8 @@ export class ObjectId extends BSONValue {
    * @param time - an integer number representing a number of seconds.
    */
   static createFromTime(time: number): ObjectId {
-    const buffer = ByteUtils.allocateUnsafe(12);
-    for (let i = 11; i >= 4; i--) buffer[i] = 0;
-    // Encode time into first 4 bytes
-    NumberUtils.setInt32BE(buffer, 0, time);
     // Return the new objectId
-    return new ObjectId(buffer);
+    return new ObjectId(time);
   }
 
   /**
