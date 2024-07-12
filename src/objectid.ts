@@ -307,19 +307,26 @@ export class ObjectId extends BSONValue {
 
   /** @internal */
   serializeInto(uint8array: Uint8Array, index: number): 12 {
-    const buffer = this.buffer || ByteUtils.fromHex(this.__id);
-    uint8array[index] = buffer[0];
-    uint8array[index + 1] = buffer[1];
-    uint8array[index + 2] = buffer[2];
-    uint8array[index + 3] = buffer[3];
-    uint8array[index + 4] = buffer[4];
-    uint8array[index + 5] = buffer[5];
-    uint8array[index + 6] = buffer[6];
-    uint8array[index + 7] = buffer[7];
-    uint8array[index + 8] = buffer[8];
-    uint8array[index + 9] = buffer[9];
-    uint8array[index + 10] = buffer[10];
-    uint8array[index + 11] = buffer[11];
+    let temp = parseInt(this.__id.substring(0, 8), 16);
+
+    uint8array[index + 3] = temp & 0xff;
+    uint8array[index + 2] = (temp >> 8) & 0xff;
+    uint8array[index + 1] = (temp >> 16) & 0xff;
+    uint8array[index + 0] = (temp >> 24) & 0xff;
+
+    temp = parseInt(this.__id.substring(8, 16), 16);
+
+    uint8array[index + 7] = temp & 0xff;
+    uint8array[index + 6] = (temp >> 8) & 0xff;
+    uint8array[index + 5] = (temp >> 16) & 0xff;
+    uint8array[index + 4] = (temp >> 24) & 0xff;
+
+    temp = parseInt(this.__id.substring(16, 24), 16);
+
+    uint8array[index + 11] = temp & 0xff;
+    uint8array[index + 10] = (temp >> 8) & 0xff;
+    uint8array[index + 9] = (temp >> 16) & 0xff;
+    uint8array[index + 8] = (temp >> 24) & 0xff;
     return 12;
   }
 
