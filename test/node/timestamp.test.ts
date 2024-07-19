@@ -22,11 +22,21 @@ describe('Timestamp', () => {
       expect(ts.t).to.equal(l.high);
     });
 
-    it('t and i always return unsigned values', () => {
-      const l = new BSON.Long(-1, -2);
-      const ts = new BSON.Timestamp(l);
-      expect(ts.i).to.equal(0xffffffff); // -1 unsigned
-      expect(ts.t).to.equal(0xfffffffe); // -2 unsigned
+    describe.only('when signed negative input is provided to the constructor', () => {
+      it('t and i return unsigned values', () => {
+        const l = new BSON.Long(-1, -2);
+        // Check the assumption that Long did NOT change the values to unsigned.
+        expect(l).to.have.property('low', -1);
+        expect(l).to.have.property('high', -2);
+
+        const ts = new BSON.Timestamp(l);
+        expect(ts).to.have.property('i', 0xffffffff); // -1 unsigned
+        expect(ts).to.have.property('t', 0xfffffffe); // -2 unsigned
+
+        // Timestamp is a subclass of Long, high and low do not change:
+        expect(ts).to.have.property('low', -1);
+        expect(ts).to.have.property('high', -2);
+      });
     });
   });
 
