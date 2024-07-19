@@ -22,7 +22,7 @@ describe('Timestamp', () => {
       expect(ts.t).to.equal(l.high);
     });
 
-    describe.only('when signed negative input is provided to the constructor', () => {
+    describe('when signed negative input is provided to the constructor', () => {
       it('t and i return unsigned values', () => {
         const l = new BSON.Long(-1, -2);
         // Check the assumption that Long did NOT change the values to unsigned.
