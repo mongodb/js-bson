@@ -28,6 +28,8 @@ export interface TimestampExtended {
 /**
  * @public
  * @category BSONType
+ *
+ * A special type for _internal_ MongoDB use and is **not** associated with the regular Date type.
  */
 export class Timestamp extends LongWithoutOverridesClass {
   get _bsontype(): 'Timestamp' {
@@ -35,6 +37,20 @@ export class Timestamp extends LongWithoutOverridesClass {
   }
 
   static readonly MAX_VALUE = Long.MAX_UNSIGNED_VALUE;
+
+  /**
+   * An incrementing ordinal for operations within a given second.
+   */
+  get i(): number {
+    return this.low >>> 0;
+  }
+
+  /**
+   * A `time_t` value measuring seconds since the Unix epoch
+   */
+  get t(): number {
+    return this.high >>> 0;
+  }
 
   /**
    * @param int - A 64-bit bigint representing the Timestamp.
@@ -127,7 +143,7 @@ export class Timestamp extends LongWithoutOverridesClass {
 
   /** @internal */
   toExtendedJSON(): TimestampExtended {
-    return { $timestamp: { t: this.high >>> 0, i: this.low >>> 0 } };
+    return { $timestamp: { t: this.t, i: this.i } };
   }
 
   /** @internal */
@@ -144,8 +160,8 @@ export class Timestamp extends LongWithoutOverridesClass {
 
   inspect(depth?: number, options?: unknown, inspect?: InspectFn): string {
     inspect ??= defaultInspect;
-    const t = inspect(this.high >>> 0, options);
-    const i = inspect(this.low >>> 0, options);
+    const t = inspect(this.t, options);
+    const i = inspect(this.i, options);
     return `new Timestamp({ t: ${t}, i: ${i} })`;
   }
 }

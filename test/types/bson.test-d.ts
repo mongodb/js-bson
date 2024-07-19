@@ -82,3 +82,6 @@ expectType<(depth?: number | undefined, options?: unknown, inspect?: InspectFn |
 expectNotDeprecated(new ObjectId('foo'));
 expectDeprecated(new ObjectId(42));
 expectNotDeprecated(new ObjectId(42 as string | number));
+
+// Timestamp accepts timestamp because constructor allows: {i:number, t:number}
+new Timestamp(new Timestamp(0n))
