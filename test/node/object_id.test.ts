@@ -306,9 +306,29 @@ describe('ObjectId', function () {
     done();
   });
 
+  it('should correctly create ObjectId from valid Buffer and offset', function (done) {
+    if (!Buffer.from) return done();
+    let a = 'AAAAAAAAAAAAAAAAAAAAAAAA';
+    let b = new ObjectId(Buffer.from(`aaaa${a}aaaa`, 'hex'), 2);
+    let c = b.equals(a); // => false
+    expect(true).to.equal(c);
+
+    a = 'aaaaaaaaaaaaaaaaaaaaaaaa';
+    b = new ObjectId(Buffer.from(`AAAA${a}AAAA`, 'hex'), 2);
+    c = b.equals(a); // => true
+    expect(a).to.equal(b.toString());
+    expect(true).to.equal(c);
+    done();
+  });
+
   it('should throw an error if invalid Buffer passed in', function () {
     const a = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
     expect(() => new ObjectId(a)).to.throw(BSONError);
+  });
+
+  it('should throw an error if invalid Buffer offset passed in', function () {
+    const a = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
+    expect(() => new ObjectId(a, 5)).to.throw(BSONError);
   });
 
   it('should correctly allow for node.js inspect to work with ObjectId', function (done) {
@@ -375,7 +395,7 @@ describe('ObjectId', function () {
      */
     const oidString = '6b61666665656b6c61746368';
     const oid = new ObjectId(oidString);
-    const oidKId = 'buffer';
+    const oidKId = '__id';
     it('should return false for an undefined otherId', () => {
       // otherId === undefined || otherId === null
       expect(oid.equals(null)).to.be.false;
@@ -415,33 +435,21 @@ describe('ObjectId', function () {
 
     it('should not rely on toString for otherIds that are instanceof ObjectId', () => {
       // Note: the method access the symbol prop directly instead of the getter
-      const equalId = { toString: () => oidString + 'wrong', [oidKId]: oid.id };
+      const equalId = { toString: () => oidString + 'wrong', [oidKId]: oid.toHexString() };
       Object.setPrototypeOf(equalId, ObjectId.prototype);
       expect(oid.toString()).to.not.equal(equalId.toString());
       expect(oid.equals(equalId)).to.be.true;
     });
 
-    it('should use otherId[kId] Buffer for equality when otherId has _bsontype === ObjectId', () => {
-      let equalId = { _bsontype: 'ObjectId', [oidKId]: oid.id };
-
-      const propAccessRecord: string[] = [];
-      equalId = new Proxy(equalId, {
-        get(target, prop: string, recv) {
-          if (prop !== '_bsontype') {
-            propAccessRecord.push(prop);
-          }
-          return Reflect.get(target, prop, recv);
-        }
-      });
+    it('should use otherId[kId] for equality when otherId has _bsontype === ObjectId', () => {
+      const equalId = { _bsontype: 'ObjectId', [oidKId]: oid.toHexString() };
 
       expect(oid.equals(equalId)).to.be.true;
-      // once for the 11th byte shortcut
-      // once for the total equality
-      expect(propAccessRecord).to.deep.equal([oidKId, oidKId]);
     });
   });
 
   it('should return the same instance if a buffer is passed in', function () {
+    ObjectId.cacheBuffer = true;
     const inBuffer = Buffer.from('00'.repeat(12), 'hex');
 
     const outBuffer = new ObjectId(inBuffer);
@@ -452,6 +460,7 @@ describe('ObjectId', function () {
     expect(inBuffer).to.deep.equal(outBuffer.id);
     // class method equality
     expect(Buffer.prototype.equals.call(inBuffer, outBuffer.id)).to.be.true;
+    ObjectId.cacheBuffer = false;
   });
 
   context('createFromHexString()', () => {

@@ -2,7 +2,6 @@ import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import { type InspectFn, defaultInspect } from './parser/utils';
 import { ByteUtils } from './utils/byte_utils';
-import { NumberUtils } from './utils/number_utils';
 import { flattenString } from './utils/string_utils';
 
 // Regular expression that checks for hex value
@@ -54,7 +53,7 @@ export class ObjectId extends BSONValue {
   /** ObjectId Bytes @internal */
   private buffer?: Uint8Array;
   /** ObjectId hexString cache @internal */
-  private __id!: string;
+  private __id: string;
 
   /**
    * Create ObjectId from a number.
@@ -143,9 +142,18 @@ export class ObjectId extends BSONValue {
       // Generate a new id
       this.__id = ObjectId.generate(typeof workingId === 'number' ? workingId : undefined);
     } else if (ArrayBuffer.isView(workingId)) {
+      if (option == null && workingId.byteLength !== 12) {
+        throw new BSONError('Buffer length must be 12 or offset must be specified');
+      }
+      if (
+        option &&
+        (typeof option !== 'number' || option < 0 || workingId.byteLength < option + 12)
+      ) {
+        throw new BSONError('Buffer offset must be a non-negative number less than buffer length');
+      }
       // If intstanceof matches we can escape calling ensure buffer in Node.js environments
       bufferCache = ByteUtils.toLocalBufferType(workingId);
-      const offset = (option as number) || 0;
+      const offset = option || 0;
       this.__id = ByteUtils.toHex(bufferCache, offset, offset + 12);
     } else {
       throw new BSONError('Argument passed in does not match the accepted types');
@@ -204,12 +212,12 @@ export class ObjectId extends BSONValue {
     if ('number' !== typeof time) {
       time = Math.floor(Date.now() / 1000);
     } else {
-      time = time % 0xffffffff;
+      time = (time | 0) % 0xffffffff;
     }
 
     if (!ObjectId.timeHexCache || time !== ObjectId.lastTimeGenerate) {
       ObjectId.lastTimeGenerate = time;
-      // This is moderatly expensive so we can cache this for repetitive calls
+      // This is moderately expensive so we can cache this for repetitive calls
       ObjectId.timeHexCache = time.toString(16);
       // Dates before 1978-07-05T00:00:00.000Z can be represented in less than 8 hex digits so we need to padStart
       if (ObjectId.timeHexCache.length < 8) {
@@ -312,7 +320,7 @@ export class ObjectId extends BSONValue {
     uint8array[index + 3] = temp & 0xff;
     uint8array[index + 2] = (temp >> 8) & 0xff;
     uint8array[index + 1] = (temp >> 16) & 0xff;
-    uint8array[index + 0] = (temp >> 24) & 0xff;
+    uint8array[index] = (temp >> 24) & 0xff;
 
     temp = parseInt(this.__id.substring(8, 16), 16);
 

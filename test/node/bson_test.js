@@ -1661,18 +1661,12 @@ describe('BSON', function () {
     expect(__id).to.equal(a.toHexString());
 
     // number
-    var genTime = a.generationTime;
-    a = new ObjectId(genTime);
+    a = new ObjectId(Date.now());
     __id = a.__id;
     expect(__id).to.equal(a.toHexString());
 
-    // generationTime
-    delete a.__id;
-    a.generationTime = genTime;
-    expect(__id).to.equal(a.toHexString());
-
     // createFromTime
-    a = ObjectId.createFromTime(genTime);
+    a = ObjectId.createFromTime(Date.now());
     __id = a.__id;
     expect(__id).to.equal(a.toHexString());
     ObjectId.cacheHexString = false;
