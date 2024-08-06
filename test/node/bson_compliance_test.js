@@ -21,7 +21,7 @@ describe('BSON Compliance', function () {
         // Attempt to deserialize
         BSON.deserialize(buffer);
         expect(false).to.be.ok;
-      } catch (err) {
+      } catch {
         expect(true).to.be.ok;
       }
     }
