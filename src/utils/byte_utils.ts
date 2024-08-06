@@ -30,7 +30,7 @@ export type ByteUtils = {
   /** Create a Uint8Array from a hex string */
   fromHex: (hex: string) => Uint8Array;
   /** Create a lowercase hex string from bytes */
-  toHex: (buffer: Uint8Array) => string;
+  toHex: (buffer: Uint8Array, start?: number, end?: number) => string;
   /** Create a string from utf8 code units, fatal=true will throw an error if UTF-8 bytes are invalid, fatal=false will insert replacement characters */
   toUTF8: (buffer: Uint8Array, start: number, end: number, fatal: boolean) => string;
   /** Get the utf8 code unit count from a string if it were to be transformed to utf8 */
