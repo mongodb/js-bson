@@ -212,6 +212,11 @@ export class ObjectId extends BSONValue {
     return this.id;
   }
 
+  /** ObjectId bytes @internal */
+  get buffer(): Uint8Array {
+    return this.id;
+  }
+
   /**
    * The ObjectId bytes
    * @readonly
@@ -283,6 +288,8 @@ export class ObjectId extends BSONValue {
    * Generate a 12 byte id buffer used in ObjectId's
    *
    * @param time - pass in a second based timestamp.
+   * @param buffer - Optionally pass in a buffer instance.
+   * @param offset - Optionally pass in a buffer offset.
    */
   static generate(time?: number): Uint8Array;
   /**

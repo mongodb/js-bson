@@ -4,6 +4,9 @@ import * as util from 'util';
 import { expect } from 'chai';
 import { bufferFromHexArray } from './tools/utils';
 import { isBufferOrUint8Array } from './tools/utils';
+import { _pool, _offset } from '../../src/objectid';
+
+ObjectId.poolSize = 100;
 
 describe('ObjectId', function () {
   describe('static createFromTime()', () => {
@@ -539,9 +542,12 @@ describe('ObjectId', function () {
       let equalId = { _bsontype: 'ObjectId', [oidKId]: oid.id };
 
       const propAccessRecord: string[] = [];
+
       equalId = new Proxy(equalId, {
         get(target, prop: string, recv) {
-          if (prop !== '_bsontype') {
+          if (typeof prop === 'symbol') {
+            propAccessRecord.push((prop as symbol).toString());
+          } else if (prop !== '_bsontype') {
             propAccessRecord.push(prop);
           }
           return Reflect.get(target, prop, recv);
