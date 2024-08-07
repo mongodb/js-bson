@@ -19,6 +19,8 @@ updates:
       # nyc is Node18+ only starting on nyc@16.x.
       - dependency-name: "nyc"
         versions: [">=16.0.0"]
+      # we ignore TS as a part of quarterly dependency updates.
+      - dependency-name: "typescript"
     groups:
       development-dependencies:
         dependency-type: "development"
