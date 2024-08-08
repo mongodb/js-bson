@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.9.0](https://github.com/mongodb/js-bson/compare/v6.8.0...v6.9.0) (2024-08-08)
+
+
+### Features
+
+* **NODE-6031:** add `t` and `i` to Timestamp ([#704](https://github.com/mongodb/js-bson/issues/704)) ([b766d0f](https://github.com/mongodb/js-bson/commit/b766d0f40ad2e8a58499615f0b2bd669661db518))
+
 ## [6.8.0](https://github.com/mongodb/js-bson/compare/v6.7.0...v6.8.0) (2024-06-27)
 
 
