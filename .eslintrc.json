@@ -51,20 +51,16 @@
       "error",
       "global"
     ],
-    "@typescript-eslint/ban-types": [
-      "error",
-      {
-        "types": {
-          "Function": false
-        }
-      }
-    ],
+    "@typescript-eslint/no-unsafe-function-type": "off",
     "@typescript-eslint/no-unsafe-member-access": "off",
     "@typescript-eslint/no-unsafe-assignment": "off",
     "@typescript-eslint/no-unsafe-return": "off",
     "@typescript-eslint/no-unsafe-argument": "off",
     "@typescript-eslint/no-unsafe-call": "off",
     "@typescript-eslint/no-unsafe-enum-comparison": "off",
+    // Note: you must disable the base rule as it can report incorrect errors
+    "no-unused-expressions": "off",
+    "@typescript-eslint/no-unused-expressions": "off",
     "@typescript-eslint/consistent-type-imports": [
       "error",
       {

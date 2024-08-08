@@ -311,7 +311,7 @@ describe('Full BSON', function () {
         checkKeys: true
       });
       expect(false).to.be.ok;
-    } catch (err) {
+    } catch {
       expect(true).to.be.ok;
     }
 
@@ -327,7 +327,7 @@ describe('Full BSON', function () {
         checkKeys: true
       });
       expect(false).to.be.ok;
-    } catch (err) {
+    } catch {
       expect(true).to.be.ok;
     }
 
@@ -343,7 +343,7 @@ describe('Full BSON', function () {
         checkKeys: true
       });
       expect(false).to.be.ok;
-    } catch (err) {
+    } catch {
       expect(true).to.be.ok;
     }
 
