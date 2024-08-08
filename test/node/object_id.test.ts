@@ -4,6 +4,9 @@ import * as util from 'util';
 import { expect } from 'chai';
 import { bufferFromHexArray } from './tools/utils';
 import { isBufferOrUint8Array } from './tools/utils';
+import { _pool, _offset } from '../../src/objectid';
+
+ObjectId.poolSize = 100;
 
 describe('ObjectId', function () {
   describe('static createFromTime()', () => {
@@ -258,6 +261,41 @@ describe('ObjectId', function () {
     ).to.be.true;
   });
 
+  it('should correctly use buffer pool for ObjectId creation', function () {
+    const obj = new ObjectId();
+    const obj2 = new ObjectId();
+
+    expect(obj[_offset]).to.not.equal(obj2[_offset]);
+    expect(obj[_pool]).to.equal(obj2[_pool]);
+
+    expect(obj.id).to.not.equal(obj2.id);
+  });
+
+  it('should respect buffer pool size for ObjectId creation', function () {
+    const oldPoolSize = ObjectId.poolSize;
+    ObjectId.poolSize = 2;
+    const test = new ObjectId();
+    // Must fill current (large) pool first
+    const num = (test[_pool].byteLength - test[_offset]) / 12;
+    for (let i = 0; i < num + 1; i++) {
+      new ObjectId();
+    }
+
+    const obj = new ObjectId();
+    const obj2 = new ObjectId();
+    const obj3 = new ObjectId();
+
+    expect(obj[_offset]).to.equal(0);
+    expect(obj2[_offset]).to.equal(12);
+    expect(obj3[_offset]).to.equal(0);
+    expect(obj[_pool]).to.equal(obj2[_pool]);
+    expect(obj2[_pool]).to.not.equal(obj3[_pool]);
+
+    expect(obj.id).to.not.equal(obj2.id);
+    expect(obj2.id).to.not.equal(obj3.id);
+    ObjectId.poolSize = oldPoolSize;
+  });
+
   it('should throw error if non-12 byte non-24 hex string passed in', function () {
     expect(() => new ObjectId('FFFFFFFFFFFFFFFFFFFFFFFG')).to.throw(BSONError);
     expect(() => new ObjectId('thisstringisdefinitelytoolong')).to.throw(BSONError);
@@ -306,9 +344,29 @@ describe('ObjectId', function () {
     done();
   });
 
+  it('should correctly create ObjectId from valid Buffer and offset', function (done) {
+    if (!Buffer.from) return done();
+    let a = 'AAAAAAAAAAAAAAAAAAAAAAAA';
+    let b = new ObjectId(Buffer.from(`aaaa${a}aaaa`, 'hex'), 2);
+    let c = b.equals(a); // => false
+    expect(true).to.equal(c);
+
+    a = 'aaaaaaaaaaaaaaaaaaaaaaaa';
+    b = new ObjectId(Buffer.from(`AAAA${a}AAAA`, 'hex'), 2);
+    c = b.equals(a); // => true
+    expect(a).to.equal(b.toString());
+    expect(true).to.equal(c);
+    done();
+  });
+
   it('should throw an error if invalid Buffer passed in', function () {
     const a = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
     expect(() => new ObjectId(a)).to.throw(BSONError);
+  });
+
+  it('should throw an error if invalid Buffer offset passed in', function () {
+    const a = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
+    expect(() => new ObjectId(a, 5)).to.throw(BSONError);
   });
 
   it('should correctly allow for node.js inspect to work with ObjectId', function (done) {
@@ -425,9 +483,12 @@ describe('ObjectId', function () {
       let equalId = { _bsontype: 'ObjectId', [oidKId]: oid.id };
 
       const propAccessRecord: string[] = [];
+
       equalId = new Proxy(equalId, {
         get(target, prop: string, recv) {
-          if (prop !== '_bsontype') {
+          if (typeof prop === 'symbol') {
+            propAccessRecord.push((prop as symbol).toString());
+          } else if (prop !== '_bsontype') {
             propAccessRecord.push(prop);
           }
           return Reflect.get(target, prop, recv);
@@ -437,21 +498,8 @@ describe('ObjectId', function () {
       expect(oid.equals(equalId)).to.be.true;
       // once for the 11th byte shortcut
       // once for the total equality
-      expect(propAccessRecord).to.deep.equal([oidKId, oidKId]);
+      expect(propAccessRecord).to.deep.equal(['Symbol(pool)', oidKId]);
     });
-  });
-
-  it('should return the same instance if a buffer is passed in', function () {
-    const inBuffer = Buffer.from('00'.repeat(12), 'hex');
-
-    const outBuffer = new ObjectId(inBuffer);
-
-    // instance equality
-    expect(inBuffer).to.equal(outBuffer.id);
-    // deep equality
-    expect(inBuffer).to.deep.equal(outBuffer.id);
-    // class method equality
-    expect(Buffer.prototype.equals.call(inBuffer, outBuffer.id)).to.be.true;
   });
 
   context('createFromHexString()', () => {

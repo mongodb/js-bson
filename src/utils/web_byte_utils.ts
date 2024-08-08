@@ -170,8 +170,10 @@ export const webByteUtils = {
     return Uint8Array.from(buffer);
   },
 
-  toHex(uint8array: Uint8Array): string {
-    return Array.from(uint8array, byte => byte.toString(16).padStart(2, '0')).join('');
+  toHex(uint8array: Uint8Array, start?: number, end?: number): string {
+    return Array.from(uint8array.subarray(start, end), byte =>
+      byte.toString(16).padStart(2, '0')
+    ).join('');
   },
 
   toUTF8(uint8array: Uint8Array, start: number, end: number, fatal: boolean): string {
