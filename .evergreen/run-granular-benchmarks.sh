@@ -5,4 +5,4 @@ set -o xtrace
 WARMUP=$WARMUP
 ITERATIONS=$ITERATIONS
 
-LIBRARY=$(git rev-parse --short HEAD) WARMUP=$WARMUP ITERATIONS=$ITERATIONS npm run check:granular-bench
+LIBRARY="bson#$(git rev-parse --short HEAD)" WARMUP=$WARMUP ITERATIONS=$ITERATIONS npm run check:granular-bench
