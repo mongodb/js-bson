@@ -51,4 +51,4 @@ export function readEnvVars(): { warmup: number; iterations: number; library: st
 const envVars = readEnvVars();
 export const ITERATIONS = envVars.iterations;
 export const WARMUP = envVars.warmup;
-export const LIBRARY_SPEC = process.env.LIBRARY;
+export const LIBRARY_SPEC = process.env.LIBRARY!;
