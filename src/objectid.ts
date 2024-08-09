@@ -4,6 +4,9 @@ import { type InspectFn, defaultInspect } from './parser/utils';
 import { ByteUtils } from './utils/byte_utils';
 import { NumberUtils } from './utils/number_utils';
 
+const pool = new Uint8Array(0);
+const poolOffset = 0;
+
 // Regular expression that checks for hex value
 const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
 
@@ -88,6 +91,21 @@ export class ObjectId extends BSONValue {
    */
   constructor(inputId?: string | number | ObjectId | ObjectIdLike | Uint8Array) {
     super();
+
+    Object.defineProperty(this, 'pool', {
+      value: pool,
+      configurable: true,
+      writable: true,
+      enumerable: false
+    });
+
+    Object.defineProperty(this, 'poolOffset', {
+      value: poolOffset,
+      configurable: true,
+      writable: true,
+      enumerable: false
+    });
+
     // workingId is set based on type of input and whether valid id exists for the input
     let workingId;
     if (typeof inputId === 'object' && inputId && 'id' in inputId) {

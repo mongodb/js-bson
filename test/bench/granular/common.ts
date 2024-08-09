@@ -34,11 +34,11 @@ export async function runSuiteAndWriteResults(suite: Suite) {
 export function readEnvVars(): { warmup: number; iterations: number; library: string } {
   const envWarmup = Number(process.env.WARMUP);
   const envIterations = Number(process.env.ITERATIONS);
-  const libraryPath = process.env.LIBRARY;
+  // const libraryPath = process.env.LIBRARY;
   const rv = {
     warmup: Number.isSafeInteger(envWarmup) && envWarmup > 0 ? envWarmup : 100_000,
     iterations: Number.isSafeInteger(envIterations) && envIterations > 0 ? envIterations : 10_000,
-    library: libraryPath ? `bson:${libraryPath}` : 'bson#main'
+    library: 'bson#main'
   };
 
   console.log(
@@ -51,4 +51,4 @@ export function readEnvVars(): { warmup: number; iterations: number; library: st
 const envVars = readEnvVars();
 export const ITERATIONS = envVars.iterations;
 export const WARMUP = envVars.warmup;
-export const LIBRARY_SPEC = envVars.library;
+export const LIBRARY_SPEC = process.env.LIBRARY;
