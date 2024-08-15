@@ -18,6 +18,7 @@ import {
   UUID,
   BSONValue
 } from '../register-bson';
+import { assertDeepEqualsWithObjectId } from './tools/utils';
 import * as vm from 'node:vm';
 
 const BSONTypeClasses = [
@@ -128,7 +129,13 @@ describe('BSON Type classes common interfaces', () => {
           ctx.ObjectId = ObjectId;
         }
         vm.runInNewContext(`module.exports.result = ${bsonValue.inspect()}`, ctx);
-        expect(ctx.module.exports.result).to.deep.equal(bsonValue);
+
+        if (ctx.ObjectId) {
+          // Since ObjectId uses a pool we expect offset to be different
+          assertDeepEqualsWithObjectId(ctx.module.exports.result, bsonValue);
+        } else {
+          expect(ctx.module.exports.result).to.deep.equal(bsonValue);
+        }
       });
     }
   });

@@ -5,8 +5,6 @@ import { expect } from 'chai';
 import { bufferFromHexArray } from './tools/utils';
 import { isBufferOrUint8Array } from './tools/utils';
 
-ObjectId.poolSize = 100;
-
 declare module '../register-bson' {
   interface ObjectId {
     pool: Uint8Array;

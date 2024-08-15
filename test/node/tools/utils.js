@@ -218,3 +218,25 @@ module.exports.sorted = (iterable, how) => {
   items.sort(how);
   return items;
 };
+
+/** Deeply converts all ObjectIds into their hex value representation */
+const deepOidValue = obj => {
+  if (obj?._bsontype === 'ObjectId') {
+    return obj.toHexString();
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(item => deepOidValue(item));
+  } else if (obj !== null && typeof obj === 'object' && !Buffer.isBuffer(obj)) {
+    return Object.entries(obj).reduce((acc, [key, value]) => {
+      acc[key] = deepOidValue(value);
+      return acc;
+    }, {});
+  }
+  return obj;
+};
+
+module.exports.assertDeepEqualsWithObjectId = (actual, expected) => {
+  const a = deepOidValue(actual);
+  const b = deepOidValue(expected);
+  expect(a).to.deep.equal(b);
+};

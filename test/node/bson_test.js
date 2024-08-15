@@ -20,7 +20,11 @@ const MaxKey = BSON.MaxKey;
 const BSONError = BSON.BSONError;
 const { BinaryParser } = require('./tools/binary_parser');
 const vm = require('vm');
-const { assertBuffersEqual, isBufferOrUint8Array } = require('./tools/utils');
+const {
+  assertBuffersEqual,
+  isBufferOrUint8Array,
+  assertDeepEqualsWithObjectId
+} = require('./tools/utils');
 const { inspect } = require('util');
 
 /**
@@ -707,7 +711,7 @@ describe('BSON', function () {
     expect(serialized_data).to.deep.equal(serialized_data2);
 
     var doc2 = b.deserialize(serialized_data);
-    expect(doc).to.deep.equal(doc2);
+    assertDeepEqualsWithObjectId(doc, doc2);
     expect(doc2.dbref.oid.toHexString()).to.deep.equal(oid.toHexString());
     done();
   });
@@ -1001,7 +1005,7 @@ describe('BSON', function () {
 
     var deserialized_data = BSON.deserialize(serialized_data);
     expect(doc.b).to.deep.equal(deserialized_data.b);
-    expect(doc).to.deep.equal(deserialized_data);
+    assertDeepEqualsWithObjectId(doc, deserialized_data);
     done();
   });
 
@@ -1213,7 +1217,7 @@ describe('BSON', function () {
 
     var doc2 = BSON.deserialize(serialized_data);
 
-    expect(doc).to.deep.equal(doc2);
+    assertDeepEqualsWithObjectId(doc, doc2);
     done();
   });
 
