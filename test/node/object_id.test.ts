@@ -4,9 +4,15 @@ import * as util from 'util';
 import { expect } from 'chai';
 import { bufferFromHexArray } from './tools/utils';
 import { isBufferOrUint8Array } from './tools/utils';
-import { _pool, _offset } from '../../src/objectid';
 
 ObjectId.poolSize = 100;
+
+declare module '../register-bson' {
+  interface ObjectId {
+    pool: Uint8Array;
+    offset: number;
+  }
+}
 
 describe('ObjectId', function () {
   describe('static createFromTime()', () => {
@@ -545,9 +551,7 @@ describe('ObjectId', function () {
 
       equalId = new Proxy(equalId, {
         get(target, prop: string, recv) {
-          if (typeof prop === 'symbol') {
-            propAccessRecord.push((prop as symbol).toString());
-          } else if (prop !== '_bsontype') {
+          if (prop !== '_bsontype') {
             propAccessRecord.push(prop);
           }
           return Reflect.get(target, prop, recv);
