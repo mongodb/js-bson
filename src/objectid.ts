@@ -163,16 +163,16 @@ export class ObjectId extends BSONValue {
       // Generate a new id
       ObjectId.generate(typeof workingId === 'number' ? workingId : undefined, pool, offset);
     } else if (ArrayBuffer.isView(workingId)) {
-      if (workingId.byteLength !== 12 && typeof inputIndex !== 'number') {
-        throw new BSONError('Buffer length must be 12 or offset must be specified');
-      }
-      if (
-        inputIndex &&
-        (typeof inputIndex !== 'number' || inputIndex < 0 || workingId.byteLength < inputIndex + 12)
+      if (workingId.byteLength === 12) {
+        inputIndex = 0;
+      } else if (
+        typeof inputIndex !== 'number' ||
+        inputIndex < 0 ||
+        workingId.byteLength < inputIndex + 12 ||
+        isNaN(inputIndex)
       ) {
-        throw new BSONError('Buffer offset must be a non-negative number less than buffer length');
+        throw new BSONError('Buffer length must be 12 or a valid offset must be specified');
       }
-      inputIndex ??= 0;
       for (let i = 0; i < 12; i++) pool[offset + i] = workingId[inputIndex + i];
     } else if (typeof workingId === 'string') {
       if (workingId.length === 24 && checkForHexRegExp.test(workingId)) {

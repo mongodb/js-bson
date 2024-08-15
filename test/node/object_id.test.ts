@@ -407,6 +407,13 @@ describe('ObjectId', function () {
   it('should throw an error if invalid Buffer offset passed in', function () {
     const a = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
     expect(() => new ObjectId(a, 5)).to.throw(BSONError);
+    expect(() => new ObjectId(a, -1)).to.throw(BSONError);
+    expect(() => new ObjectId(a, 0n)).to.throw(BSONError);
+    expect(() => new ObjectId(a, '')).to.throw(BSONError);
+    expect(() => new ObjectId(a, NaN)).to.throw(BSONError);
+    expect(() => new ObjectId(a, {})).to.throw(BSONError);
+    expect(() => new ObjectId(a, false)).to.throw(BSONError);
+    expect(() => new ObjectId(a, '' + 1)).to.throw(BSONError);
   });
 
   it('should correctly allow for node.js inspect to work with ObjectId', function (done) {
