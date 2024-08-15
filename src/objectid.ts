@@ -4,23 +4,28 @@ import { type InspectFn, defaultInspect } from './parser/utils';
 import { ByteUtils } from './utils/byte_utils';
 import { NumberUtils } from './utils/number_utils';
 
-const defaultPoolSize = 1000; // Hold 1000 ObjectId buffers in a pool
-let pool: Uint8Array;
-let poolOffset = 0;
-
-/** Internal pool accessors for objectId instance */
-/** @internal private instance pool accessor */
-export const _pool = Symbol('pool');
-/** @internal private instance offset accessor */
-export const _offset = Symbol('offset');
+let currentPool: Uint8Array | null = null;
+let poolSize = 1000; // Default: Hold 1000 ObjectId buffers in a pool
+let currentPoolOffset = 0;
 
 /**
- * Create a new ObjectId buffer pool and reset the pool offset
+ * Retrieves a ObjectId pool and offset. This function may create a new ObjectId buffer pool and reset the pool offset
  * @internal
  */
-function createPool(): void {
-  pool = ByteUtils.allocateUnsafe(ObjectId.poolSize * 12);
-  poolOffset = 0;
+function getPool(): [Uint8Array, number] {
+  if (!currentPool || currentPoolOffset + 12 > currentPool.byteLength) {
+    currentPool = ByteUtils.allocateUnsafe(poolSize * 12);
+    currentPoolOffset = 0;
+  }
+  return [currentPool, currentPoolOffset];
+}
+
+/**
+ * Increments the pool offset by 12 bytes
+ * @internal
+ */
+function incrementPool(): void {
+  currentPoolOffset += 12;
 }
 
 // Regular expression that checks for hex value
@@ -57,14 +62,24 @@ export class ObjectId extends BSONValue {
   static cacheHexString: boolean;
 
   /**
-   * The size of the buffer pool for ObjectId.
+   * The size of the current ObjectId buffer pool.
    */
-  static poolSize: number = defaultPoolSize;
+  static get poolSize(): number {
+    return poolSize;
+  }
+
+  static set poolSize(size: number) {
+    const iSize = Math.ceil(size); // Ensure new pool size is an integer
+    if (iSize <= 0) {
+      throw new BSONError('poolSize must be a positive integer greater than 0');
+    }
+    poolSize = iSize;
+  }
 
   /** ObjectId buffer pool pointer @internal */
-  private [_pool]: Uint8Array;
+  private pool: Uint8Array;
   /** Buffer pool offset @internal */
-  private [_offset]: number;
+  private offset: number;
 
   /** ObjectId hexString cache @internal */
   private __id?: string;
@@ -98,6 +113,13 @@ export class ObjectId extends BSONValue {
    * Create ObjectId from a 12 byte binary Buffer.
    *
    * @param inputId - A 12 byte binary Buffer.
+   */
+  constructor(inputId: Uint8Array);
+  /**
+   * Create ObjectId from a large binary Buffer. Only 12 bytes starting from the offset are used.
+   * @internal
+   * @param inputId - A 12 byte binary Buffer.
+   * @param inputIndex - The offset to start reading the inputId buffer.
    */
   constructor(inputId: Uint8Array, inputIndex?: number);
   /** To generate a new ObjectId, use ObjectId() with no argument. */
@@ -133,23 +155,13 @@ export class ObjectId extends BSONValue {
       workingId = inputId;
     }
 
-    // If we have reached the end of the pool then create a new pool
-    if (!pool || poolOffset + 12 > pool.byteLength) {
-      createPool();
-    }
-    this[_pool] = pool;
-    this[_offset] = poolOffset;
-    poolOffset += 12;
+    const [pool, offset] = getPool();
 
     // The following cases use workingId to construct an ObjectId
     if (workingId == null || typeof workingId === 'number') {
       // The most common use case (blank id, new objectId instance)
       // Generate a new id
-      ObjectId.generate(
-        typeof workingId === 'number' ? workingId : undefined,
-        this[_pool],
-        this[_offset]
-      );
+      ObjectId.generate(typeof workingId === 'number' ? workingId : undefined, pool, offset);
     } else if (ArrayBuffer.isView(workingId)) {
       if (workingId.byteLength !== 12 && typeof inputIndex !== 'number') {
         throw new BSONError('Buffer length must be 12 or offset must be specified');
@@ -161,10 +173,10 @@ export class ObjectId extends BSONValue {
         throw new BSONError('Buffer offset must be a non-negative number less than buffer length');
       }
       inputIndex ??= 0;
-      for (let i = 0; i < 12; i++) this[_pool][this[_offset] + i] = workingId[inputIndex + i];
+      for (let i = 0; i < 12; i++) pool[offset + i] = workingId[inputIndex + i];
     } else if (typeof workingId === 'string') {
       if (workingId.length === 24 && checkForHexRegExp.test(workingId)) {
-        this[_pool].set(ByteUtils.fromHex(workingId), this[_offset]);
+        pool.set(ByteUtils.fromHex(workingId), offset);
       } else {
         throw new BSONError(
           'input must be a 24 character hex string, 12 byte Uint8Array, or an integer'
@@ -175,8 +187,12 @@ export class ObjectId extends BSONValue {
     }
     // If we are caching the hex string
     if (ObjectId.cacheHexString) {
-      this.__id = ByteUtils.toHex(this[_pool], this[_offset], this[_offset] + 12);
+      this.__id = ByteUtils.toHex(pool, offset, offset + 12);
     }
+    // Increment pool offset once we have completed initialization
+    this.pool = pool;
+    this.offset = offset;
+    incrementPool();
   }
 
   /** ObjectId bytes @internal */
@@ -189,14 +205,14 @@ export class ObjectId extends BSONValue {
    * @readonly
    */
   get id(): Uint8Array {
-    return this[_pool].subarray(this[_offset], this[_offset] + 12);
+    return this.pool.subarray(this.offset, this.offset + 12);
   }
 
   set id(value: Uint8Array) {
     if (value.byteLength !== 12) {
       throw new BSONError('input must be a 12 byte Uint8Array');
     }
-    this[_pool].set(value, this[_offset]);
+    this.pool.set(value, this.offset);
     if (ObjectId.cacheHexString) {
       this.__id = ByteUtils.toHex(value);
     }
@@ -208,7 +224,7 @@ export class ObjectId extends BSONValue {
       return this.__id;
     }
 
-    const hexString = ByteUtils.toHex(this[_pool], this[_offset], this[_offset] + 12);
+    const hexString = ByteUtils.toHex(this.pool, this.offset, this.offset + 12);
 
     if (ObjectId.cacheHexString && !this.__id) {
       this.__id = hexString;
@@ -302,9 +318,9 @@ export class ObjectId extends BSONValue {
     }
 
     if (ObjectId.is(otherId)) {
-      if (otherId[_pool] && typeof otherId[_offset] === 'number') {
+      if (otherId.pool && typeof otherId.offset === 'number') {
         for (let i = 11; i >= 0; i--) {
-          if (this[_pool][this[_offset] + i] !== otherId[_pool][otherId[_offset] + i]) {
+          if (this.pool[this.offset + i] !== otherId.pool[otherId.offset + i]) {
             return false;
           }
         }
@@ -330,7 +346,7 @@ export class ObjectId extends BSONValue {
   /** Returns the generation date (accurate up to the second) that this ID was generated. */
   getTimestamp(): Date {
     const timestamp = new Date();
-    const time = NumberUtils.getUint32BE(this[_pool], this[_offset]);
+    const time = NumberUtils.getUint32BE(this.pool, this.offset);
     timestamp.setTime(Math.floor(time) * 1000);
     return timestamp;
   }
@@ -342,18 +358,20 @@ export class ObjectId extends BSONValue {
 
   /** @internal */
   serializeInto(uint8array: Uint8Array, index: number): 12 {
-    uint8array[index] = this[_pool][this[_offset]];
-    uint8array[index + 1] = this[_pool][this[_offset] + 1];
-    uint8array[index + 2] = this[_pool][this[_offset] + 2];
-    uint8array[index + 3] = this[_pool][this[_offset] + 3];
-    uint8array[index + 4] = this[_pool][this[_offset] + 4];
-    uint8array[index + 5] = this[_pool][this[_offset] + 5];
-    uint8array[index + 6] = this[_pool][this[_offset] + 6];
-    uint8array[index + 7] = this[_pool][this[_offset] + 7];
-    uint8array[index + 8] = this[_pool][this[_offset] + 8];
-    uint8array[index + 9] = this[_pool][this[_offset] + 9];
-    uint8array[index + 10] = this[_pool][this[_offset] + 10];
-    uint8array[index + 11] = this[_pool][this[_offset] + 11];
+    const pool = this.pool;
+    const offset = this.offset;
+    uint8array[index] = pool[offset];
+    uint8array[index + 1] = pool[offset + 1];
+    uint8array[index + 2] = pool[offset + 2];
+    uint8array[index + 3] = pool[offset + 3];
+    uint8array[index + 4] = pool[offset + 4];
+    uint8array[index + 5] = pool[offset + 5];
+    uint8array[index + 6] = pool[offset + 6];
+    uint8array[index + 7] = pool[offset + 7];
+    uint8array[index + 8] = pool[offset + 8];
+    uint8array[index + 9] = pool[offset + 9];
+    uint8array[index + 10] = pool[offset + 10];
+    uint8array[index + 11] = pool[offset + 11];
     return 12;
   }
 

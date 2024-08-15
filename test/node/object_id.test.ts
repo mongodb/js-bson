@@ -4,9 +4,15 @@ import * as util from 'util';
 import { expect } from 'chai';
 import { bufferFromHexArray } from './tools/utils';
 import { isBufferOrUint8Array } from './tools/utils';
-import { _pool, _offset } from '../../src/objectid';
 
 ObjectId.poolSize = 100;
+
+declare module '../register-bson' {
+  interface ObjectId {
+    pool: Uint8Array;
+    offset: number;
+  }
+}
 
 describe('ObjectId', function () {
   describe('static createFromTime()', () => {
@@ -265,8 +271,8 @@ describe('ObjectId', function () {
     const obj = new ObjectId();
     const obj2 = new ObjectId();
 
-    expect(obj[_offset]).to.not.equal(obj2[_offset]);
-    expect(obj[_pool]).to.equal(obj2[_pool]);
+    expect(obj.offset).to.not.equal(obj2.offset);
+    expect(obj.pool).to.equal(obj2.pool);
 
     expect(obj.id).to.not.equal(obj2.id);
   });
@@ -276,7 +282,7 @@ describe('ObjectId', function () {
     ObjectId.poolSize = 2;
     const test = new ObjectId();
     // Must fill current (large) pool first
-    const num = (test[_pool].byteLength - test[_offset]) / 12;
+    const num = (test.pool.byteLength - test.offset) / 12;
     for (let i = 0; i < num + 1; i++) {
       new ObjectId();
     }
@@ -285,14 +291,48 @@ describe('ObjectId', function () {
     const obj2 = new ObjectId();
     const obj3 = new ObjectId();
 
-    expect(obj[_offset]).to.equal(0);
-    expect(obj2[_offset]).to.equal(12);
-    expect(obj3[_offset]).to.equal(0);
-    expect(obj[_pool]).to.equal(obj2[_pool]);
-    expect(obj2[_pool]).to.not.equal(obj3[_pool]);
+    expect(obj.offset).to.equal(0);
+    expect(obj2.offset).to.equal(12);
+    expect(obj3.offset).to.equal(0);
+    expect(obj.pool).to.equal(obj2.pool);
+    expect(obj2.pool).to.not.equal(obj3.pool);
 
     expect(obj.id).to.not.equal(obj2.id);
     expect(obj2.id).to.not.equal(obj3.id);
+    ObjectId.poolSize = oldPoolSize;
+  });
+
+  it('should allow poolSize of 1', function () {
+    const oldPoolSize = ObjectId.poolSize;
+    ObjectId.poolSize = 1;
+    const test = new ObjectId();
+    // Must fill current (large) pool first
+    const num = (test.pool.byteLength - test.offset) / 12;
+    for (let i = 0; i < num + 1; i++) {
+      new ObjectId();
+    }
+
+    const obj = new ObjectId();
+    const obj2 = new ObjectId();
+    const obj3 = new ObjectId();
+
+    expect(obj.offset).to.equal(0);
+    expect(obj2.offset).to.equal(0);
+    expect(obj3.offset).to.equal(0);
+    expect(obj.pool).to.not.equal(obj2.pool);
+    expect(obj2.pool).to.not.equal(obj3.pool);
+
+    expect(obj.id).to.not.equal(obj2.id);
+    expect(obj2.id).to.not.equal(obj3.id);
+    ObjectId.poolSize = oldPoolSize;
+  });
+
+  it('should not allow 0 poolSize', function () {
+    const oldPoolSize = ObjectId.poolSize;
+    expect(() => {
+      ObjectId.poolSize = 0;
+    }).to.throw(BSONError);
+
     ObjectId.poolSize = oldPoolSize;
   });
 
@@ -486,9 +526,7 @@ describe('ObjectId', function () {
 
       equalId = new Proxy(equalId, {
         get(target, prop: string, recv) {
-          if (typeof prop === 'symbol') {
-            propAccessRecord.push((prop as symbol).toString());
-          } else if (prop !== '_bsontype') {
+          if (prop !== '_bsontype') {
             propAccessRecord.push(prop);
           }
           return Reflect.get(target, prop, recv);
@@ -498,7 +536,7 @@ describe('ObjectId', function () {
       expect(oid.equals(equalId)).to.be.true;
       // once for the 11th byte shortcut
       // once for the total equality
-      expect(propAccessRecord).to.deep.equal(['Symbol(pool)', oidKId]);
+      expect(propAccessRecord).to.deep.equal(['pool', oidKId]);
     });
   });
 

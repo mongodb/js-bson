@@ -6,7 +6,7 @@ type NodeJsEncoding = 'base64' | 'hex' | 'utf8' | 'binary';
 type NodeJsBuffer = ArrayBufferView &
   Uint8Array & {
     write(string: string, offset: number, length: undefined, encoding: 'utf8'): number;
-    copy(target: Uint8Array, targetStart: number, sourceStart?: number, sourceEnd?: number): number;
+    copy(target: Uint8Array, targetStart: number, sourceStart: number, sourceEnd: number): number;
     toString: (this: Uint8Array, encoding: NodeJsEncoding, start?: number, end?: number) => string;
     equals: (this: Uint8Array, other: Uint8Array) => boolean;
   };
@@ -124,7 +124,7 @@ export const nodeJsByteUtils = {
     return Buffer.from(hex, 'hex');
   },
 
-  toHex(buffer: NodeJsBuffer, start?: number, end?: number): string {
+  toHex(buffer: Uint8Array, start?: number, end?: number): string {
     return nodeJsByteUtils.toLocalBufferType(buffer).toString('hex', start, end);
   },
 
