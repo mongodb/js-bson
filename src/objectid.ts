@@ -69,11 +69,7 @@ export class ObjectId extends BSONValue {
   }
 
   static set poolSize(size: number) {
-    const iSize = Math.ceil(size); // Ensure new pool size is an integer
-    if (iSize <= 0) {
-      throw new BSONError('poolSize must be a positive integer greater than 0');
-    }
-    poolSize = iSize;
+    poolSize = Math.max(Math.abs(Number(size)) >>> 0, 1);
   }
 
   /** ObjectId buffer pool pointer @internal */
@@ -241,6 +237,21 @@ export class ObjectId extends BSONValue {
     return (ObjectId.index = (ObjectId.index + 1) % 0xffffff);
   }
 
+  /**
+   * Generate a 12 byte id buffer used in ObjectId's
+   *
+   * @param time - pass in a second based timestamp.
+   */
+  static generate(time?: number): Uint8Array;
+  /**
+   * Generate a 12 byte id buffer used in ObjectId's and write to the provided buffer at offset.
+   * @internal
+   *
+   * @param time - pass in a second based timestamp.
+   * @param buffer - Optionally pass in a buffer instance.
+   * @param offset - Optionally pass in a buffer offset.
+   */
+  static generate(time?: number, buffer?: Uint8Array, offset?: number): Uint8Array;
   /**
    * Generate a 12 byte id buffer used in ObjectId's
    *

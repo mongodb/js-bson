@@ -4,7 +4,6 @@ import * as vm from 'node:vm';
 import { expect } from 'chai';
 import { BSONVersionError, BSONRuntimeError } from '../../src';
 import { BSONError } from '../register-bson';
-import { assertDeepEqualsWithObjectId } from './tools/utils';
 
 // BSON types
 const Binary = BSON.Binary;
@@ -145,10 +144,11 @@ describe('Extended JSON', function () {
     const input = '{"result":[{"_id":{"$oid":"591801a468f9e7024b623939"},"emptyField":null}]}';
     const parsed = EJSON.parse(input);
 
-    const expected = {
-      result: [{ _id: new ObjectId('591801a468f9e7024b623939'), emptyField: null }]
-    };
-    assertDeepEqualsWithObjectId(parsed, expected);
+    expect(EJSON.serialize(parsed)).to.deep.equal(
+      EJSON.serialize({
+        result: [{ _id: new ObjectId('591801a468f9e7024b623939'), emptyField: null }]
+      })
+    );
   });
 
   it('should correctly throw when passed a non-string to parse', function () {

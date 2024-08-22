@@ -5,13 +5,6 @@ import { expect } from 'chai';
 import { bufferFromHexArray } from './tools/utils';
 import { isBufferOrUint8Array } from './tools/utils';
 
-declare module '../register-bson' {
-  interface ObjectId {
-    pool: Uint8Array;
-    offset: number;
-  }
-}
-
 describe('ObjectId', function () {
   describe('static createFromTime()', () => {
     it('creates an objectId with user defined value in the timestamp field', function () {
@@ -325,11 +318,24 @@ describe('ObjectId', function () {
     ObjectId.poolSize = oldPoolSize;
   });
 
-  it('should not allow 0 poolSize', function () {
+  it('should default to poolSize = 1 when invalid poolSize set', function () {
     const oldPoolSize = ObjectId.poolSize;
-    expect(() => {
-      ObjectId.poolSize = 0;
-    }).to.throw(BSONError);
+
+    ObjectId.poolSize = 0;
+    expect(ObjectId.poolSize).to.equal(1);
+    ObjectId.poolSize = -1;
+    expect(ObjectId.poolSize).to.equal(1);
+    ObjectId.poolSize = 0n;
+    expect(ObjectId.poolSize).to.equal(1);
+    ObjectId.poolSize = '';
+    expect(ObjectId.poolSize).to.equal(1);
+    ObjectId.poolSize = NaN;
+    expect(ObjectId.poolSize).to.equal(1);
+    ObjectId.poolSize = {};
+    expect(ObjectId.poolSize).to.equal(1);
+    ObjectId.poolSize = false;
+    expect(ObjectId.poolSize).to.equal(1);
+    ObjectId.poolSize = '1';
 
     ObjectId.poolSize = oldPoolSize;
   });
