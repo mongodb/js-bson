@@ -112,7 +112,7 @@ export class ObjectId extends BSONValue {
       // If intstanceof matches we can escape calling ensure buffer in Node.js environments
       this.buffer = ByteUtils.toLocalBufferType(workingId);
     } else if (typeof workingId === 'string') {
-      if (workingId.length === 24 && checkForHexRegExp.test(workingId)) {
+      if (ObjectId.validateHexString(workingId)) {
         this.buffer = ByteUtils.fromHex(workingId);
       } else {
         throw new BSONError(
@@ -141,6 +141,15 @@ export class ObjectId extends BSONValue {
     if (ObjectId.cacheHexString) {
       this.__id = ByteUtils.toHex(value);
     }
+  }
+
+  /**
+   * @internal
+   * Validates the input string is a valid hex representation of an ObjectId.
+   */
+  private static validateHexString(input: string): boolean {
+    if (input == null || input.length !== 24) return false;
+    return checkForHexRegExp.test(input);
   }
 
   /** Returns the ObjectId id as a 24 lowercase character hex string representation */
@@ -329,6 +338,7 @@ export class ObjectId extends BSONValue {
    */
   static isValid(id: string | number | ObjectId | ObjectIdLike | Uint8Array): boolean {
     if (id == null) return false;
+    if (typeof id === 'string') return ObjectId.validateHexString(id);
 
     try {
       new ObjectId(id);
