@@ -1,31 +1,54 @@
+const map = new WeakMap<object, string>();
+
+/**
+ * Retrieves the prototype.toString() of a value.
+ * If the value is an object, it will cache the result in a WeakMap for future use.
+ */
+function getPrototypeString(value: unknown): string {
+  let str = map.get(value as object);
+
+  if (!str) {
+    str = Object.prototype.toString.call(value);
+    if (value !== null && typeof value === 'object') {
+      map.set(value, str);
+    }
+  }
+  return str;
+}
+
 export function isAnyArrayBuffer(value: unknown): value is ArrayBuffer {
-  return ['[object ArrayBuffer]', '[object SharedArrayBuffer]'].includes(
-    Object.prototype.toString.call(value)
-  );
+  const type = getPrototypeString(value);
+  return ['[object ArrayBuffer]', '[object SharedArrayBuffer]'].includes(type);
 }
 
 export function isUint8Array(value: unknown): value is Uint8Array {
-  return Object.prototype.toString.call(value) === '[object Uint8Array]';
+  const type = getPrototypeString(value);
+  return type === '[object Uint8Array]';
 }
 
 export function isBigInt64Array(value: unknown): value is BigInt64Array {
-  return Object.prototype.toString.call(value) === '[object BigInt64Array]';
+  const type = getPrototypeString(value);
+  return type === '[object BigInt64Array]';
 }
 
 export function isBigUInt64Array(value: unknown): value is BigUint64Array {
-  return Object.prototype.toString.call(value) === '[object BigUint64Array]';
+  const type = getPrototypeString(value);
+  return type === '[object BigUint64Array]';
 }
 
 export function isRegExp(d: unknown): d is RegExp {
-  return Object.prototype.toString.call(d) === '[object RegExp]';
+  const type = getPrototypeString(d);
+  return type === '[object RegExp]';
 }
 
 export function isMap(d: unknown): d is Map<unknown, unknown> {
-  return Object.prototype.toString.call(d) === '[object Map]';
+  const type = getPrototypeString(d);
+  return type === '[object Map]';
 }
 
 export function isDate(d: unknown): d is Date {
-  return Object.prototype.toString.call(d) === '[object Date]';
+  const type = getPrototypeString(d);
+  return type === '[object Date]';
 }
 
 export type InspectFn = (x: unknown, options?: unknown) => string;
