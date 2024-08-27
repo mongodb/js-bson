@@ -258,7 +258,7 @@ The `"exports"` definition in our `package.json` will result in BSON's CommonJS 
 
 ## BSON benchmarking
 
-This directory contains the files pertinent to performance testing of js-bson.
+The `./test/bench` directory contains the files pertinent to performance testing of js-bson.
 
 The `./test/bench/documents` directory contains generated documents used for performance testing
 
