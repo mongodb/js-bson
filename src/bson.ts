@@ -90,8 +90,6 @@ export function setInternalBufferSize(size: number): void {
  * @public
  */
 export function serialize(object: Document, options: SerializeOptions = {}): Uint8Array {
-  // @ts-expect-error: i DNE
-  for (options.i = 0; options.i < 100_000; options.i++);
   // Unpack the options
   const checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : false;
   const serializeFunctions =
