@@ -21,9 +21,7 @@ Begin by creating a fork of this repo and cloning the fork.  Then run `npm insta
 
 ### Visual Studio Code Setup
 
-One option to get up and running quickly is to use a preconfigured VS Code [workspace][workspace-file].  Save the the workspace file in a directory separate from the directory where you cloned this repo.  Open the workspace file in VS Code, and update `folders.path` to point to your local `driver` directory.
-
-Alternatively, if you just want to get formatting and linting working automatically without using the workspace file, add these settings to your VS Code code workspace:
+If you want to get formatting and linting working automatically, add these settings to your VS Code code workspace:
 
 ```jsonc
 "settings":{
@@ -49,10 +47,13 @@ We recommended these VS Code extensions:
   - [gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens)
 
 
-
 ### Automated Tests
 
-This repo contains a suite of automated tests.  See the [Testing README](/test/readme.md) for more details.
+This repo contains a suite of automated tests that can be run with the following command:
+
+```bash
+npm run test
+```
 
 ### BSON benchmarking
 
@@ -203,5 +204,4 @@ Reviewers should use the following questions to evaluate the implementation for 
 [mdb-core-values]: https://www.mongodb.com/company/
 [nvm-windows]: https://github.com/coreybutler/nvm-windows#installation--upgrades
 [nvm-unix]: https://github.com/nvm-sh/nvm#install--update-script
-[workspace-file]: https://gist.githubusercontent.com/nbbeeken/d831a3801b4c463648c077b27da5057b/raw/8e986843e5e28019f7c0cebe5c6fa72407bf8afb/node-mongodb-native.code-workspace
 [node-jira]: https://jira.mongodb.org/browse/NODE
