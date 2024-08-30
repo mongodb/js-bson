@@ -46,6 +46,9 @@ export interface ObjectIdExtended {
   $oid: string;
 }
 
+const defineProperty = Object.defineProperty;
+const propertyDescriptor: any = { value: null, enumerable: false, writable: true, configurable: true };
+
 /**
  * A class representation of the BSON ObjectId type.
  * @public
@@ -73,9 +76,9 @@ export class ObjectId extends BSONValue {
   }
 
   /** ObjectId buffer pool pointer @internal */
-  private pool: Uint8Array;
+  private pool!: Uint8Array;
   /** Buffer pool offset @internal */
-  private offset: number;
+  private offset!: number;
 
   /** ObjectId hexString cache @internal */
   private __id?: string;
@@ -185,9 +188,14 @@ export class ObjectId extends BSONValue {
     if (ObjectId.cacheHexString) {
       this.__id = ByteUtils.toHex(pool, offset, offset + 12);
     }
+
     // Increment pool offset once we have completed initialization
-    this.pool = pool;
-    this.offset = offset;
+    propertyDescriptor.value = pool;
+    defineProperty(this, 'pool', propertyDescriptor);
+    propertyDescriptor.value = offset;
+    defineProperty(this, 'offset', propertyDescriptor);
+    propertyDescriptor.value = null;
+
     incrementPool();
   }
 
