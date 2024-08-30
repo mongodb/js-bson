@@ -5,7 +5,7 @@ import { ByteUtils } from './utils/byte_utils';
 import { NumberUtils } from './utils/number_utils';
 
 let currentPool: Uint8Array | null = null;
-let poolSize = 1000; // Default: Hold 1000 ObjectId buffers in a pool
+let poolSize = 1; // Default: Hold 1 ObjectId buffers in a pool
 let currentPoolOffset = 0;
 
 /**
