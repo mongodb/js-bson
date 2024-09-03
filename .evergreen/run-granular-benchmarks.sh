@@ -5,4 +5,4 @@ set -o xtrace
 WARMUP=$WARMUP
 ITERATIONS=$ITERATIONS
 
-WARMUP=$WARMUP ITERATIONS=$ITERATIONS npm run check:granular-bench
+WARMUP=$WARMUP ITERATIONS=$ITERATIONS LIBRARY=$(pwd) npm run check:granular-bench
