@@ -230,7 +230,7 @@ tasks:
         vars:
           TS_VERSION: "next"
           TRY_COMPILING_LIBRARY: "false"
-  - name: run-granular-benchmarks-node-18
+  - name: run-granular-benchmarks
     commands:
       - func: fetch source
         vars:
@@ -246,7 +246,7 @@ tasks:
       - command: perf.send
         params:
           file: src/test/bench/etc/resultsCollectedMeans.json
-  - name: run-spec-benchmarks-node-18
+  - name: run-spec-benchmarks
     commands:
       - func: fetch source
         vars:
@@ -298,5 +298,5 @@ buildvariants:
     display_name: RHEL 9.0 perf
     run_on: rhel90-dbx-perf-large
     tasks:
-      - run-granular-benchmarks-node-18
-      - run-spec-benchmarks-node-18
+      - run-granular-benchmarks
+      - run-spec-benchmarks
