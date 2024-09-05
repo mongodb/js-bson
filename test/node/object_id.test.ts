@@ -259,13 +259,18 @@ describe('ObjectId', function () {
   });
 
   it('should correctly use buffer pool for ObjectId creation', function () {
+    const oldPoolSize = ObjectId.poolSize;
+    ObjectId.poolSize = 2;
     const obj = new ObjectId();
     const obj2 = new ObjectId();
 
+    expect(obj.offset).to.equal(0);
+    expect(obj2.offset).to.equal(12);
     expect(obj.offset).to.not.equal(obj2.offset);
     expect(obj.pool).to.equal(obj2.pool);
 
     expect(obj.id).to.not.equal(obj2.id);
+    ObjectId.poolSize = oldPoolSize;
   });
 
   it('should respect buffer pool size for ObjectId creation', function () {
@@ -307,9 +312,9 @@ describe('ObjectId', function () {
     const obj2 = new ObjectId();
     const obj3 = new ObjectId();
 
-    expect(obj.offset).to.equal(0);
-    expect(obj2.offset).to.equal(0);
-    expect(obj3.offset).to.equal(0);
+    expect(obj.offset).to.equal(undefined);
+    expect(obj2.offset).to.equal(undefined);
+    expect(obj3.offset).to.equal(undefined);
     expect(obj.pool).to.not.equal(obj2.pool);
     expect(obj2.pool).to.not.equal(obj3.pool);
 
@@ -534,7 +539,6 @@ describe('ObjectId', function () {
       let equalId = { _bsontype: 'ObjectId', [oidKId]: oid.id };
 
       const propAccessRecord: string[] = [];
-
       equalId = new Proxy(equalId, {
         get(target, prop: string, recv) {
           if (prop !== '_bsontype') {
@@ -547,7 +551,30 @@ describe('ObjectId', function () {
       expect(oid.equals(equalId)).to.be.true;
       // once for the 11th byte shortcut
       // once for the total equality
-      expect(propAccessRecord).to.deep.equal(['pool', oidKId]);
+      expect(propAccessRecord).to.deep.equal(['pool', oidKId, oidKId]);
+    });
+
+    it('should use otherId[kId] Pool for equality when otherId has _bsontype === ObjectId when using pool', () => {
+      const oldPoolSize = ObjectId.poolSize;
+      ObjectId.poolSize = 2;
+      const oid = new ObjectId(oidString);
+      let equalId = new ObjectId(oidString);
+
+      const propAccessRecord: string[] = [];
+      equalId = new Proxy(equalId, {
+        get(target, prop: string, recv) {
+          if (prop !== '_bsontype') {
+            propAccessRecord.push(prop);
+          }
+          return Reflect.get(target, prop, recv);
+        }
+      });
+
+      expect(oid.equals(equalId)).to.be.true;
+      // once for the 11th byte shortcut
+      // once for the total equality
+      expect(propAccessRecord).to.contain('pool').contain('offset');
+      ObjectId.poolSize = oldPoolSize;
     });
   });
 

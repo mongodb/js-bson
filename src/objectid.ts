@@ -4,8 +4,11 @@ import { type InspectFn, defaultInspect } from './parser/utils';
 import { ByteUtils } from './utils/byte_utils';
 import { NumberUtils } from './utils/number_utils';
 
+// Settings for ObjectId Buffer pool
+// Disable pool by default in order to ensure compatibility
+// Specify larger poolSize to enable pool
 let currentPool: Uint8Array | null = null;
-let poolSize = 1000; // Default: Hold 1000 ObjectId buffers in a pool
+let poolSize = 1; // Disable pool by default.
 let currentPoolOffset = 0;
 
 /**
@@ -13,7 +16,7 @@ let currentPoolOffset = 0;
  * @internal
  */
 function getPool(): [Uint8Array, number] {
-  if (!currentPool || currentPoolOffset + 12 > currentPool.byteLength) {
+  if (!currentPool || currentPoolOffset + 12 > currentPool.length) {
     currentPool = ByteUtils.allocateUnsafe(poolSize * 12);
     currentPoolOffset = 0;
   }
@@ -75,7 +78,7 @@ export class ObjectId extends BSONValue {
   /** ObjectId buffer pool pointer @internal */
   private pool: Uint8Array;
   /** Buffer pool offset @internal */
-  private offset: number;
+  private offset?: number;
 
   /** ObjectId hexString cache @internal */
   private __id?: string;
@@ -151,35 +154,44 @@ export class ObjectId extends BSONValue {
       workingId = inputId;
     }
 
-    const [pool, offset] = getPool();
+    let pool: Uint8Array;
+    let offset: number;
 
-    // The following cases use workingId to construct an ObjectId
-    if (workingId == null || typeof workingId === 'number') {
-      // The most common use case (blank id, new objectId instance)
-      // Generate a new id
-      ObjectId.generate(typeof workingId === 'number' ? workingId : undefined, pool, offset);
-    } else if (ArrayBuffer.isView(workingId)) {
-      if (workingId.byteLength === 12) {
-        inputIndex = 0;
-      } else if (
-        typeof inputIndex !== 'number' ||
-        inputIndex < 0 ||
-        workingId.byteLength < inputIndex + 12 ||
-        isNaN(inputIndex)
-      ) {
-        throw new BSONError('Buffer length must be 12 or a valid offset must be specified');
-      }
-      for (let i = 0; i < 12; i++) pool[offset + i] = workingId[inputIndex + i];
-    } else if (typeof workingId === 'string') {
-      if (workingId.length === 24 && checkForHexRegExp.test(workingId)) {
-        pool.set(ByteUtils.fromHex(workingId), offset);
-      } else {
-        throw new BSONError(
-          'input must be a 24 character hex string, 12 byte Uint8Array, or an integer'
-        );
-      }
+    // Special case when poolSize === 1 and a 12 byte buffer is passed in - just persist buffer
+    if (poolSize === 1 && ArrayBuffer.isView(workingId) && workingId.length === 12) {
+      pool = ByteUtils.toLocalBufferType(workingId);
+      offset = 0;
     } else {
-      throw new BSONError('Argument passed in does not match the accepted types');
+      [pool, offset] = getPool();
+
+      // The following cases use workingId to construct an ObjectId
+      if (workingId == null || typeof workingId === 'number') {
+        // The most common use case (blank id, new objectId instance)
+        // Generate a new id
+        ObjectId.generate(typeof workingId === 'number' ? workingId : undefined, pool, offset);
+      } else if (ArrayBuffer.isView(workingId)) {
+        if (workingId.length === 12) {
+          inputIndex = 0;
+        } else if (
+          typeof inputIndex !== 'number' ||
+          inputIndex < 0 ||
+          workingId.length < inputIndex + 12 ||
+          isNaN(inputIndex)
+        ) {
+          throw new BSONError('Buffer length must be 12 or a valid offset must be specified');
+        }
+        for (let i = 0; i < 12; i++) pool[offset + i] = workingId[inputIndex + i];
+      } else if (typeof workingId === 'string') {
+        if (workingId.length === 24 && checkForHexRegExp.test(workingId)) {
+          pool.set(ByteUtils.fromHex(workingId), offset);
+        } else {
+          throw new BSONError(
+            'input must be a 24 character hex string, 12 byte Uint8Array, or an integer'
+          );
+        }
+      } else {
+        throw new BSONError('Argument passed in does not match the accepted types');
+      }
     }
     // If we are caching the hex string
     if (ObjectId.cacheHexString) {
@@ -187,7 +199,10 @@ export class ObjectId extends BSONValue {
     }
     // Increment pool offset once we have completed initialization
     this.pool = pool;
-    this.offset = offset;
+    // Only set offset if pool is used
+    if (poolSize > 1) {
+      this.offset = offset;
+    }
     incrementPool();
   }
 
@@ -201,6 +216,7 @@ export class ObjectId extends BSONValue {
    * @readonly
    */
   get id(): Uint8Array {
+    if (this.offset === undefined) return this.pool;
     return this.pool.subarray(this.offset, this.offset + 12);
   }
 
@@ -219,8 +235,9 @@ export class ObjectId extends BSONValue {
     if (ObjectId.cacheHexString && this.__id) {
       return this.__id;
     }
+    const start = this.offset ?? 0;
 
-    const hexString = ByteUtils.toHex(this.pool, this.offset, this.offset + 12);
+    const hexString = ByteUtils.toHex(this.pool, start, start + 12);
 
     if (ObjectId.cacheHexString && !this.__id) {
       this.__id = hexString;
@@ -329,16 +346,20 @@ export class ObjectId extends BSONValue {
     }
 
     if (ObjectId.is(otherId)) {
-      if (otherId.pool && typeof otherId.offset === 'number') {
+      if (otherId.pool) {
         for (let i = 11; i >= 0; i--) {
-          if (this.pool[this.offset + i] !== otherId.pool[otherId.offset + i]) {
+          const offset = this.offset ?? 0;
+          const otherOffset = otherId.offset ?? 0;
+          if (this.pool[offset + i] !== otherId.pool[otherOffset + i]) {
             return false;
           }
         }
         return true;
       }
       // If otherId does not have pool and offset, fallback to buffer comparison for compatibility
-      return ByteUtils.equals(this.buffer, otherId.buffer);
+      return (
+        this.buffer[11] === otherId.buffer[11] && ByteUtils.equals(this.buffer, otherId.buffer)
+      );
     }
 
     if (typeof otherId === 'string') {
@@ -357,7 +378,7 @@ export class ObjectId extends BSONValue {
   /** Returns the generation date (accurate up to the second) that this ID was generated. */
   getTimestamp(): Date {
     const timestamp = new Date();
-    const time = NumberUtils.getUint32BE(this.pool, this.offset);
+    const time = NumberUtils.getUint32BE(this.pool, this.offset ?? 0);
     timestamp.setTime(Math.floor(time) * 1000);
     return timestamp;
   }
@@ -370,7 +391,7 @@ export class ObjectId extends BSONValue {
   /** @internal */
   serializeInto(uint8array: Uint8Array, index: number): 12 {
     const pool = this.pool;
-    const offset = this.offset;
+    const offset = this.offset ?? 0;
     uint8array[index] = pool[offset];
     uint8array[index + 1] = pool[offset + 1];
     uint8array[index + 2] = pool[offset + 2];
