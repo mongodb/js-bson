@@ -59,7 +59,10 @@
         "plugin:@typescript-eslint/recommended"
       ],
       "rules": {
-        "@typescript-eslint/no-non-null-assertion": "off"
+        "@typescript-eslint/no-non-null-assertion": "off",
+        // Note: you must disable the base rule as it can report incorrect errors
+        "no-unused-expressions": "off",
+        "@typescript-eslint/no-unused-expressions": "off"
       }
     }
   ]

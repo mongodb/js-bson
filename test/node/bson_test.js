@@ -1687,7 +1687,7 @@ describe('BSON', function () {
     try {
       new ObjectId('zzzzzzzzzzzzzzzzzzzzzzzz');
       expect(false).to.be.ok;
-    } catch (err) {
+    } catch {
       expect(true).to.be.ok;
     }
 

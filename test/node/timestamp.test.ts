@@ -9,6 +9,37 @@ describe('Timestamp', () => {
     });
   });
 
+  describe('get i() and get t()', () => {
+    it('i returns lower bits', () => {
+      const l = new BSON.Long(1, 2);
+      const ts = new BSON.Timestamp(l);
+      expect(ts.i).to.equal(l.low);
+    });
+
+    it('t returns higher bits', () => {
+      const l = new BSON.Long(1, 2);
+      const ts = new BSON.Timestamp(l);
+      expect(ts.t).to.equal(l.high);
+    });
+
+    describe('when signed negative input is provided to the constructor', () => {
+      it('t and i return unsigned values', () => {
+        const l = new BSON.Long(-1, -2);
+        // Check the assumption that Long did NOT change the values to unsigned.
+        expect(l).to.have.property('low', -1);
+        expect(l).to.have.property('high', -2);
+
+        const ts = new BSON.Timestamp(l);
+        expect(ts).to.have.property('i', 0xffffffff); // -1 unsigned
+        expect(ts).to.have.property('t', 0xfffffffe); // -2 unsigned
+
+        // Timestamp is a subclass of Long, high and low do not change:
+        expect(ts).to.have.property('low', -1);
+        expect(ts).to.have.property('high', -2);
+      });
+    });
+  });
+
   it('should always be an unsigned value', () => {
     let bigIntInputs: Timestamp[] = [];
     if (!__noBigInt__) {
@@ -23,7 +54,8 @@ describe('Timestamp', () => {
       new BSON.Timestamp({ t: 0xffff_ffff, i: 0xffff_ffff }),
       // @ts-expect-error We do not advertise support for Int32 in the constructor of Timestamp
       // We do expect it to work so that round tripping the Int32 instance inside a Timestamp works
-      new BSON.Timestamp({ t: new BSON.Int32(0x7fff_ffff), i: new BSON.Int32(0x7fff_ffff) })
+      new BSON.Timestamp({ t: new BSON.Int32(0x7fff_ffff), i: new BSON.Int32(0x7fff_ffff) }),
+      new BSON.Timestamp(new BSON.Timestamp({ t: 0xffff_ffff, i: 0xffff_ffff }))
     ];
 
     for (const timestamp of table) {
@@ -67,6 +99,12 @@ describe('Timestamp', () => {
       const input = { t: 89, i: 144 };
       const timestamp = new BSON.Timestamp(input);
       expect(timestamp.toExtendedJSON()).to.deep.equal({ $timestamp: input });
+    });
+
+    it('accepts timestamp object as input', () => {
+      const input = new BSON.Timestamp({ t: 89, i: 144 });
+      const timestamp = new BSON.Timestamp(input);
+      expect(timestamp.toExtendedJSON()).to.deep.equal({ $timestamp: { t: input.t, i: input.i } });
     });
 
     it('accepts { t, i } object as input and coerce to integer', () => {

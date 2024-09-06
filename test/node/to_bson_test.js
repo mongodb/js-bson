@@ -114,14 +114,14 @@ describe('toBSON', function () {
     try {
       var serialized_data = BSON.serialize(doc, false, true);
       BSON.deserialize(serialized_data);
-    } catch (err) {
+    } catch {
       test1 = true;
     }
 
     try {
       serialized_data = BSON.serialize(doc, false, true);
       BSON.deserialize(serialized_data);
-    } catch (err) {
+    } catch {
       test2 = true;
     }
 
