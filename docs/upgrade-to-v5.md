@@ -10,6 +10,7 @@
 - [Other Changes](#other-changes)
   - [`serializeFunctions` bug fix](#serializefunctions-bug-fix)
   - [TS "target" set to es2020](#ts-target-set-to-es2020)
+  - [Removed SerializableTypes](#removed-serializabletypes)
 
 ## About
 
@@ -313,3 +314,15 @@ import { serialize } from 'bson5';
 serialize({ _id: new ObjectId() });
 // Uncaught BSONVersionError: Unsupported BSON version, bson types must be from bson 5.0 or later
 ```
+
+### Removed SerializableTypes
+
+```ts
+export type JSONPrimitive = string | number | boolean | null;
+export type SerializableTypes = Document | Array<JSONPrimitive | Document> | JSONPrimitive;
+```
+
+`SerializableTypes` is removed in v5 due to it inaccuracy and inconvenience when working with return type of `EJSON.parse()`.
+This type does not contain all possible outputs from this function and it cannot be conveniently related to a custom declared type.
+`EJSON.parse` and `EJSON.stringify` now accept `any` in alignment with `JSON`'s corresponding APIs.
+For users that desire type strictness it is recommended to wrap these APIs with type annotations that take/return `unknown` since that generally forces better narrowing logic than `SerializableTypes` would have prompted.
