@@ -113,6 +113,15 @@ functions:
         add_expansions_to_env: true
         args:
           - .evergreen/run-granular-benchmarks.sh
+  run custom benchmarks:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - .evergreen/run-custom-benchmarks.sh
   run spec benchmarks:
     - command: subprocess.exec
       type: test
@@ -246,6 +255,19 @@ tasks:
       - command: perf.send
         params:
           file: src/test/bench/etc/resultsCollectedMeans.json
+  - name: run-custom-benchmarks
+    commands:
+      - func: fetch source
+        vars:
+          # This needs to stay pinned at Node v18.16.0 for consistency across perf runs.
+          NODE_LTS_VERSION: v18.16.0
+      - func: install dependencies
+        vars:
+          NPM_VERSION: 9
+      - func: run custom benchmarks
+      - command: perf.send
+        params:
+          file: src/customBenchmarkResults.json
   - name: run-spec-benchmarks
     commands:
       - func: fetch source
@@ -300,3 +322,4 @@ buildvariants:
     tasks:
       - run-granular-benchmarks
       - run-spec-benchmarks
+      - run-custom-benchmarks
