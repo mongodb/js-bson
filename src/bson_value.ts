@@ -1,5 +1,6 @@
 import { BSON_MAJOR_VERSION } from './constants';
 import { type InspectFn } from './parser/utils';
+import { BSON_VERSION_SYMBOL } from './constants';
 
 /** @public */
 export abstract class BSONValue {
@@ -7,7 +8,7 @@ export abstract class BSONValue {
   public abstract get _bsontype(): string;
 
   /** @internal */
-  get [Symbol.for('@@mdb.bson.version')](): typeof BSON_MAJOR_VERSION {
+  get [BSON_VERSION_SYMBOL](): typeof BSON_MAJOR_VERSION {
     return BSON_MAJOR_VERSION;
   }
 

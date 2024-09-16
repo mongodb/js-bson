@@ -33,3 +33,4 @@ docs/public
 .nvmrc
 
 benchmarks.json
+customBenchmarkResults.json

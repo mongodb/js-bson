@@ -81,7 +81,7 @@ function calculateElement(
       if (
         value != null &&
         typeof value._bsontype === 'string' &&
-        value[Symbol.for('@@mdb.bson.version')] !== constants.BSON_MAJOR_VERSION
+        value[constants.BSON_VERSION_SYMBOL] !== constants.BSON_MAJOR_VERSION
       ) {
         throw new BSONVersionError();
       } else if (value == null || value._bsontype === 'MinKey' || value._bsontype === 'MaxKey') {
