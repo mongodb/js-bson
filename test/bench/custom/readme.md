@@ -4,16 +4,21 @@ In this directory are tests for code paths not covered by our spec or granular (
 
 ## How to write your own
 
-In `main.mjs` call the `.add` function and pass it an underscore concatenated descriptive title.
-Try to fit the title into the format of: "subject area", "method or function" "test case that is being covered" (Ex. `objectid_isvalid_bestcase_false`).
-Copy the title to the name of the function to assist with debugging and flamegraph capturing.
+In `benchmarks.mjs` add a new test to an existing array or make a new array for a new subject area.
+Try to fit the name of the function into the format of: "subject area", "method or function" "test case that is being covered" (Ex. `objectid_isvalid_bestcase_false`).
+Make sure your test is added to the `benchmarks` export.
 
 ### Example
 
 ```js
-.add('subject_function_testcase', function subject_function_testcase() {
-  BSON.ObjectId.isValid('g6e84ebdc96f4c0772f0cbbf');
-})
+const ObjectId_isValid = [
+  function objectid_isvalid_strlen() {
+    BSON.ObjectId.isValid('a');
+  },
+  // ...
+];
+
+export const benchmarks = [...ObjectId_isValid];
 ```
 
 ## Output
