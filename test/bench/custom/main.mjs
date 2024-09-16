@@ -34,6 +34,6 @@ suite
       metrics: [{ name: 'ops_per_sec', value: bench.hz }]
     }));
     console.log(util.inspect(data, { depth: Infinity, colors: true }));
-    fs.writeFileSync('results.json', JSON.stringify(data), 'utf8');
+    fs.writeFileSync('customBenchmarkResults.json', JSON.stringify(data), 'utf8');
   })
   .run();

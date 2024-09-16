@@ -267,7 +267,7 @@ tasks:
       - func: run custom benchmarks
       - command: perf.send
         params:
-          file: src/results.json
+          file: src/customBenchmarkResults.json
   - name: run-spec-benchmarks
     commands:
       - func: fetch source
