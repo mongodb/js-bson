@@ -4,9 +4,6 @@ import { type InspectFn, defaultInspect } from './parser/utils';
 import { ByteUtils } from './utils/byte_utils';
 import { NumberUtils } from './utils/number_utils';
 
-// Regular expression that checks for hex value
-const checkForHexRegExp = new RegExp('^[0-9a-fA-F]{24}$');
-
 // Unique sequence for the current process (initialized on first use)
 let PROCESS_UNIQUE: Uint8Array | null = null;
 
@@ -112,7 +109,7 @@ export class ObjectId extends BSONValue {
       // If intstanceof matches we can escape calling ensure buffer in Node.js environments
       this.buffer = ByteUtils.toLocalBufferType(workingId);
     } else if (typeof workingId === 'string') {
-      if (workingId.length === 24 && checkForHexRegExp.test(workingId)) {
+      if (ObjectId.validateHexString(workingId)) {
         this.buffer = ByteUtils.fromHex(workingId);
       } else {
         throw new BSONError(
@@ -141,6 +138,29 @@ export class ObjectId extends BSONValue {
     if (ObjectId.cacheHexString) {
       this.__id = ByteUtils.toHex(value);
     }
+  }
+
+  /**
+   * @internal
+   * Validates the input string is a valid hex representation of an ObjectId.
+   */
+  private static validateHexString(string: string): boolean {
+    if (string?.length !== 24) return false;
+    for (let i = 0; i < 24; i++) {
+      const char = string.charCodeAt(i);
+      if (
+        // Check for ASCII 0-9
+        (char >= 48 && char <= 57) ||
+        // Check for ASCII a-f
+        (char >= 97 && char <= 102) ||
+        // Check for ASCII A-F
+        (char >= 65 && char <= 70)
+      ) {
+        continue;
+      }
+      return false;
+    }
+    return true;
   }
 
   /** Returns the ObjectId id as a 24 lowercase character hex string representation */
@@ -329,6 +349,7 @@ export class ObjectId extends BSONValue {
    */
   static isValid(id: string | number | ObjectId | ObjectIdLike | Uint8Array): boolean {
     if (id == null) return false;
+    if (typeof id === 'string') return ObjectId.validateHexString(id);
 
     try {
       new ObjectId(id);
