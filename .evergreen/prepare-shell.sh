@@ -1,5 +1,21 @@
 #! /usr/bin/env bash
 
+# Only set errexit and xtrace if shell is NOT interactive
+[[ $- == *i* ]] || set -o xtrace
+[[ $- == *i* ]] || set -o errexit
+
+export PROJECT_DIRECTORY="$(pwd)"
+export DRIVERS_TOOLS="$PROJECT_DIRECTORY/.drivers-tools"
+
+
+
+if [ ! -d "$DRIVERS_TOOLS" ]; then
+  # Only clone driver tools if it does not exist
+  git clone --depth=1 "https://github.com/mongodb-labs/drivers-evergreen-tools.git" "${DRIVERS_TOOLS}"
+fi
+
+echo "installed DRIVERS_TOOLS from commit $(git -C "${DRIVERS_TOOLS}" rev-parse HEAD)"
+
 if [ -z "$NODE_LTS_VERSION" ]; then
   echo "NODE_LTS_VERSION environment variable must be specified"
   exit 1
@@ -11,7 +27,6 @@ if [ "${is_patch}" = "true" ]; then
 else
     CURRENT_VERSION=latest
 fi
-export PROJECT_DIRECTORY="$(pwd)"
 
 cat <<EOT > expansion.yml
 CURRENT_VERSION: "$CURRENT_VERSION"

@@ -25,7 +25,7 @@ functions:
         binary: bash
         add_expansions_to_env: true
         args:
-          - .evergreen/setup-environment.sh
+          - '.evergreen/prepare-shell.sh'
     - command: expansions.update
       params:
         file: src/expansion.yml
