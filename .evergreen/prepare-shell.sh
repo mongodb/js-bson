@@ -4,9 +4,10 @@
 [[ $- == *i* ]] || set -o xtrace
 [[ $- == *i* ]] || set -o errexit
 
-export PROJECT_DIRECTORY="$(pwd)"
-export DRIVERS_TOOLS="$PROJECT_DIRECTORY/.drivers-tools"
-
+PROJECT_DIRECTORY="$(pwd)"
+DRIVERS_TOOLS=$(cd .. && echo "$(pwd)/drivers-tools")
+export PROJECT_DIRECTORY
+export DRIVERS_TOOLS
 
 
 if [ ! -d "$DRIVERS_TOOLS" ]; then
