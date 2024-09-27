@@ -2,7 +2,7 @@
 
 set -o errexit
 
-source ./.drivers-tools/.evergreen/init-node-and-npm-env.sh
+source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
 
 cd etc/eslint/no-bigint-usage
 npm install
