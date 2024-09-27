@@ -76,6 +76,7 @@ functions:
       params:
         working_dir: src
         timeout_secs: 60
+        add_expansions_to_env: true
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           TS_VERSION: "${TS_VERSION}"
@@ -89,6 +90,7 @@ functions:
       params:
         working_dir: src
         timeout_secs: 60
+        add_expansions_to_env: true
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
         binary: bash
@@ -100,6 +102,7 @@ functions:
       params:
         working_dir: src
         binary: bash
+        add_expansions_to_env: true
         env:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
         args:
