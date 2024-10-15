@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.9.0](https://github.com/mongodb/js-bson/compare/v6.8.0...v6.9.0) (2024-10-15)
+
+
+### Features
+
+* **NODE-6031:** add `t` and `i` to Timestamp ([#704](https://github.com/mongodb/js-bson/issues/704)) ([b766d0f](https://github.com/mongodb/js-bson/commit/b766d0f40ad2e8a58499615f0b2bd669661db518))
+
+
+### Performance Improvements
+
+* **NODE-6344:** improve ObjectId.isValid(string) performance ([#708](https://github.com/mongodb/js-bson/issues/708)) ([064ba91](https://github.com/mongodb/js-bson/commit/064ba916e5d64aa59a2bce165553e40892687ab4))
+* **NODE-6356:** Improve serialization performance ([#709](https://github.com/mongodb/js-bson/issues/709)) ([61537f5](https://github.com/mongodb/js-bson/commit/61537f54b8e3816e943ca1b7a164327e5d812f57))
+
 ## [6.8.0](https://github.com/mongodb/js-bson/compare/v6.7.0...v6.8.0) (2024-06-27)
 
 
