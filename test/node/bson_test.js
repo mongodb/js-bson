@@ -1648,21 +1648,25 @@ describe('BSON', function () {
   it('ObjectId should have a correct cached representation of the hexString', function (done) {
     ObjectId.cacheHexString = true;
     var a = new ObjectId();
+    a.toHexString();
     var __id = a.__id;
     expect(__id).to.equal(a.toHexString());
 
     // hexString
     a = new ObjectId(__id);
+    a.toHexString();
     expect(__id).to.equal(a.toHexString());
 
     // fromHexString
     a = ObjectId.createFromHexString(__id);
+    a.toHexString();
     expect(a.__id).to.equal(a.toHexString());
     expect(__id).to.equal(a.toHexString());
 
     // number
     var genTime = a.generationTime;
     a = new ObjectId(genTime);
+    a.toHexString();
     __id = a.__id;
     expect(__id).to.equal(a.toHexString());
 
@@ -1673,6 +1677,7 @@ describe('BSON', function () {
 
     // createFromTime
     a = ObjectId.createFromTime(genTime);
+    a.toHexString();
     __id = a.__id;
     expect(__id).to.equal(a.toHexString());
     ObjectId.cacheHexString = false;
@@ -1861,7 +1866,7 @@ describe('BSON', function () {
         );
         expect(inspect(code)).to.equal(
           /* eslint-disable */
-`new Code(
+          `new Code(
 'function iLoveJavaScript() {\\n' +
   '            do {\\n' +
   "              console.log('hello!');\\n" +

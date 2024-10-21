@@ -32,7 +32,7 @@ export class ObjectId extends BSONValue {
   /** @internal */
   private static index = Math.floor(Math.random() * 0xffffff);
 
-  static cacheHexString: boolean;
+  static cacheHexString: boolean = true;
 
   /** ObjectId Bytes @internal */
   private buffer!: Uint8Array;
@@ -111,6 +111,10 @@ export class ObjectId extends BSONValue {
     } else if (typeof workingId === 'string') {
       if (ObjectId.validateHexString(workingId)) {
         this.buffer = ByteUtils.fromHex(workingId);
+        // If we are caching the hex string
+        if (ObjectId.cacheHexString) {
+          this.__id = workingId;
+        }
       } else {
         throw new BSONError(
           'input must be a 24 character hex string, 12 byte Uint8Array, or an integer'
@@ -118,10 +122,6 @@ export class ObjectId extends BSONValue {
       }
     } else {
       throw new BSONError('Argument passed in does not match the accepted types');
-    }
-    // If we are caching the hex string
-    if (ObjectId.cacheHexString) {
-      this.__id = ByteUtils.toHex(this.id);
     }
   }
 
