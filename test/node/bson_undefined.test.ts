@@ -8,13 +8,13 @@ describe('BSON undefined', () => {
   const KEY_0 = '3000';
   const KEY_1 = '3100';
   const KEY_2 = '3200';
-  const bsonDocWithUndefined = bufferFromHexArray([
-    '06', // BSON undefined
-    KEY_A
-  ]);
 
   describe('when deserialize is given BSON bytes with undefined value', function () {
     it('returns a javascript undefined value', () => {
+      const bsonDocWithUndefined = bufferFromHexArray([
+        '06', // BSON undefined
+        KEY_A
+      ]);
       const doc = BSON.deserialize(bsonDocWithUndefined);
       expect(doc).to.have.own.property('a').that.is.undefined;
     });
@@ -23,16 +23,18 @@ describe('BSON undefined', () => {
   describe('when serialize is given a javascript object that contains undefined', () => {
     describe('when ignoreUndefined is set to false', function () {
       it('serializes to document with a set to BSON null (type=10)', () => {
-        const jsObject = BSON.deserialize(bsonDocWithUndefined);
+        const jsObject = { a: undefined };
         const bytes = BSON.serialize(jsObject, { ignoreUndefined: false });
         expect(bytes).to.have.lengthOf(8);
-        expect(bytes).to.have.own.property('4', BSON_DATA_NULL);
+        const elements = BSON.onDemand.parseToElements(bytes);
+        expect(elements).to.have.lengthOf(1);
+        expect(elements[0][0]).to.deep.equal(BSON_DATA_NULL);
       });
     });
 
     describe('when ignoreUndefined is set to true', function () {
       it('serializes to empty document', () => {
-        const jsObject = BSON.deserialize(bsonDocWithUndefined);
+        const jsObject = { a: undefined };
         const bytes = BSON.serialize(jsObject, { ignoreUndefined: true });
         expect(bytes).to.deep.equal(Uint8Array.of(5, 0, 0, 0, 0));
       });
@@ -40,7 +42,7 @@ describe('BSON undefined', () => {
 
     describe('when ignoreUndefined is unset', function () {
       it('serializes to empty document', () => {
-        const jsObject = BSON.deserialize(bsonDocWithUndefined);
+        const jsObject = { a: undefined };
         const bytes = BSON.serialize(jsObject);
         expect(bytes).to.deep.equal(Uint8Array.of(5, 0, 0, 0, 0));
       });
@@ -49,7 +51,7 @@ describe('BSON undefined', () => {
 
   describe('when undefined appears inside an array', function () {
     describe('when ignoreUndefined is set to true', function () {
-      it('does not ignore undefined values', function () {
+      it('serializes undefined values as null', function () {
         // because this would change the size of the array
         const doc = { a: [1, undefined, 3] };
         const bytes = BSON.serialize(doc, { ignoreUndefined: true });
