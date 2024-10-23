@@ -32,7 +32,7 @@ export class ObjectId extends BSONValue {
   /** @internal */
   private static index = Math.floor(Math.random() * 0xffffff);
 
-  static cacheHexString: boolean = true;
+  static cacheHexString: boolean;
 
   /** ObjectId Bytes @internal */
   private buffer!: Uint8Array;
