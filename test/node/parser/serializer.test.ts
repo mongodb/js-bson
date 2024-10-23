@@ -26,6 +26,7 @@ describe('serialize()', () => {
   });
 
   it('does not turn nested nulls into empty documents', () => {
+    // In JS typeof null is 'object' so it is possible it could be misinterpreted as an object with no keys
     const nestedNull = bufferFromHexArray([
       '0A', // null type
       '6100', // 'a\x00'
