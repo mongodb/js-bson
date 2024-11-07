@@ -100,7 +100,7 @@ export const webByteUtils = {
       return new Uint8Array(potentialUint8array);
     }
 
-    throw new BSONError(`Cannot make a Uint8Array from ${String(potentialUint8array)}`);
+    throw new BSONError(`Cannot make a Uint8Array from passed potentialBuffer.`);
   },
 
   allocate(size: number): Uint8Array {
