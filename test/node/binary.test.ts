@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import * as vm from 'node:vm';
-import { Binary, BSON } from '../register-bson';
+import { __isWeb__, Binary, BSON } from '../register-bson';
 import * as util from 'node:util';
 
 describe('class Binary', () => {
@@ -81,6 +81,46 @@ describe('class Binary', () => {
     });
   });
 
+  describe('read()', function () {
+    const LocalBuffer = __isWeb__ ? Uint8Array : Buffer;
+
+    it('reads a single byte from the buffer', function () {
+      const binary = new Binary();
+      binary.put(0x42);
+      expect(binary.read(0, 1)).to.deep.equal(LocalBuffer.of(0x42));
+    });
+
+    it('does not read beyond binary.position', function () {
+      const binary = new Binary();
+      binary.put(0x42);
+      expect(binary.buffer.byteLength).to.equal(256);
+      expect(binary.read(0, 10)).to.deep.equal(LocalBuffer.of(0x42));
+    });
+
+    it('reads a single byte from the buffer at the given position', function () {
+      const binary = new Binary();
+      binary.put(0x42);
+      binary.put(0x43);
+      binary.put(0x44);
+      expect(binary.read(1, 1)).to.deep.equal(LocalBuffer.of(0x43));
+    });
+
+    it('reads nothing if the position is out of bounds', function () {
+      const binary = new Binary();
+      expect(binary.read(1, 0)).to.have.lengthOf(0);
+    });
+
+    it('sets length to position if not provided', function () {
+      const binary = new Binary();
+      binary.put(0x42);
+      binary.put(0x42);
+      binary.put(0x42);
+      expect(binary.position).to.equal(3);
+      // @ts-expect-error: checking behavior TS doesn't support
+      expect(binary.read(0)).to.have.lengthOf(3);
+    });
+  });
+
   context('inspect()', () => {
     it(`when value is default returns "Binary.createFromBase64('', 0)"`, () => {
       expect(util.inspect(new Binary())).to.equal(`Binary.createFromBase64('', 0)`);
@@ -93,6 +133,7 @@ describe('class Binary', () => {
     });
 
     it(`when value is default with a subtype returns "Binary.createFromBase64('', 35)"`, () => {
+      // @ts-expect-error: check null is handled the same as undefined
       expect(util.inspect(new Binary(null, 0x23))).to.equal(`Binary.createFromBase64('', 35)`);
     });
 
