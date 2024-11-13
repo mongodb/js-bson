@@ -1806,7 +1806,7 @@ describe('BSON', function () {
         );
         expect(inspect(code)).to.equal(
           /* eslint-disable */
-          `new Code(
+`new Code(
 'function iLoveJavaScript() {\\n' +
   '            do {\\n' +
   "              console.log('hello!');\\n" +
