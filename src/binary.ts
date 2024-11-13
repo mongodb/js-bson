@@ -61,8 +61,47 @@ export class Binary extends BSONValue {
   /** User BSON type */
   static readonly SUBTYPE_USER_DEFINED = 128;
 
+  /**
+   * The bytes of the Binary value.
+   *
+   * The format of a Binary value in BSON is defined as:
+   * ```txt
+   * binary	::= int32 subtype (byte*)
+   * ```
+   *
+   * This `buffer` is the "(byte*)" segment.
+   *
+   * Unless the value is subtype 2, then deserialize will read the first 4 bytes as an int32 and set this to the remaining bytes.
+   *
+   * ```txt
+   * binary	::= int32 unsigned_byte(2) int32 (byte*)
+   * ```
+   *
+   * @see https://bsonspec.org/spec.html
+   */
   public buffer: Uint8Array;
+  /**
+   * The binary subtype.
+   *
+   * Current defined values are:
+   *
+   * - `unsigned_byte(0)` Generic binary subtype
+   * - `unsigned_byte(1)` Function
+   * - `unsigned_byte(2)` Binary (Deprecated)
+   * - `unsigned_byte(3)` UUID (Deprecated)
+   * - `unsigned_byte(4)` UUID
+   * - `unsigned_byte(5)` MD5
+   * - `unsigned_byte(6)` Encrypted BSON value
+   * - `unsigned_byte(7)` Compressed BSON column
+   * - `unsigned_byte(8)` Sensitive
+   * - `unsigned_byte(9)` Vector
+   * - `unsigned_byte(128)` - `unsigned_byte(255)` User defined
+   */
   public sub_type: number;
+  /**
+   * The Binary's `buffer` can be larger than the Binary's content.
+   * This property is used to determine where the content ends in the buffer.
+   */
   public position: number;
 
   /**
