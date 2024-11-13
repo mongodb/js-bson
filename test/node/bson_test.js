@@ -1573,40 +1573,54 @@ describe('BSON', function () {
    */
   it('ObjectId should have a correct cached representation of the hexString', function (done) {
     ObjectId.cacheHexString = true;
+    // generated ObjectID uses lazy caching
     var a = new ObjectId();
+    expect(a.isCached()).to.be.false;
     a.toHexString();
-    var __id = a.__id;
-    expect(__id).to.equal(a.toHexString());
+    expect(a.isCached()).to.be.true;
+    expect(a.toHexString()).to.equal(a.toHexString());
 
-    // hexString
-    a = new ObjectId(__id);
+    // hexString caches immediately
+    a = new ObjectId(a.toHexString());
+    expect(a.isCached()).to.be.true;
     a.toHexString();
-    expect(__id).to.equal(a.toHexString());
+    expect(a.isCached()).to.be.true;
+    expect(a.toHexString()).to.equal(a.toHexString());
 
     // fromHexString
-    a = ObjectId.createFromHexString(__id);
+    a = ObjectId.createFromHexString(a.toHexString());
+    expect(a.isCached()).to.be.false;
     a.toHexString();
-    expect(a.__id).to.equal(a.toHexString());
-    expect(__id).to.equal(a.toHexString());
+    expect(a.isCached()).to.be.true;
+    expect(a.toHexString()).to.equal(a.toHexString());
 
     // number
     var genTime = a.generationTime;
     a = new ObjectId(genTime);
+    expect(a.isCached()).to.be.false;
     a.toHexString();
-    __id = a.__id;
-    expect(__id).to.equal(a.toHexString());
+    expect(a.isCached()).to.be.true;
+    expect(a.toHexString()).to.equal(a.toHexString());
 
     // generationTime
-    delete a.__id;
     a.generationTime = genTime;
-    expect(__id).to.equal(a.toHexString());
+    expect(a.isCached()).to.be.true;
+    expect(a.toHexString()).to.equal(a.toHexString());
 
     // createFromTime
     a = ObjectId.createFromTime(genTime);
+    expect(a.isCached()).to.be.false;
     a.toHexString();
-    __id = a.__id;
-    expect(__id).to.equal(a.toHexString());
+    expect(a.isCached()).to.be.true;
+    expect(a.toHexString()).to.equal(a.toHexString());
+
     ObjectId.cacheHexString = false;
+
+    // No longer caches after cache is disabled
+    a = new ObjectId();
+    expect(a.isCached()).to.be.false;
+    a.toHexString();
+    expect(a.isCached()).to.be.false;
 
     done();
   });
@@ -1792,7 +1806,7 @@ describe('BSON', function () {
         );
         expect(inspect(code)).to.equal(
           /* eslint-disable */
-`new Code(
+          `new Code(
 'function iLoveJavaScript() {\\n' +
   '            do {\\n' +
   "              console.log('hello!');\\n" +

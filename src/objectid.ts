@@ -7,10 +7,12 @@ import { NumberUtils } from './utils/number_utils';
 // Unique sequence for the current process (initialized on first use)
 let PROCESS_UNIQUE: Uint8Array | null = null;
 
+/** ObjectId hexString cache @internal */
+const __idCache = new WeakMap(); // TODO convert this to #__id private field when target updated to ES2022
+
 /** @public */
 export interface ObjectIdLike {
   id: string | Uint8Array;
-  __id?: string;
   toHexString(): string;
 }
 
@@ -36,8 +38,6 @@ export class ObjectId extends BSONValue {
 
   /** ObjectId Bytes @internal */
   private buffer!: Uint8Array;
-  /** ObjectId hexString cache @internal */
-  private __id?: string;
 
   /**
    * Create ObjectId from a number.
@@ -113,7 +113,7 @@ export class ObjectId extends BSONValue {
         this.buffer = ByteUtils.fromHex(workingId);
         // If we are caching the hex string
         if (ObjectId.cacheHexString) {
-          this.__id = workingId;
+          __idCache.set(this, workingId);
         }
       } else {
         throw new BSONError(
@@ -136,7 +136,7 @@ export class ObjectId extends BSONValue {
   set id(value: Uint8Array) {
     this.buffer = value;
     if (ObjectId.cacheHexString) {
-      this.__id = ByteUtils.toHex(value);
+      __idCache.set(this, ByteUtils.toHex(value));
     }
   }
 
@@ -165,14 +165,15 @@ export class ObjectId extends BSONValue {
 
   /** Returns the ObjectId id as a 24 lowercase character hex string representation */
   toHexString(): string {
-    if (ObjectId.cacheHexString && this.__id) {
-      return this.__id;
+    if (ObjectId.cacheHexString) {
+      const __id = __idCache.get(this);
+      if (__id) return __id;
     }
 
     const hexString = ByteUtils.toHex(this.id);
 
-    if (ObjectId.cacheHexString && !this.__id) {
-      this.__id = hexString;
+    if (ObjectId.cacheHexString) {
+      __idCache.set(this, hexString);
     }
 
     return hexString;
@@ -368,6 +369,11 @@ export class ObjectId extends BSONValue {
   /** @internal */
   static fromExtendedJSON(doc: ObjectIdExtended): ObjectId {
     return new ObjectId(doc.$oid);
+  }
+
+  /** @internal */
+  private isCached(): boolean {
+    return ObjectId.cacheHexString && __idCache.has(this);
   }
 
   /**
