@@ -66,6 +66,14 @@ const REQUIRED_FILES = [
 
 describe(`Release ${packFile}`, function () {
   let tarFileList;
+
+  before(function () {
+    if (process.arch !== 'x64') {
+      // This test doesn't need to run more than once on one of our platforms.
+      this.skip();
+    }
+  });
+
   before(function () {
     this.timeout(120_000); // npm pack can be slow
     expect(fs.existsSync(packFile), `expected ${packFile} to NOT exist`).to.equal(false);
@@ -81,7 +89,11 @@ describe(`Release ${packFile}`, function () {
   });
 
   after(() => {
-    fs.unlinkSync(packFile);
+    try {
+      fs.unlinkSync(packFile);
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+    }
   });
 
   for (const requiredFile of REQUIRED_FILES) {

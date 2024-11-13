@@ -339,7 +339,9 @@ describe('BSON Double Precision', function () {
     expect(type).to.equal(BSON_DATA_NUMBER);
     expect(type).to.not.equal(BSON_DATA_INT);
     expect(serializedDouble.subarray(7, 15)).to.deep.equal(
-      new Uint8Array(new Float64Array([-0]).buffer)
+      // Use this on an LE system to re-create the following bytes:
+      // new Uint8Array(new Float64Array([-0]).buffer)
+      new Uint8Array([0, 0, 0, 0, 0, 0, 0, 128])
     );
   });
 

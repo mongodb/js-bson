@@ -9,10 +9,10 @@ FLOAT[0] = -1;
 // Big endian    [191, 240, 0, 0, 0, 0, 0, 0]
 const isBigEndian = FLOAT_BYTES[7] === 0;
 
-context(`handles big endianness correctly`, () => {
+describe(`handles big endianness correctly`, () => {
   before(function () {
     if (!isBigEndian) {
-      throw new Error('expected to only run on big endian system');
+      this.skip();
     }
   });
 
