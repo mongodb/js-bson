@@ -5,14 +5,6 @@ import { expect } from 'chai';
 
 const { toHex, fromHex } = BSON.onDemand.ByteUtils;
 
-const FLOAT = new Float64Array(1);
-const FLOAT_BYTES = new Uint8Array(FLOAT.buffer, 0, 8);
-
-FLOAT[0] = -1;
-// Little endian [0, 0, 0, 0, 0, 0,  240, 191]
-// Big endian    [191, 240, 0, 0, 0, 0, 0, 0]
-const isBigEndian = FLOAT_BYTES[7] === 0;
-
 type VectorHexType = '0x03' | '0x27' | '0x10';
 type VectorTest = {
   description: string;
@@ -23,36 +15,6 @@ type VectorTest = {
   canonical_bson?: string;
 };
 type VectorSuite = { description: string; test_key: string; tests: VectorTest[] };
-
-function validateVector(vector: Binary): void {
-  const VECTOR_TYPE = Object.freeze({
-    Int8: 0x03,
-    Float32: 0x27,
-    PackedBit: 0x10
-  } as const);
-
-  if (vector.sub_type !== 9) return;
-
-  const size = vector.position;
-  const d_type = vector.buffer[0] ?? 0;
-  const padding = vector.buffer[1] ?? 0;
-
-  if ((d_type === VECTOR_TYPE.Float32 || d_type === VECTOR_TYPE.Int8) && padding !== 0) {
-    throw new BSONError('Invalid Vector: padding must be zero for int8 and float32 vectors');
-  }
-
-  if (d_type === VECTOR_TYPE.PackedBit && padding !== 0 && size === 2) {
-    throw new BSONError(
-      'Invalid Vector: padding must be zero for packed bit vectors that are empty'
-    );
-  }
-
-  if (d_type === VECTOR_TYPE.PackedBit && padding > 7) {
-    throw new BSONError(
-      `Invalid Vector: padding must be a value between 0 and 7. found: ${padding}`
-    );
-  }
-}
 
 function fixFloats(f: string | number): number {
   if (typeof f === 'number') {
@@ -90,31 +52,15 @@ function fixBits(f: number | string): number {
 function make(vector: (number | string)[], dtype_hex: VectorHexType, padding?: number): Binary {
   let binary: Binary;
   switch (dtype_hex) {
-    case '0x10': /* packed_bit */
-    case '0x03': /* int8 */ {
-      const array = new Int8Array(vector.map(dtype_hex === '0x03' /* int8 */ ? fixInt8s : fixBits));
-      const buffer = new Uint8Array(array.byteLength + 2);
-      buffer.set(new Uint8Array(array.buffer), 2);
-      binary = new Binary(buffer, 9);
+    case '0x10' /* packed_bit */:
+      binary = Binary.fromPackedBits(new Uint8Array(vector.map(fixBits)), padding);
       break;
-    }
-
-    case '0x27': /* float32 */ {
-      const array = new Float32Array(vector.map(fixFloats));
-      const buffer = new Uint8Array(array.byteLength + 2);
-      if (isBigEndian) {
-        for (let i = 0; i < array.length; i++) {
-          const bytes = new Uint8Array(array.buffer, i * 4, 4);
-          bytes.reverse();
-          buffer.set(bytes, i * 4 + 2);
-        }
-      } else {
-        buffer.set(new Uint8Array(array.buffer), 2);
-      }
-      binary = new Binary(buffer, 9);
+    case '0x03' /* int8 */:
+      binary = Binary.fromInt8Array(new Int8Array(vector.map(fixInt8s)));
       break;
-    }
-
+    case '0x27' /* float32 */:
+      binary = Binary.fromFloat32Array(new Float32Array(vector.map(fixFloats)));
+      break;
     default:
       throw new Error(`Unknown dtype_hex: ${dtype_hex}`);
   }
@@ -206,8 +152,6 @@ describe('BSON Binary Vector spec tests', () => {
             try {
               const bin = make(test.vector, test.dtype_hex, test.padding);
               BSON.serialize({ bin });
-              // TODO(NODE-6537): The following validation MUST be a part of serialize
-              validateVector(bin);
             } catch (error) {
               thrownError = error;
             }
@@ -229,8 +173,6 @@ describe('BSON Binary Vector spec tests', () => {
             try {
               const bin = make(test.vector, test.dtype_hex, test.padding);
               BSON.EJSON.stringify({ bin });
-              // TODO(NODE-6537): The following validation MUST be a part of stringify
-              validateVector(bin);
             } catch (error) {
               thrownError = error;
             }
