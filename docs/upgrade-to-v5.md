@@ -70,9 +70,9 @@ new TextDecoder('utf-16le').decode(bin.value(true));
 
 The `"export"` conditions in [package.json](../package.json) make it possible for the `bson` package to provide module resolutions for ES Module and CommonJS.
 When using a bundler and targeting the browser the export condition `"browser"` will likely point your bundler at the bson.mjs file, an ES Module.
-This ES Module form of `BSON` works in both Node.js and browser environments, however, one sticking point is often bundlers do not by default enable support of top-level await usage.
+This ES Module form of `BSON` works in both Node.js and browser environments, however, one sticking point is that bundlers often do not enable support of top-level await usage by default.
 
-For example, you may need to:
+For example, when using Webpack you may need to:
 - enable Webpack's [`topLevelAwait`](https://webpack.js.org/configuration/experiments/#experimentstoplevelawait) setting to bypass the issue.
 - override the [resolution](https://webpack.js.org/configuration/resolve/#resolve) of `bson` to use the CommonJS module, "bson.cjs".
 - `require('bson')` instead of using `import`.
