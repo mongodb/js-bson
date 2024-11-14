@@ -296,7 +296,7 @@ function deserializeObject(
 
       // We have a raw value
       if (raw) {
-        value = buffer.slice(index, index + objectSize);
+        value = buffer.subarray(index, index + objectSize);
       } else {
         let objectOptions = options;
         if (!globalUTFValidation) {
@@ -374,52 +374,24 @@ function deserializeObject(
       if (binarySize > buffer.byteLength)
         throw new BSONError('Binary type size larger than document size');
 
-      // Decode as raw Buffer object if options specifies it
-      if (buffer['slice'] != null) {
-        // If we have subtype 2 skip the 4 bytes for the size
-        if (subType === Binary.SUBTYPE_BYTE_ARRAY) {
-          binarySize = NumberUtils.getInt32LE(buffer, index);
-          index += 4;
-          if (binarySize < 0)
-            throw new BSONError('Negative binary type element size found for subtype 0x02');
-          if (binarySize > totalBinarySize - 4)
-            throw new BSONError('Binary type with subtype 0x02 contains too long binary size');
-          if (binarySize < totalBinarySize - 4)
-            throw new BSONError('Binary type with subtype 0x02 contains too short binary size');
-        }
+      // If we have subtype 2 skip the 4 bytes for the size
+      if (subType === Binary.SUBTYPE_BYTE_ARRAY) {
+        binarySize = NumberUtils.getInt32LE(buffer, index);
+        index += 4;
+        if (binarySize < 0)
+          throw new BSONError('Negative binary type element size found for subtype 0x02');
+        if (binarySize > totalBinarySize - 4)
+          throw new BSONError('Binary type with subtype 0x02 contains too long binary size');
+        if (binarySize < totalBinarySize - 4)
+          throw new BSONError('Binary type with subtype 0x02 contains too short binary size');
+      }
 
-        if (promoteBuffers && promoteValues) {
-          value = ByteUtils.toLocalBufferType(buffer.slice(index, index + binarySize));
-        } else {
-          value = new Binary(buffer.slice(index, index + binarySize), subType);
-          if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW && UUID.isValid(value)) {
-            value = value.toUUID();
-          }
-        }
+      if (promoteBuffers && promoteValues) {
+        value = ByteUtils.toLocalBufferType(buffer.subarray(index, index + binarySize));
       } else {
-        // If we have subtype 2 skip the 4 bytes for the size
-        if (subType === Binary.SUBTYPE_BYTE_ARRAY) {
-          binarySize = NumberUtils.getInt32LE(buffer, index);
-          index += 4;
-          if (binarySize < 0)
-            throw new BSONError('Negative binary type element size found for subtype 0x02');
-          if (binarySize > totalBinarySize - 4)
-            throw new BSONError('Binary type with subtype 0x02 contains too long binary size');
-          if (binarySize < totalBinarySize - 4)
-            throw new BSONError('Binary type with subtype 0x02 contains too short binary size');
-        }
-
-        if (promoteBuffers && promoteValues) {
-          value = ByteUtils.allocateUnsafe(binarySize);
-          // Copy the data
-          for (i = 0; i < binarySize; i++) {
-            value[i] = buffer[index + i];
-          }
-        } else {
-          value = new Binary(buffer.slice(index, index + binarySize), subType);
-          if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW && UUID.isValid(value)) {
-            value = value.toUUID();
-          }
+        value = new Binary(buffer.subarray(index, index + binarySize), subType);
+        if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW && UUID.isValid(value)) {
+          value = value.toUUID();
         }
       }
 

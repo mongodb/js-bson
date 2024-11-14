@@ -85,3 +85,5 @@ expectNotDeprecated(new ObjectId(42 as string | number));
 
 // Timestamp accepts timestamp because constructor allows: {i:number, t:number}
 new Timestamp(new Timestamp(0n))
+
+expectType<(position: number, length: number) => Uint8Array>(Binary.prototype.read);
