@@ -83,7 +83,7 @@ export const nodeJsByteUtils = {
       return Buffer.from(potentialBuffer);
     }
 
-    throw new BSONError(`Cannot create Buffer from ${String(potentialBuffer)}`);
+    throw new BSONError(`Cannot create Buffer from the passed potentialBuffer.`);
   },
 
   allocate(size: number): NodeJsBuffer {

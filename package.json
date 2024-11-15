@@ -14,7 +14,7 @@
     "vendor"
   ],
   "types": "bson.d.ts",
-  "version": "6.8.0",
+  "version": "6.9.0",
   "author": {
     "name": "The MongoDB NodeJS Team",
     "email": "dbx-node@mongodb.com"
@@ -105,6 +105,7 @@
     "check:web-no-bigint": "WEB=true NO_BIGINT=true mocha test/node",
     "check:granular-bench": "npm run build:bench && node ./test/bench/etc/run_granular_benchmarks.js",
     "check:spec-bench": "npm run build:bench && node ./test/bench/lib/spec/bsonBench.js",
+    "check:custom-bench": "npm run build && node ./test/bench/custom/main.mjs",
     "build:bench": "cd test/bench && npx tsc",
     "build:ts": "node ./node_modules/typescript/bin/tsc",
     "build:dts": "npm run build:ts && api-extractor run --typescript-compiler-folder node_modules/typescript --local && node etc/clean_definition_files.cjs",

@@ -7,9 +7,11 @@
     - [Impacted APIs now return `Uint8Array` in web environments; Node.js environments are unaffected](#apis-impacted)
   - [Restrict supported encodings in `ObjectId.toString` / `UUID.toString` / `Binary.toString`](#restrict-supported-encodings-in-objectidtostring--uuidtostring--binarytostring)
     - [Migration available if types beyond `'hex' | 'base64' | 'utf8'` are desired](#migration-example)
+  - [Bundling Top-Level Await in BSON](#bundling-top-level-await-in-bson)
 - [Other Changes](#other-changes)
   - [`serializeFunctions` bug fix](#serializefunctions-bug-fix)
   - [TS "target" set to es2020](#ts-target-set-to-es2020)
+  - [Removed SerializableTypes](#removed-serializabletypes)
 
 ## About
 
@@ -64,6 +66,17 @@ bin.value(true).toString('utf16le');
 // In web environments (and Node.js) the same can be accomplished with TextDecoder
 new TextDecoder('utf-16le').decode(bin.value(true));
 ```
+
+### Bundling Top-Level Await in BSON
+
+The `"export"` conditions in [package.json](../package.json) make it possible for the `bson` package to provide module resolutions for ES Module and CommonJS.
+When using a bundler and targeting the browser the export condition `"browser"` will likely point your bundler at the bson.mjs file, an ES Module.
+This ES Module form of `BSON` works in both Node.js and browser environments, however, one sticking point is that bundlers often do not enable support of top-level await usage by default.
+
+For example, when using Webpack you may need to:
+- enable Webpack's [`topLevelAwait`](https://webpack.js.org/configuration/experiments/#experimentstoplevelawait) setting to bypass the issue.
+- override the [resolution](https://webpack.js.org/configuration/resolve/#resolve) of `bson` to use the CommonJS module, "bson.cjs".
+- `require('bson')` instead of using `import`.
 
 ## Other Changes
 
@@ -313,3 +326,15 @@ import { serialize } from 'bson5';
 serialize({ _id: new ObjectId() });
 // Uncaught BSONVersionError: Unsupported BSON version, bson types must be from bson 5.0 or later
 ```
+
+### Removed SerializableTypes
+
+```ts
+export type JSONPrimitive = string | number | boolean | null;
+export type SerializableTypes = Document | Array<JSONPrimitive | Document> | JSONPrimitive;
+```
+
+`SerializableTypes` is removed in v5 due to its inaccuracy and inconvenience when working with return type of `EJSON.parse()`.
+This type does not contain all possible outputs from this function and it cannot be conveniently related to a custom declared type.
+`EJSON.parse` and `EJSON.stringify` now accept `any` in alignment with `JSON`'s corresponding APIs.
+For users that desire type strictness it is recommended to wrap these APIs with type annotations that take/return `unknown` since that generally forces better narrowing logic than `SerializableTypes` would have prompted.

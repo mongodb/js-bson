@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-set -o errexit
-
 source $DRIVERS_TOOLS/.evergreen/init-node-and-npm-env.sh
+set -o xtrace
 
-cd etc/eslint/no-bigint-usage
-npm install
-npm run test
+npm run check:custom-bench

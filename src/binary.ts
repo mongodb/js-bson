@@ -61,9 +61,48 @@ export class Binary extends BSONValue {
   /** User BSON type */
   static readonly SUBTYPE_USER_DEFINED = 128;
 
-  buffer!: Uint8Array;
-  sub_type!: number;
-  position!: number;
+  /**
+   * The bytes of the Binary value.
+   *
+   * The format of a Binary value in BSON is defined as:
+   * ```txt
+   * binary	::= int32 subtype (byte*)
+   * ```
+   *
+   * This `buffer` is the "(byte*)" segment.
+   *
+   * Unless the value is subtype 2, then deserialize will read the first 4 bytes as an int32 and set this to the remaining bytes.
+   *
+   * ```txt
+   * binary	::= int32 unsigned_byte(2) int32 (byte*)
+   * ```
+   *
+   * @see https://bsonspec.org/spec.html
+   */
+  public buffer: Uint8Array;
+  /**
+   * The binary subtype.
+   *
+   * Current defined values are:
+   *
+   * - `unsigned_byte(0)` Generic binary subtype
+   * - `unsigned_byte(1)` Function
+   * - `unsigned_byte(2)` Binary (Deprecated)
+   * - `unsigned_byte(3)` UUID (Deprecated)
+   * - `unsigned_byte(4)` UUID
+   * - `unsigned_byte(5)` MD5
+   * - `unsigned_byte(6)` Encrypted BSON value
+   * - `unsigned_byte(7)` Compressed BSON column
+   * - `unsigned_byte(8)` Sensitive
+   * - `unsigned_byte(9)` Vector
+   * - `unsigned_byte(128)` - `unsigned_byte(255)` User defined
+   */
+  public sub_type: number;
+  /**
+   * The Binary's `buffer` can be larger than the Binary's content.
+   * This property is used to determine where the content ends in the buffer.
+   */
+  public position: number;
 
   /**
    * Create a new Binary instance.
@@ -160,16 +199,15 @@ export class Binary extends BSONValue {
   }
 
   /**
-   * Reads **length** bytes starting at **position**.
+   * Returns a view of **length** bytes starting at **position**.
    *
    * @param position - read from the given position in the Binary.
    * @param length - the number of bytes to read.
    */
-  read(position: number, length: number): BinarySequence {
+  read(position: number, length: number): Uint8Array {
     length = length && length > 0 ? length : this.position;
-
-    // Let's return the data based on the type we have
-    return this.buffer.slice(position, position + length);
+    const end = position + length;
+    return this.buffer.subarray(position, end > this.position ? this.position : end);
   }
 
   /** returns a view of the binary value as a Uint8Array */
@@ -219,7 +257,7 @@ export class Binary extends BSONValue {
 
   toUUID(): UUID {
     if (this.sub_type === Binary.SUBTYPE_UUID) {
-      return new UUID(this.buffer.slice(0, this.position));
+      return new UUID(this.buffer.subarray(0, this.position));
     }
 
     throw new BSONError(
