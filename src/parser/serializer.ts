@@ -495,6 +495,10 @@ function serializeBinary(buffer: Uint8Array, key: string, value: Binary, index: 
     index += NumberUtils.setInt32LE(buffer, index, size);
   }
 
+  if (value.sub_type === Binary.SUBTYPE_VECTOR) {
+    Binary.validateVector(value);
+  }
+
   if (size <= 16) {
     for (let i = 0; i < size; i++) buffer[index + i] = data[i];
   } else {

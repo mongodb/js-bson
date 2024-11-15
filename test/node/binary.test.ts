@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import * as vm from 'node:vm';
-import { __isWeb__, Binary, BSON } from '../register-bson';
+import { __isWeb__, Binary, BSON, BSONError } from '../register-bson';
 import * as util from 'node:util';
 
 describe('class Binary', () => {
@@ -247,6 +247,265 @@ describe('class Binary', () => {
       const serializedBin = BSON.serialize({ bin });
       const roundTrippedBin = BSON.deserialize(serializedBin);
       expect(roundTrippedBin.bin.toJSON()).to.equal(bin.toJSON());
+    });
+  });
+
+  describe('sub_type vector', () => {
+    describe('d_type constants', () => {
+      it('has Int8, Float32 and PackedBit', () => {
+        expect(Binary.VECTOR_TYPE).to.have.property('Int8', 0x03);
+        expect(Binary.VECTOR_TYPE).to.have.property('Float32', 0x27);
+        expect(Binary.VECTOR_TYPE).to.have.property('PackedBit', 0x10);
+      });
+    });
+
+    describe('toInt8Array()', () => {
+      it('returns a copy of the bytes', function () {
+        const binary = Binary.fromInt8Array(new Int8Array([1, 2, 3]));
+        expect(binary.toInt8Array().buffer).to.not.equal(binary.buffer.buffer);
+      });
+
+      it('returns at the correct offset when ArrayBuffer is much larger than content', function () {
+        const space = new ArrayBuffer(400);
+        const view = new Uint8Array(space, 56, 4); // random view in a much larger buffer
+        const binary = new Binary(view, 9);
+        binary.buffer[0] = Binary.VECTOR_TYPE.Int8;
+        binary.buffer[1] = 0;
+        binary.buffer[2] = 255;
+        binary.buffer[3] = 255;
+        expect(binary.toInt8Array()).to.deep.equal(new Int8Array([-1, -1]));
+      });
+
+      it('returns Int8Array when sub_type is vector and d_type is INT8', () => {
+        const int8Array = new Int8Array([1, 2, 3]);
+        const binary = Binary.fromInt8Array(int8Array);
+        expect(binary.toInt8Array()).to.deep.equal(int8Array);
+      });
+
+      it('throws error when sub_type is not vector', () => {
+        const binary = new Binary(new Uint8Array([1, 2, 3]), Binary.SUBTYPE_BYTE_ARRAY);
+        expect(() => binary.toInt8Array()).to.throw(BSONError, 'Binary sub_type is not Vector');
+      });
+
+      it('throws error when d_type is not INT8', () => {
+        const binary = new Binary(
+          new Uint8Array([Binary.VECTOR_TYPE.Float32, 0, 1, 2, 3]),
+          Binary.SUBTYPE_VECTOR
+        );
+        expect(() => binary.toInt8Array()).to.throw(BSONError, 'Binary d_type field is not Int8');
+      });
+    });
+
+    describe('toFloat32Array()', () => {
+      it('returns a copy of the bytes', function () {
+        const binary = Binary.fromFloat32Array(new Float32Array([1.1, 2.2, 3.3]));
+        expect(binary.toFloat32Array().buffer).to.not.equal(binary.buffer.buffer);
+      });
+
+      it('returns at the correct offset when ArrayBuffer is much larger than content', function () {
+        const space = new ArrayBuffer(400);
+        const view = new Uint8Array(space, 56, 6); // random view in a much larger buffer
+        const binary = new Binary(view, 9);
+        binary.buffer[0] = Binary.VECTOR_TYPE.Float32;
+        binary.buffer[1] = 0;
+        // For reference:
+        // [ 0, 0, 128, 191 ] is -1 in little endian
+        binary.buffer[2] = 0;
+        binary.buffer[3] = 0;
+        binary.buffer[4] = 128;
+        binary.buffer[5] = 191;
+        expect(binary.toFloat32Array()).to.deep.equal(new Float32Array([-1]));
+      });
+
+      it('returns Float32Array when sub_type is vector and d_type is FLOAT32', () => {
+        const float32Array = new Float32Array([1.1, 2.2, 3.3]);
+        const binary = Binary.fromFloat32Array(float32Array);
+        expect(binary.toFloat32Array()).to.deep.equal(float32Array);
+      });
+
+      it('throws error when sub_type is not vector', () => {
+        const binary = new Binary(new Uint8Array([1, 2, 3]), Binary.SUBTYPE_BYTE_ARRAY);
+        expect(() => binary.toFloat32Array()).to.throw(BSONError, 'Binary sub_type is not Vector');
+      });
+
+      it('throws error when d_type is not FLOAT32', () => {
+        const binary = new Binary(
+          new Uint8Array([Binary.VECTOR_TYPE.Int8, 0, 1, 2, 3]),
+          Binary.SUBTYPE_VECTOR
+        );
+        expect(() => binary.toFloat32Array()).to.throw(
+          BSONError,
+          'Binary d_type field is not Float32'
+        );
+      });
+
+      it('transforms endianness correctly', () => {
+        // The expectation is that this test is run on LE and BE machines to
+        // demonstrate that on BE machines we get the same result
+        const float32Vector = new Uint8Array([
+          ...[Binary.VECTOR_TYPE.Float32, 0], // d_type, padding
+          ...[0, 0, 128, 191], // -1
+          ...[0, 0, 128, 191] // -1
+        ]);
+        const binary = new Binary(float32Vector, Binary.SUBTYPE_VECTOR);
+
+        // For reference:
+        // [ 0, 0, 128, 191 ] is -1 in little endian
+        // [ 191, 128, 0, 0 ] is -1 in big endian
+        // REGARDLESS of platform, BSON is ALWAYS little endian
+        expect(binary.toFloat32Array()).to.deep.equal(new Float32Array([-1, -1]));
+      });
+    });
+
+    describe('toBits()', () => {
+      it('returns Int8Array of bits when sub_type is vector and d_type is PACKED_BIT', () => {
+        const bits = new Int8Array([1, 0, 1, 1, 0, 0, 1, 0]);
+        const binary = Binary.fromBits(bits);
+        expect(binary.toBits()).to.deep.equal(bits);
+      });
+
+      it('returns at the correct offset when ArrayBuffer is much larger than content', function () {
+        const space = new ArrayBuffer(400);
+        const view = new Uint8Array(space, 56, 3); // random view in a much larger buffer
+        const binary = new Binary(view, 9);
+        binary.buffer[0] = Binary.VECTOR_TYPE.PackedBit;
+        binary.buffer[1] = 4;
+        binary.buffer[2] = 0xf0;
+        expect(binary.toBits()).to.deep.equal(new Int8Array([1, 1, 1, 1]));
+      });
+
+      it('throws error when sub_type is not vector', () => {
+        const binary = new Binary(new Uint8Array([1, 2, 3]), Binary.SUBTYPE_BYTE_ARRAY);
+        expect(() => binary.toBits()).to.throw(BSONError, 'Binary sub_type is not Vector');
+      });
+
+      it('throws error when d_type is not PACKED_BIT', () => {
+        const binary = new Binary(
+          new Uint8Array([Binary.VECTOR_TYPE.Int8, 0, 1, 2, 3]),
+          Binary.SUBTYPE_VECTOR
+        );
+        expect(() => binary.toBits()).to.throw(BSONError, 'Binary d_type field is not packed bit');
+      });
+    });
+
+    describe('toPackedBits()', () => {
+      it('returns Uint8Array of packed bits when sub_type is vector and d_type is PACKED_BIT', () => {
+        const bits = new Uint8Array([127, 8]);
+        const binary = Binary.fromPackedBits(bits, 3);
+        expect(binary.toPackedBits()).to.deep.equal(bits);
+        expect(binary.toBits()).to.deep.equal(
+          new Int8Array([0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1])
+        );
+      });
+
+      it('returns at the correct offset when ArrayBuffer is much larger than content', function () {
+        const space = new ArrayBuffer(400);
+        const view = new Uint8Array(space, 56, 3); // random view in a much larger buffer
+        const binary = new Binary(view, 9);
+        binary.buffer[0] = Binary.VECTOR_TYPE.PackedBit;
+        binary.buffer[1] = 4;
+        binary.buffer[2] = 0xf0;
+        expect(binary.toPackedBits()).to.deep.equal(new Uint8Array([0xf0]));
+      });
+
+      it('throws error when sub_type is not vector', () => {
+        const binary = new Binary(new Uint8Array([1, 2, 3]), Binary.SUBTYPE_BYTE_ARRAY);
+        expect(() => binary.toPackedBits()).to.throw(BSONError, 'Binary sub_type is not Vector');
+      });
+
+      it('throws error when d_type is not PACKED_BIT', () => {
+        const binary = new Binary(
+          new Uint8Array([Binary.VECTOR_TYPE.Int8, 0, 1, 2, 3]),
+          Binary.SUBTYPE_VECTOR
+        );
+        expect(() => binary.toPackedBits()).to.throw(
+          BSONError,
+          'Binary d_type field is not packed bit'
+        );
+      });
+    });
+
+    describe('fromInt8Array()', () => {
+      it('creates Binary instance from Int8Array', () => {
+        const int8Array = new Int8Array([1, 2, 3]);
+        const binary = Binary.fromInt8Array(int8Array);
+        expect(binary.buffer[0]).to.equal(Binary.VECTOR_TYPE.Int8);
+        expect(binary.toInt8Array()).to.deep.equal(int8Array);
+      });
+
+      it('creates empty Binary instance when Int8Array is empty', () => {
+        const binary = Binary.fromInt8Array(new Int8Array(0));
+        expect(binary.buffer[0]).to.equal(Binary.VECTOR_TYPE.Int8);
+        expect(binary.buffer[1]).to.equal(0);
+        expect(binary.toInt8Array()).to.deep.equal(new Int8Array(0));
+      });
+    });
+
+    describe('fromFloat32Array()', () => {
+      it('creates Binary instance from Float32Array', () => {
+        const float32Array = new Float32Array([1.1, 2.2, 3.3]);
+        const binary = Binary.fromFloat32Array(float32Array);
+        expect(binary.buffer[0]).to.equal(Binary.VECTOR_TYPE.Float32);
+        expect(binary.toFloat32Array()).to.deep.equal(float32Array);
+      });
+
+      it('creates empty Binary instance when Float32Array is empty', () => {
+        const binary = Binary.fromFloat32Array(new Float32Array(0));
+        expect(binary.buffer[0]).to.equal(Binary.VECTOR_TYPE.Float32);
+        expect(binary.buffer[1]).to.equal(0);
+        expect(binary.toFloat32Array()).to.deep.equal(new Float32Array(0));
+      });
+
+      it('transforms endianness correctly', () => {
+        // The expectation is that this test is run on LE and BE machines to
+        // demonstrate that on BE machines we get the same result
+        const float32Array = new Float32Array([-1, -1]);
+        const binary = Binary.fromFloat32Array(float32Array);
+        expect(binary.buffer[0]).to.equal(Binary.VECTOR_TYPE.Float32);
+        expect(binary.buffer[1]).to.equal(0);
+
+        // For reference:
+        // [ 0, 0, 128, 191 ] is -1 in little endian
+        // [ 191, 128, 0, 0 ] is -1 in big endian
+        // REGARDLESS of platform, BSON is ALWAYS little endian
+        expect(Array.from(binary.buffer.subarray(2))).to.deep.equal([
+          ...[0, 0, 128, 191], // -1
+          ...[0, 0, 128, 191] // -1
+        ]);
+      });
+    });
+
+    describe('fromPackedBits()', () => {
+      it('creates Binary instance from packed bits', () => {
+        const bits = new Uint8Array([127, 8]);
+        const binary = Binary.fromPackedBits(bits, 3);
+        expect(binary.buffer[0]).to.equal(Binary.VECTOR_TYPE.PackedBit);
+        expect(binary.buffer[1]).to.equal(3);
+        expect(binary.buffer.subarray(2)).to.deep.equal(bits);
+      });
+
+      it('creates empty Binary instance when bits are empty', () => {
+        const binary = Binary.fromBits(new Int8Array(0));
+        expect(binary.buffer[0]).to.equal(Binary.VECTOR_TYPE.PackedBit);
+        expect(binary.buffer[1]).to.equal(0);
+        expect(binary.toBits()).to.deep.equal(new Int8Array(0));
+      });
+    });
+
+    describe('fromBits()', () => {
+      it('creates Binary instance from bits', () => {
+        const bits = new Int8Array([1, 0, 1, 1, 0, 0, 1, 0]);
+        const binary = Binary.fromBits(bits);
+        expect(binary.buffer[0]).to.equal(Binary.VECTOR_TYPE.PackedBit);
+        expect(binary.toBits()).to.deep.equal(bits);
+      });
+
+      it('creates empty Binary instance when bits are empty', () => {
+        const binary = Binary.fromBits(new Int8Array(0));
+        expect(binary.buffer[0]).to.equal(Binary.VECTOR_TYPE.PackedBit);
+        expect(binary.buffer[1]).to.equal(0);
+        expect(binary.toBits()).to.deep.equal(new Int8Array(0));
+      });
     });
   });
 });
