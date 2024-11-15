@@ -13,14 +13,13 @@ FLOAT[0] = -1;
 // Big endian    [191, 240, 0, 0, 0, 0, 0, 0]
 const isBigEndian = FLOAT_BYTES[7] === 0;
 
-type DTypeAlias = 'INT8' | 'FLOAT32' | 'PACKED_BIT';
+type VectorHexType = '0x03' | '0x27' | '0x10';
 type VectorTest = {
   description: string;
   vector: (number | string)[];
   valid: boolean;
-  dtype_hex: string;
-  dtype_alias: DTypeAlias;
-  padding: number;
+  dtype_hex: VectorHexType;
+  padding?: number;
   canonical_bson?: string;
 };
 type VectorSuite = { description: string; test_key: string; tests: VectorTest[] };
@@ -88,30 +87,21 @@ function fixBits(f: number | string): number {
   return f;
 }
 
-function make(
-  vector: (number | string)[],
-  dtype_hex: string,
-  dtype_alias: DTypeAlias,
-  padding: number
-): Binary {
+function make(vector: (number | string)[], dtype_hex: VectorHexType, padding?: number): Binary {
   let binary: Binary;
-  switch (dtype_alias) {
-    case 'PACKED_BIT':
-    case 'INT8': {
-      const array = new Int8Array(vector.map(dtype_alias === 'INT8' ? fixInt8s : fixBits));
+  switch (dtype_hex) {
+    case '0x10': /* packed_bit */
+    case '0x03': /* int8 */ {
+      const array = new Int8Array(vector.map(dtype_hex === '0x03' /* int8 */ ? fixInt8s : fixBits));
       const buffer = new Uint8Array(array.byteLength + 2);
-      buffer[0] = +dtype_hex;
-      buffer[1] = padding;
       buffer.set(new Uint8Array(array.buffer), 2);
       binary = new Binary(buffer, 9);
       break;
     }
 
-    case 'FLOAT32': {
+    case '0x27': /* float32 */ {
       const array = new Float32Array(vector.map(fixFloats));
       const buffer = new Uint8Array(array.byteLength + 2);
-      buffer[0] = +dtype_hex;
-      buffer[1] = padding;
       if (isBigEndian) {
         for (let i = 0; i < array.length; i++) {
           const bytes = new Uint8Array(array.buffer, i * 4, 4);
@@ -126,20 +116,46 @@ function make(
     }
 
     default:
-      throw new Error(`Unknown dtype_alias: ${dtype_alias}`);
+      throw new Error(`Unknown dtype_hex: ${dtype_hex}`);
   }
 
   binary.buffer[0] = +dtype_hex;
-  binary.buffer[1] = padding;
+  binary.buffer[1] = padding ?? 0;
 
   return binary;
 }
+
+const invalidTestExpectedError = new Map()
+  .set('FLOAT32 with padding', 'Invalid Vector: padding must be zero for int8 and float32 vectors')
+  .set('INT8 with padding', 'Invalid Vector: padding must be zero for int8 and float32 vectors')
+  .set(
+    'Padding specified with no vector data PACKED_BIT',
+    'Invalid Vector: padding must be zero for packed bit vectors that are empty'
+  )
+  .set(
+    'Padding specified with no vector data PACKED_BIT',
+    'Invalid Vector: padding must be zero for packed bit vectors that are empty'
+  )
+  .set(
+    'Exceeding maximum padding PACKED_BIT',
+    'Invalid Vector: padding must be a value between 0 and 7'
+  )
+  .set('Negative padding PACKED_BIT', 'Invalid Vector: padding must be a value between 0 and 7')
+  // skipped
+  .set('Overflow Vector PACKED_BIT', false)
+  .set('Underflow Vector PACKED_BIT', false)
+  .set('Overflow Vector INT8', false)
+  .set('Underflow Vector INT8', false)
+  .set('INT8 with float inputs', false)
+  // duplicate test! but also skipped.
+  .set('Vector with float values PACKED_BIT', false)
+  .set('Vector with float values PACKED_BIT', false);
 
 describe('BSON Binary Vector spec tests', () => {
   const tests: Record<string, VectorSuite> = Object.create(null);
 
   for (const file of fs.readdirSync(path.join(__dirname, 'specs/bson-binary-vector'))) {
-    tests[file.split('.')[0]] = JSON.parse(
+    tests[path.basename(file, '.json')] = JSON.parse(
       fs.readFileSync(path.join(__dirname, 'specs/bson-binary-vector', file), 'utf8')
     );
   }
@@ -159,7 +175,7 @@ describe('BSON Binary Vector spec tests', () => {
          */
         for (const test of valid) {
           it(`encode ${test.description}`, function () {
-            const bin = make(test.vector, test.dtype_hex, test.dtype_alias, test.padding);
+            const bin = make(test.vector, test.dtype_hex, test.padding);
 
             const buffer = BSON.serialize({ [suite.test_key]: bin });
             expect(toHex(buffer)).to.equal(test.canonical_bson!.toLowerCase());
@@ -183,10 +199,12 @@ describe('BSON Binary Vector spec tests', () => {
          * a document from the numeric values, dtype, and padding.
          */
         for (const test of invalid) {
+          const expectedErrorMessage = invalidTestExpectedError.get(test.description);
+
           it(`bson: ${test.description}`, function () {
             let thrownError: Error | undefined;
             try {
-              const bin = make(test.vector, test.dtype_hex, test.dtype_alias, test.padding);
+              const bin = make(test.vector, test.dtype_hex, test.padding);
               BSON.serialize({ bin });
               // TODO(NODE-6537): The following validation MUST be a part of serialize
               validateVector(bin);
@@ -195,15 +213,21 @@ describe('BSON Binary Vector spec tests', () => {
             }
 
             if (thrownError?.message.startsWith('unsupported_error')) {
+              expect(
+                expectedErrorMessage,
+                'We expect a certain error message but got an unsupported error'
+              ).to.be.false;
               this.skip();
             }
+
             expect(thrownError).to.be.instanceOf(BSONError);
+            expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
           });
 
           it(`extended json: ${test.description}`, function () {
             let thrownError: Error | undefined;
             try {
-              const bin = make(test.vector, test.dtype_hex, test.dtype_alias, test.padding);
+              const bin = make(test.vector, test.dtype_hex, test.padding);
               BSON.EJSON.stringify({ bin });
               // TODO(NODE-6537): The following validation MUST be a part of stringify
               validateVector(bin);
@@ -212,9 +236,15 @@ describe('BSON Binary Vector spec tests', () => {
             }
 
             if (thrownError?.message.startsWith('unsupported_error')) {
+              expect(
+                expectedErrorMessage,
+                'We expect a certain error message but got an unsupported error'
+              ).to.be.false;
               this.skip();
             }
+
             expect(thrownError).to.be.instanceOf(BSONError);
+            expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
           });
         }
       });
