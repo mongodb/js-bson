@@ -489,7 +489,7 @@ export class Binary extends BSONValue {
    * @param array - The array of 1s and 0s to pack into the Binary instance
    */
   public static fromBits(bits: ArrayLike<number>): Binary {
-    const byteLength = Math.ceil(bits.length / 8);
+    const byteLength = (bits.length + 7) >>> 3; // ceil(bits.length / 8)
     const bytes = new Uint8Array(byteLength + 2);
     bytes[0] = Binary.VECTOR_TYPE.PackedBit;
 
@@ -497,7 +497,7 @@ export class Binary extends BSONValue {
     bytes[1] = remainder === 0 ? 0 : 8 - remainder;
 
     for (let bitOffset = 0; bitOffset < bits.length; bitOffset++) {
-      const byteOffset = Math.floor(bitOffset / 8);
+      const byteOffset = bitOffset >>> 3; // floor(bitOffset / 8)
       const bit = bits[bitOffset];
 
       if (bit !== 0 && bit !== 1) {
