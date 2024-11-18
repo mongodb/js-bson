@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 
 # At the time of writing. This script is not used in CI.
 # but can be used to locally iterate on big endian bugs.
