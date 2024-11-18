@@ -520,8 +520,15 @@ export class Binary extends BSONValue {
     if (vector.sub_type !== this.SUBTYPE_VECTOR) return;
 
     const size = vector.position;
+
+    // NOTE: Validation is only applied to **KNOWN** vector types
+    // If a new d_type is introduced, a future version of the library will need to add validation
     const d_type = vector.buffer[0];
-    const padding = vector.buffer[1];
+
+    // NOTE: We do not enable noUncheckedIndexedAccess so TS believes this is always number
+    // a Binary vector may be empty, in which case the padding is undefined
+    // this possible value is tolerable for our validation checks
+    const padding: number | undefined = vector.buffer[1];
 
     if (
       (d_type === this.VECTOR_TYPE.Float32 || d_type === this.VECTOR_TYPE.Int8) &&
