@@ -506,6 +506,10 @@ describe('class Binary', () => {
         expect(binary.buffer[1]).to.equal(0);
         expect(binary.toBits()).to.deep.equal(new Int8Array(0));
       });
+
+      it('throws when values are not 1 or 0', () => {
+        expect(() => Binary.fromBits([1, 0, 2])).to.throw(BSONError, /must be 0 or 1/);
+      });
     });
   });
 });
