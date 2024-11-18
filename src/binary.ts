@@ -364,18 +364,9 @@ export class Binary extends BSONValue {
     const floatBytes = new Uint8Array(
       this.buffer.buffer.slice(this.buffer.byteOffset + 2, this.buffer.byteOffset + this.position)
     );
-    if (NumberUtils.isBigEndian) {
-      for (let i = 0; i < floatBytes.byteLength; i += 4) {
-        const byte0 = floatBytes[i];
-        const byte1 = floatBytes[i + 1];
-        const byte2 = floatBytes[i + 2];
-        const byte3 = floatBytes[i + 3];
-        floatBytes[i] = byte3;
-        floatBytes[i + 1] = byte2;
-        floatBytes[i + 2] = byte1;
-        floatBytes[i + 3] = byte0;
-      }
-    }
+
+    if (NumberUtils.isBigEndian) ByteUtils.swap32(floatBytes);
+
     return new Float32Array(floatBytes.buffer);
   }
 
@@ -455,18 +446,7 @@ export class Binary extends BSONValue {
     const floatBytes = new Uint8Array(array.buffer, array.byteOffset, array.byteLength);
     binaryBytes.set(floatBytes, 2);
 
-    if (NumberUtils.isBigEndian) {
-      for (let i = 2; i < binaryBytes.byteLength; i += 4) {
-        const byte0 = binaryBytes[i];
-        const byte1 = binaryBytes[i + 1];
-        const byte2 = binaryBytes[i + 2];
-        const byte3 = binaryBytes[i + 3];
-        binaryBytes[i] = byte3;
-        binaryBytes[i + 1] = byte2;
-        binaryBytes[i + 2] = byte1;
-        binaryBytes[i + 3] = byte0;
-      }
-    }
+    if (NumberUtils.isBigEndian) ByteUtils.swap32(new Uint8Array(binaryBytes.buffer, 2));
 
     return new this(binaryBytes, this.SUBTYPE_VECTOR);
   }

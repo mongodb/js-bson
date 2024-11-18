@@ -12,7 +12,7 @@ import { utf8WebPlatformSpecTests } from './data/utf8_wpt_error_cases';
 
 type ByteUtilTest<K extends keyof ByteUtils> = {
   name: string;
-  inputs: Parameters<ByteUtils[K]>;
+  inputs: Parameters<ByteUtils[K]> | (() => Parameters<ByteUtils[K]>);
   expectation: (result: {
     web: boolean;
     output: ReturnType<ByteUtils[K]> | null;
@@ -500,6 +500,23 @@ const randomBytesTests: ByteUtilTest<'randomBytes'>[] = [
     }
   }
 ];
+const swap32Tests: ByteUtilTest<'swap32'>[] = [
+  {
+    name: 'swaps byte order in-place',
+    inputs: () => [Buffer.from([1, 2, 3, 4, 5, 6, 7, 8])],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.deep.equal(Buffer.from([4, 3, 2, 1, 8, 7, 6, 5]));
+    }
+  },
+  {
+    name: 'throws if buffer is not a multiple of 4 bytes',
+    inputs: [Buffer.from([1, 2, 3])],
+    expectation({ error }) {
+      expect(error).to.be.instanceOf(RangeError);
+    }
+  }
+];
 
 const utils = new Map([
   ['nodeJsByteUtils', nodeJsByteUtils],
@@ -520,7 +537,8 @@ const table = new Map<keyof ByteUtils, ByteUtilTest<keyof ByteUtils>[]>([
   ['encodeUTF8Into', fromUTF8Tests],
   ['toUTF8', toUTF8Tests],
   ['utf8ByteLength', utf8ByteLengthTests],
-  ['randomBytes', randomBytesTests]
+  ['randomBytes', randomBytesTests],
+  ['swap32', swap32Tests]
 ]);
 
 describe('ByteUtils', () => {
@@ -790,7 +808,10 @@ describe('ByteUtils', () => {
             let error = null;
 
             try {
-              output = byteUtils[utility].call(null, ...test.inputs);
+              output = byteUtils[utility].call(
+                null,
+                ...(typeof test.inputs === 'function' ? test.inputs() : test.inputs)
+              );
             } catch (thrownError) {
               error = thrownError;
             }

@@ -39,6 +39,8 @@ export type ByteUtils = {
   encodeUTF8Into: (destination: Uint8Array, source: string, byteOffset: number) => number;
   /** Generate a Uint8Array filled with random bytes with byteLength */
   randomBytes: (byteLength: number) => Uint8Array;
+  /** Interprets `buffer` as an array of 32-bit values and swaps the byte order in-place. */
+  swap32: (buffer: Uint8Array) => Uint8Array;
 };
 
 declare const Buffer: { new (): unknown; prototype?: { _isBuffer?: boolean } } | undefined;
