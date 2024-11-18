@@ -251,7 +251,7 @@ describe('class Binary', () => {
   });
 
   describe('sub_type vector', () => {
-    describe('d_type constants', () => {
+    describe('datatype constants', () => {
       it('has Int8, Float32 and PackedBit', () => {
         expect(Binary.VECTOR_TYPE).to.have.property('Int8', 0x03);
         expect(Binary.VECTOR_TYPE).to.have.property('Float32', 0x27);
@@ -276,7 +276,7 @@ describe('class Binary', () => {
         expect(binary.toInt8Array()).to.deep.equal(new Int8Array([-1, -1]));
       });
 
-      it('returns Int8Array when sub_type is vector and d_type is INT8', () => {
+      it('returns Int8Array when sub_type is vector and datatype is INT8', () => {
         const int8Array = new Int8Array([1, 2, 3]);
         const binary = Binary.fromInt8Array(int8Array);
         expect(binary.toInt8Array()).to.deep.equal(int8Array);
@@ -287,12 +287,12 @@ describe('class Binary', () => {
         expect(() => binary.toInt8Array()).to.throw(BSONError, 'Binary sub_type is not Vector');
       });
 
-      it('throws error when d_type is not INT8', () => {
+      it('throws error when datatype is not INT8', () => {
         const binary = new Binary(
           new Uint8Array([Binary.VECTOR_TYPE.Float32, 0, 1, 2, 3]),
           Binary.SUBTYPE_VECTOR
         );
-        expect(() => binary.toInt8Array()).to.throw(BSONError, 'Binary d_type field is not Int8');
+        expect(() => binary.toInt8Array()).to.throw(BSONError, 'Binary datatype field is not Int8');
       });
     });
 
@@ -317,7 +317,7 @@ describe('class Binary', () => {
         expect(binary.toFloat32Array()).to.deep.equal(new Float32Array([-1]));
       });
 
-      it('returns Float32Array when sub_type is vector and d_type is FLOAT32', () => {
+      it('returns Float32Array when sub_type is vector and datatype is FLOAT32', () => {
         const float32Array = new Float32Array([1.1, 2.2, 3.3]);
         const binary = Binary.fromFloat32Array(float32Array);
         expect(binary.toFloat32Array()).to.deep.equal(float32Array);
@@ -328,14 +328,14 @@ describe('class Binary', () => {
         expect(() => binary.toFloat32Array()).to.throw(BSONError, 'Binary sub_type is not Vector');
       });
 
-      it('throws error when d_type is not FLOAT32', () => {
+      it('throws error when datatype is not FLOAT32', () => {
         const binary = new Binary(
           new Uint8Array([Binary.VECTOR_TYPE.Int8, 0, 1, 2, 3]),
           Binary.SUBTYPE_VECTOR
         );
         expect(() => binary.toFloat32Array()).to.throw(
           BSONError,
-          'Binary d_type field is not Float32'
+          'Binary datatype field is not Float32'
         );
       });
 
@@ -343,7 +343,7 @@ describe('class Binary', () => {
         // The expectation is that this test is run on LE and BE machines to
         // demonstrate that on BE machines we get the same result
         const float32Vector = new Uint8Array([
-          ...[Binary.VECTOR_TYPE.Float32, 0], // d_type, padding
+          ...[Binary.VECTOR_TYPE.Float32, 0], // datatype, padding
           ...[0, 0, 128, 191], // -1
           ...[0, 0, 128, 191] // -1
         ]);
@@ -358,7 +358,7 @@ describe('class Binary', () => {
     });
 
     describe('toBits()', () => {
-      it('returns Int8Array of bits when sub_type is vector and d_type is PACKED_BIT', () => {
+      it('returns Int8Array of bits when sub_type is vector and datatype is PACKED_BIT', () => {
         const bits = new Int8Array([1, 0, 1, 1, 0, 0, 1, 0]);
         const binary = Binary.fromBits(bits);
         expect(binary.toBits()).to.deep.equal(bits);
@@ -379,17 +379,20 @@ describe('class Binary', () => {
         expect(() => binary.toBits()).to.throw(BSONError, 'Binary sub_type is not Vector');
       });
 
-      it('throws error when d_type is not PACKED_BIT', () => {
+      it('throws error when datatype is not PACKED_BIT', () => {
         const binary = new Binary(
           new Uint8Array([Binary.VECTOR_TYPE.Int8, 0, 1, 2, 3]),
           Binary.SUBTYPE_VECTOR
         );
-        expect(() => binary.toBits()).to.throw(BSONError, 'Binary d_type field is not packed bit');
+        expect(() => binary.toBits()).to.throw(
+          BSONError,
+          'Binary datatype field is not packed bit'
+        );
       });
     });
 
     describe('toPackedBits()', () => {
-      it('returns Uint8Array of packed bits when sub_type is vector and d_type is PACKED_BIT', () => {
+      it('returns Uint8Array of packed bits when sub_type is vector and datatype is PACKED_BIT', () => {
         const bits = new Uint8Array([127, 8]);
         const binary = Binary.fromPackedBits(bits, 3);
         expect(binary.toPackedBits()).to.deep.equal(bits);
@@ -413,14 +416,14 @@ describe('class Binary', () => {
         expect(() => binary.toPackedBits()).to.throw(BSONError, 'Binary sub_type is not Vector');
       });
 
-      it('throws error when d_type is not PACKED_BIT', () => {
+      it('throws error when datatype is not PACKED_BIT', () => {
         const binary = new Binary(
           new Uint8Array([Binary.VECTOR_TYPE.Int8, 0, 1, 2, 3]),
           Binary.SUBTYPE_VECTOR
         );
         expect(() => binary.toPackedBits()).to.throw(
           BSONError,
-          'Binary d_type field is not packed bit'
+          'Binary datatype field is not packed bit'
         );
       });
     });
