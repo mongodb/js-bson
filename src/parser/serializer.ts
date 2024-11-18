@@ -1,4 +1,4 @@
-import { Binary } from '../binary';
+import { Binary, validateBinaryVector } from '../binary';
 import type { BSONSymbol, DBRef, Document, MaxKey } from '../bson';
 import type { Code } from '../code';
 import * as constants from '../constants';
@@ -496,7 +496,7 @@ function serializeBinary(buffer: Uint8Array, key: string, value: Binary, index: 
   }
 
   if (value.sub_type === Binary.SUBTYPE_VECTOR) {
-    Binary.validateVector(value);
+    validateBinaryVector(value);
   }
 
   if (size <= 16) {

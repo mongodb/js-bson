@@ -250,7 +250,7 @@ export class Binary extends BSONValue {
     options = options || {};
 
     if (this.sub_type === Binary.SUBTYPE_VECTOR) {
-      Binary.validateVector(this);
+      validateBinaryVector(this);
     }
 
     const base64String = ByteUtils.toBase64(this.buffer);
@@ -514,40 +514,39 @@ export class Binary extends BSONValue {
 
     return new this(bytes, Binary.SUBTYPE_VECTOR);
   }
+}
 
-  /** @internal */
-  static validateVector(vector: Binary): void {
-    if (vector.sub_type !== this.SUBTYPE_VECTOR) return;
+export function validateBinaryVector(vector: Binary): void {
+  if (vector.sub_type !== Binary.SUBTYPE_VECTOR) return;
 
-    const size = vector.position;
+  const size = vector.position;
 
-    // NOTE: Validation is only applied to **KNOWN** vector types
-    // If a new datatype is introduced, a future version of the library will need to add validation
-    const datatype = vector.buffer[0];
+  // NOTE: Validation is only applied to **KNOWN** vector types
+  // If a new datatype is introduced, a future version of the library will need to add validation
+  const datatype = vector.buffer[0];
 
-    // NOTE: We do not enable noUncheckedIndexedAccess so TS believes this is always number
-    // a Binary vector may be empty, in which case the padding is undefined
-    // this possible value is tolerable for our validation checks
-    const padding: number | undefined = vector.buffer[1];
+  // NOTE: We do not enable noUncheckedIndexedAccess so TS believes this is always number
+  // a Binary vector may be empty, in which case the padding is undefined
+  // this possible value is tolerable for our validation checks
+  const padding: number | undefined = vector.buffer[1];
 
-    if (
-      (datatype === this.VECTOR_TYPE.Float32 || datatype === this.VECTOR_TYPE.Int8) &&
-      padding !== 0
-    ) {
-      throw new BSONError('Invalid Vector: padding must be zero for int8 and float32 vectors');
-    }
+  if (
+    (datatype === Binary.VECTOR_TYPE.Float32 || datatype === Binary.VECTOR_TYPE.Int8) &&
+    padding !== 0
+  ) {
+    throw new BSONError('Invalid Vector: padding must be zero for int8 and float32 vectors');
+  }
 
-    if (datatype === this.VECTOR_TYPE.PackedBit && padding !== 0 && size === 2) {
-      throw new BSONError(
-        'Invalid Vector: padding must be zero for packed bit vectors that are empty'
-      );
-    }
+  if (datatype === Binary.VECTOR_TYPE.PackedBit && padding !== 0 && size === 2) {
+    throw new BSONError(
+      'Invalid Vector: padding must be zero for packed bit vectors that are empty'
+    );
+  }
 
-    if (datatype === this.VECTOR_TYPE.PackedBit && padding > 7) {
-      throw new BSONError(
-        `Invalid Vector: padding must be a value between 0 and 7. found: ${padding}`
-      );
-    }
+  if (datatype === Binary.VECTOR_TYPE.PackedBit && padding > 7) {
+    throw new BSONError(
+      `Invalid Vector: padding must be a value between 0 and 7. found: ${padding}`
+    );
   }
 }
 
