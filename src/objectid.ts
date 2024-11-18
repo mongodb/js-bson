@@ -13,6 +13,7 @@ const __idCache = new WeakMap(); // TODO convert this to #__id private field whe
 /** @public */
 export interface ObjectIdLike {
   id: string | Uint8Array;
+  __id?: string;
   toHexString(): string;
 }
 
