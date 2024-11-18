@@ -327,8 +327,10 @@ export class Binary extends BSONValue {
   }
 
   /**
-   * If this Binary represents a Int8 Vector,
+   * If this Binary represents a Int8 Vector (`binary.buffer[0] === Binary.VECTOR_TYPE.Int8`),
    * returns a copy of the bytes in a new Int8Array.
+   *
+   * If the Binary is not a Vector, or the d_type is not Int8, an error is thrown.
    */
   public toInt8Array(): Int8Array {
     if (this.sub_type !== Binary.SUBTYPE_VECTOR) {
@@ -345,8 +347,10 @@ export class Binary extends BSONValue {
   }
 
   /**
-   * If this Binary represents a Float32 Vector,
+   * If this Binary represents a Float32 Vector (`binary.buffer[0] === Binary.VECTOR_TYPE.Float32`),
    * returns a copy of the bytes in a new Float32Array.
+   *
+   * If the Binary is not a Vector, or the d_type is not Float32, an error is thrown.
    */
   public toFloat32Array(): Float32Array {
     if (this.sub_type !== Binary.SUBTYPE_VECTOR) {
@@ -376,10 +380,12 @@ export class Binary extends BSONValue {
   }
 
   /**
-   * If this Binary represents packed bit Vector,
+   * If this Binary represents packed bit Vector (`binary.buffer[0] === Binary.VECTOR_TYPE.PackedBit`),
    * returns a copy of the bytes that are packed bits.
    *
    * Use `toBits` to get the unpacked bits.
+   *
+   * If the Binary is not a Vector, or the d_type is not PackedBit, an error is thrown.
    */
   public toPackedBits(): Uint8Array {
     if (this.sub_type !== Binary.SUBTYPE_VECTOR) {
@@ -396,8 +402,12 @@ export class Binary extends BSONValue {
   }
 
   /**
-   * If this Binary represents a Packed bit Vector,
+   * If this Binary represents a Packed bit Vector (`binary.buffer[0] === Binary.VECTOR_TYPE.PackedBit`),
    * returns a copy of the bit unpacked into a new Int8Array.
+   *
+   * Use `toPackedBits` to get the bits still in packed form.
+   *
+   * If the Binary is not a Vector, or the d_type is not PackedBit, an error is thrown.
    */
   public toBits(): Int8Array {
     if (this.sub_type !== Binary.SUBTYPE_VECTOR) {
