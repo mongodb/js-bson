@@ -17,6 +17,6 @@ docker buildx build \
     --progress=plain \
     --platform linux/s390x \
     --build-arg="NODE_ARCH=s390x" \
-    -f ./.github/docker/Dockerfile \
+    -f ./etc/Dockerfile \
     --output type=local,dest=./docs,platform-split=false \
     .
