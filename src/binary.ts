@@ -64,7 +64,7 @@ export class Binary extends BSONValue {
   /** User BSON type */
   static readonly SUBTYPE_USER_DEFINED = 128;
 
-  /** d_type of a Binary Vector (subtype: 9) */
+  /** datatype of a Binary Vector (subtype: 9) */
   static readonly VECTOR_TYPE = Object.freeze({
     Int8: 0x03,
     Float32: 0x27,
@@ -330,7 +330,7 @@ export class Binary extends BSONValue {
    * If this Binary represents a Int8 Vector (`binary.buffer[0] === Binary.VECTOR_TYPE.Int8`),
    * returns a copy of the bytes in a new Int8Array.
    *
-   * If the Binary is not a Vector, or the d_type is not Int8, an error is thrown.
+   * If the Binary is not a Vector, or the datatype is not Int8, an error is thrown.
    */
   public toInt8Array(): Int8Array {
     if (this.sub_type !== Binary.SUBTYPE_VECTOR) {
@@ -338,7 +338,7 @@ export class Binary extends BSONValue {
     }
 
     if (this.buffer[0] !== Binary.VECTOR_TYPE.Int8) {
-      throw new BSONError('Binary d_type field is not Int8');
+      throw new BSONError('Binary datatype field is not Int8');
     }
 
     return new Int8Array(
@@ -350,7 +350,7 @@ export class Binary extends BSONValue {
    * If this Binary represents a Float32 Vector (`binary.buffer[0] === Binary.VECTOR_TYPE.Float32`),
    * returns a copy of the bytes in a new Float32Array.
    *
-   * If the Binary is not a Vector, or the d_type is not Float32, an error is thrown.
+   * If the Binary is not a Vector, or the datatype is not Float32, an error is thrown.
    */
   public toFloat32Array(): Float32Array {
     if (this.sub_type !== Binary.SUBTYPE_VECTOR) {
@@ -358,7 +358,7 @@ export class Binary extends BSONValue {
     }
 
     if (this.buffer[0] !== Binary.VECTOR_TYPE.Float32) {
-      throw new BSONError('Binary d_type field is not Float32');
+      throw new BSONError('Binary datatype field is not Float32');
     }
 
     const floatBytes = new Uint8Array(
@@ -385,7 +385,7 @@ export class Binary extends BSONValue {
    *
    * Use `toBits` to get the unpacked bits.
    *
-   * If the Binary is not a Vector, or the d_type is not PackedBit, an error is thrown.
+   * If the Binary is not a Vector, or the datatype is not PackedBit, an error is thrown.
    */
   public toPackedBits(): Uint8Array {
     if (this.sub_type !== Binary.SUBTYPE_VECTOR) {
@@ -393,7 +393,7 @@ export class Binary extends BSONValue {
     }
 
     if (this.buffer[0] !== Binary.VECTOR_TYPE.PackedBit) {
-      throw new BSONError('Binary d_type field is not packed bit');
+      throw new BSONError('Binary datatype field is not packed bit');
     }
 
     return new Uint8Array(
@@ -407,7 +407,7 @@ export class Binary extends BSONValue {
    *
    * Use `toPackedBits` to get the bits still in packed form.
    *
-   * If the Binary is not a Vector, or the d_type is not PackedBit, an error is thrown.
+   * If the Binary is not a Vector, or the datatype is not PackedBit, an error is thrown.
    */
   public toBits(): Int8Array {
     if (this.sub_type !== Binary.SUBTYPE_VECTOR) {
@@ -415,7 +415,7 @@ export class Binary extends BSONValue {
     }
 
     if (this.buffer[0] !== Binary.VECTOR_TYPE.PackedBit) {
-      throw new BSONError('Binary d_type field is not packed bit');
+      throw new BSONError('Binary datatype field is not packed bit');
     }
 
     const byteCount = this.length() - 2;
@@ -522,8 +522,8 @@ export class Binary extends BSONValue {
     const size = vector.position;
 
     // NOTE: Validation is only applied to **KNOWN** vector types
-    // If a new d_type is introduced, a future version of the library will need to add validation
-    const d_type = vector.buffer[0];
+    // If a new datatype is introduced, a future version of the library will need to add validation
+    const datatype = vector.buffer[0];
 
     // NOTE: We do not enable noUncheckedIndexedAccess so TS believes this is always number
     // a Binary vector may be empty, in which case the padding is undefined
@@ -531,19 +531,19 @@ export class Binary extends BSONValue {
     const padding: number | undefined = vector.buffer[1];
 
     if (
-      (d_type === this.VECTOR_TYPE.Float32 || d_type === this.VECTOR_TYPE.Int8) &&
+      (datatype === this.VECTOR_TYPE.Float32 || datatype === this.VECTOR_TYPE.Int8) &&
       padding !== 0
     ) {
       throw new BSONError('Invalid Vector: padding must be zero for int8 and float32 vectors');
     }
 
-    if (d_type === this.VECTOR_TYPE.PackedBit && padding !== 0 && size === 2) {
+    if (datatype === this.VECTOR_TYPE.PackedBit && padding !== 0 && size === 2) {
       throw new BSONError(
         'Invalid Vector: padding must be zero for packed bit vectors that are empty'
       );
     }
 
-    if (d_type === this.VECTOR_TYPE.PackedBit && padding > 7) {
+    if (datatype === this.VECTOR_TYPE.PackedBit && padding > 7) {
       throw new BSONError(
         `Invalid Vector: padding must be a value between 0 and 7. found: ${padding}`
       );
