@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.10.0](https://github.com/mongodb/js-bson/compare/v6.9.0...v6.10.0) (2024-11-18)
+
+
+### Features
+
+* **NODE-6537:** add support for binary vectors ([#730](https://github.com/mongodb/js-bson/issues/730)) ([d7bdcec](https://github.com/mongodb/js-bson/commit/d7bdcec04349af697ead5655d14c4494f307b6a1))
+
+
+### Bug Fixes
+
+* **NODE-6536:** Binary.read never returns number[] and reads beyond content ([#727](https://github.com/mongodb/js-bson/issues/727)) ([f99fdfd](https://github.com/mongodb/js-bson/commit/f99fdfdb088ebfef115a9740ac4aed65fabf8a2a))
+
 ## [6.9.0](https://github.com/mongodb/js-bson/compare/v6.8.0...v6.9.0) (2024-10-15)
 
 
