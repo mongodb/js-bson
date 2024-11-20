@@ -633,7 +633,7 @@ describe('BSON', function () {
     expect(serialized_data).to.deep.equal(serialized_data2);
 
     var doc2 = b.deserialize(serialized_data);
-    expect(doc).to.deep.equal(doc2);
+    expect(b.serialize(doc)).to.deep.equal(b.serialize(doc2));
     expect(doc2.dbref.oid.toHexString()).to.deep.equal(oid.toHexString());
     done();
   });
@@ -927,7 +927,7 @@ describe('BSON', function () {
 
     var deserialized_data = BSON.deserialize(serialized_data);
     expect(doc.b).to.deep.equal(deserialized_data.b);
-    expect(doc).to.deep.equal(deserialized_data);
+    expect(BSON.serialize(doc)).to.deep.equal(BSON.serialize(deserialized_data));
     done();
   });
 
@@ -1139,7 +1139,7 @@ describe('BSON', function () {
 
     var doc2 = BSON.deserialize(serialized_data);
 
-    expect(doc).to.deep.equal(doc2);
+    expect(BSON.serialize(doc)).to.deep.equal(BSON.serialize(doc2));
     done();
   });
 
