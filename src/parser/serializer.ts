@@ -637,81 +637,77 @@ export function serializeInto(
         value = value.toBSON();
       }
 
-      // Check the type of the value
-      const type = typeof value;
-
-      if (value === undefined) {
+      if (typeof value === 'string') {
+        index = serializeString(buffer, key, value, index);
+      } else if (typeof value === 'number') {
+        index = serializeNumber(buffer, key, value, index);
+      } else if (typeof value === 'bigint') {
+        index = serializeBigInt(buffer, key, value, index);
+      } else if (typeof value === 'boolean') {
+        index = serializeBoolean(buffer, key, value, index);
+      } else if (value instanceof Date || isDate(value)) {
+        index = serializeDate(buffer, key, value, index);
+      } else if (value === undefined) {
         index = serializeNull(buffer, key, value, index);
       } else if (value === null) {
         index = serializeNull(buffer, key, value, index);
-      } else if (type === 'string') {
-        index = serializeString(buffer, key, value, index);
-      } else if (type === 'number') {
-        index = serializeNumber(buffer, key, value, index);
-      } else if (type === 'bigint') {
-        index = serializeBigInt(buffer, key, value, index);
-      } else if (type === 'boolean') {
-        index = serializeBoolean(buffer, key, value, index);
-      } else if (type === 'object' && value._bsontype == null) {
-        if (value instanceof Date || isDate(value)) {
-          index = serializeDate(buffer, key, value, index);
-        } else if (value instanceof Uint8Array || isUint8Array(value)) {
-          index = serializeBuffer(buffer, key, value, index);
-        } else if (value instanceof RegExp || isRegExp(value)) {
-          index = serializeRegExp(buffer, key, value, index);
-        } else {
-          index = serializeObject(
-            buffer,
-            key,
-            value,
-            index,
-            checkKeys,
-            depth,
-            serializeFunctions,
-            ignoreUndefined,
-            path
-          );
-        }
-      } else if (type === 'object') {
-        if (value[constants.BSON_VERSION_SYMBOL] !== constants.BSON_MAJOR_VERSION) {
-          throw new BSONVersionError();
-        } else if (value._bsontype === 'ObjectId') {
-          index = serializeObjectId(buffer, key, value, index);
-        } else if (value._bsontype === 'Decimal128') {
-          index = serializeDecimal128(buffer, key, value, index);
-        } else if (value._bsontype === 'Long' || value._bsontype === 'Timestamp') {
-          index = serializeLong(buffer, key, value, index);
-        } else if (value._bsontype === 'Double') {
-          index = serializeDouble(buffer, key, value, index);
-        } else if (value._bsontype === 'Code') {
-          index = serializeCode(
-            buffer,
-            key,
-            value,
-            index,
-            checkKeys,
-            depth,
-            serializeFunctions,
-            ignoreUndefined,
-            path
-          );
-        } else if (value._bsontype === 'Binary') {
-          index = serializeBinary(buffer, key, value, index);
-        } else if (value._bsontype === 'BSONSymbol') {
-          index = serializeSymbol(buffer, key, value, index);
-        } else if (value._bsontype === 'DBRef') {
-          index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions, path);
-        } else if (value._bsontype === 'BSONRegExp') {
-          index = serializeBSONRegExp(buffer, key, value, index);
-        } else if (value._bsontype === 'Int32') {
-          index = serializeInt32(buffer, key, value, index);
-        } else if (value._bsontype === 'MinKey' || value._bsontype === 'MaxKey') {
-          index = serializeMinMax(buffer, key, value, index);
-        } else if (typeof value._bsontype !== 'undefined') {
-          throw new BSONError(`Unrecognized or invalid _bsontype: ${String(value._bsontype)}`);
-        }
-      } else if (type === 'function' && serializeFunctions) {
+      } else if (isUint8Array(value)) {
+        index = serializeBuffer(buffer, key, value, index);
+      } else if (value instanceof RegExp || isRegExp(value)) {
+        index = serializeRegExp(buffer, key, value, index);
+      } else if (typeof value === 'object' && value._bsontype == null) {
+        index = serializeObject(
+          buffer,
+          key,
+          value,
+          index,
+          checkKeys,
+          depth,
+          serializeFunctions,
+          ignoreUndefined,
+          path
+        );
+      } else if (
+        typeof value === 'object' &&
+        value[Symbol.for('@@mdb.bson.version')] !== constants.BSON_MAJOR_VERSION
+      ) {
+        throw new BSONVersionError();
+      } else if (value._bsontype === 'ObjectId') {
+        index = serializeObjectId(buffer, key, value, index);
+      } else if (value._bsontype === 'Decimal128') {
+        index = serializeDecimal128(buffer, key, value, index);
+      } else if (value._bsontype === 'Long' || value._bsontype === 'Timestamp') {
+        index = serializeLong(buffer, key, value, index);
+      } else if (value._bsontype === 'Double') {
+        index = serializeDouble(buffer, key, value, index);
+      } else if (typeof value === 'function' && serializeFunctions) {
         index = serializeFunction(buffer, key, value, index);
+      } else if (value._bsontype === 'Code') {
+        index = serializeCode(
+          buffer,
+          key,
+          value,
+          index,
+          checkKeys,
+          depth,
+          serializeFunctions,
+          ignoreUndefined,
+          path
+        );
+      } else if (value._bsontype === 'Binary') {
+        index = serializeBinary(buffer, key, value, index);
+      } else if (value._bsontype === 'BSONSymbol') {
+        index = serializeSymbol(buffer, key, value, index);
+      } else if (value._bsontype === 'DBRef') {
+        index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions, path);
+      } else if (value._bsontype === 'BSONRegExp') {
+        index = serializeBSONRegExp(buffer, key, value, index);
+      } else if (value._bsontype === 'Int32') {
+        index = serializeInt32(buffer, key, value, index);
+      } else if (value._bsontype === 'MinKey' || value._bsontype === 'MaxKey') {
+        index = serializeMinMax(buffer, key, value, index);
+      } else if (typeof value._bsontype !== 'undefined') {
+        throw new BSONError(`Unrecognized or invalid _bsontype: ${String(value._bsontype)}`);
       }
     }
   } else if (object instanceof Map || isMap(object)) {
@@ -753,11 +749,7 @@ export function serializeInto(
         }
       }
 
-      if (value === undefined) {
-        if (ignoreUndefined === false) index = serializeNull(buffer, key, value, index);
-      } else if (value === null) {
-        index = serializeNull(buffer, key, value, index);
-      } else if (type === 'string') {
+      if (type === 'string') {
         index = serializeString(buffer, key, value, index);
       } else if (type === 'number') {
         index = serializeNumber(buffer, key, value, index);
@@ -765,66 +757,67 @@ export function serializeInto(
         index = serializeBigInt(buffer, key, value, index);
       } else if (type === 'boolean') {
         index = serializeBoolean(buffer, key, value, index);
+      } else if (value instanceof Date || isDate(value)) {
+        index = serializeDate(buffer, key, value, index);
+      } else if (value === null || (value === undefined && ignoreUndefined === false)) {
+        index = serializeNull(buffer, key, value, index);
+      } else if (isUint8Array(value)) {
+        index = serializeBuffer(buffer, key, value, index);
+      } else if (value instanceof RegExp || isRegExp(value)) {
+        index = serializeRegExp(buffer, key, value, index);
       } else if (type === 'object' && value._bsontype == null) {
-        if (value instanceof Date || isDate(value)) {
-          index = serializeDate(buffer, key, value, index);
-        } else if (value instanceof Uint8Array || isUint8Array(value)) {
-          index = serializeBuffer(buffer, key, value, index);
-        } else if (value instanceof RegExp || isRegExp(value)) {
-          index = serializeRegExp(buffer, key, value, index);
-        } else {
-          index = serializeObject(
-            buffer,
-            key,
-            value,
-            index,
-            checkKeys,
-            depth,
-            serializeFunctions,
-            ignoreUndefined,
-            path
-          );
-        }
-      } else if (type === 'object') {
-        if (value[constants.BSON_VERSION_SYMBOL] !== constants.BSON_MAJOR_VERSION) {
-          throw new BSONVersionError();
-        } else if (value._bsontype === 'ObjectId') {
-          index = serializeObjectId(buffer, key, value, index);
-        } else if (value._bsontype === 'Decimal128') {
-          index = serializeDecimal128(buffer, key, value, index);
-        } else if (value._bsontype === 'Long' || value._bsontype === 'Timestamp') {
-          index = serializeLong(buffer, key, value, index);
-        } else if (value._bsontype === 'Double') {
-          index = serializeDouble(buffer, key, value, index);
-        } else if (value._bsontype === 'Code') {
-          index = serializeCode(
-            buffer,
-            key,
-            value,
-            index,
-            checkKeys,
-            depth,
-            serializeFunctions,
-            ignoreUndefined,
-            path
-          );
-        } else if (value._bsontype === 'Binary') {
-          index = serializeBinary(buffer, key, value, index);
-        } else if (value._bsontype === 'BSONSymbol') {
-          index = serializeSymbol(buffer, key, value, index);
-        } else if (value._bsontype === 'DBRef') {
-          index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions, path);
-        } else if (value._bsontype === 'BSONRegExp') {
-          index = serializeBSONRegExp(buffer, key, value, index);
-        } else if (value._bsontype === 'Int32') {
-          index = serializeInt32(buffer, key, value, index);
-        } else if (value._bsontype === 'MinKey' || value._bsontype === 'MaxKey') {
-          index = serializeMinMax(buffer, key, value, index);
-        } else if (typeof value._bsontype !== 'undefined') {
-          throw new BSONError(`Unrecognized or invalid _bsontype: ${String(value._bsontype)}`);
-        }
-      } else if (type === 'function' && serializeFunctions) {
+        index = serializeObject(
+          buffer,
+          key,
+          value,
+          index,
+          checkKeys,
+          depth,
+          serializeFunctions,
+          ignoreUndefined,
+          path
+        );
+      } else if (
+        typeof value === 'object' &&
+        value[Symbol.for('@@mdb.bson.version')] !== constants.BSON_MAJOR_VERSION
+      ) {
+        throw new BSONVersionError();
+      } else if (value._bsontype === 'ObjectId') {
+        index = serializeObjectId(buffer, key, value, index);
+      } else if (type === 'object' && value._bsontype === 'Decimal128') {
+        index = serializeDecimal128(buffer, key, value, index);
+      } else if (value._bsontype === 'Long' || value._bsontype === 'Timestamp') {
+        index = serializeLong(buffer, key, value, index);
+      } else if (value._bsontype === 'Double') {
+        index = serializeDouble(buffer, key, value, index);
+      } else if (value._bsontype === 'Code') {
+        index = serializeCode(
+          buffer,
+          key,
+          value,
+          index,
+          checkKeys,
+          depth,
+          serializeFunctions,
+          ignoreUndefined,
+          path
+        );
+      } else if (typeof value === 'function' && serializeFunctions) {
         index = serializeFunction(buffer, key, value, index);
+      } else if (value._bsontype === 'Binary') {
+        index = serializeBinary(buffer, key, value, index);
+      } else if (value._bsontype === 'BSONSymbol') {
+        index = serializeSymbol(buffer, key, value, index);
+      } else if (value._bsontype === 'DBRef') {
+        index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions, path);
+      } else if (value._bsontype === 'BSONRegExp') {
+        index = serializeBSONRegExp(buffer, key, value, index);
+      } else if (value._bsontype === 'Int32') {
+        index = serializeInt32(buffer, key, value, index);
+      } else if (value._bsontype === 'MinKey' || value._bsontype === 'MaxKey') {
+        index = serializeMinMax(buffer, key, value, index);
+      } else if (typeof value._bsontype !== 'undefined') {
+        throw new BSONError(`Unrecognized or invalid _bsontype: ${String(value._bsontype)}`);
       }
     }
   } else {
@@ -864,11 +857,7 @@ export function serializeInto(
         }
       }
 
-      if (value === undefined) {
-        if (ignoreUndefined === false) index = serializeNull(buffer, key, value, index);
-      } else if (value === null) {
-        index = serializeNull(buffer, key, value, index);
-      } else if (type === 'string') {
+      if (type === 'string') {
         index = serializeString(buffer, key, value, index);
       } else if (type === 'number') {
         index = serializeNumber(buffer, key, value, index);
@@ -876,66 +865,69 @@ export function serializeInto(
         index = serializeBigInt(buffer, key, value, index);
       } else if (type === 'boolean') {
         index = serializeBoolean(buffer, key, value, index);
+      } else if (value instanceof Date || isDate(value)) {
+        index = serializeDate(buffer, key, value, index);
+      } else if (value === undefined) {
+        if (ignoreUndefined === false) index = serializeNull(buffer, key, value, index);
+      } else if (value === null) {
+        index = serializeNull(buffer, key, value, index);
+      } else if (isUint8Array(value)) {
+        index = serializeBuffer(buffer, key, value, index);
+      } else if (value instanceof RegExp || isRegExp(value)) {
+        index = serializeRegExp(buffer, key, value, index);
       } else if (type === 'object' && value._bsontype == null) {
-        if (value instanceof Date || isDate(value)) {
-          index = serializeDate(buffer, key, value, index);
-        } else if (value instanceof Uint8Array || isUint8Array(value)) {
-          index = serializeBuffer(buffer, key, value, index);
-        } else if (value instanceof RegExp || isRegExp(value)) {
-          index = serializeRegExp(buffer, key, value, index);
-        } else {
-          index = serializeObject(
-            buffer,
-            key,
-            value,
-            index,
-            checkKeys,
-            depth,
-            serializeFunctions,
-            ignoreUndefined,
-            path
-          );
-        }
-      } else if (type === 'object') {
-        if (value[constants.BSON_VERSION_SYMBOL] !== constants.BSON_MAJOR_VERSION) {
-          throw new BSONVersionError();
-        } else if (value._bsontype === 'ObjectId') {
-          index = serializeObjectId(buffer, key, value, index);
-        } else if (value._bsontype === 'Decimal128') {
-          index = serializeDecimal128(buffer, key, value, index);
-        } else if (value._bsontype === 'Long' || value._bsontype === 'Timestamp') {
-          index = serializeLong(buffer, key, value, index);
-        } else if (value._bsontype === 'Double') {
-          index = serializeDouble(buffer, key, value, index);
-        } else if (value._bsontype === 'Code') {
-          index = serializeCode(
-            buffer,
-            key,
-            value,
-            index,
-            checkKeys,
-            depth,
-            serializeFunctions,
-            ignoreUndefined,
-            path
-          );
-        } else if (value._bsontype === 'Binary') {
-          index = serializeBinary(buffer, key, value, index);
-        } else if (value._bsontype === 'BSONSymbol') {
-          index = serializeSymbol(buffer, key, value, index);
-        } else if (value._bsontype === 'DBRef') {
-          index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions, path);
-        } else if (value._bsontype === 'BSONRegExp') {
-          index = serializeBSONRegExp(buffer, key, value, index);
-        } else if (value._bsontype === 'Int32') {
-          index = serializeInt32(buffer, key, value, index);
-        } else if (value._bsontype === 'MinKey' || value._bsontype === 'MaxKey') {
-          index = serializeMinMax(buffer, key, value, index);
-        } else if (typeof value._bsontype !== 'undefined') {
-          throw new BSONError(`Unrecognized or invalid _bsontype: ${String(value._bsontype)}`);
-        }
-      } else if (type === 'function' && serializeFunctions) {
+        index = serializeObject(
+          buffer,
+          key,
+          value,
+          index,
+          checkKeys,
+          depth,
+          serializeFunctions,
+          ignoreUndefined,
+          path
+        );
+      } else if (
+        typeof value === 'object' &&
+        value[Symbol.for('@@mdb.bson.version')] !== constants.BSON_MAJOR_VERSION
+      ) {
+        throw new BSONVersionError();
+      } else if (value._bsontype === 'ObjectId') {
+        index = serializeObjectId(buffer, key, value, index);
+      } else if (type === 'object' && value._bsontype === 'Decimal128') {
+        index = serializeDecimal128(buffer, key, value, index);
+      } else if (value._bsontype === 'Long' || value._bsontype === 'Timestamp') {
+        index = serializeLong(buffer, key, value, index);
+      } else if (value._bsontype === 'Double') {
+        index = serializeDouble(buffer, key, value, index);
+      } else if (value._bsontype === 'Code') {
+        index = serializeCode(
+          buffer,
+          key,
+          value,
+          index,
+          checkKeys,
+          depth,
+          serializeFunctions,
+          ignoreUndefined,
+          path
+        );
+      } else if (typeof value === 'function' && serializeFunctions) {
         index = serializeFunction(buffer, key, value, index);
+      } else if (value._bsontype === 'Binary') {
+        index = serializeBinary(buffer, key, value, index);
+      } else if (value._bsontype === 'BSONSymbol') {
+        index = serializeSymbol(buffer, key, value, index);
+      } else if (value._bsontype === 'DBRef') {
+        index = serializeDBRef(buffer, key, value, index, depth, serializeFunctions, path);
+      } else if (value._bsontype === 'BSONRegExp') {
+        index = serializeBSONRegExp(buffer, key, value, index);
+      } else if (value._bsontype === 'Int32') {
+        index = serializeInt32(buffer, key, value, index);
+      } else if (value._bsontype === 'MinKey' || value._bsontype === 'MaxKey') {
+        index = serializeMinMax(buffer, key, value, index);
+      } else if (typeof value._bsontype !== 'undefined') {
+        throw new BSONError(`Unrecognized or invalid _bsontype: ${String(value._bsontype)}`);
       }
     }
   }

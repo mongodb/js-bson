@@ -6,8 +6,7 @@ import {
   BSON_INT32_MIN,
   BSON_INT64_MAX,
   BSON_INT64_MIN,
-  BSON_MAJOR_VERSION,
-  BSON_VERSION_SYMBOL
+  BSON_MAJOR_VERSION
 } from './constants';
 import { DBRef, isDBRefLike } from './db_ref';
 import { Decimal128 } from './decimal128';
@@ -359,7 +358,7 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
     doc != null &&
     typeof doc === 'object' &&
     typeof doc._bsontype === 'string' &&
-    doc[BSON_VERSION_SYMBOL] !== BSON_MAJOR_VERSION
+    doc[Symbol.for('@@mdb.bson.version')] !== BSON_MAJOR_VERSION
   ) {
     throw new BSONVersionError();
   } else if (isBSONType(doc)) {

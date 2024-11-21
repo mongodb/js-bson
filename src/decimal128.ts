@@ -142,7 +142,7 @@ export class Decimal128 extends BSONValue {
     super();
     if (typeof bytes === 'string') {
       this.bytes = Decimal128.fromString(bytes).bytes;
-    } else if (bytes instanceof Uint8Array || isUint8Array(bytes)) {
+    } else if (isUint8Array(bytes)) {
       if (bytes.byteLength !== 16) {
         throw new BSONError('Decimal128 must take a Buffer of 16 bytes');
       }
