@@ -39,7 +39,7 @@ export function isRegExp(d: unknown): d is RegExp {
   return Object.prototype.toString.call(d) === '[object RegExp]';
 }
 
-export function isMap(value: unknown): d is Map<unknown, unknown> {
+export function isMap(value: unknown): value is Map<unknown, unknown> {
   return (
     typeof value === 'object' &&
     value != null &&
