@@ -1,3 +1,17 @@
+const TypedArrayPrototypeGetSymbolToStringTag = (() => {
+  // eslint-disable-next-line @typescript-eslint/unbound-method -- the intention is to call this method with a bound value
+  const g = Object.getOwnPropertyDescriptor(
+    Object.getPrototypeOf(Uint8Array.prototype),
+    Symbol.toStringTag
+  )!.get!;
+
+  return (value: unknown) => g.call(value);
+})();
+
+export function isUint8Array(value: unknown): value is Uint8Array {
+  return TypedArrayPrototypeGetSymbolToStringTag(value) === 'Uint8Array';
+}
+
 export function isAnyArrayBuffer(value: unknown): value is ArrayBuffer {
   return (
     typeof value === 'object' &&
@@ -5,33 +19,6 @@ export function isAnyArrayBuffer(value: unknown): value is ArrayBuffer {
     Symbol.toStringTag in value &&
     (value[Symbol.toStringTag] === 'ArrayBuffer' ||
       value[Symbol.toStringTag] === 'SharedArrayBuffer')
-  );
-}
-
-export function isUint8Array(value: unknown): value is Uint8Array {
-  return (
-    typeof value === 'object' &&
-    value != null &&
-    Symbol.toStringTag in value &&
-    value[Symbol.toStringTag] === 'Uint8Array'
-  );
-}
-
-export function isBigInt64Array(value: unknown): value is BigInt64Array {
-  return (
-    typeof value === 'object' &&
-    value != null &&
-    Symbol.toStringTag in value &&
-    value[Symbol.toStringTag] === 'BigInt64Array'
-  );
-}
-
-export function isBigUInt64Array(value: unknown): value is BigUint64Array {
-  return (
-    typeof value === 'object' &&
-    value != null &&
-    Symbol.toStringTag in value &&
-    value[Symbol.toStringTag] === 'BigUint64Array'
   );
 }
 
