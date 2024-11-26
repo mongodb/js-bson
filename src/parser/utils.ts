@@ -35,8 +35,8 @@ export function isBigUInt64Array(value: unknown): value is BigUint64Array {
   );
 }
 
-export function isRegExp(d: unknown): d is RegExp {
-  return Object.prototype.toString.call(d) === '[object RegExp]';
+export function isRegExp(regexp: unknown): regexp is RegExp {
+  return regexp instanceof RegExp || Object.prototype.toString.call(regexp) === '[object RegExp]';
 }
 
 export function isMap(value: unknown): value is Map<unknown, unknown> {
@@ -48,8 +48,8 @@ export function isMap(value: unknown): value is Map<unknown, unknown> {
   );
 }
 
-export function isDate(d: unknown): d is Date {
-  return Object.prototype.toString.call(d) === '[object Date]';
+export function isDate(date: unknown): date is Date {
+  return date instanceof Date || Object.prototype.toString.call(date) === '[object Date]';
 }
 
 export type InspectFn = (x: unknown, options?: unknown) => string;
