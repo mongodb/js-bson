@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.10.1](https://github.com/mongodb/js-bson/compare/v6.10.0...v6.10.1) (2024-11-27)
+
+
+### Bug Fixes
+
+* **NODE-6552:** remove cache and use toStringTag in type helpers ([#740](https://github.com/mongodb/js-bson/issues/740)) ([3ede13e](https://github.com/mongodb/js-bson/commit/3ede13e4ff551785af3d459d62c854605fe8b154))
+
+
+### Performance Improvements
+
+* **NODE-6450:** Lazy objectId hex string cache ([#722](https://github.com/mongodb/js-bson/issues/722)) ([7c37580](https://github.com/mongodb/js-bson/commit/7c37580c139608d7926d464efa2bb318877104ba))
+
 ## [6.10.0](https://github.com/mongodb/js-bson/compare/v6.9.0...v6.10.0) (2024-11-18)
 
 
