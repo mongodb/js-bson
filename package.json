@@ -29,7 +29,7 @@
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@microsoft/api-extractor": "^7.47.5",
     "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-typescript": "^11.1.6",
+    "@rollup/plugin-typescript": "^12.1.1",
     "@types/chai": "^4.3.17",
     "@types/mocha": "^10.0.7",
     "@types/node": "^22.1.0",
