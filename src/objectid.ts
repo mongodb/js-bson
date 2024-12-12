@@ -4,32 +4,39 @@ import { type InspectFn, defaultInspect } from './parser/utils';
 import { ByteUtils } from './utils/byte_utils';
 import { NumberUtils } from './utils/number_utils';
 
-// Settings for ObjectId Buffer pool
-// Disable pool by default in order to ensure compatibility
-// Specify larger poolSize to enable pool
-let currentPool: Uint8Array | null = null;
-let poolSize = 1; // Disable pool by default.
-let currentPoolOffset = 0;
+const ObjectIdPooling: {
+  currentPool: Uint8Array | null;
+  poolSize: number;
+  currentPoolOffset: number;
+  getPool(): { readonly currentPool: Uint8Array; readonly currentPoolOffset: number };
+  incrementPool(): void;
+} = {
+  // Settings for ObjectId Buffer pool
+  // Disable pool by default in order to ensure compatibility
+  // Specify larger poolSize to enable pool
+  currentPool: null,
+  poolSize: 1, // Disable pool by default.
+  currentPoolOffset: 0,
+  /**
+   * Retrieves a ObjectId pool and offset. This function may create a new ObjectId buffer pool and reset the pool offset
+   * @internal
+   */
+  getPool() {
+    if (!this.currentPool || this.currentPoolOffset + 12 > this.currentPool.length) {
+      this.currentPool = ByteUtils.allocateUnsafe(this.poolSize * 12);
+      this.currentPoolOffset = 0;
+    }
+    return { currentPool: this.currentPool, currentPoolOffset: this.currentPoolOffset } as const;
+  },
 
-/**
- * Retrieves a ObjectId pool and offset. This function may create a new ObjectId buffer pool and reset the pool offset
- * @internal
- */
-function getPool(): [Uint8Array, number] {
-  if (!currentPool || currentPoolOffset + 12 > currentPool.length) {
-    currentPool = ByteUtils.allocateUnsafe(poolSize * 12);
-    currentPoolOffset = 0;
+  /**
+   * Increments the pool offset by 12 bytes
+   * @internal
+   */
+  incrementPool(): void {
+    this.currentPoolOffset += 12;
   }
-  return [currentPool, currentPoolOffset];
-}
-
-/**
- * Increments the pool offset by 12 bytes
- * @internal
- */
-function incrementPool(): void {
-  currentPoolOffset += 12;
-}
+};
 
 // Unique sequence for the current process (initialized on first use)
 let PROCESS_UNIQUE: Uint8Array | null = null;
@@ -70,11 +77,11 @@ export class ObjectId extends BSONValue {
    * The size of the current ObjectId buffer pool.
    */
   static get poolSize(): number {
-    return poolSize;
+    return ObjectIdPooling.poolSize;
   }
 
   static set poolSize(size: number) {
-    poolSize = Math.max(Math.abs(Number(size)) >>> 0, 1);
+    ObjectIdPooling.poolSize = Math.max(Math.abs(Number(size)) >>> 0, 1);
   }
 
   /** ObjectId buffer pool pointer @internal */
@@ -168,11 +175,13 @@ export class ObjectId extends BSONValue {
     let offset: number;
 
     // Special case when poolSize === 1 and a 12 byte buffer is passed in - just persist buffer
-    if (poolSize === 1 && ArrayBuffer.isView(workingId) && workingId.length === 12) {
+    if (ObjectId.poolSize === 1 && ArrayBuffer.isView(workingId) && workingId.length === 12) {
       pool = ByteUtils.toLocalBufferType(workingId);
       offset = 0;
     } else {
-      [pool, offset] = getPool();
+      const currentPool = ObjectIdPooling.getPool();
+      pool = currentPool.currentPool;
+      offset = currentPool.currentPoolOffset;
 
       // The following cases use workingId to construct an ObjectId
       if (workingId == null || typeof workingId === 'number') {
@@ -211,15 +220,10 @@ export class ObjectId extends BSONValue {
     // Increment pool offset once we have completed initialization
     this.pool = pool;
     // Only set offset if pool is used
-    if (poolSize > 1) {
+    if (ObjectId.poolSize > 1) {
       this.offset = offset;
     }
-    incrementPool();
-  }
-
-  /** ObjectId bytes @internal */
-  get buffer(): Uint8Array {
-    return this.id;
+    ObjectIdPooling.incrementPool();
   }
 
   /** ObjectId bytes @internal */

@@ -5,15 +5,6 @@ import { expect } from 'chai';
 import { bufferFromHexArray } from './tools/utils';
 import { isBufferOrUint8Array } from './tools/utils';
 
-ObjectId.poolSize = 100;
-
-declare module '../register-bson' {
-  interface ObjectId {
-    pool: Uint8Array;
-    offset: number;
-  }
-}
-
 describe('ObjectId', function () {
   describe('static createFromTime()', () => {
     it('creates an objectId with user defined value in the timestamp field', function () {
