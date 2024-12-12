@@ -9,6 +9,7 @@ type NodeJsBuffer = ArrayBufferView &
     copy(target: Uint8Array, targetStart: number, sourceStart: number, sourceEnd: number): number;
     toString: (this: Uint8Array, encoding: NodeJsEncoding, start?: number, end?: number) => string;
     equals: (this: Uint8Array, other: Uint8Array) => boolean;
+    swap32: (this: NodeJsBuffer) => NodeJsBuffer;
   };
 type NodeJsBufferConstructor = Omit<Uint8ArrayConstructor, 'from'> & {
   alloc: (size: number) => NodeJsBuffer;
@@ -159,5 +160,9 @@ export const nodeJsByteUtils = {
     return nodeJsByteUtils.toLocalBufferType(buffer).write(source, byteOffset, undefined, 'utf8');
   },
 
-  randomBytes: nodejsRandomBytes
+  randomBytes: nodejsRandomBytes,
+
+  swap32(buffer: Uint8Array): NodeJsBuffer {
+    return nodeJsByteUtils.toLocalBufferType(buffer).swap32();
+  }
 };

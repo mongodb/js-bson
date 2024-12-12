@@ -195,5 +195,24 @@ export const webByteUtils = {
     return bytes.byteLength;
   },
 
-  randomBytes: webRandomBytes
+  randomBytes: webRandomBytes,
+
+  swap32(buffer: Uint8Array): Uint8Array {
+    if (buffer.length % 4 !== 0) {
+      throw new RangeError('Buffer size must be a multiple of 32-bits');
+    }
+
+    for (let i = 0; i < buffer.length; i += 4) {
+      const byte0 = buffer[i];
+      const byte1 = buffer[i + 1];
+      const byte2 = buffer[i + 2];
+      const byte3 = buffer[i + 3];
+      buffer[i] = byte3;
+      buffer[i + 1] = byte2;
+      buffer[i + 2] = byte1;
+      buffer[i + 3] = byte0;
+    }
+
+    return buffer;
+  }
 };

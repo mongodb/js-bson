@@ -13,6 +13,8 @@ const isBigEndian = FLOAT_BYTES[7] === 0;
  * A collection of functions that get or set various numeric types and bit widths from a Uint8Array.
  */
 export type NumberUtils = {
+  /** Is true if the current system is big endian. */
+  isBigEndian: boolean;
   /**
    * Parses a signed int32 at offset. Throws a `RangeError` if value is negative.
    */
@@ -35,6 +37,8 @@ export type NumberUtils = {
  * @public
  */
 export const NumberUtils: NumberUtils = {
+  isBigEndian,
+
   getNonnegativeInt32LE(source: Uint8Array, offset: number): number {
     if (source[offset + 3] > 127) {
       throw new RangeError(`Size cannot be negative at offset: ${offset}`);

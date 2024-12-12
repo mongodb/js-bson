@@ -34,6 +34,9 @@ function incrementPool(): void {
 // Unique sequence for the current process (initialized on first use)
 let PROCESS_UNIQUE: Uint8Array | null = null;
 
+/** ObjectId hexString cache @internal */
+const __idCache = new WeakMap(); // TODO(NODE-6549): convert this to #__id private field when target updated to ES2022
+
 /** @public */
 export interface ObjectIdLike {
   id: string | Uint8Array;
@@ -181,6 +184,10 @@ export class ObjectId extends BSONValue {
       } else if (typeof workingId === 'string') {
         if (ObjectId.validateHexString(workingId)) {
           pool.set(ByteUtils.fromHex(workingId), offset);
+          // If we are caching the hex string
+          if (ObjectId.cacheHexString) {
+            __idCache.set(this, workingId);
+          }
         } else {
           throw new BSONError(
             'input must be a 24 character hex string, 12 byte Uint8Array, or an integer'
@@ -190,10 +197,7 @@ export class ObjectId extends BSONValue {
         throw new BSONError('Argument passed in does not match the accepted types');
       }
     }
-    // If we are caching the hex string
-    if (ObjectId.cacheHexString) {
-      this.__id = ByteUtils.toHex(pool, offset, offset + 12);
-    }
+
     // Increment pool offset once we have completed initialization
     this.pool = pool;
     // Only set offset if pool is used
@@ -223,7 +227,7 @@ export class ObjectId extends BSONValue {
     }
     this.pool.set(value, this.offset);
     if (ObjectId.cacheHexString) {
-      this.__id = ByteUtils.toHex(value);
+      __idCache.set(this, ByteUtils.toHex(value));
     }
   }
 
@@ -252,15 +256,16 @@ export class ObjectId extends BSONValue {
 
   /** Returns the ObjectId id as a 24 lowercase character hex string representation */
   toHexString(): string {
-    if (ObjectId.cacheHexString && this.__id) {
-      return this.__id;
+    if (ObjectId.cacheHexString) {
+      const __id = __idCache.get(this);
+      if (__id) return __id;
     }
     const start = this.offset ?? 0;
 
     const hexString = ByteUtils.toHex(this.pool, start, start + 12);
 
-    if (ObjectId.cacheHexString && !this.__id) {
-      this.__id = hexString;
+    if (ObjectId.cacheHexString) {
+      __idCache.set(this, hexString);
     }
 
     return hexString;
@@ -488,6 +493,11 @@ export class ObjectId extends BSONValue {
   /** @internal */
   static fromExtendedJSON(doc: ObjectIdExtended): ObjectId {
     return new ObjectId(doc.$oid);
+  }
+
+  /** @internal */
+  private isCached(): boolean {
+    return ObjectId.cacheHexString && __idCache.has(this);
   }
 
   /**
