@@ -35,7 +35,7 @@ function incrementPool(): void {
 let PROCESS_UNIQUE: Uint8Array | null = null;
 
 /** ObjectId hexString cache @internal */
-const __idCache = new WeakMap(); // TODO(NODE-6549): convert this to #__id private field when target updated to ES2022
+const __idCache = new WeakMap<ObjectId, string>(); // TODO(NODE-6549): convert this to #__id private field when target updated to ES2022
 
 /** @public */
 export interface ObjectIdLike {

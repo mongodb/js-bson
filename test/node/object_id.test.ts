@@ -548,7 +548,6 @@ describe('ObjectId', function () {
       let equalId = { _bsontype: 'ObjectId', [oidKId]: oid.id };
 
       const propAccessRecord: string[] = [];
-
       equalId = new Proxy(equalId, {
         get(target, prop: string, recv) {
           if (prop !== '_bsontype') {
