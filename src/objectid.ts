@@ -43,8 +43,6 @@ let PROCESS_UNIQUE: Uint8Array | null = null;
 
 /** ObjectId hexString cache @internal */
 const __idCache = new WeakMap<ObjectId, string>(); // TODO(NODE-6549): convert this to #__id private field when target updated to ES2022
-const __pool = new WeakMap<ObjectId, Uint8Array>(); // TODO(NODE-6549): convert this to #pool private field when target updated to ES2022
-const __offset = new WeakMap<ObjectId, number>(); // TODO(NODE-6549): convert this to #offset private field when target updated to ES2022
 
 /** @public */
 export interface ObjectIdLike {
@@ -84,21 +82,8 @@ export class ObjectId extends BSONValue {
     ObjectIdPooling.poolSize = Math.max(Math.abs(Number(size)) >>> 0, 1);
   }
 
-  /** ObjectId buffer pool pointer @internal */
-  private get pool(): Uint8Array {
-    return __pool.get(this) as Uint8Array;
-  }
-  private set pool(value: Uint8Array) {
-    __pool.set(this, value);
-  }
-
-  /** Buffer pool offset @internal */
-  private get offset(): number | undefined {
-    return __offset.get(this);
-  }
-  private set offset(value: number) {
-    __offset.set(this, value);
-  }
+  private pool: Uint8Array;
+  private offset: number | undefined;
 
   /**
    * Create ObjectId from a number.

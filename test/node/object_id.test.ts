@@ -309,6 +309,12 @@ describe('ObjectId', function () {
       expect(obj2.id).to.not.equal(obj3.id);
       ObjectId.poolSize = oldPoolSize;
     });
+
+    it('two identical ObjectId values are not deep equal', function () {
+      const oid0 = new ObjectId('00'.repeat(12));
+      const oid1 = new ObjectId('00'.repeat(12));
+      expect(oid0).to.not.deep.equal(oid1);
+    });
   });
 
   describe('when poolSize is 1', function () {
@@ -342,6 +348,12 @@ describe('ObjectId', function () {
 
       expect(obj.id).to.not.equal(obj2.id);
       expect(obj2.id).to.not.equal(obj3.id);
+    });
+
+    it('two identical ObjectId values are deep equal', function () {
+      const oid0 = new ObjectId('00'.repeat(12));
+      const oid1 = new ObjectId('00'.repeat(12));
+      expect(oid0).to.deep.equal(oid1);
     });
   });
 
