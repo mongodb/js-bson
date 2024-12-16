@@ -25,23 +25,25 @@ describe('calculateSize()', () => {
     ).to.throw(BSONVersionError, /Unsupported BSON version/i);
   });
 
-  describe('bigint', function () {
+  describe('when given a bigint value with a single character key', function () {
     beforeEach(function () {
       if (BSON.__noBigInt__) {
         this.currentTest?.skip();
       }
     });
 
-    it('returns 8 bytes (+8 meta bytes) size for a bigint value', function () {
+    it('returns 8 bytes (+4 bytes for document size + 1 type byte + 1 byte for "a" + 2 null terminators)', function () {
       const doc = { a: BigInt(1) };
-      expect(BSON.calculateObjectSize(doc)).to.equal(16);
+      expect(BSON.calculateObjectSize(doc)).to.equal(8 + 4 + 1 + 1 + 1 + 1);
       expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
     });
   });
 
-  it('returns 0 bytes (+5 meta bytes) for a symbol value', function () {
-    const doc = { a: Symbol() };
-    expect(BSON.calculateObjectSize(doc)).to.equal(5);
-    expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+  describe('when given a symbol value with a single character key', function () {
+    it('returns 0 bytes (+4 bytes for document size + 1 null terminator)', function () {
+      const doc = { a: Symbol() };
+      expect(BSON.calculateObjectSize(doc)).to.equal(4 + 1);
+      expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+    });
   });
 });
