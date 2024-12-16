@@ -24,4 +24,10 @@ describe('calculateSize()', () => {
       })
     ).to.throw(BSONVersionError, /Unsupported BSON version/i);
   });
+
+  it('returns the correct size for a bigint value', function () {
+    const doc = { a: BigInt(1) };
+    expect(BSON.calculateObjectSize(doc)).to.equal(16);
+    expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+  });
 });

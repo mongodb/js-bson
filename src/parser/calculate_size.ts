@@ -205,6 +205,9 @@ function calculateElement(
           1
         );
       }
+      return 0;
+    case 'bigint':
+      return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (8 + 1);
   }
 
   return 0;
