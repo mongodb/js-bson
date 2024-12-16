@@ -32,7 +32,7 @@ describe('calculateSize()', () => {
       }
     });
 
-    it('returns 8 bytes (+7 meta bytes) size for a bigint value', function () {
+    it('returns 8 bytes (+8 meta bytes) size for a bigint value', function () {
       const doc = { a: BigInt(1) };
       expect(BSON.calculateObjectSize(doc)).to.equal(16);
       expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
