@@ -25,10 +25,18 @@ describe('calculateSize()', () => {
     ).to.throw(BSONVersionError, /Unsupported BSON version/i);
   });
 
-  it('returns 8 bytes (+7 meta bytes) size for a bigint value', function () {
-    const doc = { a: BigInt(1) };
-    expect(BSON.calculateObjectSize(doc)).to.equal(16);
-    expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+  describe('bigint', function () {
+    beforeEach(function () {
+      if (BSON.__noBigInt__) {
+        this.currentTest?.skip();
+      }
+    });
+
+    it('returns 8 bytes (+7 meta bytes) size for a bigint value', function () {
+      const doc = { a: BigInt(1) };
+      expect(BSON.calculateObjectSize(doc)).to.equal(16);
+      expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+    });
   });
 
   it('returns 0 bytes (+5 meta bytes) for a symbol value', function () {
