@@ -249,10 +249,10 @@ tasks:
         vars:
           # This needs to stay pinned at Node v18.16.0 for consistency across perf runs.
           NODE_LTS_VERSION: v18.16.0
-          NPM_VERSION: 9
+          NPM_VERSION: 10
       - func: install dependencies
         vars:
-          NPM_VERSION: 9
+          NPM_VERSION: 10
       - func: run granular benchmarks
         vars:
           WARMUP: 1000
@@ -266,10 +266,10 @@ tasks:
         vars:
           # This needs to stay pinned at Node v18.16.0 for consistency across perf runs.
           NODE_LTS_VERSION: v18.16.0
-          NPM_VERSION: 9
+          NPM_VERSION: 10
       - func: install dependencies
         vars:
-          NPM_VERSION: 9
+          NPM_VERSION: 10
       - func: run custom benchmarks
       - command: perf.send
         params:
@@ -283,7 +283,7 @@ tasks:
           NPM_VERSION: 10
       - func: install dependencies
         vars:
-          NPM_VERSION: 9
+          NPM_VERSION: 10
       - func: run spec benchmarks
       - command: perf.send
         params:
