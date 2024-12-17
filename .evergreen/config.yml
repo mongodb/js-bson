@@ -131,8 +131,10 @@ tasks:
       - func: fetch source
         vars:
           NODE_LTS_VERSION: 16
+          NPM_VERSION: 9
       - func: install dependencies
         vars:
+          NODE_LTS_VERSION: 16
           NPM_VERSION: 9
       - func: run tests
         vars:
@@ -143,6 +145,7 @@ tasks:
       - func: fetch source
         vars:
           NODE_LTS_VERSION: 18
+          NPM_VERSION: 10
       - func: install dependencies
       - func: run tests
         vars:
@@ -246,6 +249,7 @@ tasks:
         vars:
           # This needs to stay pinned at Node v18.16.0 for consistency across perf runs.
           NODE_LTS_VERSION: v18.16.0
+          NPM_VERSION: 9
       - func: install dependencies
         vars:
           NPM_VERSION: 9
@@ -262,6 +266,7 @@ tasks:
         vars:
           # This needs to stay pinned at Node v18.16.0 for consistency across perf runs.
           NODE_LTS_VERSION: v18.16.0
+          NPM_VERSION: 9
       - func: install dependencies
         vars:
           NPM_VERSION: 9
@@ -275,6 +280,7 @@ tasks:
         vars:
           # This needs to stay pinned at Node v18.16.0 for consistency across perf runs.
           NODE_LTS_VERSION: v18.16.0
+          NPM_VERSION: 9
       - func: install dependencies
         vars:
           NPM_VERSION: 9

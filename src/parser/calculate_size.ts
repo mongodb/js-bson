@@ -1,6 +1,6 @@
 import { Binary } from '../binary';
 import type { Document } from '../bson';
-import { BSONVersionError } from '../error';
+import { BSONError, BSONVersionError } from '../error';
 import * as constants from '../constants';
 import { ByteUtils } from '../utils/byte_utils';
 import { isAnyArrayBuffer, isDate, isRegExp } from './utils';
@@ -205,6 +205,13 @@ function calculateElement(
           1
         );
       }
+      return 0;
+    case 'bigint':
+      return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (8 + 1);
+    case 'symbol':
+      return 0;
+    default:
+      throw new BSONError(`Unrecognized JS type: ${typeof value}`);
   }
 
   return 0;
