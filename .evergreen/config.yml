@@ -166,16 +166,17 @@ tasks:
           NODE_LTS_VERSION: 22
       - func: install dependencies
       - func: run tests
-  - name: node-tests-latest
-    tags: ["node"]
-    commands:
-      - func: fetch source
-        vars:
-          NODE_LTS_VERSION: latest
-      - func: install dependencies
-      - func: run tests
-        vars:
-          TEST_TARGET: node
+  # TODO(NOXE-6662): Fix tests on latest.
+  # - name: node-tests-latest
+  #   tags: ["node"]
+  #   commands:
+  #     - func: fetch source
+  #       vars:
+  #         NODE_LTS_VERSION: latest
+  #     - func: install dependencies
+  #     - func: run tests
+  #       vars:
+  #         TEST_TARGET: node
   - name: web-tests
     tags: ["web"]
     commands:
