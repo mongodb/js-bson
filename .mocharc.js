@@ -6,6 +6,7 @@ if (Number(major) >= 23) {
   nodeOptions.push('no-experimental-strip-types');
 }
 
+/** @type {import("mocha").MochaOptions} */
 module.exports = {
   require: ['source-map-support/register', 'ts-node/register'],
   extension: ['js', 'ts'],
