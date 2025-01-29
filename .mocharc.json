@@ -14,6 +14,7 @@
   "sort": true,
   "color": true,
   "node-option": [
-    "experimental-vm-modules"
+    "experimental-vm-modules",
+    "no-experimental-strip-types"
   ]
 }
