@@ -726,8 +726,8 @@ export function serializeInto(
       if (done) continue;
 
       // Get the entry values
-      const key = entry.value[0];
-      let value = entry.value[1];
+      const key = entry.value ? entry.value[0] : undefined;
+      let value = entry.value ? entry.value[1] : undefined;
 
       if (typeof value?.toBSON === 'function') {
         value = value.toBSON();
