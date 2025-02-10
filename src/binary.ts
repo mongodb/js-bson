@@ -517,6 +517,12 @@ export function validateBinaryVector(vector: Binary): void {
     throw new BSONError('Invalid Vector: padding must be zero for int8 and float32 vectors');
   }
 
+  if (datatype === Binary.VECTOR_TYPE.Float32) {
+    if (size !== 0 && size - 2 !== 0 && (size - 2) % 4 !== 0) {
+      throw new BSONError('Invalid Vector: Float32 vector must contain a multiple of 4 bytes');
+    }
+  }
+
   if (datatype === Binary.VECTOR_TYPE.PackedBit && padding !== 0 && size === 2) {
     throw new BSONError(
       'Invalid Vector: padding must be zero for packed bit vectors that are empty'
