@@ -694,11 +694,11 @@ describe('ByteUtils', () => {
       });
     });
 
-    describe('nodejs es module environment dynamically imports crypto', function () {
+    describe('nodejs es module environment imports crypto', function () {
       let bsonImportedFromESMMod;
 
       beforeEach(async function () {
-        const { exports } = await loadESModuleBSON({});
+        const { exports } = await loadESModuleBSON();
         bsonImportedFromESMMod = exports;
       });
 
