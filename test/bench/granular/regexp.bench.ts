@@ -5,7 +5,8 @@ import {
   LIBRARY_SPEC,
   ITERATIONS,
   WARMUP,
-  BOOL
+  BOOL,
+  getTags
 } from './common';
 
 async function main() {
@@ -14,6 +15,7 @@ async function main() {
   const testDocs = await getTestDocs('regex');
 
   for (const documentPath of testDocs) {
+    const tags = getTags(documentPath);
     // deserialize
     for (const bsonRegExp of BOOL) {
       suite.task({
@@ -22,7 +24,8 @@ async function main() {
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation: 'deserialize',
-        options: { bsonRegExp }
+        options: { bsonRegExp },
+        tags
       });
     }
 
@@ -33,7 +36,8 @@ async function main() {
       iterations: ITERATIONS,
       warmup: WARMUP,
       operation: 'serialize',
-      options: {}
+      options: {},
+      tags
     });
   }
   await runSuiteAndWriteResults(suite);

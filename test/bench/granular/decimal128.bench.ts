@@ -5,7 +5,8 @@ import {
   OPERATIONS,
   ITERATIONS,
   LIBRARY_SPEC,
-  WARMUP
+  WARMUP,
+  getTags
 } from './common';
 
 const OPTIONS = {
@@ -21,15 +22,17 @@ const OPTIONS = {
 async function main() {
   const suite = new Suite('Decimal128');
   const testDocs = await getTestDocs('decimal128');
-  for (const operation of OPERATIONS) {
-    for (const documentPath of testDocs) {
+  for (const documentPath of testDocs) {
+    const tags = getTags(documentPath);
+    for (const operation of OPERATIONS) {
       suite.task({
         documentPath,
         library: LIBRARY_SPEC,
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation,
-        options: OPTIONS[operation]
+        options: OPTIONS[operation],
+        tags
       });
     }
   }
