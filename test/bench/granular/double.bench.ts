@@ -6,7 +6,7 @@ import {
   BOOL,
   ITERATIONS,
   WARMUP,
-  getTags
+  getTypeTestTags
 } from './common';
 
 const OPTIONS = {
@@ -21,7 +21,7 @@ async function main() {
   const testDocs = await getTestDocs('double');
 
   for (const documentPath of testDocs) {
-    const tags = getTags(documentPath);
+    const tags = getTypeTestTags(documentPath);
     // deserialize
     for (const promoteValues of BOOL) {
       suite.task({

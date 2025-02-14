@@ -6,7 +6,7 @@ import {
   ITERATIONS,
   LIBRARY_SPEC,
   WARMUP,
-  getTags
+  getTypeTestTags
 } from './common';
 
 const OPTIONS = {
@@ -23,7 +23,7 @@ async function main() {
   const suite = new Suite('Decimal128');
   const testDocs = await getTestDocs('decimal128');
   for (const documentPath of testDocs) {
-    const tags = getTags(documentPath);
+    const tags = getTypeTestTags(documentPath);
     for (const operation of OPERATIONS) {
       suite.task({
         documentPath,

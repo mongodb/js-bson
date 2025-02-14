@@ -6,7 +6,7 @@ import {
   ITERATIONS,
   WARMUP,
   BOOL,
-  getTags
+  getTypeTestTags
 } from './common';
 
 async function main() {
@@ -15,7 +15,7 @@ async function main() {
   const testDocs = await getTestDocs('regex');
 
   for (const documentPath of testDocs) {
-    const tags = getTags(documentPath);
+    const tags = getTypeTestTags(documentPath);
     // deserialize
     for (const bsonRegExp of BOOL) {
       suite.task({

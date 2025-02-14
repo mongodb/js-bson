@@ -6,7 +6,7 @@ import {
   OPERATIONS,
   ITERATIONS,
   WARMUP,
-  getTags
+  getTypeTestTags
 } from './common';
 
 const OPTIONS = {
@@ -21,7 +21,7 @@ async function main() {
   const testDocs = await getTestDocs('maxkey');
 
   for (const documentPath of testDocs) {
-    const tags = getTags(documentPath);
+    const tags = getTypeTestTags(documentPath);
     for (const operation of OPERATIONS) {
       suite.task({
         documentPath,
