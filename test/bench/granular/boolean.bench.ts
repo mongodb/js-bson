@@ -6,7 +6,7 @@ import {
   ITERATIONS,
   WARMUP,
   LIBRARY_SPEC,
-  getTags
+  getTypeTestTags
 } from './common';
 
 const OPTIONS = {
@@ -22,7 +22,7 @@ async function main() {
   const testDocs = await getTestDocs('boolean');
   // deserialize
   for (const documentPath of testDocs) {
-    const tags = getTags(documentPath);
+    const tags = getTypeTestTags(documentPath);
     for (const promoteValues of BOOL) {
       suite.task({
         documentPath,
@@ -38,7 +38,7 @@ async function main() {
 
   // serialize
   for (const documentPath of testDocs) {
-    const tags = getTags(documentPath);
+    const tags = getTypeTestTags(documentPath);
     suite.task({
       documentPath,
       library: LIBRARY_SPEC,

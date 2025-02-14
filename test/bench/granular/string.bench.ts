@@ -6,7 +6,7 @@ import {
   ITERATIONS,
   WARMUP,
   BOOL,
-  getTags
+  getTypeTestTags
 } from './common';
 
 async function main() {
@@ -16,7 +16,7 @@ async function main() {
 
   // deserialize
   for (const documentPath of testDocs) {
-    const tags = getTags(documentPath);
+    const tags = getTypeTestTags(documentPath);
     for (const utf8 of BOOL) {
       suite.task({
         documentPath,
@@ -31,7 +31,7 @@ async function main() {
   }
   // serialize
   for (const documentPath of testDocs) {
-    const tags = getTags(documentPath);
+    const tags = getTypeTestTags(documentPath);
     suite.task({
       documentPath,
       library: LIBRARY_SPEC,

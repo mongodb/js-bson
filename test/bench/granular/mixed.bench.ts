@@ -40,7 +40,8 @@ async function main() {
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation,
-        options: OPTIONS[operation]
+        options: OPTIONS[operation],
+        tags: ['mixed']
       });
     }
   }

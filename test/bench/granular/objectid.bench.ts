@@ -5,7 +5,8 @@ import {
   LIBRARY_SPEC,
   OPERATIONS,
   ITERATIONS,
-  WARMUP
+  WARMUP,
+  getTypeTestTags
 } from './common';
 
 async function main() {
@@ -13,7 +14,7 @@ async function main() {
   const testDocs = await getTestDocs('objectid');
 
   for (const documentPath of testDocs) {
-    const tags = getTags(documentPath);
+    const tags = getTypeTestTags(documentPath);
     for (const operation of OPERATIONS) {
       suite.task({
         documentPath,

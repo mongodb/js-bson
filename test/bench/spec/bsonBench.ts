@@ -1,68 +1,82 @@
 import { Suite } from 'dbx-js-tools/packages/bson-bench';
 import { join, resolve } from 'path';
 import { writeFile } from 'fs/promises';
-import { LIBRARY_SPEC } from '../granular/common';
+import { readEnvVars, ALERT_TAG } from '../granular/common';
 
 const suite = new Suite('bson micro benchmarks');
 const DOCUMENT_ROOT = resolve(`${__dirname}/../../documents`);
+const { library } = readEnvVars();
+const warmup = 0;
+const iterations = 1;
 // Add flat bson encoding
 suite.task({
   documentPath: join(DOCUMENT_ROOT, 'flat_bson.json'),
-  library: LIBRARY_SPEC,
-  warmup: 1000,
-  iterations: 10_000,
+  library,
+  warmup,
+  iterations,
   operation: 'serialize',
-  options: {}
+  options: {},
+  tags: [ALERT_TAG]
 });
 
 // Add flat bson decoding
 suite.task({
   documentPath: join(DOCUMENT_ROOT, 'flat_bson.json'),
-  library: LIBRARY_SPEC,
-  warmup: 1000,
-  iterations: 10_000,
+  library,
+  warmup,
+  iterations,
   operation: 'deserialize',
-  options: {}
+  options: {},
+  tags: [ALERT_TAG]
+
 });
 
 // Add deep bson encoding
 suite.task({
   documentPath: join(DOCUMENT_ROOT, 'deep_bson.json'),
-  library: LIBRARY_SPEC,
-  warmup: 1000,
-  iterations: 10_000,
+  library,
+  warmup,
+  iterations,
   operation: 'serialize',
-  options: {}
+  options: {},
+  tags: [ALERT_TAG]
+
 });
 
 // Add deep bson decoding
 suite.task({
   documentPath: join(DOCUMENT_ROOT, 'deep_bson.json'),
-  library: LIBRARY_SPEC,
-  warmup: 1000,
-  iterations: 10_000,
+  library,
+  warmup,
+  iterations,
   operation: 'deserialize',
-  options: {}
+  options: {},
+  tags: [ALERT_TAG]
+
 });
 
 // Add full bson encoding
 suite.task({
   documentPath: join(DOCUMENT_ROOT, 'full_bson.json'),
-  library: LIBRARY_SPEC,
-  warmup: 1000,
-  iterations: 10_000,
+  library,
+  warmup,
+  iterations,
   operation: 'serialize',
-  options: {}
+  options: {},
+  tags: [ALERT_TAG]
+
 });
 
 // Add full bson decoding
 suite.task({
   documentPath: join(DOCUMENT_ROOT, 'full_bson.json'),
-  library: LIBRARY_SPEC,
-  warmup: 1000,
-  iterations: 10_000,
+  library,
+  warmup,
+  iterations,
   operation: 'deserialize',
-  options: {}
+  options: {},
+  tags: [ALERT_TAG]
+
 });
 
 suite.run().then(

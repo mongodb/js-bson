@@ -6,7 +6,7 @@ import {
   ITERATIONS,
   LIBRARY_SPEC,
   WARMUP,
-  getTags
+  getTypeTestTags
 } from './common';
 
 async function main() {
@@ -14,7 +14,7 @@ async function main() {
   const testDocs = await getTestDocs('binary');
   // deserialize
   for (const documentPath of testDocs) {
-    const tags = getTags(documentPath);
+    const tags = getTypeTestTags(documentPath);
     for (const promoteBuffers of BOOL) {
       suite.task({
         documentPath,

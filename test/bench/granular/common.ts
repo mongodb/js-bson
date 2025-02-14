@@ -26,25 +26,36 @@ export async function getTestDocs(type: string) {
 }
 
 const ALERTING_DOCS = new Set([
-  'objectid_array_1000',
-  'double_array_1000',
-  'int32_array_1000',
-  'long_array_1000',
-  'string_array_1000',
-  'binary_array_1000'
+  'objectid_array_1000.json',
+  'double_array_1000.json',
+  'int32_array_1000.json',
+  'long_array_1000.json',
+  'string_array_1000.json',
+  'binary_array_1000.json',
+  'bestbuy_medium.json'
 ]);
 
 export const ALERT_TAG = 'alerting-benchmark';
 
-export function getTags(documentPath: string) {
-  const stem = path.basename(documentPath).split('.')[0];
-  const type = stem.split('_')[0];
+export function getTypeTestTags(documentPath: string) {
+  const basename = path.basename(documentPath).split('.')[0];
+  const type = basename.split('_')[0];
 
-  if (ALERTING_DOCS.has(stem)) {
+  if (ALERTING_DOCS.has(basename)) {
     return [type, ALERT_TAG];
   } else {
     return [type];
   }
+}
+
+export function getMixedTestTags(documentPath: string) {
+  const basename = path.basename(documentPath).split('.')[0];
+
+  if (ALERTING_DOCS.has(basename)) {
+    return ['mixed', ALERT_TAG];
+  }
+
+  return ['mixed'];
 }
 
 
