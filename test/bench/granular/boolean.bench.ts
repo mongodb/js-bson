@@ -5,7 +5,8 @@ import {
   BOOL,
   ITERATIONS,
   WARMUP,
-  LIBRARY_SPEC
+  LIBRARY_SPEC,
+  getTags
 } from './common';
 
 const OPTIONS = {
@@ -21,6 +22,7 @@ async function main() {
   const testDocs = await getTestDocs('boolean');
   // deserialize
   for (const documentPath of testDocs) {
+    const tags = getTags(documentPath);
     for (const promoteValues of BOOL) {
       suite.task({
         documentPath,
@@ -28,20 +30,23 @@ async function main() {
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation: 'deserialize',
-        options: { ...OPTIONS.deserialize, promoteValues }
+        options: { ...OPTIONS.deserialize, promoteValues },
+        tags
       });
     }
   }
 
   // serialize
   for (const documentPath of testDocs) {
+    const tags = getTags(documentPath);
     suite.task({
       documentPath,
       library: LIBRARY_SPEC,
       iterations: ITERATIONS,
       warmup: WARMUP,
       operation: 'deserialize',
-      options: OPTIONS.serialize
+      options: OPTIONS.serialize,
+        tags
     });
   }
   await runSuiteAndWriteResults(suite);

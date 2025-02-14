@@ -25,6 +25,29 @@ export async function getTestDocs(type: string) {
   return docs;
 }
 
+const ALERTING_DOCS = new Set([
+  'objectid_array_1000',
+  'double_array_1000',
+  'int32_array_1000',
+  'long_array_1000',
+  'string_array_1000',
+  'binary_array_1000'
+]);
+
+export const ALERT_TAG = 'alerting-benchmark';
+
+export function getTags(documentPath: string) {
+  const stem = path.basename(documentPath).split('.')[0];
+  const type = stem.split('_')[0];
+
+  if (ALERTING_DOCS.has(stem)) {
+    return [type, ALERT_TAG];
+  } else {
+    return [type];
+  }
+}
+
+
 export async function runSuiteAndWriteResults(suite: Suite) {
   const targetDirectory = path.resolve(`${__dirname}/../../etc`);
   await suite.run();
@@ -47,6 +70,7 @@ export function readEnvVars(): { warmup: number; iterations: number; library: st
 
   return rv;
 }
+
 
 const envVars = readEnvVars();
 export const ITERATIONS = envVars.iterations;

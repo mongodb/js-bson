@@ -5,7 +5,8 @@ import {
   BOOL,
   ITERATIONS,
   LIBRARY_SPEC,
-  WARMUP
+  WARMUP,
+  getTags
 } from './common';
 
 async function main() {
@@ -13,6 +14,7 @@ async function main() {
   const testDocs = await getTestDocs('binary');
   // deserialize
   for (const documentPath of testDocs) {
+    const tags = getTags(documentPath);
     for (const promoteBuffers of BOOL) {
       suite.task({
         documentPath,
@@ -22,7 +24,8 @@ async function main() {
         operation: 'deserialize',
         options: {
           promoteBuffers
-        }
+        },
+        tags
       });
     }
 
@@ -33,7 +36,8 @@ async function main() {
       iterations: ITERATIONS,
       warmup: WARMUP,
       operation: 'serialize',
-      options: { checkKeys: true, ignoreUndefined: false }
+      options: { checkKeys: true, ignoreUndefined: false },
+        tags
     });
   }
   await runSuiteAndWriteResults(suite);

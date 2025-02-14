@@ -5,22 +5,25 @@ import {
   LIBRARY_SPEC,
   OPERATIONS,
   ITERATIONS,
-  WARMUP
+  WARMUP,
+  getTags
 } from './common';
 
 async function main() {
   const suite = new Suite('Timestamp');
   const testDocs = await getTestDocs('timestamp');
 
-  for (const operation of OPERATIONS) {
-    for (const documentPath of testDocs) {
+  for (const documentPath of testDocs) {
+    const tags = getTags(documentPath);
+    for (const operation of OPERATIONS) {
       suite.task({
         documentPath,
         library: LIBRARY_SPEC,
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation,
-        options: {}
+        options: {},
+        tags
       });
     }
   }

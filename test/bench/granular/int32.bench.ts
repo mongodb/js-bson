@@ -23,6 +23,7 @@ async function main() {
   const suite = new Suite('Int32');
   const testDocs = await getTestDocs('int32');
   for (const documentPath of testDocs) {
+    const tags = getTags(documentPath);
     // deserialize
     for (const promoteValues of BOOL) {
       suite.task({
@@ -31,7 +32,8 @@ async function main() {
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation: 'deserialize',
-        options: { ...OPTIONS.deserialize, promoteValues }
+        options: { ...OPTIONS.deserialize, promoteValues },
+        tags
       });
     }
     //serialize
@@ -41,7 +43,8 @@ async function main() {
       iterations: ITERATIONS,
       warmup: WARMUP,
       operation: 'serialize',
-      options: OPTIONS.serialize
+      options: OPTIONS.serialize,
+      tags
     });
   }
   await runSuiteAndWriteResults(suite);
