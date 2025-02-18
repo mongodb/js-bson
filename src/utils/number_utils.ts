@@ -87,11 +87,12 @@ export const NumberUtils: NumberUtils = {
     const hi = NumberUtils.getUint32LE(source, offset + 4);
 
     /*
-      eslint-disable-next-line no-restricted-globals
+      eslint-disable no-restricted-globals
       -- This is allowed since this helper should not be called unless bigint features are enabled
      */
     const intermediate = (BigInt(hi) << BigInt(32)) + BigInt(lo);
     return BigInt.asIntN(64, intermediate);
+    /* eslint-enable no-restricted-globals */
   },
 
   /** Reads a little-endian 64-bit float from source */
