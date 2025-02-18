@@ -90,7 +90,8 @@ export const NumberUtils: NumberUtils = {
       eslint-disable-next-line no-restricted-globals
       -- This is allowed since this helper should not be called unless bigint features are enabled
      */
-    return (BigInt(hi) << BigInt(32)) + BigInt(lo);
+    const intermediate = (BigInt(hi) << BigInt(32)) + BigInt(lo);
+    return BigInt.asIntN(64, intermediate);
   },
 
   /** Reads a little-endian 64-bit float from source */
