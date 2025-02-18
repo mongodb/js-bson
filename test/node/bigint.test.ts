@@ -10,20 +10,6 @@ describe('BSON BigInt support', function () {
     }
   });
 
-  describe('BSON roundtripping', function () {
-    const numbers = [-(2n ** 63n), -1n, 0n, 1n, 2n ** 63n - 1n];
-
-    for (const number of numbers) {
-      it(`correctly roundtrips ${number}`, function () {
-        const inputDoc = { number };
-        const serializedDoc = BSON.serialize(inputDoc);
-        const outputDoc = BSON.deserialize(serializedDoc, { useBigInt64: true });
-
-        expect(outputDoc).to.deep.equal(inputDoc);
-      });
-    }
-  });
-
   describe('BSON.deserialize()', function () {
     type DeserialzationOptions = {
       useBigInt64: boolean | undefined;
@@ -119,6 +105,39 @@ describe('BSON BigInt support', function () {
 
       it(description, test);
     }
+
+    describe('edge case tests', function () {
+      const tests = [
+        {
+          expectedResult: { a: -(2n ** 63n) },
+          input: Buffer.from('10000000126100000000000000008000', 'hex')
+        },
+        {
+          expectedResult: { a: -1n },
+          input: Buffer.from('10000000126100FFFFFFFFFFFFFFFF00', 'hex')
+        },
+        {
+          expectedResult: { a: 0n },
+          input: Buffer.from('10000000126100000000000000000000', 'hex')
+        },
+        {
+          expectedResult: { a: 1n },
+          input: Buffer.from('10000000126100010000000000000000', 'hex')
+        },
+        {
+          expectedResult: { a: 2n ** 63n - 1n },
+          input: Buffer.from('10000000126100FFFFFFFFFFFFFF7F00', 'hex')
+        }
+      ];
+
+      for (const test of tests) {
+        it(`correctly deserializes the bson document encoded in ${test.input.toString('hex')}`, function () {
+          expect(BSON.deserialize(test.input, { useBigInt64: true })).to.deep.equal(
+            test.expectedResult
+          );
+        });
+      }
+    });
   });
 
   describe('BSON.serialize()', function () {
