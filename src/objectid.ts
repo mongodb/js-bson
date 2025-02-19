@@ -4,6 +4,33 @@ import { type InspectFn, defaultInspect } from './parser/utils';
 import { ByteUtils } from './utils/byte_utils';
 import { NumberUtils } from './utils/number_utils';
 
+// Settings for ObjectId Buffer pool
+// Disable pool by default in order to ensure compatibility
+// Specify larger poolSize to enable pool
+let currentPool: Uint8Array | null = null;
+let poolSize = 1; // Disable pool by default.
+let currentPoolOffset = 0;
+
+/**
+ * Retrieves a ObjectId pool and offset. This function may create a new ObjectId buffer pool and reset the pool offset
+ * @internal
+ */
+function getPool(): [Uint8Array, number] {
+  if (!currentPool || currentPoolOffset + 12 > currentPool.length) {
+    currentPool = ByteUtils.allocateUnsafe(poolSize * 12);
+    currentPoolOffset = 0;
+  }
+  return [currentPool, currentPoolOffset];
+}
+
+/**
+ * Increments the pool offset by 12 bytes
+ * @internal
+ */
+function incrementPool(): void {
+  currentPoolOffset += 12;
+}
+
 // Unique sequence for the current process (initialized on first use)
 let PROCESS_UNIQUE: Uint8Array | null = null;
 
@@ -37,8 +64,24 @@ export class ObjectId extends BSONValue {
 
   static cacheHexString: boolean;
 
-  /** ObjectId Bytes @internal */
-  private buffer!: Uint8Array;
+  /**
+   * The size of the current ObjectId buffer pool.
+   */
+  static get poolSize(): number {
+    return poolSize;
+  }
+
+  static set poolSize(size: number) {
+    poolSize = Math.max(Math.abs(Number(size)) >>> 0, 1);
+  }
+
+  /** ObjectId buffer pool pointer @internal */
+  private pool: Uint8Array;
+  /** Buffer pool offset @internal */
+  private offset?: number;
+
+  /** ObjectId hexString cache @internal */
+  private __id?: string;
 
   /**
    * Create ObjectId from a number.
@@ -71,6 +114,13 @@ export class ObjectId extends BSONValue {
    * @param inputId - A 12 byte binary Buffer.
    */
   constructor(inputId: Uint8Array);
+  /**
+   * Create ObjectId from a large binary Buffer. Only 12 bytes starting from the offset are used.
+   * @internal
+   * @param inputId - A 12 byte binary Buffer.
+   * @param inputIndex - The offset to start reading the inputId buffer.
+   */
+  constructor(inputId: Uint8Array, inputIndex?: number);
   /** To generate a new ObjectId, use ObjectId() with no argument. */
   constructor();
   /**
@@ -84,7 +134,10 @@ export class ObjectId extends BSONValue {
    *
    * @param inputId - An input value to create a new ObjectId from.
    */
-  constructor(inputId?: string | number | ObjectId | ObjectIdLike | Uint8Array) {
+  constructor(
+    inputId?: string | number | ObjectId | ObjectIdLike | Uint8Array,
+    inputIndex?: number
+  ) {
     super();
     // workingId is set based on type of input and whether valid id exists for the input
     let workingId;
@@ -101,29 +154,62 @@ export class ObjectId extends BSONValue {
       workingId = inputId;
     }
 
-    // The following cases use workingId to construct an ObjectId
-    if (workingId == null || typeof workingId === 'number') {
-      // The most common use case (blank id, new objectId instance)
-      // Generate a new id
-      this.buffer = ObjectId.generate(typeof workingId === 'number' ? workingId : undefined);
-    } else if (ArrayBuffer.isView(workingId) && workingId.byteLength === 12) {
-      // If intstanceof matches we can escape calling ensure buffer in Node.js environments
-      this.buffer = ByteUtils.toLocalBufferType(workingId);
-    } else if (typeof workingId === 'string') {
-      if (ObjectId.validateHexString(workingId)) {
-        this.buffer = ByteUtils.fromHex(workingId);
-        // If we are caching the hex string
-        if (ObjectId.cacheHexString) {
-          __idCache.set(this, workingId);
+    let pool: Uint8Array;
+    let offset: number;
+
+    // Special case when poolSize === 1 and a 12 byte buffer is passed in - just persist buffer
+    if (poolSize === 1 && ArrayBuffer.isView(workingId) && workingId.length === 12) {
+      pool = ByteUtils.toLocalBufferType(workingId);
+      offset = 0;
+    } else {
+      [pool, offset] = getPool();
+
+      // The following cases use workingId to construct an ObjectId
+      if (workingId == null || typeof workingId === 'number') {
+        // The most common use case (blank id, new objectId instance)
+        // Generate a new id
+        ObjectId.generate(typeof workingId === 'number' ? workingId : undefined, pool, offset);
+      } else if (ArrayBuffer.isView(workingId)) {
+        if (workingId.length === 12) {
+          inputIndex = 0;
+        } else if (
+          typeof inputIndex !== 'number' ||
+          inputIndex < 0 ||
+          workingId.length < inputIndex + 12 ||
+          isNaN(inputIndex)
+        ) {
+          throw new BSONError('Buffer length must be 12 or a valid offset must be specified');
+        }
+        for (let i = 0; i < 12; i++) pool[offset + i] = workingId[inputIndex + i];
+      } else if (typeof workingId === 'string') {
+        if (ObjectId.validateHexString(workingId)) {
+          pool.set(ByteUtils.fromHex(workingId), offset);
+          // If we are caching the hex string
+          if (ObjectId.cacheHexString) {
+            __idCache.set(this, workingId);
+          }
+        } else {
+          throw new BSONError(
+            'input must be a 24 character hex string, 12 byte Uint8Array, or an integer'
+          );
         }
       } else {
-        throw new BSONError(
-          'input must be a 24 character hex string, 12 byte Uint8Array, or an integer'
-        );
+        throw new BSONError('Argument passed in does not match the accepted types');
       }
-    } else {
-      throw new BSONError('Argument passed in does not match the accepted types');
     }
+
+    // Increment pool offset once we have completed initialization
+    this.pool = pool;
+    // Only set offset if pool is used
+    if (poolSize > 1) {
+      this.offset = offset;
+    }
+    incrementPool();
+  }
+
+  /** ObjectId bytes @internal */
+  get buffer(): Uint8Array {
+    return this.id;
   }
 
   /**
@@ -131,11 +217,15 @@ export class ObjectId extends BSONValue {
    * @readonly
    */
   get id(): Uint8Array {
-    return this.buffer;
+    if (this.offset === undefined) return this.pool;
+    return this.pool.subarray(this.offset, this.offset + 12);
   }
 
   set id(value: Uint8Array) {
-    this.buffer = value;
+    if (value.byteLength !== 12) {
+      throw new BSONError('input must be a 12 byte Uint8Array');
+    }
+    this.pool.set(value, this.offset);
     if (ObjectId.cacheHexString) {
       __idCache.set(this, ByteUtils.toHex(value));
     }
@@ -170,8 +260,9 @@ export class ObjectId extends BSONValue {
       const __id = __idCache.get(this);
       if (__id) return __id;
     }
+    const start = this.offset ?? 0;
 
-    const hexString = ByteUtils.toHex(this.id);
+    const hexString = ByteUtils.toHex(this.pool, start, start + 12);
 
     if (ObjectId.cacheHexString) {
       __idCache.set(this, hexString);
@@ -193,16 +284,35 @@ export class ObjectId extends BSONValue {
    *
    * @param time - pass in a second based timestamp.
    */
-  static generate(time?: number): Uint8Array {
+  static generate(time?: number): Uint8Array;
+  /**
+   * Generate a 12 byte id buffer used in ObjectId's and write to the provided buffer at offset.
+   * @internal
+   *
+   * @param time - pass in a second based timestamp.
+   * @param buffer - Optionally pass in a buffer instance.
+   * @param offset - Optionally pass in a buffer offset.
+   */
+  static generate(time?: number, buffer?: Uint8Array, offset?: number): Uint8Array;
+  /**
+   * Generate a 12 byte id buffer used in ObjectId's
+   *
+   * @param time - pass in a second based timestamp.
+   * @param buffer - Optionally pass in a buffer instance.
+   * @param offset - Optionally pass in a buffer offset.
+   */
+  static generate(time?: number, buffer?: Uint8Array, offset: number = 0): Uint8Array {
     if ('number' !== typeof time) {
       time = Math.floor(Date.now() / 1000);
     }
 
     const inc = ObjectId.getInc();
-    const buffer = ByteUtils.allocateUnsafe(12);
+    if (!buffer) {
+      buffer = ByteUtils.allocateUnsafe(12);
+    }
 
     // 4-byte timestamp
-    NumberUtils.setInt32BE(buffer, 0, time);
+    NumberUtils.setInt32BE(buffer, offset, time);
 
     // set PROCESS_UNIQUE if yet not initialized
     if (PROCESS_UNIQUE === null) {
@@ -210,16 +320,16 @@ export class ObjectId extends BSONValue {
     }
 
     // 5-byte process unique
-    buffer[4] = PROCESS_UNIQUE[0];
-    buffer[5] = PROCESS_UNIQUE[1];
-    buffer[6] = PROCESS_UNIQUE[2];
-    buffer[7] = PROCESS_UNIQUE[3];
-    buffer[8] = PROCESS_UNIQUE[4];
+    buffer[offset + 4] = PROCESS_UNIQUE[0];
+    buffer[offset + 5] = PROCESS_UNIQUE[1];
+    buffer[offset + 6] = PROCESS_UNIQUE[2];
+    buffer[offset + 7] = PROCESS_UNIQUE[3];
+    buffer[offset + 8] = PROCESS_UNIQUE[4];
 
     // 3-byte counter
-    buffer[11] = inc & 0xff;
-    buffer[10] = (inc >> 8) & 0xff;
-    buffer[9] = (inc >> 16) & 0xff;
+    buffer[offset + 11] = inc & 0xff;
+    buffer[offset + 10] = (inc >> 8) & 0xff;
+    buffer[offset + 9] = (inc >> 16) & 0xff;
 
     return buffer;
   }
@@ -261,6 +371,17 @@ export class ObjectId extends BSONValue {
     }
 
     if (ObjectId.is(otherId)) {
+      if (otherId.pool) {
+        for (let i = 11; i >= 0; i--) {
+          const offset = this.offset ?? 0;
+          const otherOffset = otherId.offset ?? 0;
+          if (this.pool[offset + i] !== otherId.pool[otherOffset + i]) {
+            return false;
+          }
+        }
+        return true;
+      }
+      // If otherId does not have pool and offset, fallback to buffer comparison for compatibility
       return (
         this.buffer[11] === otherId.buffer[11] && ByteUtils.equals(this.buffer, otherId.buffer)
       );
@@ -282,7 +403,7 @@ export class ObjectId extends BSONValue {
   /** Returns the generation date (accurate up to the second) that this ID was generated. */
   getTimestamp(): Date {
     const timestamp = new Date();
-    const time = NumberUtils.getUint32BE(this.buffer, 0);
+    const time = NumberUtils.getUint32BE(this.pool, this.offset ?? 0);
     timestamp.setTime(Math.floor(time) * 1000);
     return timestamp;
   }
@@ -294,18 +415,20 @@ export class ObjectId extends BSONValue {
 
   /** @internal */
   serializeInto(uint8array: Uint8Array, index: number): 12 {
-    uint8array[index] = this.buffer[0];
-    uint8array[index + 1] = this.buffer[1];
-    uint8array[index + 2] = this.buffer[2];
-    uint8array[index + 3] = this.buffer[3];
-    uint8array[index + 4] = this.buffer[4];
-    uint8array[index + 5] = this.buffer[5];
-    uint8array[index + 6] = this.buffer[6];
-    uint8array[index + 7] = this.buffer[7];
-    uint8array[index + 8] = this.buffer[8];
-    uint8array[index + 9] = this.buffer[9];
-    uint8array[index + 10] = this.buffer[10];
-    uint8array[index + 11] = this.buffer[11];
+    const pool = this.pool;
+    const offset = this.offset ?? 0;
+    uint8array[index] = pool[offset];
+    uint8array[index + 1] = pool[offset + 1];
+    uint8array[index + 2] = pool[offset + 2];
+    uint8array[index + 3] = pool[offset + 3];
+    uint8array[index + 4] = pool[offset + 4];
+    uint8array[index + 5] = pool[offset + 5];
+    uint8array[index + 6] = pool[offset + 6];
+    uint8array[index + 7] = pool[offset + 7];
+    uint8array[index + 8] = pool[offset + 8];
+    uint8array[index + 9] = pool[offset + 9];
+    uint8array[index + 10] = pool[offset + 10];
+    uint8array[index + 11] = pool[offset + 11];
     return 12;
   }
 
@@ -315,7 +438,7 @@ export class ObjectId extends BSONValue {
    * @param time - an integer number representing a number of seconds.
    */
   static createFromTime(time: number): ObjectId {
-    const buffer = ByteUtils.allocate(12);
+    const buffer = ByteUtils.allocateUnsafe(12);
     for (let i = 11; i >= 4; i--) buffer[i] = 0;
     // Encode time into first 4 bytes
     NumberUtils.setInt32BE(buffer, 0, time);
