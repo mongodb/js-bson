@@ -112,7 +112,7 @@
     "build:bundle": "rollup -c rollup.config.mjs",
     "build": "npm run build:dts && npm run build:bundle",
     "check:lint": "ESLINT_USE_FLAT_CONFIG=false eslint -v && ESLINT_USE_FLAT_CONFIG=false eslint --ext '.js,.ts' --max-warnings=0 src test && npm run build:dts && npm run check:tsd",
-    "format": "eslint --ext '.js,.ts' src test --fix",
+    "format": "ESLINT_USE_FLAT_CONFIG=false eslint --ext '.js,.ts' src test --fix",
     "check:coverage": "nyc --check-coverage npm run check:node",
     "prepare": "node etc/prepare.js",
     "release": "standard-version -i HISTORY.md"
