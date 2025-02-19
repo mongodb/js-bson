@@ -83,14 +83,23 @@ export const NumberUtils: NumberUtils = {
 
   /** Reads a little-endian 64-bit integer from source */
   getBigInt64LE(source: Uint8Array, offset: number): bigint {
-    const lo = NumberUtils.getUint32LE(source, offset);
-    const hi = NumberUtils.getUint32LE(source, offset + 4);
+    // eslint-disable-next-line no-restricted-globals
+    const hi = BigInt(
+      source[offset + 4] +
+        source[offset + 5] * 256 +
+        source[offset + 6] * 65536 +
+        (source[offset + 7] << 24)
+    ); // Overflow
 
-    /*
-      eslint-disable-next-line no-restricted-globals
-      -- This is allowed since this helper should not be called unless bigint features are enabled
-     */
-    return (BigInt(hi) << BigInt(32)) + BigInt(lo);
+    // eslint-disable-next-line no-restricted-globals
+    const lo = BigInt(
+      source[offset] +
+        source[offset + 1] * 256 +
+        source[offset + 2] * 65536 +
+        source[offset + 3] * 16777216
+    );
+    // eslint-disable-next-line no-restricted-globals
+    return (hi << BigInt(32)) + lo;
   },
 
   /** Reads a little-endian 64-bit float from source */

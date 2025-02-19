@@ -105,6 +105,46 @@ describe('BSON BigInt support', function () {
 
       it(description, test);
     }
+
+    it('correctly deserializes min 64 bit int (-2n**63n)', function () {
+      expect(
+        BSON.deserialize(Buffer.from('10000000126100000000000000008000', 'hex'), {
+          useBigInt64: true
+        })
+      ).to.deep.equal({ a: -(2n ** 63n) });
+    });
+
+    it('correctly deserializes -1n', function () {
+      expect(
+        BSON.deserialize(Buffer.from('10000000126100FFFFFFFFFFFFFFFF00', 'hex'), {
+          useBigInt64: true
+        })
+      ).to.deep.equal({ a: -1n });
+    });
+
+    it('correctly deserializes 0n', function () {
+      expect(
+        BSON.deserialize(Buffer.from('10000000126100000000000000000000', 'hex'), {
+          useBigInt64: true
+        })
+      ).to.deep.equal({ a: 0n });
+    });
+
+    it('correctly deserializes 1n', function () {
+      expect(
+        BSON.deserialize(Buffer.from('10000000126100010000000000000000', 'hex'), {
+          useBigInt64: true
+        })
+      ).to.deep.equal({ a: 1n });
+    });
+
+    it('correctly deserializes max 64 bit int (2n**63n -1n)', function () {
+      expect(
+        BSON.deserialize(Buffer.from('10000000126100FFFFFFFFFFFFFF7F00', 'hex'), {
+          useBigInt64: true
+        })
+      ).to.deep.equal({ a: 2n ** 63n - 1n });
+    });
   });
 
   describe('BSON.serialize()', function () {
