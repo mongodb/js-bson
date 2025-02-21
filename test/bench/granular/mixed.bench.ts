@@ -31,6 +31,7 @@ async function main() {
 
   const suite = new Suite('Mixed Documents');
 
+  // TODO:
   for (const operation of OPERATIONS) {
     for (const documentPath of mixedDocuments) {
       suite.task({
@@ -39,7 +40,8 @@ async function main() {
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation,
-        options: OPTIONS[operation]
+        options: OPTIONS[operation],
+        tags: ['mixed']
       });
     }
   }
