@@ -28,7 +28,6 @@ suite.task({
   operation: 'deserialize',
   options: {},
   tags: [ALERT_TAG]
-
 });
 
 // Add deep bson encoding
@@ -40,7 +39,6 @@ suite.task({
   operation: 'serialize',
   options: {},
   tags: [ALERT_TAG]
-
 });
 
 // Add deep bson decoding
@@ -52,7 +50,6 @@ suite.task({
   operation: 'deserialize',
   options: {},
   tags: [ALERT_TAG]
-
 });
 
 // Add full bson encoding
@@ -64,7 +61,6 @@ suite.task({
   operation: 'serialize',
   options: {},
   tags: [ALERT_TAG]
-
 });
 
 // Add full bson decoding
@@ -76,7 +72,6 @@ suite.task({
   operation: 'deserialize',
   options: {},
   tags: [ALERT_TAG]
-
 });
 
 suite.run().then(

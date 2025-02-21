@@ -46,7 +46,7 @@ async function main() {
       warmup: WARMUP,
       operation: 'deserialize',
       options: OPTIONS.serialize,
-        tags
+      tags
     });
   }
   await runSuiteAndWriteResults(suite);

@@ -58,7 +58,6 @@ export function getMixedTestTags(documentPath: string) {
   return ['mixed'];
 }
 
-
 export async function runSuiteAndWriteResults(suite: Suite) {
   const targetDirectory = path.resolve(`${__dirname}/../../etc`);
   await suite.run();
@@ -81,7 +80,6 @@ export function readEnvVars(): { warmup: number; iterations: number; library: st
 
   return rv;
 }
-
 
 const envVars = readEnvVars();
 export const ITERATIONS = envVars.iterations;

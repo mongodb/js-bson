@@ -37,7 +37,7 @@ async function main() {
       warmup: WARMUP,
       operation: 'serialize',
       options: { checkKeys: true, ignoreUndefined: false },
-        tags
+      tags
     });
   }
   await runSuiteAndWriteResults(suite);
