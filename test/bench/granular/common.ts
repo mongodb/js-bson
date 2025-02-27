@@ -38,7 +38,7 @@ const ALERTING_DOCS = new Set([
 export const ALERT_TAG = 'alerting-benchmark';
 
 export function getTypeTestTags(documentPath: string) {
-  const basename = path.basename(documentPath).split('.')[0];
+  const basename = path.basename(documentPath);
   const type = basename.split('_')[0];
 
   if (ALERTING_DOCS.has(basename)) {
