@@ -1,6 +1,6 @@
 'use strict';
 const fs = require('fs');
-const { sep } = require('path');
+const { join } = require('path');
 const benchmark = require('benchmark');
 
 const stableRegionMean = 42.82;
@@ -55,6 +55,9 @@ new benchmark.Suite()
     }
 
     console.log(data);
-    fs.writeFileSync(`${__dirname}${sep}cpuBaseline.json`, JSON.stringify(data));
+    const path = join(__dirname, 'cpuBaseline.json');
+    fs.writeFileSync(path, JSON.stringify(data));
+
+    console.log('Wrote to ', path);
   })
   .run();

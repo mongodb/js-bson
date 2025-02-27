@@ -3,8 +3,12 @@
 import util from 'node:util';
 import fs from 'node:fs';
 import os from 'node:os';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import benchmark from 'benchmark';
 import { suites } from './benchmarks.mjs';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const hw = os.cpus();
 const ram = os.totalmem() / 1024 ** 3;
@@ -39,8 +43,8 @@ function completeSuite() {
     let cpuBaselineResults;
     try {
       cpuBaselineResults = JSON.parse(fs.readFileSync(`${__dirname}/../etc/cpuBaseline.json`));
-    } catch {
-      throw new Error("Couldn't find baseline results");
+    } catch (cause) {
+      throw new Error("Couldn't find baseline results", { cause });
     }
 
     const cpuBaselineResult = cpuBaselineResults.hz;

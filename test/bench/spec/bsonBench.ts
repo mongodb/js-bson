@@ -9,7 +9,7 @@ type Metadata = {
 const suite = new Suite('bson micro benchmarks');
 const DOCUMENT_ROOT = resolve(`${__dirname}/../../documents`);
 const { library } = readEnvVars();
-const warmup = 0;
+const warmup = 1;
 const iterations = 1;
 // Add flat bson encoding
 suite.task({
@@ -80,7 +80,7 @@ suite.task({
 suite
   .run()
   .then(() => {
-    return readFile(join(__dirname, '..', 'etc', 'cpuBaseline.json'), 'utf8');
+    return readFile(join(__dirname, '..', '..', 'etc', 'cpuBaseline.json'), 'utf8');
   }, console.error)
   .then(cpuBaseline => {
     if (!cpuBaseline) throw new Error('could not find cpu baseline');
