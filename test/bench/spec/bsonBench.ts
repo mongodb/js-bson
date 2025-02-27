@@ -142,6 +142,15 @@ suite
       ]
     });
 
+    results.push({
+      info: {
+        test_name: 'cpuBaseline',
+        tags: [],
+        args: {}
+      },
+      metrics: [{ name: 'mean_megabytes_per_second', value: cpuBaselineResult, metadata }]
+    });
+
     // Write results to file
     return writeFile('bsonBench.json', JSON.stringify(results));
   }, console.error);

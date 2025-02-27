@@ -66,7 +66,7 @@ function completeSuite() {
       }
 
       data.push({
-        info: { test_name: 'cpuBaseline_custom' },
+        info: { test_name: 'cpuBaseline' },
         metrics: [{ name: 'ops_per_sec', value: cpuBaselineResult, metadata }]
       });
 

@@ -96,7 +96,7 @@ const DOCUMENT_ROOT = path.resolve(`${__dirname}/../documents`);
   });
 
   means.push({
-    info: { test_name: 'cpuBaseline_granular' },
+    info: { test_name: 'cpuBaseline' },
     metrics: [
       { name: 'megabytes_per_second', value: cpuBaselineData.megabytes_per_second, metadata }
     ]
