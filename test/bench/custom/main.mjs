@@ -36,21 +36,21 @@ let completedSuites = 0;
 function completeSuite() {
   const metadata = { improvement_direction: 'up' };
   if (++completedSuites >= collectedSuites.length) {
-    const data = [];
-    const cpuBaseline = collectedSuites.find(d => d.suite.name === 'CPUBaseline');
-    if (!cpuBaseline) throw new Error("couldn't find baseline!");
+    let cpuBaselineResults;
+    try {
+      cpuBaselineResults = JSON.parse(fs.readFileSync(`${__dirname}/../etc/cpuBaseline.json`));
+    } catch {
+      throw new Error("Couldn't find baseline results");
+    }
 
-    const cpuBaselineResult = cpuBaseline.suite[0].hz;
+    const cpuBaselineResult = cpuBaselineResults.hz;
     if (typeof cpuBaselineResult !== 'number') {
       throw new Error("Couldn't find baseline result");
     }
 
-    data.push(processBenchmarkResult(cpuBaseline.suite[0], cpuBaseline.suiteConfig.tags, metadata));
-
+    const data = [];
     for (const { suite, suiteConfig } of collectedSuites) {
-      const { name, tags } = suiteConfig;
-      if (name === 'CPUBaseline') continue;
-
+      const { tags } = suiteConfig;
       for (const bench of Array.from(suite)) {
         const result = processBenchmarkResult(bench, tags, metadata);
         result.metrics.push({
@@ -60,6 +60,11 @@ function completeSuite() {
         });
         data.push(result);
       }
+
+      data.push({
+        info: { test_name: 'cpuBaseline_custom' },
+        metrics: [{ name: 'ops_per_sec', value: cpuBaselineResult, metadata }]
+      });
 
       console.log(util.inspect(data, { depth: Infinity, colors: true }));
       fs.writeFileSync('customBenchmarkResults.json', JSON.stringify(data), 'utf8');
