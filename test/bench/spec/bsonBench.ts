@@ -1,8 +1,11 @@
-import { Suite } from 'dbx-js-tools/packages/bson-bench';
+import { PerfSendResult, Suite } from 'dbx-js-tools/packages/bson-bench';
 import { join, resolve } from 'path';
-import { writeFile } from 'fs/promises';
+import { writeFile, readFile } from 'fs/promises';
 import { readEnvVars, ALERT_TAG } from '../granular/common';
 
+type Metadata = {
+  improvement_direction: 'up' | 'down';
+};
 const suite = new Suite('bson micro benchmarks');
 const DOCUMENT_ROOT = resolve(`${__dirname}/../../documents`);
 const { library } = readEnvVars();
@@ -74,13 +77,29 @@ suite.task({
   tags: [ALERT_TAG]
 });
 
-suite.run().then(
-  () => {
-    const results = suite.results.map(result => {
+suite
+  .run()
+  .then(() => {
+    return readFile(join(__dirname, '..', 'etc', 'cpuBaseline.json'), 'utf8');
+  }, console.error)
+  .then(cpuBaseline => {
+    if (!cpuBaseline) throw new Error('could not find cpu baseline');
+
+    const cpuBaselineResult = JSON.parse(cpuBaseline).megabytes_per_second;
+    if (typeof cpuBaselineResult !== 'number')
+      throw new Error('Could not find correctly formatted baseline results');
+
+    const suiteResults = suite.results as {
+      info: PerfSendResult['info'];
+      metrics: (PerfSendResult['metrics'][0] & { metadata?: Metadata })[];
+    }[];
+    const results = suiteResults.map(result => {
       const rv = { ...result };
       rv.metrics = rv.metrics.filter(metric => metric.type === 'MEAN');
       return rv;
     });
+
+    const metadata: Metadata = { improvement_direction: 'up' };
     // calculte BSONBench composite score
     const bsonBenchComposite =
       results.reduce((prev, result) => {
@@ -97,6 +116,15 @@ suite.run().then(
         return prev + resultMean;
       }, 0) / results.length;
 
+    for (const r of results) {
+      r.metrics[0].metadata = metadata;
+      r.metrics.push({
+        name: 'normalized_throughput',
+        value: r.metrics[0].value / cpuBaselineResult,
+        metadata
+      });
+    }
+
     // Add to results
     results.push({
       info: {
@@ -108,15 +136,12 @@ suite.run().then(
         {
           name: 'BSONBench composite score',
           type: 'THROUGHPUT',
-          value: bsonBenchComposite
+          value: bsonBenchComposite,
+          metadata
         }
       ]
     });
 
     // Write results to file
     return writeFile('bsonBench.json', JSON.stringify(results));
-  },
-  error => {
-    console.error(error);
-  }
-);
+  }, console.error);

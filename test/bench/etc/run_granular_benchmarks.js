@@ -28,6 +28,9 @@ const DOCUMENT_ROOT = path.resolve(`${__dirname}/../documents`);
     .run()
     .catch(() => null);
 
+  // Check for benchmark results
+  const cpuBaselineData = require(`${__dirname}${path.sep}cpuBaseline.json`);
+
   // Run all benchmark files
   const lib = await fs.readdir(BENCHMARK_PATH);
   for await (const dirent of lib) {
@@ -74,11 +77,29 @@ const DOCUMENT_ROOT = path.resolve(`${__dirname}/../documents`);
       collectedResults.push(...results);
     }
   }
+  const metadata = {
+    improvement_direction: 'up'
+  };
 
   const means = collectedResults.map(result => {
     const rv = { ...result };
     rv.metrics = rv.metrics.filter(metric => metric.type === 'MEAN');
+    rv.metrics = rv.metrics.map(m => {
+      return { ...m, metadata };
+    });
+    rv.metrics.push({
+      name: 'normalized_throughput',
+      value: rv.metrics[0].value / cpuBaselineData.megabytes_per_second,
+      metadata
+    });
     return rv;
+  });
+
+  means.push({
+    info: { test_name: 'cpuBaseline_granular' },
+    metrics: [
+      { name: 'megabytes_per_second', value: cpuBaselineData.megabytes_per_second, metadata }
+    ]
   });
 
   await fs.writeFile(meansFile, JSON.stringify(means));
