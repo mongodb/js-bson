@@ -9,8 +9,8 @@ type Metadata = {
 const suite = new Suite('bson micro benchmarks');
 const DOCUMENT_ROOT = resolve(`${__dirname}/../../documents`);
 const { library } = readEnvVars();
-const warmup = 1;
-const iterations = 1;
+const warmup = 1000;
+const iterations = 10_000;
 // Add flat bson encoding
 suite.task({
   documentPath: join(DOCUMENT_ROOT, 'flat_bson.json'),
