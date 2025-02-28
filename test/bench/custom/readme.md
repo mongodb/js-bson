@@ -32,7 +32,7 @@ The JSON emitted at the end of the benchmarks must follow our performance tracki
 The JSON must be an array of "`Test`"s:
 
 ```ts
-type Metric = { name: string, value: number, metadata: { improvement_diraction: 'up' | 'down' } }
+type Metric = { name: string, value: number, metadata: { improvement_direction: 'up' | 'down' } }
 type Test = {
     info: { test_name: string, tags?: string[]},
     metrics: Metric[]

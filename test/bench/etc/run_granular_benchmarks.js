@@ -29,7 +29,7 @@ const DOCUMENT_ROOT = path.resolve(`${__dirname}/../documents`);
     .catch(() => null);
 
   // Check for benchmark results
-  const cpuBaselineData = require(`${__dirname}${path.sep}cpuBaseline.json`);
+  const cpuBaselineData = require(`./cpuBaseline.json`);
 
   // Run all benchmark files
   const lib = await fs.readdir(BENCHMARK_PATH);

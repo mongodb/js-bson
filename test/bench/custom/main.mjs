@@ -3,12 +3,8 @@
 import util from 'node:util';
 import fs from 'node:fs';
 import os from 'node:os';
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import benchmark from 'benchmark';
 import { suites } from './benchmarks.mjs';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const hw = os.cpus();
 const ram = os.totalmem() / 1024 ** 3;
@@ -37,16 +33,17 @@ function processBenchmarkResult(bench, tags, metadata) {
 }
 
 let completedSuites = 0;
-function completeSuite() {
+async function completeSuite() {
   const metadata = { improvement_direction: 'up' };
   if (++completedSuites >= collectedSuites.length) {
     let cpuBaselineResults;
     try {
-      cpuBaselineResults = JSON.parse(fs.readFileSync(`${__dirname}/../etc/cpuBaseline.json`));
+      cpuBaselineResults = await import('../etc/cpuBaseline.json', { assert: { type: 'json' } });
     } catch (cause) {
       throw new Error("Couldn't find baseline results", { cause });
     }
 
+    cpuBaselineResults = cpuBaselineResults.default;
     const cpuBaselineResult = cpuBaselineResults.hz;
     if (typeof cpuBaselineResult !== 'number') {
       throw new Error("Couldn't find baseline result");
