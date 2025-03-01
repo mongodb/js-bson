@@ -28,7 +28,7 @@
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@microsoft/api-extractor": "^7.47.5",
-    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/chai": "^4.3.17",
     "@types/mocha": "^10.0.7",
