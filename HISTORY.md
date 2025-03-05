@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.4.1](https://github.com/mongodb/js-bson/compare/v6.4.0...v6.4.1) (2025-03-05)
+
+
+### Bug Fixes
+
+* **NODE-6812:** incorrect negative bigint handling ([#762](https://github.com/mongodb/js-bson/issues/762)) ([ce3e544](https://github.com/mongodb/js-bson/commit/ce3e544177bfd529d4c73b0a48bb033aa3fffd1e))
+* **NODE-6818:** flip byte order depending on system endianness ([#766](https://github.com/mongodb/js-bson/issues/766)) ([8a55718](https://github.com/mongodb/js-bson/commit/8a5571824b901abf264fdee0c6d368858127316e))
+
 ## [6.4.0](https://github.com/mongodb/js-bson/compare/v6.3.0...v6.4.0) (2024-02-29)
 
 
