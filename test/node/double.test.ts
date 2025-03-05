@@ -3,6 +3,15 @@ import { BSON, Double } from '../register-bson';
 
 import { BSON_DATA_NUMBER, BSON_DATA_INT } from '../../src/constants';
 import { inspect } from 'node:util';
+import { bufferFromHexArray } from './tools/utils';
+
+const FLOAT = new Float64Array(1);
+const FLOAT_BYTES = new Uint8Array(FLOAT.buffer, 0, 8);
+
+FLOAT[0] = -1;
+// Little endian [0, 0, 0, 0, 0, 0,  240, 191]
+// Big endian    [191, 240, 0, 0, 0, 0, 0, 0]
+const isBigEndian = FLOAT_BYTES[7] === 0;
 
 describe('BSON Double Precision', function () {
   context('class Double', function () {
@@ -295,6 +304,24 @@ describe('BSON Double Precision', function () {
         const result = BSON.EJSON.parse(`{ "a": -0.0 }`, { relaxed: true });
         expect(Object.is(result.a, -0), 'expected prop a to be negative zero').to.be.true;
       });
+    });
+  });
+
+  context(`handles ${isBigEndian ? 'big' : 'little'} endianness correctly`, () => {
+    const bsonWithFloat = bufferFromHexArray([
+      '01', // double
+      '6100', // 'a'
+      '00'.repeat(6) + 'f0bf' // 8 byte LE float equal to -1
+    ]);
+
+    it('deserialize should return -1', () => {
+      const res = BSON.deserialize(bsonWithFloat);
+      expect(res).to.have.property('a', -1);
+    });
+
+    it('serialize should set bytes to -1 in little endian format', () => {
+      const res = BSON.serialize({ a: new Double(-1) });
+      expect(res).to.deep.equal(bsonWithFloat);
     });
   });
 });
