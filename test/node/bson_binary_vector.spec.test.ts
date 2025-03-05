@@ -1,6 +1,7 @@
+import * as util from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
-import { BSON, BSONError, Binary } from '../register-bson';
+import { BSON, BSONError, Binary, EJSON } from '../register-bson';
 import { expect } from 'chai';
 
 const { toHex, fromHex } = BSON.onDemand.ByteUtils;
@@ -8,7 +9,7 @@ const { toHex, fromHex } = BSON.onDemand.ByteUtils;
 type VectorHexType = '0x03' | '0x27' | '0x10';
 type VectorTest = {
   description: string;
-  vector: (number | string)[];
+  vector?: (number | string)[];
   valid: boolean;
   dtype_hex: VectorHexType;
   padding?: number;
@@ -87,6 +88,10 @@ const invalidTestExpectedError = new Map()
     'Invalid Vector: padding must be a value between 0 and 7'
   )
   .set('Negative padding PACKED_BIT', 'Invalid Vector: padding must be a value between 0 and 7')
+  .set(
+    'Insufficient vector data FLOAT32',
+    'Invalid Vector: Float32 vector must contain a multiple of 4 bytes'
+  )
   // skipped
   .set('Overflow Vector PACKED_BIT', false)
   .set('Underflow Vector PACKED_BIT', false)
@@ -96,6 +101,84 @@ const invalidTestExpectedError = new Map()
   // duplicate test! but also skipped.
   .set('Vector with float values PACKED_BIT', false)
   .set('Vector with float values PACKED_BIT', false);
+
+function testVectorBuilding(test: VectorTest, expectedErrorMessage: string) {
+  describe('creating an instance of a Binary class using parameters', () => {
+    it(`bson: ${test.description}`, function () {
+      let thrownError: Error | undefined;
+      try {
+        const bin = make(test.vector!, test.dtype_hex, test.padding);
+        BSON.serialize({ bin });
+      } catch (error) {
+        thrownError = error;
+      }
+
+      if (thrownError?.message.startsWith('unsupported_error')) {
+        expect(
+          expectedErrorMessage,
+          'We expect a certain error message but got an unsupported error'
+        ).to.be.false;
+        this.skip();
+      }
+
+      expect(thrownError, thrownError?.stack).to.be.instanceOf(BSONError);
+      expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
+    });
+
+    it(`ejson: ${test.description}`, function () {
+      let thrownError: Error | undefined;
+      try {
+        const bin = make(test.vector!, test.dtype_hex, test.padding);
+        BSON.EJSON.stringify({ bin });
+      } catch (error) {
+        thrownError = error;
+      }
+
+      if (thrownError?.message.startsWith('unsupported_error')) {
+        expect(
+          expectedErrorMessage,
+          'We expect a certain error message but got an unsupported error'
+        ).to.be.false;
+        this.skip();
+      }
+
+      expect(thrownError, thrownError?.stack).to.be.instanceOf(BSONError);
+      expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
+    });
+  });
+}
+
+function testVectorReserializing(test: VectorTest, expectedErrorMessage: string) {
+  describe('creating an instance of a Binary class using canonical_bson', () => {
+    it(`bson deserialize: ${test.description}`, function () {
+      let thrownError: Error | undefined;
+      const bin = BSON.deserialize(Buffer.from(test.canonical_bson!, 'hex'));
+
+      try {
+        BSON.serialize(bin);
+      } catch (error) {
+        thrownError = error;
+      }
+
+      expect(thrownError, thrownError?.stack).to.be.instanceOf(BSONError);
+      expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
+    });
+
+    it(`ejson stringify: ${test.description}`, function () {
+      let thrownError: Error | undefined;
+      const bin = BSON.deserialize(Buffer.from(test.canonical_bson!, 'hex'));
+
+      try {
+        EJSON.stringify(bin);
+      } catch (error) {
+        thrownError = error;
+      }
+
+      expect(thrownError, thrownError?.stack).to.be.instanceOf(BSONError);
+      expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
+    });
+  });
+}
 
 describe('BSON Binary Vector spec tests', () => {
   const tests: Record<string, VectorSuite> = Object.create(null);
@@ -121,7 +204,7 @@ describe('BSON Binary Vector spec tests', () => {
          */
         for (const test of valid) {
           it(`encode ${test.description}`, function () {
-            const bin = make(test.vector, test.dtype_hex, test.padding);
+            const bin = make(test.vector!, test.dtype_hex, test.padding);
 
             const buffer = BSON.serialize({ [suite.test_key]: bin });
             expect(toHex(buffer)).to.equal(test.canonical_bson!.toLowerCase());
@@ -147,47 +230,22 @@ describe('BSON Binary Vector spec tests', () => {
         for (const test of invalid) {
           const expectedErrorMessage = invalidTestExpectedError.get(test.description);
 
-          it(`bson: ${test.description}`, function () {
-            let thrownError: Error | undefined;
-            try {
-              const bin = make(test.vector, test.dtype_hex, test.padding);
-              BSON.serialize({ bin });
-            } catch (error) {
-              thrownError = error;
-            }
-
-            if (thrownError?.message.startsWith('unsupported_error')) {
-              expect(
-                expectedErrorMessage,
-                'We expect a certain error message but got an unsupported error'
-              ).to.be.false;
-              this.skip();
-            }
-
-            expect(thrownError).to.be.instanceOf(BSONError);
-            expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
-          });
-
-          it(`extended json: ${test.description}`, function () {
-            let thrownError: Error | undefined;
-            try {
-              const bin = make(test.vector, test.dtype_hex, test.padding);
-              BSON.EJSON.stringify({ bin });
-            } catch (error) {
-              thrownError = error;
-            }
-
-            if (thrownError?.message.startsWith('unsupported_error')) {
-              expect(
-                expectedErrorMessage,
-                'We expect a certain error message but got an unsupported error'
-              ).to.be.false;
-              this.skip();
-            }
-
-            expect(thrownError).to.be.instanceOf(BSONError);
-            expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
-          });
+          if (test.vector != null && test.canonical_bson != null) {
+            describe('both manual vector building and re-serializing', () => {
+              testVectorBuilding(test, expectedErrorMessage);
+              testVectorReserializing(test, expectedErrorMessage);
+            });
+          } else if (test.canonical_bson != null) {
+            describe('vector re-serializing', () => {
+              testVectorReserializing(test, expectedErrorMessage);
+            });
+          } else if (test.vector != null) {
+            describe('manual vector building', () => {
+              testVectorBuilding(test, expectedErrorMessage);
+            });
+          } else {
+            throw new Error('not testing anything for: ' + util.inspect(test));
+          }
         }
       });
     });
