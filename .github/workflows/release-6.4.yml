@@ -1,6 +1,6 @@
 on:
     push:
-      branches: ["6.4"]
+      branches: ["6.4.x"]
     workflow_dispatch: {}
   
 permissions:
@@ -19,7 +19,7 @@ jobs:
         - id: release
           uses: googleapis/release-please-action@v4
           with:
-            target-branch: "6.4"
+            target-branch: "6.4.x"
   
     build:
       needs: [release_please]
@@ -75,7 +75,7 @@ jobs:
           with:
             release_version: ${{ env.package_version }}
             product_name: bson
-            sarif_report_target_ref: "6.4"
+            sarif_report_target_ref: "6.4.x"
             third_party_dependency_tool: n/a
             dist_filenames: artifacts/*
             token: ${{ github.token }}
@@ -99,8 +99,8 @@ jobs:
         - name: Install Node and dependencies
           uses: mongodb-labs/drivers-github-tools/node/setup@v2
   
-        - run: npm publish --provenance --tag=latest
-          if: ${{ needs.release_please.outputs.release_created }}
-          env:
-            NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # - run: npm publish --provenance --tag=latest
+        #   if: ${{ needs.release_please.outputs.release_created }}
+        #   env:
+        #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   
