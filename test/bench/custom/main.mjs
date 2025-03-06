@@ -24,11 +24,10 @@ function logBenchmark(event) {
   console.log(String(event.target));
 }
 
-function processBenchmarkResult(bench, tags, metadata) {
+function processBenchmarkResult(bench, metadata) {
   return {
     info: { test_name: bench.name },
-    metrics: [{ name: 'ops_per_sec', value: bench.hz, metadata }],
-    tags
+    metrics: [{ name: 'ops_per_sec', value: bench.hz, metadata }]
   };
 }
 
@@ -53,7 +52,7 @@ async function completeSuite() {
     for (const { suite, suiteConfig } of collectedSuites) {
       const { tags } = suiteConfig;
       for (const bench of Array.from(suite)) {
-        const result = processBenchmarkResult(bench, tags, metadata);
+        const result = processBenchmarkResult(bench, { ...metadata, tags });
         result.metrics.push({
           name: 'normalized_throughput',
           value: bench.hz / cpuBaselineResult,

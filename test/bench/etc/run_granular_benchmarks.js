@@ -85,7 +85,7 @@ const DOCUMENT_ROOT = path.resolve(`${__dirname}/../documents`);
     const rv = { ...result };
     rv.metrics = rv.metrics.filter(metric => metric.type === 'MEAN');
     rv.metrics = rv.metrics.map(m => {
-      return { ...m, metadata };
+      return { ...m, metadata: { ...m.metadata, improvement_direction: 'up' } };
     });
     rv.metrics.push({
       name: 'normalized_throughput',

@@ -116,11 +116,11 @@ suite.run().then(async () => {
     }, 0) / results.length;
 
   for (const r of results) {
-    r.metrics[0].metadata = metadata;
+    r.metrics[0].metadata = { ...r.metrics[0].metadata, ...metadata };
     r.metrics.push({
       name: 'normalized_throughput',
       value: r.metrics[0].value / cpuBaselineResult,
-      metadata
+      metadata: { ...r.metrics[0].metadata }
     });
   }
 
@@ -128,7 +128,6 @@ suite.run().then(async () => {
   results.push({
     info: {
       test_name: 'BSONBench',
-      tags: [],
       args: {}
     },
     metrics: [
@@ -144,7 +143,6 @@ suite.run().then(async () => {
   results.push({
     info: {
       test_name: 'cpuBaseline',
-      tags: [],
       args: {}
     },
     metrics: [{ name: 'mean_megabytes_per_second', value: cpuBaselineResult, metadata }]

@@ -257,9 +257,22 @@ tasks:
         vars:
           WARMUP: 1000
           ITERATIONS: 1000
-      - command: perf.send
+      - command: subprocess.exec
         params:
-          file: src/test/bench/etc/resultsCollectedMeans.json
+          working_dir: src
+          binary: node 
+          env:
+            project: ${project}
+            revision_order_id: ${order}
+            execution: ${execution}
+            requester: ${requester}
+            task_id: ${task_id}
+            task_name: ${task_name}
+            build_variant: ${build_variant}
+            version_id: ${version_id}
+          args:
+            - .evergreen/perfSend.mjs
+            - src/test/bench/etc/resultsCollectedMeans.json
   - name: run-custom-benchmarks
     commands:
       - func: fetch source
