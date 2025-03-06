@@ -40,6 +40,24 @@ functions:
         args:
           - .evergreen/install-dependencies.sh
 
+  perf send:
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: node 
+          env:
+            project: ${project}
+            revision_order_id: ${order}
+            execution: ${execution}
+            requester: ${requester}
+            task_id: ${task_id}
+            task_name: ${task_name}
+            build_variant: ${build_variant}
+            version_id: ${version_id}
+          args:
+            - .evergreen/perfSend.mjs
+            - ./test/bench/etc/resultsCollectedMeans.json
+
   run tests:
     - command: subprocess.exec
       type: test
@@ -255,8 +273,8 @@ tasks:
           NPM_VERSION: 9
       - func: run granular benchmarks
         vars:
-          WARMUP: 1000
-          ITERATIONS: 1000
+          WARMUP: 1
+          ITERATIONS: 1
       - command: subprocess.exec
         params:
           working_dir: src
@@ -272,7 +290,7 @@ tasks:
             version_id: ${version_id}
           args:
             - .evergreen/perfSend.mjs
-            - src/test/bench/etc/resultsCollectedMeans.json
+            - ./test/bench/etc/resultsCollectedMeans.json
   - name: run-custom-benchmarks
     commands:
       - func: fetch source
@@ -284,9 +302,21 @@ tasks:
         vars:
           NPM_VERSION: 9
       - func: run custom benchmarks
-      - command: perf.send
-        params:
-          file: src/customBenchmarkResults.json
+      - command: subprocess.exec
+        working_dir: src
+        binary: bash
+        env:
+          project: ${project}
+          revision_order_id: ${order}
+          execution: ${execution}
+          requester: ${requester}
+          task_id: ${task_id}
+          task_name: ${task_name}
+          build_variant: ${build_variant}
+          version_id: ${version_id}
+          TARGET_FILE: ../customBenchmarkResults.json
+        args:
+          - .evergreen/perf-send.sh
   - name: run-spec-benchmarks
     commands:
       - func: fetch source

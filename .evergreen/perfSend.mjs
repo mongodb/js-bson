@@ -2,6 +2,7 @@
 'use strict';
 
 import * as fs from 'fs/promises';
+console.log(process.versions);
 // STAGING
 const API_PATH = "https://performance-monitoring-service-rest.server-tig.staging.corp.mongodb.com/raw_perf_results"
 
