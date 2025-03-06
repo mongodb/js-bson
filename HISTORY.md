@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.5.1](https://github.com/mongodb/js-bson/compare/v6.5.0...v6.5.1) (2025-03-06)
+
+
+### Bug Fixes
+
+* **NODE-6826:** incorrect negative bigint handling ([#772](https://github.com/mongodb/js-bson/issues/772)) ([66af3fe](https://github.com/mongodb/js-bson/commit/66af3fec9920eb3b38027f37c43c78900cb2eaef))
+
 ## [6.5.0](https://github.com/mongodb/js-bson/compare/v6.4.0...v6.5.0) (2024-03-12)
 
 
