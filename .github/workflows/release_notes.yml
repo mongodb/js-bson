@@ -39,14 +39,15 @@ jobs:
           fi
 
       # checkout the HEAD ref from prNumber
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: refs/pull/${{ github.event_name == 'issue_comment' && github.event.issue.number || inputs.releasePr }}/head
 
 
       # Setup Node.js and npm install
-      - name: actions/setup
-        uses: ./.github/actions/setup
+      - name: Install Node and dependencies
+        uses: mongodb-labs/drivers-github-tools/node/setup@v2
+
 
       # See: https://github.com/googleapis/release-please/issues/1274
 
@@ -64,6 +65,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           PR_LIST: ${{ steps.pr_list.outputs.pr_list }}
+          REPOSITORY: ${{ github.repository }}
 
       # The combined output is available
       - id: release_notes
