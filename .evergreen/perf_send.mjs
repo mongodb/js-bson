@@ -60,11 +60,14 @@ console.log(inspect(body, { depth: Infinity }));
 const resp = await fetch(API_PATH, {
   method: "POST",
   headers: {
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
+    "accept": "application/json"
   },
   body: JSON.stringify(body)
 });
 
+
+console.log(await resp.text());
 
 let jsonResponse;
 try {
