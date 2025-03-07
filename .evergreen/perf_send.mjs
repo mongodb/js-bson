@@ -49,7 +49,7 @@ const resp = await fetch(API_PATH, {
 });
 
 if (resp.status !== 200) {
-  throw new Error(`Got status code: ${resp.status}\nResponse body: ${await resp.json()}`);
+  throw new Error(`Got status code: ${resp.status}\nResponse body: ${await resp.text()}`);
 }
 
 console.log("Successfully posted results");
