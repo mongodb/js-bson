@@ -23,41 +23,33 @@ const {
 } = process.env;
 
 
-fs.readFile(resultFile, 'utf8')
-  .then(
-    results => {
-      const body = {
-        id: {
-          project,
-          version,
-          variant,
-          order,
-          task_name,
-          task_id,
-          execution,
-          mainline: requester === 'commit'
-        },
-        results: JSON.parse(results)
-      };
+const results = await fs.readFile(resultFile, 'utf8');
+const body = {
+  id: {
+    project,
+    version,
+    variant,
+    order,
+    task_name,
+    task_id,
+    execution,
+    mainline: requester === 'commit'
+  },
+  results: JSON.parse(results)
+};
 
-      console.log(body);
-      return fetch(API_PATH, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body)
-      })
-    }
-  )
-  .then(async resp => {
-    console.log(resp);
-    if (resp.status !== 200) {
-      throw new Error(`Got status code: ${resp.status}\nResponse body: ${await resp.json()}`);
-    }
-    console.log("Successfully posted results");
-  })
-  .catch(e => {
-    console.error(e);
-    process.exit(1);
-  });
+console.log(body);
+
+const resp = await fetch(API_PATH, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(body)
+});
+
+if (resp.status !== 200) {
+  throw new Error(`Got status code: ${resp.status}\nResponse body: ${await resp.json()}`);
+}
+
+console.log("Successfully posted results");
