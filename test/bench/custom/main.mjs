@@ -56,7 +56,7 @@ async function completeSuite() {
         result.metrics.push({
           name: 'normalized_throughput',
           value: bench.hz / cpuBaselineResult,
-          metadata
+          metadata: { ...metadata, tags }
         });
         data.push(result);
       }

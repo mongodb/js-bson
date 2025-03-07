@@ -4,7 +4,7 @@
 import * as fs from 'fs/promises';
 import { inspect } from 'util';
 console.log(process.versions);
-const API_PATH = "https://performance-monitoring-service-rest.server-tig.prod.corp.mongodb.com/raw_perf_results"
+const API_PATH = "https://performance-monitoring-service-rest.server-tig.prod.corp.mongodb.com/raw_perf_results";
 
 const resultFile = process.argv[2];
 if (resultFile == undefined) {
@@ -18,13 +18,29 @@ const {
   project,
   task_id,
   task_name,
-  revision_order_id: order,
+  revision_order_id,
   build_variant: variant,
   version_id: version
 } = process.env;
 
+const orderSplit = revision_order_id?.split('_');
+let order = orderSplit ? orderSplit[orderSplit.length - 1] : undefined;
 
-const results = await fs.readFile(resultFile, 'utf8');
+if (!order) throw new Error(`failed to get order, got "${order}"`);
+
+order = Number(order);
+
+if (!Number.isInteger(order)) throw new Error(`Failed to parse integer from order, got ${order}`);
+
+let results = await fs.readFile(resultFile, 'utf8');
+results = JSON.parse(results);
+
+// FIXME(NODE-6838): We are using dummy dates here just to be able to successfully post our results
+for (const r of results) {
+  r.info.created_at = new Date().toISOString();
+  r.info.completed_at = new Date().toISOString();
+}
+
 const body = {
   id: {
     project,
@@ -36,7 +52,7 @@ const body = {
     execution,
     mainline: requester === 'commit'
   },
-  results: JSON.parse(results)
+  results
 };
 
 console.log(inspect(body, { depth: Infinity }));
@@ -49,8 +65,16 @@ const resp = await fetch(API_PATH, {
   body: JSON.stringify(body)
 });
 
-if (resp.status !== 200) {
-  throw new Error(`Got status code: ${resp.status}\nResponse body: ${await resp.text()}`);
+
+let jsonResponse;
+try {
+  jsonResponse = await resp.json();
+} catch (e) {
+  throw new Error("Failed to parse json response", { cause: e });
 }
+
+console.log(inspect(jsonResponse, { depth: Infinity }));
+
+if (!jsonResponse.message) throw new Error("Didn't get success message");
 
 console.log("Successfully posted results");
