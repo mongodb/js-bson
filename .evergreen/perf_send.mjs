@@ -3,8 +3,7 @@
 
 import * as fs from 'fs/promises';
 console.log(process.versions);
-// STAGING
-const API_PATH = "https://performance-monitoring-service-rest.server-tig.staging.corp.mongodb.com/raw_perf_results"
+const API_PATH = "https://performance-monitoring-service-rest.server-tig.prod.corp.mongodb.com/raw_perf_results"
 
 const resultFile = process.argv[2];
 if (resultFile == undefined) {
@@ -40,6 +39,8 @@ fs.readFile(resultFile, { encoding: 'utf8' })
         },
         results: JSON.parse(results)
       };
+
+      console.log(body);
       return fetch(API_PATH, {
         method: "POST",
         headers: {
@@ -49,9 +50,14 @@ fs.readFile(resultFile, { encoding: 'utf8' })
       })
     }
   )
-  .then(resp => {
+  .then(async resp => {
     console.log(resp);
     if (resp.status !== 200) {
-      throw new Error('Got non 200 status code')
+      throw new Error(`Got status code: ${resp.status}\nResponse body: ${await resp.json()}`);
     }
+    console.log("Successfully posted results");
+  })
+  .catch(e => {
+    console.error(e);
+    process.exit(1);
   });

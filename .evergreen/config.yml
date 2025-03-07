@@ -44,19 +44,10 @@ functions:
       - command: subprocess.exec
         params:
           working_dir: src
-          binary: node 
-          env:
-            project: ${project}
-            revision_order_id: ${order}
-            execution: ${execution}
-            requester: ${requester}
-            task_id: ${task_id}
-            task_name: ${task_name}
-            build_variant: ${build_variant}
-            version_id: ${version_id}
+          binary: bash
+          add_expansions_to_env: true
           args:
-            - .evergreen/perfSend.mjs
-            - ./test/bench/etc/resultsCollectedMeans.json
+            - .evergreen/perf-send.sh
 
   run tests:
     - command: subprocess.exec
@@ -273,24 +264,11 @@ tasks:
           NPM_VERSION: 9
       - func: run granular benchmarks
         vars:
-          WARMUP: 1
-          ITERATIONS: 1
-      - command: subprocess.exec
-        params:
-          working_dir: src
-          binary: node 
-          env:
-            project: ${project}
-            revision_order_id: ${order}
-            execution: ${execution}
-            requester: ${requester}
-            task_id: ${task_id}
-            task_name: ${task_name}
-            build_variant: ${build_variant}
-            version_id: ${version_id}
-          args:
-            - .evergreen/perfSend.mjs
-            - ./test/bench/etc/resultsCollectedMeans.json
+          WARMUP: 1000
+          ITERATIONS: 1000
+      - func: perf send
+        vars:
+          TARGET_FILE: ./test/bench/etc/resultsCollectedMeans.json
   - name: run-custom-benchmarks
     commands:
       - func: fetch source
@@ -302,21 +280,9 @@ tasks:
         vars:
           NPM_VERSION: 9
       - func: run custom benchmarks
-      - command: subprocess.exec
-        working_dir: src
-        binary: bash
-        env:
-          project: ${project}
-          revision_order_id: ${order}
-          execution: ${execution}
-          requester: ${requester}
-          task_id: ${task_id}
-          task_name: ${task_name}
-          build_variant: ${build_variant}
-          version_id: ${version_id}
-          TARGET_FILE: ../customBenchmarkResults.json
-        args:
-          - .evergreen/perf-send.sh
+      - func: perf send
+        vars:
+          TARGET_FILE: ./customBenchmarkResults.json
   - name: run-spec-benchmarks
     commands:
       - func: fetch source
@@ -328,9 +294,9 @@ tasks:
         vars:
           NPM_VERSION: 9
       - func: run spec benchmarks
-      - command: perf.send
-        params:
-          file: src/bsonBench.json
+      - func: perf send
+        vars:
+          TARGET_FILE: ./bsonBench.json
   - name: check-eslint-plugin
     commands:
       - func: fetch source
