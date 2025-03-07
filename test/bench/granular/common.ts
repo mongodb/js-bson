@@ -25,6 +25,39 @@ export async function getTestDocs(type: string) {
   return docs;
 }
 
+const ALERTING_DOCS = new Set([
+  'objectid_array_1000.json',
+  'double_array_1000.json',
+  'int32_array_1000.json',
+  'long_array_1000.json',
+  'string_array_1000.json',
+  'binary_array_1000.json',
+  'bestbuy_medium.json'
+]);
+
+export const ALERT_TAG = 'alerting-benchmark';
+
+export function getTypeTestTags(documentPath: string) {
+  const basename = path.basename(documentPath);
+  const type = basename.split('_')[0];
+
+  if (ALERTING_DOCS.has(basename)) {
+    return [type, ALERT_TAG];
+  } else {
+    return [type];
+  }
+}
+
+export function getMixedTestTags(documentPath: string) {
+  const basename = path.basename(documentPath).split('.')[0];
+
+  if (ALERTING_DOCS.has(basename)) {
+    return ['mixed', ALERT_TAG];
+  }
+
+  return ['mixed'];
+}
+
 export async function runSuiteAndWriteResults(suite: Suite) {
   const targetDirectory = path.resolve(`${__dirname}/../../etc`);
   await suite.run();
