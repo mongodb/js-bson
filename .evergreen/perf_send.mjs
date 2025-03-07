@@ -2,6 +2,7 @@
 'use strict';
 
 import * as fs from 'fs/promises';
+import { inspect } from 'util';
 console.log(process.versions);
 const API_PATH = "https://performance-monitoring-service-rest.server-tig.prod.corp.mongodb.com/raw_perf_results"
 
@@ -38,7 +39,7 @@ const body = {
   results: JSON.parse(results)
 };
 
-console.log(body);
+console.log(inspect(body, { depth: Infinity }));
 
 const resp = await fetch(API_PATH, {
   method: "POST",
