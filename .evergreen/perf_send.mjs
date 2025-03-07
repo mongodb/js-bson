@@ -23,7 +23,7 @@ const {
 } = process.env;
 
 
-fs.readFile(resultFile, { encoding: 'utf8' })
+fs.readFile(resultFile, 'utf8')
   .then(
     results => {
       const body = {
