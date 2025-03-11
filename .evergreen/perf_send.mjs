@@ -66,17 +66,16 @@ const resp = await fetch(API_PATH, {
   body: JSON.stringify(body)
 });
 
-console.log(await resp.text());
-
-let jsonResponse;
+const responseText = await resp.text();
+let jsonResponse = null;
 try {
-  jsonResponse = await resp.json();
-} catch (e) {
-  throw new Error('Failed to parse json response', { cause: e });
+  jsonResponse = JSON.parse(responseText)
+} catch (cause) {
+  console.log('Failed to parse json response', cause);
 }
 
-console.log(inspect(jsonResponse, { depth: Infinity }));
+console.log(inspect(jsonResponse ?? responseText, { depth: Infinity }));
 
-if (!jsonResponse.message) throw new Error("Didn't get success message");
+if (jsonResponse.message == null) throw new Error("Didn't get success message");
 
 console.log('Successfully posted results');
