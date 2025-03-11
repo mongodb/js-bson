@@ -37,8 +37,8 @@ results = JSON.parse(results);
 
 // FIXME(NODE-6838): We are using dummy dates here just to be able to successfully post our results
 for (const r of results) {
-  r.info.created_at = new Date().toISOString();
-  r.info.completed_at = new Date().toISOString();
+  r.created_at = new Date().toISOString();
+  r.completed_at = new Date().toISOString();
 }
 
 const body = {
