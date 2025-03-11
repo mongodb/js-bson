@@ -4,11 +4,11 @@
 import * as fs from 'fs/promises';
 import { inspect } from 'util';
 console.log(process.versions);
-const API_PATH = "https://performance-monitoring-service-rest.server-tig.prod.corp.mongodb.com/raw_perf_results";
+const API_PATH = 'https://performance-monitoring-api.corp.mongodb.com/raw_perf_results';
 
 const resultFile = process.argv[2];
 if (resultFile == undefined) {
-  throw new Error("Must specify result file");
+  throw new Error('Must specify result file');
 }
 
 // Get expansions
@@ -58,14 +58,13 @@ const body = {
 console.log(inspect(body, { depth: Infinity }));
 
 const resp = await fetch(API_PATH, {
-  method: "POST",
+  method: 'POST',
   headers: {
-    "Content-Type": "application/json",
-    "accept": "application/json"
+    'Content-Type': 'application/json',
+    accept: 'application/json'
   },
   body: JSON.stringify(body)
 });
-
 
 console.log(await resp.text());
 
@@ -73,11 +72,11 @@ let jsonResponse;
 try {
   jsonResponse = await resp.json();
 } catch (e) {
-  throw new Error("Failed to parse json response", { cause: e });
+  throw new Error('Failed to parse json response', { cause: e });
 }
 
 console.log(inspect(jsonResponse, { depth: Infinity }));
 
 if (!jsonResponse.message) throw new Error("Didn't get success message");
 
-console.log("Successfully posted results");
+console.log('Successfully posted results');
