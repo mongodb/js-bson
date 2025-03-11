@@ -5,7 +5,8 @@ import {
   LIBRARY_SPEC,
   ITERATIONS,
   WARMUP,
-  BOOL
+  BOOL,
+  getTypeTestTags
 } from './common';
 
 async function main() {
@@ -15,6 +16,7 @@ async function main() {
 
   // deserialize
   for (const documentPath of testDocs) {
+    const tags = getTypeTestTags(documentPath);
     for (const utf8 of BOOL) {
       suite.task({
         documentPath,
@@ -22,19 +24,22 @@ async function main() {
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation: 'deserialize',
-        options: { validation: { utf8 } }
+        options: { validation: { utf8 } },
+        tags
       });
     }
   }
   // serialize
   for (const documentPath of testDocs) {
+    const tags = getTypeTestTags(documentPath);
     suite.task({
       documentPath,
       library: LIBRARY_SPEC,
       iterations: ITERATIONS,
       warmup: WARMUP,
       operation: 'serialize',
-      options: { checkKeys: true, ignoreUndefined: false }
+      options: { checkKeys: true, ignoreUndefined: false },
+      tags
     });
   }
   await runSuiteAndWriteResults(suite);

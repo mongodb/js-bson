@@ -5,7 +5,8 @@ import {
   OPERATIONS,
   ITERATIONS,
   WARMUP,
-  LIBRARY_SPEC
+  LIBRARY_SPEC,
+  getMixedTestTags
 } from './common';
 import * as path from 'path';
 
@@ -33,13 +34,15 @@ async function main() {
 
   for (const operation of OPERATIONS) {
     for (const documentPath of mixedDocuments) {
+      const tags = getMixedTestTags(documentPath);
       suite.task({
         documentPath,
         library: LIBRARY_SPEC,
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation,
-        options: OPTIONS[operation]
+        options: OPTIONS[operation],
+        tags: tags
       });
     }
   }
