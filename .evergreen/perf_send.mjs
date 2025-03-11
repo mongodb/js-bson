@@ -1,13 +1,10 @@
-#! node
-'use strict';
+import fs from 'fs/promises';
+import util from 'util';
 
-import * as fs from 'fs/promises';
-import { inspect } from 'util';
-console.log(process.versions);
 const API_PATH = 'https://performance-monitoring-api.corp.mongodb.com/raw_perf_results';
 
 const resultFile = process.argv[2];
-if (resultFile == undefined) {
+if (resultFile == null) {
   throw new Error('Must specify result file');
 }
 
@@ -24,16 +21,11 @@ const {
 } = process.env;
 
 const orderSplit = revision_order_id?.split('_');
-let order = orderSplit ? orderSplit[orderSplit.length - 1] : undefined;
+const order = Number(orderSplit ? orderSplit[orderSplit.length - 1] : undefined);
 
-if (!order) throw new Error(`failed to get order, got "${order}"`);
+if (!Number.isInteger(order)) throw new Error(`Failed to parse integer from order, revision_order_id=${revision_order_id}`);
 
-order = Number(order);
-
-if (!Number.isInteger(order)) throw new Error(`Failed to parse integer from order, got ${order}`);
-
-let results = await fs.readFile(resultFile, 'utf8');
-results = JSON.parse(results);
+const results = JSON.parse(await fs.readFile(resultFile, 'utf8'));
 
 // FIXME(NODE-6838): We are using dummy dates here just to be able to successfully post our results
 for (const r of results) {
@@ -55,7 +47,7 @@ const body = {
   results
 };
 
-console.log(inspect(body, { depth: Infinity }));
+console.log('POST', util.inspect(body, { depth: Infinity }));
 
 const resp = await fetch(API_PATH, {
   method: 'POST',
@@ -74,8 +66,8 @@ try {
   console.log('Failed to parse json response', cause);
 }
 
-console.log(inspect(jsonResponse ?? responseText, { depth: Infinity }));
+console.log(resp.statusText, util.inspect(jsonResponse ?? responseText, { depth: Infinity }));
 
 if (jsonResponse.message == null) throw new Error("Didn't get success message");
 
-console.log('Successfully posted results');
+console.log(jsonResponse.message);
