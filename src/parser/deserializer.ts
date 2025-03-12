@@ -4,6 +4,7 @@ import { Code } from '../code';
 import * as constants from '../constants';
 import { DBRef, type DBRefLike, isDBRefLike } from '../db_ref';
 import { Decimal128 } from '../decimal128';
+import { type BSONReviver } from '../deserializer';
 import { Double } from '../double';
 import { BSONError } from '../error';
 import { Int32 } from '../int_32';
@@ -77,6 +78,10 @@ export interface DeserializeOptions {
    * ```
    */
   validation?: { utf8: boolean | Record<string, true> | Record<string, false> };
+  /**
+   * A custom map of BSON revivers to override the defaults.
+   */
+  reviverMap?: Map<number, BSONReviver>;
 }
 
 // Internal long versions
