@@ -69,31 +69,31 @@ describe('bson entrypoint', () => {
 
     it('maintains the order of keys in exports conditions', async () => {
       expect(pkg).property('exports').is.a('object');
-      expect(pkg).nested.property('exports.import').is.a('object');
-      expect(pkg).nested.property('exports.require').is.a('object');
+      expect(pkg).nested.property('exports.browser').is.a('object');
+      expect(pkg).nested.property('exports.default').is.a('object');
 
       expect(
         Object.keys(pkg.exports),
         'Order matters in the exports fields. import/require need to proceed the "bundler" targets (RN/browser) and react-native MUST proceed browser'
-      ).to.deep.equal(['import', 'require', 'react-native', 'browser']);
+      ).to.deep.equal(['browser', 'react-native', 'default']);
 
       // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-7.html#packagejson-exports-imports-and-self-referencing
       expect(
-        Object.keys(pkg.exports.import),
+        Object.keys(pkg.exports.browser),
         'TS docs say that `types` should ALWAYS proceed `default`'
       ).to.deep.equal(['types', 'default']);
       expect(
-        Object.keys(pkg.exports.require),
+        Object.keys(pkg.exports.default),
         'TS docs say that `types` should ALWAYS proceed `default`'
-      ).to.deep.equal(['types', 'default']);
+      ).to.deep.equal(['types', 'import', 'require']);
 
       expect(Object.keys(pkg['compass:exports'])).to.deep.equal(['import', 'require']);
     });
 
     it('has the equivalent "bson.d.ts" value for all "types" specifiers', () => {
       expect(pkg).property('types', 'bson.d.ts');
-      expect(pkg).nested.property('exports.import.types', './bson.d.ts');
-      expect(pkg).nested.property('exports.require.types', './bson.d.ts');
+      expect(pkg).nested.property('exports.browser.types', './bson.d.ts');
+      expect(pkg).nested.property('exports.default.types', './bson.d.ts');
     });
   });
 });
