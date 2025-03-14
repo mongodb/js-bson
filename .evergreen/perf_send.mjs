@@ -27,7 +27,8 @@ if (!Number.isInteger(order)) throw new Error(`Failed to parse integer from orde
 
 const results = JSON.parse(await fs.readFile(resultFile, 'utf8'));
 
-// FIXME(NODE-6838): We are using dummy dates here just to be able to successfully post our results
+// TODO: this isn't ideal but we'll fix it if it becomes a real problem at some point
+// These fields are required by the /raw_perf_results endpoint but are not actually used in our dashboards
 for (const r of results) {
   r.created_at = new Date().toISOString();
   r.completed_at = new Date().toISOString();
