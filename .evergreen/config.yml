@@ -40,6 +40,15 @@ functions:
         args:
           - .evergreen/install-dependencies.sh
 
+  perf send:
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - .evergreen/perf-send.sh
+
   run tests:
     - command: subprocess.exec
       type: test
@@ -131,8 +140,10 @@ tasks:
       - func: fetch source
         vars:
           NODE_LTS_VERSION: 16
+          NPM_VERSION: 9
       - func: install dependencies
         vars:
+          NODE_LTS_VERSION: 16
           NPM_VERSION: 9
       - func: run tests
         vars:
@@ -143,6 +154,7 @@ tasks:
       - func: fetch source
         vars:
           NODE_LTS_VERSION: 18
+          NPM_VERSION: 10
       - func: install dependencies
       - func: run tests
         vars:
@@ -246,6 +258,7 @@ tasks:
         vars:
           # This needs to stay pinned at Node v18.16.0 for consistency across perf runs.
           NODE_LTS_VERSION: v18.16.0
+          NPM_VERSION: 9
       - func: install dependencies
         vars:
           NPM_VERSION: 9
@@ -253,35 +266,37 @@ tasks:
         vars:
           WARMUP: 1000
           ITERATIONS: 1000
-      - command: perf.send
-        params:
-          file: src/test/bench/etc/resultsCollectedMeans.json
+      - func: perf send
+        vars:
+          TARGET_FILE: ./test/bench/etc/resultsCollectedMeans.json
   - name: run-custom-benchmarks
     commands:
       - func: fetch source
         vars:
           # This needs to stay pinned at Node v18.16.0 for consistency across perf runs.
           NODE_LTS_VERSION: v18.16.0
+          NPM_VERSION: 9
       - func: install dependencies
         vars:
           NPM_VERSION: 9
       - func: run custom benchmarks
-      - command: perf.send
-        params:
-          file: src/customBenchmarkResults.json
+      - func: perf send
+        vars:
+          TARGET_FILE: ./customBenchmarkResults.json
   - name: run-spec-benchmarks
     commands:
       - func: fetch source
         vars:
           # This needs to stay pinned at Node v18.16.0 for consistency across perf runs.
           NODE_LTS_VERSION: v18.16.0
+          NPM_VERSION: 9
       - func: install dependencies
         vars:
           NPM_VERSION: 9
       - func: run spec benchmarks
-      - command: perf.send
-        params:
-          file: src/bsonBench.json
+      - func: perf send
+        vars:
+          TARGET_FILE: ./bsonBench.json
   - name: check-eslint-plugin
     commands:
       - func: fetch source

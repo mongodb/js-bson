@@ -1,5 +1,12 @@
 import { Suite } from 'dbx-js-tools/packages/bson-bench';
-import { getTestDocs, runSuiteAndWriteResults, ITERATIONS, LIBRARY_SPEC, WARMUP } from './common';
+import {
+  getTestDocs,
+  runSuiteAndWriteResults,
+  ITERATIONS,
+  LIBRARY_SPEC,
+  WARMUP,
+  getTypeTestTags
+} from './common';
 
 const JSBSONDeserializationOptions = [
   {
@@ -29,6 +36,7 @@ async function main() {
   const testDocs = await getTestDocs('long');
   // LONG JS-BSON Deserialization tests
   for (const documentPath of testDocs) {
+    const tags = getTypeTestTags(documentPath);
     for (const options of JSBSONDeserializationOptions) {
       suite.task({
         documentPath,
@@ -36,13 +44,15 @@ async function main() {
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation: 'deserialize',
-        options
+        options,
+        tags
       });
     }
   }
 
   // LONG JS-BSON Serialization tests
   for (const documentPath of testDocs) {
+    const tags = getTypeTestTags(documentPath);
     for (const options of JSBSONSerializationOptions) {
       suite.task({
         documentPath,
@@ -50,7 +60,8 @@ async function main() {
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation: 'serialize',
-        options
+        options,
+        tags
       });
     }
   }

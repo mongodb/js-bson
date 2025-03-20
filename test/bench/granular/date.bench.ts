@@ -5,7 +5,8 @@ import {
   OPERATIONS,
   ITERATIONS,
   LIBRARY_SPEC,
-  WARMUP
+  WARMUP,
+  getTypeTestTags
 } from './common';
 
 const OPTIONS = {
@@ -17,15 +18,17 @@ async function main() {
   const suite = new Suite('Date');
   const testDocs = await getTestDocs('date');
 
-  for (const operation of OPERATIONS) {
-    for (const documentPath of testDocs) {
+  for (const documentPath of testDocs) {
+    const tags = getTypeTestTags(documentPath);
+    for (const operation of OPERATIONS) {
       suite.task({
         documentPath,
         library: LIBRARY_SPEC,
         iterations: ITERATIONS,
         warmup: WARMUP,
         operation,
-        options: OPTIONS[operation]
+        options: OPTIONS[operation],
+        tags
       });
     }
   }

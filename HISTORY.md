@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.10.3](https://github.com/mongodb/js-bson/compare/v6.10.2...v6.10.3) (2025-02-19)
+
+
+### Bug Fixes
+
+* **NODE-6764:** incorrect negative bigint handling ([#752](https://github.com/mongodb/js-bson/issues/752)) ([b3212b4](https://github.com/mongodb/js-bson/commit/b3212b42672c887ff31d3fab917b54238aa4de7d))
+
+## [6.10.2](https://github.com/mongodb/js-bson/compare/v6.10.1...v6.10.2) (2025-01-29)
+
+
+### Bug Fixes
+
+* **NODE-6608:** calculateObjectSize returns the wrong value for bigint ([#742](https://github.com/mongodb/js-bson/issues/742)) ([1fed073](https://github.com/mongodb/js-bson/commit/1fed073464f89b33fc82b0f36c3f3674af106dce))
+
 ## [6.10.1](https://github.com/mongodb/js-bson/compare/v6.10.0...v6.10.1) (2024-11-27)
 
 
