@@ -18,14 +18,10 @@ type VectorTest = {
 type VectorSuite = { description: string; test_key: string; tests: VectorTest[] };
 
 function fixFloats(f: string | number): number {
+  // Should be nothing to "fix" but validates we didn't get
+  // an unexpected type so we don't silently fail on it during the test
   if (typeof f === 'number') {
     return f;
-  }
-  if (f === 'inf') {
-    return Infinity;
-  }
-  if (f === '-inf') {
-    return -Infinity;
   }
   throw new Error(`test format error: unknown float value: ${f}`);
 }
@@ -98,8 +94,6 @@ const invalidTestExpectedError = new Map()
   .set('Overflow Vector INT8', false)
   .set('Underflow Vector INT8', false)
   .set('INT8 with float inputs', false)
-  // duplicate test! but also skipped.
-  .set('Vector with float values PACKED_BIT', false)
   .set('Vector with float values PACKED_BIT', false);
 
 function testVectorBuilding(test: VectorTest, expectedErrorMessage: string) {
@@ -184,7 +178,7 @@ describe('BSON Binary Vector spec tests', () => {
   const tests: Record<string, VectorSuite> = Object.create(null);
 
   for (const file of fs.readdirSync(path.join(__dirname, 'specs/bson-binary-vector'))) {
-    tests[path.basename(file, '.json')] = JSON.parse(
+    tests[path.basename(file, '.json')] = EJSON.parse(
       fs.readFileSync(path.join(__dirname, 'specs/bson-binary-vector', file), 'utf8')
     );
   }
