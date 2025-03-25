@@ -9,7 +9,7 @@ const { toHex, fromHex } = BSON.onDemand.ByteUtils;
 type VectorHexType = '0x03' | '0x27' | '0x10';
 type VectorTest = {
   description: string;
-  vector?: (number | string)[];
+  vector?: number[];
   valid: boolean;
   dtype_hex: VectorHexType;
   padding?: number;
@@ -46,7 +46,22 @@ function fixBits(f: number | string): number {
   return f;
 }
 
-function make(vector: (number | string)[], dtype_hex: VectorHexType, padding?: number): Binary {
+function dtypeToHelper(dtype_hex: string) {
+  switch (dtype_hex) {
+    case '0x10' /* packed_bit */:
+      return 'fromPackedBits';
+    case '0x03' /* int8 */:
+      return 'fromInt8Array';
+      break;
+    case '0x27' /* float32 */:
+      return 'fromFloat32Array';
+      break;
+    default:
+      throw new Error(`Unknown dtype_hex: ${dtype_hex}`);
+  }
+}
+
+function make(vector: number[], dtype_hex: VectorHexType, padding?: number): Binary {
   let binary: Binary;
   switch (dtype_hex) {
     case '0x10' /* packed_bit */:
@@ -88,17 +103,18 @@ const invalidTestExpectedError = new Map()
     'Insufficient vector data FLOAT32',
     'Invalid Vector: Float32 vector must contain a multiple of 4 bytes'
   )
-  // skipped
-  .set('Overflow Vector PACKED_BIT', false)
-  .set('Underflow Vector PACKED_BIT', false)
-  .set('Overflow Vector INT8', false)
-  .set('Underflow Vector INT8', false)
-  .set('INT8 with float inputs', false)
-  .set('Vector with float values PACKED_BIT', false);
+  // These are not possible given the constraints of the input types allowed:
+  // our helpers will throw an "unsupported_error" for these
+  .set('Overflow Vector PACKED_BIT', 'unsupported_error')
+  .set('Underflow Vector PACKED_BIT', 'unsupported_error')
+  .set('Overflow Vector INT8', 'unsupported_error')
+  .set('Underflow Vector INT8', 'unsupported_error')
+  .set('INT8 with float inputs', 'unsupported_error')
+  .set('Vector with float values PACKED_BIT', 'unsupported_error');
 
-function testVectorBuilding(test: VectorTest, expectedErrorMessage: string) {
-  describe('creating an instance of a Binary class using parameters', () => {
-    it(`bson: ${test.description}`, function () {
+function testVectorInvalidInputValues(test: VectorTest, expectedErrorMessage: string) {
+  describe('when creating a BSON Vector given invalid input values', () => {
+    it(`either BSON.serialize() or Binary.${dtypeToHelper(test.dtype_hex)}() throws a BSONError`, function () {
       let thrownError: Error | undefined;
       try {
         const bin = make(test.vector!, test.dtype_hex, test.padding);
@@ -111,15 +127,14 @@ function testVectorBuilding(test: VectorTest, expectedErrorMessage: string) {
         expect(
           expectedErrorMessage,
           'We expect a certain error message but got an unsupported error'
-        ).to.be.false;
-        this.skip();
+        ).to.equal('unsupported_error');
+      } else {
+        expect(thrownError, thrownError?.stack).to.be.instanceOf(BSONError);
+        expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
       }
-
-      expect(thrownError, thrownError?.stack).to.be.instanceOf(BSONError);
-      expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
     });
 
-    it(`ejson: ${test.description}`, function () {
+    it(`either EJSON.stringify() or Binary.${dtypeToHelper(test.dtype_hex)}() throws a BSONError`, function () {
       let thrownError: Error | undefined;
       try {
         const bin = make(test.vector!, test.dtype_hex, test.padding);
@@ -132,19 +147,18 @@ function testVectorBuilding(test: VectorTest, expectedErrorMessage: string) {
         expect(
           expectedErrorMessage,
           'We expect a certain error message but got an unsupported error'
-        ).to.be.false;
-        this.skip();
+        ).to.equal('unsupported_error');
+      } else {
+        expect(thrownError, thrownError?.stack).to.be.instanceOf(BSONError);
+        expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
       }
-
-      expect(thrownError, thrownError?.stack).to.be.instanceOf(BSONError);
-      expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
     });
   });
 }
 
-function testVectorReserializing(test: VectorTest, expectedErrorMessage: string) {
-  describe('creating an instance of a Binary class using canonical_bson', () => {
-    it(`bson deserialize: ${test.description}`, function () {
+function testVectorInvalidBSONBytes(test: VectorTest, expectedErrorMessage: string) {
+  describe('when creating a Binary Vector instance from invalid bytes', () => {
+    it(`BSON.serialize() throw a BSONError`, function () {
       let thrownError: Error | undefined;
       const bin = BSON.deserialize(Buffer.from(test.canonical_bson!, 'hex'));
 
@@ -158,7 +172,7 @@ function testVectorReserializing(test: VectorTest, expectedErrorMessage: string)
       expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
     });
 
-    it(`ejson stringify: ${test.description}`, function () {
+    it(`EJSON.stringify() throw a BSONError`, function () {
       let thrownError: Error | undefined;
       const bin = BSON.deserialize(Buffer.from(test.canonical_bson!, 'hex'));
 
@@ -174,7 +188,7 @@ function testVectorReserializing(test: VectorTest, expectedErrorMessage: string)
   });
 }
 
-describe('BSON Binary Vector spec tests', () => {
+describe.only('BSON Binary Vector spec tests', () => {
   const tests: Record<string, VectorSuite> = Object.create(null);
 
   for (const file of fs.readdirSync(path.join(__dirname, 'specs/bson-binary-vector'))) {
@@ -197,20 +211,22 @@ describe('BSON Binary Vector spec tests', () => {
          * > MUST assert that the input float array is the same after encoding and decoding.
          */
         for (const test of valid) {
-          it(`encode ${test.description}`, function () {
-            const bin = make(test.vector!, test.dtype_hex, test.padding);
+          describe(test.description, () => {
+            it(`calling Binary.${dtypeToHelper(test.dtype_hex)}() with input numbers and serializing it does not throw`, function () {
+              const bin = make(test.vector!, test.dtype_hex, test.padding);
 
-            const buffer = BSON.serialize({ [suite.test_key]: bin });
-            expect(toHex(buffer)).to.equal(test.canonical_bson!.toLowerCase());
-          });
+              const buffer = BSON.serialize({ [suite.test_key]: bin });
+              expect(toHex(buffer)).to.equal(test.canonical_bson!.toLowerCase());
+            });
 
-          it(`decode ${test.description}`, function () {
-            const canonical_bson = fromHex(test.canonical_bson!.toLowerCase());
-            const doc = BSON.deserialize(canonical_bson);
+            it(`creating a Binary instance from BSON bytes does not throw`, function () {
+              const canonical_bson = fromHex(test.canonical_bson!.toLowerCase());
+              const doc = BSON.deserialize(canonical_bson);
 
-            expect(doc[suite.test_key].sub_type).to.equal(0x09);
-            expect(doc[suite.test_key].buffer[0]).to.equal(+test.dtype_hex);
-            expect(doc[suite.test_key].buffer[1]).to.equal(test.padding);
+              expect(doc[suite.test_key].sub_type).to.equal(0x09);
+              expect(doc[suite.test_key].buffer[0]).to.equal(+test.dtype_hex);
+              expect(doc[suite.test_key].buffer[1]).to.equal(test.padding);
+            });
           });
         }
       });
@@ -224,22 +240,19 @@ describe('BSON Binary Vector spec tests', () => {
         for (const test of invalid) {
           const expectedErrorMessage = invalidTestExpectedError.get(test.description);
 
-          if (test.vector != null && test.canonical_bson != null) {
-            describe('both manual vector building and re-serializing', () => {
-              testVectorBuilding(test, expectedErrorMessage);
-              testVectorReserializing(test, expectedErrorMessage);
-            });
-          } else if (test.canonical_bson != null) {
-            describe('vector re-serializing', () => {
-              testVectorReserializing(test, expectedErrorMessage);
-            });
-          } else if (test.vector != null) {
-            describe('manual vector building', () => {
-              testVectorBuilding(test, expectedErrorMessage);
-            });
-          } else {
-            throw new Error('not testing anything for: ' + util.inspect(test));
-          }
+          describe(test.description, () => {
+            if (test.canonical_bson != null) {
+              testVectorInvalidBSONBytes(test, expectedErrorMessage);
+            }
+
+            if (test.vector != null) {
+              testVectorInvalidInputValues(test, expectedErrorMessage);
+            }
+
+            if (test.vector == null && test.canonical_bson == null) {
+              throw new Error('not testing anything for: ' + util.inspect(test));
+            }
+          });
         }
       });
     });
