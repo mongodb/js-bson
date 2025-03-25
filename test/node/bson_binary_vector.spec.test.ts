@@ -172,6 +172,21 @@ function testVectorInvalidBSONBytes(test: VectorTest, expectedErrorMessage: stri
       expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
     });
 
+    const toHelper = dtypeToHelper(test.dtype_hex).replace('from', 'to');
+    it(`Binary.${toHelper}() throw a BSONError`, function () {
+      let thrownError: Error | undefined;
+      const bin = BSON.deserialize(Buffer.from(test.canonical_bson!, 'hex'));
+
+      try {
+        bin.vector[toHelper]();
+      } catch (error) {
+        thrownError = error;
+      }
+
+      expect(thrownError, thrownError?.stack).to.be.instanceOf(BSONError);
+      expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
+    });
+
     it(`EJSON.stringify() throw a BSONError`, function () {
       let thrownError: Error | undefined;
       const bin = BSON.deserialize(Buffer.from(test.canonical_bson!, 'hex'));

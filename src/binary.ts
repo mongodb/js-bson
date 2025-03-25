@@ -341,6 +341,8 @@ export class Binary extends BSONValue {
       throw new BSONError('Binary datatype field is not Int8');
     }
 
+    validateBinaryVector(this);
+
     return new Int8Array(
       this.buffer.buffer.slice(this.buffer.byteOffset + 2, this.buffer.byteOffset + this.position)
     );
@@ -360,6 +362,8 @@ export class Binary extends BSONValue {
     if (this.buffer[0] !== Binary.VECTOR_TYPE.Float32) {
       throw new BSONError('Binary datatype field is not Float32');
     }
+
+    validateBinaryVector(this);
 
     const floatBytes = new Uint8Array(
       this.buffer.buffer.slice(this.buffer.byteOffset + 2, this.buffer.byteOffset + this.position)
@@ -386,6 +390,8 @@ export class Binary extends BSONValue {
     if (this.buffer[0] !== Binary.VECTOR_TYPE.PackedBit) {
       throw new BSONError('Binary datatype field is not packed bit');
     }
+
+    validateBinaryVector(this);
 
     return new Uint8Array(
       this.buffer.buffer.slice(this.buffer.byteOffset + 2, this.buffer.byteOffset + this.position)
