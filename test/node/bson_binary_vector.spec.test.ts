@@ -188,7 +188,7 @@ function testVectorInvalidBSONBytes(test: VectorTest, expectedErrorMessage: stri
   });
 }
 
-describe.only('BSON Binary Vector spec tests', () => {
+describe('BSON Binary Vector spec tests', () => {
   const tests: Record<string, VectorSuite> = Object.create(null);
 
   for (const file of fs.readdirSync(path.join(__dirname, 'specs/bson-binary-vector'))) {
