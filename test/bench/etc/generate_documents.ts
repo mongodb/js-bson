@@ -92,6 +92,30 @@ for (const { name, size } of [
   );
 }
 
+const vecTypes = [
+  ['int8', 0x03, (size: number) => randomBytes(size)],
+  ['float32', 0x27, (size: number) => randomBytes(8 * size)],
+  ['packedbit', 0x10, (size: number) => randomBytes(8 * size)]
+] as const;
+for (const [vecName, vecType, dataFn] of vecTypes) {
+  generateSimpleTests(
+    `binary_vector_${vecName}`,
+    () => new bson.Binary([vecType, 0x00, ...dataFn(1000)], 9)
+  );
+
+  for (const { name, size } of [
+    { name: 'small', size: 1024 },
+    { name: 'medium', size: 1024 ** 2 }
+  ]) {
+    const binary = new bson.Binary(dataFn(size), 9);
+    const doc = { b: binary };
+    writeFileSync(
+      `${DOCUMENT_PATH}/binary_vector_${vecName}_${name}.json`,
+      bson.EJSON.stringify(doc, { relaxed: false }, 2)
+    );
+  }
+}
+
 // code
 // without scope
 generateSimpleTests(
