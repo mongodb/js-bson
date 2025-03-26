@@ -52,10 +52,8 @@ function dtypeToHelper(dtype_hex: string) {
       return 'fromPackedBits';
     case '0x03' /* int8 */:
       return 'fromInt8Array';
-      break;
     case '0x27' /* float32 */:
       return 'fromFloat32Array';
-      break;
     default:
       throw new Error(`Unknown dtype_hex: ${dtype_hex}`);
   }
