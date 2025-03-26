@@ -415,6 +415,8 @@ export class Binary extends BSONValue {
       throw new BSONError('Binary datatype field is not packed bit');
     }
 
+    validateBinaryVector(this);
+
     const byteCount = this.length() - 2;
     const bitCount = byteCount * 8 - this.buffer[1];
     const bits = new Int8Array(bitCount);
