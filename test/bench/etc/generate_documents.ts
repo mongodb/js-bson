@@ -93,21 +93,21 @@ for (const { name, size } of [
 }
 
 const vecTypes = [
-  ['int8', 0x03, () => randomBytes(32)],
-  ['float32', 0x27, () => randomBytes(32)],
-  ['packedbit', 0x10, () => randomBytes(32)]
+  ['int8', 0x03],
+  ['float32', 0x27],
+  ['packedbit', 0x10]
 ] as const;
-for (const [vecName, vecType, dataFn] of vecTypes) {
+for (const [vecName, vecType] of vecTypes) {
   generateSimpleTests(
     `binary_vector_${vecName}`,
-    () => new bson.Binary([vecType, 0x00, ...dataFn()], 9)
+    () => new bson.Binary([vecType, 0x00, ...randomBytes(32)], 9)
   );
 
   for (const { name, size } of [
     { name: 'small', size: 1024 },
     { name: 'medium', size: 1024 ** 2 }
   ]) {
-    const binary = new bson.Binary([vecType, 0x00, ...dataFn()], 9);
+    const binary = new bson.Binary([vecType, 0x00, ...randomBytes(size)], 9);
     const doc = { b: binary };
     writeFileSync(
       `${DOCUMENT_PATH}/binary_vector_${vecName}_${name}.json`,
