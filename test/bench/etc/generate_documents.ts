@@ -107,7 +107,7 @@ for (const [vecName, vecType, dataFn] of vecTypes) {
     { name: 'small', size: 1024 },
     { name: 'medium', size: 1024 ** 2 }
   ]) {
-    const binary = new bson.Binary(dataFn(size), 9);
+    const binary = new bson.Binary([vecType, 0x00, ...dataFn(size)], 9);
     const doc = { b: binary };
     writeFileSync(
       `${DOCUMENT_PATH}/binary_vector_${vecName}_${name}.json`,
