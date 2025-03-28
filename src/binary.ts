@@ -341,6 +341,8 @@ export class Binary extends BSONValue {
       throw new BSONError('Binary datatype field is not Int8');
     }
 
+    validateBinaryVector(this);
+
     return new Int8Array(
       this.buffer.buffer.slice(this.buffer.byteOffset + 2, this.buffer.byteOffset + this.position)
     );
@@ -360,6 +362,8 @@ export class Binary extends BSONValue {
     if (this.buffer[0] !== Binary.VECTOR_TYPE.Float32) {
       throw new BSONError('Binary datatype field is not Float32');
     }
+
+    validateBinaryVector(this);
 
     const floatBytes = new Uint8Array(
       this.buffer.buffer.slice(this.buffer.byteOffset + 2, this.buffer.byteOffset + this.position)
@@ -387,6 +391,8 @@ export class Binary extends BSONValue {
       throw new BSONError('Binary datatype field is not packed bit');
     }
 
+    validateBinaryVector(this);
+
     return new Uint8Array(
       this.buffer.buffer.slice(this.buffer.byteOffset + 2, this.buffer.byteOffset + this.position)
     );
@@ -408,6 +414,8 @@ export class Binary extends BSONValue {
     if (this.buffer[0] !== Binary.VECTOR_TYPE.PackedBit) {
       throw new BSONError('Binary datatype field is not packed bit');
     }
+
+    validateBinaryVector(this);
 
     const byteCount = this.length() - 2;
     const bitCount = byteCount * 8 - this.buffer[1];
@@ -515,6 +523,12 @@ export function validateBinaryVector(vector: Binary): void {
     padding !== 0
   ) {
     throw new BSONError('Invalid Vector: padding must be zero for int8 and float32 vectors');
+  }
+
+  if (datatype === Binary.VECTOR_TYPE.Float32) {
+    if (size !== 0 && size - 2 !== 0 && (size - 2) % 4 !== 0) {
+      throw new BSONError('Invalid Vector: Float32 vector must contain a multiple of 4 bytes');
+    }
   }
 
   if (datatype === Binary.VECTOR_TYPE.PackedBit && padding !== 0 && size === 2) {
