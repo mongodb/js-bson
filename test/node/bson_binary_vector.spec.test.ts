@@ -110,33 +110,71 @@ const invalidTestExpectedError = new Map()
   .set('INT8 with float inputs', 'unsupported_error')
   .set('Vector with float values PACKED_BIT', 'unsupported_error');
 
+const invalidTestsWhereHelpersDoNotThrow = new Set()
+  .add('FLOAT32 with padding')
+  .add('INT8 with padding');
+
 function testVectorInvalidInputValues(test: VectorTest, expectedErrorMessage: string) {
   describe('when creating a BSON Vector given invalid input values', () => {
-    it(`either BSON.serialize() or Binary.${dtypeToHelper(test.dtype_hex)}() throws a BSONError`, function () {
+    it(`BSON.serialize() throws a BSONError`, function () {
       let thrownError: Error | undefined;
+
+      let bin;
       try {
-        const bin = make(test.vector!, test.dtype_hex, test.padding);
+        bin = make(test.vector!, test.dtype_hex, test.padding);
+      } catch (error) {
+        thrownError = error;
+      }
+
+      if (thrownError?.message.startsWith('unsupported_error')) {
+        expect(
+          expectedErrorMessage,
+          'We expect a certain error message but got an unsupported error'
+        ).to.equal('unsupported_error');
+        return;
+      }
+
+      try {
         BSON.serialize({ bin });
       } catch (error) {
         thrownError = error;
       }
 
+      expect(thrownError, thrownError?.stack).to.be.instanceOf(BSONError);
+      expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
+    });
+
+    it(`Binary.${dtypeToHelper(test.dtype_hex)}() throws a BSONError`, function () {
+      let thrownError: Error | undefined;
+      try {
+        make(test.vector!, test.dtype_hex, test.padding);
+      } catch (error) {
+        thrownError = error;
+      }
+
+      if (invalidTestsWhereHelpersDoNotThrow.has(test.description)) {
+        expect(thrownError).to.not.exist;
+        return;
+      }
+
       if (thrownError?.message.startsWith('unsupported_error')) {
         expect(
           expectedErrorMessage,
           'We expect a certain error message but got an unsupported error'
         ).to.equal('unsupported_error');
-      } else {
-        expect(thrownError, thrownError?.stack).to.be.instanceOf(BSONError);
-        expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
+        return;
       }
+
+      expect(thrownError, thrownError?.stack).to.be.instanceOf(BSONError);
+      expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
     });
 
-    it(`either EJSON.stringify() or Binary.${dtypeToHelper(test.dtype_hex)}() throws a BSONError`, function () {
+    it(`EJSON.stringify() throws a BSONError`, function () {
       let thrownError: Error | undefined;
+
+      let bin;
       try {
-        const bin = make(test.vector!, test.dtype_hex, test.padding);
-        BSON.EJSON.stringify({ bin });
+        bin = make(test.vector!, test.dtype_hex, test.padding);
       } catch (error) {
         thrownError = error;
       }
@@ -146,10 +184,17 @@ function testVectorInvalidInputValues(test: VectorTest, expectedErrorMessage: st
           expectedErrorMessage,
           'We expect a certain error message but got an unsupported error'
         ).to.equal('unsupported_error');
-      } else {
-        expect(thrownError, thrownError?.stack).to.be.instanceOf(BSONError);
-        expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
+        return;
       }
+
+      try {
+        BSON.EJSON.stringify({ bin });
+      } catch (error) {
+        thrownError = error;
+      }
+
+      expect(thrownError, thrownError?.stack).to.be.instanceOf(BSONError);
+      expect(thrownError?.message).to.match(new RegExp(expectedErrorMessage));
     });
   });
 }

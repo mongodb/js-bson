@@ -442,7 +442,9 @@ export class Binary extends BSONValue {
     buffer[1] = 0;
     const intBytes = new Uint8Array(array.buffer, array.byteOffset, array.byteLength);
     buffer.set(intBytes, 2);
-    return new this(buffer, this.SUBTYPE_VECTOR);
+    const bin = new this(buffer, this.SUBTYPE_VECTOR);
+    validateBinaryVector(bin);
+    return bin;
   }
 
   /** Constructs a Binary representing an Float32 Vector. */
@@ -456,7 +458,9 @@ export class Binary extends BSONValue {
 
     if (NumberUtils.isBigEndian) ByteUtils.swap32(new Uint8Array(binaryBytes.buffer, 2));
 
-    return new this(binaryBytes, this.SUBTYPE_VECTOR);
+    const bin = new this(binaryBytes, this.SUBTYPE_VECTOR);
+    validateBinaryVector(bin);
+    return bin;
   }
 
   /**
@@ -469,7 +473,9 @@ export class Binary extends BSONValue {
     buffer[0] = Binary.VECTOR_TYPE.PackedBit;
     buffer[1] = padding;
     buffer.set(array, 2);
-    return new this(buffer, this.SUBTYPE_VECTOR);
+    const bin = new this(buffer, this.SUBTYPE_VECTOR);
+    validateBinaryVector(bin);
+    return bin;
   }
 
   /**
