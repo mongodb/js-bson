@@ -1,7 +1,6 @@
 import * as util from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as assert from 'node:assert/strict';
 import { BSON, BSONError, Binary, EJSON } from '../register-bson';
 import { expect } from 'chai';
 
@@ -110,10 +109,6 @@ const invalidTestExpectedError = new Map()
   .set('Underflow Vector INT8', 'unsupported_error')
   .set('INT8 with float inputs', 'unsupported_error')
   .set('Vector with float values PACKED_BIT', 'unsupported_error');
-
-const invalidTestsWhereHelpersDoNotThrow = new Set()
-  .add('FLOAT32 with padding')
-  .add('INT8 with padding');
 
 function catchError<T>(
   fn: () => T
