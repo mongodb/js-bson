@@ -165,7 +165,7 @@ function testVectorInvalidInputValues(test: VectorTest, expectedErrorMessage: st
     } else {
       expect(errorName).to.equal('BSONError'); // unsupported_error are only when making vectors
 
-      it(`Binary.${dtypeToHelper(test.dtype_hex)}() not throw`, function () {
+      it(`Binary.${dtypeToHelper(test.dtype_hex)}() does not throw`, function () {
         expect(binaryCreation).to.have.property('status', 'returned');
       });
 
