@@ -121,45 +121,45 @@ function catchError<T>(
 }
 
 function testVectorInvalidInputValues(test: VectorTest, expectedErrorMessage: string) {
-  describe('when creating a BSON Vector given invalid input values', () => {
-    const binaryCreation = catchError(make.bind(null, test.vector!, test.dtype_hex, test.padding));
-    const bsonBytesCreation =
-      binaryCreation.status !== 'thrown'
-        ? catchError(BSON.serialize.bind(null, { bin: binaryCreation.result }))
-        : undefined;
-    const ejsonStringCreation =
-      binaryCreation.status !== 'thrown'
-        ? catchError(BSON.EJSON.stringify.bind(null, { bin: binaryCreation.result }))
-        : undefined;
+  const binaryCreation = catchError(make.bind(null, test.vector!, test.dtype_hex, test.padding));
+  const bsonBytesCreation =
+    binaryCreation.status !== 'thrown'
+      ? catchError(BSON.serialize.bind(null, { bin: binaryCreation.result }))
+      : undefined;
+  const ejsonStringCreation =
+    binaryCreation.status !== 'thrown'
+      ? catchError(BSON.EJSON.stringify.bind(null, { bin: binaryCreation.result }))
+      : undefined;
 
-    const binaryHelperValidations = [
-      'Padding specified with no vector data PACKED_BIT',
-      'Exceeding maximum padding PACKED_BIT',
-      'Negative padding PACKED_BIT',
-      ...Array.from(invalidTestExpectedError.entries())
-        .filter(([, v]) => v === 'unsupported_error')
-        .map(([k]) => k)
-    ];
+  const binaryHelperValidations = [
+    'Padding specified with no vector data PACKED_BIT',
+    'Exceeding maximum padding PACKED_BIT',
+    'Negative padding PACKED_BIT',
+    ...Array.from(invalidTestExpectedError.entries())
+      .filter(([, v]) => v === 'unsupported_error')
+      .map(([k]) => k)
+  ];
 
-    const errorType = expectedErrorMessage === 'unsupported_error' ? Error : BSONError;
-    const errorName = expectedErrorMessage === 'unsupported_error' ? 'Error' : 'BSONError';
+  const errorType = expectedErrorMessage === 'unsupported_error' ? Error : BSONError;
+  const errorName = expectedErrorMessage === 'unsupported_error' ? 'Error' : 'BSONError';
 
-    const check = outcome => {
-      expect(outcome).to.exist;
-      expect(outcome.status).to.equal('thrown');
-      expect(outcome.result).to.be.instanceOf(errorType);
-      expect(outcome.result)
-        .to.have.property('message')
-        .that.matches(new RegExp(expectedErrorMessage));
-    };
+  const check = outcome => {
+    expect(outcome).to.exist;
+    expect(outcome.status).to.equal('thrown');
+    expect(outcome.result).to.be.instanceOf(errorType);
+    expect(outcome.result).to.match(new RegExp(expectedErrorMessage));
+  };
 
-    if (binaryHelperValidations.includes(test.description)) {
+  if (binaryHelperValidations.includes(test.description)) {
+    describe('when creating a BSON Vector given invalid input values', () => {
       it(`Binary.${dtypeToHelper(test.dtype_hex)}() throws a ${errorName}`, function () {
         check(binaryCreation);
       });
-    } else {
-      expect(errorName).to.equal('BSONError'); // unsupported_error are only when making vectors
+    });
+  } else {
+    expect(errorName).to.equal('BSONError'); // unsupported_error are only when making vectors
 
+    describe('when encoding a BSON Vector given invalid input values', () => {
       it(`Binary.${dtypeToHelper(test.dtype_hex)}() does not throw`, function () {
         expect(binaryCreation).to.have.property('status', 'returned');
       });
@@ -171,8 +171,8 @@ function testVectorInvalidInputValues(test: VectorTest, expectedErrorMessage: st
       it(`EJSON.stringify() throws a BSONError`, function () {
         check(ejsonStringCreation);
       });
-    }
-  });
+    });
+  }
 }
 
 function testVectorInvalidBSONBytes(test: VectorTest, expectedErrorMessage: string) {
