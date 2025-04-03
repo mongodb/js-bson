@@ -176,7 +176,7 @@ function testVectorInvalidInputValues(test: VectorTest, expectedErrorMessage: st
 }
 
 function testVectorInvalidBSONBytes(test: VectorTest, expectedErrorMessage: string) {
-  describe('when creating a Binary Vector instance from invalid bytes', () => {
+  describe('when encoding a Binary Vector made from invalid bytes', () => {
     it(`BSON.serialize() throw a BSONError`, function () {
       let thrownError: Error | undefined;
       const bin = BSON.deserialize(Buffer.from(test.canonical_bson!, 'hex'));
