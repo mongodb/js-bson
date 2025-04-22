@@ -115,13 +115,15 @@ describe('bson entrypoint', () => {
     };
   }
 
-  for (const test of [
-    it(
-      'browser bundle does not use top-level await',
-      testSyncESMImport('browser', './lib/bson.mjs')
-    ),
-    it('node bundle does not use top-level await', testSyncESMImport('node', './lib/bson.node.mjs'))
-  ]) {
-    if (NODE_MAJOR < 22) test.skip();
-  }
+  const itFn = NODE_MAJOR < 22 ? it.skip : it;
+
+  itFn(
+    'browser bundle does not use top-level await',
+    testSyncESMImport('browser', './lib/bson.mjs')
+  );
+
+  itFn(
+    'node bundle does not use top-level await',
+    testSyncESMImport('node', './lib/bson.node.mjs')
+  );
 });
