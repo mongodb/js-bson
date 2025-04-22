@@ -66,7 +66,7 @@ const DOCUMENT_ROOT = path.resolve(`${__dirname}/../documents`);
     }
   }
 
-  console.log('No duplcate testName:Option pairs found. Now merging files...');
+  console.log('No duplicate testName:Option pairs found. Now merging files...');
 
   const meansFile = `${__dirname}/resultsCollectedMeans.json`;
   // Iterate over all result files and merge into one file
