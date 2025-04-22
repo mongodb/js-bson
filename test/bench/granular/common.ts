@@ -1,4 +1,5 @@
 import { Suite } from 'dbx-js-tools/packages/bson-bench';
+import * as process from 'process';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
@@ -71,7 +72,7 @@ export function readEnvVars(): { warmup: number; iterations: number; library: st
   const rv = {
     warmup: Number.isSafeInteger(envWarmup) && envWarmup > 0 ? envWarmup : 100_000,
     iterations: Number.isSafeInteger(envIterations) && envIterations > 0 ? envIterations : 10_000,
-    library: libraryPath ? `bson:${libraryPath}` : 'bson#main'
+    library: libraryPath ? `bson:${libraryPath}` : `bson:${process.cwd()}`
   };
 
   console.log(
