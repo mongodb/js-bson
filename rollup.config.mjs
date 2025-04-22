@@ -61,7 +61,7 @@ const config = [
       nodeResolve({ resolveOnly: [] })
     ],
     output: {
-      file: 'lib/bson.browser.mjs',
+      file: 'lib/bson.mjs',
       format: 'esm',
       sourcemap: true
     }
