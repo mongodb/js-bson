@@ -1,3 +1,4 @@
+import assert from 'node:assert/strict';
 import MagicString from 'magic-string';
 
 const CRYPTO_IMPORT_ESM_SRC = `import { randomBytes as nodejsRandomBytes } from 'crypto';`;
@@ -11,7 +12,10 @@ const CODE_TO_REPLACE = `const nodejsRandomBytes = (() => {
     }
 })();`;
 
-export function requireRewriter({ isBrowser = false } = {}) {
+/** @param {{ target: 'browser' | 'node'}} configuration - destination information that changes the replacement syntax used. */
+export function requireRewriter({ target }) {
+  assert.match(target, /^(node|browser)$/, 'target must be either "node" or "browser"');
+
   return {
     /**
      * Take the compiled source code input; types are expected to already have been removed
@@ -35,7 +39,7 @@ export function requireRewriter({ isBrowser = false } = {}) {
 
       // MagicString lets us edit the source code and still generate an accurate source map
       const magicString = new MagicString(code);
-      magicString.overwrite(start, end, isBrowser ? BROWSER_ESM_SRC : CRYPTO_IMPORT_ESM_SRC);
+      magicString.overwrite(start, end, target === 'browser' ? BROWSER_ESM_SRC : CRYPTO_IMPORT_ESM_SRC);
 
       return {
         code: magicString.toString(),
