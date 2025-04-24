@@ -61,7 +61,7 @@ export function getMixedTestTags(documentPath: string) {
 export async function runSuiteAndWriteResults(suite: Suite) {
   const targetDirectory = path.resolve(`${__dirname}/../../etc`);
   await suite.run();
-  if (suite.errors.length) process.exitCode = 1;
+  if (suite.errors.length) throw suite.errors[0].error;
   await suite.writeResults(`${targetDirectory}/${suite.name.toLowerCase()}Results.json`);
 }
 

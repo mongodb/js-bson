@@ -78,7 +78,7 @@ suite.task({
 });
 
 suite.run().then(async () => {
-  if (suite.errors.length) process.exitCode = 1;
+  if (suite.errors.length) throw suite.errors[0].error;
 
   const cpuBaseline = await readFile(
     join(__dirname, '..', '..', 'etc', 'cpuBaseline.json'),
