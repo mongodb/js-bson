@@ -3,6 +3,7 @@ import * as BSON from '../register-bson';
 import { sorted, byStrings } from './tools/utils';
 import { readFile } from 'fs/promises';
 import { resolve } from 'path';
+import * as child_process from 'node:child_process';
 
 const EXPECTED_EXPORTS = [
   // This is our added web indicator not a real export but a small exception for this test.
@@ -41,6 +42,7 @@ const EXPECTED_EXPORTS = [
 ];
 
 const EXPECTED_EJSON_EXPORTS = ['parse', 'stringify', 'serialize', 'deserialize'];
+const NODE_MAJOR = Number(process.versions.node.split('.')[0]);
 
 describe('bson entrypoint', () => {
   it('should export all and only the expected keys in expected_exports', () => {
@@ -96,4 +98,32 @@ describe('bson entrypoint', () => {
       expect(pkg).nested.property('exports.default.types', './bson.d.ts');
     });
   });
+
+  function testSyncESMImport(name, module) {
+    return () => {
+      const child = child_process.spawnSync(
+        'node',
+        ['--experimental-print-required-tla', '--print', `require('${module}')`],
+        { encoding: 'utf-8' }
+      );
+
+      expect(
+        child.status,
+        `expected to be able to 'require' to import the ${name} ESM because there should be no top-level await:\n` +
+          child.stderr
+      ).to.equal(0);
+    };
+  }
+
+  const itFn = NODE_MAJOR < 22 ? it.skip : it;
+
+  itFn(
+    'browser bundle does not use top-level await',
+    testSyncESMImport('browser', './lib/bson.mjs')
+  );
+
+  itFn(
+    'node bundle does not use top-level await',
+    testSyncESMImport('node', './lib/bson.node.mjs')
+  );
 });

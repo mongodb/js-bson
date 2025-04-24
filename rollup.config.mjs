@@ -57,18 +57,18 @@ const config = [
     input,
     plugins: [
       typescript(tsConfig),
-      requireRewriter({ isBrowser: true }),
+      requireRewriter({ target: 'browser' }),
       nodeResolve({ resolveOnly: [] })
     ],
     output: {
-      file: 'lib/bson.browser.mjs',
+      file: 'lib/bson.mjs',
       format: 'esm',
       sourcemap: true
     }
   },
   {
     input,
-    plugins: [typescript(tsConfig), requireRewriter(), nodeResolve({ resolveOnly: [] })],
+    plugins: [typescript(tsConfig), requireRewriter({ target: 'node' }), nodeResolve({ resolveOnly: [] })],
     output: {
       file: 'lib/bson.node.mjs',
       format: 'esm',

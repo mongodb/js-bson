@@ -79,7 +79,7 @@
   "exports": {
     "browser": {
       "types": "./bson.d.ts",
-      "default": "./lib/bson.browser.mjs"
+      "default": "./lib/bson.mjs"
     },
     "react-native": "./lib/bson.rn.cjs",
     "default": {
