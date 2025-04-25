@@ -52,19 +52,28 @@ function loadCJSModuleBSON(globals) {
   return { context, exports: context.exports };
 }
 
-async function loadESModuleBSON(globals) {
-  const filename = path.resolve(__dirname, `../lib/bson.mjs`);
+async function loadESModuleBSON() {
+  const filename = path.resolve(__dirname, `../lib/bson.node.mjs`);
   const code = await fs.promises.readFile(filename, { encoding: 'utf8' });
 
-  const context = vm.createContext({
-    ...commonGlobals,
-    // Putting this last to allow caller to override default globals
-    ...globals
-  });
+  const context = vm.createContext(commonGlobals);
 
   const bsonMjs = new vm.SourceTextModule(code, { context });
+  const cryptoModule = new vm.SyntheticModule(
+    ['randomBytes'],
+    function () {
+      this.setExport('randomBytes', crypto.randomBytes);
+    },
+    { context }
+  );
 
-  await bsonMjs.link(() => {});
+  await cryptoModule.link(() => {});
+
+  await bsonMjs.link(specifier => {
+    if (specifier === 'crypto') {
+      return cryptoModule;
+    }
+  });
   await bsonMjs.evaluate();
 
   return { context, exports: bsonMjs.namespace };
