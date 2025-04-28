@@ -26,9 +26,15 @@ updates:
       # we ignore TS as a part of quarterly dependency updates.
       - dependency-name: "typescript"
     groups:
-      development-dependencies:
+      development-dependencies-minor-patch:
         dependency-type: "development"
         applies-to: version-updates
         update-types:
         - "minor"
         - "patch"
+
+      development-dependencies-major:
+        dependency-type: "development"
+        applies-to: version-updates
+        update-types:
+        - "major"
