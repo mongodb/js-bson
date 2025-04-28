@@ -61,6 +61,7 @@ export function getMixedTestTags(documentPath: string) {
 export async function runSuiteAndWriteResults(suite: Suite) {
   const targetDirectory = path.resolve(`${__dirname}/../../etc`);
   await suite.run();
+  if (suite.errors.length) throw suite.errors[0].error;
   await suite.writeResults(`${targetDirectory}/${suite.name.toLowerCase()}Results.json`);
 }
 
@@ -71,7 +72,7 @@ export function readEnvVars(): { warmup: number; iterations: number; library: st
   const rv = {
     warmup: Number.isSafeInteger(envWarmup) && envWarmup > 0 ? envWarmup : 100_000,
     iterations: Number.isSafeInteger(envIterations) && envIterations > 0 ? envIterations : 10_000,
-    library: libraryPath ? `bson:${libraryPath}` : 'bson#main'
+    library: libraryPath ? `bson:${libraryPath}` : `bson:${process.cwd()}`
   };
 
   console.log(

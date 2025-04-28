@@ -83,15 +83,16 @@ WARMUP=<warmup iterations> ITERATIONS=<measured iterations> npm run check:granul
 This will build the granular tests and run them with `test/bench/etc/run_granular_benchmarks.js`. The `WARMUP` and `ITERATIONS` environment variables can be optionally provided to configure how these granular benchmarks
 are run. `WARMUP` changes the number of iterations run before results are collected to give v8's
 optimizing compiler time to reach steady state. `ITERATIONS` changes the number of iterations that
-are measured and used to calculate summary statistics. Note also that the test can be configured to
-make use of the local copy of bson when testing performance changes locally by setting the `LIBRARY`
-variable to the root directory of the bson library to be tested.
+are measured and used to calculate summary statistics.
 
 ```bash
-WARMUP=100 ITERATIONS=1000 LIBRARY=$(pwd) npm run check:granular-bench
+WARMUP=100 ITERATIONS=1000 npm run check:granular-bench
 ```
-When the `LIBRARY` environment variable is unset, the benchmark clones and runs against the main
-branch of this repository.
+
+When the `LIBRARY` environment variable is unset, the benchmark clones and runs against the current working directory.
+
+> [!NOTE]
+> The test can be configured to make use of a different copy of bson when testing performance changes locally by setting the `LIBRARY` variable to the root directory of a copy of the bson library.
 
 When the script is complete, results will be output to `test/bench/etc/resultsCollectedMeans.json`. These results will
 be in a format compatible with evergreen's perf.send command. To convert these results to CSV, run
@@ -109,13 +110,14 @@ npm run check:spec-bench
 
 This will run the spec benchmarks in `test/bench/spec/bsonBench.ts` which also makes use of the
 `bson-bench` library. Results will be written to `bsonBench`. The warmup and iterations are not
-configurable as these are determined by the common driver benchmarking specification, but similar
-to the granular benchmarks, the spec benchmarks can be run against the local copy of bson by setting
-the `LIBRARY` environment variable appropriately.
+configurable as these are determined by the common driver benchmarking specification.
 
 ```bash
-LIBRARY=$(pwd) npm run check:spec-bench
+npm run check:spec-bench
 ```
+
+> [!NOTE]
+> The test can be configured to make use of a different copy of bson when testing performance changes locally by setting the `LIBRARY` variable to the root directory of a copy of the bson library.
 
 ### Commit messages
 
