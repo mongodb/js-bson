@@ -13,6 +13,7 @@
     "watch": "webpack --watch"
   },
   "devDependencies": {
+    "@webpack-cli/generators": "^3.0.1",
     "ts-loader": "^9.5.2",
     "typescript": "^5.8.3",
     "webpack": "^5.99.7",
