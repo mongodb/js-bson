@@ -128,7 +128,7 @@ export function parseToElements(
     if (
       type === /* double */ 1 ||
       type === /* long */ 18 ||
-      type === /* date */ 9||
+      type === /* date */ 9 ||
       type === /* timestamp */ 17
     ) {
       length = 8;
