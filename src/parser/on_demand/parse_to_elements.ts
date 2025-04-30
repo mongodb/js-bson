@@ -8,32 +8,34 @@ import { NumberUtils } from '../../utils/number_utils';
  * - This enum is const so the code we produce will inline the numbers
  * - `minKey` is set to 255 so unsigned comparisons succeed
  * - Modify with caution, double check the bundle contains literals
+ *
+ * @example
+ * ```ts
+ * const BSONElementType = {
+ *   double: 1,
+ *   string: 2,
+ *   object: 3,
+ *   array: 4,
+ *   binData: 5,
+ *   undefined: 6,
+ *   objectId: 7,
+ *   bool: 8,
+ *   date: 9,
+ *   null: 10,
+ *   regex: 11,
+ *   dbPointer: 12,
+ *   javascript: 13,
+ *   symbol: 14,
+ *   javascriptWithScope: 15,
+ *   int: 16,
+ *   timestamp: 17,
+ *   long: 18,
+ *   decimal: 19,
+ *   minKey: 255,
+ *   maxKey: 127
+ * } as const;
+ * ```
  */
-const BSONElementType = {
-  double: 1,
-  string: 2,
-  object: 3,
-  array: 4,
-  binData: 5,
-  undefined: 6,
-  objectId: 7,
-  bool: 8,
-  date: 9,
-  null: 10,
-  regex: 11,
-  dbPointer: 12,
-  javascript: 13,
-  symbol: 14,
-  javascriptWithScope: 15,
-  int: 16,
-  timestamp: 17,
-  long: 18,
-  decimal: 19,
-  minKey: 255,
-  maxKey: 127
-} as const;
-
-type BSONElementType = (typeof BSONElementType)[keyof typeof BSONElementType];
 
 /**
  * @public
@@ -124,50 +126,50 @@ export function parseToElements(
     let length: number;
 
     if (
-      type === BSONElementType.double ||
-      type === BSONElementType.long ||
-      type === BSONElementType.date ||
-      type === BSONElementType.timestamp
+      type === /* double */ 1 ||
+      type === /* long */ 18 ||
+      type === /* date */ 9||
+      type === /* timestamp */ 17
     ) {
       length = 8;
-    } else if (type === BSONElementType.int) {
+    } else if (type === /* int */ 16) {
       length = 4;
-    } else if (type === BSONElementType.objectId) {
+    } else if (type === /* objectId */ 7) {
       length = 12;
-    } else if (type === BSONElementType.decimal) {
+    } else if (type === /* decimal */ 19) {
       length = 16;
-    } else if (type === BSONElementType.bool) {
+    } else if (type === /* bool */ 8) {
       length = 1;
     } else if (
-      type === BSONElementType.null ||
-      type === BSONElementType.undefined ||
-      type === BSONElementType.maxKey ||
-      type === BSONElementType.minKey
+      type === /* null */ 10 ||
+      type === /* undefined */ 6 ||
+      type === /* maxKey */ 127 ||
+      type === /* minKey */ 255
     ) {
       length = 0;
     }
     // Needs a size calculation
-    else if (type === BSONElementType.regex) {
+    else if (type === /* regex */ 11) {
       length = findNull(bytes, findNull(bytes, offset) + 1) + 1 - offset;
     } else if (
-      type === BSONElementType.object ||
-      type === BSONElementType.array ||
-      type === BSONElementType.javascriptWithScope
+      type === /* object */ 3 ||
+      type === /* array */ 4 ||
+      type === /* javascriptWithScope */ 15
     ) {
       length = getSize(bytes, offset);
     } else if (
-      type === BSONElementType.string ||
-      type === BSONElementType.binData ||
-      type === BSONElementType.dbPointer ||
-      type === BSONElementType.javascript ||
-      type === BSONElementType.symbol
+      type === /* string */ 2 ||
+      type === /* binData */ 5 ||
+      type === /* dbPointer */ 12 ||
+      type === /* javascript */ 13 ||
+      type === /* symbol */ 14
     ) {
       length = getSize(bytes, offset) + 4;
-      if (type === BSONElementType.binData) {
+      if (type === /* binData */ 5) {
         // binary subtype
         length += 1;
       }
-      if (type === BSONElementType.dbPointer) {
+      if (type === /* dbPointer */ 12) {
         // dbPointer's objectId
         length += 12;
       }
