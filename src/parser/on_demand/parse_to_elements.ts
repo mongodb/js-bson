@@ -33,7 +33,7 @@ const BSONElementType = {
   maxKey: 127
 } as const;
 
-type BSONElementType = typeof BSONElementType[keyof typeof BSONElementType];
+type BSONElementType = (typeof BSONElementType)[keyof typeof BSONElementType];
 
 /**
  * @public
