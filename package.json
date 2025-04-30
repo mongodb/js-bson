@@ -75,18 +75,18 @@
     "native": false
   },
   "main": "./lib/bson.cjs",
-  "module": "./lib/bson.mjs",
+  "module": "./lib/bson.node.mjs",
   "exports": {
-    "import": {
+    "browser": {
       "types": "./bson.d.ts",
       "default": "./lib/bson.mjs"
     },
-    "require": {
-      "types": "./bson.d.ts",
-      "default": "./lib/bson.cjs"
-    },
     "react-native": "./lib/bson.rn.cjs",
-    "browser": "./lib/bson.mjs"
+    "default": {
+      "types": "./bson.d.ts",
+      "import": "./lib/bson.node.mjs",
+      "require": "./lib/bson.cjs"
+    }
   },
   "compass:exports": {
     "import": "./lib/bson.cjs",

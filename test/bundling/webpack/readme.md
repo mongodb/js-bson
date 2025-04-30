@@ -1,7 +1,6 @@
 # Webpack BSON setup example
 
-In order to use BSON with webpack there are two changes beyond the default config file needed:
-- Set `experiments: { topLevelAwait: true }` in the top-level config object
+In order to use BSON with webpack there is one change beyond the default config file needed:
 - Set `resolve: { fallback: { crypto: false } }` in the top-level config object
 
 ## Testing
