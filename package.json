@@ -57,7 +57,7 @@
     "source-map-support": "^0.5.21",
     "tar": "^7.4.3",
     "ts-node": "^10.9.2",
-    "tsd": "^0.31.1",
+    "tsd": "^0.32.0",
     "typescript": "^5.5.4",
     "typescript-cached-transpile": "0.0.6",
     "uuid": "^11.1.0"
