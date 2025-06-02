@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.10.4](https://github.com/mongodb/js-bson/compare/v6.10.3...v6.10.4) (2025-05-05)
+
+
+### Bug Fixes
+
+* **NODE-6074:** Removes top-level await in bson with separate node and browser ESM bundles ([#749](https://github.com/mongodb/js-bson/issues/749)) ([4602973](https://github.com/mongodb/js-bson/commit/46029739ace8596beb5c397eae7992b23c5872f4))
+* **NODE-6735, NODE-6711:** add BSON vector validation to EJSON stringification, serialization and conversion to native types ([#748](https://github.com/mongodb/js-bson/issues/748)) ([64ff6a2](https://github.com/mongodb/js-bson/commit/64ff6a28643c5d7bb2933d2b82ad82483e8cb2e7))
+
 ## [6.10.3](https://github.com/mongodb/js-bson/compare/v6.10.2...v6.10.3) (2025-02-19)
 
 
