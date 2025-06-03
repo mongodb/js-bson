@@ -125,8 +125,8 @@ export const nodeJsByteUtils = {
     return Buffer.from(hex, 'hex');
   },
 
-  toHex(buffer: Uint8Array): string {
-    return nodeJsByteUtils.toLocalBufferType(buffer).toString('hex');
+  toHex(buffer: Uint8Array, start?: number, end?: number): string {
+    return nodeJsByteUtils.toLocalBufferType(buffer).toString('hex', start, end);
   },
 
   toUTF8(buffer: Uint8Array, start: number, end: number, fatal: boolean): string {
