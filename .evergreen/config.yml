@@ -326,6 +326,7 @@ buildvariants:
   - name: perf
     display_name: RHEL 9.0 perf
     run_on: rhel90-dbx-perf-large
+    activate: true
     tasks:
       - run-granular-benchmarks
       - run-spec-benchmarks
