@@ -11,7 +11,12 @@ import {
 
 async function main() {
   const suite = new Suite('Binary');
-  const testDocs = await getTestDocs('binary');
+  const testDocs = [
+    ...(await getTestDocs('binary_vector_float32')),
+    ...(await getTestDocs('binary_vector_int8')),
+    ...(await getTestDocs('binary_vector_packedbit')),
+    ...(await getTestDocs('binary'))
+  ];
   // deserialize
   for (const documentPath of testDocs) {
     const tags = getTypeTestTags(documentPath);
