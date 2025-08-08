@@ -366,7 +366,7 @@ export class Long extends BSONValue {
     let unsigned = false;
     if (typeof unsignedOrRadix === 'number') {
       // For goog.math.long compatibility
-      (radix = unsignedOrRadix), (unsignedOrRadix = false);
+      ((radix = unsignedOrRadix), (unsignedOrRadix = false));
     } else {
       unsigned = !!unsignedOrRadix;
     }
@@ -456,7 +456,7 @@ export class Long extends BSONValue {
     let unsigned = false;
     if (typeof unsignedOrRadix === 'number') {
       // For goog.math.long compatibility
-      (radix = unsignedOrRadix), (unsignedOrRadix = false);
+      ((radix = unsignedOrRadix), (unsignedOrRadix = false));
     } else {
       unsigned = !!unsignedOrRadix;
     }
