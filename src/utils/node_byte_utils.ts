@@ -17,7 +17,7 @@ type NodeJsBufferConstructor = Omit<Uint8ArrayConstructor, 'from'> & {
   from(array: number[]): NodeJsBuffer;
   from(array: Uint8Array): NodeJsBuffer;
   from(array: ArrayBuffer): NodeJsBuffer;
-  from(array: ArrayBuffer, byteOffset: number, byteLength: number): NodeJsBuffer;
+  from(array: ArrayBufferLike, byteOffset: number, byteLength: number): NodeJsBuffer;
   from(base64: string, encoding: NodeJsEncoding): NodeJsBuffer;
   byteLength(input: string, encoding: 'utf8'): number;
   isBuffer(value: unknown): value is NodeJsBuffer;
