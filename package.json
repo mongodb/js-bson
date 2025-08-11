@@ -47,7 +47,7 @@
     "eslint-plugin-prettier": "^5.2.6",
     "eslint-plugin-tsdoc": "^0.4.0",
     "magic-string": "^0.30.11",
-    "mocha": "^10.7.0",
+    "mocha": "^11.7.1",
     "node-fetch": "^3.3.2",
     "nyc": "^15.1.0",
     "prettier": "^3.5.3",
