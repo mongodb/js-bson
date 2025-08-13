@@ -45,7 +45,10 @@ export class Binary extends BSONValue {
   static readonly SUBTYPE_DEFAULT = 0;
   /** Function BSON type */
   static readonly SUBTYPE_FUNCTION = 1;
-  /** Byte Array BSON type */
+  /**
+   * Legacy default BSON Binary type
+   * @deprecated BSON Binary subtype 2 is deprecated in the BSON specification
+   */
   static readonly SUBTYPE_BYTE_ARRAY = 2;
   /** Deprecated UUID BSON type @deprecated Please use SUBTYPE_UUID */
   static readonly SUBTYPE_UUID_OLD = 3;
