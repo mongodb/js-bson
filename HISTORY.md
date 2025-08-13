@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.11.0](https://github.com/mongodb/js-bson/compare/v6.10.4...v6.11.0) (2025-08-13)
+
+
+### Features
+
+* **NODE-7099:** deprecate BSON binary subtype 2 constant ([#812](https://github.com/mongodb/js-bson/issues/812)) ([f61946d](https://github.com/mongodb/js-bson/commit/f61946debb4f6da5235bda2ac08fd863be0107ec))
+
 ## [6.10.4](https://github.com/mongodb/js-bson/compare/v6.10.3...v6.10.4) (2025-06-02)
 
 
