@@ -5,7 +5,7 @@ set -o errexit  # Exit the script with error if any of the commands fail
 ## a nodejs major version (i.e., 16)
 ## 'latest'
 ## a full nodejs version, in the format v<major>.<minor>.patch
-export NODE_LTS_VERSION=${NODE_LTS_VERSION:-16}
+export NODE_LTS_VERSION=${NODE_LTS_VERSION:-20.19.0}
 # npm version can be defined in the environment for cases where we need to install
 # a version lower than latest to support EOL Node versions. When not provided will
 # be handled by this script in drivers tools.
