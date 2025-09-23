@@ -134,37 +134,12 @@ functions:
         args:
           - .evergreen/run-spec-benchmarks.sh
 tasks:
-  - name: node-tests-v16
-    tags: ["node"]
-    commands:
-      - func: fetch source
-        vars:
-          NODE_LTS_VERSION: 16
-          NPM_VERSION: 9
-      - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 16
-          NPM_VERSION: 9
-      - func: run tests
-        vars:
-          TEST_TARGET: node
-  - name: node-tests-v18
-    tags: ["node"]
-    commands:
-      - func: fetch source
-        vars:
-          NODE_LTS_VERSION: 18
-          NPM_VERSION: 10
-      - func: install dependencies
-      - func: run tests
-        vars:
-          TEST_TARGET: node
   - name: node-tests-v20
     tags: ["node"]
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_VERSION: 20
+          NODE_LTS_VERSION: "20.19.0"
       - func: install dependencies
       - func: run tests
   - name: node-tests-v22
@@ -256,8 +231,8 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          # This needs to stay pinned at Node v18.16.0 for consistency across perf runs.
-          NODE_LTS_VERSION: v18.16.0
+          # This needs to stay pinned at Node v22.11.0 for consistency across perf runs.
+          NODE_LTS_VERSION: v22.11.0
           NPM_VERSION: 9
       - func: install dependencies
         vars:
@@ -273,8 +248,8 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          # This needs to stay pinned at Node v18.16.0 for consistency across perf runs.
-          NODE_LTS_VERSION: v18.16.0
+          # This needs to stay pinned at Node v22.11.0 for consistency across perf runs.
+          NODE_LTS_VERSION: v22.11.0
           NPM_VERSION: 9
       - func: install dependencies
         vars:
@@ -287,8 +262,8 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          # This needs to stay pinned at Node v18.16.0 for consistency across perf runs.
-          NODE_LTS_VERSION: v18.16.0
+          # This needs to stay pinned at Node v22.11.0 for consistency across perf runs.
+          NODE_LTS_VERSION: v22.11.0
           NPM_VERSION: 9
       - func: install dependencies
         vars:

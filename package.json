@@ -93,7 +93,7 @@
     "require": "./lib/bson.cjs"
   },
   "engines": {
-    "node": ">=16.20.1"
+    "node": ">=20.19.0"
   },
   "scripts": {
     "pretest": "npm run build",
