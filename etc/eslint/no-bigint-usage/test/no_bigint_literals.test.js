@@ -1,7 +1,7 @@
 const { rules } = require('../index');
 const { RuleTester } = require('eslint');
 
-const ruleTester = new RuleTester({ languageOptions: { ecmaVersion: 2020 } });
+const ruleTester = new RuleTester({ languageOptions: { ecmaVersion: 2023 } });
 
 ruleTester.run('no-bigint-literals', rules['no-bigint-literals'], {
   valid: [{

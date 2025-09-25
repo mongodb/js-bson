@@ -4,14 +4,13 @@
     "checkJs": false,
     "strict": true,
     "alwaysStrict": true,
-    "target": "es2021",
+    "target": "es2023",
     "module": "commonjs",
     "moduleResolution": "node",
     "skipLibCheck": true,
     "erasableSyntaxOnly": true,
     "lib": [
-      "es2021",
-      "ES2022.Error"
+      "es2023"
     ],
     "outDir": "lib",
     "importHelpers": false,

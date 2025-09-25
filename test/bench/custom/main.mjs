@@ -37,7 +37,9 @@ async function completeSuite() {
   if (++completedSuites >= collectedSuites.length) {
     let cpuBaselineResults;
     try {
-      cpuBaselineResults = await import('../etc/cpuBaseline.json', { assert: { type: 'json' } });
+      cpuBaselineResults = await import('../etc/cpuBaseline.json', {
+        with: { type: 'json' }
+      });
     } catch (cause) {
       throw new Error("Couldn't find baseline results", { cause });
     }
