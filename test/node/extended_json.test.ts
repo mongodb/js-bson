@@ -144,9 +144,11 @@ describe('Extended JSON', function () {
     const input = '{"result":[{"_id":{"$oid":"591801a468f9e7024b623939"},"emptyField":null}]}';
     const parsed = EJSON.parse(input);
 
-    expect(parsed).to.deep.equal({
-      result: [{ _id: new ObjectId('591801a468f9e7024b623939'), emptyField: null }]
-    });
+    expect(EJSON.serialize(parsed)).to.deep.equal(
+      EJSON.serialize({
+        result: [{ _id: new ObjectId('591801a468f9e7024b623939'), emptyField: null }]
+      })
+    );
   });
 
   it('should correctly throw when passed a non-string to parse', function () {

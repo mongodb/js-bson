@@ -16,7 +16,8 @@ import {
   ObjectId,
   Timestamp,
   UUID,
-  BSONValue
+  BSONValue,
+  BSON
 } from '../register-bson';
 import * as vm from 'node:vm';
 
@@ -128,7 +129,10 @@ describe('BSON Type classes common interfaces', () => {
           ctx.ObjectId = ObjectId;
         }
         vm.runInNewContext(`module.exports.result = ${bsonValue.inspect()}`, ctx);
-        expect(ctx.module.exports.result).to.deep.equal(bsonValue);
+
+        expect(BSON.serialize({ result: ctx.module.exports.result })).to.deep.equal(
+          BSON.serialize({ result: bsonValue })
+        );
       });
     }
   });

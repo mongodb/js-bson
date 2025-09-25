@@ -258,6 +258,93 @@ describe('ObjectId', function () {
     ).to.be.true;
   });
 
+  it('should correctly use buffer pool for ObjectId creation', function () {
+    const oldPoolSize = ObjectId.poolSize;
+    ObjectId.poolSize = 2;
+    const obj = new ObjectId();
+    const obj2 = new ObjectId();
+
+    expect(obj.offset).to.equal(0);
+    expect(obj2.offset).to.equal(12);
+    expect(obj.offset).to.not.equal(obj2.offset);
+    expect(obj.pool).to.equal(obj2.pool);
+
+    expect(obj.id).to.not.equal(obj2.id);
+    ObjectId.poolSize = oldPoolSize;
+  });
+
+  it('should respect buffer pool size for ObjectId creation', function () {
+    const oldPoolSize = ObjectId.poolSize;
+    ObjectId.poolSize = 2;
+    const test = new ObjectId();
+    // Must fill current (large) pool first
+    const num = (test.pool.byteLength - test.offset) / 12;
+    for (let i = 0; i < num + 1; i++) {
+      new ObjectId();
+    }
+
+    const obj = new ObjectId();
+    const obj2 = new ObjectId();
+    const obj3 = new ObjectId();
+
+    expect(obj.offset).to.equal(0);
+    expect(obj2.offset).to.equal(12);
+    expect(obj3.offset).to.equal(0);
+    expect(obj.pool).to.equal(obj2.pool);
+    expect(obj2.pool).to.not.equal(obj3.pool);
+
+    expect(obj.id).to.not.equal(obj2.id);
+    expect(obj2.id).to.not.equal(obj3.id);
+    ObjectId.poolSize = oldPoolSize;
+  });
+
+  it('should allow poolSize of 1', function () {
+    const oldPoolSize = ObjectId.poolSize;
+    ObjectId.poolSize = 1;
+    const test = new ObjectId();
+    // Must fill current (large) pool first
+    const num = (test.pool.byteLength - test.offset) / 12;
+    for (let i = 0; i < num + 1; i++) {
+      new ObjectId();
+    }
+
+    const obj = new ObjectId();
+    const obj2 = new ObjectId();
+    const obj3 = new ObjectId();
+
+    expect(obj.offset).to.equal(undefined);
+    expect(obj2.offset).to.equal(undefined);
+    expect(obj3.offset).to.equal(undefined);
+    expect(obj.pool).to.not.equal(obj2.pool);
+    expect(obj2.pool).to.not.equal(obj3.pool);
+
+    expect(obj.id).to.not.equal(obj2.id);
+    expect(obj2.id).to.not.equal(obj3.id);
+    ObjectId.poolSize = oldPoolSize;
+  });
+
+  it('should default to poolSize = 1 when invalid poolSize set', function () {
+    const oldPoolSize = ObjectId.poolSize;
+
+    ObjectId.poolSize = 0;
+    expect(ObjectId.poolSize).to.equal(1);
+    ObjectId.poolSize = -1;
+    expect(ObjectId.poolSize).to.equal(1);
+    ObjectId.poolSize = 0n;
+    expect(ObjectId.poolSize).to.equal(1);
+    ObjectId.poolSize = '';
+    expect(ObjectId.poolSize).to.equal(1);
+    ObjectId.poolSize = NaN;
+    expect(ObjectId.poolSize).to.equal(1);
+    ObjectId.poolSize = {};
+    expect(ObjectId.poolSize).to.equal(1);
+    ObjectId.poolSize = false;
+    expect(ObjectId.poolSize).to.equal(1);
+    ObjectId.poolSize = '1';
+
+    ObjectId.poolSize = oldPoolSize;
+  });
+
   it('should throw error if non-12 byte non-24 hex string passed in', function () {
     expect(() => new ObjectId('FFFFFFFFFFFFFFFFFFFFFFFG')).to.throw(BSONError);
     expect(() => new ObjectId('thisstringisdefinitelytoolong')).to.throw(BSONError);
@@ -306,9 +393,36 @@ describe('ObjectId', function () {
     done();
   });
 
+  it('should correctly create ObjectId from valid Buffer and offset', function (done) {
+    if (!Buffer.from) return done();
+    let a = 'AAAAAAAAAAAAAAAAAAAAAAAA';
+    let b = new ObjectId(Buffer.from(`aaaa${a}aaaa`, 'hex'), 2);
+    let c = b.equals(a); // => false
+    expect(true).to.equal(c);
+
+    a = 'aaaaaaaaaaaaaaaaaaaaaaaa';
+    b = new ObjectId(Buffer.from(`AAAA${a}AAAA`, 'hex'), 2);
+    c = b.equals(a); // => true
+    expect(a).to.equal(b.toString());
+    expect(true).to.equal(c);
+    done();
+  });
+
   it('should throw an error if invalid Buffer passed in', function () {
     const a = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
     expect(() => new ObjectId(a)).to.throw(BSONError);
+  });
+
+  it('should throw an error if invalid Buffer offset passed in', function () {
+    const a = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
+    expect(() => new ObjectId(a, 5)).to.throw(BSONError);
+    expect(() => new ObjectId(a, -1)).to.throw(BSONError);
+    expect(() => new ObjectId(a, 0n)).to.throw(BSONError);
+    expect(() => new ObjectId(a, '')).to.throw(BSONError);
+    expect(() => new ObjectId(a, NaN)).to.throw(BSONError);
+    expect(() => new ObjectId(a, {})).to.throw(BSONError);
+    expect(() => new ObjectId(a, false)).to.throw(BSONError);
+    expect(() => new ObjectId(a, '' + 1)).to.throw(BSONError);
   });
 
   it('should correctly allow for node.js inspect to work with ObjectId', function (done) {
@@ -437,21 +551,31 @@ describe('ObjectId', function () {
       expect(oid.equals(equalId)).to.be.true;
       // once for the 11th byte shortcut
       // once for the total equality
-      expect(propAccessRecord).to.deep.equal([oidKId, oidKId]);
+      expect(propAccessRecord).to.deep.equal(['pool', oidKId, oidKId]);
     });
-  });
 
-  it('should return the same instance if a buffer is passed in', function () {
-    const inBuffer = Buffer.from('00'.repeat(12), 'hex');
+    it('should use otherId[kId] Pool for equality when otherId has _bsontype === ObjectId when using pool', () => {
+      const oldPoolSize = ObjectId.poolSize;
+      ObjectId.poolSize = 2;
+      const oid = new ObjectId(oidString);
+      let equalId = new ObjectId(oidString);
 
-    const outBuffer = new ObjectId(inBuffer);
+      const propAccessRecord: string[] = [];
+      equalId = new Proxy(equalId, {
+        get(target, prop: string, recv) {
+          if (prop !== '_bsontype') {
+            propAccessRecord.push(prop);
+          }
+          return Reflect.get(target, prop, recv);
+        }
+      });
 
-    // instance equality
-    expect(inBuffer).to.equal(outBuffer.id);
-    // deep equality
-    expect(inBuffer).to.deep.equal(outBuffer.id);
-    // class method equality
-    expect(Buffer.prototype.equals.call(inBuffer, outBuffer.id)).to.be.true;
+      expect(oid.equals(equalId)).to.be.true;
+      // once for the 11th byte shortcut
+      // once for the total equality
+      expect(propAccessRecord).to.contain('pool').contain('offset');
+      ObjectId.poolSize = oldPoolSize;
+    });
   });
 
   context('createFromHexString()', () => {
