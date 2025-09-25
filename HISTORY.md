@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.0.0](https://github.com/mongodb/js-bson/compare/v6.10.4...v7.0.0) (2025-09-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **NODE-6625:** remove support for Node 16 and 18 ([#821](https://github.com/mongodb/js-bson/issues/821))
+
+### Features
+
+* **NODE-6625:** remove support for Node 16 and 18 ([#821](https://github.com/mongodb/js-bson/issues/821)) ([f636254](https://github.com/mongodb/js-bson/commit/f636254cc889bdd3eb732801c52a6ef311111afe))
+* **NODE-7099:** deprecate BSON binary subtype 2 constant ([#812](https://github.com/mongodb/js-bson/issues/812)) ([f61946d](https://github.com/mongodb/js-bson/commit/f61946debb4f6da5235bda2ac08fd863be0107ec))
+
 ## [6.10.4](https://github.com/mongodb/js-bson/compare/v6.10.3...v6.10.4) (2025-06-02)
 
 
