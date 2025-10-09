@@ -1641,7 +1641,7 @@ describe('BSON', function () {
     expect(false).to.equal(ObjectId.isValid({ length: 12 }));
     expect(false).to.equal(ObjectId.isValid([]));
     expect(false).to.equal(ObjectId.isValid(true));
-    expect(true).to.equal(ObjectId.isValid(0));
+    expect(false).to.equal(ObjectId.isValid(0));
     expect(false).to.equal(ObjectId.isValid('invalid'));
     expect(false).to.equal(ObjectId.isValid('zzzzzzzzzzzzzzzzzzzzzzzz'));
     expect(true).to.equal(ObjectId.isValid('000000000000000000000000'));
