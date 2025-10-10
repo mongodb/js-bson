@@ -14,8 +14,7 @@ CURRENT_TS_VERSION=$(get_current_ts_version)
 export TSC="./node_modules/typescript/bin/tsc"
 export TS_VERSION=${TS_VERSION:=$CURRENT_TS_VERSION}
 
-# On old versions of TS we need to put the node types back to 18.11.19
-npm install --no-save --force typescript@"$TS_VERSION" "$(if [[ $TS_VERSION == '4.0.2' ]]; then echo "@types/node@18.11.19"; else echo ""; fi)"
+npm install --no-save --force typescript@"$TS_VERSION"
 
 echo "Typescript $($TSC -v)"
 

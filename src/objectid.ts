@@ -40,13 +40,8 @@ export class ObjectId extends BSONValue {
   /** ObjectId Bytes @internal */
   private buffer!: Uint8Array;
 
-  /**
-   * Create ObjectId from a number.
-   *
-   * @param inputId - A number.
-   * @deprecated Instead, use `static createFromTime()` to set a numeric value for the new ObjectId.
-   */
-  constructor(inputId: number);
+  /** To generate a new ObjectId, use ObjectId() with no argument. */
+  constructor();
   /**
    * Create ObjectId from a 24 character hex string.
    *
@@ -71,20 +66,18 @@ export class ObjectId extends BSONValue {
    * @param inputId - A 12 byte binary Buffer.
    */
   constructor(inputId: Uint8Array);
-  /** To generate a new ObjectId, use ObjectId() with no argument. */
-  constructor();
   /**
    * Implementation overload.
    *
    * @param inputId - All input types that are used in the constructor implementation.
    */
-  constructor(inputId?: string | number | ObjectId | ObjectIdLike | Uint8Array);
+  constructor(inputId?: string | ObjectId | ObjectIdLike | Uint8Array);
   /**
    * Create a new ObjectId.
    *
    * @param inputId - An input value to create a new ObjectId from.
    */
-  constructor(inputId?: string | number | ObjectId | ObjectIdLike | Uint8Array) {
+  constructor(inputId?: string | ObjectId | ObjectIdLike | Uint8Array) {
     super();
     // workingId is set based on type of input and whether valid id exists for the input
     let workingId;
@@ -102,12 +95,12 @@ export class ObjectId extends BSONValue {
     }
 
     // The following cases use workingId to construct an ObjectId
-    if (workingId == null || typeof workingId === 'number') {
+    if (workingId == null) {
       // The most common use case (blank id, new objectId instance)
       // Generate a new id
-      this.buffer = ObjectId.generate(typeof workingId === 'number' ? workingId : undefined);
+      this.buffer = ObjectId.generate();
     } else if (ArrayBuffer.isView(workingId) && workingId.byteLength === 12) {
-      // If intstanceof matches we can escape calling ensure buffer in Node.js environments
+      // If instanceof matches we can escape calling ensure buffer in Node.js environments
       this.buffer = ByteUtils.toLocalBufferType(workingId);
     } else if (typeof workingId === 'string') {
       if (ObjectId.validateHexString(workingId)) {
@@ -349,7 +342,7 @@ export class ObjectId extends BSONValue {
    * Checks if a value can be used to create a valid bson ObjectId
    * @param id - any JS value
    */
-  static isValid(id: string | number | ObjectId | ObjectIdLike | Uint8Array): boolean {
+  static isValid(id: string | ObjectId | ObjectIdLike | Uint8Array): boolean {
     if (id == null) return false;
     if (typeof id === 'string') return ObjectId.validateHexString(id);
 
