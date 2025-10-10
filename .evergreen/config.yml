@@ -205,7 +205,7 @@ tasks:
       - func: install dependencies
       - func: "run typescript"
         vars:
-          TS_VERSION: "5.6.0"
+          TS_VERSION: "5.6"
           TRY_COMPILING_LIBRARY: "false"
   - name: check-typescript-current
     commands:
