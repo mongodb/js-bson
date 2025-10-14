@@ -72,7 +72,6 @@
     "no-bigint-usage/no-bigint-literals": "error",
     "no-restricted-globals": [
       "error",
-      "BigInt",
       "DataView"
     ]
   },
