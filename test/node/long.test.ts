@@ -183,13 +183,8 @@ describe('Long', function () {
       ],
       ['max signed input', BigInt(Long.MAX_VALUE.toString(10)), false, Long.MAX_VALUE],
       ['min signed input', BigInt(Long.MIN_VALUE.toString(10)), false, Long.MIN_VALUE],
-      [
-        'negative greater than 32 bits',
-        BigInt(-9228915101),
-        false,
-        Long.fromBits(0xd9e9ee63, 0xfffffffd)
-      ],
-      ['less than 32 bits', BigInt(245666), false, new Long(245666)],
+      ['negative greater than 32 bits', -9228915101n, false, Long.fromBits(0xd9e9ee63, 0xfffffffd)],
+      ['less than 32 bits', 245666n, false, new Long(245666)],
       ['unsigned less than 32 bits', BigInt(245666), true, new Long(245666, true)],
       ['negative less than 32 bits', BigInt(-245666), false, new Long(-245666, -1)],
       ['max int32', BigInt(BSON_INT32_MAX), false, new Long(BSON_INT32_MAX)],

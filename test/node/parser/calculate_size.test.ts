@@ -33,7 +33,7 @@ describe('calculateSize()', () => {
     });
 
     it('returns 8 bytes (+4 bytes for document size + 1 type byte + 1 byte for "a" + 2 null terminators)', function () {
-      const doc = { a: BigInt(1) };
+      const doc = { a: 1n };
       expect(BSON.calculateObjectSize(doc)).to.equal(8 + 4 + 1 + 1 + 1 + 1);
       expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
     });

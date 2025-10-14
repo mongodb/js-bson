@@ -258,8 +258,8 @@ export class Long extends BSONValue {
    * @returns The corresponding Long value
    */
   static fromBigInt(value: bigint, unsigned?: boolean): Long {
-    const FROM_BIGINT_BIT_MASK = BigInt(0xffffffff);
-    const FROM_BIGINT_BIT_SHIFT = BigInt(32);
+    const FROM_BIGINT_BIT_MASK = 0xffffffffn;
+    const FROM_BIGINT_BIT_SHIFT = 32n;
     return new Long(
       Number(value & FROM_BIGINT_BIT_MASK),
       Number((value >> FROM_BIGINT_BIT_SHIFT) & FROM_BIGINT_BIT_MASK),

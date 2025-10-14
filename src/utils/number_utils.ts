@@ -97,7 +97,7 @@ export const NumberUtils: NumberUtils = {
         source[offset + 3] * 16777216
     );
 
-    return (hi << BigInt(32)) + lo;
+    return (hi << 32n) + lo;
   },
 
   /** Reads a little-endian 64-bit float from source */
@@ -151,7 +151,7 @@ export const NumberUtils: NumberUtils = {
 
   /** Write a little-endian 64-bit integer to source */
   setBigInt64LE(destination: Uint8Array, offset: number, value: bigint): 8 {
-    const mask32bits = BigInt(0xffff_ffff);
+    const mask32bits = 0xffff_ffffn;
 
     /** lower 32 bits */
     let lo = Number(value & mask32bits);
@@ -163,7 +163,7 @@ export const NumberUtils: NumberUtils = {
     lo >>= 8;
     destination[offset + 3] = lo;
 
-    let hi = Number((value >> BigInt(32)) & mask32bits);
+    let hi = Number((value >> 32n) & mask32bits);
     destination[offset + 4] = hi;
     hi >>= 8;
     destination[offset + 5] = hi;
