@@ -43,7 +43,6 @@
     "dbx-js-tools": "github:mongodb-js/dbx-js-tools#main",
     "eslint": "^9.33.0",
     "eslint-config-prettier": "^10.1.2",
-    "eslint-plugin-no-bigint-usage": "file:etc/eslint/no-bigint-usage",
     "eslint-plugin-prettier": "^5.2.6",
     "eslint-plugin-tsdoc": "^0.4.0",
     "magic-string": "^0.30.11",
