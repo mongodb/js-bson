@@ -194,7 +194,7 @@ tasks:
       - func: install dependencies
       - func: "run typescript"
         vars:
-          TS_VERSION: "4.0.2"
+          TS_VERSION: "5.6"
           TRY_COMPILING_LIBRARY: "false"
   - name: check-typescript-current
     commands:
@@ -214,7 +214,8 @@ tasks:
       - func: install dependencies
       - func: "run typescript"
         vars:
-          TS_VERSION: "next"
+          # TODO(NODE-7233): switch to `next` again once compatible with TS 6.0
+          TS_VERSION: "latest"
           TRY_COMPILING_LIBRARY: "false"
   - name: run-granular-benchmarks
     commands:

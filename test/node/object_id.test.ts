@@ -217,26 +217,11 @@ describe('ObjectId', function () {
     expect(new ObjectId(objectInvalidBuffer).id).to.deep.equal(bufferNew24Hex);
   });
 
-  const numericIO = [
-    { input: 42, output: 42, description: '42' },
-    { input: 0x2a, output: 0x2a, description: '0x2a' },
-    { input: 4.2, output: 4, description: '4.2' },
-    { input: NaN, output: 0, description: 'NaN' }
-  ];
-
-  for (const { input, output } of numericIO) {
-    it(`should correctly create ObjectId from ${input} and result in ${output}`, function () {
-      const objId = new ObjectId(input);
-      expect(objId).to.have.property('id');
-      expect(
-        isBufferOrUint8Array(objId.id),
-        `expected objId.id to be instanceof buffer or uint8Array`
-      ).to.be.true;
-      const num = new DataView(objId.id.buffer, objId.id.byteOffset, objId.id.byteLength).getInt32(
-        0,
-        false
-      );
-      expect(num).to.equal(output);
+  for (const input of [42, 0x2a, 4.2, NaN]) {
+    it(`should fail to create ObjectId from ${input}`, function () {
+      expect(() => {
+        new ObjectId(input);
+      }).to.throw(/Argument passed in does not match the accepted types/);
     });
   }
 
@@ -343,12 +328,12 @@ describe('ObjectId', function () {
     });
 
     context('when called with a number', () => {
-      it('returns true for any number (0)', () => expect(ObjectId.isValid(0)).to.be.true);
+      it('returns false for any number (0)', () => expect(ObjectId.isValid(0)).to.be.false);
 
-      it('returns true for any number (MIN_SAFE_INTEGER)', () =>
-        expect(ObjectId.isValid(Number.MIN_SAFE_INTEGER)).to.be.true);
+      it('returns false for any number (MIN_SAFE_INTEGER)', () =>
+        expect(ObjectId.isValid(Number.MIN_SAFE_INTEGER)).to.be.false);
 
-      it('returns true for any number (NaN)', () => expect(ObjectId.isValid(NaN)).to.be.true);
+      it('returns false for any number (NaN)', () => expect(ObjectId.isValid(NaN)).to.be.false);
     });
 
     context('when called with a ObjectId or ObjectIdLike', () => {
