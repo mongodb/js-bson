@@ -26,12 +26,6 @@ describe('calculateSize()', () => {
   });
 
   describe('when given a bigint value with a single character key', function () {
-    beforeEach(function () {
-      if (BSON.__noBigInt__) {
-        this.currentTest?.skip();
-      }
-    });
-
     it('returns 8 bytes (+4 bytes for document size + 1 type byte + 1 byte for "a" + 2 null terminators)', function () {
       const doc = { a: 1n };
       expect(BSON.calculateObjectSize(doc)).to.equal(8 + 4 + 1 + 1 + 1 + 1);

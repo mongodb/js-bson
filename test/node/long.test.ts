@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Long, BSONError, __noBigInt__ } from '../register-bson';
+import { Long, BSONError } from '../register-bson';
 import { BSON_INT32_MAX, BSON_INT32_MIN } from '../../src/constants';
 
 describe('Long', function () {
@@ -15,17 +15,13 @@ describe('Long', function () {
   });
 
   it('accepts BigInts in Long constructor', function () {
-    if (__noBigInt__) {
-      this.currentTest?.skip();
-    } else {
-      expect(new Long(0n).toString()).to.equal('0');
-      expect(new Long(-1n).toString()).to.equal('-1');
-      expect(new Long(-1n, true).toString()).to.equal('18446744073709551615');
-      expect(new Long(123456789123456789n).toString()).to.equal('123456789123456789');
-      expect(new Long(123456789123456789n, true).toString()).to.equal('123456789123456789');
-      expect(new Long(13835058055282163712n).toString()).to.equal('-4611686018427387904');
-      expect(new Long(13835058055282163712n, true).toString()).to.equal('13835058055282163712');
-    }
+    expect(new Long(0n).toString()).to.equal('0');
+    expect(new Long(-1n).toString()).to.equal('-1');
+    expect(new Long(-1n, true).toString()).to.equal('18446744073709551615');
+    expect(new Long(123456789123456789n).toString()).to.equal('123456789123456789');
+    expect(new Long(123456789123456789n, true).toString()).to.equal('123456789123456789');
+    expect(new Long(13835058055282163712n).toString()).to.equal('-4611686018427387904');
+    expect(new Long(13835058055282163712n, true).toString()).to.equal('13835058055282163712');
   });
 
   describe('static fromExtendedJSON()', function () {
@@ -125,11 +121,6 @@ describe('Long', function () {
     });
 
     describe('when useBigInt64=true', function () {
-      beforeEach(function () {
-        if (__noBigInt__) {
-          this.currentTest?.skip();
-        }
-      });
       describe('truncates', function () {
         it('positive numbers outside int64 range', function () {
           const ejsonDoc = { $numberLong: '9223372036854775808' }; // 2^63
@@ -191,12 +182,6 @@ describe('Long', function () {
       ['max int32 unsigned', BigInt(BSON_INT32_MAX), true, new Long(BSON_INT32_MAX, 0, true)],
       ['min int32', BigInt(BSON_INT32_MIN), false, new Long(BSON_INT32_MIN, -1)]
     ];
-
-    beforeEach(function () {
-      if (__noBigInt__) {
-        this.currentTest?.skip();
-      }
-    });
 
     for (const [testName, num, unsigned, expectedLong] of inputs) {
       context(`when the input is ${testName}`, () => {

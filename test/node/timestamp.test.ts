@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import * as BSON from '../register-bson';
-import { Timestamp, __noBigInt__ } from '../register-bson';
+import { Timestamp } from '../register-bson';
 
 describe('Timestamp', () => {
   describe('static MAX_VALUE', () => {
@@ -41,10 +41,10 @@ describe('Timestamp', () => {
   });
 
   it('should always be an unsigned value', () => {
-    let bigIntInputs: Timestamp[] = [];
-    if (!__noBigInt__) {
-      bigIntInputs = [new BSON.Timestamp(0xffffffffffn), new BSON.Timestamp(0xffffffffffffffffn)];
-    }
+    const bigIntInputs = [
+      new BSON.Timestamp(0xffffffffffn),
+      new BSON.Timestamp(0xffffffffffffffffn)
+    ];
     const table = [
       // @ts-expect-error: Not advertized by the types, but constructs a 0 timestamp
       new BSON.Timestamp(),
@@ -64,12 +64,6 @@ describe('Timestamp', () => {
   });
 
   context('output formats', () => {
-    beforeEach(function () {
-      if (__noBigInt__) {
-        this.currentTest?.skip();
-      }
-    });
-
     context('when converting toString', () => {
       it('exports an unsigned number', () => {
         const timestamp = new BSON.Timestamp(0xffffffffffffffffn);
