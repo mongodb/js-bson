@@ -53,17 +53,7 @@ const REQUIRED_FILES = [
   'src/utils/string_utils.ts',
   'src/utils/web_byte_utils.ts',
   'src/utils/latin.ts',
-  'src/parse_utf8.ts',
-  'vendor/base64/base64.js',
-  'vendor/base64/package.json',
-  'vendor/base64/LICENSE-MIT.txt',
-  'vendor/base64/README.md',
-  'vendor/text-encoding/lib/encoding-indexes.js',
-  'vendor/text-encoding/lib/encoding.js',
-  'vendor/text-encoding/index.js',
-  'vendor/text-encoding/package.json',
-  'vendor/text-encoding/LICENSE.md',
-  'vendor/text-encoding/README.md'
+  'src/parse_utf8.ts'
 ].map(f => `package/${f}`);
 
 describe(`Release ${packFile}`, function () {
