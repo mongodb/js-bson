@@ -230,7 +230,14 @@ try {
 
 ## React Native
 
-BSON vendors the required polyfills for `TextEncoder`, `TextDecoder`, `atob`, `btoa` imported from React Native and therefore doesn't expect users to polyfill these. One additional polyfill, `crypto.getRandomValues` is recommended and can be installed with the following command:
+BSON requires the `atob`, `btoa` and `TextEncoder` globals.  Old versions of React Native did not support these global objects.  <TODO find versions>.
+
+If you find yourself on a version of React Native that does not have these globals, either:
+
+1. polyfill them yourself
+2. use BSON 6.x
+
+One additional polyfill, `crypto.getRandomValues` is recommended and can be installed with the following command:
 
 ```sh
 npm install --save react-native-get-random-values
