@@ -1,6 +1,5 @@
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
-import { RequireVendor } from './etc/rollup/rollup-plugin-require-vendor/require_vendor.mjs';
 
 /** @type {typescript.RollupTypescriptOptions} */
 const tsConfig = {
@@ -75,7 +74,7 @@ const config = [
   },
   {
     input,
-    plugins: [typescript(tsConfig), new RequireVendor(), nodeResolve({ resolveOnly: [] })],
+    plugins: [typescript(tsConfig), nodeResolve({ resolveOnly: [] })],
     output: {
       file: 'lib/bson.rn.cjs',
       format: 'commonjs',
