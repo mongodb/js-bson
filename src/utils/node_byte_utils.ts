@@ -28,11 +28,28 @@ type NodeJsBufferConstructor = Omit<Uint8ArrayConstructor, 'from'> & {
 declare const Buffer: NodeJsBufferConstructor;
 
 /** @internal */
-const nodejsRandomBytes: (byteLength: number) => NodeJsBuffer = (byteLength: number) => {
+function nodejsMathRandomBytes(byteLength: number): NodeJsBuffer {
+  return nodeJsByteUtils.fromNumberArray(
+    Array.from({ length: byteLength }, () => Math.floor(Math.random() * 256))
+  );
+}
+
+/** @internal */
+function nodejsSecureRandomBytes(byteLength: number): NodeJsBuffer {
   // @ts-expect-error: crypto.getRandomValues cannot actually be null here
-  // You cannot separate getRandomValues from crypto (need to have this === crypto)
   return crypto.getRandomValues(nodeJsByteUtils.allocate(byteLength));
-};
+}
+
+const nodejsRandomBytes = (() => {
+  const { crypto } = globalThis as {
+    crypto?: { getRandomValues?: (space: Uint8Array) => Uint8Array };
+  };
+  if (crypto != null && typeof crypto.getRandomValues === 'function') {
+    return nodejsSecureRandomBytes;
+  } else {
+    return nodejsMathRandomBytes;
+  }
+})();
 
 /** @internal */
 export const nodeJsByteUtils = {
