@@ -177,17 +177,6 @@ tasks:
           NODE_LTS_VERSION: 22
       - func: install dependencies
       - func: run bundling
-  - name: no-bigint-web-tests
-    tags: ["no-bigint", "web"]
-    commands:
-      - func: fetch source
-        vars:
-          NODE_LTS_VERSION: 22
-      - func: install dependencies
-      - func: run tests
-        vars:
-          TEST_TARGET: web
-          NO_BIGINT: true
   - name: run-checks
     tags:
       - run-checks
@@ -273,13 +262,6 @@ tasks:
       - func: perf send
         vars:
           TARGET_FILE: ./bsonBench.json
-  - name: check-eslint-plugin
-    commands:
-      - func: fetch source
-        vars:
-          NODE_LTS_VERSION: 22
-      - func: install dependencies
-      - func: run eslint plugin tests
 
 buildvariants:
   - name: linux

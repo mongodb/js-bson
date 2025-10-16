@@ -102,7 +102,6 @@ function deserializeValue(value: any, options: EJSONOptions = {}) {
       }
       if (in64BitRange) {
         if (options.useBigInt64) {
-          // eslint-disable-next-line no-restricted-globals -- This is allowed here as useBigInt64=true
           return BigInt(value);
         }
         return Long.fromNumber(value);
@@ -275,12 +274,10 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
   }
 
   if (typeof value === 'bigint') {
-    /* eslint-disable no-restricted-globals -- This is allowed as we are accepting a bigint as input */
     if (!options.relaxed) {
       return { $numberLong: BigInt.asIntN(64, value).toString() };
     }
     return Number(BigInt.asIntN(64, value));
-    /* eslint-enable */
   }
 
   if (value instanceof RegExp || isRegExp(value)) {

@@ -26,8 +26,7 @@
   },
   "plugins": [
     "prettier",
-    "eslint-plugin-tsdoc",
-    "no-bigint-usage"
+    "eslint-plugin-tsdoc"
   ],
   "reportUnusedDisableDirectives": true,
   "rules": {
@@ -69,10 +68,8 @@
         "fixStyle": "inline-type-imports"
       }
     ],
-    "no-bigint-usage/no-bigint-literals": "error",
     "no-restricted-globals": [
       "error",
-      "BigInt",
       "DataView"
     ]
   },

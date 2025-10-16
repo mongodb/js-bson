@@ -444,9 +444,6 @@ describe('Extended JSON', function () {
 
         context('when using useBigInt64=true', function () {
           it('parses $date.$numberLong with millis since epoch', function () {
-            if (BSON.__noBigInt__) {
-              this.skip();
-            }
             const date = new Date(1676315495987);
             const doc = { field: date };
             const stringified = EJSON.stringify(doc, { relaxed: false });
