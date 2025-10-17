@@ -230,7 +230,17 @@ try {
 
 ## React Native
 
-BSON vendors the required polyfills for `TextEncoder`, `TextDecoder`, `atob`, `btoa` imported from React Native and therefore doesn't expect users to polyfill these. One additional polyfill, `crypto.getRandomValues` is recommended and can be installed with the following command:
+js-bson requires the `atob`, `btoa` and `TextEncoder` globals.  Older versions of React Native did not support these global objects, and so 
+[js-bson v5.4.0](https://github.com/mongodb/js-bson/releases/tag/v5.4.0) added support for bundled polyfills for these globals.  Newer versions
+of Hermes includes these globals, and so the polyfills for are no longer needed in the js-bson package.
+
+If you find yourself on a version of React Native that does not have these globals, either:
+
+1. polyfill them yourself
+2. upgrade to a later version of hermes
+3. use a version of js-bson `>=5.4.0` and `<7.0.0`
+
+One additional polyfill, `crypto.getRandomValues` is recommended and can be installed with the following command:
 
 ```sh
 npm install --save react-native-get-random-values
