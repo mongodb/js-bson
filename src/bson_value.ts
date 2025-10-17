@@ -3,9 +3,32 @@ import { type InspectFn } from './parser/utils';
 import { BSON_VERSION_SYMBOL } from './constants';
 
 /** @public */
+export type BSONTypeTag =
+  | 'BSONRegExp'
+  | 'BSONSymbol'
+  | 'ObjectId'
+  | 'Binary'
+  | 'Decimal128'
+  | 'Double'
+  | 'Int32'
+  | 'Long'
+  | 'MaxKey'
+  | 'MinKey'
+  | 'Timestamp'
+  | 'Code'
+  | 'DBRef';
+
+/** @public */
+export const bsonType = Symbol.for('@@mdb.bson.type');
+
+/** @public */
 export abstract class BSONValue {
   /** @public */
-  public abstract get _bsontype(): string;
+  public abstract get _bsontype(): BSONTypeTag;
+
+  public get [bsonType](): this['_bsontype'] {
+    return this._bsontype;
+  }
 
   /** @internal */
   get [BSON_VERSION_SYMBOL](): typeof BSON_MAJOR_VERSION {
