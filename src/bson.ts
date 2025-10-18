@@ -50,7 +50,7 @@ export {
   BSONRegExp,
   Decimal128
 };
-export { BSONValue } from './bson_value';
+export { BSONValue, bsonType, type BSONTypeTag } from './bson_value';
 export { BSONError, BSONVersionError, BSONRuntimeError, BSONOffsetError } from './error';
 export { BSONType } from './constants';
 export { EJSON } from './extended_json';

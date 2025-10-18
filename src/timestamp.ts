@@ -1,10 +1,16 @@
+import { bsonType } from './bson_value';
 import { BSONError } from './error';
 import type { Int32 } from './int_32';
 import { Long } from './long';
 import { type InspectFn, defaultInspect } from './parser/utils';
 
 /** @public */
-export type TimestampOverrides = '_bsontype' | 'toExtendedJSON' | 'fromExtendedJSON' | 'inspect';
+export type TimestampOverrides =
+  | '_bsontype'
+  | 'toExtendedJSON'
+  | 'fromExtendedJSON'
+  | 'inspect'
+  | typeof bsonType;
 /** @public */
 export type LongWithoutOverrides = new (
   low: unknown,
@@ -33,6 +39,9 @@ export interface TimestampExtended {
  */
 export class Timestamp extends LongWithoutOverridesClass {
   get _bsontype(): 'Timestamp' {
+    return 'Timestamp';
+  }
+  get [bsonType](): 'Timestamp' {
     return 'Timestamp';
   }
 
