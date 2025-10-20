@@ -18,7 +18,9 @@ import {
   DBRefLike,
   Document,
   Decimal128Extended,
-  BSONValue
+  BSONValue,
+  bsonType,
+  BSONTypeTag
 } from '../../bson'; // import from generated bson.d.ts
 import type { InspectFn } from '../../src/parser/utils';
 
@@ -74,9 +76,25 @@ expectType<'MinKey'>(MinKey.prototype._bsontype)
 expectType<'BSONRegExp'>(BSONRegExp.prototype._bsontype)
 expectType<'Binary'>(UUID.prototype._bsontype)
 
+expectType<'Timestamp'>(Timestamp.prototype[bsonType])
+expectType<'ObjectId'>(ObjectId.prototype[bsonType])
+expectType<'BSONSymbol'>(BSONSymbol.prototype[bsonType])
+expectType<'Binary'>(Binary.prototype[bsonType])
+expectType<'Code'>(Code.prototype[bsonType])
+expectType<'DBRef'>(DBRef.prototype[bsonType])
+expectType<'Decimal128'>(Decimal128.prototype[bsonType])
+expectType<'Double'>(Double.prototype[bsonType])
+expectType<'Int32'>(Int32.prototype[bsonType])
+expectType<'Long'>(Long.prototype[bsonType])
+expectType<'MaxKey'>(MaxKey.prototype[bsonType])
+expectType<'MinKey'>(MinKey.prototype[bsonType])
+expectType<'BSONRegExp'>(BSONRegExp.prototype[bsonType])
+expectType<'Binary'>(UUID.prototype[bsonType])
+
 // Common BSONValue interface
 declare const bsonValue: BSONValue;
-expectType<string>(bsonValue._bsontype);
+expectType<BSONTypeTag>(bsonValue._bsontype);
+expectType<BSONTypeTag>(bsonValue[bsonType]);
 expectType<(depth?: number | undefined, options?: unknown, inspect?: InspectFn | undefined) => string>(bsonValue.inspect);
 
 expectNotDeprecated(new ObjectId('foo'));

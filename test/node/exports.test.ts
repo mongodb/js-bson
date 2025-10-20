@@ -37,7 +37,8 @@ const EXPECTED_EXPORTS = [
   'deserialize',
   'calculateObjectSize',
   'deserializeStream',
-  'BSON'
+  'BSON',
+  'bsonType'
 ];
 
 const EXPECTED_EJSON_EXPORTS = ['parse', 'stringify', 'serialize', 'deserialize'];
