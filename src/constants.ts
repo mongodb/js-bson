@@ -1,5 +1,5 @@
 /** @internal */
-export const BSON_MAJOR_VERSION = 6;
+export const BSON_MAJOR_VERSION = 7;
 
 /** @internal */
 export const BSON_VERSION_SYMBOL = Symbol.for('@@mdb.bson.version');

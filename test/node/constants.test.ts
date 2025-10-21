@@ -4,8 +4,10 @@ import * as constants from '../../src/constants';
 
 describe('BSON Constants', () => {
   describe('.BSON_MAJOR_VERSION', () => {
-    it('returns the current major version', () => {
-      expect(constants.BSON_MAJOR_VERSION).to.equal(6);
+    it('returns the current major version', async () => {
+      const package_json = await import('../../package.json');
+      const current_major = Number(package_json.version.split('.')[0]);
+      expect(constants.BSON_MAJOR_VERSION).to.equal(current_major);
     });
   });
 
