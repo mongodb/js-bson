@@ -4,8 +4,55 @@ import * as util from 'util';
 import { expect } from 'chai';
 import { bufferFromHexArray } from './tools/utils';
 import { isBufferOrUint8Array } from './tools/utils';
+import { test } from 'mocha';
 
 describe('ObjectId', function () {
+  describe('hex string caching does not impact deep equality', function () {
+    const original = ObjectId.cacheHexString;
+    before(function () {
+      ObjectId.cacheHexString = true;
+    });
+    after(function () {
+      ObjectId.cacheHexString = original;
+    });
+    test('no hex strings cached', function () {
+      const id = new ObjectId();
+      const id2 = new ObjectId(id.id);
+
+      // @ts-expect-error isCached() is internal
+      expect(id.isCached()).to.be.false;
+      // @ts-expect-error isCached() is internal
+      expect(id2.isCached()).to.be.false;
+
+      expect(new ObjectId(id.id)).to.deep.equal(id);
+    });
+
+    test('one id with cached hex string, one without', function () {
+      const id = new ObjectId();
+      const id2 = new ObjectId(id.id);
+      id2.toHexString();
+
+      // @ts-expect-error isCached() is internal
+      expect(id.isCached()).to.be.false;
+      // @ts-expect-error isCached() is internal
+      expect(id2.isCached()).to.be.true;
+
+      expect(id).to.deep.equal(id2);
+    });
+
+    test('both with cached hex string', function () {
+      const id = new ObjectId();
+      const id2 = new ObjectId(id.toHexString());
+
+      // @ts-expect-error isCached() is internal
+      expect(id.isCached()).to.be.true;
+      // @ts-expect-error isCached() is internal
+      expect(id2.isCached()).to.be.true;
+
+      expect(id).to.deep.equal(id2);
+    });
+  });
+
   describe('static createFromTime()', () => {
     it('creates an objectId with user defined value in the timestamp field', function () {
       const a = ObjectId.createFromTime(1);
@@ -265,7 +312,7 @@ describe('ObjectId', function () {
     let a = 'AAAAAAAAAAAAAAAAAAAAAAAA';
     let b = new ObjectId(a);
     let c = b.equals(a); // => false
-    expect(true).to.equal(c);
+    expect(c).to.be.true;
 
     a = 'aaaaaaaaaaaaaaaaaaaaaaaa';
     b = new ObjectId(a);

@@ -7,9 +7,6 @@ import { NumberUtils } from './utils/number_utils';
 // Unique sequence for the current process (initialized on first use)
 let PROCESS_UNIQUE: Uint8Array | null = null;
 
-/** ObjectId hexString cache @internal */
-const __idCache = new WeakMap(); // TODO(NODE-6549): convert this to #__id private field when target updated to ES2022
-
 /** @public */
 export interface ObjectIdLike {
   id: string | Uint8Array;
@@ -35,10 +32,19 @@ export class ObjectId extends BSONValue {
   /** @internal */
   private static index = Math.floor(Math.random() * 0xffffff);
 
-  static cacheHexString: boolean;
+  static cacheHexString: boolean = false;
 
   /** ObjectId Bytes @internal */
   private buffer!: Uint8Array;
+
+  /**
+   * If hex string caching is enabled, contains the cached hex string.  Otherwise, is null.
+   *
+   * Note that #hexString is populated lazily, and as a result simply checking `this.#hexString != null` is
+   * not sufficient to determine if caching is enabled.  `ObjectId.prototype.isCached()` can be used to
+   * determine if the hex string has been cached yet for an ObjectId.
+   */
+  #cachedHexString: string | null = null;
 
   /** To generate a new ObjectId, use ObjectId() with no argument. */
   constructor();
@@ -107,7 +113,7 @@ export class ObjectId extends BSONValue {
         this.buffer = ByteUtils.fromHex(workingId);
         // If we are caching the hex string
         if (ObjectId.cacheHexString) {
-          __idCache.set(this, workingId);
+          this.#cachedHexString = workingId;
         }
       } else {
         throw new BSONError(
@@ -130,7 +136,7 @@ export class ObjectId extends BSONValue {
   set id(value: Uint8Array) {
     this.buffer = value;
     if (ObjectId.cacheHexString) {
-      __idCache.set(this, ByteUtils.toHex(value));
+      this.#cachedHexString = ByteUtils.toHex(value);
     }
   }
 
@@ -159,15 +165,12 @@ export class ObjectId extends BSONValue {
 
   /** Returns the ObjectId id as a 24 lowercase character hex string representation */
   toHexString(): string {
-    if (ObjectId.cacheHexString) {
-      const __id = __idCache.get(this);
-      if (__id) return __id;
-    }
+    if (this.#cachedHexString) return this.#cachedHexString.toLowerCase();
 
     const hexString = ByteUtils.toHex(this.id);
 
     if (ObjectId.cacheHexString) {
-      __idCache.set(this, hexString);
+      this.#cachedHexString = hexString;
     }
 
     return hexString;
@@ -365,9 +368,13 @@ export class ObjectId extends BSONValue {
     return new ObjectId(doc.$oid);
   }
 
-  /** @internal */
+  /**
+   * @internal
+   *
+   * used for testing
+   */
   private isCached(): boolean {
-    return ObjectId.cacheHexString && __idCache.has(this);
+    return ObjectId.cacheHexString && this.#cachedHexString != null;
   }
 
   /**
