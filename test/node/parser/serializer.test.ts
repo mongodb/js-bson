@@ -48,7 +48,7 @@ describe('serialize()', () => {
       // a nested invalid _bsontype throws something different
       expect(() =>
         BSON.serialize({
-          a: { _bsontype: 'iLoveJavascript', [Symbol.for('@@mdb.bson.version')]: 6 }
+          a: { _bsontype: 'iLoveJavascript', [Symbol.for('@@mdb.bson.version')]: 7 }
         })
       ).to.throw(/invalid _bsontype/);
     });
