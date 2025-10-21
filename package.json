@@ -14,7 +14,7 @@
     "vendor"
   ],
   "types": "bson.d.ts",
-  "version": "7.0.0-alpha",
+  "version": "7.0.0-alpha.1",
   "author": {
     "name": "The MongoDB NodeJS Team",
     "email": "dbx-node@mongodb.com"
