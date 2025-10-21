@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.0.0-alpha](https://github.com/mongodb/js-bson/compare/v6.10.4...v7.0.0-alpha) (2025-10-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **NODE-7098:** use bigint literal syntax ([#826](https://github.com/mongodb/js-bson/issues/826))
+* **NODE-5763:** remove support for new ObjectId(<number>) ([#824](https://github.com/mongodb/js-bson/issues/824))
+* **NODE-6625:** remove support for Node 16 and 18 ([#821](https://github.com/mongodb/js-bson/issues/821))
+
+### Features
+
+* **NODE-5763:** remove support for new ObjectId(&lt;number&gt;) ([#824](https://github.com/mongodb/js-bson/issues/824)) ([21cc3ff](https://github.com/mongodb/js-bson/commit/21cc3ff4c05ef3459c0e5e2787243ee660e5b4bb))
+* **NODE-6321:** remove require('crypto') from Nodejs bundle ([#825](https://github.com/mongodb/js-bson/issues/825)) ([7ba8917](https://github.com/mongodb/js-bson/commit/7ba89174e08e994b028a7adcd33db300c86b4153))
+* **NODE-6625:** remove support for Node 16 and 18 ([#821](https://github.com/mongodb/js-bson/issues/821)) ([f636254](https://github.com/mongodb/js-bson/commit/f636254cc889bdd3eb732801c52a6ef311111afe))
+* **NODE-7019:** remove react native vendor polyfills ([#827](https://github.com/mongodb/js-bson/issues/827)) ([883f238](https://github.com/mongodb/js-bson/commit/883f23855f7b718bb22e54aa1c54b06724b88449))
+* **NODE-7098:** use bigint literal syntax ([#826](https://github.com/mongodb/js-bson/issues/826)) ([94bf732](https://github.com/mongodb/js-bson/commit/94bf73294b7472129db241536c1c9220ab39f783))
+* **NODE-7099:** deprecate BSON binary subtype 2 constant ([#812](https://github.com/mongodb/js-bson/issues/812)) ([f61946d](https://github.com/mongodb/js-bson/commit/f61946debb4f6da5235bda2ac08fd863be0107ec))
+* **NODE-7255:** add well-known Symbol alias for `_bsontype` ([#829](https://github.com/mongodb/js-bson/issues/829)) ([1e1b619](https://github.com/mongodb/js-bson/commit/1e1b61995a3beaf7491e4980d09e2ca02918ec07))
+
 ## [6.10.4](https://github.com/mongodb/js-bson/compare/v6.10.3...v6.10.4) (2025-06-02)
 
 
