@@ -22,7 +22,8 @@ echo "Typescript $($TSC -v)"
 echo "import * as BSON from '.'" > file.ts && node $TSC --noEmit --traceResolution file.ts | grep 'bson.d.ts' && rm file.ts
 
 # check compilation
-node $TSC bson.d.ts --target es2022 --module nodenext
+rm -rf node_modules/@types/eslint # not a dependency we use, but breaks the build :(
+node $TSC bson.d.ts
 
 if [[ $TRY_COMPILING_LIBRARY != "false" ]]; then
     npm run build:ts
