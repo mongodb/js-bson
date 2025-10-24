@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.0.0-alpha.2](https://github.com/mongodb/js-bson/compare/v7.0.0-alpha.1...v7.0.0-alpha.2) (2025-10-24)
+
+
+### Bug Fixes
+
+* **NODE-7271:** revert private property usage in ObjectId ([#835](https://github.com/mongodb/js-bson/issues/835)) ([79faf75](https://github.com/mongodb/js-bson/commit/79faf75869c64c65bcd948d8906b65e9be0a93af))
+
 ## [7.0.0-alpha.1](https://github.com/mongodb/js-bson/compare/v7.0.0-alpha...v7.0.0-alpha.1) (2025-10-21)
 
 
