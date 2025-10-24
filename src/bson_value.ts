@@ -19,14 +19,14 @@ export type BSONTypeTag =
   | 'DBRef';
 
 /** @public */
-export const bsonType = Symbol.for('@@mdb.bson.type');
+export const bsonTypeSymbol = Symbol.for('@@mdb.bson.type');
 
 /** @public */
 export abstract class BSONValue {
   /** @public */
   public abstract get _bsontype(): BSONTypeTag;
 
-  public get [bsonType](): this['_bsontype'] {
+  public get [bsonTypeSymbol](): this['_bsontype'] {
     return this._bsontype;
   }
 

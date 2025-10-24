@@ -1,4 +1,4 @@
-import { bsonType } from './bson_value';
+import { bsonTypeSymbol } from './bson_value';
 import { BSONError } from './error';
 import type { Int32 } from './int_32';
 import { Long } from './long';
@@ -10,7 +10,7 @@ export type TimestampOverrides =
   | 'toExtendedJSON'
   | 'fromExtendedJSON'
   | 'inspect'
-  | typeof bsonType;
+  | typeof bsonTypeSymbol;
 /** @public */
 export type LongWithoutOverrides = new (
   low: unknown,
@@ -41,7 +41,7 @@ export class Timestamp extends LongWithoutOverridesClass {
   get _bsontype(): 'Timestamp' {
     return 'Timestamp';
   }
-  get [bsonType](): 'Timestamp' {
+  get [bsonTypeSymbol](): 'Timestamp' {
     return 'Timestamp';
   }
 
