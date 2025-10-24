@@ -1,4 +1,4 @@
-import { expectType, expectError , expectDeprecated, expectNotDeprecated } from 'tsd';
+import { expectType, expectError, expectDeprecated, expectNotDeprecated } from 'tsd';
 import {
   Binary,
   Code,
@@ -19,7 +19,7 @@ import {
   Document,
   Decimal128Extended,
   BSONValue,
-  bsonType,
+  bsonTypeSymbol,
   BSONTypeTag
 } from '../../bson'; // import from generated bson.d.ts
 import type { InspectFn } from '../../src/parser/utils';
@@ -60,48 +60,50 @@ expectError(BSONRegExp.prototype.toJSON);
 // but it actually is _bsontype='Long', inside the Timestamp constructor
 // we override the property on the instance
 // TODO(NODE-2624): Make Timestamp hold its long value on a property rather than be a subclass
-expectType<'Timestamp'>(Timestamp.prototype._bsontype)
+expectType<'Timestamp'>(Timestamp.prototype._bsontype);
 
-expectType<'ObjectId'>(ObjectId.prototype._bsontype)
-expectType<'BSONSymbol'>(BSONSymbol.prototype._bsontype)
-expectType<'Binary'>(Binary.prototype._bsontype)
-expectType<'Code'>(Code.prototype._bsontype)
-expectType<'DBRef'>(DBRef.prototype._bsontype)
-expectType<'Decimal128'>(Decimal128.prototype._bsontype)
-expectType<'Double'>(Double.prototype._bsontype)
-expectType<'Int32'>(Int32.prototype._bsontype)
-expectType<'Long'>(Long.prototype._bsontype)
-expectType<'MaxKey'>(MaxKey.prototype._bsontype)
-expectType<'MinKey'>(MinKey.prototype._bsontype)
-expectType<'BSONRegExp'>(BSONRegExp.prototype._bsontype)
-expectType<'Binary'>(UUID.prototype._bsontype)
+expectType<'ObjectId'>(ObjectId.prototype._bsontype);
+expectType<'BSONSymbol'>(BSONSymbol.prototype._bsontype);
+expectType<'Binary'>(Binary.prototype._bsontype);
+expectType<'Code'>(Code.prototype._bsontype);
+expectType<'DBRef'>(DBRef.prototype._bsontype);
+expectType<'Decimal128'>(Decimal128.prototype._bsontype);
+expectType<'Double'>(Double.prototype._bsontype);
+expectType<'Int32'>(Int32.prototype._bsontype);
+expectType<'Long'>(Long.prototype._bsontype);
+expectType<'MaxKey'>(MaxKey.prototype._bsontype);
+expectType<'MinKey'>(MinKey.prototype._bsontype);
+expectType<'BSONRegExp'>(BSONRegExp.prototype._bsontype);
+expectType<'Binary'>(UUID.prototype._bsontype);
 
-expectType<'Timestamp'>(Timestamp.prototype[bsonType])
-expectType<'ObjectId'>(ObjectId.prototype[bsonType])
-expectType<'BSONSymbol'>(BSONSymbol.prototype[bsonType])
-expectType<'Binary'>(Binary.prototype[bsonType])
-expectType<'Code'>(Code.prototype[bsonType])
-expectType<'DBRef'>(DBRef.prototype[bsonType])
-expectType<'Decimal128'>(Decimal128.prototype[bsonType])
-expectType<'Double'>(Double.prototype[bsonType])
-expectType<'Int32'>(Int32.prototype[bsonType])
-expectType<'Long'>(Long.prototype[bsonType])
-expectType<'MaxKey'>(MaxKey.prototype[bsonType])
-expectType<'MinKey'>(MinKey.prototype[bsonType])
-expectType<'BSONRegExp'>(BSONRegExp.prototype[bsonType])
-expectType<'Binary'>(UUID.prototype[bsonType])
+expectType<'Timestamp'>(Timestamp.prototype[bsonTypeSymbol]);
+expectType<'ObjectId'>(ObjectId.prototype[bsonTypeSymbol]);
+expectType<'BSONSymbol'>(BSONSymbol.prototype[bsonTypeSymbol]);
+expectType<'Binary'>(Binary.prototype[bsonTypeSymbol]);
+expectType<'Code'>(Code.prototype[bsonTypeSymbol]);
+expectType<'DBRef'>(DBRef.prototype[bsonTypeSymbol]);
+expectType<'Decimal128'>(Decimal128.prototype[bsonTypeSymbol]);
+expectType<'Double'>(Double.prototype[bsonTypeSymbol]);
+expectType<'Int32'>(Int32.prototype[bsonTypeSymbol]);
+expectType<'Long'>(Long.prototype[bsonTypeSymbol]);
+expectType<'MaxKey'>(MaxKey.prototype[bsonTypeSymbol]);
+expectType<'MinKey'>(MinKey.prototype[bsonTypeSymbol]);
+expectType<'BSONRegExp'>(BSONRegExp.prototype[bsonTypeSymbol]);
+expectType<'Binary'>(UUID.prototype[bsonTypeSymbol]);
 
 // Common BSONValue interface
 declare const bsonValue: BSONValue;
 expectType<BSONTypeTag>(bsonValue._bsontype);
-expectType<BSONTypeTag>(bsonValue[bsonType]);
-expectType<(depth?: number | undefined, options?: unknown, inspect?: InspectFn | undefined) => string>(bsonValue.inspect);
+expectType<BSONTypeTag>(bsonValue[bsonTypeSymbol]);
+expectType<
+  (depth?: number | undefined, options?: unknown, inspect?: InspectFn | undefined) => string
+>(bsonValue.inspect);
 
 expectNotDeprecated(new ObjectId('foo'));
 expectError(new ObjectId(42));
 expectError(new ObjectId(42 as string | number));
 
 // Timestamp accepts timestamp because constructor allows: {i:number, t:number}
-new Timestamp(new Timestamp(0n))
+new Timestamp(new Timestamp(0n));
 
 expectType<(position: number, length: number) => Uint8Array>(Binary.prototype.read);
