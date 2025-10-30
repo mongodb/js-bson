@@ -150,6 +150,14 @@ tasks:
           NODE_LTS_VERSION: 22
       - func: install dependencies
       - func: run tests
+  - name: node-tests-v24
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_LTS_VERSION: 24
+      - func: install dependencies
+      - func: run tests
   - name: node-tests-latest
     tags: ["node"]
     commands:
