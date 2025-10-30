@@ -173,7 +173,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_VERSION: 22
+          NODE_LTS_VERSION: 24
       - func: install dependencies
       - func: run tests
         vars:
@@ -182,7 +182,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_VERSION: 22
+          NODE_LTS_VERSION: 24
       - func: install dependencies
       - func: run bundling
   - name: run-checks
@@ -191,14 +191,14 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_VERSION: 22
+          NODE_LTS_VERSION: 24
       - func: install dependencies
       - func: run checks
   - name: check-typescript-oldest
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_VERSION: 22
+          NODE_LTS_VERSION: 24
       - func: install dependencies
       - func: "run typescript"
         vars:
@@ -208,7 +208,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_VERSION: 22
+          NODE_LTS_VERSION: 24
       - func: install dependencies
       - func: "run typescript"
         vars:
@@ -218,7 +218,7 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_VERSION: 22
+          NODE_LTS_VERSION: 24
       - func: install dependencies
       - func: "run typescript"
         vars:
