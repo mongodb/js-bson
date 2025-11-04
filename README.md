@@ -99,12 +99,13 @@ npm install bson
 
 Only the following version combinations with the [MongoDB Node.js Driver](https://github.com/mongodb/node-mongodb-native) are considered stable.
 
-|               | `bson@1.x` | `bson@4.x` | `bson@5.x` | `bson@6.x` |
-| ------------- | ---------- | ---------- | ---------- | ---------- |
-| `mongodb@6.x` | N/A        | N/A        | N/A        | ✓          |
-| `mongodb@5.x` | N/A        | N/A        | ✓          | N/A        |
-| `mongodb@4.x` | N/A        | ✓          | N/A        | N/A        |
-| `mongodb@3.x` | ✓          | N/A        | N/A        | N/A        |
+|               | `bson@1.x` | `bson@4.x` | `bson@5.x` | `bson@6.x` | `bson@7.x` |
+| ------------- | ---------- | ---------- | ---------- | ---------- | ---------- |
+| `mongodb@7.x` | N/A        | N/A        | N/A        | N/A        | ✓          |
+| `mongodb@6.x` | N/A        | N/A        | N/A        | ✓          | N/A        |
+| `mongodb@5.x` | N/A        | N/A        | ✓          | N/A        | N/A        |
+| `mongodb@4.x` | N/A        | ✓          | N/A        | N/A        | N/A        |
+| `mongodb@3.x` | ✓          | N/A        | N/A        | N/A        | N/A        |
 
 ## Documentation
 
