@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.0.0](https://github.com/mongodb/js-bson/compare/v7.0.0-alpha.2...v7.0.0) (2025-11-05)
+
+
+### Miscellaneous Chores
+
+* prerelease false ([#847](https://github.com/mongodb/js-bson/issues/847)) ([b925f26](https://github.com/mongodb/js-bson/commit/b925f26686015853516851ece9f38ba6bb792e89))
+
 ## [7.0.0-alpha.2](https://github.com/mongodb/js-bson/compare/v7.0.0-alpha.1...v7.0.0-alpha.2) (2025-10-24)
 
 
