@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.1.0](https://github.com/mongodb/js-bson/compare/v7.0.0...v7.1.0) (2025-11-21)
+
+
+### Features
+
+* **NODE-7316:** export number utils ([#850](https://github.com/mongodb/js-bson/issues/850)) ([a23e788](https://github.com/mongodb/js-bson/commit/a23e788eded5253f7e1295c36e3187363971ab8c))
+
 ## [7.0.0](https://github.com/mongodb/js-bson/compare/v7.0.0-alpha.2...v7.0.0) (2025-11-05)
 
 
