@@ -114,6 +114,42 @@ export const webByteUtils = {
     return webByteUtils.allocate(size);
   },
 
+  compare(a: Uint8Array, b: Uint8Array): -1 | 0 | 1 {
+    if (a === b) return 0;
+
+    const len = Math.min(a.length, b.length);
+
+    for (let i = 0; i < len; i++) {
+      if (a[i] < b[i]) return -1;
+      if (a[i] > b[i]) return 1;
+    }
+
+    if (a.length < b.length) return -1;
+    if (a.length > b.length) return 1;
+
+    return 0;
+  },
+
+  concat(list: Uint8Array[]): Uint8Array {
+    if (list.length === 0) return webByteUtils.allocate(0);
+    if (list.length === 1) return list[0];
+
+    let totalLength = 0;
+    for (const arr of list) {
+      totalLength += arr.length;
+    }
+
+    const result = webByteUtils.allocate(totalLength);
+    let offset = 0;
+
+    for (const arr of list) {
+      result.set(arr, offset);
+      offset += arr.length;
+    }
+
+    return result;
+  },
+
   equals(a: Uint8Array, b: Uint8Array): boolean {
     if (a.byteLength !== b.byteLength) {
       return false;

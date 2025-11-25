@@ -10,6 +10,7 @@ type NodeJsBuffer = ArrayBufferView &
     toString: (this: Uint8Array, encoding: NodeJsEncoding, start?: number, end?: number) => string;
     equals: (this: Uint8Array, other: Uint8Array) => boolean;
     swap32: (this: NodeJsBuffer) => NodeJsBuffer;
+    compare: (this: Uint8Array, other: Uint8Array) => -1 | 0 | 1;
   };
 type NodeJsBufferConstructor = Omit<Uint8ArrayConstructor, 'from'> & {
   alloc: (size: number) => NodeJsBuffer;
@@ -21,6 +22,7 @@ type NodeJsBufferConstructor = Omit<Uint8ArrayConstructor, 'from'> & {
   from(base64: string, encoding: NodeJsEncoding): NodeJsBuffer;
   byteLength(input: string, encoding: 'utf8'): number;
   isBuffer(value: unknown): value is NodeJsBuffer;
+  concat(list: Uint8Array[]): NodeJsBuffer;
 };
 
 // This can be nullish, but we gate the nodejs functions on being exported whether or not this exists
@@ -86,6 +88,14 @@ export const nodeJsByteUtils = {
 
   allocateUnsafe(size: number): NodeJsBuffer {
     return Buffer.allocUnsafe(size);
+  },
+
+  compare(a: Uint8Array, b: Uint8Array) {
+    return nodeJsByteUtils.toLocalBufferType(a).compare(b);
+  },
+
+  concat(list: Uint8Array[]): NodeJsBuffer {
+    return Buffer.concat(list);
   },
 
   equals(a: Uint8Array, b: Uint8Array): boolean {

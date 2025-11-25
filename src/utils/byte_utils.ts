@@ -15,6 +15,10 @@ export type ByteUtils = {
   allocate: (size: number) => Uint8Array;
   /** Create empty space of size, use pooled memory when available */
   allocateUnsafe: (size: number) => Uint8Array;
+  /** Compare 2 Uint8Arrays lexicographically */
+  compare: (buffer1: Uint8Array, buffer2: Uint8Array) => -1 | 0 | 1;
+  /** Concatenating all the Uint8Arrays in new Uint8Array. */
+  concat: (list: Uint8Array[]) => Uint8Array;
   /** Check if two Uint8Arrays are deep equal */
   equals: (a: Uint8Array, b: Uint8Array) => boolean;
   /** Check if two Uint8Arrays are deep equal */
