@@ -69,7 +69,10 @@ const webRandomBytes: (byteLength: number) => Uint8Array = (() => {
 
 const HEX_DIGIT = /(\d|[a-f])/i;
 
-/** @internal */
+/**
+ * @public
+ * @experimental
+ */
 export const webByteUtils = {
   toLocalBufferType(
     potentialUint8array: Uint8Array | ArrayBufferViewWithTag | ArrayBuffer

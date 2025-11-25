@@ -53,7 +53,10 @@ const nodejsRandomBytes = (() => {
   }
 })();
 
-/** @internal */
+/**
+ * @public
+ * @experimental
+ */
 export const nodeJsByteUtils = {
   toLocalBufferType(potentialBuffer: Uint8Array | NodeJsBuffer | ArrayBuffer): NodeJsBuffer {
     if (Buffer.isBuffer(potentialBuffer)) {

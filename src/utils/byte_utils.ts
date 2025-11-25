@@ -62,6 +62,7 @@ const hasGlobalBuffer = typeof Buffer === 'function' && Buffer.prototype?._isBuf
  * The type annotation is important here, it asserts that each of the platform specific
  * utils implementations are compatible with the common one.
  *
- * @internal
+ * @public
+ * @experimental
  */
 export const ByteUtils: ByteUtils = hasGlobalBuffer ? nodeJsByteUtils : webByteUtils;
