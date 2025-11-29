@@ -39,6 +39,11 @@ export type EJSONOptions = {
    * @defaultValue `false`
    */
   useBigInt64?: boolean;
+  /**
+   * Omits undefined values from the output instead of converting them to null
+   * @defaultValue `false`
+   */
+  ignoreUndefined?: boolean;
 };
 
 /** @internal */
@@ -242,7 +247,7 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
 
   if (Array.isArray(value)) return serializeArray(value, options);
 
-  if (value === undefined) return null;
+  if (value === undefined) return options.ignoreUndefined ? undefined : null;
 
   if (value instanceof Date || isDate(value)) {
     const dateNum = value.getTime(),

@@ -574,6 +574,70 @@ describe('Extended JSON', function () {
     expect(result).to.deep.equal({ a: 1 });
   });
 
+  describe('ignoreUndefined option', () => {
+    it('should convert undefined to null by default', () => {
+      const doc = { a: 1, b: undefined, c: 'test' };
+      const serialized = EJSON.stringify(doc);
+      expect(serialized).to.equal('{"a":1,"b":null,"c":"test"}');
+    });
+
+    it('should omit undefined values when ignoreUndefined is true', () => {
+      const doc = { a: 1, b: undefined, c: 'test' };
+      const serialized = EJSON.stringify(doc, { ignoreUndefined: true });
+      expect(serialized).to.equal('{"a":1,"c":"test"}');
+    });
+
+    it('should handle nested undefined values with ignoreUndefined: true', () => {
+      const doc = { a: 1, nested: { b: undefined, c: 2 }, d: 'test' };
+      const serialized = EJSON.stringify(doc, { ignoreUndefined: true });
+      expect(serialized).to.equal('{"a":1,"nested":{"c":2},"d":"test"}');
+    });
+
+    it('should handle nested undefined values without ignoreUndefined (default behavior)', () => {
+      const doc = { a: 1, nested: { b: undefined, c: 2 }, d: 'test' };
+      const serialized = EJSON.stringify(doc);
+      expect(serialized).to.equal('{"a":1,"nested":{"b":null,"c":2},"d":"test"}');
+    });
+
+    it('should handle undefined in arrays with ignoreUndefined: true', () => {
+      const doc = { arr: [1, undefined, 3] };
+      const serialized = EJSON.stringify(doc, { ignoreUndefined: true });
+      // JSON.stringify converts undefined array elements to null
+      expect(serialized).to.equal('{"arr":[1,null,3]}');
+    });
+
+    it('should handle undefined in arrays without ignoreUndefined (default behavior)', () => {
+      const doc = { arr: [1, undefined, 3] };
+      const serialized = EJSON.stringify(doc);
+      expect(serialized).to.equal('{"arr":[1,null,3]}');
+    });
+
+    it('should handle object with all undefined values with ignoreUndefined: true', () => {
+      const doc = { a: undefined, b: undefined };
+      const serialized = EJSON.stringify(doc, { ignoreUndefined: true });
+      expect(serialized).to.equal('{}');
+    });
+
+    it('should work with other options like relaxed', () => {
+      const doc = { a: new Int32(10), b: undefined, c: new Double(3.14) };
+      const serialized = EJSON.stringify(doc, { ignoreUndefined: true, relaxed: false });
+      expect(serialized).to.equal('{"a":{"$numberInt":"10"},"c":{"$numberDouble":"3.14"}}');
+    });
+
+    it('should work with replacer function', () => {
+      const doc = { a: 1, b: undefined, c: 2 };
+      const replacer = (key: string, value: unknown) => (key === 'a' ? 100 : value);
+      const serialized = EJSON.stringify(doc, replacer, 0, { ignoreUndefined: true });
+      expect(serialized).to.equal('{"a":100,"c":2}');
+    });
+
+    it('should work with space parameter', () => {
+      const doc = { a: 1, b: undefined };
+      const serialized = EJSON.stringify(doc, undefined, 2, { ignoreUndefined: true });
+      expect(serialized).to.equal('{\n  "a": 1\n}');
+    });
+  });
+
   it(`throws if Symbol.for('@@mdb.bson.version') is the wrong version in EJSON.stringify`, () => {
     expect(() =>
       EJSON.stringify({
