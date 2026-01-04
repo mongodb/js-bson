@@ -142,6 +142,21 @@ describe('UUID', () => {
     expect(() => binV4.toUUID()).to.not.throw();
   });
 
+  it('should throw message with type information when converted from an incompatible Binary instance', () => {
+    // @ts-expect-error: putting in a subtype that is not correct on purpose
+    const stringifiedSubType = Binary.createFromBase64(new UUID().toString('base64'), '4');
+    // @ts-expect-error: sub_type is a writable property
+    stringifiedSubType.sub_type = '4';
+    expect(() => stringifiedSubType.toUUID()).to.throw(/\(string\).+0x04/);
+
+    const fourish = { [Symbol.toPrimitive]: () => 4 };
+    // @ts-expect-error: putting in a subtype that is not correct on purpose
+    const objectSubtype = Binary.createFromBase64(new UUID().toString('base64'), fourish);
+    // @ts-expect-error: sub_type is a writable property
+    objectSubtype.sub_type = fourish;
+    expect(() => objectSubtype.toUUID()).to.throw(/\(object\).+0x04/);
+  });
+
   it('should correctly allow for node.js inspect to work with UUID', () => {
     const uuid = new UUID(UPPERCASE_DASH_SEPARATED_UUID_STRING);
     expect(inspect(uuid)).to.equal(`new UUID('${LOWERCASE_DASH_SEPARATED_UUID_STRING}')`);
