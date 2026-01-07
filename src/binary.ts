@@ -134,7 +134,7 @@ export class Binary extends BSONValue {
       throw new BSONError('Binary can only be constructed from Uint8Array or number[]');
     }
 
-    this.sub_type = Number(subType ?? Binary.BSON_BINARY_SUBTYPE_DEFAULT) & 0xff;
+    this.sub_type = (subType ?? Binary.BSON_BINARY_SUBTYPE_DEFAULT) & 0xff;
 
     if (buffer == null) {
       // create an empty binary buffer
