@@ -135,7 +135,6 @@ export const webByteUtils = {
 
   concat(list: Uint8Array[]): Uint8Array {
     if (list.length === 0) return webByteUtils.allocate(0);
-    if (list.length === 1) return list[0];
 
     let totalLength = 0;
     for (const arr of list) {
