@@ -9,6 +9,8 @@ import { webByteUtils } from './web_byte_utils';
  * ByteUtils is configured at load time to use Node.js or Web based APIs for the internal implementations.
  */
 export type ByteUtils = {
+  /** Checks if the given value is a Uint8Array. */
+  isUint8Array: (value: unknown) => boolean;
   /** Transforms the input to an instance of Buffer if running on node, otherwise Uint8Array */
   toLocalBufferType: (buffer: Uint8Array | ArrayBufferView | ArrayBuffer) => Uint8Array;
   /** Create empty space of size */

@@ -1,6 +1,7 @@
 import { BSONError } from '../error';
 import { parseUtf8 } from '../parse_utf8';
 import { tryReadBasicLatin, tryWriteBasicLatin } from './latin';
+import { isUint8Array } from '../parser/utils';
 
 type NodeJsEncoding = 'base64' | 'hex' | 'utf8' | 'binary';
 type NodeJsBuffer = ArrayBufferView &
@@ -58,6 +59,8 @@ const nodejsRandomBytes = (() => {
  * @experimental
  */
 export const nodeJsByteUtils = {
+  isUint8Array: isUint8Array,
+
   toLocalBufferType(potentialBuffer: Uint8Array | NodeJsBuffer | ArrayBuffer): NodeJsBuffer {
     if (Buffer.isBuffer(potentialBuffer)) {
       return potentialBuffer;

@@ -34,6 +34,30 @@ const isNode19OrHigher = (() => {
 
 const testArrayBuffer = new ArrayBuffer(8);
 
+const isUint8ArrayTests: ByteUtilTest<'isUint8Array'>[] = [
+  {
+    name: 'should detect Uint8Array',
+    inputs: [new Uint8Array()],
+    expectation({ output }) {
+      expect(output).to.be.true;
+    }
+  },
+  {
+    name: 'should detect Buffer',
+    inputs: [Buffer.alloc(0)],
+    expectation({ output }) {
+      expect(output).to.be.true;
+    }
+  },
+  {
+    name: 'should return false for non-Uint8Array values',
+    inputs: ['hello'],
+    expectation({ output }) {
+      expect(output).to.be.false;
+    }
+  }
+];
+
 const toLocalBufferTypeTests: ByteUtilTest<'toLocalBufferType'>[] = [
   {
     name: 'should transform to local type',
@@ -641,6 +665,7 @@ const utils = new Map([
 ]);
 
 const table = new Map<keyof ByteUtils, ByteUtilTest<keyof ByteUtils>[]>([
+  ['isUint8Array', isUint8ArrayTests],
   ['toLocalBufferType', toLocalBufferTypeTests],
   ['allocate', allocateTests],
   ['equals', equalsTests],

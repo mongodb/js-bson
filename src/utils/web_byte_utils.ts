@@ -1,6 +1,7 @@
 import { BSONError } from '../error';
 import { tryReadBasicLatin } from './latin';
 import { parseUtf8 } from '../parse_utf8';
+import { isUint8Array } from '../parser/utils';
 
 type TextDecoder = {
   readonly encoding: string;
@@ -74,6 +75,8 @@ const HEX_DIGIT = /(\d|[a-f])/i;
  * @experimental
  */
 export const webByteUtils = {
+  isUint8Array: isUint8Array,
+
   toLocalBufferType(
     potentialUint8array: Uint8Array | ArrayBufferViewWithTag | ArrayBuffer
   ): Uint8Array {
