@@ -116,6 +116,10 @@ export const nodeJsByteUtils = {
     return Buffer.from(base64, 'base64');
   },
 
+  fromUTF8(utf8: string): NodeJsBuffer {
+    return Buffer.from(utf8, 'utf8');
+  },
+
   toBase64(buffer: Uint8Array): string {
     return nodeJsByteUtils.toLocalBufferType(buffer).toString('base64');
   },

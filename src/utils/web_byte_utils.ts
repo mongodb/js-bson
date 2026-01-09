@@ -175,6 +175,10 @@ export const webByteUtils = {
     return Uint8Array.from(atob(base64), c => c.charCodeAt(0));
   },
 
+  fromUTF8(utf8: string): Uint8Array {
+    return new TextEncoder().encode(utf8);
+  },
+
   toBase64(uint8array: Uint8Array): string {
     return btoa(webByteUtils.toISO88591(uint8array));
   },

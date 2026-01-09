@@ -240,6 +240,24 @@ const fromBase64Tests: ByteUtilTest<'fromBase64'>[] = [
     }
   }
 ];
+const fromUTF8Tests: ByteUtilTest<'fromUTF8'>[] = [
+  {
+    name: 'should create buffer from utf8 input',
+    inputs: ['hello world!'],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.deep.equal(Buffer.from('hello world!', 'utf8'));
+    }
+  },
+  {
+    name: 'should return empty buffer for empty string input',
+    inputs: [''],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.have.property('byteLength', 0);
+    }
+  }
+];
 const toBase64Tests: ByteUtilTest<'toBase64'>[] = [
   {
     name: 'should create base64 string from buffer input',
@@ -390,7 +408,7 @@ const toISO88591Tests: ByteUtilTest<'toISO88591'>[] = [
     }
   }
 ];
-const fromUTF8Tests: ByteUtilTest<'encodeUTF8Into'>[] = [
+const encodeUTF8IntoTests: ByteUtilTest<'encodeUTF8Into'>[] = [
   {
     name: 'should insert utf8 bytes into buffer',
     inputs: [Buffer.alloc(7), 'abc\u{1f913}', 0],
@@ -671,12 +689,13 @@ const table = new Map<keyof ByteUtils, ByteUtilTest<keyof ByteUtils>[]>([
   ['equals', equalsTests],
   ['fromNumberArray', fromNumberArrayTests],
   ['fromBase64', fromBase64Tests],
+  ['fromUTF8', fromUTF8Tests],
   ['toBase64', toBase64Tests],
   ['fromHex', fromHexTests],
   ['toHex', toHexTests],
   ['fromISO88591', fromISO88591Tests],
   ['toISO88591', toISO88591Tests],
-  ['encodeUTF8Into', fromUTF8Tests],
+  ['encodeUTF8Into', encodeUTF8IntoTests],
   ['toUTF8', toUTF8Tests],
   ['utf8ByteLength', utf8ByteLengthTests],
   ['randomBytes', randomBytesTests],

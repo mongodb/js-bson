@@ -23,10 +23,12 @@ export type ByteUtils = {
   concat: (list: Uint8Array[]) => Uint8Array;
   /** Check if two Uint8Arrays are deep equal */
   equals: (a: Uint8Array, b: Uint8Array) => boolean;
-  /** Check if two Uint8Arrays are deep equal */
+  /** Create a Uint8Array from an array of numbers */
   fromNumberArray: (array: number[]) => Uint8Array;
   /** Create a Uint8Array from a base64 string */
   fromBase64: (base64: string) => Uint8Array;
+  /** Create a Uint8Array from a UTF8 string */
+  fromUTF8: (utf8: string) => Uint8Array;
   /** Create a base64 string from bytes */
   toBase64: (buffer: Uint8Array) => string;
   /** **Legacy** binary strings are an outdated method of data transfer. Do not add public API support for interpreting this format */
