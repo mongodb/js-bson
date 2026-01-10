@@ -23,8 +23,8 @@ import { BSONRegExp } from './regexp';
 import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
 
-/** @internal */
-type EJSONOptionsBase = {
+/** @public */
+export type EJSONOptionsBase = {
   /**
    * Output using the Extended JSON v1 spec
    * @defaultValue `false`
