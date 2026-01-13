@@ -34,6 +34,30 @@ const isNode19OrHigher = (() => {
 
 const testArrayBuffer = new ArrayBuffer(8);
 
+const isUint8ArrayTests: ByteUtilTest<'isUint8Array'>[] = [
+  {
+    name: 'should detect Uint8Array',
+    inputs: [new Uint8Array()],
+    expectation({ output }) {
+      expect(output).to.be.true;
+    }
+  },
+  {
+    name: 'should detect Buffer',
+    inputs: [Buffer.alloc(0)],
+    expectation({ output }) {
+      expect(output).to.be.true;
+    }
+  },
+  {
+    name: 'should return false for non-Uint8Array values',
+    inputs: ['hello'],
+    expectation({ output }) {
+      expect(output).to.be.false;
+    }
+  }
+];
+
 const toLocalBufferTypeTests: ByteUtilTest<'toLocalBufferType'>[] = [
   {
     name: 'should transform to local type',
@@ -216,6 +240,24 @@ const fromBase64Tests: ByteUtilTest<'fromBase64'>[] = [
     }
   }
 ];
+const fromUTF8Tests: ByteUtilTest<'fromUTF8'>[] = [
+  {
+    name: 'should create buffer from utf8 input',
+    inputs: ['hello world!'],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.deep.equal(Buffer.from('hello world!', 'utf8'));
+    }
+  },
+  {
+    name: 'should return empty buffer for empty string input',
+    inputs: [''],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.have.property('byteLength', 0);
+    }
+  }
+];
 const toBase64Tests: ByteUtilTest<'toBase64'>[] = [
   {
     name: 'should create base64 string from buffer input',
@@ -366,7 +408,7 @@ const toISO88591Tests: ByteUtilTest<'toISO88591'>[] = [
     }
   }
 ];
-const fromUTF8Tests: ByteUtilTest<'encodeUTF8Into'>[] = [
+const encodeUTF8IntoTests: ByteUtilTest<'encodeUTF8Into'>[] = [
   {
     name: 'should insert utf8 bytes into buffer',
     inputs: [Buffer.alloc(7), 'abc\u{1f913}', 0],
@@ -517,6 +559,123 @@ const swap32Tests: ByteUtilTest<'swap32'>[] = [
     }
   }
 ];
+const compareTests: ByteUtilTest<'compare'>[] = [
+  {
+    name: 'returns 0 for two equal arrays (same content)',
+    inputs: [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 3])],
+    expectation({ output }) {
+      expect(output).to.equal(0);
+    }
+  },
+  {
+    name: 'returns 0 when comparing the same buffer by reference',
+    inputs: (() => {
+      const buf = new Uint8Array([5, 6, 7]);
+      return [buf, buf];
+    })(),
+    expectation({ output }) {
+      expect(output).to.equal(0);
+    }
+  },
+  {
+    name: 'array a is lexicographically less than array b (first differing byte)',
+    inputs: [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2, 4])],
+    expectation({ output }) {
+      expect(output).to.equal(-1);
+    }
+  },
+  {
+    name: 'array a is lexicographically greater than array b (first differing byte)',
+    inputs: [new Uint8Array([1, 2, 4]), new Uint8Array([1, 2, 3])],
+    expectation({ output }) {
+      expect(output).to.equal(1);
+    }
+  },
+  {
+    name: 'a is a strict prefix of b (a shorter, same starting bytes) -> a < b',
+    inputs: [new Uint8Array([1, 2]), new Uint8Array([1, 2, 3])],
+    expectation({ output }) {
+      expect(output).to.equal(-1);
+    }
+  },
+  {
+    name: 'b is a strict prefix of a (b shorter, same starting bytes) -> a > b',
+    inputs: [new Uint8Array([1, 2, 3]), new Uint8Array([1, 2])],
+    expectation({ output }) {
+      expect(output).to.equal(1);
+    }
+  },
+  {
+    name: 'handles empty arrays',
+    inputs: [new Uint8Array([]), new Uint8Array([])],
+    expectation({ output }) {
+      expect(output).to.equal(0);
+    }
+  }
+];
+const concatTests: ByteUtilTest<'concat'>[] = [
+  {
+    name: 'concatenates two non-empty arrays',
+    inputs: [[new Uint8Array([1, 2]), new Uint8Array([3, 4])]],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.deep.equal(Buffer.from([1, 2, 3, 4]));
+    }
+  },
+  {
+    name: 'concatenates multiple arrays in order',
+    inputs: [[new Uint8Array([1]), new Uint8Array([2, 3]), new Uint8Array([4, 5, 6])]],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.deep.equal(Buffer.from([1, 2, 3, 4, 5, 6]));
+    }
+  },
+  {
+    name: 'returns an empty Uint8Array when given an empty list',
+    inputs: [[]],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.have.property('byteLength', 0);
+      expect(output).to.deep.equal(Buffer.from([]));
+    }
+  },
+  {
+    name: 'returns the same contents when given a single array',
+    inputs: [[new Uint8Array([7, 8, 9])]],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.deep.equal(Buffer.from([7, 8, 9]));
+    }
+  },
+  {
+    name: 'handles concatenation with empty arrays inside the list',
+    inputs: [
+      [new Uint8Array([]), new Uint8Array([1, 2, 3]), new Uint8Array([]), new Uint8Array([4])]
+    ],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.deep.equal(Buffer.from([1, 2, 3, 4]));
+    }
+  },
+  {
+    name: 'result has correct total byteLength',
+    inputs: [[new Uint8Array([1, 2]), new Uint8Array([3]), new Uint8Array([4, 5, 6])]],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      // 2 + 1 + 3 = 6
+      expect(output).to.have.property('byteLength', 6);
+      expect(output).to.deep.equal(Buffer.from([1, 2, 3, 4, 5, 6]));
+    }
+  },
+  {
+    name: 'concatenates arrays with overlapping contents correctly',
+    inputs: [[new Uint8Array([0, 0, 1]), new Uint8Array([1, 0, 0])]],
+    expectation({ output, error }) {
+      expect(error).to.be.null;
+      expect(output).to.deep.equal(Buffer.from([0, 0, 1, 1, 0, 0]));
+    }
+  }
+];
 
 const utils = new Map([
   ['nodeJsByteUtils', nodeJsByteUtils],
@@ -524,21 +683,25 @@ const utils = new Map([
 ]);
 
 const table = new Map<keyof ByteUtils, ByteUtilTest<keyof ByteUtils>[]>([
+  ['isUint8Array', isUint8ArrayTests],
   ['toLocalBufferType', toLocalBufferTypeTests],
   ['allocate', allocateTests],
   ['equals', equalsTests],
   ['fromNumberArray', fromNumberArrayTests],
   ['fromBase64', fromBase64Tests],
+  ['fromUTF8', fromUTF8Tests],
   ['toBase64', toBase64Tests],
   ['fromHex', fromHexTests],
   ['toHex', toHexTests],
   ['fromISO88591', fromISO88591Tests],
   ['toISO88591', toISO88591Tests],
-  ['encodeUTF8Into', fromUTF8Tests],
+  ['encodeUTF8Into', encodeUTF8IntoTests],
   ['toUTF8', toUTF8Tests],
   ['utf8ByteLength', utf8ByteLengthTests],
   ['randomBytes', randomBytesTests],
-  ['swap32', swap32Tests]
+  ['swap32', swap32Tests],
+  ['compare', compareTests],
+  ['concat', concatTests]
 ]);
 
 describe('ByteUtils', () => {

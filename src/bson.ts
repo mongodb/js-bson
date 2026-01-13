@@ -49,7 +49,8 @@ export {
   MaxKey,
   BSONRegExp,
   Decimal128,
-  NumberUtils
+  NumberUtils,
+  ByteUtils
 };
 export { BSONValue, bsonType, type BSONTypeTag } from './bson_value';
 export { BSONError, BSONVersionError, BSONRuntimeError, BSONOffsetError } from './error';

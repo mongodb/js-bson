@@ -1,6 +1,7 @@
 import { BSONError } from '../error';
 import { parseUtf8 } from '../parse_utf8';
 import { tryReadBasicLatin, tryWriteBasicLatin } from './latin';
+import { isUint8Array } from '../parser/utils';
 
 type NodeJsEncoding = 'base64' | 'hex' | 'utf8' | 'binary';
 type NodeJsBuffer = ArrayBufferView &
@@ -10,6 +11,7 @@ type NodeJsBuffer = ArrayBufferView &
     toString: (this: Uint8Array, encoding: NodeJsEncoding, start?: number, end?: number) => string;
     equals: (this: Uint8Array, other: Uint8Array) => boolean;
     swap32: (this: NodeJsBuffer) => NodeJsBuffer;
+    compare: (this: Uint8Array, other: Uint8Array) => -1 | 0 | 1;
   };
 type NodeJsBufferConstructor = Omit<Uint8ArrayConstructor, 'from'> & {
   alloc: (size: number) => NodeJsBuffer;
@@ -21,6 +23,7 @@ type NodeJsBufferConstructor = Omit<Uint8ArrayConstructor, 'from'> & {
   from(base64: string, encoding: NodeJsEncoding): NodeJsBuffer;
   byteLength(input: string, encoding: 'utf8'): number;
   isBuffer(value: unknown): value is NodeJsBuffer;
+  concat(list: Uint8Array[]): NodeJsBuffer;
 };
 
 // This can be nullish, but we gate the nodejs functions on being exported whether or not this exists
@@ -51,8 +54,13 @@ const nodejsRandomBytes = (() => {
   }
 })();
 
-/** @internal */
+/**
+ * @public
+ * @experimental
+ */
 export const nodeJsByteUtils = {
+  isUint8Array: isUint8Array,
+
   toLocalBufferType(potentialBuffer: Uint8Array | NodeJsBuffer | ArrayBuffer): NodeJsBuffer {
     if (Buffer.isBuffer(potentialBuffer)) {
       return potentialBuffer;
@@ -88,6 +96,14 @@ export const nodeJsByteUtils = {
     return Buffer.allocUnsafe(size);
   },
 
+  compare(a: Uint8Array, b: Uint8Array) {
+    return nodeJsByteUtils.toLocalBufferType(a).compare(b);
+  },
+
+  concat(list: Uint8Array[]): NodeJsBuffer {
+    return Buffer.concat(list);
+  },
+
   equals(a: Uint8Array, b: Uint8Array): boolean {
     return nodeJsByteUtils.toLocalBufferType(a).equals(b);
   },
@@ -98,6 +114,10 @@ export const nodeJsByteUtils = {
 
   fromBase64(base64: string): NodeJsBuffer {
     return Buffer.from(base64, 'base64');
+  },
+
+  fromUTF8(utf8: string): NodeJsBuffer {
+    return Buffer.from(utf8, 'utf8');
   },
 
   toBase64(buffer: Uint8Array): string {
