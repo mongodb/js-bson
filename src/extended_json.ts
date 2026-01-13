@@ -469,8 +469,11 @@ function parse(text: string, options?: EJSONParseOptions): any {
 function stringify(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  replacer?: (number | string)[] | ((this: any, key: string, value: any) => any) | EJSONSerializeOptions,
+  replacer?:
+    | (number | string)[]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | ((this: any, key: string, value: any) => any)
+    | EJSONSerializeOptions,
   space?: string | number,
   options?: EJSONSerializeOptions
 ): string {
