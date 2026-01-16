@@ -10,7 +10,7 @@ import { webByteUtils } from './web_byte_utils';
  */
 export type ByteUtils = {
   /** Checks if the given value is a Uint8Array. */
-  isUint8Array: (value: unknown) => boolean;
+  isUint8Array: (value: unknown) => value is Uint8Array;
   /** Transforms the input to an instance of Buffer if running on node, otherwise Uint8Array */
   toLocalBufferType: (buffer: Uint8Array | ArrayBufferView | ArrayBuffer) => Uint8Array;
   /** Create empty space of size */
