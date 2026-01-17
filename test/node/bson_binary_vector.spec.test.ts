@@ -4,7 +4,7 @@ import * as path from 'path';
 import { BSON, BSONError, Binary, EJSON } from '../register-bson';
 import { expect } from 'chai';
 
-const { toHex, fromHex } = BSON.ByteUtils;
+const { toHex, fromHex } = BSON.onDemand.ByteUtils;
 
 type VectorHexType = '0x03' | '0x27' | '0x10';
 type VectorTest = {
