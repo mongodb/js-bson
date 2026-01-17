@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.1.1](https://github.com/mongodb/js-bson/compare/v7.1.0...v7.1.1) (2026-01-17)
+
+
+### Bug Fixes
+
+* **NODE-7399:** revert bson PR 859 / NODE-7334 ([#861](https://github.com/mongodb/js-bson/issues/861)) ([6511e0d](https://github.com/mongodb/js-bson/commit/6511e0d6ca20a69a89d53ed6c265af67704efc08))
+
 ## [7.1.0](https://github.com/mongodb/js-bson/compare/v7.0.0...v7.1.0) (2026-01-16)
 
 
