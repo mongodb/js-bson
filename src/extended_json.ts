@@ -24,7 +24,7 @@ import { BSONSymbol } from './symbol';
 import { Timestamp } from './timestamp';
 
 /** @public */
-export type EJSONOptions = {
+export type EJSONOptionsBase = {
   /**
    * Output using the Extended JSON v1 spec
    * @defaultValue `false`
@@ -32,14 +32,31 @@ export type EJSONOptions = {
   legacy?: boolean;
   /**
    * Enable Extended JSON's `relaxed` mode, which attempts to return native JS types where possible, rather than BSON types
-   * @defaultValue `false` */
+   * @defaultValue `false`
+   */
   relaxed?: boolean;
+};
+
+/** @public */
+export type EJSONSerializeOptions = EJSONOptionsBase & {
+  /**
+   * Omits undefined values from the output instead of converting them to null
+   * @defaultValue `false`
+   */
+  ignoreUndefined?: boolean;
+};
+
+/** @public */
+export type EJSONParseOptions = EJSONOptionsBase & {
   /**
    * Enable native bigint support
    * @defaultValue `false`
    */
   useBigInt64?: boolean;
 };
+
+/** @public */
+export type EJSONOptions = EJSONSerializeOptions & EJSONParseOptions;
 
 /** @internal */
 type BSONType =
@@ -174,12 +191,12 @@ function deserializeValue(value: any, options: EJSONOptions = {}) {
   return value;
 }
 
-type EJSONSerializeOptions = EJSONOptions & {
+type EJSONSerializeInternalOptions = EJSONSerializeOptions & {
   seenObjects: { obj: unknown; propertyName: string }[];
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function serializeArray(array: any[], options: EJSONSerializeOptions): any[] {
+function serializeArray(array: any[], options: EJSONSerializeInternalOptions): any[] {
   return array.map((v: unknown, index: number) => {
     options.seenObjects.push({ propertyName: `index ${index}`, obj: null });
     try {
@@ -197,7 +214,7 @@ function getISOString(date: Date) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function serializeValue(value: any, options: EJSONSerializeOptions): any {
+function serializeValue(value: any, options: EJSONSerializeInternalOptions): any {
   if (value instanceof Map || isMap(value)) {
     const obj: Record<string, unknown> = Object.create(null);
     for (const [k, v] of value) {
@@ -242,7 +259,7 @@ function serializeValue(value: any, options: EJSONSerializeOptions): any {
 
   if (Array.isArray(value)) return serializeArray(value, options);
 
-  if (value === undefined) return null;
+  if (value === undefined) return options.ignoreUndefined ? undefined : null;
 
   if (value instanceof Date || isDate(value)) {
     const dateNum = value.getTime(),
@@ -326,7 +343,7 @@ const BSON_TYPE_MAPPINGS = {
 } as const;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function serializeDocument(doc: any, options: EJSONSerializeOptions) {
+function serializeDocument(doc: any, options: EJSONSerializeInternalOptions) {
   if (doc == null || typeof doc !== 'object') throw new BSONError('not an object instance');
 
   const bsontype: BSONType['_bsontype'] = doc._bsontype;
@@ -410,7 +427,7 @@ function serializeDocument(doc: any, options: EJSONSerializeOptions) {
  * ```
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function parse(text: string, options?: EJSONOptions): any {
+function parse(text: string, options?: EJSONParseOptions): any {
   const ejsonOptions = {
     useBigInt64: options?.useBigInt64 ?? false,
     relaxed: options?.relaxed ?? true,
@@ -452,10 +469,13 @@ function parse(text: string, options?: EJSONOptions): any {
 function stringify(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  replacer?: (number | string)[] | ((this: any, key: string, value: any) => any) | EJSONOptions,
+  replacer?:
+    | (number | string)[]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | ((this: any, key: string, value: any) => any)
+    | EJSONSerializeOptions,
   space?: string | number,
-  options?: EJSONOptions
+  options?: EJSONSerializeOptions
 ): string {
   if (space != null && typeof space === 'object') {
     options = space;
@@ -481,7 +501,7 @@ function stringify(
  * @param options - Optional settings passed to the `stringify` function
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function EJSONserialize(value: any, options?: EJSONOptions): Document {
+function EJSONserialize(value: any, options?: EJSONSerializeOptions): Document {
   options = options || {};
   return JSON.parse(stringify(value, options));
 }
@@ -493,7 +513,7 @@ function EJSONserialize(value: any, options?: EJSONOptions): Document {
  * @param options - Optional settings passed to the parse method
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function EJSONdeserialize(ejson: Document, options?: EJSONOptions): any {
+function EJSONdeserialize(ejson: Document, options?: EJSONParseOptions): any {
   options = options || {};
   return parse(JSON.stringify(ejson), options);
 }
