@@ -1,6 +1,7 @@
 import { BSONError } from '../error';
 import { tryReadBasicLatin } from './latin';
 import { parseUtf8 } from '../parse_utf8';
+import { isUint8Array } from '../parser/utils';
 
 type TextDecoder = {
   readonly encoding: string;
@@ -69,8 +70,13 @@ const webRandomBytes: (byteLength: number) => Uint8Array = (() => {
 
 const HEX_DIGIT = /(\d|[a-f])/i;
 
-/** @internal */
+/**
+ * @public
+ * @experimental
+ */
 export const webByteUtils = {
+  isUint8Array: isUint8Array,
+
   toLocalBufferType(
     potentialUint8array: Uint8Array | ArrayBufferViewWithTag | ArrayBuffer
   ): Uint8Array {
@@ -114,12 +120,47 @@ export const webByteUtils = {
     return webByteUtils.allocate(size);
   },
 
-  equals(a: Uint8Array, b: Uint8Array): boolean {
-    if (a.byteLength !== b.byteLength) {
+  compare(uint8Array: Uint8Array, otherUint8Array: Uint8Array): -1 | 0 | 1 {
+    if (uint8Array === otherUint8Array) return 0;
+
+    const len = Math.min(uint8Array.length, otherUint8Array.length);
+
+    for (let i = 0; i < len; i++) {
+      if (uint8Array[i] < otherUint8Array[i]) return -1;
+      if (uint8Array[i] > otherUint8Array[i]) return 1;
+    }
+
+    if (uint8Array.length < otherUint8Array.length) return -1;
+    if (uint8Array.length > otherUint8Array.length) return 1;
+
+    return 0;
+  },
+
+  concat(uint8Arrays: Uint8Array[]): Uint8Array {
+    if (uint8Arrays.length === 0) return webByteUtils.allocate(0);
+
+    let totalLength = 0;
+    for (const uint8Array of uint8Arrays) {
+      totalLength += uint8Array.length;
+    }
+
+    const result = webByteUtils.allocate(totalLength);
+    let offset = 0;
+
+    for (const uint8Array of uint8Arrays) {
+      result.set(uint8Array, offset);
+      offset += uint8Array.length;
+    }
+
+    return result;
+  },
+
+  equals(uint8Array: Uint8Array, otherUint8Array: Uint8Array): boolean {
+    if (uint8Array.byteLength !== otherUint8Array.byteLength) {
       return false;
     }
-    for (let i = 0; i < a.byteLength; i++) {
-      if (a[i] !== b[i]) {
+    for (let i = 0; i < uint8Array.byteLength; i++) {
+      if (uint8Array[i] !== otherUint8Array[i]) {
         return false;
       }
     }
@@ -132,6 +173,10 @@ export const webByteUtils = {
 
   fromBase64(base64: string): Uint8Array {
     return Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+  },
+
+  fromUTF8(utf8: string): Uint8Array {
+    return new TextEncoder().encode(utf8);
   },
 
   toBase64(uint8array: Uint8Array): string {

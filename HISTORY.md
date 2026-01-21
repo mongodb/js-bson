@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.1.1](https://github.com/mongodb/js-bson/compare/v7.1.0...v7.1.1) (2026-01-17)
+
+
+### Bug Fixes
+
+* **NODE-7399:** revert bson PR 859 / NODE-7334 ([#861](https://github.com/mongodb/js-bson/issues/861)) ([6511e0d](https://github.com/mongodb/js-bson/commit/6511e0d6ca20a69a89d53ed6c265af67704efc08))
+
+## [7.1.0](https://github.com/mongodb/js-bson/compare/v7.0.0...v7.1.0) (2026-01-16)
+
+
+### Features
+
+* **NODE-7314:** export byteUtils & add missing methods ([#852](https://github.com/mongodb/js-bson/issues/852)) ([a31c90e](https://github.com/mongodb/js-bson/commit/a31c90ebb5ea9c80b94986a13c574f0541d0d5d2))
+* **NODE-7316:** export number utils ([#850](https://github.com/mongodb/js-bson/issues/850)) ([a23e788](https://github.com/mongodb/js-bson/commit/a23e788eded5253f7e1295c36e3187363971ab8c))
+* **NODE-7334:** remove ByteUtils and NumberUtils from the `onDemand` ns ([#859](https://github.com/mongodb/js-bson/issues/859)) ([92bbc34](https://github.com/mongodb/js-bson/commit/92bbc34a5aa2de972a61b9a5f77246e8dc6288e8))
+
+
+### Bug Fixes
+
+* **NODE-7397:** Use type predicate for isUint8Array ([#860](https://github.com/mongodb/js-bson/issues/860)) ([89b3a2b](https://github.com/mongodb/js-bson/commit/89b3a2b6cf88de5ba407ce24c71eff5e55db2165))
+
 ## [7.0.0](https://github.com/mongodb/js-bson/compare/v7.0.0-alpha.2...v7.0.0) (2025-11-05)
 
 
