@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.2.0](https://github.com/mongodb/js-bson/compare/v7.1.1...v7.2.0) (2026-01-22)
+
+
+### Features
+
+* **NODE-7328:** Add ignoreUndefined option to EJSON APIs ([#853](https://github.com/mongodb/js-bson/issues/853)) ([5cf00c2](https://github.com/mongodb/js-bson/commit/5cf00c2165fed16329d147ba088c6af35e8d1c3c))
+
 ## [7.1.1](https://github.com/mongodb/js-bson/compare/v7.1.0...v7.1.1) (2026-01-17)
 
 
