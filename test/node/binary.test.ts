@@ -15,6 +15,28 @@ describe('class Binary', () => {
       emptyZeroedArray.fill(0x00);
       expect(binary.buffer).to.deep.equal(emptyZeroedArray);
     });
+
+    const cases: { test: unknown; expected: number }[] = [
+      { test: '4', expected: 4 },
+      { test: { [Symbol.toPrimitive]: () => 4 }, expected: 4 },
+      { test: { [Symbol.toPrimitive]: () => '4' }, expected: 4 },
+      { test: { toString: () => '4' }, expected: 4 },
+      { test: undefined, expected: Binary.SUBTYPE_DEFAULT },
+      { test: null, expected: Binary.SUBTYPE_DEFAULT },
+      { test: Infinity, expected: Binary.SUBTYPE_DEFAULT },
+      { test: -Infinity, expected: Binary.SUBTYPE_DEFAULT },
+      { test: -0, expected: Binary.SUBTYPE_DEFAULT },
+      { test: 0.23, expected: Binary.SUBTYPE_DEFAULT },
+      { test: NaN, expected: Binary.SUBTYPE_DEFAULT },
+      { test: 0xff_ff, expected: 0xff }
+    ];
+    for (const testCase of cases) {
+      it(`casts the subType input (${util.inspect(testCase.test, { compact: true, breakLength: 1000 })}) to a byte size number (${testCase.expected})`, () => {
+        //@ts-expect-error: checking strange inputs
+        const b = new Binary(new Uint8Array(0), testCase.test);
+        expect(b.sub_type).to.equal(testCase.expected);
+      });
+    }
   });
 
   context('createFromHexString()', () => {
