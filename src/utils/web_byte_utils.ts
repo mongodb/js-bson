@@ -10,7 +10,7 @@ type TextDecoder = {
   decode(input?: Uint8Array): string;
 };
 type TextDecoderConstructor = {
-  new (label: 'utf8', options: { fatal: boolean; ignoreBOM?: boolean }): TextDecoder;
+  new(label: 'utf8', options: { fatal: boolean; ignoreBOM?: boolean }): TextDecoder;
 };
 
 type TextEncoder = {
@@ -18,7 +18,7 @@ type TextEncoder = {
   encode(input?: string): Uint8Array;
 };
 type TextEncoderConstructor = {
-  new (): TextEncoder;
+  new(): TextEncoder;
 };
 
 // Web global
@@ -153,6 +153,25 @@ export const webByteUtils = {
     }
 
     return result;
+  },
+
+  copy(source: Uint8Array, target: Uint8Array, targetStart?: number, sourceStart?: number, sourceEnd?: number): number {
+    const targetStartActual = targetStart ?? 0;
+    const sourceEndActual = sourceEnd ?? source.length;
+    if (sourceEndActual < 0) {
+      throw new RangeError(`The value of "sourceEnd" is out of range. It must be >= 0. Received ${sourceEndActual}`);
+    }
+    const sourceStartActual = sourceStart ?? 0;
+    if (sourceStartActual < 0 || sourceStartActual > sourceEndActual) {
+      throw new RangeError(`The value of "sourceStart" is out of range. It must be >= 0 and <= ${sourceEndActual}. Received ${sourceStartActual}`);
+    }
+    const srcSlice = source.subarray(sourceStart, sourceEndActual);
+    const maxLen = Math.min(srcSlice.length, target.length - targetStartActual);
+    if (maxLen <= 0) {
+      return 0;
+    }
+    target.set(srcSlice.subarray(0, maxLen), targetStartActual);
+    return maxLen;
   },
 
   equals(uint8Array: Uint8Array, otherUint8Array: Uint8Array): boolean {
