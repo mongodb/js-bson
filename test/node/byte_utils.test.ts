@@ -679,10 +679,7 @@ const concatTests: ByteUtilTest<'concat'>[] = [
 const copyTests: ByteUtilTest<'copy'>[] = [
   {
     name: 'should copy bytes from source to target buffer, with no offsets',
-    inputs: [
-      Uint8Array.from([1, 2, 3, 4, 5]),
-      Uint8Array.from([0, 0, 0, 0, 0]),
-    ],
+    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0])],
     expectation({ output, error }) {
       expect(error).to.be.null;
       expect(output).to.equal(5);
@@ -691,24 +688,16 @@ const copyTests: ByteUtilTest<'copy'>[] = [
   },
   {
     name: 'should copy bytes from source to target buffer, specify valid targetOffset',
-    inputs: [
-      Uint8Array.from([1, 2, 3, 4, 5]),
-      Uint8Array.from([0, 0, 0, 0, 0]),
-      2
-    ],
+    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), 2],
     expectation({ output, error }) {
       expect(error).to.be.null;
       expect(output).to.equal(3);
-      expect(this.inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 1, 2, 3,]));
+      expect(this.inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 1, 2, 3]));
     }
   },
   {
     name: 'should copy bytes from source to target buffer, specify invalid targetOffset',
-    inputs: [
-      Uint8Array.from([1, 2, 3, 4, 5]),
-      Uint8Array.from([0, 0, 0, 0, 0]),
-      10
-    ],
+    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), 10],
     expectation({ output, error }) {
       expect(error).to.be.null;
       expect(output).to.equal(0);
@@ -717,61 +706,38 @@ const copyTests: ByteUtilTest<'copy'>[] = [
   },
   {
     name: 'should copy bytes from source to target buffer, specify targetOffset and sourceOffset',
-    inputs: [
-      Uint8Array.from([1, 2, 3, 4, 5]),
-      Uint8Array.from([0, 0, 0, 0, 0]),
-      2,
-      1
-    ],
+    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), 2, 1],
     expectation({ output, error }) {
       expect(error).to.be.null;
       expect(output).to.equal(3);
-      expect(this.inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 2, 3, 4,]));
+      expect(this.inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 2, 3, 4]));
     }
   },
   {
     name: 'should copy bytes from source to target buffer, specify valid targetOffset and invalid sourceOffset',
-    inputs: [
-      Uint8Array.from([1, 2, 3, 4, 5]),
-      Uint8Array.from([0, 0, 0, 0, 0]),
-      2,
-      10
-    ],
-    expectation({ output, error }) {
+    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), 2, 10],
+    expectation({ error }) {
       expect(error).to.match(/The value of "sourceStart" is out of range/i);
-      // expect(error).to.be.null;
-      // expect(output).to.equal(0);
-      // expect(this.inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 0, 0, 0]));
     }
   },
   {
     name: 'should copy bytes from source to target buffer, specify valid targetOffset, sourceOffset, and sourceEnd',
-    inputs: [
-      Uint8Array.from([1, 2, 3, 4, 5]),
-      Uint8Array.from([0, 0, 0, 0, 0]),
-      2,
-      1,
-      3
-    ],
+    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), 2, 1, 3],
     expectation({ output, error }) {
       expect(error).to.be.null;
       expect(output).to.equal(2);
-      expect(this.inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 2, 3, 0,]));
+      expect(this.inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 2, 3, 0]));
     }
   },
   {
     name: 'should copy bytes from source to target buffer, specify valid targetOffset, valid sourceOffset, and invalid sourceEnd',
-    inputs: [
-      Uint8Array.from([1, 2, 3, 4, 5]),
-      Uint8Array.from([0, 0, 0, 0, 0]),
-      2,
-      1,
-      -1
-    ],
-    expectation({ output, error }) {
-      expect(error).to.match(/The value of "sourceEnd" is out of range. It must be >= 0. Received -1/i);
+    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), 2, 1, -1],
+    expectation({ error }) {
+      expect(error).to.match(
+        /The value of "sourceEnd" is out of range. It must be >= 0. Received -1/i
+      );
     }
-  },
+  }
 ];
 
 const utils = new Map([

@@ -104,13 +104,16 @@ export const nodeJsByteUtils = {
     return Buffer.concat(list);
   },
 
-  copy(source: Uint8Array, target: Uint8Array, targetStart?: number, sourceStart?: number, sourceEnd?: number): number {
-    return nodeJsByteUtils.toLocalBufferType(source).copy(
-      target,
-      targetStart ?? 0,
-      sourceStart ?? 0,
-      sourceEnd ?? source.length
-    );
+  copy(
+    source: Uint8Array,
+    target: Uint8Array,
+    targetStart?: number,
+    sourceStart?: number,
+    sourceEnd?: number
+  ): number {
+    return nodeJsByteUtils
+      .toLocalBufferType(source)
+      .copy(target, targetStart ?? 0, sourceStart ?? 0, sourceEnd ?? source.length);
   },
 
   equals(a: Uint8Array, b: Uint8Array): boolean {

@@ -22,7 +22,13 @@ export type ByteUtils = {
   /** Concatenating all the Uint8Arrays in new Uint8Array. */
   concat: (list: Uint8Array[]) => Uint8Array;
   /** Copy bytes from source Uint8Array to target Uint8Array */
-  copy: (source: Uint8Array, target: Uint8Array, targetStart?: number, sourceStart?: number, sourceEnd?: number) => number;
+  copy: (
+    source: Uint8Array,
+    target: Uint8Array,
+    targetStart?: number,
+    sourceStart?: number,
+    sourceEnd?: number
+  ) => number;
   /** Check if two Uint8Arrays are deep equal */
   equals: (a: Uint8Array, b: Uint8Array) => boolean;
   /** Create a Uint8Array from an array of numbers */
@@ -53,7 +59,7 @@ export type ByteUtils = {
   swap32: (buffer: Uint8Array) => Uint8Array;
 };
 
-declare const Buffer: { new(): unknown; prototype?: { _isBuffer?: boolean } } | undefined;
+declare const Buffer: { new (): unknown; prototype?: { _isBuffer?: boolean } } | undefined;
 
 /**
  * Check that a global Buffer exists that is a function and
