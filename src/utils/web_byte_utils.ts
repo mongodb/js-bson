@@ -162,25 +162,39 @@ export const webByteUtils = {
     sourceStart?: number,
     sourceEnd?: number
   ): number {
-    const targetStartActual = targetStart ?? 0;
-    const sourceEndActual = sourceEnd ?? source.length;
-    if (sourceEndActual < 0) {
+    // validate and standardize passed-in sourceEnd
+    if (sourceEnd !== undefined && sourceEnd < 0) {
       throw new RangeError(
-        `The value of "sourceEnd" is out of range. It must be >= 0. Received ${sourceEndActual}`
+        `The value of "sourceEnd" is out of range. It must be >= 0. Received ${sourceEnd}`
       );
     }
-    const sourceStartActual = sourceStart ?? 0;
-    if (sourceStartActual < 0 || sourceStartActual > sourceEndActual) {
+    sourceEnd = sourceEnd ?? source.length;
+
+    // validate and standardize passed-in sourceStart
+    if (sourceStart !== undefined && (sourceStart < 0 || sourceStart > sourceEnd)) {
       throw new RangeError(
-        `The value of "sourceStart" is out of range. It must be >= 0 and <= ${sourceEndActual}. Received ${sourceStartActual}`
+        `The value of "sourceStart" is out of range. It must be >= 0 and <= ${sourceEnd}. Received ${sourceStart}`
       );
     }
-    const srcSlice = source.subarray(sourceStart, sourceEndActual);
-    const maxLen = Math.min(srcSlice.length, target.length - targetStartActual);
+    sourceStart = sourceStart ?? 0;
+
+    // validate and standardize passed-in targetStart
+    if (targetStart !== undefined && targetStart < 0) {
+      throw new RangeError(
+        `The value of "targetStart" is out of range. It must be >= 0. Received ${targetStart}`
+      );
+    }
+    targetStart = targetStart ?? 0;
+
+    // figure out how many bytes we can copy
+    const srcSlice = source.subarray(sourceStart, sourceEnd);
+    const maxLen = Math.min(srcSlice.length, target.length - targetStart);
     if (maxLen <= 0) {
       return 0;
     }
-    target.set(srcSlice.subarray(0, maxLen), targetStartActual);
+
+    // perform the copy
+    target.set(srcSlice.subarray(0, maxLen), targetStart);
     return maxLen;
   },
 

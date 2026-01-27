@@ -17,6 +17,7 @@ type ByteUtilTest<K extends keyof ByteUtils> = {
     web: boolean;
     output: ReturnType<ByteUtils[K]> | null;
     error: Error | null;
+    inputs: Parameters<ByteUtils[K]>;
   }) => void;
 };
 
@@ -412,31 +413,31 @@ const encodeUTF8IntoTests: ByteUtilTest<'encodeUTF8Into'>[] = [
   {
     name: 'should insert utf8 bytes into buffer',
     inputs: [Buffer.alloc(7), 'abc\u{1f913}', 0],
-    expectation({ output, error }) {
+    expectation({ output, error, inputs }) {
       expect(error).to.be.null;
       expect(output).to.equal(7);
-      expect(this.inputs[0]).to.deep.equal(Buffer.from('abc\u{1f913}', 'utf8'));
+      expect(inputs[0]).to.deep.equal(Buffer.from('abc\u{1f913}', 'utf8'));
     }
   },
   {
     name: 'should return 0 and not modify input buffer',
     inputs: [Uint8Array.from([2, 2]), '', 0],
-    expectation({ output, error }) {
+    expectation({ output, error, inputs }) {
       expect(error).to.be.null;
       expect(output).to.equal(0);
-      expect(this.inputs[0]).to.deep.equal(Uint8Array.from([2, 2]));
+      expect(inputs[0]).to.deep.equal(Uint8Array.from([2, 2]));
     }
   },
   {
     name: 'should insert replacement character bytes if string is not encodable',
     inputs: [Uint8Array.from({ length: 10 }, () => 2), '\u{1f913}'.slice(0, 1), 2],
-    expectation({ output, error }) {
+    expectation({ output, error, inputs }) {
       expect(error).to.be.null;
       expect(output).to.equal(3);
-      expect(this.inputs[0]).to.have.property('2', 0xef);
-      expect(this.inputs[0]).to.have.property('3', 0xbf);
-      expect(this.inputs[0]).to.have.property('4', 0xbd);
-      const backToString = Buffer.from(this.inputs[0].subarray(2, 5)).toString('utf8');
+      expect(inputs[0]).to.have.property('2', 0xef);
+      expect(inputs[0]).to.have.property('3', 0xbf);
+      expect(inputs[0]).to.have.property('4', 0xbd);
+      const backToString = Buffer.from(inputs[0].subarray(2, 5)).toString('utf8');
       const replacementCharacter = '\u{fffd}';
       expect(backToString).to.equal(replacementCharacter);
     }
@@ -680,42 +681,56 @@ const copyTests: ByteUtilTest<'copy'>[] = [
   {
     name: 'should copy bytes from source to target buffer, with no offsets',
     inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0])],
-    expectation({ output, error }) {
+    expectation({ output, error, inputs }) {
       expect(error).to.be.null;
       expect(output).to.equal(5);
-      expect(this.inputs[1]).to.deep.equal(Uint8Array.from([1, 2, 3, 4, 5]));
+      expect(inputs[1]).to.deep.equal(Uint8Array.from([1, 2, 3, 4, 5]));
     }
   },
   {
     name: 'should copy bytes from source to target buffer, specify valid targetOffset',
     inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), 2],
-    expectation({ output, error }) {
+    expectation({ output, error, inputs }) {
       expect(error).to.be.null;
       expect(output).to.equal(3);
-      expect(this.inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 1, 2, 3]));
+      expect(inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 1, 2, 3]));
     }
   },
   {
-    name: 'should copy bytes from source to target buffer, specify invalid targetOffset',
+    name: 'should copy bytes from source to target buffer, specify high targetOffset',
     inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), 10],
-    expectation({ output, error }) {
+    expectation({ output, error, inputs }) {
       expect(error).to.be.null;
       expect(output).to.equal(0);
-      expect(this.inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 0, 0, 0]));
+      expect(inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 0, 0, 0]));
     }
   },
   {
-    name: 'should copy bytes from source to target buffer, specify targetOffset and sourceOffset',
+    name: 'should copy bytes from source to target buffer, specify negative targetOffset',
+    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), -1],
+    expectation({ error }) {
+      expect(error).to.match(/The value of "targetStart" is out of range/i);
+    }
+  },
+  {
+    name: 'should copy bytes from source to target buffer, specify valid targetOffset and sourceOffset',
     inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), 2, 1],
-    expectation({ output, error }) {
+    expectation({ output, error, inputs }) {
       expect(error).to.be.null;
       expect(output).to.equal(3);
-      expect(this.inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 2, 3, 4]));
+      expect(inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 2, 3, 4]));
     }
   },
   {
-    name: 'should copy bytes from source to target buffer, specify valid targetOffset and invalid sourceOffset',
+    name: 'should copy bytes from source to target buffer, specify valid targetOffset and high sourceOffset',
     inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), 2, 10],
+    expectation({ error }) {
+      expect(error).to.match(/The value of "sourceStart" is out of range/i);
+    }
+  },
+  {
+    name: 'should copy bytes from source to target buffer, specify valid targetOffset and negative sourceOffset',
+    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), 2, -1],
     expectation({ error }) {
       expect(error).to.match(/The value of "sourceStart" is out of range/i);
     }
@@ -723,19 +738,76 @@ const copyTests: ByteUtilTest<'copy'>[] = [
   {
     name: 'should copy bytes from source to target buffer, specify valid targetOffset, sourceOffset, and sourceEnd',
     inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), 2, 1, 3],
-    expectation({ output, error }) {
+    expectation({ output, error, inputs }) {
       expect(error).to.be.null;
       expect(output).to.equal(2);
-      expect(this.inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 2, 3, 0]));
+      expect(inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 2, 3, 0]));
     }
   },
   {
-    name: 'should copy bytes from source to target buffer, specify valid targetOffset, valid sourceOffset, and invalid sourceEnd',
+    name: 'should copy bytes from source to target buffer, specify valid targetOffset, valid sourceOffset, and high sourceEnd',
+    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), 2, 1, 10],
+    expectation({ output, error, inputs }) {
+      expect(error).to.be.null;
+      expect(output).to.equal(3);
+      expect(inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 2, 3, 4]));
+    }
+  },
+  {
+    name: 'should copy bytes from source to target buffer, specify valid targetOffset, valid sourceOffset, and negative sourceEnd',
     inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), 2, 1, -1],
     expectation({ error }) {
       expect(error).to.match(
         /The value of "sourceEnd" is out of range. It must be >= 0. Received -1/i
       );
+    }
+  },
+  {
+    name: 'should not copy bytes from source to empty target buffer',
+    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([])],
+    expectation({ output, error, inputs }) {
+      expect(error).to.be.null;
+      expect(output).to.equal(0);
+      expect(inputs[1]).to.deep.equal(Uint8Array.from([]));
+    }
+  },
+  {
+    name: 'should not copy bytes from empty source to target buffer',
+    inputs: [Uint8Array.from([]), Uint8Array.from([1, 2, 3, 4, 5])],
+    expectation({ output, error, inputs }) {
+      expect(error).to.be.null;
+      expect(output).to.equal(0);
+      expect(inputs[1]).to.deep.equal(Uint8Array.from([1, 2, 3, 4, 5]));
+    }
+  },
+  {
+    name: 'should copy bytes from source to smaller target buffer',
+    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([6, 7, 8])],
+    expectation({ output, error, inputs }) {
+      expect(error).to.be.null;
+      expect(output).to.equal(3);
+      expect(inputs[1]).to.deep.equal(Uint8Array.from([1, 2, 3]));
+    }
+  },
+  {
+    name: 'should copy bytes from smaller source to target buffer',
+    inputs: [Uint8Array.from([1, 2, 3]), Uint8Array.from([6, 7, 8, 9, 10])],
+    expectation({ output, error, inputs }) {
+      expect(error).to.be.null;
+      expect(output).to.equal(3);
+      expect(inputs[1]).to.deep.equal(Uint8Array.from([1, 2, 3, 9, 10]));
+    }
+  },
+  {
+    name: 'should copy bytes from one buffer to itself',
+    inputs: () => {
+      const buf = Uint8Array.from([1, 2, 3, 4, 5]);
+      return [buf, buf, 1, 2, 3];
+    },
+    expectation({ output, error, inputs }) {
+      expect(error).to.be.null;
+      expect(output).to.equal(1);
+      expect(inputs[1]).to.deep.equal(Uint8Array.from([1, 3, 3, 4, 5]));
     }
   }
 ];
@@ -1033,12 +1105,11 @@ describe('ByteUtils', () => {
             expect(byteUtils).to.have.property(utility).that.is.a('function');
             let output = null;
             let error = null;
+            const inputsArray: Parameters<ByteUtils[typeof utility]> =
+              typeof test.inputs === 'function' ? test.inputs() : test.inputs;
 
             try {
-              output = byteUtils[utility].call(
-                null,
-                ...(typeof test.inputs === 'function' ? test.inputs() : test.inputs)
-              );
+              output = byteUtils[utility].call(null, ...inputsArray);
             } catch (thrownError) {
               error = thrownError;
             }
@@ -1051,7 +1122,12 @@ describe('ByteUtils', () => {
               expect(error).to.be.null;
             }
 
-            test.expectation({ web: byteUtilsName === 'webByteUtils', output, error });
+            test.expectation({
+              web: byteUtilsName === 'webByteUtils',
+              output,
+              error,
+              inputs: inputsArray
+            });
           });
         }
       });
