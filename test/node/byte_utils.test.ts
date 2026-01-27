@@ -722,6 +722,15 @@ const copyTests: ByteUtilTest<'copy'>[] = [
     }
   },
   {
+    name: 'should copy bytes from source to target buffer, specify undefined targetOffset and valid sourceOffset',
+    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), undefined, 1],
+    expectation({ output, error, inputs }) {
+      expect(error).to.be.null;
+      expect(output).to.equal(4);
+      expect(inputs[1]).to.deep.equal(Uint8Array.from([2, 3, 4, 5, 0]));
+    }
+  },
+  {
     name: 'should copy bytes from source to target buffer, specify valid targetOffset and high sourceOffset',
     inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), 2, 10],
     expectation({ error }) {
@@ -742,6 +751,33 @@ const copyTests: ByteUtilTest<'copy'>[] = [
       expect(error).to.be.null;
       expect(output).to.equal(2);
       expect(inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 2, 3, 0]));
+    }
+  },
+  {
+    name: 'should copy bytes from source to target buffer, specify valid targetOffset, undefined sourceOffset, and valid sourceEnd',
+    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), 2, undefined, 3],
+    expectation({ output, error, inputs }) {
+      expect(error).to.be.null;
+      expect(output).to.equal(3);
+      expect(inputs[1]).to.deep.equal(Uint8Array.from([0, 0, 1, 2, 3]));
+    }
+  },
+  {
+    name: 'should copy bytes from source to target buffer, specify undefined targetOffset, valid sourceOffset, and valid sourceEnd',
+    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), undefined, 1, 3],
+    expectation({ output, error, inputs }) {
+      expect(error).to.be.null;
+      expect(output).to.equal(2);
+      expect(inputs[1]).to.deep.equal(Uint8Array.from([2, 3, 0, 0, 0]));
+    }
+  },
+  {
+    name: 'should copy bytes from source to target buffer, specify undefined targetOffset, undefined sourceOffset, and valid sourceEnd',
+    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), undefined, undefined, 3],
+    expectation({ output, error, inputs }) {
+      expect(error).to.be.null;
+      expect(output).to.equal(3);
+      expect(inputs[1]).to.deep.equal(Uint8Array.from([1, 2, 3, 0, 0]));
     }
   },
   {
