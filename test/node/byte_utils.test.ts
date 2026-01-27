@@ -773,7 +773,13 @@ const copyTests: ByteUtilTest<'copy'>[] = [
   },
   {
     name: 'should copy bytes from source to target buffer, specify undefined targetOffset, undefined sourceOffset, and valid sourceEnd',
-    inputs: [Uint8Array.from([1, 2, 3, 4, 5]), Uint8Array.from([0, 0, 0, 0, 0]), undefined, undefined, 3],
+    inputs: [
+      Uint8Array.from([1, 2, 3, 4, 5]),
+      Uint8Array.from([0, 0, 0, 0, 0]),
+      undefined,
+      undefined,
+      3
+    ],
     expectation({ output, error, inputs }) {
       expect(error).to.be.null;
       expect(output).to.equal(3);
