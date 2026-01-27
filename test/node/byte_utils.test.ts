@@ -1105,11 +1105,11 @@ describe('ByteUtils', () => {
             expect(byteUtils).to.have.property(utility).that.is.a('function');
             let output = null;
             let error = null;
-            const inputsArray: Parameters<ByteUtils[typeof utility]> =
+            const inputs: Parameters<ByteUtils[typeof utility]> =
               typeof test.inputs === 'function' ? test.inputs() : test.inputs;
 
             try {
-              output = byteUtils[utility].call(null, ...inputsArray);
+              output = byteUtils[utility].call(null, ...inputs);
             } catch (thrownError) {
               error = thrownError;
             }
@@ -1126,7 +1126,7 @@ describe('ByteUtils', () => {
               web: byteUtilsName === 'webByteUtils',
               output,
               error,
-              inputs: inputsArray
+              inputs
             });
           });
         }
