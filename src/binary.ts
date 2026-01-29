@@ -134,7 +134,7 @@ export class Binary extends BSONValue {
       throw new BSONError('Binary can only be constructed from Uint8Array or number[]');
     }
 
-    this.sub_type = subType ?? Binary.BSON_BINARY_SUBTYPE_DEFAULT;
+    this.sub_type = (subType ?? Binary.BSON_BINARY_SUBTYPE_DEFAULT) & 0xff;
 
     if (buffer == null) {
       // create an empty binary buffer
@@ -279,7 +279,7 @@ export class Binary extends BSONValue {
     }
 
     throw new BSONError(
-      `Binary sub_type "${this.sub_type}" is not supported for converting to UUID. Only "${Binary.SUBTYPE_UUID}" is currently supported.`
+      `Binary sub_type "${this.sub_type}" (${typeof this.sub_type}) is not supported for converting to UUID. Only 0x${Binary.SUBTYPE_UUID.toString(16).padStart(2, '0')} is currently supported.`
     );
   }
 
