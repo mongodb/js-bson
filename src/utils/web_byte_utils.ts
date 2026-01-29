@@ -155,6 +155,49 @@ export const webByteUtils = {
     return result;
   },
 
+  copy(
+    source: Uint8Array,
+    target: Uint8Array,
+    targetStart?: number,
+    sourceStart?: number,
+    sourceEnd?: number
+  ): number {
+    // validate and standardize passed-in sourceEnd
+    if (sourceEnd !== undefined && sourceEnd < 0) {
+      throw new RangeError(
+        `The value of "sourceEnd" is out of range. It must be >= 0. Received ${sourceEnd}`
+      );
+    }
+    sourceEnd = sourceEnd ?? source.length;
+
+    // validate and standardize passed-in sourceStart
+    if (sourceStart !== undefined && (sourceStart < 0 || sourceStart > sourceEnd)) {
+      throw new RangeError(
+        `The value of "sourceStart" is out of range. It must be >= 0 and <= ${sourceEnd}. Received ${sourceStart}`
+      );
+    }
+    sourceStart = sourceStart ?? 0;
+
+    // validate and standardize passed-in targetStart
+    if (targetStart !== undefined && targetStart < 0) {
+      throw new RangeError(
+        `The value of "targetStart" is out of range. It must be >= 0. Received ${targetStart}`
+      );
+    }
+    targetStart = targetStart ?? 0;
+
+    // figure out how many bytes we can copy
+    const srcSlice = source.subarray(sourceStart, sourceEnd);
+    const maxLen = Math.min(srcSlice.length, target.length - targetStart);
+    if (maxLen <= 0) {
+      return 0;
+    }
+
+    // perform the copy
+    target.set(srcSlice.subarray(0, maxLen), targetStart);
+    return maxLen;
+  },
+
   equals(uint8Array: Uint8Array, otherUint8Array: Uint8Array): boolean {
     if (uint8Array.byteLength !== otherUint8Array.byteLength) {
       return false;
