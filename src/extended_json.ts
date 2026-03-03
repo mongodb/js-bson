@@ -59,14 +59,6 @@ export type EJSONParseOptions = EJSONOptionsBase & {
 export type EJSONOptions = EJSONSerializeOptions & EJSONParseOptions;
 
 /** @internal */
-function isEJSONSerializeOptions(value: unknown): value is EJSONSerializeOptions {
-  if (value == null || typeof value !== 'object' || Array.isArray(value)) {
-    return false;
-  }
-  return true;
-}
-
-/** @internal */
 type BSONType =
   | Binary
   | Code
@@ -500,36 +492,15 @@ function stringify(
   spaceOrOptions?: string | number | EJSONSerializeOptions,
   options?: EJSONSerializeOptions
 ): string {
-  let replacer:
-    | ((this: any, key: string, value: any) => any)
-    | (number | string)[]
-    | null
-    | undefined;
-  let space: string | number | undefined;
   /* eslint-enable @typescript-eslint/no-explicit-any */
 
-  // Check if second parameter is options
-  if (isEJSONSerializeOptions(replacerOrOptions)) {
-    options = replacerOrOptions;
-    replacer = undefined;
-    space =
-      typeof spaceOrOptions === 'number' || typeof spaceOrOptions === 'string'
-        ? spaceOrOptions
-        : undefined;
-  }
-  // Check if third parameter is options
-  else if (isEJSONSerializeOptions(spaceOrOptions)) {
+  if (spaceOrOptions != null && typeof spaceOrOptions === 'object') {
     options = spaceOrOptions;
-    replacer = replacerOrOptions;
-    space = undefined;
+    spaceOrOptions = undefined;
   }
-  // Standard case: replacer, space, options
-  else {
-    replacer = replacerOrOptions;
-    space =
-      typeof spaceOrOptions === 'number' || typeof spaceOrOptions === 'string'
-        ? spaceOrOptions
-        : undefined;
+  if (replacerOrOptions != null && typeof replacerOrOptions === 'object' && !Array.isArray(replacerOrOptions)) {
+    options = replacerOrOptions;
+    replacerOrOptions = undefined;
   }
 
   const serializeOptions = Object.assign({ relaxed: true, legacy: false }, options, {
@@ -537,7 +508,7 @@ function stringify(
   });
 
   const doc = serializeValue(value, serializeOptions);
-  return JSON.stringify(doc, replacer as Parameters<JSON['stringify']>[1], space);
+  return JSON.stringify(doc, replacerOrOptions as Parameters<JSON['stringify']>[1], spaceOrOptions);
 }
 
 /**
