@@ -60,26 +60,10 @@ export type EJSONOptions = EJSONSerializeOptions & EJSONParseOptions;
 
 /** @internal */
 function isEJSONSerializeOptions(value: unknown): value is EJSONSerializeOptions {
-  if (value == null || typeof value !== 'object') {
+  if (value == null || typeof value !== 'object' || Array.isArray(value)) {
     return false;
   }
-
-  // Check that all properties, if present, are of the correct type
-  if ('legacy' in value && typeof value.legacy !== 'boolean') {
-    return false;
-  }
-  if ('relaxed' in value && typeof value.relaxed !== 'boolean') {
-    return false;
-  }
-  if ('ignoreUndefined' in value && typeof value.ignoreUndefined !== 'boolean') {
-    return false;
-  }
-
-  // Check that there are no invalid properties (only known EJSON serialize options)
-  const validKeys = ['legacy', 'relaxed', 'ignoreUndefined'];
-  const keys = Object.keys(value);
-
-  return keys.every(key => validKeys.includes(key));
+  return true;
 }
 
 /** @internal */

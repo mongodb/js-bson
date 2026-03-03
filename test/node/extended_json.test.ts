@@ -3,7 +3,7 @@ const EJSON = BSON.EJSON;
 import * as vm from 'node:vm';
 import { expect } from 'chai';
 import { BSONVersionError, BSONRuntimeError } from '../../src';
-import { BSONError } from '../register-bson';
+import { BSONError, EJSONSerializeOptions } from '../register-bson';
 
 // BSON types
 const Binary = BSON.Binary;
@@ -844,6 +844,16 @@ describe('Extended JSON', function () {
 
     it('should work with (value, options) - value and options only', function () {
       const result = EJSON.stringify(testDoc, { relaxed: false });
+      expect(result).to.equal(
+        '{"objectId":{"$oid":"111111111111111111111111"},"int32Number":{"$numberInt":"300"},"name":"test"}'
+      );
+    });
+
+    it('should work with (value, options) - value and options only (options with typo)', function () {
+      const result = EJSON.stringify(testDoc, {
+        relaxed: false,
+        igroneUndefined: true
+      } as unknown as EJSONSerializeOptions);
       expect(result).to.equal(
         '{"objectId":{"$oid":"111111111111111111111111"},"int32Number":{"$numberInt":"300"},"name":"test"}'
       );
