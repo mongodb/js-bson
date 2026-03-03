@@ -498,7 +498,11 @@ function stringify(
     options = spaceOrOptions;
     spaceOrOptions = undefined;
   }
-  if (replacerOrOptions != null && typeof replacerOrOptions === 'object' && !Array.isArray(replacerOrOptions)) {
+  if (
+    replacerOrOptions != null &&
+    typeof replacerOrOptions === 'object' &&
+    !Array.isArray(replacerOrOptions)
+  ) {
     options = replacerOrOptions;
     replacerOrOptions = undefined;
   }
