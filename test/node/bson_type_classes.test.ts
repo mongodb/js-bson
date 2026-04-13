@@ -98,6 +98,17 @@ describe('BSON Type classes common interfaces', () => {
           ));
       }
 
+      if (TypeClass.name !== 'UUID') {
+        it(`defines Symbol.toStringTag equal to its name`, () =>
+          expect(TypeClass.prototype).to.have.property(Symbol.toStringTag, TypeClass.name));
+      } else {
+        it(`UUID inherits Symbol.toStringTag from Binary`, () =>
+          expect(Object.getPrototypeOf(TypeClass.prototype)).to.have.property(
+            Symbol.toStringTag,
+            'Binary'
+          ));
+      }
+
       it(`defines a Symbol.for('@@mdb.bson.version') property equal to 7`, () =>
         expect(TypeClass.prototype).to.have.property(Symbol.for('@@mdb.bson.version'), 7));
 

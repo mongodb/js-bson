@@ -29,6 +29,9 @@ export abstract class BSONValue {
   public get [bsonType](): this['_bsontype'] {
     return this._bsontype;
   }
+  public get [Symbol.toStringTag](): string {
+    return this._bsontype;
+  }
 
   /** @internal */
   get [BSON_VERSION_SYMBOL](): typeof BSON_MAJOR_VERSION {
