@@ -351,6 +351,11 @@ function serializeDocument(doc: any, options: EJSONSerializeInternalOptions) {
     // It's a regular object. Recursively serialize its property values.
     const _doc: Document = {};
     for (const name of Object.keys(doc)) {
+      if (name.indexOf('\x00') !== -1) {
+        throw new BSONError(
+          `BSON Document field names cannot contain null bytes, found: ${JSON.stringify(name)}`
+        );
+      }
       options.seenObjects.push({ propertyName: name, obj: null });
       try {
         const value = serializeValue(doc[name], options);

@@ -733,4 +733,18 @@ describe('Extended JSON', function () {
       expect(() => EJSON.stringify(input)).to.throw(BSONError);
     });
   });
+
+  context('when document keys contain null bytes', function () {
+    it('EJSON.stringify throws a BSONError', function () {
+      expect(() => EJSON.stringify({ 'a\x00b': 1 })).to.throw(BSONError, /null bytes/);
+    });
+
+    it('EJSON.serialize throws a BSONError', function () {
+      expect(() => EJSON.serialize({ 'a\x00b': 1 })).to.throw(BSONError, /null bytes/);
+    });
+
+    it('EJSON.parse throws a BSONError', function () {
+      expect(() => EJSON.parse('{"a\\u0000b": 1}')).to.throw(BSONError, /null bytes/);
+    });
+  });
 });
