@@ -21,6 +21,7 @@ const BSONRegExp = BSON.BSONRegExp;
 const BSONSymbol = BSON.BSONSymbol;
 const Timestamp = BSON.Timestamp;
 
+
 describe('Extended JSON', function () {
   let doc = {};
 
