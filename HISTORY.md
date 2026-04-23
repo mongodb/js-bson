@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.2.1](https://github.com/mongodb/js-bson/compare/v7.2.0...v7.2.1) (2026-04-23)
+
+
+### Bug Fixes
+
+* **NODE-7436:** EJSON.stringify type signature ([#870](https://github.com/mongodb/js-bson/issues/870)) ([c949780](https://github.com/mongodb/js-bson/commit/c94978003a8193bfeb8b0438910a099f410e27bf))
+
 ## [7.2.0](https://github.com/mongodb/js-bson/compare/v7.1.1...v7.2.0) (2026-01-29)
 
 
