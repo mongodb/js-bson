@@ -3,7 +3,7 @@ const EJSON = BSON.EJSON;
 import * as vm from 'node:vm';
 import { expect } from 'chai';
 import { BSONVersionError, BSONRuntimeError } from '../../src';
-import { BSONError } from '../register-bson';
+import { BSONError, EJSONSerializeOptions } from '../register-bson';
 
 // BSON types
 const Binary = BSON.Binary;
@@ -574,6 +574,120 @@ describe('Extended JSON', function () {
     expect(result).to.deep.equal({ a: 1 });
   });
 
+  describe('ignoreUndefined option', () => {
+    it('should convert undefined to null by default', () => {
+      const doc = { a: 1, b: undefined, c: 'test' };
+      const serialized = EJSON.stringify(doc);
+      expect(serialized).to.equal('{"a":1,"b":null,"c":"test"}');
+    });
+
+    it('should omit undefined values when ignoreUndefined is true', () => {
+      const doc = { a: 1, b: undefined, c: 'test' };
+      const serialized = EJSON.stringify(doc, { ignoreUndefined: true });
+      expect(serialized).to.equal('{"a":1,"c":"test"}');
+    });
+
+    it('should handle nested undefined values with ignoreUndefined: true', () => {
+      const doc = { a: 1, nested: { b: undefined, c: 2 }, d: 'test' };
+      const serialized = EJSON.stringify(doc, { ignoreUndefined: true });
+      expect(serialized).to.equal('{"a":1,"nested":{"c":2},"d":"test"}');
+    });
+
+    it('should handle nested undefined values without ignoreUndefined (default behavior)', () => {
+      const doc = { a: 1, nested: { b: undefined, c: 2 }, d: 'test' };
+      const serialized = EJSON.stringify(doc);
+      expect(serialized).to.equal('{"a":1,"nested":{"b":null,"c":2},"d":"test"}');
+    });
+
+    it('should handle undefined in arrays with ignoreUndefined: true', () => {
+      const doc = { arr: [1, undefined, 3] };
+      const serialized = EJSON.stringify(doc, { ignoreUndefined: true });
+      // JSON.stringify converts undefined array elements to null
+      expect(serialized).to.equal('{"arr":[1,null,3]}');
+    });
+
+    it('should handle undefined in arrays without ignoreUndefined (default behavior)', () => {
+      const doc = { arr: [1, undefined, 3] };
+      const serialized = EJSON.stringify(doc);
+      expect(serialized).to.equal('{"arr":[1,null,3]}');
+    });
+
+    it('should handle object with all undefined values with ignoreUndefined: true', () => {
+      const doc = { a: undefined, b: undefined };
+      const serialized = EJSON.stringify(doc, { ignoreUndefined: true });
+      expect(serialized).to.equal('{}');
+    });
+
+    it('should work with other options like relaxed', () => {
+      const doc = { a: new Int32(10), b: undefined, c: new Double(3.14) };
+      const serialized = EJSON.stringify(doc, { ignoreUndefined: true, relaxed: false });
+      expect(serialized).to.equal('{"a":{"$numberInt":"10"},"c":{"$numberDouble":"3.14"}}');
+    });
+
+    it('should work with replacer function', () => {
+      const doc = { a: 1, b: undefined, c: 2 };
+      const replacer = (key: string, value: unknown) => (key === 'a' ? 100 : value);
+      const serialized = EJSON.stringify(doc, replacer, 0, { ignoreUndefined: true });
+      expect(serialized).to.equal('{"a":100,"c":2}');
+    });
+
+    it('should work with space parameter', () => {
+      const doc = { a: 1, b: undefined };
+      const serialized = EJSON.stringify(doc, undefined, 2, { ignoreUndefined: true });
+      expect(serialized).to.equal('{\n  "a": 1\n}');
+    });
+  });
+
+  describe('ignoreUndefined option in EJSON.serialize', () => {
+    it('should convert undefined to null by default', () => {
+      const doc = { a: 1, b: undefined, c: 'test' };
+      const serialized = EJSON.serialize(doc);
+      expect(serialized).to.deep.equal({ a: 1, b: null, c: 'test' });
+    });
+
+    it('should omit undefined values when ignoreUndefined is true', () => {
+      const doc = { a: 1, b: undefined, c: 'test' };
+      const serialized = EJSON.serialize(doc, { ignoreUndefined: true });
+      expect(serialized).to.deep.equal({ a: 1, c: 'test' });
+    });
+
+    it('should handle nested undefined values with ignoreUndefined: true', () => {
+      const doc = { a: 1, nested: { b: undefined, c: 2 }, d: 'test' };
+      const serialized = EJSON.serialize(doc, { ignoreUndefined: true });
+      expect(serialized).to.deep.equal({ a: 1, nested: { c: 2 }, d: 'test' });
+    });
+
+    it('should handle nested undefined values without ignoreUndefined (default behavior)', () => {
+      const doc = { a: 1, nested: { b: undefined, c: 2 }, d: 'test' };
+      const serialized = EJSON.serialize(doc);
+      expect(serialized).to.deep.equal({ a: 1, nested: { b: null, c: 2 }, d: 'test' });
+    });
+
+    it('should handle undefined in arrays with ignoreUndefined: true', () => {
+      const doc = { arr: [1, undefined, 3] };
+      const serialized = EJSON.serialize(doc, { ignoreUndefined: true });
+      expect(serialized).to.deep.equal({ arr: [1, null, 3] });
+    });
+
+    it('should handle undefined in arrays without ignoreUndefined (default behavior)', () => {
+      const doc = { arr: [1, undefined, 3] };
+      const serialized = EJSON.serialize(doc);
+      expect(serialized).to.deep.equal({ arr: [1, null, 3] });
+    });
+
+    it('should handle object with all undefined values with ignoreUndefined: true', () => {
+      const doc = { a: undefined, b: undefined };
+      const serialized = EJSON.serialize(doc, { ignoreUndefined: true });
+      expect(serialized).to.deep.equal({});
+    });
+
+    it('should work with relaxed: false option', () => {
+      const doc = { a: new Int32(10), b: undefined, c: new Double(3.14) };
+      const serialized = EJSON.serialize(doc, { ignoreUndefined: true, relaxed: false });
+      expect(serialized).to.deep.equal({ a: { $numberInt: '10' }, c: { $numberDouble: '3.14' } });
+    });
+  });
+
   it(`throws if Symbol.for('@@mdb.bson.version') is the wrong version in EJSON.stringify`, () => {
     expect(() =>
       EJSON.stringify({
@@ -617,6 +731,165 @@ describe('Extended JSON', function () {
       ]);
 
       expect(() => EJSON.stringify(input)).to.throw(BSONError);
+    });
+  });
+
+  context('stringify: Parameter signature combinations', function () {
+    const testDoc = {
+      objectId: ObjectId.createFromHexString('111111111111111111111111'),
+      int32Number: 300,
+      name: 'test'
+    };
+
+    it('should work with (value) - only value parameter', function () {
+      const result = EJSON.stringify(testDoc);
+      expect(result).to.equal(
+        '{"objectId":{"$oid":"111111111111111111111111"},"int32Number":300,"name":"test"}'
+      );
+    });
+
+    it('should work with (value, null, space) - replacer null, space number', function () {
+      const result = EJSON.stringify(testDoc, null, 2);
+      expect(result).to.equal(`{
+  "objectId": {
+    "$oid": "111111111111111111111111"
+  },
+  "int32Number": 300,
+  "name": "test"
+}`);
+    });
+
+    it('should work with (value, null, space, options) - replacer null, space, options', function () {
+      const result = EJSON.stringify(testDoc, null, 2, { relaxed: false });
+      expect(result).to.equal(`{
+  "objectId": {
+    "$oid": "111111111111111111111111"
+  },
+  "int32Number": {
+    "$numberInt": "300"
+  },
+  "name": "test"
+}`);
+    });
+
+    it('should work with (value, array, space) - replacer array, space', function () {
+      const result = EJSON.stringify(testDoc, ['objectId', '$oid', 'name'], 2);
+      expect(result).to.equal(`{
+  "objectId": {
+    "$oid": "111111111111111111111111"
+  },
+  "name": "test"
+}`);
+    });
+
+    it('should work with (value, array, space, options) - replacer array, space, options', function () {
+      const result = EJSON.stringify(testDoc, ['objectId', '$oid'], 2, { relaxed: false });
+      expect(result).to.equal(`{
+  "objectId": {
+    "$oid": "111111111111111111111111"
+  }
+}`);
+    });
+
+    it('should work with (value, function, space) - replacer function, space', function () {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const replacer = function (key: string, value: any) {
+        return key === 'name' ? undefined : value;
+      };
+      const result = EJSON.stringify(testDoc, replacer, 2);
+      expect(result).to.equal(`{
+  "objectId": {
+    "$oid": "111111111111111111111111"
+  },
+  "int32Number": 300
+}`);
+    });
+
+    it('should work with (value, function, space, options) - replacer function, space, options', function () {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const replacer = function (key: string, value: any) {
+        return key === 'name' ? undefined : value;
+      };
+      const result = EJSON.stringify(testDoc, replacer, 2, { relaxed: false });
+      expect(result).to.equal(`{
+  "objectId": {
+    "$oid": "111111111111111111111111"
+  },
+  "int32Number": {
+    "$numberInt": "300"
+  }
+}`);
+    });
+
+    it('should work with (value, null, options) - replacer null, options', function () {
+      const result = EJSON.stringify(testDoc, null, { relaxed: false });
+      expect(result).to.equal(
+        '{"objectId":{"$oid":"111111111111111111111111"},"int32Number":{"$numberInt":"300"},"name":"test"}'
+      );
+    });
+
+    it('should work with (value, array, options) - replacer array, options', function () {
+      const result = EJSON.stringify(testDoc, ['objectId', '$oid'], { relaxed: false });
+      expect(result).to.equal('{"objectId":{"$oid":"111111111111111111111111"}}');
+    });
+
+    it('should work with (value, function, options) - replacer function, options', function () {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const replacer = function (key: string, value: any) {
+        return key === 'int32Number' ? undefined : value;
+      };
+      const result = EJSON.stringify(testDoc, replacer, { relaxed: false });
+      expect(result).to.equal('{"objectId":{"$oid":"111111111111111111111111"},"name":"test"}');
+    });
+
+    it('should work with (value, options) - value and options only', function () {
+      const result = EJSON.stringify(testDoc, { relaxed: false });
+      expect(result).to.equal(
+        '{"objectId":{"$oid":"111111111111111111111111"},"int32Number":{"$numberInt":"300"},"name":"test"}'
+      );
+    });
+
+    it('should work with (value, options) - value and options only (options with typo)', function () {
+      const result = EJSON.stringify(testDoc, {
+        relaxed: false,
+        igroneUndefined: true
+      } as unknown as EJSONSerializeOptions);
+      expect(result).to.equal(
+        '{"objectId":{"$oid":"111111111111111111111111"},"int32Number":{"$numberInt":"300"},"name":"test"}'
+      );
+    });
+
+    it('should work with (value, options, space) - value, options, space (second overload)', function () {
+      const result = EJSON.stringify(testDoc, { relaxed: false }, 2);
+      expect(result).to.equal(`{
+  "objectId": {
+    "$oid": "111111111111111111111111"
+  },
+  "int32Number": {
+    "$numberInt": "300"
+  },
+  "name": "test"
+}`);
+    });
+
+    it('should work with string space parameter', function () {
+      const result = EJSON.stringify(testDoc, null, '\t', { relaxed: false });
+      expect(result).to.equal(`{
+\t"objectId": {
+\t\t"$oid": "111111111111111111111111"
+\t},
+\t"int32Number": {
+\t\t"$numberInt": "300"
+\t},
+\t"name": "test"
+}`);
+    });
+
+    it('should work with space 0 (no formatting)', function () {
+      const result = EJSON.stringify(testDoc, null, 0, { relaxed: false });
+      expect(result).to.equal(
+        '{"objectId":{"$oid":"111111111111111111111111"},"int32Number":{"$numberInt":"300"},"name":"test"}'
+      );
     });
   });
 });

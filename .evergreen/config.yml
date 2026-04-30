@@ -80,6 +80,7 @@ functions:
           PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
           TS_VERSION: "${TS_VERSION}"
           TRY_COMPILING_LIBRARY: "${TRY_COMPILING_LIBRARY}"
+          TSC_EXTRA_FLAGS: "${TSC_EXTRA_FLAGS}"
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
@@ -148,6 +149,7 @@ tasks:
       - func: fetch source
         vars:
           NODE_LTS_VERSION: 22
+          NPM_VERSION: 11.11.1
       - func: install dependencies
       - func: run tests
   - name: node-tests-v24
@@ -222,9 +224,12 @@ tasks:
       - func: install dependencies
       - func: "run typescript"
         vars:
-          # TODO(NODE-7233): switch to `next` again once compatible with TS 6.0
-          TS_VERSION: "latest"
+          TS_VERSION: "next"
+          # TODO(NODE-7542): flip to "true" once the library builds under TS 6.0.
           TRY_COMPILING_LIBRARY: "false"
+          # Keeps the consumer-perspective checks in run-typescript.sh from inheriting
+          # this repo's tsconfig. Available in TS 6.0+, so only set on this task.
+          TSC_EXTRA_FLAGS: "--ignoreConfig"
   - name: run-granular-benchmarks
     commands:
       - func: fetch source
