@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import * as vm from 'node:vm';
-import { __isWeb__, Binary, BSON, BSONError } from '../register-bson';
+import { __isWeb__, Binary, BSON, BSONError, UUID } from '../register-bson';
 import * as util from 'node:util';
 
 describe('class Binary', () => {
@@ -536,5 +536,72 @@ describe('class Binary', () => {
         expect(() => Binary.fromBits([1, 0, 2])).to.throw(BSONError, /must be 0 or 1/);
       });
     });
+  });
+});
+
+describe('class Binary — sub_type coercion behavior (NODE-7354)', () => {
+  it('toUUID() works when constructed with a stringified valid subtype "4"', () => {
+    const uuidBytes = Buffer.from('0123456789abcdef0123456789abcdef', 'hex');
+    // @ts-expect-error: subType coerces from string at runtime
+    const binary = new Binary(uuidBytes, '4');
+    const uuid = binary.toUUID();
+    expect(uuid).to.be.instanceOf(UUID);
+    expect(binary.sub_type).to.equal(4);
+    expect(binary.sub_type).to.be.a('number');
+  });
+
+  it('UUID.isValid returns true for Binary constructed with stringified "4"', () => {
+    const uuidBytes = Buffer.from('0123456789abcdef0123456789abcdef', 'hex');
+    // @ts-expect-error: subType coerces from string at runtime
+    const binary = new Binary(uuidBytes, '4');
+    expect(UUID.isValid(binary)).to.equal(true);
+  });
+
+  it('subtype 2 round-trips identically whether passed as 2 or "2" (closes latent length-prefix bug)', () => {
+    const payload = new Uint8Array([10, 20, 30, 40]);
+    const numericBytes = BSON.serialize({ b: new Binary(payload, 2) });
+    // @ts-expect-error: subType coerces from string at runtime
+    const stringBytes = BSON.serialize({ b: new Binary(payload, '2') });
+    expect(Buffer.from(stringBytes).equals(Buffer.from(numericBytes))).to.equal(true);
+
+    const decoded = BSON.deserialize(numericBytes) as { b: Binary };
+    expect(decoded.b.sub_type).to.equal(2);
+    expect(decoded.b.position).to.equal(payload.length);
+    expect(Array.from(decoded.b.value())).to.deep.equal([10, 20, 30, 40]);
+  });
+
+  it('round-trip wire-byte parity for all defined subtypes when passed as strings', () => {
+    const cases: Array<[number, string]> = [
+      [0, '0'],
+      [1, '1'],
+      [3, '3'],
+      [4, '4'],
+      [5, '5'],
+      [6, '6'],
+      [7, '7'],
+      [8, '8'],
+      [9, '9'],
+      [128, '128']
+    ];
+    for (const [num, str] of cases) {
+      const payload = new Uint8Array([1, 2, 3]);
+      // Vector (subtype 9) requires a specific buffer layout — use a minimal valid Int8 vector.
+      const buf = num === 9 ? new Uint8Array([Binary.VECTOR_TYPE.Int8, 0, 1, 2, 3]) : payload;
+      const numericBytes = BSON.serialize({ b: new Binary(buf, num) });
+      // @ts-expect-error: subType coerces from string at runtime
+      const stringBytes = BSON.serialize({ b: new Binary(buf, str) });
+      expect(
+        Buffer.from(stringBytes).equals(Buffer.from(numericBytes)),
+        `bytes differed for subtype ${num}/"${str}"`
+      ).to.equal(true);
+    }
+  });
+
+  it('EJSON.stringify produces identical output for numeric and stringified subtype', () => {
+    const bytes = new Uint8Array([1, 2, 3, 4, 5]);
+    const numericForm = BSON.EJSON.stringify(new Binary(bytes, 4));
+    // @ts-expect-error: subType coerces from string at runtime
+    const stringForm = BSON.EJSON.stringify(new Binary(bytes, '4'));
+    expect(stringForm).to.equal(numericForm);
   });
 });

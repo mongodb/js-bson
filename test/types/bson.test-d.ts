@@ -1,4 +1,10 @@
-import { expectType, expectError , expectDeprecated, expectNotDeprecated } from 'tsd';
+import {
+  expectType,
+  expectError,
+  expectDeprecated,
+  expectNotDeprecated,
+  expectAssignable
+} from 'tsd';
 import {
   Binary,
   Code,
@@ -28,6 +34,14 @@ expectType<() => UUID>(Binary.prototype.toUUID);
 expectType<() => Binary>(UUID.prototype.toBinary);
 
 expectType<(encoding?: 'hex' | 'base64' | 'utf8' | 'utf-8') => string>(Binary.prototype.toString);
+
+// NODE-7354: constructor signature must remain (buffer?: BinarySequence, subType?: number) — runtime coercion does not loosen the typed contract
+expectAssignable<(buffer?: Uint8Array | number[], subType?: number) => Binary>(
+  (b, s) => new Binary(b, s)
+);
+expectError(new Binary(new Uint8Array(0), 'not-a-number'));
+expectError(new Binary(new Uint8Array(0), true));
+expectError(new Binary(new Uint8Array(0), null));
 expectType<(radix?: number) => string>(Double.prototype.toString);
 expectType<(radix?: number) => string>(Long.prototype.toString);
 expectType<(radix?: number) => string>(Int32.prototype.toString);
