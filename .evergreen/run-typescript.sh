@@ -19,11 +19,11 @@ npm install --no-save --force typescript@"$TS_VERSION"
 echo "Typescript $($TSC -v)"
 
 # check resolution uses the default latest types
-echo "import * as BSON from '.'" > file.ts && node $TSC --noEmit --traceResolution file.ts | grep 'bson.d.ts' && rm file.ts
+echo "import * as BSON from '.'" > file.ts && node $TSC $TSC_EXTRA_FLAGS --noEmit --traceResolution file.ts | grep 'bson.d.ts' && rm file.ts
 
 # check compilation
 rm -rf node_modules/@types/eslint # not a dependency we use, but breaks the build :(
-node $TSC bson.d.ts
+node $TSC $TSC_EXTRA_FLAGS bson.d.ts
 
 if [[ $TRY_COMPILING_LIBRARY != "false" ]]; then
     npm run build:ts

@@ -443,6 +443,7 @@ function parse(text: string, options?: EJSONParseOptions): any {
   });
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Converts a BSON document to an Extended JSON string, optionally replacing values if a replacer
  * function is specified or optionally including only the specified properties if a replacer array
@@ -464,34 +465,54 @@ function parse(text: string, options?: EJSONParseOptions): any {
  *
  * // prints '{"int32":10}'
  * console.log(EJSON.stringify(doc));
+ *
+ * // prints '{"int32":{"$numberInt":"10"}}' with 2 space indentation
+ * console.log(EJSON.stringify(doc, { relaxed: false }, 2));
  * ```
  */
 function stringify(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any,
-  replacer?:
-    | (number | string)[]
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | ((this: any, key: string, value: any) => any)
-    | EJSONSerializeOptions,
+  replacer?: (number | string)[] | ((this: any, key: string, value: any) => any) | null,
   space?: string | number,
   options?: EJSONSerializeOptions
+): string;
+function stringify(
+  value: any,
+  replacer?: (number | string)[] | ((this: any, key: string, value: any) => any) | null,
+  options?: EJSONSerializeOptions
+): string;
+function stringify(value: any, options?: EJSONSerializeOptions, space?: string | number): string;
+function stringify(
+  value: any,
+  replacerOrOptions?:
+    | (number | string)[]
+    | ((this: any, key: string, value: any) => any)
+    | null
+    | EJSONSerializeOptions,
+  spaceOrOptions?: string | number | EJSONSerializeOptions,
+  options?: EJSONSerializeOptions
 ): string {
-  if (space != null && typeof space === 'object') {
-    options = space;
-    space = 0;
+  /* eslint-enable @typescript-eslint/no-explicit-any */
+
+  if (spaceOrOptions != null && typeof spaceOrOptions === 'object') {
+    options = spaceOrOptions;
+    spaceOrOptions = undefined;
   }
-  if (replacer != null && typeof replacer === 'object' && !Array.isArray(replacer)) {
-    options = replacer;
-    replacer = undefined;
-    space = 0;
+  if (
+    replacerOrOptions != null &&
+    typeof replacerOrOptions === 'object' &&
+    !Array.isArray(replacerOrOptions)
+  ) {
+    options = replacerOrOptions;
+    replacerOrOptions = undefined;
   }
+
   const serializeOptions = Object.assign({ relaxed: true, legacy: false }, options, {
     seenObjects: [{ propertyName: '(root)', obj: null }]
   });
 
   const doc = serializeValue(value, serializeOptions);
-  return JSON.stringify(doc, replacer as Parameters<JSON['stringify']>[1], space);
+  return JSON.stringify(doc, replacerOrOptions as Parameters<JSON['stringify']>[1], spaceOrOptions);
 }
 
 /**
