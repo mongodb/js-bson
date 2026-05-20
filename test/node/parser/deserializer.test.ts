@@ -4,6 +4,55 @@ import { bufferFromHexArray, int32LEToHex } from '../tools/utils';
 import { utf8WebPlatformSpecTests } from '../data/utf8_wpt_error_cases';
 
 describe('deserializer()', () => {
+  describe('basic deserialization', () => {
+    it('deserializes a simple document', () => {
+      const bytes = BSON.serialize({ hello: 'world' });
+      const result = BSON.deserialize(bytes);
+      expect(result).to.deep.equal({ hello: 'world' });
+    });
+
+    it('can deserialize a document with an array of objects', () => {
+      const bytes = BSON.serialize({ a: [{ b: 1 }, { c: 2 }] });
+      const result = BSON.deserialize(bytes);
+      expect(result).to.deep.equal({ a: [{ b: 1 }, { c: 2 }] });
+    });
+
+    it('converts a root-level DBRef-shaped document to a DBRef instance', () => {
+      const oid = new BSON.ObjectId();
+      const bytes = BSON.serialize({ $ref: 'ns', $id: oid, $db: 'db' });
+      const result = BSON.deserialize(bytes);
+      expect(result).to.have.property('_bsontype', 'DBRef');
+      expect(result).to.have.property('collection', 'ns');
+      expect(result).to.have.property('db', 'db');
+      expect((result as BSON.DBRef).oid.toHexString()).to.equal(oid.toHexString());
+    });
+
+    it('can deserialize a nested document', () => {
+      // Build a valid BSON buffer iteratively to avoid hitting the serializer's own recursion limit.
+      // Each level wraps the previous in { a: <nested> }.
+      let inner = Buffer.from([0x05, 0x00, 0x00, 0x00, 0x00]); // innermost: empty doc {}
+
+      for (let i = 0; i < 1; i++) {
+        // doc layout: [int32 size][0x03 type]['a\0' key][nested doc][0x00 terminator]
+        const docSize = 4 + 1 + 2 + inner.length + 1;
+        const doc = Buffer.allocUnsafe(docSize);
+        let offset = 0;
+        doc.writeInt32LE(docSize, 0);
+        offset += 4;
+        doc[offset++] = 0x03; // BSON_DATA_OBJECT
+        doc[offset++] = 0x61; // 'a'
+        doc[offset++] = 0x00; // key null terminator
+        inner.copy(doc, offset);
+        offset += inner.length;
+        doc[offset] = 0x00; // document null terminator
+        inner = doc;
+      }
+
+      const result = BSON.deserialize(inner);
+      expect(result).to.deep.equal({ a: {} });
+    });
+  });
+
   describe('when the fieldsAsRaw options is present and has a value that corresponds to a key in the object', () => {
     it('ignores non-own properties set on the options object', () => {
       const bytes = BSON.serialize({ someKey: [1] });
@@ -57,6 +106,32 @@ describe('deserializer()', () => {
         'function iLoveJavascript() {}'
       );
       expect(resultCodeWithScope).to.have.deep.nested.property('a.scope', { b: true });
+    });
+  });
+
+  describe('when deserializing deeply nested documents', () => {
+    it('can deserialize a document with 20,000 nesting levels', () => {
+      // Build a valid BSON buffer iteratively to avoid hitting the serializer's own recursion limit.
+      // Each level wraps the previous in { a: <nested> }.
+      let inner = Buffer.from([0x05, 0x00, 0x00, 0x00, 0x00]); // innermost: empty doc {}
+
+      for (let i = 0; i < 20_000; i++) {
+        // doc layout: [int32 size][0x03 type]['a\0' key][nested doc][0x00 terminator]
+        const docSize = 4 + 1 + 2 + inner.length + 1;
+        const doc = Buffer.allocUnsafe(docSize);
+        let offset = 0;
+        doc.writeInt32LE(docSize, 0);
+        offset += 4;
+        doc[offset++] = 0x03; // BSON_DATA_OBJECT
+        doc[offset++] = 0x61; // 'a'
+        doc[offset++] = 0x00; // key null terminator
+        inner.copy(doc, offset);
+        offset += inner.length;
+        doc[offset] = 0x00; // document null terminator
+        inner = doc;
+      }
+
+      expect(() => BSON.deserialize(inner)).to.not.throw();
     });
   });
 
