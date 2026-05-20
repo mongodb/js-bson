@@ -40,7 +40,7 @@ export class ObjectId extends BSONValue {
   /** @internal */
   private static resetState = (): void => {
     this.index = Math.floor(Math.random() * 0x1000000);
-    this.PROCESS_UNIQUE = null;
+    this.PROCESS_UNIQUE = ByteUtils.randomBytes(5);
   };
 
   static {
@@ -215,10 +215,8 @@ export class ObjectId extends BSONValue {
     // 4-byte timestamp
     NumberUtils.setInt32BE(buffer, 0, time);
 
-    // set PROCESS_UNIQUE if yet not initialized
-    const PROCESS_UNIQUE = (this.PROCESS_UNIQUE ??= ByteUtils.randomBytes(5));
-
     // 5-byte process unique
+    const PROCESS_UNIQUE = this.PROCESS_UNIQUE!;
     buffer[4] = PROCESS_UNIQUE[0];
     buffer[5] = PROCESS_UNIQUE[1];
     buffer[6] = PROCESS_UNIQUE[2];
