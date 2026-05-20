@@ -4,9 +4,6 @@ import { type InspectFn, defaultInspect } from './parser/utils';
 import { ByteUtils } from './utils/byte_utils';
 import { NumberUtils } from './utils/number_utils';
 
-// Unique sequence for the current process (initialized on first use)
-let PROCESS_UNIQUE: Uint8Array | null = null;
-
 /** ObjectId hexString cache @internal */
 const __idCache = new WeakMap(); // TODO(NODE-6549): convert this to #__id private field when target updated to ES2022
 
@@ -33,7 +30,28 @@ export class ObjectId extends BSONValue {
   }
 
   /** @internal */
-  private static index = Math.floor(Math.random() * 0xffffff);
+  private static index = 0;
+
+  /** Unique sequence for the current process (initialized on first use)
+   * @internal
+   */
+  private static PROCESS_UNIQUE: Uint8Array | null = null;
+
+  /** @internal */
+  private static resetState = (): void => {
+    this.index = Math.floor(Math.random() * 0x1000000);
+    this.PROCESS_UNIQUE = ByteUtils.randomBytes(5);
+  };
+
+  static {
+    this.resetState();
+    // https://nodejs.org/api/v8.html#startup-snapshot-api
+    // @ts-expect-error Node.js types not present since this is an optional API
+    const { startupSnapshot } = globalThis?.process?.getBuiltinModule('v8') ?? {};
+    if (startupSnapshot?.isBuildingSnapshot()) {
+      startupSnapshot?.addDeserializeCallback(this.resetState);
+    }
+  }
 
   static cacheHexString: boolean;
 
@@ -178,7 +196,7 @@ export class ObjectId extends BSONValue {
    * @internal
    */
   private static getInc(): number {
-    return (ObjectId.index = (ObjectId.index + 1) % 0xffffff);
+    return (ObjectId.index = (ObjectId.index + 1) % 0x1000000);
   }
 
   /**
@@ -197,12 +215,8 @@ export class ObjectId extends BSONValue {
     // 4-byte timestamp
     NumberUtils.setInt32BE(buffer, 0, time);
 
-    // set PROCESS_UNIQUE if yet not initialized
-    if (PROCESS_UNIQUE === null) {
-      PROCESS_UNIQUE = ByteUtils.randomBytes(5);
-    }
-
     // 5-byte process unique
+    const PROCESS_UNIQUE = this.PROCESS_UNIQUE!;
     buffer[4] = PROCESS_UNIQUE[0];
     buffer[5] = PROCESS_UNIQUE[1];
     buffer[6] = PROCESS_UNIQUE[2];
