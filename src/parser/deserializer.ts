@@ -263,7 +263,7 @@ function deserializeObject(
 
   // How we set the value in the destination object, with special handling for __proto__ to avoid prototype pollution vulnerabilities
   const setValue = (name: string | number, value: unknown) => {
-    const frame = currentFrame as NestedParsingFrame | null;
+    const frame = currentFrame;
     const dest = frame !== null ? frame.holdingDocument : rootObject;
     if (name === '__proto__') {
       Object.defineProperty(dest, name, {
@@ -304,7 +304,9 @@ function deserializeObject(
           const completedFrame = currentFrame;
           nestedParsingStack.pop();
           currentFrame =
-            nestedParsingStack.length === 0 ? null : nestedParsingStack[nestedParsingStack.length - 1];
+            nestedParsingStack.length === 0
+              ? null
+              : nestedParsingStack[nestedParsingStack.length - 1];
           // finish the frame
           let result: Document = completedFrame.holdingDocument;
           switch (completedFrame.elementType) {
