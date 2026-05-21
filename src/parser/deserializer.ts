@@ -123,6 +123,14 @@ export function internalDeserialize(
 }
 
 interface NestedParsingFrame {
+  // One of 3 supported types:
+  // - constants.BSON_DATA_OBJECT
+  // - constants.BSON_DATA_ARRAY
+  // - constants.BSON_DATA_CODE_W_SCOPE
+  elementType:
+    | typeof constants.BSON_DATA_OBJECT
+    | typeof constants.BSON_DATA_ARRAY
+    | typeof constants.BSON_DATA_CODE_W_SCOPE;
   // Document that we will fill out as we parse the nested object
   holdingDocument: Document;
   // The name of the key we will set the parsed object on once we finish parsing the nested object, this is used in the onComplete callback to know where to set the parsed nested object in the parent document
@@ -144,14 +152,6 @@ interface NestedParsingFrame {
   // The utf-8 validation setting for this frame, used to determine whether to utf-8 validate keys in this frame. This is determined based on the global utf-8 validation setting and the specific keys specified in the validation option.
   validationSetting: boolean;
   functionString: string | null; // only used for Code with Scope
-  // One of 3 supported types:
-  // - constants.BSON_DATA_OBJECT
-  // - constants.BSON_DATA_ARRAY
-  // - constants.BSON_DATA_CODE_W_SCOPE
-  elementType:
-    | typeof constants.BSON_DATA_OBJECT
-    | typeof constants.BSON_DATA_ARRAY
-    | typeof constants.BSON_DATA_CODE_W_SCOPE;
 }
 
 const allowedDBRefKeys = /^\$ref$|^\$id$|^\$db$/;
@@ -437,17 +437,17 @@ function deserializeObject(
       } else {
         isDeferredValue = true;
         nestedParsingStack.push({
-          holdingDocument: {},
           elementType: constants.BSON_DATA_OBJECT,
+          holdingDocument: {},
           propertyName: name,
-          functionString: null,
           lastIndex: index + objectSize,
           isArray: false,
           arrayIndex: 0,
           raw: false,
           isPossibleDBRef: null, // we don't know if this is a DBRef until we parse the keys, so we start with null and set to false if we encounter a key that is not valid for a DBRef
           globalUTFValidation: true,
-          validationSetting: shouldValidateKey
+          validationSetting: shouldValidateKey,
+          functionString: null
         });
         currentFrame = nestedParsingStack[nestedParsingStack.length - 1];
         index = index + 4;
@@ -463,17 +463,17 @@ function deserializeObject(
       const arrayRaw = !!(fieldsAsRaw && fieldsAsRaw[name]) || (currentFrame?.raw ?? false);
       isDeferredValue = true;
       nestedParsingStack.push({
-        holdingDocument: [],
         elementType: constants.BSON_DATA_ARRAY,
+        holdingDocument: [],
         propertyName: name,
-        functionString: null,
         lastIndex: stopIndex,
         isArray: true,
         arrayIndex: 0,
         raw: arrayRaw,
         isPossibleDBRef: false,
         globalUTFValidation: true,
-        validationSetting: shouldValidateKey
+        validationSetting: shouldValidateKey,
+        functionString: null
       });
       currentFrame = nestedParsingStack[nestedParsingStack.length - 1];
       index = index + 4;
@@ -710,17 +710,17 @@ function deserializeObject(
 
       isDeferredValue = true;
       nestedParsingStack.push({
-        holdingDocument: {},
         elementType: constants.BSON_DATA_CODE_W_SCOPE,
+        holdingDocument: {},
         propertyName: name,
-        functionString: functionString,
         lastIndex: _index + objectSize,
         isArray: false,
         arrayIndex: 0,
         raw: false,
         isPossibleDBRef: null,
         globalUTFValidation: true,
-        validationSetting: shouldValidateKey
+        validationSetting: shouldValidateKey,
+        functionString: functionString
       });
       currentFrame = nestedParsingStack[nestedParsingStack.length - 1];
       index = index + 4; // move index past the size of the object, the rest of the object will be parsed in subsequent iterations of this loop
