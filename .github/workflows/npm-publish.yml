@@ -33,9 +33,15 @@ jobs:
     environment: release
     steps:
       - uses: actions/checkout@v5
+        env:
+          REF: ${{ inputs.ref }}
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ env.REF }}
       - name: Install Node and dependencies
         uses: mongodb-labs/drivers-github-tools/node/setup@v3
-      - run: npm version "${{ inputs.version }}" --git-tag-version=false --allow-same-version
-      - run: npm publish --provenance --tag="${{ inputs.tag }}"
+      - run: npm version "$VERSION" --git-tag-version=false --allow-same-version
+        env:
+          VERSION: ${{ inputs.version }}
+      - run: npm publish --provenance --tag="$TAG"
+        env:
+          TAG: ${{ inputs.tag }}
