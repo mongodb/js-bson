@@ -718,9 +718,8 @@ function deserializeObject(
       );
     }
 
-    if (isDeferredValue) {
-      // console.log(`Deferring setting value for key "${name}" until end of object parsing`);
-    } else {
+    // If we have the value, set it on the target object
+    if (!isDeferredValue) {
       setValue(value);
     }
   }
@@ -740,6 +739,7 @@ function deserializeObject(
   // if we did not find "$ref", "$id", "$db", or found an extraneous $key, don't make a DBRef
   if (!isPossibleDBRef) return object;
 
+  // If the object is DBRef-like, create a new DBRef instance
   if (isDBRefLike(object)) {
     const copy = Object.assign({}, object) as Partial<DBRefLike>;
     delete copy.$ref;
