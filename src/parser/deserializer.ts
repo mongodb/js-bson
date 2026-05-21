@@ -125,12 +125,14 @@ export function internalDeserialize(
 interface NestedParsingFrame {
   // Document that we will fill out as we parse the nested object
   holdingDocument: Document;
+  // The name of the key we will set the parsed object on once we finish parsing the nested object, this is used in the onComplete callback to know where to set the parsed nested object in the parent document
+  propertyName: string | number;
   // The index in the buffer where the current object ends, used to know when we are done parsing the current object and can pop the stack
   lastIndex: number;
   // Whether the current frame is parsing an array, used to know whether to interpret keys as strings or array indices
   isArray: boolean;
   // The next array index to use if this frame is parsing an array, used to assign numeric keys to array elements without having to utf-8 decode the key from the buffer
-  arrayIndex?: number;
+  arrayIndex: number;
   // When true, all objects in this frame will be returned as raw bson buffers without parsing.
   // This is used when the fieldsAsRaw option is used on a parent object, and is inherited by nested frames.
   // It can also be set to true if the global raw option is set, but it cannot be set to true for a frame if the global raw option is false.
@@ -141,8 +143,15 @@ interface NestedParsingFrame {
   globalUTFValidation: boolean;
   // The utf-8 validation setting for this frame, used to determine whether to utf-8 validate keys in this frame. This is determined based on the global utf-8 validation setting and the specific keys specified in the validation option.
   validationSetting: boolean;
-  // A callback function that will be called when the frame is completed, used to set the value in the parent object once we have finished parsing the current object.
-  onComplete: () => void;
+  functionString: string | null; // only used for Code with Scope
+  // One of 3 supported types:
+  // - constants.BSON_DATA_OBJECT
+  // - constants.BSON_DATA_ARRAY
+  // - constants.BSON_DATA_CODE_W_SCOPE
+  elementType:
+    | typeof constants.BSON_DATA_OBJECT
+    | typeof constants.BSON_DATA_ARRAY
+    | typeof constants.BSON_DATA_CODE_W_SCOPE;
 }
 
 const allowedDBRefKeys = /^\$ref$|^\$id$|^\$db$/;
@@ -250,13 +259,41 @@ function deserializeObject(
 
   let isPossibleDBRef = isArray ? false : null;
 
+  // How we set the value in the destination object, with special handling for __proto__ to avoid prototype pollution vulnerabilities
+  const setValue = (name: string | number, value: unknown) => {
+    const dest =
+      nestedParsingStack.length === 0
+        ? rootObject
+        : nestedParsingStack[nestedParsingStack.length - 1].holdingDocument;
+    if (name === '__proto__') {
+      Object.defineProperty(dest, name, {
+        value,
+        writable: true,
+        enumerable: true,
+        configurable: true
+      });
+    } else {
+      dest[name] = value;
+    }
+  };
+
+  const toPotentialDbRef = (doc: Document): DBRef | Document => {
+    if (isDBRefLike(doc)) {
+      const copy = Object.assign({}, doc) as Partial<DBRefLike>;
+      delete copy.$ref;
+      delete copy.$id;
+      delete copy.$db;
+      const dbref = new DBRef(doc.$ref, doc.$id, doc.$db, copy);
+      return dbref;
+    }
+    return doc;
+  };
+
   // While we have more left data left keep parsing
   while (!done) {
     // Current frame, if one is present
     const currentFrame =
       nestedParsingStack.length === 0 ? null : nestedParsingStack[nestedParsingStack.length - 1];
-    // The object that we will be setting the current key value on, this is either the root object if we are at the top level, or the holdingDocument of the current frame if we are nested
-    const destObject = currentFrame === null ? rootObject : currentFrame.holdingDocument;
 
     // Read the type
     const elementType = buffer[index++];
@@ -269,7 +306,28 @@ function deserializeObject(
         if (index === currentFrame.lastIndex) {
           // Current index matches the last index of the frame, so we pop the frame and set the value in the parent document
           nestedParsingStack.pop();
-          currentFrame.onComplete();
+          // finish the frame
+          let result: Document = currentFrame.holdingDocument;
+          switch (currentFrame.elementType) {
+            case constants.BSON_DATA_OBJECT:
+              // if this is a DBRef, we need to construct a DBRef object instead of a plain object
+              if (currentFrame.isPossibleDBRef) {
+                result = toPotentialDbRef(result);
+              }
+              break;
+            case constants.BSON_DATA_ARRAY:
+              // nothing to do, the holding document is already an array and the keys were set as numeric indices
+              break;
+            case constants.BSON_DATA_CODE_W_SCOPE:
+              // the holding document is the scope, we need to construct a Code object with the function string and scope
+              result = new Code(currentFrame.functionString!, currentFrame.holdingDocument);
+              break;
+            default:
+              throw new BSONError('Unexpected element type in frame stack');
+          }
+          const propName = currentFrame.propertyName;
+          // set the value in the parent document
+          setValue(propName, result);
           continue;
         } else {
           // Current index does not match the last index of the frame, the document is malformed
@@ -302,23 +360,9 @@ function deserializeObject(
     // Represents the key
     const name = isArray
       ? currentFrame && currentFrame.isArray
-        ? currentFrame.arrayIndex!++
+        ? currentFrame.arrayIndex++
         : arrayIndex++
       : ByteUtils.toUTF8(buffer, index, i, false);
-
-    // How we set the value in the destination object, with special handling for __proto__ to avoid prototype pollution vulnerabilities
-    const setValue = (value: unknown) => {
-      if (name === '__proto__') {
-        Object.defineProperty(destObject, name, {
-          value,
-          writable: true,
-          enumerable: true,
-          configurable: true
-        });
-      } else {
-        destObject[name] = value;
-      }
-    };
 
     // shouldValidateKey is true if the key should be validated, false otherwise.
     // Within a nested frame the original code passed a collapsed boolean validation option,
@@ -396,23 +440,16 @@ function deserializeObject(
         isDeferredValue = true;
         nestedParsingStack.push({
           holdingDocument: {},
+          elementType: constants.BSON_DATA_OBJECT,
+          propertyName: name,
+          functionString: null,
           lastIndex: index + objectSize,
           isArray: false,
+          arrayIndex: 0,
           raw: false,
           isPossibleDBRef: null, // we don't know if this is a DBRef until we parse the keys, so we start with null and set to false if we encounter a key that is not valid for a DBRef
           globalUTFValidation: true,
-          validationSetting: shouldValidateKey,
-          onComplete: function () {
-            let result = this.holdingDocument;
-            if (this.isPossibleDBRef && isDBRefLike(result)) {
-              const copy = Object.assign({}, result) as Partial<DBRefLike>;
-              delete copy.$ref;
-              delete copy.$id;
-              delete copy.$db;
-              result = new DBRef(result.$ref, result.$id, result.$db, copy);
-            }
-            setValue(result);
-          }
+          validationSetting: shouldValidateKey
         });
         index = index + 4;
       }
@@ -428,16 +465,16 @@ function deserializeObject(
       isDeferredValue = true;
       nestedParsingStack.push({
         holdingDocument: [],
+        elementType: constants.BSON_DATA_ARRAY,
+        propertyName: name,
+        functionString: null,
         lastIndex: stopIndex,
         isArray: true,
         arrayIndex: 0,
         raw: arrayRaw,
         isPossibleDBRef: false,
         globalUTFValidation: true,
-        validationSetting: shouldValidateKey,
-        onComplete: function () {
-          setValue(this.holdingDocument);
-        }
+        validationSetting: shouldValidateKey
       });
       index = index + 4;
     } else if (elementType === constants.BSON_DATA_UNDEFINED) {
@@ -674,16 +711,16 @@ function deserializeObject(
       isDeferredValue = true;
       nestedParsingStack.push({
         holdingDocument: {},
+        elementType: constants.BSON_DATA_CODE_W_SCOPE,
+        propertyName: name,
+        functionString: functionString,
         lastIndex: _index + objectSize,
         isArray: false,
+        arrayIndex: 0,
         raw: false,
         isPossibleDBRef: null,
         globalUTFValidation: true,
-        validationSetting: shouldValidateKey,
-        onComplete: function () {
-          const result = new Code(functionString, this.holdingDocument);
-          setValue(result);
-        }
+        validationSetting: shouldValidateKey
       });
       index = index + 4; // move index past the size of the object, the rest of the object will be parsed in subsequent iterations of this loop
     } else if (elementType === constants.BSON_DATA_DBPOINTER) {
@@ -720,7 +757,7 @@ function deserializeObject(
 
     // If we have the value, set it on the target object
     if (!isDeferredValue) {
-      setValue(value);
+      setValue(name, value);
     }
   }
 
@@ -740,13 +777,5 @@ function deserializeObject(
   if (!isPossibleDBRef) return object;
 
   // If the object is DBRef-like, create a new DBRef instance
-  if (isDBRefLike(object)) {
-    const copy = Object.assign({}, object) as Partial<DBRefLike>;
-    delete copy.$ref;
-    delete copy.$id;
-    delete copy.$db;
-    return new DBRef(object.$ref, object.$id, object.$db, copy);
-  }
-
-  return object;
+  return toPotentialDbRef(object);
 }
