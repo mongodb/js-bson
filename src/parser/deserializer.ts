@@ -255,16 +255,16 @@ function deserializeObject(
   const nestedParsingStack: NestedParsingFrame[] = [];
   // Used for arrays to skip having to perform utf8 decoding
   let arrayIndex = 0;
-  const done = false;
 
   let isPossibleDBRef = isArray ? false : null;
 
+  // Tracks the top of nestedParsingStack, or null if there is no nested document currently being parsed.
+  let currentFrame: NestedParsingFrame | null = null;
+
   // How we set the value in the destination object, with special handling for __proto__ to avoid prototype pollution vulnerabilities
   const setValue = (name: string | number, value: unknown) => {
-    const dest =
-      nestedParsingStack.length === 0
-        ? rootObject
-        : nestedParsingStack[nestedParsingStack.length - 1].holdingDocument;
+    const frame = currentFrame as NestedParsingFrame | null;
+    const dest = frame !== null ? frame.holdingDocument : rootObject;
     if (name === '__proto__') {
       Object.defineProperty(dest, name, {
         value,
@@ -290,11 +290,7 @@ function deserializeObject(
   };
 
   // While we have more left data left keep parsing
-  while (!done) {
-    // Current frame, if one is present
-    const currentFrame =
-      nestedParsingStack.length === 0 ? null : nestedParsingStack[nestedParsingStack.length - 1];
-
+  while (true) {
     // Read the type
     const elementType = buffer[index++];
 
@@ -304,14 +300,17 @@ function deserializeObject(
       if (currentFrame) {
         // If we're in a frame, that means the end of the current nested document
         if (index === currentFrame.lastIndex) {
-          // Current index matches the last index of the frame, so we pop the frame and set the value in the parent document
+          // Snapshot the completed frame before updating currentFrame to the parent.
+          const completedFrame = currentFrame;
           nestedParsingStack.pop();
+          currentFrame =
+            nestedParsingStack.length === 0 ? null : nestedParsingStack[nestedParsingStack.length - 1];
           // finish the frame
-          let result: Document = currentFrame.holdingDocument;
-          switch (currentFrame.elementType) {
+          let result: Document = completedFrame.holdingDocument;
+          switch (completedFrame.elementType) {
             case constants.BSON_DATA_OBJECT:
               // if this is a DBRef, we need to construct a DBRef object instead of a plain object
-              if (currentFrame.isPossibleDBRef) {
+              if (completedFrame.isPossibleDBRef) {
                 result = toPotentialDbRef(result);
               }
               break;
@@ -320,14 +319,13 @@ function deserializeObject(
               break;
             case constants.BSON_DATA_CODE_W_SCOPE:
               // the holding document is the scope, we need to construct a Code object with the function string and scope
-              result = new Code(currentFrame.functionString!, currentFrame.holdingDocument);
+              result = new Code(completedFrame.functionString!, completedFrame.holdingDocument);
               break;
             default:
               throw new BSONError('Unexpected element type in frame stack');
           }
-          const propName = currentFrame.propertyName;
-          // set the value in the parent document
-          setValue(propName, result);
+          // set the value in the parent document (setValue reads currentFrame, now pointing to parent)
+          setValue(completedFrame.propertyName, result);
           continue;
         } else {
           // Current index does not match the last index of the frame, the document is malformed
@@ -451,6 +449,7 @@ function deserializeObject(
           globalUTFValidation: true,
           validationSetting: shouldValidateKey
         });
+        currentFrame = nestedParsingStack[nestedParsingStack.length - 1];
         index = index + 4;
       }
     } else if (elementType === constants.BSON_DATA_ARRAY) {
@@ -476,6 +475,7 @@ function deserializeObject(
         globalUTFValidation: true,
         validationSetting: shouldValidateKey
       });
+      currentFrame = nestedParsingStack[nestedParsingStack.length - 1];
       index = index + 4;
     } else if (elementType === constants.BSON_DATA_UNDEFINED) {
       value = undefined;
@@ -722,6 +722,7 @@ function deserializeObject(
         globalUTFValidation: true,
         validationSetting: shouldValidateKey
       });
+      currentFrame = nestedParsingStack[nestedParsingStack.length - 1];
       index = index + 4; // move index past the size of the object, the rest of the object will be parsed in subsequent iterations of this loop
     } else if (elementType === constants.BSON_DATA_DBPOINTER) {
       // Get the code string size
