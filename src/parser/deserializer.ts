@@ -439,17 +439,17 @@ function deserializeObject(
       } else {
         isDeferredValue = true;
         nestedParsingStack.push({
-          elementType: constants.BSON_DATA_OBJECT,
           holdingDocument: {},
+          elementType: constants.BSON_DATA_OBJECT,
           propertyName: name,
+          functionString: null,
           lastIndex: index + objectSize,
           isArray: false,
           arrayIndex: 0,
           raw: false,
           isPossibleDBRef: null, // we don't know if this is a DBRef until we parse the keys, so we start with null and set to false if we encounter a key that is not valid for a DBRef
           globalUTFValidation: true,
-          validationSetting: shouldValidateKey,
-          functionString: null
+          validationSetting: shouldValidateKey
         });
         currentFrame = nestedParsingStack[nestedParsingStack.length - 1];
         index = index + 4;
@@ -465,17 +465,17 @@ function deserializeObject(
       const arrayRaw = !!(fieldsAsRaw && fieldsAsRaw[name]) || (currentFrame?.raw ?? false);
       isDeferredValue = true;
       nestedParsingStack.push({
-        elementType: constants.BSON_DATA_ARRAY,
         holdingDocument: [],
+        elementType: constants.BSON_DATA_ARRAY,
         propertyName: name,
+        functionString: null,
         lastIndex: stopIndex,
         isArray: true,
         arrayIndex: 0,
         raw: arrayRaw,
         isPossibleDBRef: false,
         globalUTFValidation: true,
-        validationSetting: shouldValidateKey,
-        functionString: null
+        validationSetting: shouldValidateKey
       });
       currentFrame = nestedParsingStack[nestedParsingStack.length - 1];
       index = index + 4;
@@ -712,17 +712,17 @@ function deserializeObject(
 
       isDeferredValue = true;
       nestedParsingStack.push({
-        elementType: constants.BSON_DATA_CODE_W_SCOPE,
         holdingDocument: {},
+        elementType: constants.BSON_DATA_CODE_W_SCOPE,
         propertyName: name,
+        functionString: functionString,
         lastIndex: _index + objectSize,
         isArray: false,
         arrayIndex: 0,
         raw: false,
         isPossibleDBRef: null,
         globalUTFValidation: true,
-        validationSetting: shouldValidateKey,
-        functionString: functionString
+        validationSetting: shouldValidateKey
       });
       currentFrame = nestedParsingStack[nestedParsingStack.length - 1];
       index = index + 4; // move index past the size of the object, the rest of the object will be parsed in subsequent iterations of this loop
