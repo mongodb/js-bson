@@ -117,7 +117,6 @@ export function serialize(object: Document, options: SerializeOptions = {}): Uin
     object,
     checkKeys,
     0,
-    0,
     serializeFunctions,
     ignoreUndefined,
     null
@@ -160,7 +159,6 @@ export function serializeWithBufferAndIndex(
     buffer,
     object,
     checkKeys,
-    0,
     0,
     serializeFunctions,
     ignoreUndefined,
