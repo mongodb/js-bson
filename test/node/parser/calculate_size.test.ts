@@ -2,6 +2,14 @@ import * as BSON from '../../register-bson';
 import { expect } from 'chai';
 import { BSONVersionError } from '../../register-bson';
 
+function buildDeeplyNestedObject(depth: number): Record<string, unknown> {
+  let inner: Record<string, unknown> = {};
+  for (let i = 0; i < depth; i++) {
+    inner = { a: inner };
+  }
+  return inner;
+}
+
 describe('calculateSize()', () => {
   it('should only enumerate own property keys from input objects', () => {
     const input = { a: 1 };
@@ -23,6 +31,13 @@ describe('calculateSize()', () => {
         a: { _bsontype: 'Int32', value: 2 }
       })
     ).to.throw(BSONVersionError, /Unsupported BSON version/i);
+  });
+
+  describe('when calculating size of deeply nested documents', () => {
+    it('can calculate the size of a document with 20,000 nesting levels without a stack overflow', () => {
+      const size = BSON.calculateObjectSize(buildDeeplyNestedObject(20_000));
+      expect(size).to.be.greaterThan(0);
+    });
   });
 
   describe('when given a bigint value with a single character key', function () {

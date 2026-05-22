@@ -10,43 +10,51 @@ export function internalCalculateObjectSize(
   serializeFunctions?: boolean,
   ignoreUndefined?: boolean
 ): number {
-  let totalLength = 4 + 1;
+  const objectStack: Document[] = [object];
+  let total = 0;
 
-  if (Array.isArray(object)) {
-    for (let i = 0; i < object.length; i++) {
-      totalLength += calculateElement(
-        i.toString(),
-        object[i],
-        serializeFunctions,
-        true,
-        ignoreUndefined
-      );
-    }
-  } else {
-    // If we have toBSON defined, override the current object
+  while (objectStack.length > 0) {
+    const obj = objectStack.pop()!;
+    total += 5; // 4-byte size field + null terminator
 
-    if (typeof object?.toBSON === 'function') {
-      object = object.toBSON();
+    const isObjArray = Array.isArray(obj);
+    let target = obj;
+    if (!isObjArray && typeof (obj as any)?.toBSON === 'function') {
+      target = (obj as any).toBSON();
     }
 
-    // Calculate size
-    for (const key of Object.keys(object)) {
-      totalLength += calculateElement(key, object[key], serializeFunctions, false, ignoreUndefined);
+    if (isObjArray) {
+      const array = target as unknown[];
+      for (let i = 0; i < array.length; i++) {
+        total += calculateElementSize(
+          i.toString(),
+          array[i],
+          serializeFunctions,
+          true,
+          ignoreUndefined,
+          objectStack
+        );
+      }
+    } else {
+      for (const key of Object.keys(target)) {
+        total += calculateElementSize(key, target[key], serializeFunctions, false, ignoreUndefined, objectStack);
+      }
     }
   }
 
-  return totalLength;
+  return total;
 }
 
 /** @internal */
-function calculateElement(
+function calculateElementSize(
   name: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any,
   serializeFunctions = false,
   isArray = false,
-  ignoreUndefined = false
-) {
+  ignoreUndefined = false,
+  objectStack: Document[]
+): number {
   // If we have toBSON defined, override the current object
   if (typeof value?.toBSON === 'function') {
     value = value.toBSON();
@@ -107,16 +115,16 @@ function calculateElement(
       } else if (value._bsontype === 'Decimal128') {
         return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (16 + 1);
       } else if (value._bsontype === 'Code') {
-        // Calculate size depending on the availability of a scope
+        // Calculate size deobjectStack on the availability of a scope
         if (value.scope != null && Object.keys(value.scope).length > 0) {
+          objectStack.push(value.scope);
           return (
             (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
             1 +
             4 +
             4 +
             ByteUtils.utf8ByteLength(value.code.toString()) +
-            1 +
-            internalCalculateObjectSize(value.scope, serializeFunctions, ignoreUndefined)
+            1
           );
         } else {
           return (
@@ -163,11 +171,8 @@ function calculateElement(
           ordered_values['$db'] = value.db;
         }
 
-        return (
-          (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
-          1 +
-          internalCalculateObjectSize(ordered_values, serializeFunctions, ignoreUndefined)
-        );
+        objectStack.push(ordered_values);
+        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + 1;
       } else if (value instanceof RegExp || isRegExp(value)) {
         return (
           (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
@@ -189,11 +194,8 @@ function calculateElement(
           1
         );
       } else {
-        return (
-          (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
-          internalCalculateObjectSize(value, serializeFunctions, ignoreUndefined) +
-          1
-        );
+        objectStack.push(value);
+        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + 1;
       }
     case 'function':
       if (serializeFunctions) {
