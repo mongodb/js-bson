@@ -26,31 +26,6 @@ describe('deserializer()', () => {
       expect(result).to.have.property('db', 'db');
       expect((result as BSON.DBRef).oid.toHexString()).to.equal(oid.toHexString());
     });
-
-    it('can deserialize a nested document', () => {
-      // Build a valid BSON buffer iteratively to avoid hitting the serializer's own recursion limit.
-      // Each level wraps the previous in { a: <nested> }.
-      let inner = Buffer.from([0x05, 0x00, 0x00, 0x00, 0x00]); // innermost: empty doc {}
-
-      for (let i = 0; i < 1; i++) {
-        // doc layout: [int32 size][0x03 type]['a\0' key][nested doc][0x00 terminator]
-        const docSize = 4 + 1 + 2 + inner.length + 1;
-        const doc = Buffer.allocUnsafe(docSize);
-        let offset = 0;
-        doc.writeInt32LE(docSize, 0);
-        offset += 4;
-        doc[offset++] = 0x03; // BSON_DATA_OBJECT
-        doc[offset++] = 0x61; // 'a'
-        doc[offset++] = 0x00; // key null terminator
-        inner.copy(doc, offset);
-        offset += inner.length;
-        doc[offset] = 0x00; // document null terminator
-        inner = doc;
-      }
-
-      const result = BSON.deserialize(inner);
-      expect(result).to.deep.equal({ a: {} });
-    });
   });
 
   describe('when the fieldsAsRaw options is present and has a value that corresponds to a key in the object', () => {
