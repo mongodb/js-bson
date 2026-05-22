@@ -440,7 +440,9 @@ function toKvPairs(object: Document): [string, unknown][] {
     return Array.from((object as Map<unknown, unknown>).entries()) as [string, unknown][];
   } else {
     let target: Document = object;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (typeof (target as any)?.toBSON === 'function') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       target = (target as any).toBSON() as Document;
       if (target != null && typeof target !== 'object') {
         throw new BSONError('toBSON function did not return an object');
@@ -527,6 +529,7 @@ export function serializeInto(
 
     const pair = frame.kvPairs[frame.serializedPairCount++];
     const key = pair[0];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let value: any = pair[1];
 
     if (typeof value?.toBSON === 'function') {

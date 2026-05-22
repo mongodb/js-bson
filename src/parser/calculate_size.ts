@@ -19,7 +19,9 @@ export function internalCalculateObjectSize(
 
     const isObjArray = Array.isArray(obj);
     let target = obj;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (!isObjArray && typeof (obj as any)?.toBSON === 'function') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       target = (obj as any).toBSON();
     }
 
