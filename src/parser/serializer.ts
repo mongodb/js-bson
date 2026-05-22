@@ -409,18 +409,23 @@ function serializeSymbol(buffer: Uint8Array, key: string, value: BSONSymbol, ind
 }
 
 interface SerializationFrame {
-  // The object we are serializing at this level of the stack. Used for circular reference detection and to avoid having to call toBSON multiple times on the same object in case of circular references.
+  // The object being serialized at this frame.
+  // Held so it can be removed from the cycle-detection path when this frame completes.
   sourceObject: Document;
-  // Whether the object we are serializing is an array, which forces the keys to be serialized as ascii strings of their index in the array
+  // Whether the object we are serializing is an array.
+  // This forces the keys to be serialized as ASCII strings of their index in the array.
   isArray: boolean;
-  // The key-value pairs of the object we are serializing.
-  // We compute this once per object to avoid having to compute it multiple times in case of circular references
+  // The key-value pairs of the object we are serializing, snapshotted at frame creation.
   kvPairs: [string, unknown][];
-  // The number of serialized kvPairs, used to keep track of where we are in the serialization process
+  // The number of serialized kvPairs.
+  // Used to keep track of where we are in the serialization process
   serializedPairCount: number;
-  // The index in the buffer where the size of the current object being serialized is stored. We will only know the size of the object once we have finished serializing it, so we keep track of where to write the size once we know it.
+  // The index in the buffer where the size of the current serialized object is stored.
+  // We will only know the size of the object once we have finished serializing it, so we keep track of where to write the size once we know it.
   objectSizeIndex: number;
-  // The index in the buffer where the size of the code with scope object is stored, used for Code with Scope serialization. We will only know the size of the code with scope object once we have finished serializing it, so we keep track of where to write the size once we know it.
+  // The index in the buffer where the size of the code with scope object is stored.
+  // Used for Code with Scope serialization.
+  // We will only know the size of the code with scope object once we have finished serializing it, so we keep track of where to write the size once we know it.
   codeSizeIndex: number | null;
 }
 
@@ -579,7 +584,7 @@ export function serializeInto(
           serializedPairCount: 0,
           objectSizeIndex: nestedStartIndex,
           codeSizeIndex: null,
-          sourceObject:value,
+          sourceObject: value,
           isArray: nestedIsArray
         });
         index += 4;
@@ -608,7 +613,7 @@ export function serializeInto(
           NumberUtils.setInt32LE(buffer, index, codeSize);
           buffer[index + 4 + codeSize - 1] = 0;
           index = index + codeSize + 4;
-          const scope = codeValue.scope as Document;
+          const scope = codeValue.scope;
           if (path.has(scope)) {
             throw new BSONError('Cannot convert circular structure to BSON');
           }
@@ -618,7 +623,7 @@ export function serializeInto(
             serializedPairCount: 0,
             objectSizeIndex: index,
             codeSizeIndex: codeTotalSizeIndex,
-            sourceObject:scope,
+            sourceObject: scope,
             isArray: false
           });
           index += 4;
@@ -653,7 +658,7 @@ export function serializeInto(
           serializedPairCount: 0,
           objectSizeIndex: index,
           codeSizeIndex: null,
-          sourceObject:orderedValues,
+          sourceObject: orderedValues,
           isArray: false
         });
         index += 4;

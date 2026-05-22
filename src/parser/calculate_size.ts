@@ -37,7 +37,14 @@ export function internalCalculateObjectSize(
       }
     } else {
       for (const key of Object.keys(target)) {
-        total += calculateElementSize(key, target[key], serializeFunctions, false, ignoreUndefined, objectStack);
+        total += calculateElementSize(
+          key,
+          target[key],
+          serializeFunctions,
+          false,
+          ignoreUndefined,
+          objectStack
+        );
       }
     }
   }
@@ -71,20 +78,19 @@ function calculateElementSize(
       ) {
         if (value >= constants.BSON_INT32_MIN && value <= constants.BSON_INT32_MAX) {
           // 32 bit
-          return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (4 + 1);
+          return ByteUtils.utf8ByteLength(name) + 1 + (4 + 1);
         } else {
-          return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (8 + 1);
+          return ByteUtils.utf8ByteLength(name) + 1 + (8 + 1);
         }
       } else {
         // 64 bit
-        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (8 + 1);
+        return ByteUtils.utf8ByteLength(name) + 1 + (8 + 1);
       }
     case 'undefined':
-      if (isArray || !ignoreUndefined)
-        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + 1;
+      if (isArray || !ignoreUndefined) return ByteUtils.utf8ByteLength(name) + 1 + 1;
       return 0;
     case 'boolean':
-      return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (1 + 1);
+      return ByteUtils.utf8ByteLength(name) + 1 + (1 + 1);
     case 'object':
       if (
         value != null &&
@@ -93,33 +99,32 @@ function calculateElementSize(
       ) {
         throw new BSONVersionError();
       } else if (value == null || value._bsontype === 'MinKey' || value._bsontype === 'MaxKey') {
-        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + 1;
+        return ByteUtils.utf8ByteLength(name) + 1 + 1;
       } else if (value._bsontype === 'ObjectId') {
-        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (12 + 1);
+        return ByteUtils.utf8ByteLength(name) + 1 + (12 + 1);
       } else if (value instanceof Date || isDate(value)) {
-        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (8 + 1);
+        return ByteUtils.utf8ByteLength(name) + 1 + (8 + 1);
       } else if (
         ArrayBuffer.isView(value) ||
         value instanceof ArrayBuffer ||
         isAnyArrayBuffer(value)
       ) {
-        return (
-          (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (1 + 4 + 1) + value.byteLength
-        );
+        return ByteUtils.utf8ByteLength(name) + 1 + (1 + 4 + 1) + value.byteLength;
       } else if (
         value._bsontype === 'Long' ||
         value._bsontype === 'Double' ||
         value._bsontype === 'Timestamp'
       ) {
-        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (8 + 1);
+        return ByteUtils.utf8ByteLength(name) + 1 + (8 + 1);
       } else if (value._bsontype === 'Decimal128') {
-        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (16 + 1);
+        return ByteUtils.utf8ByteLength(name) + 1 + (16 + 1);
       } else if (value._bsontype === 'Code') {
-        // Calculate size deobjectStack on the availability of a scope
+        // Calculate size depending on the availability of a scope
         if (value.scope != null && Object.keys(value.scope).length > 0) {
           objectStack.push(value.scope);
           return (
-            (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
+            ByteUtils.utf8ByteLength(name) +
+            1 +
             1 +
             4 +
             4 +
@@ -128,7 +133,8 @@ function calculateElementSize(
           );
         } else {
           return (
-            (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
+            ByteUtils.utf8ByteLength(name) +
+            1 +
             1 +
             4 +
             ByteUtils.utf8ByteLength(value.code.toString()) +
@@ -139,22 +145,13 @@ function calculateElementSize(
         const binary: Binary = value;
         // Check what kind of subtype we have
         if (binary.sub_type === Binary.SUBTYPE_BYTE_ARRAY) {
-          return (
-            (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
-            (binary.position + 1 + 4 + 1 + 4)
-          );
+          return ByteUtils.utf8ByteLength(name) + 1 + (binary.position + 1 + 4 + 1 + 4);
         } else {
-          return (
-            (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (binary.position + 1 + 4 + 1)
-          );
+          return ByteUtils.utf8ByteLength(name) + 1 + (binary.position + 1 + 4 + 1);
         }
       } else if (value._bsontype === 'Symbol') {
         return (
-          (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
-          ByteUtils.utf8ByteLength(value.value) +
-          4 +
-          1 +
-          1
+          ByteUtils.utf8ByteLength(name) + 1 + ByteUtils.utf8ByteLength(value.value) + 4 + 1 + 1
         );
       } else if (value._bsontype === 'DBRef') {
         // Set up correct object for serialization
@@ -172,10 +169,11 @@ function calculateElementSize(
         }
 
         objectStack.push(ordered_values);
-        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + 1;
+        return ByteUtils.utf8ByteLength(name) + 1 + 1;
       } else if (value instanceof RegExp || isRegExp(value)) {
         return (
-          (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
+          ByteUtils.utf8ByteLength(name) +
+          1 +
           1 +
           ByteUtils.utf8ByteLength(value.source) +
           1 +
@@ -186,7 +184,8 @@ function calculateElementSize(
         );
       } else if (value._bsontype === 'BSONRegExp') {
         return (
-          (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
+          ByteUtils.utf8ByteLength(name) +
+          1 +
           1 +
           ByteUtils.utf8ByteLength(value.pattern) +
           1 +
@@ -195,12 +194,13 @@ function calculateElementSize(
         );
       } else {
         objectStack.push(value);
-        return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + 1;
+        return ByteUtils.utf8ByteLength(name) + 1 + 1;
       }
     case 'function':
       if (serializeFunctions) {
         return (
-          (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) +
+          ByteUtils.utf8ByteLength(name) +
+          1 +
           1 +
           4 +
           ByteUtils.utf8ByteLength(value.toString()) +
@@ -209,12 +209,10 @@ function calculateElementSize(
       }
       return 0;
     case 'bigint':
-      return (name != null ? ByteUtils.utf8ByteLength(name) + 1 : 0) + (8 + 1);
+      return ByteUtils.utf8ByteLength(name) + 1 + (8 + 1);
     case 'symbol':
       return 0;
     default:
       throw new BSONError(`Unrecognized JS type: ${typeof value}`);
   }
-
-  return 0;
 }

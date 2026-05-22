@@ -71,11 +71,13 @@ describe('serialize()', () => {
         const docSize = 4 + 1 + 2 + inner.length + 1;
         const doc = Buffer.allocUnsafe(docSize);
         let offset = 0;
-        doc.writeInt32LE(docSize, 0); offset += 4;
+        doc.writeInt32LE(docSize, 0);
+        offset += 4;
         doc[offset++] = 0x03; // BSON_DATA_OBJECT
         doc[offset++] = 0x61; // 'a'
         doc[offset++] = 0x00;
-        inner.copy(doc, offset); offset += inner.length;
+        inner.copy(doc, offset);
+        offset += inner.length;
         doc[offset] = 0x00;
         inner = doc;
       }
