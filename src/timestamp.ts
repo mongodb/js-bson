@@ -20,12 +20,28 @@ export type TimestampOverrides =
  * the public type — preventing accidental behavioral bleed-through.
  */
 type TimestampKept =
-  | 'high' | 'low'
-  | 'equals' | 'eq' | 'notEquals' | 'neq' | 'ne'
-  | 'lessThan' | 'lt' | 'lessThanOrEqual' | 'lte' | 'le'
-  | 'greaterThan' | 'gt' | 'greaterThanOrEqual' | 'gte' | 'ge'
-  | 'compare' | 'comp'
-  | 'isZero' | 'eqz';
+  | 'high'
+  | 'low'
+  | 'toString'
+  | 'equals'
+  | 'eq'
+  | 'notEquals'
+  | 'neq'
+  | 'ne'
+  | 'lessThan'
+  | 'lt'
+  | 'lessThanOrEqual'
+  | 'lte'
+  | 'le'
+  | 'greaterThan'
+  | 'gt'
+  | 'greaterThanOrEqual'
+  | 'gte'
+  | 'ge'
+  | 'compare'
+  | 'comp'
+  | 'isZero'
+  | 'eqz';
 
 /** @public */
 export type LongWithoutOverrides = new (
@@ -199,7 +215,6 @@ export class Timestamp extends LongWithoutOverridesClass {
   // ********************
   // **** DEPRECATED ****
   // ********************
-  
   // Declare used to avoid runtime effects for field declaration.
   // See: https://www.typescriptlang.org/docs/handbook/2/classes.html#type-only-field-declarations
 
@@ -278,8 +293,6 @@ export class Timestamp extends LongWithoutOverridesClass {
   declare toBytesLE: Long['toBytesLE'];
   /** @deprecated Not applicable to Timestamp; use `.t` for seconds since the Unix epoch, or `.i` for the increment ordinal. */
   declare toBytesBE: Long['toBytesBE'];
-  /** @deprecated Not applicable to Timestamp; renders the underlying Long. Use `inspect()` for a debug representation, or `toJSON()` for the Extended JSON form. */
-  declare toString: Long['toString'];
 
   // Other
   /** @deprecated Incompatible with Timestamp: returns a signed integer, but Timestamp is always unsigned. Use `.t` for seconds since the Unix epoch. */
@@ -299,5 +312,4 @@ export class Timestamp extends LongWithoutOverridesClass {
   declare isEven: Long['isEven'];
   /** @deprecated Not applicable to Timestamp; tests parity of the increment only. */
   declare isOdd: Long['isOdd'];
-
 }
