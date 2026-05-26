@@ -4,7 +4,10 @@ import type { Int32 } from './int_32';
 import { Long } from './long';
 import { type InspectFn, defaultInspect } from './parser/utils';
 
-/** @public */
+/**
+ * @public
+ * @deprecated This type is no longer used internally and will be removed in a future version.
+ */
 export type TimestampOverrides =
   | '_bsontype'
   | 'toExtendedJSON'
