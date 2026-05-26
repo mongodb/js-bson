@@ -183,6 +183,7 @@ export class Timestamp extends LongWithoutOverridesClass {
 
   /**
    * Returns a Timestamp from the given string, optionally using the given radix.
+   * @deprecated Interprets `str` as a uint64, splitting it across (t, i); the result rarely matches user intent. Use `new Timestamp({ t, i })` or `Timestamp.fromBits(lowBits, highBits)` for explicit construction.
    *
    * @param str - the textual representation of the Timestamp.
    * @param optRadix - the radix in which the text is written.
