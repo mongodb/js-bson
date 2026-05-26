@@ -119,3 +119,93 @@ expectError(new ObjectId(42 as string | number));
 new Timestamp(new Timestamp(0n))
 
 expectType<(position: number, length: number) => Uint8Array>(Binary.prototype.read);
+
+// NODE-7069: TimestampKept members must be accessible and non-deprecated
+declare const timestamp: Timestamp;
+expectNotDeprecated(timestamp.high);
+expectNotDeprecated(timestamp.low);
+expectNotDeprecated(timestamp.toString);
+expectNotDeprecated(timestamp.equals);
+expectNotDeprecated(timestamp.eq);
+expectNotDeprecated(timestamp.notEquals);
+expectNotDeprecated(timestamp.neq);
+expectNotDeprecated(timestamp.ne);
+expectNotDeprecated(timestamp.lessThan);
+expectNotDeprecated(timestamp.lt);
+expectNotDeprecated(timestamp.lessThanOrEqual);
+expectNotDeprecated(timestamp.lte);
+expectNotDeprecated(timestamp.le);
+expectNotDeprecated(timestamp.greaterThan);
+expectNotDeprecated(timestamp.gt);
+expectNotDeprecated(timestamp.greaterThanOrEqual);
+expectNotDeprecated(timestamp.gte);
+expectNotDeprecated(timestamp.ge);
+expectNotDeprecated(timestamp.compare);
+expectNotDeprecated(timestamp.comp);
+expectNotDeprecated(timestamp.isZero);
+expectNotDeprecated(timestamp.eqz);
+
+// Timestamp's own instance members must not be deprecated
+expectNotDeprecated(timestamp.t);
+expectNotDeprecated(timestamp.i);
+expectNotDeprecated(timestamp.toJSON);
+
+// Non-deprecated static methods
+expectNotDeprecated(Timestamp.fromBits);
+expectNotDeprecated(Timestamp.fromString);
+
+// Deprecated static methods
+expectDeprecated(Timestamp.fromInt);
+expectDeprecated(Timestamp.fromNumber);
+
+// Deprecated instance members: Arithmetic
+expectDeprecated(timestamp.add);
+expectDeprecated(timestamp.subtract);
+expectDeprecated(timestamp.sub);
+expectDeprecated(timestamp.multiply);
+expectDeprecated(timestamp.mul);
+expectDeprecated(timestamp.divide);
+expectDeprecated(timestamp.div);
+expectDeprecated(timestamp.modulo);
+expectDeprecated(timestamp.mod);
+expectDeprecated(timestamp.rem);
+expectDeprecated(timestamp.negate);
+expectDeprecated(timestamp.neg);
+
+// Deprecated instance members: Bitwise
+expectDeprecated(timestamp.and);
+expectDeprecated(timestamp.or);
+expectDeprecated(timestamp.xor);
+expectDeprecated(timestamp.not);
+expectDeprecated(timestamp.shiftLeft);
+expectDeprecated(timestamp.shl);
+expectDeprecated(timestamp.shiftRight);
+expectDeprecated(timestamp.shr);
+expectDeprecated(timestamp.shiftRightUnsigned);
+expectDeprecated(timestamp.shr_u);
+expectDeprecated(timestamp.shru);
+
+// Deprecated instance members: Signing
+expectDeprecated(timestamp.toSigned);
+expectDeprecated(timestamp.toUnsigned);
+expectDeprecated(timestamp.isNegative);
+expectDeprecated(timestamp.isPositive);
+expectDeprecated(timestamp.unsigned);
+
+// Deprecated instance members: Conversion
+expectDeprecated(timestamp.toInt);
+expectDeprecated(timestamp.toNumber);
+expectDeprecated(timestamp.toBigInt);
+expectDeprecated(timestamp.toBytes);
+expectDeprecated(timestamp.toBytesLE);
+expectDeprecated(timestamp.toBytesBE);
+
+// Deprecated instance members: Other
+expectDeprecated(timestamp.getHighBits);
+expectDeprecated(timestamp.getHighBitsUnsigned);
+expectDeprecated(timestamp.getLowBits);
+expectDeprecated(timestamp.getLowBitsUnsigned);
+expectDeprecated(timestamp.__isLong__);
+expectDeprecated(timestamp.getNumBitsAbs);
+expectDeprecated(timestamp.isEven);
+expectDeprecated(timestamp.isOdd);
