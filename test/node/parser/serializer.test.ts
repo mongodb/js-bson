@@ -92,6 +92,20 @@ describe('serialize()', () => {
     });
   });
 
+  describe('DBRef serialization consistency with calculateObjectSize', () => {
+    for (const [label, db] of [
+      ['empty string db', ''],
+      ['defined db', 'mydb'],
+      ['undefined db', undefined]
+    ] as const) {
+      it(`calculateObjectSize matches serialize byte count for DBRef with ${label}`, () => {
+        const dbref = new BSON.DBRef('users', new BSON.ObjectId(), db);
+        const doc = { ref: dbref };
+        expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+      });
+    }
+  });
+
   describe('validates input types', () => {
     it('does not permit arrays as the root input', () => {
       expect(() => BSON.serialize([])).to.throw(/does not support an array/);

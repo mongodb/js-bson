@@ -647,9 +647,8 @@ export function serializeInto(
       } else if (value._bsontype === 'DBRef') {
         const dbref = value as DBRef;
         const orderedValues: Document = Object.assign(
-          { $ref: dbref.collection },
-          dbref.oid ? { $id: dbref.oid } : null,
-          dbref.db ? { $db: dbref.db } : null,
+          { $ref: dbref.collection, $id: dbref.oid },
+          dbref.db != null ? { $db: dbref.db } : null,
           dbref.fields
         );
         buffer[index++] = constants.BSON_DATA_OBJECT;

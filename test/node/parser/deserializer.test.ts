@@ -110,6 +110,18 @@ describe('deserializer()', () => {
     });
   });
 
+  describe('corrupted BSON error messages', () => {
+    it('throws "corrupted array bson" for a nested array with a wrong size field', () => {
+      // Serialize a valid { a: [1] } document, then corrupt the nested array's size field
+      // so the terminator is reached before the declared end of the array.
+      const valid = Buffer.from(BSON.serialize({ a: [new BSON.Int32(1)] }));
+      // The array size field is at byte 7: [outer size(4)] [type(1)] [key 'a\0'(2)] [array size(4)...]
+      const arraySizeOffset = 7;
+      valid.writeInt32LE(valid.readInt32LE(arraySizeOffset) + 1, arraySizeOffset);
+      expect(() => BSON.deserialize(valid)).to.throw(BSON.BSONError, 'corrupted array bson');
+    });
+  });
+
   describe('utf8 validation', () => {
     for (const test of utf8WebPlatformSpecTests) {
       const inputStringSize = int32LEToHex(test.input.length + 1); // int32 size of string

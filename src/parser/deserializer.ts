@@ -331,6 +331,9 @@ function deserializeObject(
           continue;
         } else {
           // Current index does not match the last index of the frame, the document is malformed
+          if (currentFrame.elementType === constants.BSON_DATA_ARRAY) {
+            throw new BSONError('corrupted array bson');
+          }
           throw new BSONError('Bad BSON Document: object not properly terminated');
         }
       } else {
