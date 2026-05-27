@@ -16,6 +16,8 @@ export type TimestampOverrides =
   | typeof bsonType;
 
 /**
+ * @internal
+ * 
  * Inherited `Long` members surfaced on `Timestamp`.
  * When `Long` gains a new member: add it here if it should pass through, or
  * add a `@deprecated declare` line on the `Timestamp` class if it should be
