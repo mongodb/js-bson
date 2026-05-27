@@ -279,11 +279,11 @@ export class Timestamp extends LongWithoutOverridesClass {
   declare toSigned: Long['toSigned'];
   /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned (this is a no-op). */
   declare toUnsigned: Long['toUnsigned'];
-  /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned (always returns false). */
+  /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned (is always false). */
   declare isNegative: Long['isNegative'];
-  /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned (returns true except for the zero Timestamp). */
+  /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned (is always true except for the zero Timestamp). */
   declare isPositive: Long['isPositive'];
-  /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned (always returns true). */
+  /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned (is always true). */
   declare unsigned: Long['unsigned'];
 
   // Conversion
