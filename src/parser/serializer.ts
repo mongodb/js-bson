@@ -433,7 +433,7 @@ function* toKvPairs(object: Document): Iterator<[string, unknown]> {
       yield [`${i}`, object[i]];
     }
   } else if (object instanceof Map || isMap(object)) {
-    yield* (object as Map<unknown, unknown>) as Iterable<[string, unknown]>;
+    yield* object as Map<unknown, unknown> as Iterable<[string, unknown]>;
   } else {
     let target: Document = object;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -179,14 +179,18 @@ describe('deserializer()', () => {
       const docSize = 4 + 1 + 2 + cwsTotalSize + 1;
       const doc = Buffer.allocUnsafe(docSize);
       let offset = 0;
-      doc.writeInt32LE(docSize, offset); offset += 4;
+      doc.writeInt32LE(docSize, offset);
+      offset += 4;
       doc[offset++] = 0x0f; // BSON_DATA_CODE_W_SCOPE
       doc[offset++] = 0x61; // 'a'
       doc[offset++] = 0x00;
-      doc.writeInt32LE(cwsTotalSize, offset); offset += 4;
-      doc.writeInt32LE(stringSize, offset); offset += 4;
+      doc.writeInt32LE(cwsTotalSize, offset);
+      offset += 4;
+      doc.writeInt32LE(stringSize, offset);
+      offset += 4;
       doc[offset++] = 0x00; // empty function string null terminator
-      scope.copy(doc, offset); offset += scope.length;
+      scope.copy(doc, offset);
+      offset += scope.length;
       doc[offset] = 0x00; // document null terminator
 
       expect(() => BSON.deserialize(doc)).to.not.throw();
