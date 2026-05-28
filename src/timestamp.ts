@@ -25,6 +25,7 @@ export type TimestampOverrides =
  * the public type — preventing accidental behavioral bleed-through.
  */
 type TimestampKept =
+  | 'toBigInt'
   | 'toString'
   | 'equals'
   | 'eq'
@@ -288,8 +289,6 @@ export class Timestamp extends LongWithoutOverridesClass {
   declare toInt: Long['toInt'];
   /** @deprecated Not applicable to Timestamp; use `.t` for seconds since the Unix epoch, or `.i` for the increment ordinal. */
   declare toNumber: Long['toNumber'];
-  /** @deprecated Not applicable to Timestamp; use `.t` for seconds since the Unix epoch, or `.i` for the increment ordinal. */
-  declare toBigInt: Long['toBigInt'];
   /** @deprecated Not applicable to Timestamp; use `.t` for seconds since the Unix epoch, or `.i` for the increment ordinal. */
   declare toBytes: Long['toBytes'];
   /** @deprecated Not applicable to Timestamp; use `.t` for seconds since the Unix epoch, or `.i` for the increment ordinal. */
