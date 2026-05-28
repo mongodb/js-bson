@@ -25,8 +25,6 @@ export type TimestampOverrides =
  * the public type — preventing accidental behavioral bleed-through.
  */
 type TimestampKept =
-  | 'high'
-  | 'low'
   | 'toString'
   | 'equals'
   | 'eq'
@@ -309,6 +307,11 @@ export class Timestamp extends LongWithoutOverridesClass {
   declare getLowBits: Long['getLowBits'];
   /** @deprecated Not applicable to Timestamp; use `.i` for the increment ordinal. */
   declare getLowBitsUnsigned: Long['getLowBitsUnsigned'];
+
+  /** @deprecated Not applicable to Timestamp; use `.i` instead. */
+  declare low: Long['low'];
+  /** @deprecated Not applicable to Timestamp; use `.t` instead. */
+  declare high: Long['high'];
 
   /** @deprecated Not applicable to Timestamp. Use `_bsontype === 'Timestamp'` to identify a Timestamp. */
   declare __isLong__: Long['__isLong__'];
