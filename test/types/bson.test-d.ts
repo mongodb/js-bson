@@ -122,8 +122,6 @@ expectType<(position: number, length: number) => Uint8Array>(Binary.prototype.re
 
 // NODE-7069: TimestampKept members must be accessible and non-deprecated
 declare const timestamp: Timestamp;
-expectNotDeprecated(timestamp.high);
-expectNotDeprecated(timestamp.low);
 expectNotDeprecated(timestamp.toString);
 expectNotDeprecated(timestamp.equals);
 expectNotDeprecated(timestamp.eq);
@@ -140,10 +138,7 @@ expectNotDeprecated(timestamp.gt);
 expectNotDeprecated(timestamp.greaterThanOrEqual);
 expectNotDeprecated(timestamp.gte);
 expectNotDeprecated(timestamp.ge);
-expectNotDeprecated(timestamp.compare);
-expectNotDeprecated(timestamp.comp);
-expectNotDeprecated(timestamp.isZero);
-expectNotDeprecated(timestamp.eqz);
+expectNotDeprecated(timestamp.toBigInt);
 
 // Timestamp's own instance members must not be deprecated
 expectNotDeprecated(timestamp.t);
@@ -152,7 +147,7 @@ expectNotDeprecated(timestamp.toJSON);
 
 // Non-deprecated static methods
 expectNotDeprecated(Timestamp.fromBits);
-expectDeprecated(Timestamp.fromString);
+expectNotDeprecated(Timestamp.fromString);
 
 // Deprecated static methods
 expectDeprecated(Timestamp.fromInt);
@@ -171,6 +166,12 @@ expectDeprecated(timestamp.mod);
 expectDeprecated(timestamp.rem);
 expectDeprecated(timestamp.negate);
 expectDeprecated(timestamp.neg);
+expectDeprecated(timestamp.compare);
+expectDeprecated(timestamp.comp);
+expectDeprecated(timestamp.isZero);
+expectDeprecated(timestamp.eqz);
+expectDeprecated(timestamp.high);
+expectDeprecated(timestamp.low);
 
 // Deprecated instance members: Bitwise
 expectDeprecated(timestamp.and);
@@ -195,7 +196,6 @@ expectDeprecated(timestamp.unsigned);
 // Deprecated instance members: Conversion
 expectDeprecated(timestamp.toInt);
 expectDeprecated(timestamp.toNumber);
-expectDeprecated(timestamp.toBigInt);
 expectDeprecated(timestamp.toBytes);
 expectDeprecated(timestamp.toBytesLE);
 expectDeprecated(timestamp.toBytesBE);
