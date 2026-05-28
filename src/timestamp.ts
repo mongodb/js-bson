@@ -312,7 +312,7 @@ export class Timestamp extends LongWithoutOverridesClass {
   /** @deprecated Not applicable to Timestamp; use `.t` instead. */
   declare high: Long['high'];
 
-  /** @deprecated Not applicable to Timestamp. Use `_bsontype === 'Timestamp'` to identify a Timestamp. */
+  /** @deprecated Not applicable to Timestamp. Use `bsontype === 'Timestamp'` to identify a Timestamp. */
   declare __isLong__: Long['__isLong__'];
   /** @deprecated Not applicable to Timestamp. */
   declare getNumBitsAbs: Long['getNumBitsAbs'];
