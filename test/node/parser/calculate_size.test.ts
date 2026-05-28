@@ -1,14 +1,7 @@
 import * as BSON from '../../register-bson';
 import { expect } from 'chai';
 import { BSONVersionError } from '../../register-bson';
-
-function buildDeeplyNestedObject(depth: number): Record<string, unknown> {
-  let inner: Record<string, unknown> = {};
-  for (let i = 0; i < depth; i++) {
-    inner = { a: inner };
-  }
-  return inner;
-}
+import { buildDeeplyNestedObject } from '../tools/utils';
 
 describe('calculateSize()', () => {
   it('should only enumerate own property keys from input objects', () => {

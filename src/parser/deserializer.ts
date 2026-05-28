@@ -2,7 +2,7 @@ import { Binary, UUID } from '../binary';
 import type { Document } from '../bson';
 import { Code } from '../code';
 import * as constants from '../constants';
-import { DBRef, type DBRefLike, isDBRefLike } from '../db_ref';
+import { DBRef, isDBRefLike } from '../db_ref';
 import { Decimal128 } from '../decimal128';
 import { Double } from '../double';
 import { BSONError } from '../error';
@@ -164,8 +164,8 @@ function deserializeObject(
 ) {
   // Settings configured from options parameter
 
-  // Strip the prototype chain so inherited properties don't affect option reads.
-  options = Object.assign({}, options);
+  // Strips prototype chain so inherited properties don't affect option reads.
+  options = { ...options };
 
   // Used to track whether we are parsing an array or object, affects how keys are interpreted and when we hit the end of the document
   const originalIsArray = isArray;
@@ -279,12 +279,8 @@ function deserializeObject(
 
   const toPotentialDbRef = (doc: Document): DBRef | Document => {
     if (isDBRefLike(doc)) {
-      const copy = Object.assign({}, doc) as Partial<DBRefLike>;
-      delete copy.$ref;
-      delete copy.$id;
-      delete copy.$db;
-      const dbref = new DBRef(doc.$ref, doc.$id, doc.$db, copy);
-      return dbref;
+      const { $ref, $id, $db, ...fields } = doc;
+      return new DBRef($ref, $id, $db, fields);
     }
     return doc;
   };

@@ -415,11 +415,9 @@ interface SerializationFrame {
   // Whether the object we are serializing is an array.
   // This forces the keys to be serialized as ASCII strings of their index in the array.
   isArray: boolean;
-  // The key-value pairs of the object we are serializing, snapshotted at frame creation.
-  kvPairs: [string, unknown][];
-  // The number of serialized kvPairs.
-  // Used to keep track of where we are in the serialization process
-  serializedPairCount: number;
+  // Lazy iterator over the key-value pairs of the object being serialized.
+  // Avoids materializing intermediate arrays for Maps and Arrays.
+  pairs: Iterator<[string, unknown]>;
   // The index in the buffer where the size of the current serialized object is stored.
   // We will only know the size of the object once we have finished serializing it, so we keep track of where to write the size once we know it.
   objectSizeIndex: number;
@@ -429,15 +427,13 @@ interface SerializationFrame {
   codeSizeIndex: number | null;
 }
 
-function toKvPairs(object: Document): [string, unknown][] {
+function* toKvPairs(object: Document): Iterator<[string, unknown]> {
   if (Array.isArray(object)) {
-    const kvPairs = new Array<[string, unknown]>(object.length);
     for (let i = 0; i < object.length; i++) {
-      kvPairs[i] = [`${i}`, object[i]];
+      yield [`${i}`, object[i]];
     }
-    return kvPairs;
   } else if (object instanceof Map || isMap(object)) {
-    return Array.from((object as Map<unknown, unknown>).entries()) as [string, unknown][];
+    yield* (object as Map<unknown, unknown>) as Iterable<[string, unknown]>;
   } else {
     let target: Document = object;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -449,11 +445,9 @@ function toKvPairs(object: Document): [string, unknown][] {
       }
     }
     const keys = Object.keys(target);
-    const kvPairs = new Array<[string, unknown]>(keys.length);
     for (let i = 0; i < keys.length; i++) {
-      kvPairs[i] = [keys[i], target[keys[i]]];
+      yield [keys[i], target[keys[i]]];
     }
-    return kvPairs;
   }
 }
 
@@ -503,8 +497,7 @@ export function serializeInto(
 
   const stack: SerializationFrame[] = [
     {
-      kvPairs: toKvPairs(object),
-      serializedPairCount: 0,
+      pairs: toKvPairs(object),
       objectSizeIndex: startingIndex,
       codeSizeIndex: null,
       sourceObject: object,
@@ -515,8 +508,9 @@ export function serializeInto(
 
   while (stack.length > 0) {
     const frame = stack[stack.length - 1];
+    const next = frame.pairs.next();
 
-    if (frame.serializedPairCount >= frame.kvPairs.length) {
+    if (next.done) {
       buffer[index++] = 0x00;
       NumberUtils.setInt32LE(buffer, frame.objectSizeIndex, index - frame.objectSizeIndex);
       if (frame.codeSizeIndex !== null) {
@@ -527,7 +521,7 @@ export function serializeInto(
       continue;
     }
 
-    const pair = frame.kvPairs[frame.serializedPairCount++];
+    const pair = next.value;
     const key = pair[0];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let value: any = pair[1];
@@ -583,8 +577,7 @@ export function serializeInto(
         const nestedStartIndex = index;
         path.add(value);
         stack.push({
-          kvPairs: toKvPairs(value),
-          serializedPairCount: 0,
+          pairs: toKvPairs(value),
           objectSizeIndex: nestedStartIndex,
           codeSizeIndex: null,
           sourceObject: value,
@@ -622,8 +615,7 @@ export function serializeInto(
           }
           path.add(scope);
           stack.push({
-            kvPairs: toKvPairs(scope),
-            serializedPairCount: 0,
+            pairs: toKvPairs(scope),
             objectSizeIndex: index,
             codeSizeIndex: codeTotalSizeIndex,
             sourceObject: scope,
@@ -656,8 +648,7 @@ export function serializeInto(
         buffer[index++] = 0x00;
         path.add(orderedValues);
         stack.push({
-          kvPairs: toKvPairs(orderedValues),
-          serializedPairCount: 0,
+          pairs: toKvPairs(orderedValues),
           objectSizeIndex: index,
           codeSizeIndex: null,
           sourceObject: orderedValues,

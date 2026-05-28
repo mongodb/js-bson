@@ -26,6 +26,25 @@ describe('deserializer()', () => {
       expect(result).to.have.property('db', 'db');
       expect((result as BSON.DBRef).oid.toHexString()).to.equal(oid.toHexString());
     });
+
+    it('preserves extra fields in DBRef.fields and excludes $ref/$id/$db from them', () => {
+      const oid = new BSON.ObjectId();
+      const bytes = BSON.serialize({ $ref: 'ns', $id: oid, $db: 'db', extra: 'value', num: 42 });
+      const result = BSON.deserialize(bytes) as BSON.DBRef;
+      expect(result).to.have.property('_bsontype', 'DBRef');
+      expect(result.fields).to.deep.equal({ extra: 'value', num: 42 });
+      expect(result.fields).to.not.have.property('$ref');
+      expect(result.fields).to.not.have.property('$id');
+      expect(result.fields).to.not.have.property('$db');
+    });
+
+    it('produces an empty fields object when a DBRef-shaped document has no extra fields', () => {
+      const oid = new BSON.ObjectId();
+      const bytes = BSON.serialize({ $ref: 'ns', $id: oid, $db: 'db' });
+      const result = BSON.deserialize(bytes) as BSON.DBRef;
+      expect(result).to.have.property('_bsontype', 'DBRef');
+      expect(result.fields).to.deep.equal({});
+    });
   });
 
   describe('when the fieldsAsRaw options is present and has a value that corresponds to a key in the object', () => {
@@ -107,6 +126,81 @@ describe('deserializer()', () => {
       }
 
       expect(() => BSON.deserialize(inner)).to.not.throw();
+    });
+
+    it('can deserialize a document with 20,000 levels of nested arrays', () => {
+      // Same technique as the object nesting test but with 0x04 (array) type and '0' index keys.
+      let inner = Buffer.from([0x05, 0x00, 0x00, 0x00, 0x00]); // innermost: empty array []
+
+      for (let i = 0; i < 20_000; i++) {
+        // array doc layout: [int32 size][0x04 type]['0\0' key][nested array][0x00 terminator]
+        const docSize = 4 + 1 + 2 + inner.length + 1;
+        const doc = Buffer.allocUnsafe(docSize);
+        let offset = 0;
+        doc.writeInt32LE(docSize, 0);
+        offset += 4;
+        doc[offset++] = 0x04; // BSON_DATA_ARRAY
+        doc[offset++] = 0x30; // '0'
+        doc[offset++] = 0x00; // key null terminator
+        inner.copy(doc, offset);
+        offset += inner.length;
+        doc[offset] = 0x00; // document null terminator
+        inner = doc;
+      }
+
+      expect(() => BSON.deserialize(inner)).to.not.throw();
+    });
+
+    it('can deserialize a code-with-scope whose scope is 20,000 levels deep', () => {
+      // Build a deeply nested scope document (same technique as the object nesting test).
+      let scope = Buffer.from([0x05, 0x00, 0x00, 0x00, 0x00]); // innermost: empty doc {}
+      for (let i = 0; i < 20_000; i++) {
+        const docSize = 4 + 1 + 2 + scope.length + 1;
+        const doc = Buffer.allocUnsafe(docSize);
+        let offset = 0;
+        doc.writeInt32LE(docSize, 0);
+        offset += 4;
+        doc[offset++] = 0x03; // BSON_DATA_OBJECT
+        doc[offset++] = 0x61; // 'a'
+        doc[offset++] = 0x00;
+        scope.copy(doc, offset);
+        offset += scope.length;
+        doc[offset] = 0x00;
+        scope = doc;
+      }
+
+      // Wrap the scope in a code-with-scope element at the root.
+      // code-with-scope value layout (BSON spec):
+      //   [int32 total_size][int32 string_size][string_bytes][0x00][scope_document]
+      //   total_size = 4 (total_size field) + 4 (string_size field) + string_size + scope.length
+      const stringSize = 1; // empty string: just the null terminator
+      const cwsTotalSize = 4 + 4 + stringSize + scope.length;
+      // outer doc: [int32 size][0x0F]['a\0'][cws bytes][0x00 terminator]
+      const docSize = 4 + 1 + 2 + cwsTotalSize + 1;
+      const doc = Buffer.allocUnsafe(docSize);
+      let offset = 0;
+      doc.writeInt32LE(docSize, offset); offset += 4;
+      doc[offset++] = 0x0f; // BSON_DATA_CODE_W_SCOPE
+      doc[offset++] = 0x61; // 'a'
+      doc[offset++] = 0x00;
+      doc.writeInt32LE(cwsTotalSize, offset); offset += 4;
+      doc.writeInt32LE(stringSize, offset); offset += 4;
+      doc[offset++] = 0x00; // empty function string null terminator
+      scope.copy(doc, offset); offset += scope.length;
+      doc[offset] = 0x00; // document null terminator
+
+      expect(() => BSON.deserialize(doc)).to.not.throw();
+    });
+
+    it('round-trips a deeply nested document without data loss', () => {
+      // Use moderate depth so BSON.serialize can handle it, while verifying the iterative
+      // deserializer reconstructs the structure correctly (not just "doesn't throw").
+      let obj: Record<string, unknown> = { leaf: 'value' };
+      for (let i = 0; i < 100; i++) {
+        obj = { a: obj };
+      }
+      const result = BSON.deserialize(BSON.serialize(obj));
+      expect(result).to.deep.equal(obj);
     });
   });
 

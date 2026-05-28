@@ -218,3 +218,19 @@ module.exports.sorted = (iterable, how) => {
   items.sort(how);
   return items;
 };
+
+module.exports.buildDeeplyNestedObject = function (depth) {
+  let inner = {};
+  for (let i = 0; i < depth; i++) {
+    inner = { a: inner };
+  }
+  return inner;
+};
+
+module.exports.buildDeeplyNestedArray = function (depth) {
+  let inner = [];
+  for (let i = 0; i < depth; i++) {
+    inner = [inner];
+  }
+  return inner;
+};

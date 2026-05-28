@@ -1,23 +1,11 @@
 import * as BSON from '../../register-bson';
-import { bufferFromHexArray } from '../tools/utils';
+import {
+  bufferFromHexArray,
+  buildDeeplyNestedObject,
+  buildDeeplyNestedArray
+} from '../tools/utils';
 import { expect } from 'chai';
 import { BSONVersionError } from '../../register-bson';
-
-function buildDeeplyNestedObject(depth: number): Record<string, unknown> {
-  let inner: Record<string, unknown> = {};
-  for (let i = 0; i < depth; i++) {
-    inner = { a: inner };
-  }
-  return inner;
-}
-
-function buildDeeplyNestedArray(depth: number): unknown[] {
-  let inner: unknown[] = [];
-  for (let i = 0; i < depth; i++) {
-    inner = [inner];
-  }
-  return inner;
-}
 
 describe('serialize()', () => {
   it('should only enumerate own property keys from input objects', () => {
