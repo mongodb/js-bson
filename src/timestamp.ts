@@ -41,11 +41,7 @@ type TimestampKept =
   | 'gt'
   | 'greaterThanOrEqual'
   | 'gte'
-  | 'ge'
-  | 'compare'
-  | 'comp'
-  | 'isZero'
-  | 'eqz';
+  | 'ge';
 
 /** @public */
 export type LongWithoutOverrides = new (
@@ -310,6 +306,15 @@ export class Timestamp extends LongWithoutOverridesClass {
   declare low: Long['low'];
   /** @deprecated Not applicable to Timestamp; use `.t` instead. */
   declare high: Long['high'];
+
+  /** @deprecated Use `.equals()`, `.lessThan()`, or `.greaterThan()` for comparisons. */
+  declare compare: Long['compare'];
+  /** @deprecated Use `.equals()`, `.lessThan()`, or `.greaterThan()` for comparisons. */
+  declare comp: Long['comp'];
+  /** @deprecated Compare `.t` and `.i` against `0` explicitly. */
+  declare isZero: Long['isZero'];
+  /** @deprecated Compare `.t` and `.i` against `0` explicitly. */
+  declare eqz: Long['eqz'];
 
   /** @deprecated Not applicable to Timestamp. Use `bsontype === 'Timestamp'` to identify a Timestamp. */
   declare __isLong__: Long['__isLong__'];
