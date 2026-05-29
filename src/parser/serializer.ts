@@ -429,9 +429,7 @@ interface SerializationFrame {
 
 function* toKvPairs(object: Document): Iterator<[string, unknown]> {
   if (Array.isArray(object)) {
-    for (let i = 0; i < object.length; i++) {
-      yield [`${i}`, object[i]];
-    }
+    yield* Object.entries(object);
   } else if (object instanceof Map || isMap(object)) {
     yield* object as Map<unknown, unknown> as Iterable<[string, unknown]>;
   } else {
@@ -444,10 +442,7 @@ function* toKvPairs(object: Document): Iterator<[string, unknown]> {
         throw new BSONError('toBSON function did not return an object');
       }
     }
-    const keys = Object.keys(target);
-    for (let i = 0; i < keys.length; i++) {
-      yield [keys[i], target[keys[i]]];
-    }
+    yield* Object.entries(target);
   }
 }
 
