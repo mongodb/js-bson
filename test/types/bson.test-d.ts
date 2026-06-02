@@ -150,7 +150,8 @@ expectNotDeprecated(timestamp.toJSON);
 expectNotDeprecated(Timestamp.fromBits);
 expectNotDeprecated(Timestamp.fromString);
 
-// Deprecated static methods
+// Deprecated static members
+expectDeprecated(Timestamp.MAX_VALUE);
 expectDeprecated(Timestamp.fromInt);
 expectDeprecated(Timestamp.fromNumber);
 
