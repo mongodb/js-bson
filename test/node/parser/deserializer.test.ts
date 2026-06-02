@@ -61,6 +61,28 @@ describe('deserializer()', () => {
     });
   });
 
+  describe('Code with Scope', () => {
+    it('round-trips a simple scope', () => {
+      const original = new BSON.Code('function() {}', { x: 1, y: 'hello' });
+      const { code } = BSON.deserialize(BSON.serialize({ code: original }));
+      expect(code).to.have.property('_bsontype', 'Code');
+      expect(code.scope).to.deep.equal({ x: 1, y: 'hello' });
+    });
+
+    it('keeps a DBRef-shaped scope as a plain object', () => {
+      const oid = new BSON.ObjectId();
+      const scope = { $ref: 'col', $id: oid, $db: 'db' };
+      const original = new BSON.Code('function () {}', scope);
+      const { code } = BSON.deserialize(BSON.serialize({ code: original }));
+      expect(code).to.have.property('_bsontype', 'Code');
+      expect(code.scope).to.not.have.property('_bsontype');
+      expect(code.scope).to.have.property('$ref', 'col');
+      expect(code.scope).to.have.property('$db', 'db');
+      expect(code.scope.$id).to.be.instanceOf(BSON.ObjectId);
+      expect(code.scope.$id.toHexString()).to.equal(oid.toHexString());
+    });
+  });
+
   describe('when passing an evalFunctions option', () => {
     const codeTypeBSON = bufferFromHexArray([
       '0D', // javascript type
@@ -217,6 +239,52 @@ describe('deserializer()', () => {
       const arraySizeOffset = 7;
       valid.writeInt32LE(valid.readInt32LE(arraySizeOffset) + 1, arraySizeOffset);
       expect(() => BSON.deserialize(valid)).to.throw(BSON.BSONError, 'corrupted array bson');
+    });
+
+    it('throws "corrupted array bson" for an array nested inside a nested object', () => {
+      // Regression: before the fix, deeply nested arrays threw 'Bad BSON Document: object not properly terminated'
+      // because the frame-level mismatch check did not distinguish array frames from object frames.
+      // { a: { b: [1] } } — the array is two levels deep, so two frames are on the stack when the
+      // mismatch is detected.
+      // Layout: [root size(4)][0x03 type(1)]['a\0'(2)][obj size(4)][0x04 type(1)]['b\0'(2)][arr size(4)...]
+      //          ^0                                                                           ^14
+      const valid = Buffer.from(BSON.serialize({ a: { b: [new BSON.Int32(1)] } }));
+      const innerArraySizeOffset = 14;
+      valid.writeInt32LE(valid.readInt32LE(innerArraySizeOffset) + 1, innerArraySizeOffset);
+      expect(() => BSON.deserialize(valid)).to.throw(BSON.BSONError, 'corrupted array bson');
+    });
+
+    it('throws "corrupted array bson" for an array nested inside another array', () => {
+      // Regression: same fix as above — when the inner array of { a: [[1]] } has a wrong size,
+      // the parser must still throw 'corrupted array bson', not the generic object-terminator error.
+      // Layout: [root size(4)][0x04 type(1)]['a\0'(2)][outer arr size(4)][0x04 type(1)]['0\0'(2)][inner arr size(4)...]
+      //          ^0                                                                                 ^14
+      const valid = Buffer.from(BSON.serialize({ a: [[new BSON.Int32(1)]] }));
+      const innerArraySizeOffset = 14;
+      valid.writeInt32LE(valid.readInt32LE(innerArraySizeOffset) + 1, innerArraySizeOffset);
+      expect(() => BSON.deserialize(valid)).to.throw(BSON.BSONError, 'corrupted array bson');
+    });
+
+    it('throws "bad embedded array length in bson" for a nested array with size zero', () => {
+      const valid = Buffer.from(BSON.serialize({ a: [new BSON.Int32(1)] }));
+      // byte 7: [outer size(4)] [type(1)] [key 'a\0'(2)] → array size field
+      const arraySizeOffset = 7;
+      valid.writeInt32LE(0, arraySizeOffset);
+      expect(() => BSON.deserialize(valid)).to.throw(BSON.BSONError, 'bad embedded array length in bson');
+    });
+
+    it('throws "bad embedded array length in bson" for a nested array with a negative size', () => {
+      const valid = Buffer.from(BSON.serialize({ a: [new BSON.Int32(1)] }));
+      const arraySizeOffset = 7;
+      valid.writeInt32LE(-1, arraySizeOffset);
+      expect(() => BSON.deserialize(valid)).to.throw(BSON.BSONError, 'bad embedded array length in bson');
+    });
+
+    it('throws "bad embedded array length in bson" for a nested array whose size exceeds the buffer', () => {
+      const valid = Buffer.from(BSON.serialize({ a: [new BSON.Int32(1)] }));
+      const arraySizeOffset = 7;
+      valid.writeInt32LE(valid.length + 1, arraySizeOffset);
+      expect(() => BSON.deserialize(valid)).to.throw(BSON.BSONError, 'bad embedded array length in bson');
     });
   });
 

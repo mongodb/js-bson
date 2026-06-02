@@ -456,6 +456,9 @@ function deserializeObject(
     } else if (elementType === constants.BSON_DATA_ARRAY) {
       const objectSize = NumberUtils.getInt32LE(buffer, index);
 
+      if (objectSize <= 0 || objectSize > buffer.length - index)
+        throw new BSONError('bad embedded array length in bson');
+
       // Stop index
       const stopIndex = index + objectSize;
 
