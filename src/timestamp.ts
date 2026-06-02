@@ -77,6 +77,9 @@ export class Timestamp extends LongWithoutOverridesClass {
     return 'Timestamp';
   }
 
+  /**
+   * @deprecated Use `Long.MAX_UNSIGNED_VALUE` instead.
+   */
   static readonly MAX_VALUE = Long.MAX_UNSIGNED_VALUE;
 
   /**
