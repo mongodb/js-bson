@@ -27,6 +27,7 @@ export type TimestampOverrides =
 type TimestampKept =
   | 'toBigInt'
   | 'toString'
+  | 'compare'
   | 'equals'
   | 'eq'
   | 'notEquals'
@@ -310,8 +311,6 @@ export class Timestamp extends LongWithoutOverridesClass {
   /** @deprecated Not applicable to Timestamp; use `.t` instead. */
   declare high: Long['high'];
 
-  /** @deprecated Use `.equals()`, `.lessThan()`, or `.greaterThan()` for comparisons. */
-  declare compare: Long['compare'];
   /** @deprecated Use `.equals()`, `.lessThan()`, or `.greaterThan()` for comparisons. */
   declare comp: Long['comp'];
   /** @deprecated Compare `.t` and `.i` against `0` explicitly. */

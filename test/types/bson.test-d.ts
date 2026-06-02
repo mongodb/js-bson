@@ -123,6 +123,7 @@ expectType<(position: number, length: number) => Uint8Array>(Binary.prototype.re
 // NODE-7069: TimestampKept members must be accessible and non-deprecated
 declare const timestamp: Timestamp;
 expectNotDeprecated(timestamp.toString);
+expectNotDeprecated(timestamp.compare);
 expectNotDeprecated(timestamp.equals);
 expectNotDeprecated(timestamp.eq);
 expectNotDeprecated(timestamp.notEquals);
@@ -166,7 +167,6 @@ expectDeprecated(timestamp.mod);
 expectDeprecated(timestamp.rem);
 expectDeprecated(timestamp.negate);
 expectDeprecated(timestamp.neg);
-expectDeprecated(timestamp.compare);
 expectDeprecated(timestamp.comp);
 expectDeprecated(timestamp.isZero);
 expectDeprecated(timestamp.eqz);
