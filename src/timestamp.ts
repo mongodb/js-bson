@@ -279,7 +279,7 @@ export class Timestamp extends LongWithoutOverridesClass {
   declare toUnsigned: Long['toUnsigned'];
   /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned (is always false). */
   declare isNegative: Long['isNegative'];
-  /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned (is always true except for the zero Timestamp). */
+  /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned (is always true). */
   declare isPositive: Long['isPositive'];
   /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned (is always true). */
   declare unsigned: Long['unsigned'];
@@ -311,14 +311,14 @@ export class Timestamp extends LongWithoutOverridesClass {
   /** @deprecated Not applicable to Timestamp; use `.t` instead. */
   declare high: Long['high'];
 
-  /** @deprecated Use `.equals()`, `.lessThan()`, or `.greaterThan()` for comparisons. */
+  /** @deprecated Use .compare() for general comparison, or .equals(), .lessThan(), .greaterThan() for specific cases. */
   declare comp: Long['comp'];
   /** @deprecated Compare `.t` and `.i` against `0` explicitly. */
   declare isZero: Long['isZero'];
   /** @deprecated Compare `.t` and `.i` against `0` explicitly. */
   declare eqz: Long['eqz'];
 
-  /** @deprecated Not applicable to Timestamp. Use `bsontype === 'Timestamp'` to identify a Timestamp. */
+  /** @deprecated Not applicable to Timestamp. Use the bsonType symbol or _bsontype === 'Timestamp' to identify a Timestamp. */
   declare __isLong__: Long['__isLong__'];
   /** @deprecated Not applicable to Timestamp. */
   declare getNumBitsAbs: Long['getNumBitsAbs'];
