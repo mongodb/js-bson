@@ -270,21 +270,30 @@ describe('deserializer()', () => {
       // byte 7: [outer size(4)] [type(1)] [key 'a\0'(2)] → array size field
       const arraySizeOffset = 7;
       valid.writeInt32LE(0, arraySizeOffset);
-      expect(() => BSON.deserialize(valid)).to.throw(BSON.BSONError, 'bad embedded array length in bson');
+      expect(() => BSON.deserialize(valid)).to.throw(
+        BSON.BSONError,
+        'bad embedded array length in bson'
+      );
     });
 
     it('throws "bad embedded array length in bson" for a nested array with a negative size', () => {
       const valid = Buffer.from(BSON.serialize({ a: [new BSON.Int32(1)] }));
       const arraySizeOffset = 7;
       valid.writeInt32LE(-1, arraySizeOffset);
-      expect(() => BSON.deserialize(valid)).to.throw(BSON.BSONError, 'bad embedded array length in bson');
+      expect(() => BSON.deserialize(valid)).to.throw(
+        BSON.BSONError,
+        'bad embedded array length in bson'
+      );
     });
 
     it('throws "bad embedded array length in bson" for a nested array whose size exceeds the buffer', () => {
       const valid = Buffer.from(BSON.serialize({ a: [new BSON.Int32(1)] }));
       const arraySizeOffset = 7;
       valid.writeInt32LE(valid.length + 1, arraySizeOffset);
-      expect(() => BSON.deserialize(valid)).to.throw(BSON.BSONError, 'bad embedded array length in bson');
+      expect(() => BSON.deserialize(valid)).to.throw(
+        BSON.BSONError,
+        'bad embedded array length in bson'
+      );
     });
   });
 
