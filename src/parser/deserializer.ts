@@ -2,7 +2,7 @@ import { Binary, UUID } from '../binary';
 import type { Document } from '../bson';
 import { Code } from '../code';
 import * as constants from '../constants';
-import { DBRef, type DBRefLike, isDBRefLike } from '../db_ref';
+import { DBRef, isDBRefLike } from '../db_ref';
 import { Decimal128 } from '../decimal128';
 import { Double } from '../double';
 import { BSONError } from '../error';
@@ -122,6 +122,38 @@ export function internalDeserialize(
   return deserializeObject(buffer, index, options, isArray);
 }
 
+interface NestedParsingFrame {
+  // One of 3 supported types:
+  // - constants.BSON_DATA_OBJECT
+  // - constants.BSON_DATA_ARRAY
+  // - constants.BSON_DATA_CODE_W_SCOPE
+  elementType:
+    | typeof constants.BSON_DATA_OBJECT
+    | typeof constants.BSON_DATA_ARRAY
+    | typeof constants.BSON_DATA_CODE_W_SCOPE;
+  // Document that we will fill out as we parse the nested object
+  holdingDocument: Document;
+  // The name of the key we will set the parsed object on once we finish parsing the nested object, this is used in the onComplete callback to know where to set the parsed nested object in the parent document
+  propertyName: string | number;
+  // The index in the buffer where the current object ends, used to know when we are done parsing the current object and can pop the stack
+  lastIndex: number;
+  // Whether the current frame is parsing an array, used to know whether to interpret keys as strings or array indices
+  isArray: boolean;
+  // The next array index to use if this frame is parsing an array, used to assign numeric keys to array elements without having to utf-8 decode the key from the buffer
+  arrayIndex: number;
+  // When true, all objects in this frame will be returned as raw bson buffers without parsing.
+  // This is used when the fieldsAsRaw option is used on a parent object, and is inherited by nested frames.
+  // It can also be set to true if the global raw option is set, but it cannot be set to true for a frame if the global raw option is false.
+  raw: boolean;
+  // When true, this frame may be a DBRef. This is set to false if we encounter a key that is not valid for a DBRef, and is left as null for arrays since they cannot be DBRefs.
+  isPossibleDBRef: boolean | null;
+  // The global utf-8 validation setting for this frame, used to determine the default utf-8 validation behavior for keys in this frame if the validation option is not an object specifying specific keys.
+  globalUTFValidation: boolean;
+  // The utf-8 validation setting for this frame, used to determine whether to utf-8 validate keys in this frame. This is determined based on the global utf-8 validation setting and the specific keys specified in the validation option.
+  validationSetting: boolean;
+  functionString: string | null; // only used for Code with Scope
+}
+
 const allowedDBRefKeys = /^\$ref$|^\$id$|^\$db$/;
 
 function deserializeObject(
@@ -130,6 +162,15 @@ function deserializeObject(
   options: DeserializeOptions,
   isArray = false
 ) {
+  // Settings configured from options parameter
+
+  // Strips prototype chain so inherited properties don't affect option reads.
+  options = { ...options };
+
+  // Used to track whether we are parsing an array or object, affects how keys are interpreted and when we hit the end of the document
+  const originalIsArray = isArray;
+
+  // Used to track fields that should be returned as raw bson buffers without parsing, this is set based on the fieldsAsRaw option and is inherited by nested frames when parsing nested objects
   const fieldsAsRaw = options['fieldsAsRaw'] == null ? null : options['fieldsAsRaw'];
 
   // Return raw bson buffer instead of parsing it
@@ -144,10 +185,10 @@ function deserializeObject(
   const promoteValues = options.promoteValues ?? true;
   const useBigInt64 = options.useBigInt64 ?? false;
 
+  // Validate bigint and long promotion settings
   if (useBigInt64 && !promoteValues) {
     throw new BSONError('Must either request bigint or Long for int64 deserialization');
   }
-
   if (useBigInt64 && !promoteLongs) {
     throw new BSONError('Must either request bigint or Long for int64 deserialization');
   }
@@ -193,6 +234,8 @@ function deserializeObject(
     }
   }
 
+  // Begin parsing the document
+
   // Set the start index
   const startIndex = index;
 
@@ -201,26 +244,107 @@ function deserializeObject(
 
   // Read the document size
   const size = NumberUtils.getInt32LE(buffer, index);
+  // Skip past the size field
   index += 4;
 
   // Ensure buffer is valid size
   if (size < 5 || size > buffer.length) throw new BSONError('corrupt bson message');
 
   // Create holding object
-  const object: Document = isArray ? [] : {};
+  const rootObject: Document = isArray ? [] : {};
+  const nestedParsingStack: NestedParsingFrame[] = [];
   // Used for arrays to skip having to perform utf8 decoding
   let arrayIndex = 0;
-  const done = false;
 
   let isPossibleDBRef = isArray ? false : null;
 
+  // Tracks the top of nestedParsingStack, or null if there is no nested document currently being parsed.
+  let currentFrame: NestedParsingFrame | null = null;
+
+  // How we set the value in the destination object, with special handling for __proto__ to avoid prototype pollution vulnerabilities
+  const setValue = (name: string | number, value: unknown) => {
+    const frame = currentFrame;
+    const dest = frame !== null ? frame.holdingDocument : rootObject;
+    if (name === '__proto__') {
+      Object.defineProperty(dest, name, {
+        value,
+        writable: true,
+        enumerable: true,
+        configurable: true
+      });
+    } else {
+      dest[name] = value;
+    }
+  };
+
+  const toPotentialDbRef = (doc: Document): DBRef | Document => {
+    if (isDBRefLike(doc)) {
+      const { $ref, $id, $db, ...fields } = doc;
+      return new DBRef($ref, $id, $db, fields);
+    }
+    return doc;
+  };
+
   // While we have more left data left keep parsing
-  while (!done) {
+  while (true) {
     // Read the type
     const elementType = buffer[index++];
 
     // If we get a zero it's the last byte, exit
-    if (elementType === 0) break;
+    if (elementType === 0) {
+      // 0 byte marks end of document.
+      if (currentFrame) {
+        // If we're in a frame, that means the end of the current nested document
+        if (index === currentFrame.lastIndex) {
+          // Snapshot the completed frame before updating currentFrame to the parent.
+          const completedFrame = currentFrame;
+          nestedParsingStack.pop();
+          currentFrame =
+            nestedParsingStack.length === 0
+              ? null
+              : nestedParsingStack[nestedParsingStack.length - 1];
+          // finish the frame
+          let result: Document = completedFrame.holdingDocument;
+          switch (completedFrame.elementType) {
+            case constants.BSON_DATA_OBJECT:
+              // if this is a DBRef, we need to construct a DBRef object instead of a plain object
+              if (completedFrame.isPossibleDBRef) {
+                result = toPotentialDbRef(result);
+              }
+              break;
+            case constants.BSON_DATA_ARRAY:
+              // nothing to do, the holding document is already an array and the keys were set as numeric indices
+              break;
+            case constants.BSON_DATA_CODE_W_SCOPE:
+              // the holding document is the scope, we need to construct a Code object with the function string and scope
+              result = new Code(completedFrame.functionString!, completedFrame.holdingDocument);
+              break;
+            default:
+              throw new BSONError('Unexpected element type in frame stack');
+          }
+          // set the value in the parent document (setValue reads currentFrame, now pointing to parent)
+          setValue(completedFrame.propertyName, result);
+          continue;
+        } else {
+          // Current index does not match the last index of the frame, the document is malformed
+          if (currentFrame.elementType === constants.BSON_DATA_ARRAY) {
+            throw new BSONError('corrupted array bson');
+          }
+          throw new BSONError('Bad BSON Document: object not properly terminated');
+        }
+      } else {
+        // If we're not in a frame, that means the end of the root document, so we break out of the loop and return the object
+        break;
+      }
+    }
+
+    if (currentFrame) {
+      // If we're in a frame, use the frame's array setting
+      isArray = currentFrame.isArray;
+    } else {
+      // If we're not in a frame, use the original isArray value that was passed in for the root document
+      isArray = originalIsArray;
+    }
 
     // Get the start search index
     let i = index;
@@ -233,20 +357,34 @@ function deserializeObject(
     if (i >= buffer.byteLength) throw new BSONError('Bad BSON Document: illegal CString');
 
     // Represents the key
-    const name = isArray ? arrayIndex++ : ByteUtils.toUTF8(buffer, index, i, false);
+    const name = isArray
+      ? currentFrame && currentFrame.isArray
+        ? currentFrame.arrayIndex++
+        : arrayIndex++
+      : ByteUtils.toUTF8(buffer, index, i, false);
 
-    // shouldValidateKey is true if the key should be validated, false otherwise
-    let shouldValidateKey = true;
-    if (globalUTFValidation || utf8KeysSet?.has(name)) {
+    // shouldValidateKey is true if the key should be validated, false otherwise.
+    // Within a nested frame the original code passed a collapsed boolean validation option,
+    // so all keys in the frame are validated uniformly using the frame's setting.
+    let shouldValidateKey: boolean;
+    if (currentFrame !== null) {
+      shouldValidateKey = currentFrame.validationSetting;
+    } else if (globalUTFValidation || utf8KeysSet?.has(name)) {
       shouldValidateKey = validationSetting;
     } else {
       shouldValidateKey = !validationSetting;
     }
 
-    if (isPossibleDBRef !== false && (name as string)[0] === '$') {
+    // Route DBRef key tracking to the current frame; the root variable handles the root doc.
+    if (currentFrame !== null) {
+      if (currentFrame.isPossibleDBRef !== false && typeof name === 'string' && name[0] === '$') {
+        currentFrame.isPossibleDBRef = allowedDBRefKeys.test(name);
+      }
+    } else if (isPossibleDBRef !== false && (name as string)[0] === '$') {
       isPossibleDBRef = allowedDBRefKeys.test(name as string);
     }
     let value;
+    let isDeferredValue = false;
 
     index = i + 1;
 
@@ -288,45 +426,61 @@ function deserializeObject(
         throw new BSONError('illegal boolean type value');
       value = buffer[index++] === 1;
     } else if (elementType === constants.BSON_DATA_OBJECT) {
-      const _index = index;
       const objectSize = NumberUtils.getInt32LE(buffer, index);
 
       if (objectSize <= 0 || objectSize > buffer.length - index)
         throw new BSONError('bad embedded document length in bson');
 
-      // We have a raw value
-      if (raw) {
+      // We have a raw value: either the global raw option, or the parent frame requested raw elements.
+      if (raw || (currentFrame?.raw ?? false)) {
         value = buffer.subarray(index, index + objectSize);
+        index = index + objectSize;
       } else {
-        let objectOptions = options;
-        if (!globalUTFValidation) {
-          objectOptions = { ...options, validation: { utf8: shouldValidateKey } };
-        }
-        value = deserializeObject(buffer, _index, objectOptions, false);
+        isDeferredValue = true;
+        nestedParsingStack.push({
+          holdingDocument: {},
+          elementType: constants.BSON_DATA_OBJECT,
+          propertyName: name,
+          functionString: null,
+          lastIndex: index + objectSize,
+          isArray: false,
+          arrayIndex: 0,
+          raw: false,
+          isPossibleDBRef: null, // we don't know if this is a DBRef until we parse the keys, so we start with null and set to false if we encounter a key that is not valid for a DBRef
+          globalUTFValidation: true,
+          validationSetting: shouldValidateKey
+        });
+        currentFrame = nestedParsingStack[nestedParsingStack.length - 1];
+        index = index + 4;
       }
-
-      index = index + objectSize;
     } else if (elementType === constants.BSON_DATA_ARRAY) {
-      const _index = index;
       const objectSize = NumberUtils.getInt32LE(buffer, index);
-      let arrayOptions: DeserializeOptions = options;
+
+      if (objectSize <= 0 || objectSize > buffer.length - index)
+        throw new BSONError('bad embedded array length in bson');
 
       // Stop index
       const stopIndex = index + objectSize;
 
-      // All elements of array to be returned as raw bson
-      if (fieldsAsRaw && fieldsAsRaw[name]) {
-        arrayOptions = { ...options, raw: true };
-      }
-
-      if (!globalUTFValidation) {
-        arrayOptions = { ...arrayOptions, validation: { utf8: shouldValidateKey } };
-      }
-      value = deserializeObject(buffer, _index, arrayOptions, true);
-      index = index + objectSize;
-
-      if (buffer[index - 1] !== 0) throw new BSONError('invalid array terminator byte');
-      if (index !== stopIndex) throw new BSONError('corrupted array bson');
+      // fieldsAsRaw match: push with raw=true so embedded objects inside come back as raw bytes.
+      // Also propagate raw from the parent frame (nested arrays inside a raw array stay raw).
+      const arrayRaw = !!(fieldsAsRaw && fieldsAsRaw[name]) || (currentFrame?.raw ?? false);
+      isDeferredValue = true;
+      nestedParsingStack.push({
+        holdingDocument: [],
+        elementType: constants.BSON_DATA_ARRAY,
+        propertyName: name,
+        functionString: null,
+        lastIndex: stopIndex,
+        isArray: true,
+        arrayIndex: 0,
+        raw: arrayRaw,
+        isPossibleDBRef: false,
+        globalUTFValidation: true,
+        validationSetting: shouldValidateKey
+      });
+      currentFrame = nestedParsingStack[nestedParsingStack.length - 1];
+      index = index + 4;
     } else if (elementType === constants.BSON_DATA_UNDEFINED) {
       value = undefined;
     } else if (elementType === constants.BSON_DATA_NULL) {
@@ -547,10 +701,6 @@ function deserializeObject(
       const _index = index;
       // Decode the size of the object document
       const objectSize = NumberUtils.getInt32LE(buffer, index);
-      // Decode the scope object
-      const scopeObject = deserializeObject(buffer, _index, options, false);
-      // Adjust the index
-      index = index + objectSize;
 
       // Check if field length is too short
       if (totalSize < 4 + 4 + objectSize + stringSize) {
@@ -562,7 +712,22 @@ function deserializeObject(
         throw new BSONError('code_w_scope total size is too long, clips outer document');
       }
 
-      value = new Code(functionString, scopeObject);
+      isDeferredValue = true;
+      nestedParsingStack.push({
+        holdingDocument: {},
+        elementType: constants.BSON_DATA_CODE_W_SCOPE,
+        propertyName: name,
+        functionString: functionString,
+        lastIndex: _index + objectSize,
+        isArray: false,
+        arrayIndex: 0,
+        raw: false,
+        isPossibleDBRef: null,
+        globalUTFValidation: true,
+        validationSetting: shouldValidateKey
+      });
+      currentFrame = nestedParsingStack[nestedParsingStack.length - 1];
+      index = index + 4; // move index past the size of the object, the rest of the object will be parsed in subsequent iterations of this loop
     } else if (elementType === constants.BSON_DATA_DBPOINTER) {
       // Get the code string size
       const stringSize = NumberUtils.getInt32LE(buffer, index);
@@ -594,17 +759,18 @@ function deserializeObject(
         `Detected unknown BSON type ${elementType.toString(16)} for fieldname "${name}"`
       );
     }
-    if (name === '__proto__') {
-      Object.defineProperty(object, name, {
-        value,
-        writable: true,
-        enumerable: true,
-        configurable: true
-      });
-    } else {
-      object[name] = value;
+
+    // If we have the value, set it on the target object
+    if (!isDeferredValue) {
+      setValue(name, value);
     }
   }
+
+  // Check if we have any frames left on the stack, if we do then we had a malformed document
+  if (nestedParsingStack.length !== 0) {
+    throw new BSONError('corrupted bson, more objects expected based on the current document size');
+  }
+  const object = rootObject;
 
   // Check if the deserialization was against a valid array/object
   if (size !== index - startIndex) {
@@ -615,13 +781,6 @@ function deserializeObject(
   // if we did not find "$ref", "$id", "$db", or found an extraneous $key, don't make a DBRef
   if (!isPossibleDBRef) return object;
 
-  if (isDBRefLike(object)) {
-    const copy = Object.assign({}, object) as Partial<DBRefLike>;
-    delete copy.$ref;
-    delete copy.$id;
-    delete copy.$db;
-    return new DBRef(object.$ref, object.$id, object.$db, copy);
-  }
-
-  return object;
+  // If the object is DBRef-like, create a new DBRef instance
+  return toPotentialDbRef(object);
 }

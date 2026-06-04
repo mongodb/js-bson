@@ -1,5 +1,9 @@
 import * as BSON from '../../register-bson';
-import { bufferFromHexArray } from '../tools/utils';
+import {
+  bufferFromHexArray,
+  buildDeeplyNestedObject,
+  buildDeeplyNestedArray
+} from '../tools/utils';
 import { expect } from 'chai';
 import { BSONVersionError } from '../../register-bson';
 
@@ -36,6 +40,58 @@ describe('serialize()', () => {
     expect(emptyDocumentUndef).to.deep.equal(nestedNull);
     const emptyDocumentNull = BSON.serialize({ a: null });
     expect(emptyDocumentNull).to.deep.equal(nestedNull);
+  });
+
+  describe('when serializing deeply nested documents', () => {
+    it('can serialize a document with 20,000 nesting levels without a stack overflow', () => {
+      // Calling serialize directly: if it throws, mocha fails the test.
+      // Avoids expect().to.not.throw() which is silently swallowed by the register-bson chai plugin.
+      // Use byteLength (not instanceof) — instanceof fails across vm.createContext in WEB mode.
+      const result = BSON.serialize(buildDeeplyNestedObject(20_000));
+      expect(result.byteLength).to.be.greaterThan(0);
+    });
+
+    it('produces valid BSON after deserializing and re-serializing a deeply nested document', () => {
+      // Build the BSON buffer the same iterative way the deserializer test does,
+      // bypassing the serializer's own recursion limit to get a deeply nested BSON buffer.
+      let inner = Buffer.from([0x05, 0x00, 0x00, 0x00, 0x00]); // empty doc {}
+      for (let i = 0; i < 20_000; i++) {
+        const docSize = 4 + 1 + 2 + inner.length + 1;
+        const doc = Buffer.allocUnsafe(docSize);
+        let offset = 0;
+        doc.writeInt32LE(docSize, 0);
+        offset += 4;
+        doc[offset++] = 0x03; // BSON_DATA_OBJECT
+        doc[offset++] = 0x61; // 'a'
+        doc[offset++] = 0x00;
+        inner.copy(doc, offset);
+        offset += inner.length;
+        doc[offset] = 0x00;
+        inner = doc;
+      }
+      const obj = BSON.deserialize(inner);
+      const result = BSON.serialize(obj);
+      expect(result.byteLength).to.be.greaterThan(0);
+    });
+
+    it('can serialize a document containing a deeply nested array without a stack overflow', () => {
+      const result = BSON.serialize({ a: buildDeeplyNestedArray(20_000) });
+      expect(result.byteLength).to.be.greaterThan(0);
+    });
+  });
+
+  describe('DBRef serialization consistency with calculateObjectSize', () => {
+    for (const [label, db] of [
+      ['empty string db', ''],
+      ['defined db', 'mydb'],
+      ['undefined db', undefined]
+    ] as const) {
+      it(`calculateObjectSize matches serialize byte count for DBRef with ${label}`, () => {
+        const dbref = new BSON.DBRef('users', new BSON.ObjectId(), db);
+        const doc = { ref: dbref };
+        expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+      });
+    }
   });
 
   describe('validates input types', () => {
