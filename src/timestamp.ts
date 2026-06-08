@@ -4,20 +4,53 @@ import type { Int32 } from './int_32';
 import { Long } from './long';
 import { type InspectFn, defaultInspect } from './parser/utils';
 
-/** @public */
+/**
+ * @public
+ * @deprecated This type is no longer used internally and will be removed in a future version.
+ */
 export type TimestampOverrides =
   | '_bsontype'
   | 'toExtendedJSON'
   | 'fromExtendedJSON'
   | 'inspect'
   | typeof bsonType;
+
+/**
+ * @public
+ *
+ * Inherited `Long` members surfaced on `Timestamp`.
+ * When `Long` gains a new member: add it here if it should pass through, or
+ * add a `@deprecated declare` line on the `Timestamp` class if it should be
+ * surfaced as deprecated. Anything left unclassified is silently dropped from
+ * the public type — preventing accidental behavioral bleed-through.
+ */
+type TimestampKept =
+  | 'toBigInt'
+  | 'toString'
+  | 'compare'
+  | 'equals'
+  | 'eq'
+  | 'notEquals'
+  | 'neq'
+  | 'ne'
+  | 'lessThan'
+  | 'lt'
+  | 'lessThanOrEqual'
+  | 'lte'
+  | 'le'
+  | 'greaterThan'
+  | 'gt'
+  | 'greaterThanOrEqual'
+  | 'gte'
+  | 'ge';
+
 /** @public */
 export type LongWithoutOverrides = new (
   low: unknown,
   high?: number | boolean,
   unsigned?: boolean
 ) => {
-  [P in Exclude<keyof Long, TimestampOverrides>]: Long[P];
+  [P in TimestampKept]: Long[P];
 };
 /** @public */
 export const LongWithoutOverridesClass: LongWithoutOverrides =
@@ -45,6 +78,9 @@ export class Timestamp extends LongWithoutOverridesClass {
     return 'Timestamp';
   }
 
+  /**
+   * @deprecated Use `Long.MAX_UNSIGNED_VALUE` instead.
+   */
   static readonly MAX_VALUE = Long.MAX_UNSIGNED_VALUE;
 
   /**
@@ -120,12 +156,18 @@ export class Timestamp extends LongWithoutOverridesClass {
     };
   }
 
-  /** Returns a Timestamp represented by the given (32-bit) integer value. */
+  /**
+   * Returns a Timestamp represented by the given (32-bit) integer value.
+   * @deprecated Stores `value` in the low 32 bits (increment), leaving t = 0. Use `new Timestamp({ t, i })` or `Timestamp.fromBits(lowBits, highBits)` for explicit construction.
+   */
   static fromInt(value: number): Timestamp {
     return new Timestamp(Long.fromInt(value, true));
   }
 
-  /** Returns a Timestamp representing the given number value, provided that it is a finite number. Otherwise, zero is returned. */
+  /**
+   * Returns a Timestamp representing the given number value, provided that it is a finite number. Otherwise, zero is returned.
+   * @deprecated Splits `value` across (t, i) as a uint64; the result rarely matches user intent. Use `new Timestamp({ t, i })` or `Timestamp.fromBits(lowBits, highBits)` for explicit construction.
+   */
   static fromNumber(value: number): Timestamp {
     return new Timestamp(Long.fromNumber(value, true));
   }
@@ -173,4 +215,115 @@ export class Timestamp extends LongWithoutOverridesClass {
     const i = inspect(this.i, options);
     return `new Timestamp({ t: ${t}, i: ${i} })`;
   }
+
+  // ********************
+  // **** DEPRECATED ****
+  // ********************
+  // Declare used to avoid runtime effects for field declaration.
+  // See: https://www.typescriptlang.org/docs/handbook/2/classes.html#type-only-field-declarations
+
+  // Arithmetic
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare add: Long['add'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare subtract: Long['subtract'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare sub: Long['sub'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare multiply: Long['multiply'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare mul: Long['mul'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare divide: Long['divide'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare div: Long['div'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare modulo: Long['modulo'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare mod: Long['mod'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare rem: Long['rem'];
+  /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned. */
+  declare negate: Long['negate'];
+  /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned. */
+  declare neg: Long['neg'];
+
+  // Bitwise / shifts
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare and: Long['and'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare or: Long['or'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare xor: Long['xor'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare not: Long['not'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare shiftLeft: Long['shiftLeft'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare shl: Long['shl'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare shiftRight: Long['shiftRight'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare shr: Long['shr'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare shiftRightUnsigned: Long['shiftRightUnsigned'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare shr_u: Long['shr_u'];
+  /** @deprecated Not applicable to Timestamp; Timestamp is not intended to be used as a Long. */
+  declare shru: Long['shru'];
+
+  // Signing
+  /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned. */
+  declare toSigned: Long['toSigned'];
+  /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned (this is a no-op). */
+  declare toUnsigned: Long['toUnsigned'];
+  /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned (is always false). */
+  declare isNegative: Long['isNegative'];
+  /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned (is always true). */
+  declare isPositive: Long['isPositive'];
+  /** @deprecated Not applicable to Timestamp as the underlying Long is always unsigned (is always true). */
+  declare unsigned: Long['unsigned'];
+
+  // Conversion
+  /** @deprecated Not applicable to Timestamp; use `.t` for seconds since the Unix epoch, or `.i` for the increment ordinal. */
+  declare toInt: Long['toInt'];
+  /** @deprecated Not applicable to Timestamp; use `.t` for seconds since the Unix epoch, or `.i` for the increment ordinal. */
+  declare toNumber: Long['toNumber'];
+  /** @deprecated Not applicable to Timestamp; use `.t` for seconds since the Unix epoch, or `.i` for the increment ordinal. */
+  declare toBytes: Long['toBytes'];
+  /** @deprecated Not applicable to Timestamp; use `.t` for seconds since the Unix epoch, or `.i` for the increment ordinal. */
+  declare toBytesLE: Long['toBytesLE'];
+  /** @deprecated Not applicable to Timestamp; use `.t` for seconds since the Unix epoch, or `.i` for the increment ordinal. */
+  declare toBytesBE: Long['toBytesBE'];
+
+  // Other
+  /** @deprecated Incompatible with Timestamp: returns a signed integer, but Timestamp is always unsigned. Use `.t` for seconds since the Unix epoch. */
+  declare getHighBits: Long['getHighBits'];
+  /** @deprecated Not applicable to Timestamp; use `.t` for seconds since the Unix epoch. */
+  declare getHighBitsUnsigned: Long['getHighBitsUnsigned'];
+  /** @deprecated Incompatible with Timestamp: returns a signed integer, but Timestamp is always unsigned. Use `.i` for the increment ordinal. */
+  declare getLowBits: Long['getLowBits'];
+  /** @deprecated Not applicable to Timestamp; use `.i` for the increment ordinal. */
+  declare getLowBitsUnsigned: Long['getLowBitsUnsigned'];
+
+  /** @deprecated Not applicable to Timestamp; use `.i` instead. */
+  declare low: Long['low'];
+  /** @deprecated Not applicable to Timestamp; use `.t` instead. */
+  declare high: Long['high'];
+
+  /** @deprecated Use .compare() for general comparison, or .equals(), .lessThan(), .greaterThan() for specific cases. */
+  declare comp: Long['comp'];
+  /** @deprecated Compare `.t` and `.i` against `0` explicitly. */
+  declare isZero: Long['isZero'];
+  /** @deprecated Compare `.t` and `.i` against `0` explicitly. */
+  declare eqz: Long['eqz'];
+
+  /** @deprecated Not applicable to Timestamp. Use the bsonType symbol or _bsontype === 'Timestamp' to identify a Timestamp. */
+  declare __isLong__: Long['__isLong__'];
+  /** @deprecated Not applicable to Timestamp. */
+  declare getNumBitsAbs: Long['getNumBitsAbs'];
+  /** @deprecated Not applicable to Timestamp; tests parity of the increment only. */
+  declare isEven: Long['isEven'];
+  /** @deprecated Not applicable to Timestamp; tests parity of the increment only. */
+  declare isOdd: Long['isOdd'];
 }
