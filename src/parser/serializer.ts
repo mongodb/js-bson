@@ -581,8 +581,8 @@ export function serializeInto(
       value = value.toBSON();
     }
 
-    if (!frame.isArray && typeof key === 'string' && !ignoreKeys.has(key)) {
-      if (key.match(regexp) != null) {
+    if (!frame.isArray && !(key[0] === '$' && ignoreKeys.has(key))) {
+      if (regexp.test(key)) {
         throw new BSONError('key ' + key + ' must not contain null bytes');
       }
       if (checkKeys) {
@@ -633,15 +633,17 @@ export function serializeInto(
     } else if (type === 'object') {
       if (value[constants.BSON_VERSION_SYMBOL] !== constants.BSON_MAJOR_VERSION) {
         throw new BSONVersionError();
-      } else if (value._bsontype === 'ObjectId') {
+      }
+      const bsontype = value._bsontype;
+      if (bsontype === 'ObjectId') {
         index = serializeObjectId(buffer, key, value, index);
-      } else if (value._bsontype === 'Decimal128') {
+      } else if (bsontype === 'Decimal128') {
         index = serializeDecimal128(buffer, key, value, index);
-      } else if (value._bsontype === 'Long' || value._bsontype === 'Timestamp') {
+      } else if (bsontype === 'Long' || bsontype === 'Timestamp') {
         index = serializeLong(buffer, key, value, index);
-      } else if (value._bsontype === 'Double') {
+      } else if (bsontype === 'Double') {
         index = serializeDouble(buffer, key, value, index);
-      } else if (value._bsontype === 'Code') {
+      } else if (bsontype === 'Code') {
         const codeValue = value as Code;
         if (codeValue.scope && typeof codeValue.scope === 'object') {
           buffer[index++] = constants.BSON_DATA_CODE_W_SCOPE;
@@ -671,11 +673,11 @@ export function serializeInto(
           index = index + 4 + size - 1;
           buffer[index++] = 0;
         }
-      } else if (value._bsontype === 'Binary') {
+      } else if (bsontype === 'Binary') {
         index = serializeBinary(buffer, key, value, index);
-      } else if (value._bsontype === 'BSONSymbol') {
+      } else if (bsontype === 'BSONSymbol') {
         index = serializeSymbol(buffer, key, value, index);
-      } else if (value._bsontype === 'DBRef') {
+      } else if (bsontype === 'DBRef') {
         const dbref = value as DBRef;
         const orderedValues: Document = Object.assign(
           { $ref: dbref.collection, $id: dbref.oid },
@@ -688,14 +690,14 @@ export function serializeInto(
         path.add(orderedValues);
         stack.push(makeFrame(orderedValues, index, null));
         index += 4;
-      } else if (value._bsontype === 'BSONRegExp') {
+      } else if (bsontype === 'BSONRegExp') {
         index = serializeBSONRegExp(buffer, key, value, index);
-      } else if (value._bsontype === 'Int32') {
+      } else if (bsontype === 'Int32') {
         index = serializeInt32(buffer, key, value, index);
-      } else if (value._bsontype === 'MinKey' || value._bsontype === 'MaxKey') {
+      } else if (bsontype === 'MinKey' || bsontype === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index);
-      } else if (typeof value._bsontype !== 'undefined') {
-        throw new BSONError(`Unrecognized or invalid _bsontype: ${String(value._bsontype)}`);
+      } else if (typeof bsontype !== 'undefined') {
+        throw new BSONError(`Unrecognized or invalid _bsontype: ${String(bsontype)}`);
       }
     } else if (type === 'function' && serializeFunctions) {
       index = serializeFunction(buffer, key, value, index);
