@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: release
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         env:
           REF: ${{ inputs.ref }}
         with:
