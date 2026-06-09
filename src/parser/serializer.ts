@@ -587,7 +587,7 @@ export function serializeInto(
       value = value.toBSON();
     }
 
-    if (!frame.isArray && !(key[0] === '$' && ignoreKeys.has(key))) {
+    if (!frame.isArray && typeof key === 'string' && !(key[0] === '$' && ignoreKeys.has(key))) {
       if (regexp.test(key)) {
         throw new BSONError('key ' + key + ' must not contain null bytes');
       }
