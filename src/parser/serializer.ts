@@ -44,12 +44,6 @@ export interface SerializeOptions {
 const regexp = /\x00/; // eslint-disable-line no-control-regex
 const ignoreKeys = new Set(['$db', '$ref', '$id', '$clusterTime']);
 
-/*
- * isArray indicates if we are writing to a BSON array (type 0x04)
- * which forces the "key" which really an array index as a string to be written as ascii
- * This will catch any errors in index as a string generation
- */
-
 function serializeString(buffer: Uint8Array, key: string, value: string, index: number) {
   // Encode String type
   buffer[index++] = constants.BSON_DATA_STRING;
@@ -409,41 +403,79 @@ function serializeSymbol(buffer: Uint8Array, key: string, value: BSONSymbol, ind
 }
 
 interface SerializationFrame {
-  // The object being serialized at this frame.
-  // Held so it can be removed from the cycle-detection path when this frame completes.
+  /** Original object passed to this frame — used for cycle-detection (path.delete). */
   sourceObject: Document;
-  // Whether the object we are serializing is an array.
-  // This forces the keys to be serialized as ASCII strings of their index in the array.
+  /** True when serializing a BSON array; affects key format and type byte. */
   isArray: boolean;
-  // Lazy iterator over the key-value pairs of the object being serialized.
-  // Avoids materializing intermediate arrays for Maps and Arrays.
-  pairs: Iterator<[string, unknown]>;
-  // The index in the buffer where the size of the current serialized object is stored.
-  // We will only know the size of the object once we have finished serializing it, so we keep track of where to write the size once we know it.
+  /** Buffer offset where this object's 4-byte size field will be written. */
   objectSizeIndex: number;
-  // The index in the buffer where the size of the code with scope object is stored.
-  // Used for Code with Scope serialization.
-  // We will only know the size of the code with scope object once we have finished serializing it, so we keep track of where to write the size once we know it.
+  /** Buffer offset for code-with-scope wrapper size, or null if not applicable. */
   codeSizeIndex: number | null;
+  /**
+   * Object being iterated. For plain objects this may be the toBSON() result of
+   * sourceObject; for arrays and Maps it equals sourceObject.
+   */
+  iterTarget: Document;
+  /**
+   * Pre-computed Object.keys() of iterTarget for plain objects.
+   * Null for arrays (use keyIndex as numeric index) and Maps (use mapIterator).
+   */
+  keys: string[] | null;
+  /** Next index into keys[] for plain objects, or next array index for arrays. */
+  keyIndex: number;
+  /** Active iterator for Map objects; null for arrays and plain objects. */
+  mapIterator: IterableIterator<[unknown, unknown]> | null;
 }
 
-function* toKvPairs(object: Document): Iterator<[string, unknown]> {
-  if (Array.isArray(object)) {
-    yield* Object.entries(object);
-  } else if (object instanceof Map || isMap(object)) {
-    yield* object as Map<unknown, unknown> as Iterable<[string, unknown]>;
-  } else {
-    let target: Document = object;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (typeof (target as any)?.toBSON === 'function') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      target = (target as any).toBSON() as Document;
-      if (target != null && typeof target !== 'object') {
-        throw new BSONError('toBSON function did not return an object');
-      }
-    }
-    yield* Object.entries(target);
+function makeFrame(
+  sourceObject: Document,
+  objectSizeIndex: number,
+  codeSizeIndex: number | null
+): SerializationFrame {
+  if (Array.isArray(sourceObject)) {
+    return {
+      sourceObject,
+      isArray: true,
+      objectSizeIndex,
+      codeSizeIndex,
+      iterTarget: sourceObject,
+      keys: null,
+      keyIndex: 0,
+      mapIterator: null
+    };
   }
+  if (sourceObject instanceof Map || isMap(sourceObject)) {
+    return {
+      sourceObject,
+      isArray: false,
+      objectSizeIndex,
+      codeSizeIndex,
+      iterTarget: sourceObject,
+      keys: null,
+      keyIndex: 0,
+      mapIterator: (sourceObject as Map<unknown, unknown>).entries()
+    };
+  }
+  // Plain object: call toBSON() if defined to obtain the object to iterate.
+  let target: Document = sourceObject;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (typeof (target as any)?.toBSON === 'function') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    target = (target as any).toBSON() as Document;
+    if (target != null && typeof target !== 'object') {
+      throw new BSONError('toBSON function did not return an object');
+    }
+  }
+  return {
+    sourceObject,
+    isArray: false,
+    objectSizeIndex,
+    codeSizeIndex,
+    iterTarget: target,
+    keys: Object.keys(target as object),
+    keyIndex: 0,
+    mapIterator: null
+  };
 }
 
 export function serializeInto(
@@ -490,36 +522,60 @@ export function serializeInto(
 
   path.add(object);
 
-  const stack: SerializationFrame[] = [
-    {
-      pairs: toKvPairs(object),
-      objectSizeIndex: startingIndex,
-      codeSizeIndex: null,
-      sourceObject: object,
-      isArray: Array.isArray(object)
-    }
-  ];
+  const stack: SerializationFrame[] = [makeFrame(object, startingIndex, null)];
   let index = startingIndex + 4;
 
   while (stack.length > 0) {
     const frame = stack[stack.length - 1];
-    const next = frame.pairs.next();
 
-    if (next.done) {
-      buffer[index++] = 0x00;
-      NumberUtils.setInt32LE(buffer, frame.objectSizeIndex, index - frame.objectSizeIndex);
-      if (frame.codeSizeIndex !== null) {
-        NumberUtils.setInt32LE(buffer, frame.codeSizeIndex, index - frame.codeSizeIndex);
-      }
-      path.delete(frame.sourceObject);
-      stack.pop();
-      continue;
-    }
-
-    const pair = next.value;
-    const key = pair[0];
+    // Advance to the next key-value pair, or finalize the frame if exhausted.
+    let key: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let value: any = pair[1];
+    let value: any;
+    if (frame.mapIterator !== null) {
+      const next = frame.mapIterator.next();
+      if (next.done) {
+        buffer[index++] = 0x00;
+        NumberUtils.setInt32LE(buffer, frame.objectSizeIndex, index - frame.objectSizeIndex);
+        if (frame.codeSizeIndex !== null) {
+          NumberUtils.setInt32LE(buffer, frame.codeSizeIndex, index - frame.codeSizeIndex);
+        }
+        path.delete(frame.sourceObject);
+        stack.pop();
+        continue;
+      }
+      key = next.value[0] as string;
+      value = next.value[1];
+    } else if (frame.keys !== null) {
+      if (frame.keyIndex >= frame.keys.length) {
+        buffer[index++] = 0x00;
+        NumberUtils.setInt32LE(buffer, frame.objectSizeIndex, index - frame.objectSizeIndex);
+        if (frame.codeSizeIndex !== null) {
+          NumberUtils.setInt32LE(buffer, frame.codeSizeIndex, index - frame.codeSizeIndex);
+        }
+        path.delete(frame.sourceObject);
+        stack.pop();
+        continue;
+      }
+      key = frame.keys[frame.keyIndex++];
+      value = (frame.iterTarget as Record<string, unknown>)[key];
+    } else {
+      // Array: use keyIndex as the numeric index.
+      const arr = frame.iterTarget as unknown[];
+      if (frame.keyIndex >= arr.length) {
+        buffer[index++] = 0x00;
+        NumberUtils.setInt32LE(buffer, frame.objectSizeIndex, index - frame.objectSizeIndex);
+        if (frame.codeSizeIndex !== null) {
+          NumberUtils.setInt32LE(buffer, frame.codeSizeIndex, index - frame.codeSizeIndex);
+        }
+        path.delete(frame.sourceObject);
+        stack.pop();
+        continue;
+      }
+      const i = frame.keyIndex++;
+      key = String(i);
+      value = arr[i];
+    }
 
     if (typeof value?.toBSON === 'function') {
       value = value.toBSON();
@@ -571,13 +627,7 @@ export function serializeInto(
         buffer[index++] = 0x00;
         const nestedStartIndex = index;
         path.add(value);
-        stack.push({
-          pairs: toKvPairs(value),
-          objectSizeIndex: nestedStartIndex,
-          codeSizeIndex: null,
-          sourceObject: value,
-          isArray: nestedIsArray
-        });
+        stack.push(makeFrame(value, nestedStartIndex, null));
         index += 4;
       }
     } else if (type === 'object') {
@@ -609,13 +659,7 @@ export function serializeInto(
             throw new BSONError('Cannot convert circular structure to BSON');
           }
           path.add(scope);
-          stack.push({
-            pairs: toKvPairs(scope),
-            objectSizeIndex: index,
-            codeSizeIndex: codeTotalSizeIndex,
-            sourceObject: scope,
-            isArray: false
-          });
+          stack.push(makeFrame(scope, index, codeTotalSizeIndex));
           index += 4;
         } else {
           buffer[index++] = constants.BSON_DATA_CODE;
@@ -642,13 +686,7 @@ export function serializeInto(
         index += ByteUtils.encodeUTF8Into(buffer, key, index);
         buffer[index++] = 0x00;
         path.add(orderedValues);
-        stack.push({
-          pairs: toKvPairs(orderedValues),
-          objectSizeIndex: index,
-          codeSizeIndex: null,
-          sourceObject: orderedValues,
-          isArray: false
-        });
+        stack.push(makeFrame(orderedValues, index, null));
         index += 4;
       } else if (value._bsontype === 'BSONRegExp') {
         index = serializeBSONRegExp(buffer, key, value, index);
