@@ -150,6 +150,9 @@ interface NestedParsingFrame {
   // The utf-8 validation setting for this frame, used to determine whether to utf-8 validate keys in this frame. This is determined based on the global utf-8 validation setting and the specific keys specified in the validation option.
   validationSetting: boolean;
   functionString: string | null; // only used for Code with Scope
+  // The enclosing frame, or null at the top level. The parsing stack is a linked list threaded
+  // through this field rather than a separate array, which avoids array push/pop churn per frame.
+  prev: NestedParsingFrame | null;
 }
 
 const allowedDBRefKeys = /^\$ref$|^\$id$|^\$db$/;
@@ -271,13 +274,12 @@ function deserializeObject(
 
   // Create holding object
   const rootObject: Document = isArray ? [] : {};
-  const nestedParsingStack: NestedParsingFrame[] = [];
   // Used for arrays to skip having to perform utf8 decoding
   let arrayIndex = 0;
 
   let isPossibleDBRef = isArray ? false : null;
 
-  // Tracks the top of nestedParsingStack, or null if there is no nested document currently being parsed.
+  // Top of the parsing stack (a linked list via each frame's `prev`), or null at the top level.
   let currentFrame: NestedParsingFrame | null = null;
   // Destination object for the current frame (the parent's holdingDocument, or rootObject at the
   // top level). Maintained alongside currentFrame so per-field assignment never recomputes it.
@@ -298,14 +300,12 @@ function deserializeObject(
         // If we're in a frame, that means the end of the current nested document
         if (index === currentFrame.lastIndex) {
           // Snapshot the completed frame before updating currentFrame to the parent.
-          const completedFrame = currentFrame;
-          nestedParsingStack.pop();
-          if (nestedParsingStack.length === 0) {
-            currentFrame = null;
+          const completedFrame: NestedParsingFrame = currentFrame;
+          currentFrame = completedFrame.prev;
+          if (currentFrame === null) {
             currentDest = rootObject;
             currentIsArray = isArray;
           } else {
-            currentFrame = nestedParsingStack[nestedParsingStack.length - 1];
             currentDest = currentFrame.holdingDocument;
             currentIsArray = currentFrame.isArray;
           }
@@ -445,9 +445,9 @@ function deserializeObject(
           arrayIndex: 0,
           raw: false,
           isPossibleDBRef: null, // we don't know if this is a DBRef until we parse the keys, so we start with null and set to false if we encounter a key that is not valid for a DBRef
-          validationSetting: shouldValidateKey
+          validationSetting: shouldValidateKey,
+          prev: currentFrame
         };
-        nestedParsingStack.push(objectFrame);
         currentFrame = objectFrame;
         currentDest = objectFrame.holdingDocument;
         currentIsArray = false;
@@ -476,9 +476,9 @@ function deserializeObject(
         arrayIndex: 0,
         raw: arrayRaw,
         isPossibleDBRef: false,
-        validationSetting: shouldValidateKey
+        validationSetting: shouldValidateKey,
+        prev: currentFrame
       };
-      nestedParsingStack.push(arrayFrame);
       currentFrame = arrayFrame;
       currentDest = arrayFrame.holdingDocument;
       currentIsArray = true;
@@ -725,9 +725,9 @@ function deserializeObject(
         arrayIndex: 0,
         raw: false,
         isPossibleDBRef: null,
-        validationSetting: shouldValidateKey
+        validationSetting: shouldValidateKey,
+        prev: currentFrame
       };
-      nestedParsingStack.push(scopeFrame);
       currentFrame = scopeFrame;
       currentDest = scopeFrame.holdingDocument;
       currentIsArray = false;
@@ -771,7 +771,7 @@ function deserializeObject(
   }
 
   // Check if we have any frames left on the stack, if we do then we had a malformed document
-  if (nestedParsingStack.length !== 0) {
+  if (currentFrame !== null) {
     throw new BSONError('corrupted bson, more objects expected based on the current document size');
   }
   const object = rootObject;

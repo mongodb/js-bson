@@ -425,12 +425,15 @@ interface SerializationFrame {
   keyIndex: number;
   /** Active iterator for Map objects; null for arrays and plain objects. */
   mapIterator: IterableIterator<[unknown, unknown]> | null;
+  /** The enclosing frame, or null at the root. The stack is a linked list via this field. */
+  prev: SerializationFrame | null;
 }
 
 function makeFrame(
   sourceObject: Document,
   objectSizeIndex: number,
-  codeSizeIndex: number | null
+  codeSizeIndex: number | null,
+  prev: SerializationFrame | null
 ): SerializationFrame {
   if (Array.isArray(sourceObject)) {
     return {
@@ -441,7 +444,8 @@ function makeFrame(
       iterTarget: sourceObject,
       keys: null,
       keyIndex: 0,
-      mapIterator: null
+      mapIterator: null,
+      prev
     };
   }
   if (sourceObject instanceof Map || isMap(sourceObject)) {
@@ -453,7 +457,8 @@ function makeFrame(
       iterTarget: sourceObject,
       keys: null,
       keyIndex: 0,
-      mapIterator: (sourceObject as Map<unknown, unknown>).entries()
+      mapIterator: (sourceObject as Map<unknown, unknown>).entries(),
+      prev
     };
   }
   // Plain object: call toBSON() if defined to obtain the object to iterate.
@@ -474,7 +479,8 @@ function makeFrame(
     iterTarget: target,
     keys: Object.keys(target as object),
     keyIndex: 0,
-    mapIterator: null
+    mapIterator: null,
+    prev
   };
 }
 
@@ -522,11 +528,11 @@ export function serializeInto(
 
   path.add(object);
 
-  const stack: SerializationFrame[] = [makeFrame(object, startingIndex, null)];
+  let currentFrame: SerializationFrame | null = makeFrame(object, startingIndex, null, null);
   let index = startingIndex + 4;
 
-  while (stack.length > 0) {
-    const frame = stack[stack.length - 1];
+  while (currentFrame !== null) {
+    const frame: SerializationFrame = currentFrame;
 
     // Advance to the next key-value pair, or finalize the frame if exhausted.
     let key: string;
@@ -541,7 +547,7 @@ export function serializeInto(
           NumberUtils.setInt32LE(buffer, frame.codeSizeIndex, index - frame.codeSizeIndex);
         }
         path.delete(frame.sourceObject);
-        stack.pop();
+        currentFrame = frame.prev;
         continue;
       }
       key = next.value[0] as string;
@@ -554,7 +560,7 @@ export function serializeInto(
           NumberUtils.setInt32LE(buffer, frame.codeSizeIndex, index - frame.codeSizeIndex);
         }
         path.delete(frame.sourceObject);
-        stack.pop();
+        currentFrame = frame.prev;
         continue;
       }
       key = frame.keys[frame.keyIndex++];
@@ -569,7 +575,7 @@ export function serializeInto(
           NumberUtils.setInt32LE(buffer, frame.codeSizeIndex, index - frame.codeSizeIndex);
         }
         path.delete(frame.sourceObject);
-        stack.pop();
+        currentFrame = frame.prev;
         continue;
       }
       const i = frame.keyIndex++;
@@ -627,7 +633,7 @@ export function serializeInto(
         buffer[index++] = 0x00;
         const nestedStartIndex = index;
         path.add(value);
-        stack.push(makeFrame(value, nestedStartIndex, null));
+        currentFrame = makeFrame(value, nestedStartIndex, null, frame);
         index += 4;
       }
     } else if (type === 'object') {
@@ -661,7 +667,7 @@ export function serializeInto(
             throw new BSONError('Cannot convert circular structure to BSON');
           }
           path.add(scope);
-          stack.push(makeFrame(scope, index, codeTotalSizeIndex));
+          currentFrame = makeFrame(scope, index, codeTotalSizeIndex, frame);
           index += 4;
         } else {
           buffer[index++] = constants.BSON_DATA_CODE;
@@ -688,7 +694,7 @@ export function serializeInto(
         index += ByteUtils.encodeUTF8Into(buffer, key, index);
         buffer[index++] = 0x00;
         path.add(orderedValues);
-        stack.push(makeFrame(orderedValues, index, null));
+        currentFrame = makeFrame(orderedValues, index, null, frame);
         index += 4;
       } else if (bsontype === 'BSONRegExp') {
         index = serializeBSONRegExp(buffer, key, value, index);
