@@ -152,6 +152,7 @@ export class Timestamp extends LongWithoutOverridesClass {
 
   toJSON(): { $timestamp: string } {
     return {
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       $timestamp: this.toString()
     };
   }

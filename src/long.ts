@@ -248,7 +248,7 @@ export class Long extends BSONValue {
       if (value + 1 >= TWO_PWR_63_DBL) return Long.MAX_VALUE;
     }
     if (value < 0) return Long.fromNumber(-value, unsigned).neg();
-    return Long.fromBits(value % TWO_PWR_32_DBL | 0, (value / TWO_PWR_32_DBL) | 0, unsigned);
+    return Long.fromBits((value % TWO_PWR_32_DBL) | 0, (value / TWO_PWR_32_DBL) | 0, unsigned);
   }
 
   /**
