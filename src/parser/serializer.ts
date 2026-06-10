@@ -1,5 +1,6 @@
 import { Binary, validateBinaryVector } from '../binary';
 import type { BSONSymbol, DBRef, Document, MaxKey } from '../bson';
+import { bsonType } from '../bson_value';
 import type { Code } from '../code';
 import * as constants from '../constants';
 import type { Decimal128 } from '../decimal128';
@@ -206,7 +207,7 @@ function serializeMinMax(buffer: Uint8Array, key: string, value: MinKey | MaxKey
   // Write the type of either min or max key
   if (value === null) {
     buffer[index++] = constants.BSON_DATA_NULL;
-  } else if (value._bsontype === 'MinKey') {
+  } else if (value[bsonType] === 'MinKey') {
     buffer[index++] = constants.BSON_DATA_MIN_KEY;
   } else {
     buffer[index++] = constants.BSON_DATA_MAX_KEY;
@@ -276,7 +277,7 @@ function serializeDecimal128(buffer: Uint8Array, key: string, value: Decimal128,
 function serializeLong(buffer: Uint8Array, key: string, value: Long, index: number) {
   // Write the type
   buffer[index++] =
-    value._bsontype === 'Long' ? constants.BSON_DATA_LONG : constants.BSON_DATA_TIMESTAMP;
+    value[bsonType] === 'Long' ? constants.BSON_DATA_LONG : constants.BSON_DATA_TIMESTAMP;
   // Number of written bytes
   const numberOfWrittenBytes = ByteUtils.encodeUTF8Into(buffer, key, index);
   // Encode the name
@@ -640,16 +641,16 @@ export function serializeInto(
       if (value[constants.BSON_VERSION_SYMBOL] !== constants.BSON_MAJOR_VERSION) {
         throw new BSONVersionError();
       }
-      const bsontype = value._bsontype;
-      if (bsontype === 'ObjectId') {
+      const tag = value[bsonType];
+      if (tag === 'ObjectId') {
         index = serializeObjectId(buffer, key, value, index);
-      } else if (bsontype === 'Decimal128') {
+      } else if (tag === 'Decimal128') {
         index = serializeDecimal128(buffer, key, value, index);
-      } else if (bsontype === 'Long' || bsontype === 'Timestamp') {
+      } else if (tag === 'Long' || tag === 'Timestamp') {
         index = serializeLong(buffer, key, value, index);
-      } else if (bsontype === 'Double') {
+      } else if (tag === 'Double') {
         index = serializeDouble(buffer, key, value, index);
-      } else if (bsontype === 'Code') {
+      } else if (tag === 'Code') {
         const codeValue = value as Code;
         if (codeValue.scope && typeof codeValue.scope === 'object') {
           buffer[index++] = constants.BSON_DATA_CODE_W_SCOPE;
@@ -679,11 +680,11 @@ export function serializeInto(
           index = index + 4 + size - 1;
           buffer[index++] = 0;
         }
-      } else if (bsontype === 'Binary') {
+      } else if (tag === 'Binary') {
         index = serializeBinary(buffer, key, value, index);
-      } else if (bsontype === 'BSONSymbol') {
+      } else if (tag === 'BSONSymbol') {
         index = serializeSymbol(buffer, key, value, index);
-      } else if (bsontype === 'DBRef') {
+      } else if (tag === 'DBRef') {
         const dbref = value as DBRef;
         const orderedValues: Document = Object.assign(
           { $ref: dbref.collection, $id: dbref.oid },
@@ -696,14 +697,14 @@ export function serializeInto(
         path.add(orderedValues);
         currentFrame = makeFrame(orderedValues, index, null, frame);
         index += 4;
-      } else if (bsontype === 'BSONRegExp') {
+      } else if (tag === 'BSONRegExp') {
         index = serializeBSONRegExp(buffer, key, value, index);
-      } else if (bsontype === 'Int32') {
+      } else if (tag === 'Int32') {
         index = serializeInt32(buffer, key, value, index);
-      } else if (bsontype === 'MinKey' || bsontype === 'MaxKey') {
+      } else if (tag === 'MinKey' || tag === 'MaxKey') {
         index = serializeMinMax(buffer, key, value, index);
-      } else if (typeof bsontype !== 'undefined') {
-        throw new BSONError(`Unrecognized or invalid _bsontype: ${String(bsontype)}`);
+      } else if (typeof value._bsontype !== 'undefined') {
+        throw new BSONError(`Unrecognized or invalid _bsontype: ${String(value._bsontype)}`);
       }
     } else if (type === 'function' && serializeFunctions) {
       index = serializeFunction(buffer, key, value, index);
