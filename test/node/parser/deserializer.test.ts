@@ -81,6 +81,32 @@ describe('deserializer()', () => {
       expect(code.scope.$id).to.be.instanceOf(BSON.ObjectId);
       expect(code.scope.$id.toHexString()).to.equal(oid.toHexString());
     });
+
+    it('throws a precise error when the scope document size field is negative', () => {
+      // Craft a code_w_scope element whose scope objectSize = -1.
+      //
+      // The totalSize cross-check computes:
+      //   4 (totalSize field) + 4 (string_size field) + stringSize + objectSize
+      // With stringSize = 6 ("hello\0") and objectSize = -1:
+      //   4 + 4 + 6 + (-1) = 13, which equals totalSize = 13.
+      // Both inequality guards pass, and 13 also clears the minimum-length check (>= 13).
+      //
+      // Without the objectSize <= 0 guard the frame is created with lastIndex = _index - 1.
+      // Since lastIndex is already behind the current index, the outer null terminator is
+      // consumed by the scope's terminator check, which fails the exact-match (index !== lastIndex)
+      // and throws 'Bad BSON Document: object not properly terminated' — pointing at the outer
+      // document rather than the malformed scope size field.  The fix produces a precise error
+      // from the right layer instead.
+      const buf = bufferFromHexArray([
+        '0f',                                    // BSON_DATA_CODE_W_SCOPE
+        '6600',                                  // key 'f' + null
+        int32LEToHex(13),                        // totalSize = 4+4+6+(-1) = 13
+        int32LEToHex(6),                         // code string length = 6 ("hello" + null)
+        '68656c6c6f00',                          // code string "hello\0"
+        'ffffffff'                               // scope objectSize = -1 — the malicious value
+      ]);
+      expect(() => BSON.deserialize(buf)).to.throw(BSON.BSONError, 'bad scope document size');
+    });
   });
 
   describe('when passing an evalFunctions option', () => {

@@ -704,6 +704,9 @@ function deserializeObject(
       // Decode the size of the object document
       const objectSize = NumberUtils.getInt32LE(buffer, index);
 
+      if (objectSize <= 0 || objectSize > buffer.length - index)
+        throw new BSONError('bad scope document size in code_w_scope');
+
       // Check if field length is too short
       if (totalSize < 4 + 4 + objectSize + stringSize) {
         throw new BSONError('code_w_scope total size is too short, truncating scope');
