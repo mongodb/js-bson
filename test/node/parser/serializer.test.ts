@@ -124,7 +124,9 @@ describe('serialize()', () => {
       it(`calculateObjectSize matches serialize byte count for DBRef with ${label} and ignoreUndefined option`, () => {
         const dbref = new BSON.DBRef('users', new BSON.ObjectId(), db, { extra: undefined });
         const doc = { ref: dbref };
-        expect(BSON.calculateObjectSize(doc, { ignoreUndefined: false })).to.equal(BSON.serialize(doc, { ignoreUndefined: false }).byteLength);
+        expect(BSON.calculateObjectSize(doc, { ignoreUndefined: false })).to.equal(
+          BSON.serialize(doc, { ignoreUndefined: false }).byteLength
+        );
       });
     }
   });

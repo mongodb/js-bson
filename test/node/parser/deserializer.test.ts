@@ -45,7 +45,6 @@ describe('deserializer()', () => {
       expect(result).to.have.property('_bsontype', 'DBRef');
       expect(result.fields).to.deep.equal({});
     });
-
   });
 
   describe('when the fieldsAsRaw options is present and has a value that corresponds to a key in the object', () => {

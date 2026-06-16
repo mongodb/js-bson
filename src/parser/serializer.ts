@@ -541,7 +541,14 @@ export function serializeInto(
 
   path.add(object);
 
-  let currentFrame: SerializationFrame | null = makeFrame(object, startingIndex, null, null, checkKeys, ignoreUndefined);
+  let currentFrame: SerializationFrame | null = makeFrame(
+    object,
+    startingIndex,
+    null,
+    null,
+    checkKeys,
+    ignoreUndefined
+  );
   let index = startingIndex + 4;
 
   while (currentFrame !== null) {
@@ -646,7 +653,14 @@ export function serializeInto(
         buffer[index++] = 0x00;
         const nestedStartIndex = index;
         path.add(value);
-        currentFrame = makeFrame(value, nestedStartIndex, null, frame, frame.checkKeys, frame.ignoreUndefined);
+        currentFrame = makeFrame(
+          value,
+          nestedStartIndex,
+          null,
+          frame,
+          frame.checkKeys,
+          frame.ignoreUndefined
+        );
         index += 4;
       }
     } else if (type === 'object') {
@@ -680,7 +694,14 @@ export function serializeInto(
             throw new BSONError('Cannot convert circular structure to BSON');
           }
           path.add(scope);
-          currentFrame = makeFrame(scope, index, codeTotalSizeIndex, frame, frame.checkKeys, frame.ignoreUndefined);
+          currentFrame = makeFrame(
+            scope,
+            index,
+            codeTotalSizeIndex,
+            frame,
+            frame.checkKeys,
+            frame.ignoreUndefined
+          );
           index += 4;
         } else {
           buffer[index++] = constants.BSON_DATA_CODE;
