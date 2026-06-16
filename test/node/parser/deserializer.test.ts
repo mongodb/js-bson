@@ -83,27 +83,30 @@ describe('deserializer()', () => {
     });
 
     it('throws a precise error when the scope document size field is negative', () => {
-      // Craft a code_w_scope element whose scope objectSize = -1.
-      //
-      // The totalSize cross-check computes:
-      //   4 (totalSize field) + 4 (string_size field) + stringSize + objectSize
-      // With stringSize = 6 ("hello\0") and objectSize = -1:
-      //   4 + 4 + 6 + (-1) = 13, which equals totalSize = 13.
-      // Both inequality guards pass, and 13 also clears the minimum-length check (>= 13).
-      //
-      // Without the objectSize <= 0 guard the frame is created with lastIndex = _index - 1.
-      // Since lastIndex is already behind the current index, the outer null terminator is
-      // consumed by the scope's terminator check, which fails the exact-match (index !== lastIndex)
-      // and throws 'Bad BSON Document: object not properly terminated' — pointing at the outer
-      // document rather than the malformed scope size field.  The fix produces a precise error
-      // from the right layer instead.
+      // objectSize = -1 satisfies the totalSize cross-check (4+4+6+(-1) = 13 = totalSize),
+      // so only the direct size guard catches it.
       const buf = bufferFromHexArray([
-        '0f',                                    // BSON_DATA_CODE_W_SCOPE
-        '6600',                                  // key 'f' + null
-        int32LEToHex(13),                        // totalSize = 4+4+6+(-1) = 13
-        int32LEToHex(6),                         // code string length = 6 ("hello" + null)
-        '68656c6c6f00',                          // code string "hello\0"
-        'ffffffff'                               // scope objectSize = -1 — the malicious value
+        '0f', // BSON_DATA_CODE_W_SCOPE
+        '6600', // key 'f' + null
+        int32LEToHex(13), // totalSize = 4+4+6+(-1) = 13
+        int32LEToHex(6), // code string length = 6 ("hello" + null)
+        '68656c6c6f00', // code string "hello\0"
+        'ffffffff' // scope objectSize = -1
+      ]);
+      expect(() => BSON.deserialize(buf)).to.throw(BSON.BSONError, 'bad scope document size');
+    });
+
+    it('throws a precise error when the scope document size is too small to be a valid BSON document', () => {
+      // objectSize = 4 is positive so it passes a naive (<= 0) guard, but a valid BSON document
+      // requires at least 5 bytes: the 4-byte int32 size header plus the 0x00 terminator.
+      // totalSize = 4+4+6+4 = 18, which satisfies the cross-check, so only the < 5 guard catches it.
+      const buf = bufferFromHexArray([
+        '0f', // BSON_DATA_CODE_W_SCOPE
+        '6600', // key 'f' + null
+        int32LEToHex(18), // totalSize = 4+4+6+4 = 18
+        int32LEToHex(6), // code string length = 6 ("hello" + null)
+        '68656c6c6f00', // code string "hello\0"
+        int32LEToHex(4) // scope objectSize = 4 — positive but structurally impossible
       ]);
       expect(() => BSON.deserialize(buf)).to.throw(BSON.BSONError, 'bad scope document size');
     });
@@ -312,6 +315,16 @@ describe('deserializer()', () => {
       );
     });
 
+    it('throws "bad embedded array length in bson" for a nested array with a too-small size', () => {
+      const valid = Buffer.from(BSON.serialize({ a: [new BSON.Int32(1)] }));
+      const arraySizeOffset = 7;
+      valid.writeInt32LE(4, arraySizeOffset);
+      expect(() => BSON.deserialize(valid)).to.throw(
+        BSON.BSONError,
+        'bad embedded array length in bson'
+      );
+    });
+
     it('throws "bad embedded array length in bson" for a nested array whose size exceeds the buffer', () => {
       const valid = Buffer.from(BSON.serialize({ a: [new BSON.Int32(1)] }));
       const arraySizeOffset = 7;
@@ -319,6 +332,47 @@ describe('deserializer()', () => {
       expect(() => BSON.deserialize(valid)).to.throw(
         BSON.BSONError,
         'bad embedded array length in bson'
+      );
+    });
+
+    it('throws "bad embedded document length in bson" for a nested object with size zero', () => {
+      const valid = Buffer.from(BSON.serialize({ a: { b: new BSON.Int32(1) } }));
+      // Layout: [outer size(4)][0x03 type(1)]['a\0'(2)][inner object size(4)...]
+      const objectSizeOffset = 7;
+      valid.writeInt32LE(0, objectSizeOffset);
+      expect(() => BSON.deserialize(valid)).to.throw(
+        BSON.BSONError,
+        'bad embedded document length in bson'
+      );
+    });
+
+    it('throws "bad embedded document length in bson" for a nested object with a negative size', () => {
+      const valid = Buffer.from(BSON.serialize({ a: { b: new BSON.Int32(1) } }));
+      const objectSizeOffset = 7;
+      valid.writeInt32LE(-1, objectSizeOffset);
+      expect(() => BSON.deserialize(valid)).to.throw(
+        BSON.BSONError,
+        'bad embedded document length in bson'
+      );
+    });
+
+    it('throws "bad embedded document length in bson" for a nested object with a too-small size', () => {
+      const valid = Buffer.from(BSON.serialize({ a: { b: new BSON.Int32(1) } }));
+      const objectSizeOffset = 7;
+      valid.writeInt32LE(4, objectSizeOffset);
+      expect(() => BSON.deserialize(valid)).to.throw(
+        BSON.BSONError,
+        'bad embedded document length in bson'
+      );
+    });
+
+    it('throws "bad embedded document length in bson" for a nested object whose size exceeds the buffer', () => {
+      const valid = Buffer.from(BSON.serialize({ a: { b: new BSON.Int32(1) } }));
+      const objectSizeOffset = 7;
+      valid.writeInt32LE(valid.length + 1, objectSizeOffset);
+      expect(() => BSON.deserialize(valid)).to.throw(
+        BSON.BSONError,
+        'bad embedded document length in bson'
       );
     });
   });
