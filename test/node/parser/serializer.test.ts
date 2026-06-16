@@ -42,6 +42,27 @@ describe('serialize()', () => {
     expect(emptyDocumentNull).to.deep.equal(nestedNull);
   });
 
+  it('does not throw when checkKeys=true and a DBRef has a $-prefixed extra field', () => {
+    const dbref = new BSON.DBRef('col', new BSON.ObjectId(), undefined, { $custom: 1 });
+    const bytes = BSON.serialize({ ref: dbref }, { checkKeys: true });
+    const result = BSON.deserialize(bytes) as { ref: BSON.DBRef };
+    expect(result.ref).to.have.property('$custom', 1);
+  });
+
+  it('omits undefined DBRef extra fields even when ignoreUndefined=false', () => {
+    const dbref = new BSON.DBRef('col', new BSON.ObjectId(), undefined, { extra: undefined });
+    const bytes = BSON.serialize({ ref: dbref }, { ignoreUndefined: false });
+    const result = BSON.deserialize(bytes) as { ref: BSON.DBRef };
+    expect(result.ref.fields).not.to.have.property('extra');
+  });
+
+  it('calculateObjectSize matches serialize byteLength for DBRef with undefined fields when ignoreUndefined=false', () => {
+    const dbref = new BSON.DBRef('col', new BSON.ObjectId(), undefined, { extra: undefined });
+    const doc = { ref: dbref };
+    const bytes = BSON.serialize(doc, { ignoreUndefined: false });
+    expect(BSON.calculateObjectSize(doc, { ignoreUndefined: false })).to.equal(bytes.byteLength);
+  });
+
   describe('when serializing deeply nested documents', () => {
     it('can serialize a document with 20,000 nesting levels without a stack overflow', () => {
       // Calling serialize directly: if it throws, mocha fails the test.
@@ -90,6 +111,20 @@ describe('serialize()', () => {
         const dbref = new BSON.DBRef('users', new BSON.ObjectId(), db);
         const doc = { ref: dbref };
         expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+      });
+    }
+  });
+
+  describe('DBRef serialization consistency with calculateObjectSize and ignoreUndefined', () => {
+    for (const [label, db] of [
+      ['empty string db', ''],
+      ['defined db', 'mydb'],
+      ['undefined db', undefined]
+    ] as const) {
+      it(`calculateObjectSize matches serialize byte count for DBRef with ${label} and ignoreUndefined option`, () => {
+        const dbref = new BSON.DBRef('users', new BSON.ObjectId(), db, { extra: undefined });
+        const doc = { ref: dbref };
+        expect(BSON.calculateObjectSize(doc, { ignoreUndefined: false })).to.equal(BSON.serialize(doc, { ignoreUndefined: false }).byteLength);
       });
     }
   });

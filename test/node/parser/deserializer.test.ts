@@ -46,23 +46,6 @@ describe('deserializer()', () => {
       expect(result.fields).to.deep.equal({});
     });
 
-    it('does not throw when checkKeys=true and a DBRef has a $-prefixed extra field', () => {
-      // Old serializeDBRef always used checkKeys=false internally.
-      // The new iterative serializer applies the ambient checkKeys to DBRef fields,
-      // causing this to throw BSONError when it should not.
-      const dbref = new BSON.DBRef('col', new BSON.ObjectId(), undefined, { $custom: 1 });
-      expect(() => BSON.serialize({ ref: dbref }, { checkKeys: true })).not.to.throw();
-    });
-
-    it('omits undefined DBRef extra fields even when ignoreUndefined=false', () => {
-      // Old serializeDBRef hardcoded ignoreUndefined=true for its inner serialization.
-      // New code uses the ambient value, so undefined fields become BSON null when
-      // the caller sets ignoreUndefined=false.
-      const dbref = new BSON.DBRef('col', new BSON.ObjectId(), undefined, { extra: undefined });
-      const bytes = BSON.serialize({ ref: dbref }, { ignoreUndefined: false });
-      const result = BSON.deserialize(bytes) as { ref: BSON.DBRef };
-      expect(result.ref.fields).not.to.have.property('extra');
-    });
   });
 
   describe('when the fieldsAsRaw options is present and has a value that corresponds to a key in the object', () => {
