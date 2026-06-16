@@ -360,7 +360,6 @@ describe('ObjectId', function () {
      */
     const oidString = '6b61666665656b6c61746368';
     const oid = new ObjectId(oidString);
-    const oidKId = 'buffer';
     it('should return false for an undefined otherId', () => {
       // otherId === undefined || otherId === null
       expect(oid.equals(null)).to.be.false;
@@ -398,45 +397,46 @@ describe('ObjectId', function () {
       expect(oid.equals({ toHexString: () => 100 })).to.be.false;
     });
 
-    it('should not rely on toString for otherIds that are instanceof ObjectId', () => {
-      // Note: the method access the symbol prop directly instead of the getter
-      const equalId = { toString: () => oidString + 'wrong', [oidKId]: oid.id };
-      Object.setPrototypeOf(equalId, ObjectId.prototype);
+    it('does not rely on toString when comparing against another ObjectId', () => {
+      // A real ObjectId with the same bytes; tampering with toString must not change the result,
+      // because equality of two ObjectId instances is by value, not by their string form.
+      const equalId = new ObjectId(oid.id);
+      equalId.toString = () => oidString + 'wrong';
       expect(oid.toString()).to.not.equal(equalId.toString());
       expect(oid.equals(equalId)).to.be.true;
     });
 
-    it('should use otherId[kId] Buffer for equality when otherId has _bsontype === ObjectId', () => {
-      let equalId = { _bsontype: 'ObjectId', [oidKId]: oid.id };
+    it('compares by value against an ObjectId from a different bson build', () => {
+      // A different copy of bson yields ObjectIds with the same _bsontype and public API but a
+      // different internal layout; equality must fall back to the public hex representation.
+      const foreignEqual = {
+        _bsontype: 'ObjectId',
+        id: oid.id,
+        toHexString: () => oidString
+      } as unknown as ObjectId;
+      const other = new ObjectId();
+      const foreignOther = {
+        _bsontype: 'ObjectId',
+        id: other.id,
+        toHexString: () => other.toHexString()
+      } as unknown as ObjectId;
 
-      const propAccessRecord: string[] = [];
-      equalId = new Proxy(equalId, {
-        get(target, prop: string, recv) {
-          if (prop !== '_bsontype') {
-            propAccessRecord.push(prop);
-          }
-          return Reflect.get(target, prop, recv);
-        }
-      });
-
-      expect(oid.equals(equalId)).to.be.true;
-      // once for the 11th byte shortcut
-      // once for the total equality
-      expect(propAccessRecord).to.deep.equal([oidKId, oidKId]);
+      expect(oid.equals(foreignEqual)).to.be.true;
+      expect(oid.equals(foreignOther)).to.be.false;
     });
   });
 
-  it('should return the same instance if a buffer is passed in', function () {
-    const inBuffer = Buffer.from('00'.repeat(12), 'hex');
+  it('preserves the bytes of a buffer passed to the constructor', function () {
+    const inBuffer = Buffer.from('00112233445566778899aabb', 'hex');
 
-    const outBuffer = new ObjectId(inBuffer);
+    const objectId = new ObjectId(inBuffer);
 
-    // instance equality
-    expect(inBuffer).to.equal(outBuffer.id);
-    // deep equality
-    expect(inBuffer).to.deep.equal(outBuffer.id);
-    // class method equality
-    expect(Buffer.prototype.equals.call(inBuffer, outBuffer.id)).to.be.true;
+    // .id is rebuilt from the stored fields on each access, so it is a distinct buffer instance
+    expect(objectId.id).to.not.equal(inBuffer);
+    // with equal contents
+    expect(objectId.id).to.deep.equal(inBuffer);
+    expect(Buffer.prototype.equals.call(inBuffer, objectId.id)).to.be.true;
+    expect(objectId.toHexString()).to.equal('00112233445566778899aabb');
   });
 
   context('createFromHexString()', () => {

@@ -399,9 +399,9 @@ function deserializeObject(
       value = ByteUtils.toUTF8(buffer, index, index + stringSize - 1, shouldValidateKey);
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_OID) {
-      const oid = ByteUtils.allocateUnsafe(12);
-      for (let i = 0; i < 12; i++) oid[i] = buffer[index + i];
-      value = new ObjectId(oid);
+      // ObjectId copies these bytes into its own fields and keeps no reference to the source,
+      // so it is safe to hand it a view onto the wire buffer.
+      value = new ObjectId(buffer.subarray(index, index + 12));
       index = index + 12;
     } else if (elementType === constants.BSON_DATA_INT && promoteValues === false) {
       value = new Int32(NumberUtils.getInt32LE(buffer, index));
