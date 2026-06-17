@@ -10,11 +10,15 @@ export function internalCalculateObjectSize(
   serializeFunctions?: boolean,
   ignoreUndefined?: boolean
 ): number {
-  const objectStack: Document[] = [object];
+  // Each stack entry carries its own ignoreUndefined so DBRef fields can force ignoreUndefined=true
+  // regardless of the caller's setting, matching the behavior of serializeInto.
+  const objectStack: Array<{ obj: Document; ignoreUndefined: boolean }> = [
+    { obj: object, ignoreUndefined: ignoreUndefined ?? false }
+  ];
   let total = 0;
 
   while (objectStack.length > 0) {
-    const obj = objectStack.pop()!;
+    const { obj, ignoreUndefined: frameIgnoreUndefined } = objectStack.pop()!;
     total += 5; // 4-byte size field + null terminator
 
     const isObjArray = Array.isArray(obj);
@@ -33,7 +37,7 @@ export function internalCalculateObjectSize(
           array[i],
           serializeFunctions,
           true,
-          ignoreUndefined,
+          frameIgnoreUndefined,
           objectStack
         );
       }
@@ -44,7 +48,7 @@ export function internalCalculateObjectSize(
           target[key],
           serializeFunctions,
           false,
-          ignoreUndefined,
+          frameIgnoreUndefined,
           objectStack
         );
       }
@@ -62,7 +66,7 @@ function calculateElementSize(
   serializeFunctions = false,
   isArray = false,
   ignoreUndefined = false,
-  objectStack: Document[]
+  objectStack: Array<{ obj: Document; ignoreUndefined: boolean }>
 ): number {
   // If we have toBSON defined, override the current object
   if (typeof value?.toBSON === 'function') {
@@ -123,7 +127,7 @@ function calculateElementSize(
       } else if (value._bsontype === 'Code') {
         // Calculate size depending on the availability of a scope
         if (value.scope != null && Object.keys(value.scope).length > 0) {
-          objectStack.push(value.scope);
+          objectStack.push({ obj: value.scope, ignoreUndefined });
           return (
             ByteUtils.utf8ByteLength(name) +
             1 +
@@ -170,7 +174,8 @@ function calculateElementSize(
           ordered_values['$db'] = value.db;
         }
 
-        objectStack.push(ordered_values);
+        // DBRef fields always use ignoreUndefined=true to match serializeInto behavior.
+        objectStack.push({ obj: ordered_values, ignoreUndefined: true });
         return ByteUtils.utf8ByteLength(name) + 1 + 1;
       } else if (value instanceof RegExp || isRegExp(value)) {
         return (
@@ -195,7 +200,7 @@ function calculateElementSize(
           1
         );
       } else {
-        objectStack.push(value);
+        objectStack.push({ obj: value, ignoreUndefined });
         return ByteUtils.utf8ByteLength(name) + 1 + 1;
       }
     case 'function':

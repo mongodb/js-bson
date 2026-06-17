@@ -428,13 +428,19 @@ interface SerializationFrame {
   mapIterator: IterableIterator<[unknown, unknown]> | null;
   /** The enclosing frame, or null at the root. The stack is a linked list via this field. */
   prev: SerializationFrame | null;
+  /** Whether to validate keys for this frame's document (may differ from caller, e.g. DBRef uses false). */
+  checkKeys: boolean;
+  /** Whether undefined values are skipped (may differ from caller, e.g. DBRef uses true). */
+  ignoreUndefined: boolean;
 }
 
 function makeFrame(
   sourceObject: Document,
   objectSizeIndex: number,
   codeSizeIndex: number | null,
-  prev: SerializationFrame | null
+  prev: SerializationFrame | null,
+  checkKeys: boolean,
+  ignoreUndefined: boolean
 ): SerializationFrame {
   if (Array.isArray(sourceObject)) {
     return {
@@ -446,7 +452,9 @@ function makeFrame(
       keys: null,
       keyIndex: 0,
       mapIterator: null,
-      prev
+      prev,
+      checkKeys,
+      ignoreUndefined
     };
   }
   if (sourceObject instanceof Map || isMap(sourceObject)) {
@@ -459,7 +467,9 @@ function makeFrame(
       keys: null,
       keyIndex: 0,
       mapIterator: (sourceObject as Map<unknown, unknown>).entries(),
-      prev
+      prev,
+      checkKeys,
+      ignoreUndefined
     };
   }
   // Plain object: call toBSON() if defined to obtain the object to iterate.
@@ -481,7 +491,9 @@ function makeFrame(
     keys: Object.keys(target as object),
     keyIndex: 0,
     mapIterator: null,
-    prev
+    prev,
+    checkKeys,
+    ignoreUndefined
   };
 }
 
@@ -529,7 +541,14 @@ export function serializeInto(
 
   path.add(object);
 
-  let currentFrame: SerializationFrame | null = makeFrame(object, startingIndex, null, null);
+  let currentFrame: SerializationFrame | null = makeFrame(
+    object,
+    startingIndex,
+    null,
+    null,
+    checkKeys,
+    ignoreUndefined
+  );
   let index = startingIndex + 4;
 
   while (currentFrame !== null) {
@@ -592,7 +611,7 @@ export function serializeInto(
       if (regexp.test(key)) {
         throw new BSONError('key ' + key + ' must not contain null bytes');
       }
-      if (checkKeys) {
+      if (frame.checkKeys) {
         if ('$' === key[0]) {
           throw new BSONError('key ' + key + " must not start with '$'");
         } else if (key.includes('.')) {
@@ -604,7 +623,7 @@ export function serializeInto(
     const type = typeof value;
 
     if (value === undefined) {
-      if (frame.isArray || ignoreUndefined === false) {
+      if (frame.isArray || frame.ignoreUndefined === false) {
         index = serializeNull(buffer, key, value, index);
       }
     } else if (value === null) {
@@ -634,7 +653,14 @@ export function serializeInto(
         buffer[index++] = 0x00;
         const nestedStartIndex = index;
         path.add(value);
-        currentFrame = makeFrame(value, nestedStartIndex, null, frame);
+        currentFrame = makeFrame(
+          value,
+          nestedStartIndex,
+          null,
+          frame,
+          frame.checkKeys,
+          frame.ignoreUndefined
+        );
         index += 4;
       }
     } else if (type === 'object') {
@@ -668,7 +694,14 @@ export function serializeInto(
             throw new BSONError('Cannot convert circular structure to BSON');
           }
           path.add(scope);
-          currentFrame = makeFrame(scope, index, codeTotalSizeIndex, frame);
+          currentFrame = makeFrame(
+            scope,
+            index,
+            codeTotalSizeIndex,
+            frame,
+            frame.checkKeys,
+            frame.ignoreUndefined
+          );
           index += 4;
         } else {
           buffer[index++] = constants.BSON_DATA_CODE;
@@ -695,7 +728,7 @@ export function serializeInto(
         index += ByteUtils.encodeUTF8Into(buffer, key, index);
         buffer[index++] = 0x00;
         path.add(orderedValues);
-        currentFrame = makeFrame(orderedValues, index, null, frame);
+        currentFrame = makeFrame(orderedValues, index, null, frame, false, true);
         index += 4;
       } else if (tag === 'BSONRegExp') {
         index = serializeBSONRegExp(buffer, key, value, index);
