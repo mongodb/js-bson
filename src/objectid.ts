@@ -178,6 +178,21 @@ export class ObjectId extends BSONValue {
     // workingId is set based on type of input and whether valid id exists for the input
     let workingId;
     if (typeof inputId === 'object' && inputId && 'id' in inputId) {
+      if (
+        ObjectId.is(inputId) &&
+        typeof inputId.i0 === 'number' &&
+        typeof inputId.i1 === 'number' &&
+        typeof inputId.i2 === 'number' &&
+        typeof inputId.i3 === 'number'
+      ) {
+        // Same-build ObjectId: copy the packed fields directly. The general path below would
+        // hit the id getter (which allocates) and then re-decode a hex round trip.
+        this.i0 = inputId.i0;
+        this.i1 = inputId.i1;
+        this.i2 = inputId.i2;
+        this.i3 = inputId.i3;
+        return;
+      }
       if (typeof inputId.id !== 'string' && !ArrayBuffer.isView(inputId.id)) {
         throw new BSONError('Argument passed in must have an id that is of type string or Buffer');
       }

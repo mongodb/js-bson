@@ -304,6 +304,26 @@ describe('ObjectId', function () {
     done();
   });
 
+  it('constructs a structurally equal copy from another ObjectId instance', function () {
+    const original = new ObjectId('6b61666665656b6c61746368');
+    const copy = new ObjectId(original);
+    expect(copy.equals(original)).to.be.true;
+    expect(copy.id).to.deep.equal(original.id);
+    expect(copy.toHexString()).to.equal(original.toHexString());
+    // The copy holds the same packed fields, so a structural comparison treats the two as equal.
+    expect(copy).to.deep.equal(original);
+  });
+
+  it('constructs from a different-build ObjectId-like via its hex representation', function () {
+    const hex = '6b61666665656b6c61746368';
+    const foreign = {
+      _bsontype: 'ObjectId',
+      id: new ObjectId(hex).id,
+      toHexString: () => hex
+    } as unknown as ObjectId;
+    expect(new ObjectId(foreign).toHexString()).to.equal(hex);
+  });
+
   context('isValid()', () => {
     context('when called with typed array', () => {
       it('returns true for 12 byteLength', () =>
