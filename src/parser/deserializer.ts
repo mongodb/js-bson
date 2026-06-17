@@ -399,8 +399,8 @@ function deserializeObject(
       value = ByteUtils.toUTF8(buffer, index, index + stringSize - 1, shouldValidateKey);
       index = index + stringSize;
     } else if (elementType === constants.BSON_DATA_OID) {
-      // ObjectId reads the 12 bytes directly from the wire buffer at this offset into its
-      // fields and keeps no reference to it, so there is no copy or intermediate view.
+      // ObjectId reads these 12 bytes from the wire buffer at this offset into its own fields
+      // and keeps no reference to the source, so the buffer can be passed directly.
       value = new ObjectId(buffer, index);
       index = index + 12;
     } else if (elementType === constants.BSON_DATA_INT && promoteValues === false) {

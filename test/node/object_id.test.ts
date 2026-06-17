@@ -424,6 +424,17 @@ describe('ObjectId', function () {
       expect(oid.equals(foreignEqual)).to.be.true;
       expect(oid.equals(foreignOther)).to.be.false;
     });
+
+    it('falls back to hex when the other id is ObjectId-like with a stray numeric i3', () => {
+      // _bsontype 'ObjectId' plus a numeric `i3` must not trigger the same-build fast path;
+      // without all four packed fields it should compare by the public hex string.
+      const lookalike = {
+        _bsontype: 'ObjectId',
+        i3: 123,
+        toHexString: () => oidString
+      } as unknown as ObjectId;
+      expect(oid.equals(lookalike)).to.be.true;
+    });
   });
 
   it('preserves the bytes of a buffer passed to the constructor', function () {
@@ -437,6 +448,14 @@ describe('ObjectId', function () {
     expect(objectId.id).to.deep.equal(inBuffer);
     expect(Buffer.prototype.equals.call(inBuffer, objectId.id)).to.be.true;
     expect(objectId.toHexString()).to.equal('00112233445566778899aabb');
+  });
+
+  it('accepts a non-Uint8Array view of 12 bytes', function () {
+    const hex = '0011223344556677889900ff';
+    const ab = new ArrayBuffer(12);
+    new Uint8Array(ab).set(Buffer.from(hex, 'hex'));
+    expect(new ObjectId(new Int8Array(ab) as unknown as Uint8Array).toHexString()).to.equal(hex);
+    expect(new ObjectId(new Uint16Array(ab) as unknown as Uint8Array).toHexString()).to.equal(hex);
   });
 
   context('createFromHexString()', () => {

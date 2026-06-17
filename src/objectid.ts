@@ -68,9 +68,8 @@ export class ObjectId extends BSONValue {
   /**
    * The 12 ObjectId bytes packed as four 24-bit integers (bytes 0-2, 3-5, 6-8, 9-11).
    * The 24-bit width keeps each value inside V8's small-integer (Smi) range so it stays stored
-   * inline, which keeps the object small. The fields are enumerable own properties (not `#`
-   * private) so two ObjectIds with the same bytes stay equal under structural comparison such
-   * as deepStrictEqual.
+   * inline, which keeps the object small. The fields are enumerable own properties, so two
+   * ObjectIds with the same bytes stay equal under structural comparison such as deepStrictEqual.
    * @internal
    */
   private i0!: number;
@@ -159,8 +158,8 @@ export class ObjectId extends BSONValue {
    */
   constructor(inputId?: string | ObjectId | ObjectIdLike | Uint8Array);
   /**
-   * Read 12 bytes from `source` starting at `offset` into a new ObjectId, without allocating an
-   * intermediate view. Used by the deserializer on a hot path.
+   * Read 12 bytes from `source` starting at `offset` directly into the packed fields.
+   * Used by the deserializer on a hot path.
    * @internal
    */
   constructor(source: Uint8Array, offset: number);
@@ -203,7 +202,11 @@ export class ObjectId extends BSONValue {
       this.i2 = (pu[2] << 16) | (pu[3] << 8) | pu[4];
       this.i3 = inc & 0xffffff;
     } else if (ArrayBuffer.isView(workingId) && workingId.byteLength === 12) {
-      this.setFromBytes(workingId);
+      // Normalize a non-Uint8Array view (DataView, Int8Array, ...) to a byte buffer so its
+      // bytes are read correctly.
+      this.setFromBytes(
+        workingId instanceof Uint8Array ? workingId : ByteUtils.toLocalBufferType(workingId)
+      );
     } else if (typeof workingId === 'string') {
       if (ObjectId.validateHexString(workingId)) {
         this.setFromHex(workingId);
@@ -244,9 +247,10 @@ export class ObjectId extends BSONValue {
   }
 
   set id(value: Uint8Array) {
-    this.setFromBytes(value);
+    const bytes = value instanceof Uint8Array ? value : ByteUtils.toLocalBufferType(value);
+    this.setFromBytes(bytes);
     if (ObjectId.cacheHexString) {
-      __idCache.set(this, ByteUtils.toHex(value));
+      __idCache.set(this, ByteUtils.toHex(bytes));
     }
   }
 
@@ -381,9 +385,15 @@ export class ObjectId extends BSONValue {
       return false;
     }
 
-    if (ObjectId.is(otherId) && typeof otherId.i3 === 'number') {
-      // Same-build ObjectId: compare the packed integer fields directly. i3 (the counter /
-      // low bytes) differs most often between two ids, so checking it first fails fast.
+    if (
+      ObjectId.is(otherId) &&
+      typeof otherId.i0 === 'number' &&
+      typeof otherId.i1 === 'number' &&
+      typeof otherId.i2 === 'number' &&
+      typeof otherId.i3 === 'number'
+    ) {
+      // Same-build ObjectId (all four packed fields present): compare them directly. i3 (the
+      // counter / low bytes) differs most often between two ids, so checking it first fails fast.
       return (
         this.i3 === otherId.i3 &&
         this.i0 === otherId.i0 &&
