@@ -71,22 +71,22 @@ export class ObjectId extends BSONValue {
    * inline, which keeps the object small. The fields are enumerable own properties (not `#`
    * private) so two ObjectIds with the same bytes stay equal under structural comparison such
    * as deepStrictEqual.
+   * @internal
    */
-  // @internal
   private i0!: number;
-  // @internal
+  /** @internal */
   private i1!: number;
-  // @internal
+  /** @internal */
   private i2!: number;
-  // @internal
+  /** @internal */
   private i3!: number;
 
   /** Pack 12 bytes into the four integer fields. @internal */
-  private setFromBytes(b: Uint8Array): void {
-    this.i0 = (b[0] << 16) | (b[1] << 8) | b[2];
-    this.i1 = (b[3] << 16) | (b[4] << 8) | b[5];
-    this.i2 = (b[6] << 16) | (b[7] << 8) | b[8];
-    this.i3 = (b[9] << 16) | (b[10] << 8) | b[11];
+  private setFromBytes(b: Uint8Array, offset = 0): void {
+    this.i0 = (b[offset] << 16) | (b[offset + 1] << 8) | b[offset + 2];
+    this.i1 = (b[offset + 3] << 16) | (b[offset + 4] << 8) | b[offset + 5];
+    this.i2 = (b[offset + 6] << 16) | (b[offset + 7] << 8) | b[offset + 8];
+    this.i3 = (b[offset + 9] << 16) | (b[offset + 10] << 8) | b[offset + 11];
   }
 
   /**
@@ -159,12 +159,23 @@ export class ObjectId extends BSONValue {
    */
   constructor(inputId?: string | ObjectId | ObjectIdLike | Uint8Array);
   /**
+   * Read 12 bytes from `source` starting at `offset` into a new ObjectId, without allocating an
+   * intermediate view. Used by the deserializer on a hot path.
+   * @internal
+   */
+  constructor(source: Uint8Array, offset: number);
+  /**
    * Create a new ObjectId.
    *
    * @param inputId - An input value to create a new ObjectId from.
    */
-  constructor(inputId?: string | ObjectId | ObjectIdLike | Uint8Array) {
+  constructor(inputId?: string | ObjectId | ObjectIdLike | Uint8Array, offset?: number) {
     super();
+    if (typeof offset === 'number') {
+      // Fast path used by the deserializer: read the 12 bytes directly from source at offset.
+      this.setFromBytes(inputId as Uint8Array, offset);
+      return;
+    }
     // workingId is set based on type of input and whether valid id exists for the input
     let workingId;
     if (typeof inputId === 'object' && inputId && 'id' in inputId) {
