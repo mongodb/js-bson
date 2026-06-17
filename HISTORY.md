@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.3.0](https://github.com/mongodb/js-bson/compare/v7.2.0...v7.3.0) (2026-06-17)
+
+
+### Features
+
+* **NODE-7069:** deprecate Long members inapplicable to Timestamp ([#887](https://github.com/mongodb/js-bson/issues/887)) ([c5d1dd8](https://github.com/mongodb/js-bson/commit/c5d1dd89d933556a9c9880152156d15caa0f293b))
+
+
+### Bug Fixes
+
+* **NODE-5937:** rewrite deserializeObject as iterative, not recursive ([#886](https://github.com/mongodb/js-bson/issues/886)) ([0231603](https://github.com/mongodb/js-bson/commit/02316031eef6f31fbb3b00ab124acb9754826892))
+* **NODE-7354:** eagerly make Binary sub_type into a number ([#858](https://github.com/mongodb/js-bson/issues/858)) ([5b42c5a](https://github.com/mongodb/js-bson/commit/5b42c5a1535d45ec89ab9f1ed3bb249d09730e3c))
+* **NODE-7436:** EJSON.stringify type signature ([#870](https://github.com/mongodb/js-bson/issues/870)) ([c949780](https://github.com/mongodb/js-bson/commit/c94978003a8193bfeb8b0438910a099f410e27bf))
+* **NODE-7575:** reset ObjectId state when building startup snapshot ([#884](https://github.com/mongodb/js-bson/issues/884)) ([ba29d33](https://github.com/mongodb/js-bson/commit/ba29d33ff0ed5ba6fc63e598fe8b7e7879e4753f))
+* **NODE-7606:** restore serializer performance by removing generator-based iteration ([#890](https://github.com/mongodb/js-bson/issues/890)) ([7c4d1aa](https://github.com/mongodb/js-bson/commit/7c4d1aa04fadff6281a76d8f14d5539932be1913))
+* **NODE-7618:** propagate serializing flags to the parsing frames ([#891](https://github.com/mongodb/js-bson/issues/891)) ([a7cee8c](https://github.com/mongodb/js-bson/commit/a7cee8c14b35248506ed3cc282f1ffdcc4835567))
+* **NODE-7619:** reject embedded BSON document sizes below minimum valid length ([#892](https://github.com/mongodb/js-bson/issues/892)) ([b43c657](https://github.com/mongodb/js-bson/commit/b43c6571152bec06ac23b4e94304174515abf393))
+
 ## [7.2.0](https://github.com/mongodb/js-bson/compare/v7.1.1...v7.2.0) (2026-01-29)
 
 
