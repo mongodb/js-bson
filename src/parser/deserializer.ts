@@ -426,7 +426,7 @@ function deserializeObject(
     } else if (elementType === constants.BSON_DATA_OBJECT) {
       const objectSize = NumberUtils.getInt32LE(buffer, index);
 
-      if (objectSize <= 0 || objectSize > buffer.length - index)
+      if (objectSize < 5 || objectSize > buffer.length - index)
         throw new BSONError('bad embedded document length in bson');
 
       // We have a raw value: either the global raw option, or the parent frame requested raw elements.
@@ -456,7 +456,7 @@ function deserializeObject(
     } else if (elementType === constants.BSON_DATA_ARRAY) {
       const objectSize = NumberUtils.getInt32LE(buffer, index);
 
-      if (objectSize <= 0 || objectSize > buffer.length - index)
+      if (objectSize < 5 || objectSize > buffer.length - index)
         throw new BSONError('bad embedded array length in bson');
 
       // Stop index
@@ -703,6 +703,9 @@ function deserializeObject(
       const _index = index;
       // Decode the size of the object document
       const objectSize = NumberUtils.getInt32LE(buffer, index);
+
+      if (objectSize < 5 || objectSize > buffer.length - index)
+        throw new BSONError('bad scope document size in code_w_scope');
 
       // Check if field length is too short
       if (totalSize < 4 + 4 + objectSize + stringSize) {

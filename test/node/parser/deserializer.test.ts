@@ -81,6 +81,35 @@ describe('deserializer()', () => {
       expect(code.scope.$id).to.be.instanceOf(BSON.ObjectId);
       expect(code.scope.$id.toHexString()).to.equal(oid.toHexString());
     });
+
+    it('throws a precise error when the scope document size field is negative', () => {
+      // objectSize = -1 satisfies the totalSize cross-check (4+4+6+(-1) = 13 = totalSize),
+      // so only the direct size guard catches it.
+      const buf = bufferFromHexArray([
+        '0f', // BSON_DATA_CODE_W_SCOPE
+        '6600', // key 'f' + null
+        int32LEToHex(13), // totalSize = 4+4+6+(-1) = 13
+        int32LEToHex(6), // code string length = 6 ("hello" + null)
+        '68656c6c6f00', // code string "hello\0"
+        'ffffffff' // scope objectSize = -1
+      ]);
+      expect(() => BSON.deserialize(buf)).to.throw(BSON.BSONError, 'bad scope document size');
+    });
+
+    it('throws a precise error when the scope document size is too small to be a valid BSON document', () => {
+      // objectSize = 4 is positive so it passes a naive (<= 0) guard, but a valid BSON document
+      // requires at least 5 bytes: the 4-byte int32 size header plus the 0x00 terminator.
+      // totalSize = 4+4+6+4 = 18, which satisfies the cross-check, so only the < 5 guard catches it.
+      const buf = bufferFromHexArray([
+        '0f', // BSON_DATA_CODE_W_SCOPE
+        '6600', // key 'f' + null
+        int32LEToHex(18), // totalSize = 4+4+6+4 = 18
+        int32LEToHex(6), // code string length = 6 ("hello" + null)
+        '68656c6c6f00', // code string "hello\0"
+        int32LEToHex(4) // scope objectSize = 4 — positive but structurally impossible
+      ]);
+      expect(() => BSON.deserialize(buf)).to.throw(BSON.BSONError, 'bad scope document size');
+    });
   });
 
   describe('when passing an evalFunctions option', () => {
@@ -286,6 +315,16 @@ describe('deserializer()', () => {
       );
     });
 
+    it('throws "bad embedded array length in bson" for a nested array with a too-small size', () => {
+      const valid = Buffer.from(BSON.serialize({ a: [new BSON.Int32(1)] }));
+      const arraySizeOffset = 7;
+      valid.writeInt32LE(4, arraySizeOffset);
+      expect(() => BSON.deserialize(valid)).to.throw(
+        BSON.BSONError,
+        'bad embedded array length in bson'
+      );
+    });
+
     it('throws "bad embedded array length in bson" for a nested array whose size exceeds the buffer', () => {
       const valid = Buffer.from(BSON.serialize({ a: [new BSON.Int32(1)] }));
       const arraySizeOffset = 7;
@@ -293,6 +332,47 @@ describe('deserializer()', () => {
       expect(() => BSON.deserialize(valid)).to.throw(
         BSON.BSONError,
         'bad embedded array length in bson'
+      );
+    });
+
+    it('throws "bad embedded document length in bson" for a nested object with size zero', () => {
+      const valid = Buffer.from(BSON.serialize({ a: { b: new BSON.Int32(1) } }));
+      // Layout: [outer size(4)][0x03 type(1)]['a\0'(2)][inner object size(4)...]
+      const objectSizeOffset = 7;
+      valid.writeInt32LE(0, objectSizeOffset);
+      expect(() => BSON.deserialize(valid)).to.throw(
+        BSON.BSONError,
+        'bad embedded document length in bson'
+      );
+    });
+
+    it('throws "bad embedded document length in bson" for a nested object with a negative size', () => {
+      const valid = Buffer.from(BSON.serialize({ a: { b: new BSON.Int32(1) } }));
+      const objectSizeOffset = 7;
+      valid.writeInt32LE(-1, objectSizeOffset);
+      expect(() => BSON.deserialize(valid)).to.throw(
+        BSON.BSONError,
+        'bad embedded document length in bson'
+      );
+    });
+
+    it('throws "bad embedded document length in bson" for a nested object with a too-small size', () => {
+      const valid = Buffer.from(BSON.serialize({ a: { b: new BSON.Int32(1) } }));
+      const objectSizeOffset = 7;
+      valid.writeInt32LE(4, objectSizeOffset);
+      expect(() => BSON.deserialize(valid)).to.throw(
+        BSON.BSONError,
+        'bad embedded document length in bson'
+      );
+    });
+
+    it('throws "bad embedded document length in bson" for a nested object whose size exceeds the buffer', () => {
+      const valid = Buffer.from(BSON.serialize({ a: { b: new BSON.Int32(1) } }));
+      const objectSizeOffset = 7;
+      valid.writeInt32LE(valid.length + 1, objectSizeOffset);
+      expect(() => BSON.deserialize(valid)).to.throw(
+        BSON.BSONError,
+        'bad embedded document length in bson'
       );
     });
   });
