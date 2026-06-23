@@ -48,4 +48,19 @@ describe('calculateSize()', () => {
       expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
     });
   });
+
+  describe('when given an Int32 value with a single character key', function () {
+    it('returns 12 bytes (+4 bytes for document size + 1 type byte + 1 byte for "a" + 4 bytes int32 + 2 null terminators)', function () {
+      const doc = { a: new BSON.Int32(2) };
+      expect(BSON.calculateObjectSize(doc)).to.equal(4 + 1 + 1 + 4 + 1 + 1);
+      expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+    });
+  });
+
+  describe('when given a BSONSymbol value with a single character key', function () {
+    it('matches the serialized byte length', function () {
+      const doc = { a: new BSON.BSONSymbol('sym') };
+      expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+    });
+  });
 });
