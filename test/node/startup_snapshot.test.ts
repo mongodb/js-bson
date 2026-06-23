@@ -2,6 +2,7 @@ import * as child_process from 'node:child_process';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
+import * as vm from 'node:vm';
 import { promisify } from 'node:util';
 import { expect } from 'chai';
 
@@ -86,5 +87,15 @@ describe('snapshot support', () => {
     expect(oid1.uniq).to.not.equal(oid2.uniq);
     // Distinct counter values
     expect(oid1.counter).to.not.equal(oid2.counter);
+  });
+
+  it('allows loading the BSON bundle with varying degrees of `process` polyfilling', async () => {
+    const bsonBundleSource = path.join(__dirname, '..', '..', 'lib', 'bson.bundle.js');
+    const script = await fs.readFile(bsonBundleSource, 'utf8');
+    vm.runInNewContext(script, { __proto__: null });
+    vm.runInNewContext(script, { __proto__: null, process: {} });
+    vm.runInNewContext(script, { __proto__: null, process: { getBuiltinModule: null } });
+    vm.runInNewContext(script, { __proto__: null, process: { getBuiltinModule: () => null } });
+    vm.runInNewContext(script, { __proto__: null, process: { getBuiltinModule: () => ({}) } });
   });
 });
