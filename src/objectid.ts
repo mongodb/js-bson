@@ -47,9 +47,9 @@ export class ObjectId extends BSONValue {
     this.resetState();
     // https://nodejs.org/api/v8.html#startup-snapshot-api
     // @ts-expect-error Node.js types not present since this is an optional API
-    const { startupSnapshot } = globalThis?.process?.getBuiltinModule('v8') ?? {};
-    if (startupSnapshot?.isBuildingSnapshot()) {
-      startupSnapshot?.addDeserializeCallback(this.resetState);
+    const { startupSnapshot } = globalThis?.process?.getBuiltinModule?.('v8') ?? {};
+    if (startupSnapshot?.isBuildingSnapshot?.()) {
+      startupSnapshot?.addDeserializeCallback?.(this.resetState);
     }
   }
 
