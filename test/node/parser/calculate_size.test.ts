@@ -57,9 +57,24 @@ describe('calculateSize()', () => {
     });
   });
 
-  describe('when given a BSONSymbol value with a single character key', function () {
+  describe('when given an array of Int32 values', function () {
     it('matches the serialized byte length', function () {
+      const doc = { a: [new BSON.Int32(1), new BSON.Int32(2)] };
+      expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+    });
+  });
+
+  describe('when given an Int32 value nested in a subdocument', function () {
+    it('matches the serialized byte length', function () {
+      const doc = { a: { b: new BSON.Int32(1) } };
+      expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+    });
+  });
+
+  describe('when given a BSONSymbol value with a single character key', function () {
+    it('returns the exact byte count (+4 bytes for document size + 1 type byte + 1 byte for "a" + 4 bytes string length + 4 bytes "sym\\0" + 2 null terminators)', function () {
       const doc = { a: new BSON.BSONSymbol('sym') };
+      expect(BSON.calculateObjectSize(doc)).to.equal(4 + 1 + 1 + 4 + 4 + 1 + 1);
       expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
     });
   });
