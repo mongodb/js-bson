@@ -48,7 +48,7 @@
     "magic-string": "^0.30.11",
     "mocha": "^11.7.1",
     "node-fetch": "^3.3.2",
-    "nyc": "^17.1.0",
+    "nyc": "^18.0.0",
     "prettier": "^3.5.3",
     "rollup": "^4.40.1",
     "sinon": "^21.0.0",
@@ -59,7 +59,7 @@
     "tsd": "^0.33.0",
     "typescript": "^5.8.3",
     "typescript-cached-transpile": "0.0.6",
-    "uuid": "^13.0.0"
+    "uuid": "^14.0.1"
   },
   "tsd": {
     "directory": "test/types",
