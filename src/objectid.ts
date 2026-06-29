@@ -2,6 +2,7 @@ import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import { type InspectFn, defaultInspect } from './parser/utils';
 import { ByteUtils } from './utils/byte_utils';
+import { getNodeStartupSnapshot, isNodeProcessCurrentlyBuildingSnapshot } from './utils/node_utils';
 import { NumberUtils } from './utils/number_utils';
 
 /** ObjectId hexString cache @internal */
@@ -46,9 +47,8 @@ export class ObjectId extends BSONValue {
   static {
     this.resetState();
     // https://nodejs.org/api/v8.html#startup-snapshot-api
-    // @ts-expect-error Node.js types not present since this is an optional API
-    const { startupSnapshot } = globalThis?.process?.getBuiltinModule?.('v8') ?? {};
-    if (startupSnapshot?.isBuildingSnapshot?.()) {
+    const startupSnapshot = getNodeStartupSnapshot();
+    if (isNodeProcessCurrentlyBuildingSnapshot()) {
       startupSnapshot?.addDeserializeCallback?.(this.resetState);
     }
   }
