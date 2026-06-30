@@ -12,7 +12,7 @@ declare global {
 export function addV8SnapshotDeserializeCallback(callback: () => void) {
   try {
     const startUpSnapshot = globalThis?.process?.getBuiltinModule?.('v8')?.startupSnapshot;
-    if (startUpSnapshot?.isBuildingSnapshot?.() ?? false) {
+    if (startUpSnapshot?.isBuildingSnapshot?.()) {
       startUpSnapshot?.addDeserializeCallback?.(callback);
     }
   } catch {
