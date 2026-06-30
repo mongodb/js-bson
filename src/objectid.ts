@@ -2,7 +2,7 @@ import { BSONValue } from './bson_value';
 import { BSONError } from './error';
 import { type InspectFn, defaultInspect } from './parser/utils';
 import { ByteUtils } from './utils/byte_utils';
-import { getNodeStartupSnapshot, isNodeProcessCurrentlyBuildingSnapshot } from './utils/node_utils';
+import { addV8SnapshotDeserializeCallback } from './utils/v8_snapshot_callback';
 import { NumberUtils } from './utils/number_utils';
 
 /** ObjectId hexString cache @internal */
@@ -47,10 +47,7 @@ export class ObjectId extends BSONValue {
   static {
     this.resetState();
     // https://nodejs.org/api/v8.html#startup-snapshot-api
-    const startupSnapshot = getNodeStartupSnapshot();
-    if (isNodeProcessCurrentlyBuildingSnapshot()) {
-      startupSnapshot?.addDeserializeCallback?.(this.resetState);
-    }
+    addV8SnapshotDeserializeCallback(this.resetState);
   }
 
   static cacheHexString: boolean;
