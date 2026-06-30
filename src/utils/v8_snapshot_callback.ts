@@ -17,6 +17,7 @@ export function addV8SnapshotDeserializeCallback(callback: () => void) {
     }
   } catch {
     // catch is needed due to Bun runtime implementing v8 module with the callback throwing `NotImplementedError: node:v8 isBuildingSnapshot is not yet implemented in Bun.`
+    // a fix was merged for https://github.com/oven-sh/bun/issues/32501 so this is likely get solved for 1.3.15
     return;
   }
 }
