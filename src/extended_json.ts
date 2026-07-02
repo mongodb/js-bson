@@ -264,7 +264,7 @@ function serializeValue(value: any, options: EJSONSerializeInternalOptions): any
   if (value instanceof Date || isDate(value)) {
     const dateNum = value.getTime(),
       // is it in year range 1970-9999?
-      inRange = dateNum > -1 && dateNum < 253402318800000;
+      inRange = dateNum > -1 && dateNum < 253402300800000;
 
     if (options.legacy) {
       return options.relaxed && inRange
