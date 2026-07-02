@@ -357,6 +357,15 @@ describe('Extended JSON', function () {
             expect(json).to.equal('{"field":{"$date":1452124800000}}');
           });
         });
+
+        context('when the date is the first instant of year 10000', function () {
+          it('stringifies $date as $numberLong instead of an out-of-range ISO string', function () {
+            const date = new Date(253402300800000);
+            const doc = { field: date };
+            const json = EJSON.stringify(doc, { relaxed: true });
+            expect(json).to.equal('{"field":{"$date":{"$numberLong":"253402300800000"}}}');
+          });
+        });
       });
 
       context('when serializing regex', function () {
