@@ -3,7 +3,7 @@ import type { Document } from '../bson';
 import { BSONError, BSONVersionError } from '../error';
 import * as constants from '../constants';
 import { ByteUtils } from '../utils/byte_utils';
-import { isAnyArrayBuffer, isDate, isRegExp } from './utils';
+import { isAnyArrayBuffer, isDate, isMap, isRegExp } from './utils';
 
 export function internalCalculateObjectSize(
   object: Document,
@@ -22,9 +22,10 @@ export function internalCalculateObjectSize(
     total += 5; // 4-byte size field + null terminator
 
     const isObjArray = Array.isArray(obj);
+    const isObjMap = !isObjArray && (obj instanceof Map || isMap(obj));
     let target = obj;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (!isObjArray && typeof (obj as any)?.toBSON === 'function') {
+    if (!isObjArray && !isObjMap && typeof (obj as any)?.toBSON === 'function') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       target = (obj as any).toBSON();
     }
@@ -37,6 +38,17 @@ export function internalCalculateObjectSize(
           array[i],
           serializeFunctions,
           true,
+          frameIgnoreUndefined,
+          objectStack
+        );
+      }
+    } else if (isObjMap) {
+      for (const [key, value] of target as Map<string, unknown>) {
+        total += calculateElementSize(
+          key,
+          value,
+          serializeFunctions,
+          false,
           frameIgnoreUndefined,
           objectStack
         );
