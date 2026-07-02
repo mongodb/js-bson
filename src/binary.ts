@@ -256,7 +256,7 @@ export class Binary extends BSONValue {
       validateBinaryVector(this);
     }
 
-    const base64String = ByteUtils.toBase64(this.buffer);
+    const base64String = ByteUtils.toBase64(this.buffer.subarray(0, this.position));
 
     const subType = Number(this.sub_type).toString(16);
     if (options.legacy) {
