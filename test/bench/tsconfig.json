@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "checkJs": false,
+    "strict": true,
+    "alwaysStrict": true,
+    "target": "es2021",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "erasableSyntaxOnly": true,
+    "lib": [
+      "es2021"
+    ],
+    "outDir": "./lib",
+    "importHelpers": false,
+    "noEmitHelpers": false,
+    "noEmitOnError": true,
+    "emitDeclarationOnly": false,
+    "sourceMap": true,
+    "inlineSourceMap": false,
+    "inlineSources": false,
+    "types": ["node"]
+  },
+  "include": [
+    "./granular/*.ts",
+    "./spec/*.ts"
+  ]
+}

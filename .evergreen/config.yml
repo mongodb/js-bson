@@ -1,0 +1,304 @@
+# Run previous commits to pinpoint a failure's origin.
+stepback: true
+
+# Mark failures other than test failures with a purple box.
+command_type: system
+
+# Limit maximum test running time.
+exec_timeout_secs: 900 # 15 minutes
+
+# What to do when evergreen hits the timeout
+timeout:
+  - command: shell.exec
+    params:
+      script: |
+        ls -la
+
+functions:
+  fetch source:
+    - command: git.get_project
+      params:
+        directory: src
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - '.evergreen/prepare-shell.sh'
+    - command: expansions.update
+      params:
+        file: src/expansion.yml
+
+  install dependencies:
+    - command: subprocess.exec
+      type: setup
+      params:
+        working_dir: src
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - .evergreen/install-dependencies.sh
+
+  perf send:
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - .evergreen/perf-send.sh
+
+  run tests:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        add_expansions_to_env: true
+        binary: bash
+        args:
+          - .evergreen/run-tests.sh
+
+  run checks:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        add_expansions_to_env: true
+        binary: bash
+        args:
+          - .evergreen/run-checks.sh
+
+  run typescript:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 60
+        add_expansions_to_env: true
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          TS_VERSION: "${TS_VERSION}"
+          TRY_COMPILING_LIBRARY: "${TRY_COMPILING_LIBRARY}"
+          TSC_EXTRA_FLAGS: "${TSC_EXTRA_FLAGS}"
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
+  run eslint plugin tests:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        timeout_secs: 60
+        add_expansions_to_env: true
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        binary: bash
+        args:
+          - .evergreen/run-eslint-plugin-test.sh
+  run bundling:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        binary: bash
+        add_expansions_to_env: true
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+        args:
+          - .evergreen/run-bundling-test.sh
+  run granular benchmarks:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - .evergreen/run-granular-benchmarks.sh
+  run custom benchmarks:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - .evergreen/run-custom-benchmarks.sh
+  run spec benchmarks:
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: src
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - .evergreen/run-spec-benchmarks.sh
+tasks:
+  - name: node-tests-v20
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_LTS_VERSION: "20.19.0"
+      - func: install dependencies
+      - func: run tests
+  - name: node-tests-v22
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_LTS_VERSION: 22
+          NPM_VERSION: 11.11.1
+      - func: install dependencies
+      - func: run tests
+  - name: node-tests-v24
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_LTS_VERSION: 24
+      - func: install dependencies
+      - func: run tests
+  - name: node-tests-latest
+    tags: ["node"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_LTS_VERSION: latest
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: node
+  - name: web-tests
+    tags: ["web"]
+    commands:
+      - func: fetch source
+        vars:
+          NODE_LTS_VERSION: 24
+      - func: install dependencies
+      - func: run tests
+        vars:
+          TEST_TARGET: web
+  - name: bundling-tests
+    commands:
+      - func: fetch source
+        vars:
+          NODE_LTS_VERSION: 24
+      - func: install dependencies
+      - func: run bundling
+  - name: run-checks
+    tags:
+      - run-checks
+    commands:
+      - func: fetch source
+        vars:
+          NODE_LTS_VERSION: 24
+      - func: install dependencies
+      - func: run checks
+  - name: check-typescript-oldest
+    commands:
+      - func: fetch source
+        vars:
+          NODE_LTS_VERSION: 24
+      - func: install dependencies
+      - func: "run typescript"
+        vars:
+          TS_VERSION: "5.6"
+          TRY_COMPILING_LIBRARY: "false"
+  - name: check-typescript-current
+    commands:
+      - func: fetch source
+        vars:
+          NODE_LTS_VERSION: 24
+      - func: install dependencies
+      - func: "run typescript"
+        vars:
+          TS_VERSION: ""
+          TRY_COMPILING_LIBRARY: "true"
+  - name: check-typescript-next
+    commands:
+      - func: fetch source
+        vars:
+          NODE_LTS_VERSION: 24
+      - func: install dependencies
+      - func: "run typescript"
+        vars:
+          TS_VERSION: "next"
+          # TODO(NODE-7542): flip to "true" once the library builds under TS 6.0.
+          TRY_COMPILING_LIBRARY: "false"
+          # Keeps the consumer-perspective checks in run-typescript.sh from inheriting
+          # this repo's tsconfig. Available in TS 6.0+, so only set on this task.
+          TSC_EXTRA_FLAGS: "--ignoreConfig"
+  - name: run-granular-benchmarks
+    commands:
+      - func: fetch source
+        vars:
+          # This needs to stay pinned at Node v22.11.0 for consistency across perf runs.
+          NODE_LTS_VERSION: v22.11.0
+          NPM_VERSION: 9
+      - func: install dependencies
+        vars:
+          NPM_VERSION: 9
+      - func: run granular benchmarks
+        vars:
+          WARMUP: 1000
+          ITERATIONS: 1000
+      - func: perf send
+        vars:
+          TARGET_FILE: ./test/bench/etc/resultsCollectedMeans.json
+  - name: run-custom-benchmarks
+    commands:
+      - func: fetch source
+        vars:
+          # This needs to stay pinned at Node v22.11.0 for consistency across perf runs.
+          NODE_LTS_VERSION: v22.11.0
+          NPM_VERSION: 9
+      - func: install dependencies
+        vars:
+          NPM_VERSION: 9
+      - func: run custom benchmarks
+      - func: perf send
+        vars:
+          TARGET_FILE: ./customBenchmarkResults.json
+  - name: run-spec-benchmarks
+    commands:
+      - func: fetch source
+        vars:
+          # This needs to stay pinned at Node v22.11.0 for consistency across perf runs.
+          NODE_LTS_VERSION: v22.11.0
+          NPM_VERSION: 9
+      - func: install dependencies
+        vars:
+          NPM_VERSION: 9
+      - func: run spec benchmarks
+      - func: perf send
+        vars:
+          TARGET_FILE: ./bsonBench.json
+
+buildvariants:
+  - name: linux
+    display_name: RHEL 8.0
+    run_on: rhel80-small
+    tasks: [".node", ".web", "check-eslint-plugin"]
+  - name: linux-zseries
+    display_name: RHEL 9.0 zSeries
+    run_on: rhel9-zseries-small
+    tasks: [".node", ".web"]
+  - name: lint
+    display_name: lint
+    run_on: rhel80-small
+    tasks:
+      - run-checks
+      - check-typescript-oldest
+      - check-typescript-current
+      - check-typescript-next
+      - bundling-tests
+  - name: perf
+    display_name: RHEL 9.0 perf
+    run_on: rhel90-dbx-perf-large
+    activate: true
+    tasks:
+      - run-granular-benchmarks
+      - run-spec-benchmarks
+      - run-custom-benchmarks

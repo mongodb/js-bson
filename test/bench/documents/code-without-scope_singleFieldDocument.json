@@ -1,0 +1,1 @@
+{"a":{"$code":"function (a, b) {\n    let t;\n    while (b !== 0) {\n        t = b;\n        b = a % b;\n        a = t;\n    }\n    return a;\n}"}}

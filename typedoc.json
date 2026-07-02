@@ -1,0 +1,7 @@
+{
+  "entryPoint": "./bson.d.ts",
+  "mode": "file",
+  "out": "docs/public",
+  "excludeNotExported": true,
+  "stripInternal": true
+}

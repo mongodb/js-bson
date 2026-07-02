@@ -1,0 +1,15 @@
+{
+  "extends": "@istanbuljs/nyc-config-typescript",
+  "include": [
+    "src/**/*"
+  ],
+  "reporter": [
+    "lcovonly",
+    "text-summary",
+    "html"
+  ],
+  "statements": 81,
+  "branches": 73,
+  "functions": 74,
+  "lines": 83
+}

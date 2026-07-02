@@ -1,0 +1,1 @@
+{"a":[{"$code":"function () {\n    // @ts-expect-error nested\n    console.log(left);\n    // @ts-expect-error nested\n    console.log(right);\n}","$scope":{"left":{"$numberInt":"100"},"right":{"$numberInt":"10000"}}}]}

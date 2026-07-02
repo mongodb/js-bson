@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "checkJs": false,
+    "strict": true,
+    "alwaysStrict": true,
+    "target": "es2023",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "erasableSyntaxOnly": true,
+    "lib": [
+      "es2023"
+    ],
+    "outDir": "lib",
+    "importHelpers": false,
+    "noEmitHelpers": false,
+    "noEmitOnError": true,
+    "emitDeclarationOnly": true,
+    // Generate separate source maps files with sourceContent included
+    "sourceMap": true,
+    "inlineSourceMap": false,
+    "inlineSources": false,
+    // API-extractor makes use of the declarations, npm script should be cleaning these up
+    "declaration": true,
+    "declarationMap": true,
+    "types": [],
+    "isolatedModules": true
+  },
+  "ts-node": {
+    "transpileOnly": true,
+    "compiler": "typescript-cached-transpile",
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

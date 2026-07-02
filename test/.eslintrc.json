@@ -1,0 +1,69 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "env": {
+    "node": true,
+    "mocha": true,
+    "es6": true
+  },
+  "globals": {
+    "expect": true,
+    "BSON": false,
+    "Buffer": false,
+    "BigInt": true,
+    "globalThis": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2023
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:prettier/recommended"
+  ],
+  "rules": {
+    "prettier/prettier": "error",
+    "no-console": "off",
+    "eqeqeq": [
+      "error",
+      "always",
+      {
+        "null": "ignore"
+      }
+    ],
+    "strict": [
+      "error",
+      "global"
+    ],
+    "promise/no-native": "off",
+    "no-restricted-properties": [
+      "error",
+      {
+        "object": "describe",
+        "property": "only"
+      },
+      {
+        "object": "it",
+        "property": "only"
+      },
+      {
+        "object": "context",
+        "property": "only"
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": "./**/*.ts",
+      "extends": [
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
+      ],
+      "rules": {
+        "@typescript-eslint/no-non-null-assertion": "off",
+        // Note: you must disable the base rule as it can report incorrect errors
+        "no-unused-expressions": "off",
+        "@typescript-eslint/no-unused-expressions": "off"
+      }
+    }
+  ]
+}

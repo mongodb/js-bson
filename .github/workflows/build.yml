@@ -1,0 +1,14 @@
+on:
+  workflow_call: {}
+
+name: Build
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "nothing to do."
+        shell: bash

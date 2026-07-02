@@ -1,0 +1,55 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "main", 5.x ]
+  pull_request:
+    branches: [ "main", 5.x ]
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }} - ${{ matrix.identifier }})
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 360
+    permissions:
+      # required for all workflows
+      security-events: write
+
+      # required to fetch internal or private CodeQL packs
+      packages: read
+
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: javascript-typescript
+          build-mode: none
+          identifier: 'source'
+          root: './src'
+        - language: javascript-typescript
+          build-mode: none
+          identifier: 'bundled'
+          root: './lib'
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+
+    - name: Install
+      shell: bash
+      run: npm install
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v4
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+        source-root: ${{matrix.root}}
+
+    - name: Perform CodeQL Analysis ${{matrix.identifier}}
+      uses: github/codeql-action/analyze@v4
+      with:
+        category: "/language:${{matrix.language}}"
