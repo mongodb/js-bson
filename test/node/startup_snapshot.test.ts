@@ -97,5 +97,30 @@ describe('snapshot support', () => {
     vm.runInNewContext(script, { __proto__: null, process: { getBuiltinModule: null } });
     vm.runInNewContext(script, { __proto__: null, process: { getBuiltinModule: () => null } });
     vm.runInNewContext(script, { __proto__: null, process: { getBuiltinModule: () => ({}) } });
+    vm.runInNewContext(script, {
+      __proto__: null,
+      process: {
+        getBuiltinModule: () => ({
+          startupSnapshot: {
+            isBuildingSnapshot: () => {
+              throw new Error('isBuildingSnapshot unavailable');
+            }
+          }
+        })
+      }
+    });
+    vm.runInNewContext(script, {
+      __proto__: null,
+      Bun: {},
+      process: {
+        getBuiltinModule: () => ({
+          startupSnapshot: {
+            isBuildingSnapshot: () => {
+              throw new Error('should not be called when Bun is present');
+            }
+          }
+        })
+      }
+    });
   });
 });
