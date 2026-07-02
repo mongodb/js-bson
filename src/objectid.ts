@@ -246,17 +246,17 @@ export class ObjectId extends BSONValue {
    */
   get id(): Uint8Array {
     const b = ByteUtils.allocateUnsafe(12);
-    b[0] = (this.i0 >> 16) & 0xff;
-    b[1] = (this.i0 >> 8) & 0xff;
+    b[0] = (this.i0 >>> 16) & 0xff;
+    b[1] = (this.i0 >>> 8) & 0xff;
     b[2] = this.i0 & 0xff;
-    b[3] = (this.i1 >> 16) & 0xff;
-    b[4] = (this.i1 >> 8) & 0xff;
+    b[3] = (this.i1 >>> 16) & 0xff;
+    b[4] = (this.i1 >>> 8) & 0xff;
     b[5] = this.i1 & 0xff;
-    b[6] = (this.i2 >> 16) & 0xff;
-    b[7] = (this.i2 >> 8) & 0xff;
+    b[6] = (this.i2 >>> 16) & 0xff;
+    b[7] = (this.i2 >>> 8) & 0xff;
     b[8] = this.i2 & 0xff;
-    b[9] = (this.i3 >> 16) & 0xff;
-    b[10] = (this.i3 >> 8) & 0xff;
+    b[9] = (this.i3 >>> 16) & 0xff;
+    b[10] = (this.i3 >>> 8) & 0xff;
     b[11] = this.i3 & 0xff;
     return b;
   }
@@ -305,17 +305,17 @@ export class ObjectId extends BSONValue {
     const i2 = this.i2;
     const i3 = this.i3;
     const hexString =
-      byteToHex[(i0 >> 16) & 0xff] +
-      byteToHex[(i0 >> 8) & 0xff] +
+      byteToHex[(i0 >>> 16) & 0xff] +
+      byteToHex[(i0 >>> 8) & 0xff] +
       byteToHex[i0 & 0xff] +
-      byteToHex[(i1 >> 16) & 0xff] +
-      byteToHex[(i1 >> 8) & 0xff] +
+      byteToHex[(i1 >>> 16) & 0xff] +
+      byteToHex[(i1 >>> 8) & 0xff] +
       byteToHex[i1 & 0xff] +
-      byteToHex[(i2 >> 16) & 0xff] +
-      byteToHex[(i2 >> 8) & 0xff] +
+      byteToHex[(i2 >>> 16) & 0xff] +
+      byteToHex[(i2 >>> 8) & 0xff] +
       byteToHex[i2 & 0xff] +
-      byteToHex[(i3 >> 16) & 0xff] +
-      byteToHex[(i3 >> 8) & 0xff] +
+      byteToHex[(i3 >>> 16) & 0xff] +
+      byteToHex[(i3 >>> 8) & 0xff] +
       byteToHex[i3 & 0xff];
 
     if (ObjectId.cacheHexString) {
@@ -359,8 +359,8 @@ export class ObjectId extends BSONValue {
 
     // 3-byte counter
     buffer[11] = inc & 0xff;
-    buffer[10] = (inc >> 8) & 0xff;
-    buffer[9] = (inc >> 16) & 0xff;
+    buffer[10] = (inc >>> 8) & 0xff;
+    buffer[9] = (inc >>> 16) & 0xff;
 
     return buffer;
   }
@@ -448,17 +448,17 @@ export class ObjectId extends BSONValue {
 
   /** @internal */
   serializeInto(uint8array: Uint8Array, index: number): 12 {
-    uint8array[index] = (this.i0 >> 16) & 0xff;
-    uint8array[index + 1] = (this.i0 >> 8) & 0xff;
+    uint8array[index] = (this.i0 >>> 16) & 0xff;
+    uint8array[index + 1] = (this.i0 >>> 8) & 0xff;
     uint8array[index + 2] = this.i0 & 0xff;
-    uint8array[index + 3] = (this.i1 >> 16) & 0xff;
-    uint8array[index + 4] = (this.i1 >> 8) & 0xff;
+    uint8array[index + 3] = (this.i1 >>> 16) & 0xff;
+    uint8array[index + 4] = (this.i1 >>> 8) & 0xff;
     uint8array[index + 5] = this.i1 & 0xff;
-    uint8array[index + 6] = (this.i2 >> 16) & 0xff;
-    uint8array[index + 7] = (this.i2 >> 8) & 0xff;
+    uint8array[index + 6] = (this.i2 >>> 16) & 0xff;
+    uint8array[index + 7] = (this.i2 >>> 8) & 0xff;
     uint8array[index + 8] = this.i2 & 0xff;
-    uint8array[index + 9] = (this.i3 >> 16) & 0xff;
-    uint8array[index + 10] = (this.i3 >> 8) & 0xff;
+    uint8array[index + 9] = (this.i3 >>> 16) & 0xff;
+    uint8array[index + 10] = (this.i3 >>> 8) & 0xff;
     uint8array[index + 11] = this.i3 & 0xff;
     return 12;
   }
