@@ -124,6 +124,8 @@ function calculateElementSize(
         return ByteUtils.utf8ByteLength(name) + 1 + (8 + 1);
       } else if (value._bsontype === 'Decimal128') {
         return ByteUtils.utf8ByteLength(name) + 1 + (16 + 1);
+      } else if (value._bsontype === 'Int32') {
+        return ByteUtils.utf8ByteLength(name) + 1 + (4 + 1);
       } else if (value._bsontype === 'Code') {
         // Calculate size depending on the availability of a scope
         if (value.scope != null && Object.keys(value.scope).length > 0) {
@@ -155,7 +157,7 @@ function calculateElementSize(
         } else {
           return ByteUtils.utf8ByteLength(name) + 1 + (binary.position + 1 + 4 + 1);
         }
-      } else if (value._bsontype === 'Symbol') {
+      } else if (value._bsontype === 'BSONSymbol') {
         return (
           ByteUtils.utf8ByteLength(name) + 1 + ByteUtils.utf8ByteLength(value.value) + 4 + 1 + 1
         );
