@@ -270,23 +270,14 @@ buildvariants:
   - name: linux
     display_name: RHEL 8.0
     run_on: rhel80-small
-    # TODO(NODE-7677): update to npm 12 once we figure out how to allow git packages to be installed with npm 12.
-    expansions:
-      NPM_VERSION: 11.11.1
     tasks: [".node", ".web", "check-eslint-plugin"]
   - name: linux-zseries
     display_name: RHEL 9.0 zSeries
     run_on: rhel9-zseries-small
-    # TODO(NODE-7677): update to npm 12 once we figure out how to allow git packages to be installed with npm 12.
-    expansions:
-      NPM_VERSION: 11.11.1
     tasks: [".node", ".web"]
   - name: lint
     display_name: lint
     run_on: rhel80-small
-    # TODO(NODE-7677): update to npm 12 once we figure out how to allow git packages to be installed with npm 12.
-    expansions:
-      NPM_VERSION: 11.11.1
     tasks:
       - run-checks
       - check-typescript-oldest
@@ -297,8 +288,6 @@ buildvariants:
     display_name: RHEL 9.0 perf
     run_on: rhel90-dbx-perf-large
     activate: true
-    expansions:
-      NPM_VERSION: 9
     tasks:
       - run-granular-benchmarks
       - run-spec-benchmarks
