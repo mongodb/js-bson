@@ -82,7 +82,11 @@ function calculateElementSize(
         value >= constants.JS_INT_MIN &&
         value <= constants.JS_INT_MAX
       ) {
-        if (value >= constants.BSON_INT32_MIN && value <= constants.BSON_INT32_MAX) {
+        if (
+          !Object.is(value, -0) &&
+          value >= constants.BSON_INT32_MIN &&
+          value <= constants.BSON_INT32_MAX
+        ) {
           // 32 bit
           return ByteUtils.utf8ByteLength(name) + 1 + (4 + 1);
         } else {
