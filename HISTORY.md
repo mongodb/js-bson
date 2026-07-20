@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.3.2](https://github.com/mongodb/js-bson/compare/v7.3.1...v7.3.2) (2026-07-20)
+
+
+### Bug Fixes
+
+* **NODE-7631:** count Int32 and BSONSymbol in calculateObjectSize ([#901](https://github.com/mongodb/js-bson/issues/901)) ([7f948a6](https://github.com/mongodb/js-bson/commit/7f948a6931faa7dfff068f65d8de4d45051d36f0))
+
+
+### Performance Improvements
+
+* **NODE-6246:** store ObjectId bytes as four packed integers ([#893](https://github.com/mongodb/js-bson/issues/893)) ([a84229c](https://github.com/mongodb/js-bson/commit/a84229c56fd91a0390a96a9dab28b78c8bf5eeea))
+
 ## [7.3.1](https://github.com/mongodb/js-bson/compare/v7.3.0...v7.3.1) (2026-06-23)
 
 
