@@ -65,3 +65,15 @@ Use these to validate `perf`-tagged changes — run before and after on the same
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) — contributor workflow
 - [docs/](docs/) — upgrade guides (v4, v5)
+
+## Related Repositories
+
+MongoDB-maintained repos with a direct dependency relationship to `bson`. Changes here ripple into these; check them when altering public API or serialization behavior.
+
+| Repo | Relationship | Used in | Why it matters |
+| --- | --- | --- | --- |
+| [node-mongodb-native](https://github.com/mongodb/node-mongodb-native) | imports `bson` | source | The Node.js driver; primary consumer. Every public API and wire-format behavior change surfaces there. |
+| [mongodb-client-encryption](https://github.com/mongodb-js/mongodb-client-encryption) | imports `bson` | source | CSFLE/QE bindings; serializes/deserializes BSON when talking to libmongocrypt. |
+| [mongosh](https://github.com/mongodb-js/mongosh) | imports `bson` | source | The MongoDB shell; exposes BSON type classes (`ObjectId`, `Long`, …) directly to end users. |
+| [compass](https://github.com/mongodb-js/compass) | imports `bson` | source | Compass GUI; consumes via the `compass:exports` condition in package.json. |
+| [specifications](https://github.com/mongodb/specifications) | consumed by `bson` | tests | Source of the bson-corpus spec tests run by `test/node/bson_corpus*`. Behavior changes must stay conformant. |
