@@ -32,21 +32,21 @@ npm run check:custom-bench     # ad-hoc/scenario benchmarks (test/bench/custom)
 
 Use these to validate `perf`-tagged changes — run before and after on the same machine and compare.
 
-## Architecture
+## Structure
 
+- [src/index.ts](./src/index.ts) — the public API surface. api-extractor rolls it into `bson.d.ts`.
 - `src/*.ts` — BSON type classes (`ObjectId`, `Long`, `Decimal128`, `Binary`, …), all extending `BSONValue`; `extended_json.ts` for EJSON.
 - `src/parser/` — the eager codec: recursive serializer/deserializer that converts whole JS objects to/from BSON bytes in one pass, plus size calculation used to pre-allocate output buffers.
 - `src/parser/on_demand` — the lazy path: scans a BSON buffer into document metadata without materializing JS values, so they can be independently decoded.
 - `src/utils/` — shared helpers (byte utils, number parsing, platform detection).
-- `src/index.ts` — the public API surface; api-extractor rolls it into `bson.d.ts`.
 - `test/node/` — main test suite; `bson_corpus*` tests run the cross-driver BSON corpus spec.
 
 ## Code Conventions
 
 - **Public API stability** — Everything exported from `src/index.ts` lands in the published `bson.d.ts`. Renaming, removing, or narrowing exported types/signatures is a breaking change; confirm with a maintainer first.
 - **No `export default`** — all exports named. **No TypeScript enums** — use `as const` objects or string unions.
-- **No `Buffer` in `src/`** — use `Uint8Array`; code must run in browsers.
-- **No `node:` import prefix in `src/`**; tests may use it.
+- **No `Buffer` in `src/`** — use `Uint8Array`. Code must run in browsers.
+- **No `node:` import prefix in `src/`**. Tests may use it.
 - **Null checks** — loose equality (`== null`), not `=== null`/`=== undefined`.
 - **Type imports** — inline: `import { type Foo }`.
 - **Errors** — throw `BSONError` or its subclasses (`BSONRuntimeError`, `BSONOffsetError`, …) from `src/error.ts`; messages in sentence case, no trailing period.
