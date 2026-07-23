@@ -11,7 +11,7 @@ Instructions for AI coding agents working in this repository. This file is the s
 ```bash
 npm run build          # tsc + api-extractor (bson.d.ts) + rollup bundles into lib/
 npm run check:lint     # eslint + api-extractor + tsd type tests
-npm run format         # attemps to automatically fix lint errors
+npm run format         # attempts to automatically fix lint errors
 npm run check:node     # mocha test/node (Node target). Run `build` first
 npm run check:web      # same suite with WEB=true (browser code paths)
 npm test               # builds (pretest), then check:node + check:web
