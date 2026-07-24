@@ -95,6 +95,18 @@ If you are working directly in the browser without a bundler please use the `.mj
 </script>
 ```
 
+## AI Agent Configuration
+
+This repository uses [agentskills.io](https://agentskills.io) conventions for AI coding agent
+instructions. `AGENTS.md` is the canonical source of truth — tool-specific files like `CLAUDE.md`
+are generated references.
+
+### Adding a nested AGENTS.md
+
+1. Create an `AGENTS.md` in the target directory.
+2. Run `scripts/symlink-claude-md.sh` to generate the companion `CLAUDE.md`.
+3. Stage and commit both files.
+
 ## Installation
 
 ```sh
