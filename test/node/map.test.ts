@@ -94,4 +94,29 @@ describe('ES Map support in calculateObjectSize()', () => {
     const buffer = Buffer.alloc(BSON.calculateObjectSize(map));
     expect(() => BSON.serializeWithBufferAndIndex(map, buffer)).to.not.throw();
   });
+
+  it('skips an undefined Map value to match serialize() when ignoreUndefined is true (default)', () => {
+    const map = new Map<string, unknown>([
+      ['a', new BSON.Int32(1)],
+      ['b', undefined]
+    ]);
+    // ignoreUndefined defaults to true, so the undefined entry is dropped by both
+    // serialize() and calculateObjectSize(), leaving only { a: Int32 } => 12 bytes.
+    expect(BSON.calculateObjectSize(map)).to.equal(BSON.serialize(map).byteLength);
+    expect(BSON.calculateObjectSize(map)).to.equal(12);
+  });
+
+  it('counts an undefined Map value as null to match serialize() when ignoreUndefined is false', () => {
+    const map = new Map<string, unknown>([
+      ['a', new BSON.Int32(1)],
+      ['b', undefined]
+    ]);
+    const options = { ignoreUndefined: false };
+    // With ignoreUndefined=false the undefined entry is written as a BSON null by both,
+    // adding a 3-byte null element (type + 'b' + terminator) => 15 bytes.
+    expect(BSON.calculateObjectSize(map, options)).to.equal(
+      BSON.serialize(map, options).byteLength
+    );
+    expect(BSON.calculateObjectSize(map, options)).to.equal(15);
+  });
 });
