@@ -149,7 +149,6 @@ tasks:
       - func: fetch source
         vars:
           NODE_LTS_VERSION: 22
-          NPM_VERSION: 11.11.1
       - func: install dependencies
       - func: run tests
   - name: node-tests-v24
@@ -236,10 +235,7 @@ tasks:
         vars:
           # This needs to stay pinned at Node v22.11.0 for consistency across perf runs.
           NODE_LTS_VERSION: v22.11.0
-          NPM_VERSION: 9
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: run granular benchmarks
         vars:
           WARMUP: 1000
@@ -253,10 +249,7 @@ tasks:
         vars:
           # This needs to stay pinned at Node v22.11.0 for consistency across perf runs.
           NODE_LTS_VERSION: v22.11.0
-          NPM_VERSION: 9
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: run custom benchmarks
       - func: perf send
         vars:
@@ -267,10 +260,7 @@ tasks:
         vars:
           # This needs to stay pinned at Node v22.11.0 for consistency across perf runs.
           NODE_LTS_VERSION: v22.11.0
-          NPM_VERSION: 9
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: run spec benchmarks
       - func: perf send
         vars:
