@@ -4,6 +4,15 @@ var fs = require('fs');
 
 var nodeMajorVersion = +process.version.match(/^v(\d+)\.\d+/)[1];
 
+// Point git at the checked in hooks (see .githooks/pre-commit). Not shipped to
+// consumers: .githooks is excluded from the published package files.
+if (fs.existsSync('.githooks')) {
+  for (var hook of fs.readdirSync('.githooks')) {
+    fs.chmodSync('.githooks/' + hook, 0o755);
+  }
+  cp.spawnSync('git', ['config', 'core.hooksPath', '.githooks'], { stdio: 'inherit' });
+}
+
 if (fs.existsSync('src') && nodeMajorVersion >= 10) {
   cp.spawnSync('npm', ['run', 'build'], { stdio: 'inherit', shell: true });
 } else {
