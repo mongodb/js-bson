@@ -59,8 +59,7 @@ Use these to validate `perf`-tagged changes — run before and after on the same
 
 ## Commit Messages
 
-[Conventional Commits](https://www.conventionalcommits.org/) with a Jira ticket: `<type>(NODE-XXXX): <subject>` — types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`; breaking changes use `!` (e.g. `feat(NODE-XXXX)!: …`).
-
+[Conventional Commits](https://www.conventionalcommits.org/) optionally with a Jira ticket: `<type>(NODE-XXXX): <subject>` — types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`; breaking changes use `!` (e.g. `feat(NODE-XXXX)!: …`). This rule is a *soft requirement*, though it is encouraged.
 ## Further Reading
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) — contributor workflow
