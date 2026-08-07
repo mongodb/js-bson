@@ -106,7 +106,7 @@ are generated references.
 1. Create an `AGENTS.md` in the target directory.
 2. `git add` the file.
 3. Run `scripts/symlink-claude-md.sh` to generate the companion `CLAUDE.md`.
-    - Note: `scripts/symlink-claude-md.sh` is vendored from an internal repo and should not be edited directly. Consult internal mongodb documentation for more information.
+    - Note: `scripts/symlink-claude-md.sh` is vendored from an [internal repo](https://github.com/10gen/mongohouse/blob/master/scripts/symlink-claude-md.sh) and should not be edited directly.
 4. Stage and commit the files.
 
 ## Installation
