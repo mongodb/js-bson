@@ -59,7 +59,7 @@ Use these to validate `perf`-tagged changes — run before and after on the same
 
 ## Commit Messages
 
-[Conventional Commits](https://www.conventionalcommits.org/) optionally with a Jira ticket: `<type>(NODE-XXXX): <subject>` — types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`; breaking changes use `!` (e.g. `feat(NODE-XXXX)!: …`). Though this rule is optional, it is encouraged.
+[Conventional Commits](https://www.conventionalcommits.org/) optionally with a Jira ticket: `<type>(NODE-XXXX): <subject>` — types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`; breaking changes use `!` (e.g. `feat(NODE-XXXX)!: …`). This rule is mandatory for PR descriptions, because that is what ends up in the history. The individual commits inside a PR do not have to follow this convention, because we squash PR commits.
 
 ## Further Reading
 
