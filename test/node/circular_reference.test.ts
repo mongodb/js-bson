@@ -60,6 +60,40 @@ describe('Cyclic reference detection', () => {
     });
   });
 
+  context('in calculateObjectSize', () => {
+    for (const test of generateTests()) {
+      it(test.title, () => {
+        expect(() => BSON.calculateObjectSize(test.input), inspect(test.input)).to.throw(
+          /circular/
+        );
+      });
+    }
+
+    it('throws if code.scope is circular', () => {
+      const root: { code: Code | null } = { code: null };
+      root.code = new BSON.Code('function() {}', { a: root });
+      expect(() => BSON.calculateObjectSize(root)).to.throw(/circular/);
+    });
+
+    it('throws if dbref.fields is circular', () => {
+      const root: { dbref: DBRef | null } = { dbref: null };
+      root.dbref = new BSON.DBRef('test', new BSON.ObjectId(), 'test', { a: root });
+      expect(() => BSON.calculateObjectSize(root)).to.throw(/circular/);
+    });
+
+    it('does not throw when sibling keys share a reference', () => {
+      const shared = { a: 1 };
+      const root = { x: shared, y: shared };
+      expect(() => BSON.calculateObjectSize(root)).to.not.throw();
+    });
+
+    it('agrees with serialize on the size of a document sharing a reference', () => {
+      const shared = { a: 1 };
+      const root = { x: shared, y: shared };
+      expect(BSON.calculateObjectSize(root)).to.equal(BSON.serialize(root).byteLength);
+    });
+  });
+
   context('EJSON circular references', () => {
     it('should throw a helpful error message for input with circular references', function () {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
