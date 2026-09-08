@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.3.2](https://github.com/mongodb/js-bson/compare/v7.3.1...v7.3.2) (2026-07-31)
+
+
+### Bug Fixes
+
+* **NODE-7631:** count Int32 and BSONSymbol in calculateObjectSize ([#901](https://github.com/mongodb/js-bson/issues/901)) ([7f948a6](https://github.com/mongodb/js-bson/commit/7f948a6931faa7dfff068f65d8de4d45051d36f0))
+* **NODE-7645:** use the first instant of year 10000 as the relaxed EJSON date bound ([#917](https://github.com/mongodb/js-bson/issues/917)) ([9272c9a](https://github.com/mongodb/js-bson/commit/9272c9aeddd1dfb606ecd9e9ad770201afa28225))
+* **NODE-7646:** count ES Map entries in calculateObjectSize ([#910](https://github.com/mongodb/js-bson/issues/910)) ([8d28b12](https://github.com/mongodb/js-bson/commit/8d28b12431ff74880eaf764efccced4a96559f29))
+* **NODE-7667:** remove early initialization from ObjectId ([#916](https://github.com/mongodb/js-bson/issues/916)) ([665286f](https://github.com/mongodb/js-bson/commit/665286fcca01c89f53be0ff3fb597467c666f694))
+
+
+### Performance Improvements
+
+* **NODE-6246:** store ObjectId bytes as four packed integers ([#893](https://github.com/mongodb/js-bson/issues/893)) ([a84229c](https://github.com/mongodb/js-bson/commit/a84229c56fd91a0390a96a9dab28b78c8bf5eeea))
+
 ## [7.3.1](https://github.com/mongodb/js-bson/compare/v7.3.0...v7.3.1) (2026-06-23)
 
 

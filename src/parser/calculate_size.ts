@@ -3,28 +3,55 @@ import type { Document } from '../bson';
 import { BSONError, BSONVersionError } from '../error';
 import * as constants from '../constants';
 import { ByteUtils } from '../utils/byte_utils';
-import { isAnyArrayBuffer, isDate, isRegExp } from './utils';
+import { isAnyArrayBuffer, isDate, isMap, isRegExp } from './utils';
+
+/** @internal */
+interface SizeFrame {
+  object: Document;
+  /** Each frame carries its own ignoreUndefined so DBRef fields can force ignoreUndefined=true
+   * regardless of the caller's setting. */
+  ignoreUndefined: boolean;
+  /**
+   * Exit frames carry no work. They mark the point at which obj's entire subtree has been
+   * drained, so obj can leave the ancestor path.
+   */
+  exit: boolean;
+}
 
 export function internalCalculateObjectSize(
   object: Document,
   serializeFunctions?: boolean,
   ignoreUndefined?: boolean
 ): number {
-  // Each stack entry carries its own ignoreUndefined so DBRef fields can force ignoreUndefined=true
-  // regardless of the caller's setting, matching the behavior of serializeInto.
-  const objectStack: Array<{ obj: Document; ignoreUndefined: boolean }> = [
-    { obj: object, ignoreUndefined: ignoreUndefined ?? false }
+  const objectStack: SizeFrame[] = [
+    { object, ignoreUndefined: ignoreUndefined ?? false, exit: false }
   ];
+  // The chain of objects from the root down to the one currently being walked.
+  const path = new Set<Document>();
   let total = 0;
 
   while (objectStack.length > 0) {
-    const { obj, ignoreUndefined: frameIgnoreUndefined } = objectStack.pop()!;
+    const frame = objectStack.pop()!;
+
+    if (frame.exit) {
+      path.delete(frame.object);
+      continue;
+    }
+
+    const { object: obj, ignoreUndefined: frameIgnoreUndefined } = frame;
+    path.add(obj);
+    // Re-push this frame as its own exit marker.
+    // The frame itself is popped when the subtree is exhausted.
+    frame.exit = true;
+    objectStack.push(frame);
+
     total += 5; // 4-byte size field + null terminator
 
     const isObjArray = Array.isArray(obj);
+    const isObjMap = !isObjArray && (obj instanceof Map || isMap(obj));
     let target = obj;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (!isObjArray && typeof (obj as any)?.toBSON === 'function') {
+    if (!isObjArray && !isObjMap && typeof (obj as any)?.toBSON === 'function') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       target = (obj as any).toBSON();
     }
@@ -38,7 +65,20 @@ export function internalCalculateObjectSize(
           serializeFunctions,
           true,
           frameIgnoreUndefined,
-          objectStack
+          objectStack,
+          path
+        );
+      }
+    } else if (isObjMap) {
+      for (const [key, value] of target as Map<string, unknown>) {
+        total += calculateElementSize(
+          key,
+          value,
+          serializeFunctions,
+          false,
+          frameIgnoreUndefined,
+          objectStack,
+          path
         );
       }
     } else {
@@ -49,7 +89,8 @@ export function internalCalculateObjectSize(
           serializeFunctions,
           false,
           frameIgnoreUndefined,
-          objectStack
+          objectStack,
+          path
         );
       }
     }
@@ -66,7 +107,8 @@ function calculateElementSize(
   serializeFunctions = false,
   isArray = false,
   ignoreUndefined = false,
-  objectStack: Array<{ obj: Document; ignoreUndefined: boolean }>
+  objectStack: SizeFrame[],
+  path: Set<Document>
 ): number {
   // If we have toBSON defined, override the current object
   if (typeof value?.toBSON === 'function') {
@@ -129,7 +171,10 @@ function calculateElementSize(
       } else if (value._bsontype === 'Code') {
         // Calculate size depending on the availability of a scope
         if (value.scope != null && Object.keys(value.scope).length > 0) {
-          objectStack.push({ obj: value.scope, ignoreUndefined });
+          if (path.has(value.scope)) {
+            throw new BSONError('Cannot convert circular structure to BSON');
+          }
+          objectStack.push({ object: value.scope, ignoreUndefined, exit: false });
           return (
             ByteUtils.utf8ByteLength(name) +
             1 +
@@ -177,7 +222,9 @@ function calculateElementSize(
         }
 
         // DBRef fields always use ignoreUndefined=true to match serializeInto behavior.
-        objectStack.push({ obj: ordered_values, ignoreUndefined: true });
+        // No cycle check: ordered_values is freshly built here, so it can never already be an
+        // ancestor. A cycle through value.fields is caught when its contents are walked.
+        objectStack.push({ object: ordered_values, ignoreUndefined: true, exit: false });
         return ByteUtils.utf8ByteLength(name) + 1 + 1;
       } else if (value instanceof RegExp || isRegExp(value)) {
         return (
@@ -202,7 +249,10 @@ function calculateElementSize(
           1
         );
       } else {
-        objectStack.push({ obj: value, ignoreUndefined });
+        if (path.has(value)) {
+          throw new BSONError('Cannot convert circular structure to BSON');
+        }
+        objectStack.push({ object: value, ignoreUndefined, exit: false });
         return ByteUtils.utf8ByteLength(name) + 1 + 1;
       }
     case 'function':

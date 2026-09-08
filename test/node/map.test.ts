@@ -64,3 +64,59 @@ describe('ES Map support in serialize()', () => {
     expect(result).to.deep.equal(expected);
   });
 });
+
+describe('ES Map support in calculateObjectSize()', () => {
+  it('counts a root Map to the same size that serialize() produces', () => {
+    const map = new Map<string, unknown>([
+      ['a', new BSON.Int32(1)],
+      ['b', 'hello']
+    ]);
+    expect(BSON.calculateObjectSize(map)).to.equal(BSON.serialize(map).byteLength);
+  });
+
+  it('counts a nested Map to the same size that serialize() produces', () => {
+    const doc = { m: new Map<string, unknown>([['x', new BSON.Int32(10)]]) };
+    expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+  });
+
+  it('counts a Map nested inside a Map to the same size that serialize() produces', () => {
+    const map = new Map<string, unknown>([
+      ['a', new Map<string, unknown>([['b', new BSON.Int32(2)]])]
+    ]);
+    expect(BSON.calculateObjectSize(map)).to.equal(BSON.serialize(map).byteLength);
+  });
+
+  it('produces a size large enough for serializeWithBufferAndIndex to write a Map', () => {
+    const map = new Map<string, unknown>([
+      ['a', new BSON.Int32(1)],
+      ['b', 'hello']
+    ]);
+    const buffer = Buffer.alloc(BSON.calculateObjectSize(map));
+    expect(() => BSON.serializeWithBufferAndIndex(map, buffer)).to.not.throw();
+  });
+
+  it('skips an undefined Map value to match serialize() when ignoreUndefined is true (default)', () => {
+    const map = new Map<string, unknown>([
+      ['a', new BSON.Int32(1)],
+      ['b', undefined]
+    ]);
+    // ignoreUndefined defaults to true, so the undefined entry is dropped by both
+    // serialize() and calculateObjectSize(), leaving only { a: Int32 } => 12 bytes.
+    expect(BSON.calculateObjectSize(map)).to.equal(BSON.serialize(map).byteLength);
+    expect(BSON.calculateObjectSize(map)).to.equal(12);
+  });
+
+  it('counts an undefined Map value as null to match serialize() when ignoreUndefined is false', () => {
+    const map = new Map<string, unknown>([
+      ['a', new BSON.Int32(1)],
+      ['b', undefined]
+    ]);
+    const options = { ignoreUndefined: false };
+    // With ignoreUndefined=false the undefined entry is written as a BSON null by both,
+    // adding a 3-byte null element (type + 'b' + terminator) => 15 bytes.
+    expect(BSON.calculateObjectSize(map, options)).to.equal(
+      BSON.serialize(map, options).byteLength
+    );
+    expect(BSON.calculateObjectSize(map, options)).to.equal(15);
+  });
+});

@@ -50,7 +50,10 @@ export class ObjectId extends BSONValue {
   /** @internal */
   private static resetState = (): void => {
     this.index = Math.floor(Math.random() * 0x1000000);
-    this.PROCESS_UNIQUE = ByteUtils.randomBytes(5);
+    // PROCESS_UNIQUE is (re)generated lazily on first use rather than here, so that merely loading
+    // BSON never calls secure random at module-evaluation time. Runtimes such as Cloudflare Workers
+    // forbid generating random values in the global scope.
+    this.PROCESS_UNIQUE = null;
   };
 
   static {
@@ -211,7 +214,7 @@ export class ObjectId extends BSONValue {
       // generate a new id directly into the packed fields.
       const time = Math.floor(Date.now() / 1000);
       const inc = ObjectId.getInc();
-      const pu = ObjectId.PROCESS_UNIQUE!;
+      const pu = (ObjectId.PROCESS_UNIQUE ??= ByteUtils.randomBytes(5));
       this.i0 = (time >>> 8) & 0xffffff;
       this.i1 = ((time & 0xff) << 16) | (pu[0] << 8) | pu[1];
       this.i2 = (pu[2] << 16) | (pu[3] << 8) | pu[4];
@@ -349,8 +352,8 @@ export class ObjectId extends BSONValue {
     // 4-byte timestamp
     NumberUtils.setInt32BE(buffer, 0, time);
 
-    // 5-byte process unique
-    const PROCESS_UNIQUE = this.PROCESS_UNIQUE!;
+    // 5-byte process unique (generated lazily on first use, see NODE-7667)
+    const PROCESS_UNIQUE = (this.PROCESS_UNIQUE ??= ByteUtils.randomBytes(5));
     buffer[4] = PROCESS_UNIQUE[0];
     buffer[5] = PROCESS_UNIQUE[1];
     buffer[6] = PROCESS_UNIQUE[2];

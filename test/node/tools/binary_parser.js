@@ -97,6 +97,7 @@ BinaryParser.encodeFloat = function encodeFloat(data, precisionBits, exponentBit
 
   for (i = bias + 1; floatPart > 0 && i; (bin[++i] = ((floatPart *= 2) >= 1) - 0) && --floatPart);
 
+  // eslint-disable-next-line prettier/prettier
   for (i = -1; ++i < len && !bin[i]; );
 
   if (
@@ -117,6 +118,7 @@ BinaryParser.encodeFloat = function encodeFloat(data, precisionBits, exponentBit
     for (j = lastBit + 1; rounded && --j >= 0; (bin[j] = !bin[j] - 0) && (rounded = 0));
   }
 
+  // eslint-disable-next-line prettier/prettier
   for (i = i - 2 < 0 ? -1 : i - 3; ++i < len && !bin[i]; );
 
   if ((exp = bias + 1 - i) >= minExp && exp <= maxExp) {

@@ -264,7 +264,10 @@ function serializeValue(value: any, options: EJSONSerializeInternalOptions): any
   if (value instanceof Date || isDate(value)) {
     const dateNum = value.getTime(),
       // is it in year range 1970-9999?
-      inRange = dateNum > -1 && dateNum < 253402318800000;
+      // 253402300800000 is the first instant of year 10000 (+010000-01-01T00:00:00Z).
+      // It is the exclusive upper bound: a relaxed date is emitted as an ISO 8601 string,
+      // which only has a 4-digit year, so year 10000 and later are kept as a numeric timestamp.
+      inRange = dateNum > -1 && dateNum < 253402300800000;
 
     if (options.legacy) {
       return options.relaxed && inRange

@@ -4,6 +4,8 @@ import * as util from 'util';
 import { expect } from 'chai';
 import { bufferFromHexArray } from './tools/utils';
 import { isBufferOrUint8Array } from './tools/utils';
+import { loadCJSModuleBSON } from '../load_bson';
+import * as crypto from 'node:crypto';
 
 describe('ObjectId', function () {
   describe('static createFromTime()', () => {
@@ -546,6 +548,39 @@ describe('ObjectId', function () {
         b10: 0x61,
         b11: 0x61
       });
+    });
+  });
+
+  describe('lazy secure-random initialization (NODE-7667)', function () {
+    // Regression test for https://jira.mongodb.org/browse/NODE-7667
+    // Cloudflare Workers forbid generating random values in the global scope (i.e. during module
+    // evaluation, before any request handler runs). BSON must therefore not request secure random
+    // bytes when the module is loaded - only when an ObjectId is actually created.
+    it('does not request secure random bytes at module-evaluation time, only on first ObjectId creation', function () {
+      let getRandomValuesCalls = 0;
+      const { exports } = loadCJSModuleBSON({
+        crypto: {
+          getRandomValues(buffer: Uint8Array) {
+            getRandomValuesCalls += 1;
+            buffer.set(crypto.randomBytes(buffer.byteLength), 0);
+            return buffer;
+          }
+        }
+      });
+
+      // Loading BSON (running ObjectId's static initializer) must not touch secure random.
+      expect(
+        getRandomValuesCalls,
+        'BSON requested secure random bytes at module-evaluation time'
+      ).to.equal(0);
+
+      // The process-unique bytes are generated lazily, on the first ObjectId.
+      new exports.BSON.ObjectId();
+      expect(getRandomValuesCalls).to.equal(1);
+
+      // ...and cached: later ObjectIds reuse them rather than re-generating.
+      new exports.BSON.ObjectId();
+      expect(getRandomValuesCalls).to.equal(1);
     });
   });
 });

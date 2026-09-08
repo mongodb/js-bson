@@ -488,6 +488,7 @@ function makeFrame(
     objectSizeIndex,
     codeSizeIndex,
     iterTarget: target,
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     keys: Object.keys(target as object),
     keyIndex: 0,
     mapIterator: null,
