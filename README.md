@@ -151,6 +151,10 @@ string.
 > can inject operators or unexpected field values that change the meaning of the
 > operation. This risk is greatest when the input text originates from a user, an API
 > request, or another untrusted source. Validate untrusted input before parsing it.
+> To learn more about validating input before conversion and other security best
+> practices for client libraries, see the [Client Libraries Best
+> Practices](https://www.mongodb.com/docs/drivers/client-libraries-best-practices/)
+> page in the MongoDB documentation.
 
 **Example**
 
