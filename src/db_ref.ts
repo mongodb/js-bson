@@ -47,13 +47,6 @@ export class DBRef extends BSONValue {
    */
   constructor(collection: string, oid: ObjectId, db?: string, fields?: Document) {
     super();
-    // check if namespace has been provided
-    const parts = collection.split('.');
-    if (parts.length === 2) {
-      db = parts.shift();
-      collection = parts.shift()!;
-    }
-
     this.collection = collection;
     this.oid = oid;
     this.db = db;
