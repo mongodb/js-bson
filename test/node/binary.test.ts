@@ -272,6 +272,26 @@ describe('class Binary', () => {
     });
   });
 
+  context('toExtendedJSON()', () => {
+    it('should respect position when converting to Extended JSON', () => {
+      const bin = new Binary();
+      expect(bin.toExtendedJSON()).to.deep.equal({ $binary: { base64: '', subType: '00' } });
+      bin.put(1);
+      bin.put(2);
+      bin.put(3);
+      // toExtendedJSON uses base64
+      expect(bin.toExtendedJSON()).to.deep.equal({ $binary: { base64: 'AQID', subType: '00' } });
+    });
+
+    it('should remain same after round trip', () => {
+      const bin = new BSON.Binary();
+      bin.put(1);
+      const ejson = BSON.EJSON.stringify(bin);
+      const roundTrippedBin = BSON.EJSON.parse(ejson);
+      expect(roundTrippedBin.toExtendedJSON()).to.deep.equal(bin.toExtendedJSON());
+    });
+  });
+
   describe('sub_type vector', () => {
     describe('datatype constants', () => {
       it('has Int8, Float32 and PackedBit', () => {
