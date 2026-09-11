@@ -78,4 +78,12 @@ describe('calculateSize()', () => {
       expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
     });
   });
+
+  describe('when given a negative zero value with a single character key', function () {
+    it('counts 8 bytes to match the double the serializer writes for -0', function () {
+      const doc = { a: -0 };
+      expect(BSON.calculateObjectSize(doc)).to.equal(4 + 1 + 1 + 8 + 1 + 1);
+      expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+    });
+  });
 });
