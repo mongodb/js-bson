@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.3.3](https://github.com/mongodb/js-bson/compare/v7.3.2...v7.3.3) (2026-09-11)
+
+
+### Bug Fixes
+
+* **NODE-7696:** calculateObjectSize hangs indefinitely on an object containing a circular reference ([#926](https://github.com/mongodb/js-bson/issues/926)) ([f35af5c](https://github.com/mongodb/js-bson/commit/f35af5c96270f9f9e6d69d34e351353b11d56fd7))
+
 ## [7.3.2](https://github.com/mongodb/js-bson/compare/v7.3.1...v7.3.2) (2026-07-31)
 
 
