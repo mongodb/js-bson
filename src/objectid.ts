@@ -58,24 +58,31 @@ export class ObjectId extends BSONValue {
 
   static {
     this.resetState();
-    // https://nodejs.org/api/v8.html#startup-snapshot-api
-    let startupSnapshot;
+
+    let v8Module;
     let isBuildingSnapshot = false;
+    // NODE-7784: getBuiltInModule is wrapped in a try..catch due to
+    // https://github.com/vercel/next.js/issues/98226.
+    //
+    // The NextJS Edge runtime
+    // implements getBuiltInModule with a throwable stub, which we protect
+    // against so our users are operable across this popular runtime.
     try {
-      // NODE-7784: getBuiltInModule is wrapped in a try..catch due to 
-      // https://github.com/vercel/next.js/issues/98226.
-      //
-      // The NextJS Edge runtime
-      // implements getBuiltInModule with a throwable stub, which we protect
-      // against so our users are operable across this popular runtime.
       // @ts-expect-error Node.js types not present since this is an optional API
-      const v8Module = globalThis?.process?.getBuiltinModule?.('v8') ?? {};
-      startupSnapshot = v8Module?.startupSnapshot;
-      // NODE-7784: isBuildingSnapshot is wrapped in a try..catch due to
-      // https://github.com/oven-sh/bun/issues/32501
-      //
-      // Bun implements isBuildingSnapshot with a throwable stub, which we also
-      // protect against for the same reason as getBuiltInModule.
+      v8Module = globalThis?.process?.getBuiltinModule?.('v8') ?? {};
+    } catch {
+      // Suppress
+    }
+
+    // https://nodejs.org/api/v8.html#startup-snapshot-api
+    const startupSnapshot = v8Module?.startupSnapshot;
+
+    // NODE-7784: isBuildingSnapshot is wrapped in a try..catch due to
+    // https://github.com/oven-sh/bun/issues/32501
+    //
+    // Bun implements isBuildingSnapshot with a throwable stub, which we also
+    // protect against for the same reason as getBuiltInModule.
+    try {
       isBuildingSnapshot = startupSnapshot?.isBuildingSnapshot?.();
     } catch {
       // Suppress
