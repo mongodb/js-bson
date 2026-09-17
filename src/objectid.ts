@@ -59,14 +59,14 @@ export class ObjectId extends BSONValue {
   static {
     this.resetState();
     // https://nodejs.org/api/v8.html#startup-snapshot-api
-    let startupSnapshot: any;
+    let startupSnapshot;
     let isBuildingSnapshot = false;
     try {
       // @ts-expect-error Node.js types not present since this is an optional API
       const v8Module = globalThis?.process?.getBuiltinModule?.('v8') ?? {};
       startupSnapshot = v8Module?.startupSnapshot;
       isBuildingSnapshot = startupSnapshot?.isBuildingSnapshot?.();
-    } catch (err) {
+    } catch {
       // Suppress
     }
     if (isBuildingSnapshot) {

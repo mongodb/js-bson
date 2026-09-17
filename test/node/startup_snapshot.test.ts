@@ -137,6 +137,7 @@ describe('snapshot support', () => {
     const bsonBundleSource = path.join(__dirname, '..', '..', 'lib', 'bson.bundle.js');
     const script = await fs.readFile(bsonBundleSource, 'utf8');
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const context: any = {
       __proto__: null,
       process: {
@@ -146,8 +147,6 @@ describe('snapshot support', () => {
       }
     };
     vm.runInNewContext(script, context);
-
     expect(new context.BSON.ObjectId()).not.to.be.null;
   });
-
 });
