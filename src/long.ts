@@ -154,12 +154,20 @@ export class Long extends BSONValue {
    * @param unsigned - Whether unsigned or not, defaults to signed
    */
   constructor(value: string, unsigned?: boolean);
+  /** @internal Create from clone. */
+  constructor(clone: { high: number; low: number; unsigned: boolean });
   constructor(
-    lowOrValue: number | bigint | string = 0,
+    lowOrValue: number | bigint | string | { high: number; low: number; unsigned: boolean } = 0,
     highOrUnsigned?: number | boolean,
     unsigned?: boolean
   ) {
     super();
+    if (typeof lowOrValue === 'object') {
+      this.high = lowOrValue.high;
+      this.low = lowOrValue.low;
+      this.unsigned = lowOrValue.unsigned;
+      return;
+    }
     const unsignedBool = typeof highOrUnsigned === 'boolean' ? highOrUnsigned : Boolean(unsigned);
     const high = typeof highOrUnsigned === 'number' ? highOrUnsigned : 0;
     const res =
@@ -518,6 +526,20 @@ export class Long extends BSONValue {
       typeof value === 'object' &&
       '__isLong__' in value &&
       value.__isLong__ === true
+    );
+  }
+
+  /** @internal */
+  static isLongLike(value: unknown): value is { high: number; low: number; unsigned: boolean } {
+    return (
+      value != null &&
+      typeof value === 'object' &&
+      'high' in value &&
+      typeof value.high === 'number' &&
+      'low' in value &&
+      typeof value.low === 'number' &&
+      'unsigned' in value &&
+      typeof value.unsigned === 'boolean'
     );
   }
 

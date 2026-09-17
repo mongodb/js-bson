@@ -28,8 +28,16 @@ export class Code extends BSONValue {
    * @param code - a string or function.
    * @param scope - an optional scope for the function.
    */
-  constructor(code: string | Function, scope?: Document | null) {
+  constructor(code: string | Function, scope?: Document | null);
+  /** @internal Create from clone. */
+  constructor(clone: { code: string; scope: null });
+  constructor(code: string | Function | { code: string; scope: null }, scope?: Document | null) {
     super();
+    if (typeof code === 'object') {
+      this.code = code.code;
+      this.scope = code.scope;
+      return;
+    }
     this.code = code.toString();
     this.scope = scope ?? null;
   }
