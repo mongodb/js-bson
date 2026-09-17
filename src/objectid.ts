@@ -131,6 +131,10 @@ export class ObjectId extends BSONValue {
   /** To generate a new ObjectId, use ObjectId() with no argument. */
   constructor();
   /**
+   * @internal Create from clone.
+   */
+  constructor(clone: { i0: number; i1: number; i2: number; i3: number });
+  /**
    * Create ObjectId from a 24 character hex string.
    *
    * @param inputId - A 24 character hex string.
@@ -171,7 +175,15 @@ export class ObjectId extends BSONValue {
    *
    * @param inputId - An input value to create a new ObjectId from.
    */
-  constructor(inputId?: string | ObjectId | ObjectIdLike | Uint8Array, offset?: number) {
+  constructor(
+    inputId?:
+      | string
+      | ObjectId
+      | ObjectIdLike
+      | Uint8Array
+      | { i0: number; i1: number; i2: number; i3: number },
+    offset?: number
+  ) {
     super();
     if (typeof offset === 'number') {
       // Fast path used by the deserializer: read the 12 bytes directly from source at offset.
@@ -180,28 +192,27 @@ export class ObjectId extends BSONValue {
     }
     // workingId is set based on type of input and whether valid id exists for the input
     let workingId;
-    if (typeof inputId === 'object' && inputId && 'id' in inputId) {
+    if (typeof inputId === 'object' && inputId) {
       if (
-        ObjectId.is(inputId) &&
-        typeof inputId.i0 === 'number' &&
-        typeof inputId.i1 === 'number' &&
-        typeof inputId.i2 === 'number' &&
-        typeof inputId.i3 === 'number'
+        typeof (inputId as { i0?: number }).i0 === 'number' &&
+        typeof (inputId as { i1?: number }).i1 === 'number' &&
+        typeof (inputId as { i2?: number }).i2 === 'number' &&
+        typeof (inputId as { i3?: number }).i3 === 'number'
       ) {
         // Same-build ObjectId: copy the packed fields directly. The general path below would
         // hit the id getter (which allocates) and then re-decode a hex round trip.
-        this.i0 = inputId.i0;
-        this.i1 = inputId.i1;
-        this.i2 = inputId.i2;
-        this.i3 = inputId.i3;
+        this.i0 = (inputId as unknown as { i0: number }).i0;
+        this.i1 = (inputId as unknown as { i1: number }).i1;
+        this.i2 = (inputId as unknown as { i2: number }).i2;
+        this.i3 = (inputId as unknown as { i3: number }).i3;
         return;
       }
-      if (typeof inputId.id !== 'string' && !ArrayBuffer.isView(inputId.id)) {
+      if ('id' in inputId && typeof inputId.id !== 'string' && !ArrayBuffer.isView(inputId.id)) {
         throw new BSONError('Argument passed in must have an id that is of type string or Buffer');
       }
       if ('toHexString' in inputId && typeof inputId.toHexString === 'function') {
         workingId = ByteUtils.fromHex(inputId.toHexString());
-      } else {
+      } else if ('id' in inputId) {
         workingId = inputId.id;
       }
     } else {

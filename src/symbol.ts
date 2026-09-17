@@ -16,12 +16,19 @@ export class BSONSymbol extends BSONValue {
     return 'BSONSymbol';
   }
 
-  value!: string;
+  value: string;
   /**
    * @param value - the string representing the symbol.
    */
-  constructor(value: string) {
+  constructor(value: string);
+  /** @internal Create from clone. */
+  constructor(clone: { value: string });
+  constructor(value: string | { value: string }) {
     super();
+    if (typeof value === 'object') {
+      this.value = value.value;
+      return;
+    }
     this.value = value;
   }
 

@@ -122,8 +122,21 @@ export class Binary extends BSONValue {
    * @param buffer - a buffer object containing the binary data.
    * @param subType - the option binary type.
    */
-  constructor(buffer?: BinarySequence, subType?: number) {
+  constructor(buffer?: BinarySequence, subType?: number);
+  /** @internal Create from clone. */
+  constructor(clone: { buffer: Uint8Array; sub_type: number; position: number });
+  constructor(
+    buffer?: BinarySequence | { buffer: Uint8Array; sub_type: number; position: number },
+    subType?: number
+  ) {
     super();
+    if (buffer != null && typeof buffer === 'object' && 'sub_type' in buffer) {
+      this.buffer = buffer.buffer;
+      this.sub_type = buffer.sub_type;
+      this.position = buffer.position;
+      return;
+    }
+
     if (
       !(buffer == null) &&
       typeof buffer === 'string' &&
@@ -574,10 +587,18 @@ export class UUID extends Binary {
    *
    * @param input - Can be a 32 or 36 character hex string (dashes excluded/included) or a 16 byte binary Buffer.
    */
-  constructor(input?: string | Uint8Array | UUID) {
+  constructor(input?: string | Uint8Array | UUID);
+  /** @internal Create from clone. */
+  constructor(clone: { buffer: Uint8Array; sub_type: number; position: number });
+  constructor(
+    input?: string | Uint8Array | UUID | { buffer: Uint8Array; sub_type: number; position: number }
+  ) {
     let bytes: Uint8Array;
     if (input == null) {
       bytes = UUID.generate();
+    } else if (typeof input === 'object' && 'sub_type' in input) {
+      super(input);
+      return;
     } else if (input instanceof UUID) {
       bytes = ByteUtils.toLocalBufferType(new Uint8Array(input.buffer));
     } else if (ArrayBuffer.isView(input) && input.byteLength === UUID_BYTE_LENGTH) {
