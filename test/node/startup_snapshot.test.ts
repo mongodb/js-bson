@@ -98,4 +98,56 @@ describe('snapshot support', () => {
     vm.runInNewContext(script, { __proto__: null, process: { getBuiltinModule: () => null } });
     vm.runInNewContext(script, { __proto__: null, process: { getBuiltinModule: () => ({}) } });
   });
+
+  it('allows loading the BSON bundle when snapshot API access throws', async () => {
+    const bsonBundleSource = path.join(__dirname, '..', '..', 'lib', 'bson.bundle.js');
+    const script = await fs.readFile(bsonBundleSource, 'utf8');
+
+    let getBuiltinModuleCallCount = 0;
+    vm.runInNewContext(script, {
+      __proto__: null,
+      process: {
+        getBuiltinModule: () => {
+          getBuiltinModuleCallCount++;
+          throw new Error('getBuiltinModule not permitted');
+        }
+      }
+    });
+
+    let isBuildingSnapshotCallCount = 0;
+    vm.runInNewContext(script, {
+      __proto__: null,
+      process: {
+        getBuiltinModule: () => ({
+          startupSnapshot: {
+            isBuildingSnapshot: () => {
+              isBuildingSnapshotCallCount++;
+              throw new Error('isBuildingSnapshot not available');
+            }
+          }
+        })
+      }
+    });
+
+    expect(getBuiltinModuleCallCount).to.equal(1);
+    expect(isBuildingSnapshotCallCount).to.equal(1);
+  });
+
+  it('is usable after a throwing snapshot API is suppressed', async () => {
+    const bsonBundleSource = path.join(__dirname, '..', '..', 'lib', 'bson.bundle.js');
+    const script = await fs.readFile(bsonBundleSource, 'utf8');
+
+    const context: any = {
+      __proto__: null,
+      process: {
+        getBuiltinModule: () => {
+          throw new Error('getBuiltinModule not permitted');
+        }
+      }
+    };
+    vm.runInNewContext(script, context);
+
+    expect(new context.BSON.ObjectId()).not.to.be.null;
+  });
+
 });
