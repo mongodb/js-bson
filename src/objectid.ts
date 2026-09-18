@@ -61,7 +61,7 @@ export class ObjectId extends BSONValue {
 
     let v8Module;
     let isBuildingSnapshot = false;
-    // NODE-7784: getBuiltInModule is wrapped in a try..catch due to
+    // getBuiltinModule is wrapped in a try..catch due to
     // https://github.com/vercel/next.js/issues/98226.
     //
     // The NextJS Edge runtime
@@ -77,7 +77,7 @@ export class ObjectId extends BSONValue {
     // https://nodejs.org/api/v8.html#startup-snapshot-api
     const startupSnapshot = v8Module?.startupSnapshot;
 
-    // NODE-7784: isBuildingSnapshot is wrapped in a try..catch due to
+    // isBuildingSnapshot is wrapped in a try..catch due to
     // https://github.com/oven-sh/bun/issues/32501
     //
     // Bun implements isBuildingSnapshot with a throwable stub, which we also
