@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.3.4](https://github.com/mongodb/js-bson/compare/v7.3.3...v7.3.4) (2026-09-23)
+
+
+### Bug Fixes
+
+* **NODE-7611:** bounds check findNull scan in on-demand parser ([#924](https://github.com/mongodb/js-bson/issues/924)) ([12ed533](https://github.com/mongodb/js-bson/commit/12ed5335c494b2f18c76648b1b7d2ee75c50deca))
+* **NODE-7784:** try..catch wrapper around snapshot fn calls in static ObjectID initializer ([#936](https://github.com/mongodb/js-bson/issues/936)) ([5a9d5fc](https://github.com/mongodb/js-bson/commit/5a9d5fc40bc31a0b1c389980604b932f0456fd18))
+
 ## [7.3.3](https://github.com/mongodb/js-bson/compare/v7.3.2...v7.3.3) (2026-09-11)
 
 
