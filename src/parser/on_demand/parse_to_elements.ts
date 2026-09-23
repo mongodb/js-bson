@@ -57,16 +57,20 @@ function getSize(source: Uint8Array, offset: number) {
 
 /**
  * Searches for null terminator of a BSON element's value (Never the document null terminator)
- * **Does not** bounds check since this should **ONLY** be used within parseToElements which has asserted that `bytes` ends with a `0x00`.
- * So this will at most iterate to the document's terminator and error if that is the offset reached.
+ * The scan is bounds checked so malformed inputs (for example, a zero-length string size that
+ * advances the cursor past the end of the document) throw instead of looping forever (NODE-7611).
  */
 function findNull(bytes: Uint8Array, offset: number): number {
   let nullTerminatorOffset = offset;
 
-  for (; bytes[nullTerminatorOffset] !== 0x00; nullTerminatorOffset++);
+  for (
+    ;
+    nullTerminatorOffset < bytes.length && bytes[nullTerminatorOffset] !== 0x00;
+    nullTerminatorOffset++
+  );
 
-  if (nullTerminatorOffset === bytes.length - 1) {
-    // We reached the null terminator of the document, not a value's
+  if (nullTerminatorOffset >= bytes.length - 1) {
+    // We reached the null terminator of the document or the end of the input, not a value's
     throw new BSONOffsetError('Null terminator not found', offset);
   }
 
@@ -178,7 +182,10 @@ export function parseToElements(
       );
     }
 
-    if (length > documentSize) {
+    // The value must fit within the current document: the document's last byte
+    // (startOffset + documentSize - 1) is its null terminator, so a value may
+    // extend at most up to that byte.
+    if (offset + length > startOffset + documentSize - 1) {
       throw new BSONOffsetError('value reports length larger than document', offset);
     }
 
