@@ -20,9 +20,12 @@ describe('Int32', function () {
       done();
     });
 
-    it('should accept number objects', function (done) {
+    it('should accept number objects', function () {
+      if (BSON.__isWeb__) {
+        // instanceof Number won't match cross realm objects but the unary plus in the constructor will handle it correctly
+        return this.skip();
+      }
       expect(new Int32(new Number(value)).valueOf()).to.equal(value);
-      done();
     });
 
     it('should accept string Hex', function (done) {

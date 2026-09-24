@@ -18,16 +18,20 @@ export class Double extends BSONValue {
     return 'Double';
   }
 
-  value!: number;
+  value: number;
   /**
    * Create a Double type
    *
    * @param value - the number we want to represent as a double.
    */
-  constructor(value: number) {
+  constructor(value: number);
+  /** @internal Create from clone. */
+  constructor(clone: { value: number });
+  constructor(value: number | { value: number }) {
     super();
-    if ((value as unknown) instanceof Number) {
-      value = value.valueOf();
+    if (!((value as unknown) instanceof Number) && typeof value === 'object') {
+      this.value = value.value;
+      return;
     }
 
     this.value = +value;

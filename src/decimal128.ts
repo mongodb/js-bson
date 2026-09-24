@@ -138,8 +138,16 @@ export class Decimal128 extends BSONValue {
    * @param bytes - a buffer containing the raw Decimal128 bytes in little endian order,
    *                or a string representation as returned by .toString()
    */
-  constructor(bytes: Uint8Array | string) {
+  constructor(bytes: Uint8Array | string);
+  /** @internal Create from clone. */
+  constructor(clone: { bytes: Uint8Array });
+  constructor(bytes: Uint8Array | string | { bytes: Uint8Array }) {
     super();
+    if (typeof bytes === 'object' && 'bytes' in bytes) {
+      this.bytes = bytes.bytes;
+      return;
+    }
+
     if (typeof bytes === 'string') {
       this.bytes = Decimal128.fromString(bytes).bytes;
     } else if (bytes instanceof Uint8Array || isUint8Array(bytes)) {

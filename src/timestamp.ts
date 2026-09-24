@@ -115,7 +115,7 @@ export class Timestamp extends LongWithoutOverridesClass {
       super(0, 0, true);
     } else if (typeof low === 'bigint') {
       super(low, true);
-    } else if (Long.isLong(low)) {
+    } else if (Long.isLongLike(low)) {
       super(low.low, low.high, true);
     } else if (typeof low === 'object' && 't' in low && 'i' in low) {
       if (typeof low.t !== 'number' && (typeof low.t !== 'object' || low.t._bsontype !== 'Int32')) {
