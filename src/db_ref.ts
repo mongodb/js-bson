@@ -45,8 +45,24 @@ export class DBRef extends BSONValue {
    * @param oid - the reference ObjectId.
    * @param db - optional db name, if omitted the reference is local to the current db.
    */
-  constructor(collection: string, oid: ObjectId, db?: string, fields?: Document) {
+  constructor(collection: string, oid: ObjectId, db?: string, fields?: Document);
+  /** @internal Create from clone. */
+  constructor(clone: { collection: string; oid: ObjectId; db: string; fields: Document });
+  constructor(
+    collection: string | { collection: string; oid: ObjectId; db: string; fields: Document },
+    oid?: ObjectId,
+    db?: string,
+    fields?: Document
+  ) {
     super();
+    if (typeof collection === 'object') {
+      this.collection = collection.collection;
+      this.oid = collection.oid;
+      this.db = collection.db;
+      this.fields = collection.fields;
+      return;
+    }
+
     // check if namespace has been provided
     const parts = collection.split('.');
     if (parts.length === 2) {
@@ -55,7 +71,7 @@ export class DBRef extends BSONValue {
     }
 
     this.collection = collection;
-    this.oid = oid;
+    this.oid = oid!;
     this.db = db;
     this.fields = fields || {};
   }

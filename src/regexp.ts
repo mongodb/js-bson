@@ -37,8 +37,17 @@ export class BSONRegExp extends BSONValue {
    * @param pattern - The regular expression pattern to match
    * @param options - The regular expression options
    */
-  constructor(pattern: string, options?: string) {
+  constructor(pattern: string, options?: string);
+  /** @internal Create from clone. */
+  constructor(clone: { pattern: string; options: string });
+  constructor(pattern: string | { pattern: string; options: string }, options?: string) {
     super();
+    if (typeof pattern === 'object') {
+      this.pattern = pattern.pattern;
+      this.options = pattern.options;
+      return;
+    }
+
     this.pattern = pattern;
     this.options = alphabetize(options ?? '');
 

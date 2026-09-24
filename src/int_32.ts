@@ -20,16 +20,20 @@ export class Int32 extends BSONValue {
     return 'Int32';
   }
 
-  value!: number;
+  value: number;
   /**
    * Create an Int32 type
    *
    * @param value - the number we want to represent as an int32.
    */
-  constructor(value: number | string) {
+  constructor(value: number | string);
+  /** @internal Create from clone. */
+  constructor(clone: { value: number });
+  constructor(value: number | string | { value: number }) {
     super();
-    if ((value as unknown) instanceof Number) {
-      value = value.valueOf();
+    if (!((value as unknown) instanceof Number) && typeof value === 'object') {
+      this.value = value.value;
+      return;
     }
 
     this.value = +value | 0;

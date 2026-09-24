@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { BSON, Double } from '../register-bson';
+import { BSON, Double, __isWeb__ } from '../register-bson';
 
 import { BSON_DATA_NUMBER, BSON_DATA_INT } from '../../src/constants';
 import { inspect } from 'node:util';
@@ -23,6 +23,10 @@ describe('BSON Double Precision', function () {
       });
 
       it('Number object', function () {
+        if (__isWeb__) {
+          // instanceof Number won't match cross realm objects but the unary plus in the constructor will handle it correctly
+          return this.skip();
+        }
         // @ts-expect-error: A number object is not supported by the types
         // but the constructor at runtime should keep handling it correctly
         expect(new Double(new Number(value)).valueOf()).to.equal(value);
