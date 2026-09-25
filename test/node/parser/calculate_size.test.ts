@@ -78,4 +78,11 @@ describe('calculateSize()', () => {
       expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
     });
   });
+
+  describe('when given a Code value with an empty scope', function () {
+    it('matches the serialized byte length', function () {
+      const doc = { a: new BSON.Code('x', {}) };
+      expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+    });
+  });
 });
