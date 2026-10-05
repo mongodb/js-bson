@@ -9,6 +9,7 @@ import { type InspectFn, defaultInspect } from './parser/utils';
  * @deprecated This type is no longer used internally and will be removed in a future version.
  */
 export type TimestampOverrides =
+  // eslint-disable-next-line prettier/prettier
   | '_bsontype'
   | 'toExtendedJSON'
   | 'fromExtendedJSON'

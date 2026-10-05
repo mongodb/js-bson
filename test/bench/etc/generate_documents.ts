@@ -10,6 +10,7 @@ import { writeFileSync, readFileSync } from 'fs';
 import { resolve } from 'path';
 
 type numericConstructor =
+  // eslint-disable-next-line prettier/prettier
   | typeof bson.Double
   | typeof bson.Long
   | typeof bson.Int32

@@ -4,6 +4,11 @@ var fs = require('fs');
 
 var nodeMajorVersion = +process.version.match(/^v(\d+)\.\d+/)[1];
 
+// Point git at the checked in hooks (see .githooks/pre-commit).
+if (fs.existsSync('.githooks')) {
+  cp.spawnSync('git', ['config', 'core.hooksPath', '.githooks'], { stdio: 'inherit' });
+}
+
 if (fs.existsSync('src') && nodeMajorVersion >= 10) {
   cp.spawnSync('npm', ['run', 'build'], { stdio: 'inherit', shell: true });
 } else {

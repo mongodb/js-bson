@@ -55,6 +55,7 @@ let wasm: LongWASMHelpers | undefined = undefined;
 declare const WebAssembly: any;
 
 try {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   wasm = new WebAssembly.Instance(
     new WebAssembly.Module(
       // prettier-ignore

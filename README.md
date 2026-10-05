@@ -95,6 +95,20 @@ If you are working directly in the browser without a bundler please use the `.mj
 </script>
 ```
 
+## AI Agent Configuration
+
+This repository uses [agentskills.io](https://agentskills.io) conventions for AI coding agent
+instructions. `AGENTS.md` is the canonical source of truth — tool-specific files like `CLAUDE.md`
+are generated references.
+
+### Adding a nested AGENTS.md
+
+1. Create an `AGENTS.md` in the target directory.
+2. `git add` the file.
+3. Run `scripts/symlink-claude-md.sh` to generate the companion `CLAUDE.md`.
+    - Note: `scripts/symlink-claude-md.sh` is vendored from an [internal repo](https://github.com/10gen/mongohouse/blob/master/scripts/symlink-claude-md.sh) and should not be edited directly.
+4. Stage and commit the files.
+
 ## Installation
 
 ```sh
@@ -145,6 +159,16 @@ Only the following version combinations with the [MongoDB Node.js Driver](https:
 
 Parse an Extended JSON string, constructing the JavaScript value or object described by that
 string.
+
+> [!WARNING]
+> If you use the result of `EJSON.parse()` in a query, update, or command, an attacker
+> can inject operators or unexpected field values that change the meaning of the
+> operation. This risk is greatest when the input text originates from a source that
+> your application does not control. Validate untrusted input before parsing it.
+> To learn more about validating input before conversion and other security best
+> practices for client libraries, see the [Client Libraries Best
+> Practices](https://www.mongodb.com/docs/drivers/client-libraries-best-practices/)
+> page in the MongoDB documentation.
 
 **Example**
 
