@@ -63,11 +63,7 @@ function getSize(source: Uint8Array, offset: number) {
 function findNull(bytes: Uint8Array, offset: number): number {
   let nullTerminatorOffset = offset;
 
-  for (
-    ;
-    nullTerminatorOffset < bytes.length && bytes[nullTerminatorOffset] !== 0x00;
-    nullTerminatorOffset++
-  );
+  for (; bytes[nullTerminatorOffset]; nullTerminatorOffset++);
 
   if (nullTerminatorOffset >= bytes.length - 1) {
     // We reached the null terminator of the document or the end of the input, not a value's
