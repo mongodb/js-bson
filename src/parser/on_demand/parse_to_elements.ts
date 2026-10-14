@@ -64,7 +64,7 @@ function findNull(bytes: Uint8Array, offset: number): number {
   let nullTerminatorOffset = offset;
 
   // Advance nullTerminatorOffset to next null byte
-  // also exits when nullTerminatorOffset is greater than length
+  // also exits when nullTerminatorOffset reaches length
   for (; bytes[nullTerminatorOffset]; nullTerminatorOffset++);
 
   if (nullTerminatorOffset >= bytes.length - 1) {
