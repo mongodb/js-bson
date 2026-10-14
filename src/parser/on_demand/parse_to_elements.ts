@@ -63,6 +63,8 @@ function getSize(source: Uint8Array, offset: number) {
 function findNull(bytes: Uint8Array, offset: number): number {
   let nullTerminatorOffset = offset;
 
+  // Advance nullTerminatorOffset to next null byte
+  // also exits when nullTerminatorOffset is greater than length
   for (; bytes[nullTerminatorOffset]; nullTerminatorOffset++);
 
   if (nullTerminatorOffset >= bytes.length - 1) {
