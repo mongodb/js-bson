@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import BSON from '../register-bson';
+import * as BSON from '../register-bson';
 import { sorted, byStrings } from './tools/utils';
 import { readFile } from 'fs/promises';
 import { resolve } from 'path';
@@ -8,7 +8,9 @@ import * as child_process from 'node:child_process';
 const EXPECTED_EXPORTS = [
   // This is our added web indicator not a real export but a small exception for this test.
   '__isWeb__',
-
+  // esModuleInterop (default true in TS6) wraps CJS modules without __esModule (the bundle) in a synthetic
+  // namespace that carries a `default` key.
+  ...(BSON.__isWeb__ ? ['default'] : []),
   'BSONType',
   'BSONValue',
   'BSONVersionError',

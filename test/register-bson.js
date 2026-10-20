@@ -51,6 +51,7 @@ let BSON;
 if (web) {
   BSON = loadCJSModuleBSON().exports;
 } else {
+  // Why are we doing this? This will create assertions off of a 'never-production' scenario. Users consume the build.
   BSON = require('../src/index');
 }
 
