@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["mocha", "node", "chai", "sinon", "sinon-chai"],
+    "esModuleInterop": false,
+    "ignoreDeprecations": "6.0"
+  },
+  "include": ["./**/*"],
+  "exclude": ["./bench", "./types", "./bundling"]
+}
