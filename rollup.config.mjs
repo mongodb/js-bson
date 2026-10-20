@@ -9,7 +9,7 @@ const tsConfig = {
   alwaysStrict: true,
   target: 'es2023',
   module: 'esnext',
-  moduleResolution: 'node',
+  moduleResolution: 'bundler',
   removeComments: true,
   lib: ['es2023'],
   importHelpers: false,

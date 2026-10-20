@@ -5,14 +5,15 @@
     "strict": true,
     "alwaysStrict": true,
     "target": "es2023",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "preserve",
+    "moduleResolution": "bundler",
     "skipLibCheck": true,
     "erasableSyntaxOnly": true,
     "lib": [
       "es2023"
     ],
-    "outDir": "lib",
+    "outDir": "./lib",
+    "rootDir": "./src",
     "importHelpers": false,
     "noEmitHelpers": false,
     "noEmitOnError": true,
@@ -29,7 +30,7 @@
   },
   "ts-node": {
     "transpileOnly": true,
-    "compiler": "typescript-cached-transpile",
+    "compiler": "typescript-cached-transpile"
   },
   "include": [
     "src/**/*"
