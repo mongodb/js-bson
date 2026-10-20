@@ -30,6 +30,51 @@ type NodeJsBufferConstructor = Omit<Uint8ArrayConstructor, 'from'> & {
 // Node.js global
 declare const Buffer: NodeJsBufferConstructor;
 
+let nodeIsUtf8Resolved = false;
+let nodeIsUtf8: ((input: Uint8Array) => boolean) | null = null;
+
+/**
+ * `isUtf8` from the Node.js `buffer` module, reached through `process.getBuiltinModule`
+ * (Node.js \>= 20.16 / 22.3) so no import is visible to bundlers. Resolved on first use, so loading
+ * the library makes no extra call; null when unavailable.
+ * @internal
+ */
+function getNodeIsUtf8(): ((input: Uint8Array) => boolean) | null {
+  if (!nodeIsUtf8Resolved) {
+    nodeIsUtf8Resolved = true;
+    // getBuiltinModule can be a throwing stub (see the ObjectId static block)
+    try {
+      // @ts-expect-error Node.js types not present since this is an optional API
+      const isUtf8 = globalThis?.process?.getBuiltinModule?.('buffer')?.isUtf8;
+      if (typeof isUtf8 === 'function') nodeIsUtf8 = isUtf8;
+    } catch {
+      // Suppress
+    }
+  }
+  return nodeIsUtf8;
+}
+
+/**
+ * Below this length, decoding then scanning for U+FFFD is cheaper than a native validation pass.
+ * @internal
+ */
+const UTF8_VALIDATE_NATIVE_MIN_BYTES = 64;
+
+/**
+ * Fatal UTF-8 decoding validated by `buffer.isUtf8`; null when it is not available. Kept out of
+ * `toUTF8` so that the short-string path stays small.
+ * @internal
+ */
+function toUTF8NativeValidated(buffer: Uint8Array, start: number, end: number): string | null {
+  const isUtf8 = getNodeIsUtf8();
+  if (isUtf8 == null) return null;
+  if (!isUtf8(new Uint8Array(buffer.buffer, buffer.byteOffset + start, end - start))) {
+    // Throws the same error as the decode-and-scan path.
+    return parseUtf8(buffer, start, end, true);
+  }
+  return nodeJsByteUtils.toLocalBufferType(buffer).toString('utf8', start, end);
+}
+
 /** @internal */
 function nodejsMathRandomBytes(byteLength: number): NodeJsBuffer {
   return nodeJsByteUtils.fromNumberArray(
@@ -158,6 +203,11 @@ export const nodeJsByteUtils = {
     const basicLatin = end - start <= 20 ? tryReadBasicLatin(buffer, start, end) : null;
     if (basicLatin != null) {
       return basicLatin;
+    }
+
+    if (fatal && end - start >= UTF8_VALIDATE_NATIVE_MIN_BYTES) {
+      const string = toUTF8NativeValidated(buffer, start, end);
+      if (string != null) return string;
     }
 
     const string = nodeJsByteUtils.toLocalBufferType(buffer).toString('utf8', start, end);
