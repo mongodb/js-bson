@@ -215,6 +215,9 @@ tasks:
         vars:
           TS_VERSION: ""
           TRY_COMPILING_LIBRARY: "true"
+          # Keeps the consumer-perspective checks in run-typescript.sh from inheriting
+          # this repo's tsconfig.
+          TSC_EXTRA_FLAGS: "--ignoreConfig"
   - name: check-typescript-next
     commands:
       - func: fetch source
@@ -225,8 +228,6 @@ tasks:
         vars:
           TS_VERSION: "next"
           TRY_COMPILING_LIBRARY: "true"
-          # Keeps the consumer-perspective checks in run-typescript.sh from inheriting
-          # this repo's tsconfig. Available in TS 6.0+, so only set on this task.
           TSC_EXTRA_FLAGS: "--ignoreConfig"
   - name: run-granular-benchmarks
     commands:
