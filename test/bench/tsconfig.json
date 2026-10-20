@@ -5,7 +5,7 @@
     "strict": true,
     "alwaysStrict": true,
     "target": "es2021",
-    "module": "nodenext",
+    "module": "commonjs",
     "moduleResolution": "nodenext",
     "skipLibCheck": true,
     "erasableSyntaxOnly": true,

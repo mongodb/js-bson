@@ -5,7 +5,7 @@
     "strict": true,
     "alwaysStrict": true,
     "target": "es2023",
-    "module": "preserve",
+    "module": "commonjs",
     "moduleResolution": "bundler",
     "skipLibCheck": true,
     "erasableSyntaxOnly": true,
