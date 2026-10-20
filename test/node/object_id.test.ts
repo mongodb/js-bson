@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import { bufferFromHexArray } from './tools/utils';
 import { isBufferOrUint8Array } from './tools/utils';
 import { loadCJSModuleBSON } from '../load_bson';
-import * as crypto from 'node:crypto';
+import crypto from 'node:crypto';
 
 describe('ObjectId', function () {
   describe('static createFromTime()', () => {

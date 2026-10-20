@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import * as BSON from '../register-bson';
+import BSON from '../register-bson';
 import { sorted, byStrings } from './tools/utils';
 import { readFile } from 'fs/promises';
 import { resolve } from 'path';
