@@ -1,6 +1,6 @@
 import { BSON } from '../register-bson';
 import { expect } from 'chai';
-import * as corpus from './tools/bson_corpus_test_loader';
+import corpus from './tools/bson_corpus_test_loader';
 
 const Decimal128 = BSON.Decimal128;
 const BSONError = BSON.BSONError;

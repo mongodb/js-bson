@@ -5,8 +5,8 @@
     "strict": true,
     "alwaysStrict": true,
     "target": "es2021",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "skipLibCheck": true,
     "erasableSyntaxOnly": true,
     "lib": [
