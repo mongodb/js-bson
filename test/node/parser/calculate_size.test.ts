@@ -26,6 +26,40 @@ describe('calculateSize()', () => {
     ).to.throw(BSONVersionError, /Unsupported BSON version/i);
   });
 
+  describe('matches the serialized length', () => {
+    const cases: Record<string, () => BSON.Document> = {
+      'array index keys of 1 to 5 digits': () => ({
+        a: Array.from({ length: 12_000 }, (_, i) => i)
+      }),
+      'names and values around 12 code units': () => ({
+        abcdefghijkl: 'abcdefghijkl',
+        abcdefghijklm: 'abcdefghijklm',
+        abcdefghijké: 'abcdefghijké',
+        é: 'é',
+        名前: '名前',
+        '': ''
+      }),
+      'Map keys': () => ({
+        m: new Map<string, unknown>([
+          ['clé', 1],
+          ['k', 'v']
+        ])
+      }),
+      'skipped values': () => ({ u: undefined, f: () => null, s: Symbol('s'), a: [undefined, 1] })
+    };
+
+    for (const [name, build] of Object.entries(cases)) {
+      for (const options of [{}, { ignoreUndefined: true }, { serializeFunctions: true }]) {
+        it(`${name} with ${JSON.stringify(options)}`, () => {
+          const doc = build();
+          expect(BSON.calculateObjectSize(doc, options)).to.equal(
+            BSON.serialize(doc, options).byteLength
+          );
+        });
+      }
+    }
+  });
+
   describe('when calculating size of deeply nested documents', () => {
     it('can calculate the size of a document with 20,000 nesting levels without a stack overflow', () => {
       const size = BSON.calculateObjectSize(buildDeeplyNestedObject(20_000));
