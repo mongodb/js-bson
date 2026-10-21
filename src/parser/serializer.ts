@@ -44,6 +44,9 @@ export interface SerializeOptions {
 
 const regexp = /\x00/; // eslint-disable-line no-control-regex
 const ignoreKeys = new Set(['$db', '$ref', '$id', '$clusterTime']);
+/** Array index key strings, built on first use. */
+const INDEX_KEYS_CACHED = 1024;
+const indexKeys: string[] = [];
 
 function serializeString(buffer: Uint8Array, key: string, value: string, index: number) {
   // Encode String type
@@ -600,7 +603,7 @@ export function serializeInto(
         continue;
       }
       const i = frame.keyIndex++;
-      key = String(i);
+      key = i < INDEX_KEYS_CACHED ? (indexKeys[i] ??= String(i)) : String(i);
       value = arr[i];
     }
 
