@@ -135,13 +135,16 @@ function deserializeValue(value: any, options: EJSONOptions = {}) {
   // upgrade deprecated undefined to null
   if (value.$undefined) return null;
 
-  const keys = Object.keys(value).filter(
-    k => k.startsWith('$') && value[k] != null
-  ) as (keyof typeof keysToCodecs)[];
-  for (let i = 0; i < keys.length; i++) {
-    const c = keysToCodecs[keys[i]];
+  // Only objects with a `$`-prefixed own key can be EJSON wrappers; the rest pass through as is.
+  let hasDollarKey = false;
+  for (const key of Object.keys(value)) {
+    if (key.charCodeAt(0) !== 0x24 /* $ */) continue;
+    hasDollarKey = true;
+    if (value[key] == null) continue;
+    const c = keysToCodecs[key as keyof typeof keysToCodecs];
     if (c) return c.fromExtendedJSON(value, options);
   }
+  if (!hasDollarKey) return value;
 
   if (value.$date != null) {
     const d = value.$date;
@@ -436,14 +439,46 @@ function parse(text: string, options?: EJSONParseOptions): any {
     relaxed: options?.relaxed ?? true,
     legacy: options?.legacy ?? false
   };
-  return JSON.parse(text, (key, value) => {
-    if (key.indexOf('\x00') !== -1) {
-      throw new BSONError(
-        `BSON Document field names cannot contain null bytes, found: ${JSON.stringify(key)}`
-      );
+  const holder = { '': JSON.parse(text) };
+  reviveProperty(holder, '', ejsonOptions);
+  return holder[''];
+}
+
+/**
+ * Replaces `holder[key]` by its EJSON-decoded value, children first: the visiting order, key
+ * checks and property updates of a `JSON.parse` reviver. Passing a reviver to `JSON.parse` takes
+ * V8 off its fast path, which costs several times more than this walk.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function reviveProperty(holder: any, key: string | number, options: EJSONOptions): void {
+  const value = holder[key];
+  if (typeof value === 'object' && value != null) {
+    if (Array.isArray(value)) {
+      for (let i = 0; i < value.length; i++) reviveProperty(value, i, options);
+    } else {
+      for (const childKey of Object.keys(value)) reviveProperty(value, childKey, options);
     }
-    return deserializeValue(value, ejsonOptions);
-  });
+  }
+  // Array indexes cannot contain a null byte
+  if (typeof key === 'string' && key.indexOf('\x00') !== -1) {
+    throw new BSONError(
+      `BSON Document field names cannot contain null bytes, found: ${JSON.stringify(key)}`
+    );
+  }
+  const revived = deserializeValue(value, options);
+  if (revived === value) return;
+  if (revived === undefined) {
+    delete holder[key];
+  } else if (key === '__proto__') {
+    Object.defineProperty(holder, key, {
+      value: revived,
+      writable: true,
+      enumerable: true,
+      configurable: true
+    });
+  } else {
+    holder[key] = revived;
+  }
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

@@ -328,6 +328,31 @@ describe('Extended JSON', function () {
     expect(deserialized.__proto__.a).to.equal(42);
   });
 
+  it('decodes an EJSON value under a __proto__ key into an own property', function () {
+    const deserialized = EJSON.parse('{"__proto__":{"$numberLong":"5"}}', { relaxed: false });
+    const descriptor = Object.getOwnPropertyDescriptor(deserialized, '__proto__');
+    expect(descriptor).to.include({ configurable: true, enumerable: true, writable: true });
+    expect(descriptor?.value).to.have.property('_bsontype', 'Long');
+    expect(Object.getPrototypeOf(deserialized)).to.not.have.property('_bsontype');
+  });
+
+  it('reports the innermost field name containing a null byte first', function () {
+    expect(() => EJSON.parse('{"a\\u0000":{"b\\u0000":1}}')).to.throw(
+      BSONError,
+      'BSON Document field names cannot contain null bytes, found: "b\\u0000"'
+    );
+  });
+
+  it('decodes EJSON values nested in arrays and objects', function () {
+    const parsed = EJSON.parse(
+      '{"a":[{"$numberInt":"1"},{"b":{"$oid":"65a1b2c3d4e5f60718293a4b"}}],"c":{"$date":{"$numberLong":"5"}}}',
+      { relaxed: false }
+    );
+    expect(parsed.a[0]).to.have.property('_bsontype', 'Int32');
+    expect(parsed.a[1].b.toHexString()).to.equal('65a1b2c3d4e5f60718293a4b');
+    expect(parsed.c.getTime()).to.equal(5);
+  });
+
   context('when dealing with legacy extended json', function () {
     describe('.stringify', function () {
       context('when serializing binary', function () {
