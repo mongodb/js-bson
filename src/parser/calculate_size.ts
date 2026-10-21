@@ -3,7 +3,7 @@ import type { Document } from '../bson';
 import { BSONError, BSONVersionError } from '../error';
 import * as constants from '../constants';
 import { ByteUtils } from '../utils/byte_utils';
-import { isAnyArrayBuffer, isDate, isMap, isRegExp } from './utils';
+import { AncestorPath, isAnyArrayBuffer, isDate, isMap, isRegExp } from './utils';
 
 /** @internal */
 interface SizeFrame {
@@ -27,19 +27,19 @@ export function internalCalculateObjectSize(
     { object, ignoreUndefined: ignoreUndefined ?? false, exit: false }
   ];
   // The chain of objects from the root down to the one currently being walked.
-  const path = new Set<Document>();
+  const path = new AncestorPath();
   let total = 0;
 
   while (objectStack.length > 0) {
     const frame = objectStack.pop()!;
 
     if (frame.exit) {
-      path.delete(frame.object);
+      path.pop();
       continue;
     }
 
     const { object: obj, ignoreUndefined: frameIgnoreUndefined } = frame;
-    path.add(obj);
+    path.push(obj);
     // Re-push this frame as its own exit marker.
     // The frame itself is popped when the subtree is exhausted.
     frame.exit = true;
@@ -108,7 +108,7 @@ function calculateElementSize(
   isArray = false,
   ignoreUndefined = false,
   objectStack: SizeFrame[],
-  path: Set<Document>
+  path: AncestorPath
 ): number {
   // If we have toBSON defined, override the current object
   if (typeof value?.toBSON === 'function') {

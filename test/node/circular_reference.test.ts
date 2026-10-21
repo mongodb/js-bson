@@ -94,6 +94,39 @@ describe('Cyclic reference detection', () => {
     });
   });
 
+  context('in deeply nested documents', () => {
+    function chain(depth: number) {
+      const root: Document = {};
+      const levels = [root];
+      for (let i = 1; i <= depth; i++) {
+        const next: Document = {};
+        levels[i - 1].child = next;
+        levels.push(next);
+      }
+      return levels;
+    }
+
+    for (const target of [0, 40]) {
+      it(`throws on a cycle at depth 60 back to depth ${target}`, () => {
+        const levels = chain(60);
+        levels[60].back = levels[target];
+        expect(() => BSON.serialize(levels[0])).to.throw(/circular/);
+        expect(() => BSON.calculateObjectSize(levels[0])).to.throw(/circular/);
+      });
+    }
+
+    it('does not throw when deep sibling subtrees share a reference', () => {
+      const shared = { a: 1 };
+      const x = chain(50);
+      const y = chain(50);
+      x[50].shared = shared;
+      y[50].shared = shared;
+      const root = { x: x[0], y: y[0] };
+      expect(() => BSON.serialize(root)).to.not.throw();
+      expect(BSON.calculateObjectSize(root)).to.equal(BSON.serialize(root).byteLength);
+    });
+  });
+
   context('EJSON circular references', () => {
     it('should throw a helpful error message for input with circular references', function () {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
