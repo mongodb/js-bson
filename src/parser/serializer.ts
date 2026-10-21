@@ -138,10 +138,19 @@ function serializeDate(buffer: Uint8Array, key: string, value: Date, index: numb
   index = index + numberOfWrittenBytes;
   buffer[index++] = 0;
 
-  // Write the date
-  const dateInMilis = Long.fromNumber(value.getTime());
-  const lowBits = dateInMilis.getLowBits();
-  const highBits = dateInMilis.getHighBits();
+  // Write the date. For a safe integer (any valid Date) the two's complement words are computed
+  // directly; anything else (an invalid Date's NaN) goes through Long.fromNumber as before.
+  const time = value.getTime();
+  let lowBits: number;
+  let highBits: number;
+  if (Number.isSafeInteger(time)) {
+    lowBits = time | 0;
+    highBits = Math.floor(time / 4294967296) | 0;
+  } else {
+    const dateInMilis = Long.fromNumber(time);
+    lowBits = dateInMilis.getLowBits();
+    highBits = dateInMilis.getHighBits();
+  }
   // Encode low bits
   index += NumberUtils.setInt32LE(buffer, index, lowBits);
   // Encode high bits
