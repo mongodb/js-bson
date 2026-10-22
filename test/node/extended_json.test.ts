@@ -366,6 +366,40 @@ describe('Extended JSON', function () {
             expect(json).to.equal('{"field":{"$date":{"$numberLong":"253402300800000"}}}');
           });
         });
+
+        context(
+          'when the date is invalid (its time value is NaN)',
+          function () {
+            it('rejects it instead of emitting a $numberLong it cannot parse back', function () {
+              const doc = { field: new Date(NaN) };
+
+              // The default mode emitted {"$date":{"$numberLong":"NaN"}}, which EJSON.parse
+              // refuses with '$numberLong string "NaN" is in an invalid format', and the
+              // legacy modes threw a RangeError out of toISOString instead.
+              expect(() => EJSON.stringify(doc)).to.throw(BSONError, /invalid Date/);
+              expect(() => EJSON.stringify(doc, { relaxed: true })).to.throw(BSONError, /invalid Date/);
+              expect(() => EJSON.stringify(doc, { relaxed: false })).to.throw(BSONError, /invalid Date/);
+              expect(() => EJSON.stringify(doc, { legacy: true })).to.throw(BSONError, /invalid Date/);
+              expect(() => EJSON.stringify(doc, { legacy: true, relaxed: false })).to.throw(
+                BSONError,
+                /invalid Date/
+              );
+            });
+
+            it('still serializes valid dates unchanged', function () {
+              const date = new Date(1452124800000);
+              expect(EJSON.stringify({ field: date })).to.equal(
+                '{"field":{"$date":"2016-01-07T00:00:00Z"}}'
+              );
+              expect(EJSON.stringify({ field: date }, { relaxed: false })).to.equal(
+                '{"field":{"$date":{"$numberLong":"1452124800000"}}}'
+              );
+              expect(EJSON.stringify({ field: date }, { legacy: true, relaxed: true })).to.equal(
+                '{"field":{"$date":1452124800000}}'
+              );
+            });
+          }
+        );
       });
 
       context('when serializing regex', function () {
