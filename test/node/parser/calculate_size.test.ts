@@ -78,4 +78,40 @@ describe('calculateSize()', () => {
       expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
     });
   });
+
+  describe('when given a negative zero value with a single character key', function () {
+    it('counts 8 bytes to match the double the serializer writes for -0', function () {
+      const doc = { a: -0 };
+      expect(BSON.calculateObjectSize(doc)).to.equal(4 + 1 + 1 + 8 + 1 + 1);
+      expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+    });
+  });
+
+  describe('when given a Code value without a scope', function () {
+    it('matches the serialized byte length', function () {
+      const doc = { a: new BSON.Code('x') };
+      expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+    });
+  });
+
+  describe('when given a Code value with an empty scope', function () {
+    it('matches the serialized byte length', function () {
+      const doc = { a: new BSON.Code('x', {}) };
+      expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+    });
+
+    it('deserializes back to a Code with an empty scope', function () {
+      const doc = { a: new BSON.Code('x', {}) };
+      const result = BSON.deserialize(BSON.serialize(doc));
+      expect(result.a).to.be.instanceOf(BSON.Code);
+      expect(result.a.scope).to.deep.equal({});
+    });
+  });
+
+  describe('when given a Code value with a non-empty scope', function () {
+    it('matches the serialized byte length', function () {
+      const doc = { a: new BSON.Code('x', { y: 1 }) };
+      expect(BSON.calculateObjectSize(doc)).to.equal(BSON.serialize(doc).byteLength);
+    });
+  });
 });

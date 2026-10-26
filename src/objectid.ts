@@ -58,10 +58,36 @@ export class ObjectId extends BSONValue {
 
   static {
     this.resetState();
+
+    let v8Module;
+    let isBuildingSnapshot = false;
+    // getBuiltinModule is wrapped in a try..catch due to
+    // https://github.com/vercel/next.js/issues/98226.
+    //
+    // The NextJS Edge runtime
+    // implements getBuiltInModule with a throwable stub, which we protect
+    // against so our users are operable across this popular runtime.
+    try {
+      // @ts-expect-error Node.js types not present since this is an optional API
+      v8Module = globalThis?.process?.getBuiltinModule?.('v8') ?? {};
+    } catch {
+      // Suppress
+    }
+
     // https://nodejs.org/api/v8.html#startup-snapshot-api
-    // @ts-expect-error Node.js types not present since this is an optional API
-    const { startupSnapshot } = globalThis?.process?.getBuiltinModule?.('v8') ?? {};
-    if (startupSnapshot?.isBuildingSnapshot?.()) {
+    const startupSnapshot = v8Module?.startupSnapshot;
+
+    // isBuildingSnapshot is wrapped in a try..catch due to
+    // https://github.com/oven-sh/bun/issues/32501
+    //
+    // Bun implements isBuildingSnapshot with a throwable stub, which we also
+    // protect against for the same reason as getBuiltInModule.
+    try {
+      isBuildingSnapshot = startupSnapshot?.isBuildingSnapshot?.();
+    } catch {
+      // Suppress
+    }
+    if (isBuildingSnapshot) {
       startupSnapshot?.addDeserializeCallback?.(this.resetState);
     }
   }
