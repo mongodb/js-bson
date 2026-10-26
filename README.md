@@ -160,6 +160,16 @@ Only the following version combinations with the [MongoDB Node.js Driver](https:
 Parse an Extended JSON string, constructing the JavaScript value or object described by that
 string.
 
+> [!WARNING]
+> If you use the result of `EJSON.parse()` in a query, update, or command, an attacker
+> can inject operators or unexpected field values that change the meaning of the
+> operation. This risk is greatest when the input text originates from a source that
+> your application does not control. Validate untrusted input before parsing it.
+> To learn more about validating input before conversion and other security best
+> practices for client libraries, see the [Client Libraries Best
+> Practices](https://www.mongodb.com/docs/drivers/client-libraries-best-practices/)
+> page in the MongoDB documentation.
+
 **Example**
 
 ```js

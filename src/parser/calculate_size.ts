@@ -124,7 +124,11 @@ function calculateElementSize(
         value >= constants.JS_INT_MIN &&
         value <= constants.JS_INT_MAX
       ) {
-        if (value >= constants.BSON_INT32_MIN && value <= constants.BSON_INT32_MAX) {
+        if (
+          !Object.is(value, -0) &&
+          value >= constants.BSON_INT32_MIN &&
+          value <= constants.BSON_INT32_MAX
+        ) {
           // 32 bit
           return ByteUtils.utf8ByteLength(name) + 1 + (4 + 1);
         } else {
@@ -170,7 +174,7 @@ function calculateElementSize(
         return ByteUtils.utf8ByteLength(name) + 1 + (4 + 1);
       } else if (value._bsontype === 'Code') {
         // Calculate size depending on the availability of a scope
-        if (value.scope != null && Object.keys(value.scope).length > 0) {
+        if (value.scope != null && typeof value.scope === 'object') {
           if (path.has(value.scope)) {
             throw new BSONError('Cannot convert circular structure to BSON');
           }
