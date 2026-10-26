@@ -61,6 +61,54 @@ describe('parseToElements()', () => {
     });
   });
 
+  context('when a string element declares a zero length (NODE-7611)', () => {
+    it('throws instead of scanning past the end of the input', () => {
+      // 10-byte document: string element with empty name declares a stringSize of 0,
+      // which would advance the cursor to the declared document end and previously
+      // made findNull scan out of range forever.
+      const test = () =>
+        parseToElements(
+          new Uint8Array([0x0a, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00])
+        );
+      expect(test).to.throw(/value reports length larger than document/i);
+      expect(test).to.throw(BSONOffsetError);
+    });
+  });
+
+  context('when an element value extends past the end of an embedded document', () => {
+    it('throws an error indicating the value is larger than the document', () => {
+      const bytes = new Uint8Array([
+        0x17,
+        0x00,
+        0x00,
+        0x00, // outer documentSize
+        0x03,
+        0x61,
+        0x00, // 'a': embedded document
+        0x08,
+        0x00,
+        0x00,
+        0x00, // embedded documentSize
+        0x10,
+        0x62,
+        0x62,
+        0x00, // int32 named 'bb'
+        0x10,
+        0x63,
+        0x00,
+        0x2a,
+        0x00,
+        0x00,
+        0x00, // 'c': int32 sibling of 'a'
+        0x00 // outer terminator
+      ]);
+
+      const test = () => parseToElements(bytes, 7);
+      expect(test).to.throw(/value reports length larger than document/i);
+      expect(test).to.throw(BSONOffsetError);
+    });
+  });
+
   context('when given a negative size', () => {
     context('in a document', () => {
       it('throws an error that a size cannot be negative', () => {
@@ -200,7 +248,7 @@ describe('parseToElements()', () => {
     },
     {
       name: 'binary',
-      input: ['05', '6100', int32LEToHex(5), '23', '00'],
+      input: ['05', '6100', int32LEToHex(5), '23', '0000000000'],
       output: { type: 5, length: 10 }
     },
     {
