@@ -262,7 +262,16 @@ function serializeValue(value: any, options: EJSONSerializeInternalOptions): any
   if (value === undefined) return options.ignoreUndefined ? undefined : null;
 
   if (value instanceof Date || isDate(value)) {
-    const dateNum = value.getTime(),
+    const dateNum = value.getTime();
+
+    // An invalid Date has no Extended JSON representation: printing its NaN as a
+    // $numberLong makes a document this parser then refuses to read, and asking for an
+    // ISO string throws a RangeError from toISOString instead. Reject it here, in both
+    // modes, rather than emitting something that cannot be parsed back.
+    if (!Number.isFinite(dateNum)) {
+      throw new BSONError(`Cannot serialize an invalid Date to EJSON: ${value.toString()}`);
+    }
+    const
       // is it in year range 1970-9999?
       // 253402300800000 is the first instant of year 10000 (+010000-01-01T00:00:00Z).
       // It is the exclusive upper bound: a relaxed date is emitted as an ISO 8601 string,
