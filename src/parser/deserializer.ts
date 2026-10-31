@@ -35,6 +35,14 @@ export interface DeserializeOptions {
    */
   promoteBuffers?: boolean;
   /**
+   * Copy the bytes of Binary values (and of the Buffers returned with `promoteBuffers`) out of the
+   * input instead of returning views into it, so that keeping such a value does not keep the
+   * whole input buffer alive. `true` copies every payload; a number copies only payloads of at
+   * most that many bytes, larger ones stay views.
+   * @defaultValue `false`
+   */
+  copyBinary?: boolean | number;
+  /**
    * when deserializing will promote BSON values to their Node.js closest equivalent types.
    * @defaultValue `true`
    */
@@ -206,6 +214,10 @@ function deserializeObject(
   const promoteLongs = options.promoteLongs ?? true;
   const promoteValues = options.promoteValues ?? true;
   const useBigInt64 = options.useBigInt64 ?? false;
+  // Largest Binary payload that is copied out of the input; -1 never copies
+  const copyBinary = options.copyBinary ?? false;
+  const copyBinaryMaxBytes =
+    copyBinary === true ? Infinity : typeof copyBinary === 'number' ? copyBinary : -1;
 
   // Validate bigint and long promotion settings
   if (useBigInt64 && !promoteValues) {
@@ -542,10 +554,17 @@ function deserializeObject(
           throw new BSONError('Binary type with subtype 0x02 contains too short binary size');
       }
 
+      let payload = buffer.subarray(index, index + binarySize);
+      if (binarySize <= copyBinaryMaxBytes) {
+        const copy = ByteUtils.allocate(binarySize);
+        copy.set(payload);
+        payload = copy;
+      }
+
       if (promoteBuffers && promoteValues) {
-        value = ByteUtils.toLocalBufferType(buffer.subarray(index, index + binarySize));
+        value = ByteUtils.toLocalBufferType(payload);
       } else {
-        value = new Binary(buffer.subarray(index, index + binarySize), subType);
+        value = new Binary(payload, subType);
         if (subType === constants.BSON_BINARY_SUBTYPE_UUID_NEW && UUID.isValid(value)) {
           value = value.toUUID();
         }
