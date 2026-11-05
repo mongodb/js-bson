@@ -164,7 +164,9 @@ tasks:
     commands:
       - func: fetch source
         vars:
-          NODE_LTS_VERSION: latest
+          # TODO(NODE-7962): revert to 'latest' once node v27 is supported. Node 27 does not start on
+          # rhel8 (glibc too old) and fails the NaN payload roundtrip test on s390x.
+          NODE_LTS_VERSION: 26
       - func: install dependencies
       - func: run tests
         vars:
