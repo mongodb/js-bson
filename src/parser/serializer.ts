@@ -609,7 +609,7 @@ export function serializeInto(
     }
 
     if (!frame.isArray && typeof key === 'string' && !(key[0] === '$' && ignoreKeys.has(key))) {
-      if (regexp.test(key)) {
+      if (key.includes('\x00')) {
         throw new BSONError('key ' + key + ' must not contain null bytes');
       }
       if (frame.checkKeys) {
