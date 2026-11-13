@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [7.4.0](https://github.com/mongodb/js-bson/compare/v7.3.4...v7.4.0) (2026-11-13)
+
+
+### Features
+
+* **NODE-7626:** deprecate ObjectId.cacheHexString ([#962](https://github.com/mongodb/js-bson/issues/962)) ([e8c85a0](https://github.com/mongodb/js-bson/commit/e8c85a0ff49e12a99202d6378ca3802958125530))
+
 ## [7.3.4](https://github.com/mongodb/js-bson/compare/v7.3.3...v7.3.4) (2026-11-05)
 
 
