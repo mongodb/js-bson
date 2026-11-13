@@ -92,6 +92,10 @@ export class ObjectId extends BSONValue {
     }
   }
 
+  /**
+   * @deprecated `toHexString()` is already fast, so `cacheHexString` is unnecessary. It will be
+   * removed in the next major version.
+   */
   static cacheHexString: boolean;
 
   /**
