@@ -3,16 +3,6 @@ import { tryReadBasicLatin } from './latin';
 import { parseUtf8 } from '../parse_utf8';
 import { isUint8Array } from '../parser/utils';
 
-type TextDecoder = {
-  readonly encoding: string;
-  readonly fatal: boolean;
-  readonly ignoreBOM: boolean;
-  decode(input?: Uint8Array): string;
-};
-type TextDecoderConstructor = {
-  new (label: 'utf8', options: { fatal: boolean; ignoreBOM?: boolean }): TextDecoder;
-};
-
 type TextEncoder = {
   readonly encoding: string;
   encode(input?: string): Uint8Array;
@@ -22,7 +12,6 @@ type TextEncoderConstructor = {
 };
 
 // Web global
-declare const TextDecoder: TextDecoderConstructor;
 declare const TextEncoder: TextEncoderConstructor;
 declare const atob: (base64: string) => string;
 declare const btoa: (binary: string) => string;
