@@ -79,10 +79,6 @@ export interface DeserializeOptions {
   validation?: { utf8: boolean | Record<string, true> | Record<string, false> };
 }
 
-// Internal long versions
-const JS_INT_MAX_LONG = Long.fromNumber(constants.JS_INT_MAX);
-const JS_INT_MIN_LONG = Long.fromNumber(constants.JS_INT_MIN);
-
 export function internalDeserialize(
   buffer: Uint8Array,
   options: DeserializeOptions,
@@ -497,15 +493,17 @@ function deserializeObject(
         const highBits = NumberUtils.getInt32LE(buffer, index + 4);
         index += 8;
 
-        const long = new Long(lowBits, highBits);
-        // Promote the long if possible
-        if (promoteLongs && promoteValues === true) {
-          value =
-            long.lessThanOrEqual(JS_INT_MAX_LONG) && long.greaterThanOrEqual(JS_INT_MIN_LONG)
-              ? long.toNumber()
-              : long;
+        // Promote the long if possible. The range check reads the bits, not the computed double:
+        // [JS_INT_MIN, JS_INT_MAX] is [-2^53, 2^53], and 2^53 + 1 rounds to 2^53 as a double.
+        if (
+          promoteLongs &&
+          promoteValues === true &&
+          highBits >= -0x200000 &&
+          (highBits < 0x200000 || (highBits === 0x200000 && lowBits === 0))
+        ) {
+          value = highBits * 4294967296 + (lowBits >>> 0);
         } else {
-          value = long;
+          value = new Long(lowBits, highBits);
         }
       }
     } else if (elementType === constants.BSON_DATA_DECIMAL128) {
