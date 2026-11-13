@@ -480,7 +480,32 @@ const toUTF8Tests: ByteUtilTest<'toUTF8'>[] = [
     expectation({ error }) {
       expect(error).to.match(/Invalid UTF-8 string in BSON document/i);
     }
-  }))
+  })),
+  ...utf8WebPlatformSpecTests.map(t => {
+    // A long string at an offset inside a larger buffer, with the invalid bytes at the end
+    const prefix = Buffer.from('xx' + 'é'.repeat(40), 'utf8');
+    const buffer = Buffer.concat([prefix, Uint8Array.from(t.input), Buffer.from('yy')]);
+    return {
+      name: `${t.name} (long string at an offset)`,
+      inputs: [buffer, 2, buffer.length - 2, true] as [
+        buffer: Uint8Array,
+        start: number,
+        end: number,
+        fatal: boolean
+      ],
+      expectation({ error }) {
+        expect(error).to.match(/Invalid UTF-8 string in BSON document/i);
+      }
+    };
+  }),
+  {
+    name: 'should return a valid long string containing U+FFFD when fatal is true',
+    inputs: [Buffer.from('xx' + 'é'.repeat(40) + '�' + 'a'.repeat(30) + 'yy'), 2, 115, true],
+    expectation({ error, output }) {
+      expect(error).to.be.null;
+      expect(output).to.equal('é'.repeat(40) + '�' + 'a'.repeat(30));
+    }
+  }
 ];
 
 const utf8ByteLengthTests: ByteUtilTest<'utf8ByteLength'>[] = [
