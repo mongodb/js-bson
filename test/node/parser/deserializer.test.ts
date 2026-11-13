@@ -47,6 +47,46 @@ describe('deserializer()', () => {
     });
   });
 
+  describe('field names repeated across documents', () => {
+    it('decodes every name correctly when there are more distinct names than cache slots', () => {
+      const doc: Record<string, number> = {};
+      for (let i = 0; i < 5000; i++) doc[`f${i}`] = i;
+      const bytes = BSON.serialize(doc);
+      for (let round = 0; round < 10; round++) {
+        expect(BSON.deserialize(bytes)).to.deep.equal(doc);
+      }
+    });
+
+    it('decodes names of the same length and different bytes as different keys', () => {
+      const docs = Array.from({ length: 2000 }, (_, i) => ({
+        [i.toString(36).padStart(4, '0')]: i
+      }));
+      for (let round = 0; round < 3; round++) {
+        for (const doc of docs) {
+          expect(BSON.deserialize(BSON.serialize(doc))).to.deep.equal(doc);
+        }
+      }
+    });
+
+    it('keeps decoding non-ASCII and long names', () => {
+      const doc = { clé: 1, ['k'.repeat(100)]: 2, 名前: 3 };
+      const bytes = BSON.serialize(doc);
+      expect(BSON.deserialize(bytes)).to.deep.equal(doc);
+      expect(BSON.deserialize(bytes)).to.deep.equal(doc);
+    });
+
+    it('keeps __proto__ an own property on every document', () => {
+      const bytes = BSON.serialize(JSON.parse('{"__proto__": {"polluted": true}, "a": 1}'));
+      for (let round = 0; round < 10; round++) {
+        const result = BSON.deserialize(bytes);
+        expect(Object.getOwnPropertyDescriptor(result, '__proto__')?.value).to.deep.equal({
+          polluted: true
+        });
+        expect(({} as Record<string, unknown>).polluted).to.be.undefined;
+      }
+    });
+  });
+
   describe('when the fieldsAsRaw options is present and has a value that corresponds to a key in the object', () => {
     it('ignores non-own properties set on the options object', () => {
       const bytes = BSON.serialize({ someKey: [1] });

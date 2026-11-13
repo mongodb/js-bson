@@ -157,6 +157,56 @@ interface NestedParsingFrame {
 
 const allowedDBRefKeys = /^\$ref$|^\$id$|^\$db$/;
 
+/**
+ * Field names repeat across the documents of a reply, so short ASCII names are kept in a small
+ * direct-mapped cache. A hit returns the same string instance, which V8 has already internalized
+ * as a property key, so the following property store skips the string-table lookup.
+ * Bounded: KEY_CACHE_SIZE slots of at most KEY_CACHE_MAX_LENGTH characters each. An occupied
+ * slot is only replaced after KEY_CACHE_REPLACE_AFTER misses in a row, so documents with more
+ * distinct names than slots do not pay a cache store for every field.
+ */
+const KEY_CACHE_SIZE = 1024;
+const KEY_CACHE_MAX_LENGTH = 64;
+const KEY_CACHE_REPLACE_AFTER = 8;
+const keyCache: (string | null)[] = new Array(KEY_CACHE_SIZE).fill(null);
+const keyCacheMisses = new Uint8Array(KEY_CACHE_SIZE);
+// The bytes of each cached name, KEY_CACHE_MAX_LENGTH per slot: comparing bytes is cheaper than
+// charCodeAt on the cached string, which V8 may have turned into a reference to its internalized
+// copy.
+const keyCacheBytes = new Uint8Array(KEY_CACHE_SIZE * KEY_CACHE_MAX_LENGTH);
+
+function readKey(buffer: Uint8Array, start: number, end: number): string {
+  const length = end - start;
+  if (length === 0 || length > KEY_CACHE_MAX_LENGTH) {
+    return ByteUtils.toUTF8(buffer, start, end, false);
+  }
+  let hash = length;
+  for (let i = start; i < end; i++) {
+    const byte = buffer[i];
+    // Non-ASCII names (including invalid UTF-8) bypass the cache.
+    if (byte > 0x7f) return ByteUtils.toUTF8(buffer, start, end, false);
+    hash = Math.imul(hash ^ byte, 0x01000193);
+  }
+  const slot = (hash ^ (hash >>> 16)) & (KEY_CACHE_SIZE - 1);
+  const cached = keyCache[slot];
+  const slotStart = slot * KEY_CACHE_MAX_LENGTH;
+  if (cached != null && cached.length === length) {
+    let i = 0;
+    while (i < length && keyCacheBytes[slotStart + i] === buffer[start + i]) i++;
+    if (i === length) {
+      keyCacheMisses[slot] = 0;
+      return cached;
+    }
+  }
+  const key = ByteUtils.toUTF8(buffer, start, end, false);
+  if (cached == null || ++keyCacheMisses[slot] >= KEY_CACHE_REPLACE_AFTER) {
+    keyCache[slot] = key;
+    for (let i = 0; i < length; i++) keyCacheBytes[slotStart + i] = buffer[start + i];
+    keyCacheMisses[slot] = 0;
+  }
+  return key;
+}
+
 // Assigns a parsed value into the destination document, guarding the __proto__ key to avoid
 // prototype pollution.
 function assignValue(dest: Document, name: string | number, value: unknown): void {
@@ -359,7 +409,7 @@ function deserializeObject(
       ? currentFrame !== null
         ? currentFrame.arrayIndex++
         : arrayIndex++
-      : ByteUtils.toUTF8(buffer, index, i, false);
+      : readKey(buffer, index, i);
 
     // shouldValidateKey is true if the key should be validated, false otherwise.
     // Within a nested frame the original code passed a collapsed boolean validation option,
