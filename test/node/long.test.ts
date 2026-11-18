@@ -14,6 +14,23 @@ describe('Long', function () {
     expect(new Long('13835058055282163712', true).toString()).to.equal('13835058055282163712');
   });
 
+  it('converts values around 2^53 to and from decimal strings', function () {
+    for (const value of [
+      2n ** 53n - 1n,
+      2n ** 53n,
+      2n ** 53n + 1n,
+      -(2n ** 53n) + 1n,
+      -(2n ** 53n),
+      -(2n ** 53n) - 1n
+    ]) {
+      expect(Long.fromBigInt(value).toString()).to.equal(value.toString());
+      expect(Long.fromString(value.toString()).toBigInt()).to.equal(value);
+    }
+    expect(Long.fromBigInt(2n ** 53n + 1n, true).toString()).to.equal('9007199254740993');
+    expect(Long.fromString('999999999999999').toString()).to.equal('999999999999999');
+    expect(Long.fromString('1000000000000000').toString()).to.equal('1000000000000000');
+  });
+
   it('accepts BigInts in Long constructor', function () {
     expect(new Long(0n).toString()).to.equal('0');
     expect(new Long(-1n).toString()).to.equal('-1');
