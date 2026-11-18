@@ -424,6 +424,13 @@ describe('Extended JSON', function () {
           });
           expect(bson).to.deep.equal(doc);
         });
+
+        it('throws BSONError when $type is not a one- or two-character hex string', function () {
+          for (const $type of ['100', 'zz']) {
+            const text = JSON.stringify({ field: { $binary: 'AQIDBAU=', $type } });
+            expect(() => EJSON.parse(text, { legacy: true })).to.throw(BSONError, /subtype/);
+          }
+        });
       });
 
       context('when deserializing date', function () {
@@ -542,6 +549,27 @@ describe('Extended JSON', function () {
       const stringifiedBinaryNewUUIDSubType = '04';
       expect(stringifiedUUIDtoObject.u.$binary.subType).to.equal(stringifiedBinaryNewUUIDSubType);
     });
+  });
+
+  describe('Binary subType parse', () => {
+    for (const subType of ['100', 'zz', '0x1', '-1', ' 1']) {
+      it(`throws BSONError for the subType ${JSON.stringify(subType)}`, () => {
+        const text = JSON.stringify({ b: { $binary: { base64: 'AQIDBAU=', subType } } });
+        expect(() => EJSON.parse(text)).to.throw(BSONError, /subtype/);
+      });
+    }
+
+    for (const [subType, expected] of [
+      ['0', 0],
+      ['05', 5],
+      ['80', 0x80],
+      ['fF', 0xff]
+    ] as const) {
+      it(`parses the subType ${JSON.stringify(subType)} as ${expected}`, () => {
+        const text = JSON.stringify({ b: { $binary: { base64: 'AQIDBAU=', subType } } });
+        expect(EJSON.parse(text).b).to.have.property('sub_type', expected);
+      });
+    }
   });
 
   describe('UUID parse', () => {
