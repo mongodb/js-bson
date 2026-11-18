@@ -464,7 +464,14 @@ function deserializeObject(
 
       // fieldsAsRaw match: push with raw=true so embedded objects inside come back as raw bytes.
       // Also propagate raw from the parent frame (nested arrays inside a raw array stay raw).
-      const arrayRaw = !!(fieldsAsRaw && fieldsAsRaw[name]) || (currentFrame?.raw ?? false);
+      // Only own keys of fieldsAsRaw match, so names such as `constructor` do not match Object.prototype.
+      const arrayRaw =
+        !!(
+          fieldsAsRaw &&
+          Object.prototype.hasOwnProperty.call(fieldsAsRaw, name) &&
+          fieldsAsRaw[name]
+        ) ||
+        (currentFrame?.raw ?? false);
       isDeferredValue = true;
       const arrayFrame: NestedParsingFrame = {
         holdingDocument: [],
