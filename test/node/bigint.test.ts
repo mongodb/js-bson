@@ -100,6 +100,15 @@ describe('BSON BigInt support', function () {
       it(description, test);
     }
 
+    it('throws BSONError when an int64 value is cut and useBigInt64 is true', function () {
+      // key 'a', then only 3 of the 8 bytes of the int64 value, then the document terminator
+      const cutDoc = Buffer.from('0b000000126100010203' + '00', 'hex');
+      expect(() => BSON.deserialize(cutDoc, { useBigInt64: true })).to.throw(
+        BSONError,
+        'Not enough bytes in the buffer for an int64 value'
+      );
+    });
+
     it('correctly deserializes min 64 bit int (-2n**63n)', function () {
       expect(
         BSON.deserialize(Buffer.from('10000000126100000000000000008000', 'hex'), {
