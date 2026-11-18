@@ -570,6 +570,20 @@ describe('Extended JSON', function () {
         expect(EJSON.parse(text).b).to.have.property('sub_type', expected);
       });
     }
+
+    for (const subType of [false, true, 0, 4]) {
+      it(`throws BSONError for the subType ${JSON.stringify(subType)}, which is not a string`, () => {
+        const text = JSON.stringify({ b: { $binary: { base64: 'AQIDBAU=', subType } } });
+        expect(() => EJSON.parse(text)).to.throw(BSONError, /subtype/);
+      });
+    }
+
+    for (const subType of [undefined, null, '']) {
+      it(`parses a missing or empty subType (${JSON.stringify(subType)}) as 0`, () => {
+        const text = JSON.stringify({ b: { $binary: { base64: 'AQIDBAU=', subType } } });
+        expect(EJSON.parse(text).b).to.have.property('sub_type', 0);
+      });
+    }
   });
 
   describe('UUID parse', () => {

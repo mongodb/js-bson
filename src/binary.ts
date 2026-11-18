@@ -303,11 +303,11 @@ export class Binary extends BSONValue {
     let type;
     if ('$binary' in doc) {
       if (options.legacy && typeof doc.$binary === 'string' && '$type' in doc) {
-        type = doc.$type ? subTypeFromExtendedJSON(doc.$type) : 0;
+        type = subTypeFromExtendedJSON(doc.$type);
         data = ByteUtils.fromBase64(doc.$binary);
       } else {
         if (typeof doc.$binary !== 'string') {
-          type = doc.$binary.subType ? subTypeFromExtendedJSON(doc.$binary.subType) : 0;
+          type = subTypeFromExtendedJSON(doc.$binary.subType);
           data = ByteUtils.fromBase64(doc.$binary.base64);
         }
       }
@@ -561,8 +561,12 @@ export type UUIDExtended = {
 /**
  * Parses the subtype of a Binary in Extended JSON: a one- or two-character hex string.
  * parseInt alone accepts other strings (`'100'`, `'zz'`), and the constructor then masks the result to 0.
+ * A missing or empty subtype gives 0, as before. Each other value must be a valid hex string.
  */
-function subTypeFromExtendedJSON(subType: string): number {
+function subTypeFromExtendedJSON(subType: unknown): number {
+  if (subType == null || subType === '') {
+    return 0;
+  }
   if (typeof subType !== 'string' || !EXTENDED_JSON_SUBTYPE.test(subType)) {
     throw new BSONError(
       `Binary subtype in Extended JSON must be a one- or two-character hex string, got ${JSON.stringify(subType)}`
