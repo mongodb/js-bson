@@ -59,6 +59,18 @@ describe('deserializer()', () => {
         'expected promoteValues option set on options object prototype to be ignored, but it was not'
       ).to.not.have.property('_bsontype', 'Int32');
     });
+
+    it('does not match field names that are only on the prototype of fieldsAsRaw', () => {
+      const bytes = BSON.serialize({
+        constructor: [{ a: 1 }],
+        toString: [{ b: 2 }],
+        plain: [{ c: 3 }]
+      });
+      const result = BSON.deserialize(bytes, { fieldsAsRaw: { plain: true } });
+      expect(result.constructor).to.deep.equal([{ a: 1 }]);
+      expect(result.toString).to.deep.equal([{ b: 2 }]);
+      expect(result.plain[0]).to.be.instanceOf(Uint8Array);
+    });
   });
 
   describe('Code with Scope', () => {
