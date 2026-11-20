@@ -63,6 +63,17 @@ describe('serialize()', () => {
     expect(BSON.calculateObjectSize(doc, { ignoreUndefined: false })).to.equal(bytes.byteLength);
   });
 
+  it('writes array index keys inside and past the reused range', () => {
+    const array = Array.from({ length: 1100 }, (_, i) => i);
+    const document = Object.fromEntries(array.map(i => [String(i), i]));
+    const arrayBytes = BSON.serialize({ a: array });
+    const documentBytes = BSON.serialize({ a: document });
+    // Same bytes except the element type: array (0x04) vs embedded document (0x03).
+    documentBytes[4] = 0x04;
+    expect(arrayBytes).to.deep.equal(documentBytes);
+    expect(BSON.serialize({ a: array })).to.deep.equal(arrayBytes);
+  });
+
   describe('when serializing deeply nested documents', () => {
     it('can serialize a document with 20,000 nesting levels without a stack overflow', () => {
       // Calling serialize directly: if it throws, mocha fails the test.
