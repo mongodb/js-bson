@@ -47,6 +47,49 @@ describe('deserializer()', () => {
     });
   });
 
+  describe('copyBinary option', () => {
+    const uuid = new BSON.UUID('3b241101-e2bb-4255-8caf-4136c566a962');
+    const small = Uint8Array.from({ length: 16 }, (_, i) => i);
+    const large = Uint8Array.from({ length: 100 }, (_, i) => i);
+    const makeInput = () =>
+      BSON.serialize({ small: new BSON.Binary(small), large: new BSON.Binary(large), uuid });
+
+    it('returns views into the input by default', () => {
+      const input = makeInput();
+      const result = BSON.deserialize(input);
+      expect(result.small.buffer.buffer).to.equal(input.buffer);
+      expect(result.uuid.buffer.buffer).to.equal(input.buffer);
+    });
+
+    it('copies every payload when true, so later changes to the input do not show', () => {
+      const input = makeInput();
+      const result = BSON.deserialize(input, { copyBinary: true });
+      input.fill(0xff);
+      expect(result.small.buffer.buffer).to.not.equal(input.buffer);
+      expect(result.small.value()).to.deep.equal(Buffer.from(small));
+      expect(result.large.value()).to.deep.equal(Buffer.from(large));
+      expect(result.uuid).to.be.instanceOf(BSON.UUID);
+      expect(result.uuid.toHexString()).to.equal(uuid.toHexString());
+    });
+
+    it('copies only payloads up to the given number of bytes', () => {
+      const input = makeInput();
+      const result = BSON.deserialize(input, { copyBinary: 64 });
+      expect(result.small.buffer.buffer).to.not.equal(input.buffer);
+      expect(result.uuid.buffer.buffer).to.not.equal(input.buffer);
+      expect(result.large.buffer.buffer).to.equal(input.buffer);
+      expect(result.large.value()).to.deep.equal(Buffer.from(large));
+    });
+
+    it('copies promoted Buffers too', () => {
+      const input = makeInput();
+      const result = BSON.deserialize(input, { promoteBuffers: true, copyBinary: true });
+      input.fill(0xff);
+      expect(result.small).to.deep.equal(Buffer.from(small));
+      expect(result.small.buffer).to.not.equal(input.buffer);
+    });
+  });
+
   describe('when the fieldsAsRaw options is present and has a value that corresponds to a key in the object', () => {
     it('ignores non-own properties set on the options object', () => {
       const bytes = BSON.serialize({ someKey: [1] });
