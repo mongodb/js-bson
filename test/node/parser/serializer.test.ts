@@ -63,6 +63,31 @@ describe('serialize()', () => {
     expect(BSON.calculateObjectSize(doc, { ignoreUndefined: false })).to.equal(bytes.byteLength);
   });
 
+  describe('Date values', () => {
+    /** The bytes of an int64 element holding Long.fromNumber(time), retyped as a datetime. */
+    const longBytesAsDatetime = (time: number) => {
+      const bytes = BSON.serialize({ d: BSON.Long.fromNumber(time) });
+      bytes[4] = 0x09;
+      return bytes;
+    };
+    const dateWithTime = (time: number) => Object.assign(new Date(0), { getTime: () => time });
+
+    it('writes the same bytes as Long.fromNumber for valid times', () => {
+      const times = [0, 1, -1, 2 ** 31, -(2 ** 31) - 1, 2 ** 32, -(2 ** 32) - 1, 8.64e15, -8.64e15];
+      for (const time of times) {
+        expect(BSON.serialize({ d: new Date(time) })).to.deep.equal(longBytesAsDatetime(time));
+      }
+    });
+
+    it('writes the same bytes as Long.fromNumber for an invalid Date and non-integer times', () => {
+      expect(BSON.serialize({ d: new Date(NaN) })).to.deep.equal(longBytesAsDatetime(NaN));
+      const times = [1.5, -1.5, 2 ** 53 + 2, 2 ** 60, -(2 ** 60), Infinity, -Infinity];
+      for (const time of times) {
+        expect(BSON.serialize({ d: dateWithTime(time) })).to.deep.equal(longBytesAsDatetime(time));
+      }
+    });
+  });
+
   describe('when serializing deeply nested documents', () => {
     it('can serialize a document with 20,000 nesting levels without a stack overflow', () => {
       // Calling serialize directly: if it throws, mocha fails the test.
