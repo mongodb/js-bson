@@ -59,8 +59,7 @@ export function internalCalculateObjectSize(
     if (isObjArray) {
       const array = target as unknown[];
       for (let i = 0; i < array.length; i++) {
-        total += calculateElementSize(
-          i.toString(),
+        const size = calculateValueSize(
           array[i],
           serializeFunctions,
           true,
@@ -68,11 +67,11 @@ export function internalCalculateObjectSize(
           objectStack,
           path
         );
+        if (size !== 0) total += indexKeyByteLength(i) + 1 + size;
       }
     } else if (isObjMap) {
       for (const [key, value] of target as Map<string, unknown>) {
-        total += calculateElementSize(
-          key,
+        const size = calculateValueSize(
           value,
           serializeFunctions,
           false,
@@ -80,11 +79,11 @@ export function internalCalculateObjectSize(
           objectStack,
           path
         );
+        if (size !== 0) total += ByteUtils.utf8ByteLength(key) + 1 + size;
       }
     } else {
       for (const key of Object.keys(target)) {
-        total += calculateElementSize(
-          key,
+        const size = calculateValueSize(
           target[key],
           serializeFunctions,
           false,
@@ -92,6 +91,7 @@ export function internalCalculateObjectSize(
           objectStack,
           path
         );
+        if (size !== 0) total += shortStringByteLength(key) + 1 + size;
       }
     }
   }
@@ -99,9 +99,34 @@ export function internalCalculateObjectSize(
   return total;
 }
 
-/** @internal */
-function calculateElementSize(
-  name: string,
+/** Byte length of the decimal string of an array index. */
+function indexKeyByteLength(index: number): number {
+  if (index < 10) return 1;
+  if (index < 100) return 2;
+  if (index < 1000) return 3;
+  if (index < 10000) return 4;
+  return index.toString().length;
+}
+
+/**
+ * UTF-8 byte length. Short ASCII strings (most field names and enum-like values) are counted in
+ * JS, which is cheaper than the call into the platform implementation at that size.
+ */
+function shortStringByteLength(value: string): number {
+  const length = value.length;
+  if (length > 12) return ByteUtils.utf8ByteLength(value);
+  for (let i = 0; i < length; i++) {
+    if (value.charCodeAt(i) > 0x7f) return ByteUtils.utf8ByteLength(value);
+  }
+  return length;
+}
+
+/**
+ * Size of an element without its name and the name's null terminator: the type byte plus the
+ * value bytes, or 0 when the element is not serialized.
+ * @internal
+ */
+function calculateValueSize(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any,
   serializeFunctions = false,
@@ -117,7 +142,7 @@ function calculateElementSize(
 
   switch (typeof value) {
     case 'string':
-      return 1 + ByteUtils.utf8ByteLength(name) + 1 + 4 + ByteUtils.utf8ByteLength(value) + 1;
+      return 1 + 4 + shortStringByteLength(value) + 1;
     case 'number':
       if (
         Math.floor(value) === value &&
@@ -130,19 +155,19 @@ function calculateElementSize(
           value <= constants.BSON_INT32_MAX
         ) {
           // 32 bit
-          return ByteUtils.utf8ByteLength(name) + 1 + (4 + 1);
+          return 4 + 1;
         } else {
-          return ByteUtils.utf8ByteLength(name) + 1 + (8 + 1);
+          return 8 + 1;
         }
       } else {
         // 64 bit
-        return ByteUtils.utf8ByteLength(name) + 1 + (8 + 1);
+        return 8 + 1;
       }
     case 'undefined':
-      if (isArray || !ignoreUndefined) return ByteUtils.utf8ByteLength(name) + 1 + 1;
+      if (isArray || !ignoreUndefined) return 1;
       return 0;
     case 'boolean':
-      return ByteUtils.utf8ByteLength(name) + 1 + (1 + 1);
+      return 1 + 1;
     case 'object':
       if (
         value != null &&
@@ -151,27 +176,27 @@ function calculateElementSize(
       ) {
         throw new BSONVersionError();
       } else if (value == null || value._bsontype === 'MinKey' || value._bsontype === 'MaxKey') {
-        return ByteUtils.utf8ByteLength(name) + 1 + 1;
+        return 1;
       } else if (value._bsontype === 'ObjectId') {
-        return ByteUtils.utf8ByteLength(name) + 1 + (12 + 1);
+        return 12 + 1;
       } else if (value instanceof Date || isDate(value)) {
-        return ByteUtils.utf8ByteLength(name) + 1 + (8 + 1);
+        return 8 + 1;
       } else if (
         ArrayBuffer.isView(value) ||
         value instanceof ArrayBuffer ||
         isAnyArrayBuffer(value)
       ) {
-        return ByteUtils.utf8ByteLength(name) + 1 + (1 + 4 + 1) + value.byteLength;
+        return 1 + 4 + 1 + value.byteLength;
       } else if (
         value._bsontype === 'Long' ||
         value._bsontype === 'Double' ||
         value._bsontype === 'Timestamp'
       ) {
-        return ByteUtils.utf8ByteLength(name) + 1 + (8 + 1);
+        return 8 + 1;
       } else if (value._bsontype === 'Decimal128') {
-        return ByteUtils.utf8ByteLength(name) + 1 + (16 + 1);
+        return 16 + 1;
       } else if (value._bsontype === 'Int32') {
-        return ByteUtils.utf8ByteLength(name) + 1 + (4 + 1);
+        return 4 + 1;
       } else if (value._bsontype === 'Code') {
         // Calculate size depending on the availability of a scope
         if (value.scope != null && typeof value.scope === 'object') {
@@ -179,37 +204,20 @@ function calculateElementSize(
             throw new BSONError('Cannot convert circular structure to BSON');
           }
           objectStack.push({ object: value.scope, ignoreUndefined, exit: false });
-          return (
-            ByteUtils.utf8ByteLength(name) +
-            1 +
-            1 +
-            4 +
-            4 +
-            ByteUtils.utf8ByteLength(value.code.toString()) +
-            1
-          );
+          return 1 + 4 + 4 + ByteUtils.utf8ByteLength(value.code.toString()) + 1;
         } else {
-          return (
-            ByteUtils.utf8ByteLength(name) +
-            1 +
-            1 +
-            4 +
-            ByteUtils.utf8ByteLength(value.code.toString()) +
-            1
-          );
+          return 1 + 4 + ByteUtils.utf8ByteLength(value.code.toString()) + 1;
         }
       } else if (value._bsontype === 'Binary') {
         const binary: Binary = value;
         // Check what kind of subtype we have
         if (binary.sub_type === Binary.SUBTYPE_BYTE_ARRAY) {
-          return ByteUtils.utf8ByteLength(name) + 1 + (binary.position + 1 + 4 + 1 + 4);
+          return binary.position + 1 + 4 + 1 + 4;
         } else {
-          return ByteUtils.utf8ByteLength(name) + 1 + (binary.position + 1 + 4 + 1);
+          return binary.position + 1 + 4 + 1;
         }
       } else if (value._bsontype === 'BSONSymbol') {
-        return (
-          ByteUtils.utf8ByteLength(name) + 1 + ByteUtils.utf8ByteLength(value.value) + 4 + 1 + 1
-        );
+        return ByteUtils.utf8ByteLength(value.value) + 4 + 1 + 1;
       } else if (value._bsontype === 'DBRef') {
         // Set up correct object for serialization
         const ordered_values = Object.assign(
@@ -229,11 +237,9 @@ function calculateElementSize(
         // No cycle check: ordered_values is freshly built here, so it can never already be an
         // ancestor. A cycle through value.fields is caught when its contents are walked.
         objectStack.push({ object: ordered_values, ignoreUndefined: true, exit: false });
-        return ByteUtils.utf8ByteLength(name) + 1 + 1;
+        return 1;
       } else if (value instanceof RegExp || isRegExp(value)) {
         return (
-          ByteUtils.utf8ByteLength(name) +
-          1 +
           1 +
           ByteUtils.utf8ByteLength(value.source) +
           1 +
@@ -244,8 +250,6 @@ function calculateElementSize(
         );
       } else if (value._bsontype === 'BSONRegExp') {
         return (
-          ByteUtils.utf8ByteLength(name) +
-          1 +
           1 +
           ByteUtils.utf8ByteLength(value.pattern) +
           1 +
@@ -257,22 +261,15 @@ function calculateElementSize(
           throw new BSONError('Cannot convert circular structure to BSON');
         }
         objectStack.push({ object: value, ignoreUndefined, exit: false });
-        return ByteUtils.utf8ByteLength(name) + 1 + 1;
+        return 1;
       }
     case 'function':
       if (serializeFunctions) {
-        return (
-          ByteUtils.utf8ByteLength(name) +
-          1 +
-          1 +
-          4 +
-          ByteUtils.utf8ByteLength(value.toString()) +
-          1
-        );
+        return 1 + 4 + ByteUtils.utf8ByteLength(value.toString()) + 1;
       }
       return 0;
     case 'bigint':
-      return ByteUtils.utf8ByteLength(name) + 1 + (8 + 1);
+      return 8 + 1;
     case 'symbol':
       return 0;
     default:
