@@ -289,6 +289,22 @@ export class Long extends BSONValue {
       return Long._fromString(str.substring(1), unsigned, radix).neg();
     }
 
+    if (radix === 10 && str.length <= 15) {
+      // Up to 15 decimal digits fit exactly in a double
+      let digitsOnly = true;
+      for (let i = 0; i < str.length; i++) {
+        const c = str.charCodeAt(i);
+        if (c < 48 || c > 57) {
+          digitsOnly = false;
+          break;
+        }
+      }
+      if (digitsOnly) {
+        const value = +str;
+        return Long.fromBits((value % TWO_PWR_32_DBL) | 0, (value / TWO_PWR_32_DBL) | 0, unsigned);
+      }
+    }
+
     // Do several (8) digits each time through the loop, so as to
     // minimize the calls to the very expensive emulated div.
     const radixToPower = Long.fromNumber(Math.pow(radix, 8));
@@ -1142,6 +1158,13 @@ export class Long extends BSONValue {
   toString(radix?: number): string {
     radix = radix || 10;
     if (radix < 2 || 36 < radix) throw new BSONError('radix');
+    if (radix === 10) {
+      // Values within +/-2^53 are exactly representable as a double
+      const hi = this.unsigned ? this.high >>> 0 : this.high;
+      if (hi >= -0x200000 && hi < 0x200000) return String(hi * TWO_PWR_32_DBL + (this.low >>> 0));
+      // Larger values: native BigInt formatting avoids the emulated 64-bit division loop
+      return ((BigInt(hi) << BigInt(32)) | BigInt(this.low >>> 0)).toString();
+    }
     if (this.isZero()) return '0';
     if (this.isNegative()) {
       // Unsigned Longs are never negative
