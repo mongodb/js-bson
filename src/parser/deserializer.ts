@@ -489,6 +489,10 @@ function deserializeObject(
       value = null;
     } else if (elementType === constants.BSON_DATA_LONG) {
       if (useBigInt64) {
+        // Without this check, a cut value makes getBigInt64LE call BigInt(NaN), which throws RangeError.
+        if (index + 8 > buffer.length) {
+          throw new BSONError('Not enough bytes in the buffer for an int64 value');
+        }
         value = NumberUtils.getBigInt64LE(buffer, index);
         index += 8;
       } else {
