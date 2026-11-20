@@ -67,3 +67,43 @@ export function getStylizeFunction(options?: unknown): StylizeFunction | undefin
     return options.stylize as StylizeFunction;
   }
 }
+
+const SHALLOW_PATH_DEPTH = 32;
+
+/**
+ * The chain of objects from the root down to the one being serialized, for cycle detection.
+ * Most documents are shallow, so ancestors are found by identity scan of an array; past
+ * {@link SHALLOW_PATH_DEPTH} the whole chain is mirrored in a Set, keeping lookups O(1) on
+ * deep input. Entries are pushed and popped in strict LIFO order.
+ */
+export class AncestorPath {
+  private readonly stack: unknown[] = [];
+  /** Mirrors `stack` while it is deeper than SHALLOW_PATH_DEPTH, null otherwise. */
+  private deep: Set<unknown> | null = null;
+
+  has(value: unknown): boolean {
+    if (this.deep != null) return this.deep.has(value);
+    const stack = this.stack;
+    for (let i = 0; i < stack.length; i++) {
+      if (stack[i] === value) return true;
+    }
+    return false;
+  }
+
+  push(value: unknown): void {
+    this.stack.push(value);
+    if (this.deep != null) {
+      this.deep.add(value);
+    } else if (this.stack.length > SHALLOW_PATH_DEPTH) {
+      this.deep = new Set(this.stack);
+    }
+  }
+
+  pop(): void {
+    const value = this.stack.pop();
+    if (this.deep != null) {
+      if (this.stack.length < SHALLOW_PATH_DEPTH) this.deep = null;
+      else this.deep.delete(value);
+    }
+  }
+}

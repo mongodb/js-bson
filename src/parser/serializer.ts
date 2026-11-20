@@ -13,7 +13,7 @@ import type { ObjectId } from '../objectid';
 import type { BSONRegExp } from '../regexp';
 import { ByteUtils } from '../utils/byte_utils';
 import { NumberUtils } from '../utils/number_utils';
-import { isAnyArrayBuffer, isDate, isMap, isRegExp, isUint8Array } from './utils';
+import { AncestorPath, isAnyArrayBuffer, isDate, isMap, isRegExp, isUint8Array } from './utils';
 
 /** @public */
 export interface SerializeOptions {
@@ -404,7 +404,7 @@ function serializeSymbol(buffer: Uint8Array, key: string, value: BSONSymbol, ind
 }
 
 interface SerializationFrame {
-  /** Original object passed to this frame — used for cycle-detection (path.delete). */
+  /** Original object passed to this frame — used for cycle-detection (path.pop). */
   sourceObject: Document;
   /** True when serializing a BSON array; affects key format and type byte. */
   isArray: boolean;
@@ -505,7 +505,7 @@ export function serializeInto(
   startingIndex: number,
   serializeFunctions: boolean,
   ignoreUndefined: boolean,
-  path: Set<Document> | null
+  path: AncestorPath | null
 ): number {
   if (path == null) {
     // We are at the root input
@@ -537,10 +537,10 @@ export function serializeInto(
       throw new BSONError(`date, regexp, typedarray, and arraybuffer cannot be BSON documents`);
     }
 
-    path = new Set();
+    path = new AncestorPath();
   }
 
-  path.add(object);
+  path.push(object);
 
   let currentFrame: SerializationFrame | null = makeFrame(
     object,
@@ -567,7 +567,7 @@ export function serializeInto(
         if (frame.codeSizeIndex !== null) {
           NumberUtils.setInt32LE(buffer, frame.codeSizeIndex, index - frame.codeSizeIndex);
         }
-        path.delete(frame.sourceObject);
+        path.pop();
         currentFrame = frame.prev;
         continue;
       }
@@ -580,7 +580,7 @@ export function serializeInto(
         if (frame.codeSizeIndex !== null) {
           NumberUtils.setInt32LE(buffer, frame.codeSizeIndex, index - frame.codeSizeIndex);
         }
-        path.delete(frame.sourceObject);
+        path.pop();
         currentFrame = frame.prev;
         continue;
       }
@@ -595,7 +595,7 @@ export function serializeInto(
         if (frame.codeSizeIndex !== null) {
           NumberUtils.setInt32LE(buffer, frame.codeSizeIndex, index - frame.codeSizeIndex);
         }
-        path.delete(frame.sourceObject);
+        path.pop();
         currentFrame = frame.prev;
         continue;
       }
@@ -653,7 +653,7 @@ export function serializeInto(
         index += ByteUtils.encodeUTF8Into(buffer, key, index);
         buffer[index++] = 0x00;
         const nestedStartIndex = index;
-        path.add(value);
+        path.push(value);
         currentFrame = makeFrame(
           value,
           nestedStartIndex,
@@ -694,7 +694,7 @@ export function serializeInto(
           if (path.has(scope)) {
             throw new BSONError('Cannot convert circular structure to BSON');
           }
-          path.add(scope);
+          path.push(scope);
           currentFrame = makeFrame(
             scope,
             index,
@@ -728,7 +728,7 @@ export function serializeInto(
         buffer[index++] = constants.BSON_DATA_OBJECT;
         index += ByteUtils.encodeUTF8Into(buffer, key, index);
         buffer[index++] = 0x00;
-        path.add(orderedValues);
+        path.push(orderedValues);
         currentFrame = makeFrame(orderedValues, index, null, frame, false, true);
         index += 4;
       } else if (tag === 'BSONRegExp') {
