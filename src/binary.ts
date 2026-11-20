@@ -193,22 +193,28 @@ export class Binary extends BSONValue {
   write(sequence: BinarySequence, offset: number): void {
     offset = typeof offset === 'number' ? offset : this.position;
 
+    if (typeof sequence === 'string') {
+      throw new BSONError('input cannot be string');
+    }
+
+    const bytes = Array.isArray(sequence)
+      ? ByteUtils.fromNumberArray(sequence)
+      : ByteUtils.toLocalBufferType(sequence);
+
     // If the buffer is to small let's extend the buffer
-    if (this.buffer.byteLength < offset + sequence.length) {
-      const newSpace = ByteUtils.allocate(this.buffer.byteLength + sequence.length);
+    if (this.buffer.byteLength < offset + bytes.byteLength) {
+      const newSpace = ByteUtils.allocate(
+        Math.max(this.buffer.byteLength + bytes.byteLength, offset + bytes.byteLength)
+      );
       newSpace.set(this.buffer, 0);
 
       // Assign the new buffer
       this.buffer = newSpace;
     }
 
-    if (ArrayBuffer.isView(sequence)) {
-      this.buffer.set(ByteUtils.toLocalBufferType(sequence), offset);
-      this.position =
-        offset + sequence.byteLength > this.position ? offset + sequence.length : this.position;
-    } else if (typeof sequence === 'string') {
-      throw new BSONError('input cannot be string');
-    }
+    this.buffer.set(bytes, offset);
+    this.position =
+      offset + bytes.byteLength > this.position ? offset + bytes.byteLength : this.position;
   }
 
   /**

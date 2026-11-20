@@ -143,6 +143,37 @@ describe('class Binary', () => {
     });
   });
 
+  describe('write()', function () {
+    const LocalBuffer = __isWeb__ ? Uint8Array : Buffer;
+
+    it('writes a Uint8Array at the given offset', function () {
+      const binary = new Binary(new Uint8Array([1, 2, 3, 4]));
+      binary.write(new Uint8Array([7, 8]), 3);
+      expect(binary.position).to.equal(5);
+      expect(binary.value()).to.deep.equal(LocalBuffer.of(1, 2, 3, 7, 8));
+    });
+
+    it('writes a number array', function () {
+      const binary = new Binary();
+      binary.write([1, 2, 3], 0);
+      expect(binary.position).to.equal(3);
+      expect(binary.value()).to.deep.equal(LocalBuffer.of(1, 2, 3));
+    });
+
+    it('grows the buffer when the offset is past the end of the buffer', function () {
+      const binary = new Binary(new Uint8Array([1, 2]));
+      binary.write(new Uint8Array([9]), 5);
+      expect(binary.position).to.equal(6);
+      expect(binary.value()).to.deep.equal(LocalBuffer.of(1, 2, 0, 0, 0, 9));
+    });
+
+    it('throws when the input is a string', function () {
+      const binary = new Binary();
+      // @ts-expect-error: checking behavior TS doesn't support
+      expect(() => binary.write('abc', 0)).to.throw(BSONError, 'input cannot be string');
+    });
+  });
+
   context('inspect()', () => {
     it(`when value is default returns "Binary.createFromBase64('', 0)"`, () => {
       expect(util.inspect(new Binary())).to.equal(`Binary.createFromBase64('', 0)`);
