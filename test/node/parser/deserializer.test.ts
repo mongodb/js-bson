@@ -47,6 +47,35 @@ describe('deserializer()', () => {
     });
   });
 
+  describe('int64 promotion', () => {
+    const MAX = 2n ** 53n;
+    const values = [0n, 1n, -1n, 2n ** 32n, -(2n ** 32n), MAX - 1n, MAX, -MAX, MAX + 1n, -MAX - 1n];
+    values.push(MAX + 2n, -MAX - 2n, 2n ** 63n - 1n, -(2n ** 63n));
+    const bytes = values.map(v => BSON.serialize({ v: BSON.Long.fromBigInt(v) }));
+
+    it('returns a number for values in [-2^53, 2^53] and a Long outside', () => {
+      bytes.forEach((b, i) => {
+        const v = BSON.deserialize(b).v;
+        if (values[i] >= -MAX && values[i] <= MAX) {
+          expect(v).to.equal(Number(values[i]));
+        } else {
+          expect(v).to.be.instanceOf(BSON.Long);
+          expect(v.toBigInt()).to.equal(values[i]);
+        }
+      });
+    });
+
+    it('returns a Long when promoteLongs or promoteValues is false', () => {
+      bytes.forEach((b, i) => {
+        for (const options of [{ promoteLongs: false }, { promoteValues: false }]) {
+          const v = BSON.deserialize(b, options).v;
+          expect(v).to.be.instanceOf(BSON.Long);
+          expect(v.toBigInt()).to.equal(values[i]);
+        }
+      });
+    });
+  });
+
   describe('when the fieldsAsRaw options is present and has a value that corresponds to a key in the object', () => {
     it('ignores non-own properties set on the options object', () => {
       const bytes = BSON.serialize({ someKey: [1] });
