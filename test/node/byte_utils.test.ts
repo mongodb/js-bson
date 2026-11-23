@@ -462,6 +462,21 @@ const toUTF8Tests: ByteUtilTest<'toUTF8'>[] = [
     }
   },
   {
+    name: 'should return a valid replacement character when fatal is true',
+    inputs: [Buffer.from('a replacement \uFFFD character', 'utf8'), 0, 27, true],
+    expectation({ error, output }) {
+      expect(error).to.not.exist;
+      expect(output).to.equal('a replacement \uFFFD character');
+    }
+  },
+  {
+    name: 'should throw when fatal is true and an invalid byte follows the basic latin limit',
+    inputs: [Buffer.from('6161616161616161616161616161616161616161616161ff', 'hex'), 0, 24, true],
+    expectation({ error }) {
+      expect(error).to.match(/Invalid UTF-8 string in BSON document/i);
+    }
+  },
+  {
     name: 'should insert replacement character fatal is false and string is invalid',
     inputs: [Buffer.from('616263f09fa4', 'hex'), 0, 7, false],
     expectation({ error, output }) {
