@@ -161,13 +161,9 @@ export const nodeJsByteUtils = {
     }
 
     const string = nodeJsByteUtils.toLocalBufferType(buffer).toString('utf8', start, end);
-    if (fatal) {
-      for (let i = 0; i < string.length; i++) {
-        if (string.charCodeAt(i) === 0xfffd) {
-          parseUtf8(buffer, start, end, true);
-          break;
-        }
-      }
+    // A replacement character means the bytes may be invalid: let the strict decoder decide.
+    if (fatal && string.includes('\uFFFD')) {
+      parseUtf8(buffer, start, end, true);
     }
     return string;
   },
