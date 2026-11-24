@@ -720,11 +720,13 @@ export function serializeInto(
         index = serializeSymbol(buffer, key, value, index);
       } else if (tag === 'DBRef') {
         const dbref = value as DBRef;
-        const orderedValues: Document = Object.assign(
-          { $ref: dbref.collection, $id: dbref.oid },
-          dbref.db != null ? { $db: dbref.db } : null,
-          dbref.fields
-        );
+        // Spread, not Object.assign, so that a field named __proto__ stays an own key
+        const orderedValues: Document = {
+          $ref: dbref.collection,
+          $id: dbref.oid,
+          ...(dbref.db != null ? { $db: dbref.db } : null),
+          ...dbref.fields
+        };
         buffer[index++] = constants.BSON_DATA_OBJECT;
         index += ByteUtils.encodeUTF8Into(buffer, key, index);
         buffer[index++] = 0x00;
