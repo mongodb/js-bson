@@ -212,13 +212,13 @@ function calculateElementSize(
         );
       } else if (value._bsontype === 'DBRef') {
         // Set up correct object for serialization
-        const ordered_values = Object.assign(
-          {
-            $ref: value.collection,
-            $id: value.oid
-          },
-          value.fields
-        );
+        // Spread, not Object.assign, so that a field named __proto__ stays an own key,
+        // the same as in the serializer
+        const ordered_values: Document = {
+          $ref: value.collection,
+          $id: value.oid,
+          ...value.fields
+        };
 
         // Add db reference if it exists
         if (value.db != null) {

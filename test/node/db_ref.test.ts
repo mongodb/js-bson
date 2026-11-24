@@ -66,4 +66,40 @@ describe('dbpointer tests', function () {
       });
     }
   });
+
+  describe('a field named __proto__', () => {
+    const ejson = '{"r":{"$ref":"c","$id":1,"__proto__":{"isAdmin":true}}}';
+
+    it('stays an own key of fields in EJSON.parse', () => {
+      const dbref = BSON.EJSON.parse(ejson).r;
+      expect(dbref).to.be.instanceOf(BSON.DBRef);
+      expect(Object.getPrototypeOf(dbref.fields)).to.equal(Object.prototype);
+      expect(Object.keys(dbref.fields)).to.deep.equal(['__proto__']);
+      expect(dbref.fields.isAdmin).to.be.undefined;
+    });
+
+    it('stays a field in EJSON.stringify', () => {
+      const dbref = BSON.EJSON.parse(ejson).r;
+      expect(JSON.parse(BSON.EJSON.stringify({ r: dbref }))).to.deep.equal(JSON.parse(ejson));
+    });
+
+    it('stays a field in toJSON', () => {
+      const dbref = BSON.EJSON.parse(ejson).r;
+      const json = dbref.toJSON();
+      expect(Object.getPrototypeOf(json)).to.equal(Object.prototype);
+      expect(Object.keys(json)).to.deep.equal(['$ref', '$id', '__proto__']);
+    });
+
+    it('stays a field in a BSON round trip', () => {
+      const fields = JSON.parse('{"__proto__":{"isAdmin":true}}');
+      const doc = { r: new BSON.DBRef('c', new BSON.ObjectId(), undefined, fields) };
+      const bytes = BSON.serialize(doc);
+      expect(bytes.byteLength).to.equal(BSON.calculateObjectSize(doc));
+      const dbref = BSON.deserialize(bytes).r;
+      expect(dbref).to.be.instanceOf(BSON.DBRef);
+      expect(Object.getPrototypeOf(dbref.fields)).to.equal(Object.prototype);
+      expect(Object.keys(dbref.fields)).to.deep.equal(['__proto__']);
+      expect(dbref.fields.isAdmin).to.be.undefined;
+    });
+  });
 });

@@ -73,13 +73,12 @@ export class DBRef extends BSONValue {
   }
 
   toJSON(): DBRefLike & Document {
-    const o = Object.assign(
-      {
-        $ref: this.collection,
-        $id: this.oid
-      },
-      this.fields
-    );
+    // Spread, not Object.assign, so that a field named __proto__ stays an own key
+    const o: DBRefLike & Document = {
+      $ref: this.collection,
+      $id: this.oid,
+      ...this.fields
+    };
 
     if (this.db != null) o.$db = this.db;
     return o;
@@ -98,17 +97,16 @@ export class DBRef extends BSONValue {
     }
 
     if (this.db) o.$db = this.db;
-    o = Object.assign(o, this.fields);
+    o = { ...o, ...this.fields };
     return o;
   }
 
   /** @internal */
   static fromExtendedJSON(doc: DBRefLike): DBRef {
-    const copy = Object.assign({}, doc) as Partial<DBRefLike>;
-    delete copy.$ref;
-    delete copy.$id;
-    delete copy.$db;
-    return new DBRef(doc.$ref, doc.$id, doc.$db, copy);
+    // Object rest, not Object.assign, so that a field named __proto__ stays an own key
+    // and does not set the prototype of the fields
+    const { $ref, $id, $db, ...fields } = doc;
+    return new DBRef($ref, $id, $db, fields);
   }
 
   inspect(depth?: number, options?: unknown, inspect?: InspectFn): string {
